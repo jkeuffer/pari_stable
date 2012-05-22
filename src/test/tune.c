@@ -86,7 +86,7 @@ rand_INT(long n)
   pari_sp av = avma;
   GEN x, N = int2n(n*BITS_IN_LONG);
   do x = randomi(N); while (lgefint(x) != n+2);
-  if (!mpodd(x)) x = addis(x,1); /*For Montgomery REDC */
+  if (!mpodd(x)) x = addis(x,1); /*For Barrett REDC */
   return gerepileuptoint(av, x);
 }
 /* real, n words */
@@ -234,7 +234,7 @@ static double speed_Flx_sqr(speed_param *s)
 { TIME_FUN(Flx_sqr(s->x, s->l)); }
 
 static double speed_Flx_inv(speed_param *s)
-{ TIME_FUN(Flx_invMontgomery(s->x, s->l)); }
+{ TIME_FUN(Flx_invBarrett(s->x, s->l)); }
 
 static double speed_Flx_mul(speed_param *s)
 { TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
@@ -259,7 +259,7 @@ static double speed_Flx_extgcd(speed_param *s)
 { GEN u,v; TIME_FUN(Flx_extgcd(s->x, s->y, s->l, &u, &v)); }
 
 static double speed_FpX_inv(speed_param *s)
-{ TIME_FUN(FpX_invMontgomery(s->x, s->p)); }
+{ TIME_FUN(FpX_invBarrett(s->x, s->p)); }
 
 static double speed_FpX_rem(speed_param *s)
 {
@@ -318,15 +318,15 @@ static tune_param param[] = {
 {0,   var(Flx_SQR_SQRI_LIMIT),     t_Fl1x,5,0, speed_Flx_sqr},
 {0,   var(Flx_MUL_MULII2_LIMIT),   t_Fl2x,5,20000, speed_Flx_mul,0.05},
 {0,   var(Flx_SQR_SQRI2_LIMIT),    t_Fl2x,5,20000, speed_Flx_sqr,0.05},
-{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.05},
-{0,  var(Flx_REM_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.05},
-{0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
+{0,   var(Flx_INVBARRETT_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.05},
+{0,  var(Flx_REM_BARRETT_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.05},
+{0,  var(Flx_POW_BARRETT_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
 {0,  var(Flx_HALFGCD_LIMIT),       t_Flx,10,0, speed_Flx_halfgcd},
 {0,  var(Flx_GCD_LIMIT),           t_Flx,10,0, speed_Flx_gcd,0.1},
 {0,  var(Flx_EXTGCD_LIMIT),        t_Flx,10,0, speed_Flx_extgcd},
-{0,  var(FpX_INVMONTGOMERY_LIMIT), t_NFpX,10,0, speed_FpX_inv,0.05},
-{0,  var(FpX_REM_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpX_rem,0.05},
-{0,  var(FpX_POW_MONTGOMERY_LIMIT),t_NFpX,10,0, speed_FpXQ_pow},
+{0,  var(FpX_INVBARRETT_LIMIT), t_NFpX,10,0, speed_FpX_inv,0.05},
+{0,  var(FpX_REM_BARRETT_LIMIT),t_NFpX,10,0, speed_FpX_rem,0.05},
+{0,  var(FpX_POW_BARRETT_LIMIT),t_NFpX,10,0, speed_FpXQ_pow},
 {0,  var(FpX_HALFGCD_LIMIT),       t_FpX,10,0, speed_FpX_halfgcd},
 {0,  var(FpX_GCD_LIMIT),           t_FpX,10,0, speed_FpX_gcd,0.1},
 {0,  var(FpX_EXTGCD_LIMIT),        t_FpX,10,0, speed_FpX_extgcd},

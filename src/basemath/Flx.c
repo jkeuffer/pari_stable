@@ -832,7 +832,7 @@ Flx_recip(GEN x)
  * x/polrecip(P)+O(x^n)
  */
 static GEN
-Flx_invMontgomery_basecase(GEN T, ulong p)
+Flx_invBarrett_basecase(GEN T, ulong p)
 {
   long i, l=lg(T)-1, lr=l-1, k;
   GEN r=cgetg(lr,t_VECSMALL); r[1] = T[1];
@@ -864,7 +864,7 @@ Flx_lgrenormalizespec(GEN x, long lx)
   return i+1;
 }
 static GEN
-Flx_invMontgomery_Newton(GEN T, ulong p)
+Flx_invBarrett_Newton(GEN T, ulong p)
 {
   long nold, lx, lz, lq, l = degpol(T), lQ;
   GEN q, y, z, x = const_vecsmall(l+1, 0) + 2;
@@ -920,35 +920,35 @@ Flx_invMontgomery_Newton(GEN T, ulong p)
 
 /* x/polrecip(T)+O(x^deg(T)) */
 GEN
-Flx_invMontgomery(GEN T, ulong p)
+Flx_invBarrett(GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long l=lg(T);
   GEN r;
   if (l<5) return pol0_Flx(T[1]);
-  if (l<=Flx_INVMONTGOMERY_LIMIT)
+  if (l<=Flx_INVBARRETT_LIMIT)
   {
     ulong c = T[l-1];
     if (c!=1)
     {
       ulong ci = Fl_inv(c,p);
       T=Flx_Fl_mul(T, ci, p);
-      r=Flx_invMontgomery_basecase(T,p);
+      r=Flx_invBarrett_basecase(T,p);
       r=Flx_Fl_mul(r,ci,p);
     }
     else
-      r=Flx_invMontgomery_basecase(T,p);
+      r=Flx_invBarrett_basecase(T,p);
   }
   else
-    r = Flx_invMontgomery_Newton(T,p);
+    r = Flx_invBarrett_Newton(T,p);
   return gerepileuptoleaf(ltop, r);
 }
 
 /* Compute x mod T where lg(x)<=2*lg(T)-2
- * and mg is the Montgomery inverse of T.
+ * and mg is the Barrett inverse of T.
  */
 GEN
-Flx_rem_Montgomery(GEN x, GEN mg, GEN T, ulong p)
+Flx_rem_Barrett(GEN x, GEN mg, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;
@@ -1045,13 +1045,13 @@ Flx_rem(GEN x, GEN y, ulong p)
 {
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return Flx_copy(x);
-  if (d+3 < Flx_REM_MONTGOMERY_LIMIT || d>dy-2)
+  if (d+3 < Flx_REM_BARRETT_LIMIT || d>dy-2)
     return Flx_rem_basecase(x,y,p);
   else
   {
     pari_sp av=avma;
-    GEN mg = Flx_invMontgomery(y, p);
-    return gerepileupto(av, Flx_rem_Montgomery(x, mg, y, p));
+    GEN mg = Flx_invBarrett(y, p);
+    return gerepileupto(av, Flx_rem_Barrett(x, mg, y, p));
   }
 }
 
@@ -1743,7 +1743,7 @@ Flxq_mul_mg(GEN x,GEN y,GEN mg,GEN T,ulong p)
 {
   GEN z = Flx_mul(x,y,p);
   if (lg(T) > lg(z)) return z;
-  return Flx_rem_Montgomery(z, mg, T, p);
+  return Flx_rem_Barrett(z, mg, T, p);
 }
 
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
@@ -1752,7 +1752,7 @@ Flxq_sqr_mg(GEN y,GEN mg,GEN T,ulong p)
 {
   GEN z = Flx_sqr(y,p);
   if (lg(T) > lg(z)) return z;
-  return Flx_rem_Montgomery(z, mg, T, p);
+  return Flx_rem_Barrett(z, mg, T, p);
 }
 
 typedef struct {
@@ -1762,13 +1762,13 @@ typedef struct {
 } Flxq_muldata;
 
 static GEN
-_sqr_Montgomery(void *data, GEN x)
+_sqr_Barrett(void *data, GEN x)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
   return Flxq_sqr_mg(x,D->mg, D->T, D->p);
 }
 static GEN
-_mul_Montgomery(void *data, GEN x, GEN y)
+_mul_Barrett(void *data, GEN x, GEN y)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
   return Flxq_mul_mg(x,y,D->mg, D->T, D->p);
@@ -1801,10 +1801,10 @@ Flxq_powu(GEN x, ulong n, GEN T, ulong p)
     case 2: return Flxq_sqr(x, T, p);
   }
   D.T = T; D.p = p;
-  if (lg(T) >= Flx_POW_MONTGOMERY_LIMIT)
+  if (lg(T) >= Flx_POW_BARRETT_LIMIT)
   {
-    D.mg  = Flx_invMontgomery(T,p);
-    y = gen_powu(x, n, (void*)&D, &_sqr_Montgomery, &_mul_Montgomery);
+    D.mg  = Flx_invBarrett(T,p);
+    y = gen_powu(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
   }
   else
     y = gen_powu(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
@@ -1825,10 +1825,10 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   if (is_pm1(n)) return s < 0 ? x : Flx_copy(x);
   D.T = T;
   D.p = p;
-  if (lg(T) >= Flx_POW_MONTGOMERY_LIMIT)
+  if (lg(T) >= Flx_POW_BARRETT_LIMIT)
   {
-    D.mg  = Flx_invMontgomery(T,p);
-    y = gen_pow(x, n, (void*)&D, &_sqr_Montgomery, &_mul_Montgomery);
+    D.mg  = Flx_invBarrett(T,p);
+    y = gen_pow(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
   }
   else
     y = gen_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
@@ -1867,7 +1867,7 @@ Flxq_div(GEN x,GEN y,GEN T,ulong p)
 GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
-  GEN mg=Flx_invMontgomery(T,p);
+  GEN mg=Flx_invBarrett(T,p);
   GEN V = cgetg(l+2,t_VEC);
   long i, v = T[1];
   gel(V,1) = pol1_Flx(v);  if (l==0) return V;
@@ -3033,7 +3033,7 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
 }
 
 static GEN
-FlxqX_invMontgomery_basecase(GEN T, GEN Q, ulong p)
+FlxqX_invBarrett_basecase(GEN T, GEN Q, ulong p)
 {
   long i, l=lg(T)-1, k;
   long sv=Q[1];
@@ -3063,7 +3063,7 @@ FlxX_lgrenormalizespec(GEN x, long lx)
 }
 
 static GEN
-FlxqX_invMontgomery_Newton(GEN S, GEN T, ulong p)
+FlxqX_invBarrett_Newton(GEN S, GEN T, ulong p)
 {
   pari_sp av = avma;
   long nold, lx, lz, lq, l = degpol(S), i, lQ;
@@ -3115,34 +3115,34 @@ FlxqX_invMontgomery_Newton(GEN S, GEN T, ulong p)
   return gerepilecopy(av, x);
 }
 
-static const long FlxqX_INVMONTGOMERY_LIMIT = 5;
+static const long FlxqX_INVBARRETT_LIMIT = 5;
 
 /* x/polrecip(P)+O(x^n) */
 GEN
-FlxqX_invMontgomery(GEN T, GEN Q, ulong p)
+FlxqX_invBarrett(GEN T, GEN Q, ulong p)
 {
   pari_sp ltop=avma;
   long l=lg(T);
   GEN r;
   GEN c = gel(T,l-1);
   if (l<5) return pol0_Flx(T[1]);
-  if (l<=FlxqX_INVMONTGOMERY_LIMIT)
+  if (l<=FlxqX_INVBARRETT_LIMIT)
   {
     if (!Flx_equal1(c))
     {
       GEN ci = Flxq_inv(c,Q,p);
       T = FlxqX_Flxq_mul(T, ci, Q, p);
-      r = FlxqX_invMontgomery_basecase(T,Q,p);
+      r = FlxqX_invBarrett_basecase(T,Q,p);
       r = FlxqX_Flxq_mul(r,ci,Q,p);
     } else
-      r = FlxqX_invMontgomery_basecase(T,Q,p);
+      r = FlxqX_invBarrett_basecase(T,Q,p);
   } else
-    r = FlxqX_invMontgomery_Newton(T,Q,p);
+    r = FlxqX_invBarrett_Newton(T,Q,p);
   return gerepileupto(ltop, r);
 }
 
 GEN
-FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p)
+FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;

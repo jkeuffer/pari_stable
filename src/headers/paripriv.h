@@ -420,8 +420,8 @@ char *file_getline(Buffer *b, char **s0, input_method *IM);
 
 GEN     zxX_to_Kronecker(GEN P, GEN Q);
 GEN     Kronecker_to_FlxqX(GEN z, GEN T, ulong p);
-GEN     FlxqX_invMontgomery(GEN T, GEN Q, ulong p);
-GEN     FlxqX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
+GEN     FlxqX_invBarrett(GEN T, GEN Q, ulong p);
+GEN     FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 
 /* Qfb.c */
 

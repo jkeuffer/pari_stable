@@ -806,7 +806,7 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
-/* invert all elements of x mod p using Montgomery's trick. Not stack-clean. */
+/* invert all elements of x mod p using Barrett's trick. Not stack-clean. */
 GEN
 FpV_inv(GEN x, GEN p)
 {
@@ -844,12 +844,12 @@ FqV_inv(GEN x, GEN T, GEN p)
 
 /***********************************************************************/
 /**                                                                   **/
-/**                  Montgomery reduction                            **/
+/**                  Barrett reduction                            **/
 /**                                                                   **/
 /***********************************************************************/
 
 static GEN
-FpX_invMontgomery_basecase(GEN T, GEN p)
+FpX_invBarrett_basecase(GEN T, GEN p)
 {
   long i, l=lg(T)-1, lr = l-1, k;
   GEN r=cgetg(lr, t_POL); r[1]=T[1];
@@ -888,7 +888,7 @@ FpX_mulspec(GEN a, GEN b, GEN p, long na, long nb)
 }
 
 static GEN
-FpX_invMontgomery_Newton(GEN T, GEN p)
+FpX_invBarrett_Newton(GEN T, GEN p)
 {
   pari_sp av = avma;
   long nold, lx, lz, lq, l = degpol(T), i, lQ;
@@ -942,33 +942,33 @@ FpX_invMontgomery_Newton(GEN T, GEN p)
 
 /* 1/polrecip(T)+O(x^(deg(T)-1)) */
 GEN
-FpX_invMontgomery(GEN T, GEN p)
+FpX_invBarrett(GEN T, GEN p)
 {
   pari_sp ltop = avma;
   long l = lg(T);
   GEN r;
   if (l<5) return pol_0(T[1]);
-  if (l<=FpX_INVMONTGOMERY_LIMIT)
+  if (l<=FpX_INVBARRETT_LIMIT)
   {
     GEN c = gel(T,l-1), ci=gen_1;
     if (!equali1(c))
     {
       ci = Fp_inv(c, p);
       T = FpX_Fp_mul(T, ci, p);
-      r = FpX_invMontgomery_basecase(T, p);
+      r = FpX_invBarrett_basecase(T, p);
       r = FpX_Fp_mul(r, ci, p);
     } else
-      r = FpX_invMontgomery_basecase(T, p);
+      r = FpX_invBarrett_basecase(T, p);
   }
   else
-    r = FpX_invMontgomery_Newton(T, p);
+    r = FpX_invBarrett_Newton(T, p);
   return gerepileupto(ltop, r);
 }
 
 /* Compute x mod T where degpol(x)<=2*(degpol(T)-1) i.e. lgpol(x)<2*lgpol(T)-2
- * and mg is the Montgomery inverse of T. */
+ * and mg is the Barrett inverse of T. */
 static GEN
-FpX_rem_Montgomery_noGC(GEN x, GEN mg, GEN T, GEN p)
+FpX_rem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p)
 {
   GEN z;
   long l  = lgpol(x);
@@ -987,10 +987,10 @@ FpX_rem_Montgomery_noGC(GEN x, GEN mg, GEN T, GEN p)
   z[1] = x[1]; return z;
 }
 GEN
-FpX_rem_Montgomery(GEN x, GEN mg, GEN T, GEN p)
+FpX_rem_Barrett(GEN x, GEN mg, GEN T, GEN p)
 {
   pari_sp av = avma;
-  return gerepileupto(av, FpX_rem_Montgomery_noGC(x,mg,T,p));
+  return gerepileupto(av, FpX_rem_Barrett_noGC(x,mg,T,p));
 }
 
 GEN
@@ -998,13 +998,13 @@ FpX_rem(GEN x, GEN y, GEN p)
 {
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return FpX_red(x,p);
-  if (d+3 < FpX_REM_MONTGOMERY_LIMIT || d>dy-2)
+  if (d+3 < FpX_REM_BARRETT_LIMIT || d>dy-2)
     return FpX_divrem(x,y,p,ONLY_REM);
   else
   {
     pari_sp av=avma;
-    GEN mg = FpX_invMontgomery(y, p);
-    return gerepileupto(av, FpX_rem_Montgomery_noGC(x, mg, y, p));
+    GEN mg = FpX_invBarrett(y, p);
+    return gerepileupto(av, FpX_rem_Barrett_noGC(x, mg, y, p));
   }
 }
 
@@ -1071,7 +1071,7 @@ FpXQ_mul_mg(GEN x,GEN y,GEN mg,GEN T,GEN p)
   pari_sp av = avma;
   GEN z = FpX_mul(x,y,p);
   if (lg(T) > lg(z)) return z;
-  return gerepileupto(av, FpX_rem_Montgomery_noGC(z, mg, T, p));
+  return gerepileupto(av, FpX_rem_Barrett_noGC(z, mg, T, p));
 }
 
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
@@ -1081,7 +1081,7 @@ FpXQ_sqr_mg(GEN y,GEN mg,GEN T,GEN p)
   pari_sp av = avma;
   GEN z = FpX_sqr(y,p);
   if (lg(T) > lg(z)) return z;
-  return gerepileupto(av, FpX_rem_Montgomery_noGC(z, mg, T, p));
+  return gerepileupto(av, FpX_rem_Barrett_noGC(z, mg, T, p));
 }
 
 typedef struct {
@@ -1139,12 +1139,12 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
     D.T = T;
     D.p = p;
     if (s < 0) x = FpXQ_inv(x,T,p);
-    if (lT+2>FpX_POW_MONTGOMERY_LIMIT)
+    if (lT+2>FpX_POW_BARRETT_LIMIT)
     {
-      D.mg  = FpX_invMontgomery(T,p);
+      D.mg  = FpX_invBarrett(T,p);
       if (lx>=lT)
       {
-        if (lx<2*lT-2) x = FpX_rem_Montgomery(x,D.mg,T,p);
+        if (lx<2*lT-2) x = FpX_rem_Barrett(x,D.mg,T,p);
         else x = FpX_rem(x,T,p);
       }
       y = gen_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
@@ -1170,9 +1170,9 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
     long pp = p[2];
     return FlxC_to_ZXC(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
   }
-  if (lg(T)>FpX_POW_MONTGOMERY_LIMIT)
+  if (lg(T)>FpX_POW_BARRETT_LIMIT)
   {
-    GEN mg = FpX_invMontgomery(T,p);
+    GEN mg = FpX_invBarrett(T,p);
     gel(V,3) = FpXQ_sqr_mg(x,mg,T,p);
     if ((degpol(x)<<1) < degpol(T)) {
       for(i = 4; i < l+2; i++)
