@@ -212,13 +212,7 @@ FpE_cmp(GEN x, GEN y)
   return lexcmp(x,y);
 }
 
-static ulong
-FpE_hash(GEN P)
-{
-  return signe(gel(P,1))?mod2BIL(gel(P,1)):0;
-}
-
-static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,FpE_hash,FpE_cmp,ell_is_inf,NULL};
+static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,hash_GEN,FpE_cmp,ell_is_inf,NULL};
 
 GEN
 FpE_order(GEN z, GEN o, GEN a4, GEN p)

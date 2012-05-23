@@ -1979,16 +1979,6 @@ _Flxq_rand(void *data)
   return z;
 }
 
-static ulong
-_Flxq_hash(GEN x)
-{
-  ulong h = 0;
-  long i, l=lgpol(x);
-  for (i=0;i<l;i++)
-    h ^= x[2+i]<<(i&(BITS_IN_LONG-1));
-  return h;
-}
-
 /* Let [ be the following order on Fp: 0 [ p-1 [ 1 [ p-2 [ 2 .. [ p\2
 and [[ the lexicographic extension of [ to Fp[T]. Compute the
 isomorphism (Fp[X], [[) -> (N,<) on P */
@@ -2363,7 +2353,7 @@ Flxq_easylog(void* E, GEN a, GEN g, GEN ord)
   return Flxq_log_index(a,g,ord,f->T,f->p);
 }
 
-static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,_Flxq_hash,vecsmall_lexcmp,Flx_equal1,Flxq_easylog};
+static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,hash_GEN,vecsmall_lexcmp,Flx_equal1,Flxq_easylog};
 
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)

@@ -4056,26 +4056,6 @@ topol(GEN x)
   return x;
 }
 
-static ulong
-_hash(GEN x)
-{
-  pari_sp av;
-  GEN r;
-  ulong h=0;
-  if (ell_is_inf(x)) return 0;
-  av = avma;
-  r = topol(gel(x,1));
-  if (typ(r)==t_INT) h=signe(r)?mod2BIL(r):0;
-  else
-  {
-    long i, l=lg(r);
-    for (i=1;i<l;i++)
-      if (signe(gel(r,i)))
-        h ^= mod2BIL(gel(r,i))<<((i-1)&(BITS_IN_LONG-1));
-  }
-  avma = av; return h;
-}
-
 static int
 _cmp(GEN x, GEN y)
 {
@@ -4089,7 +4069,7 @@ _cmp(GEN x, GEN y)
   avma = av; return r;
 }
 
-static const struct bb_group ell_group={_mul,_pow,NULL,_hash,_cmp,ell_is_inf};
+static const struct bb_group ell_group={_mul,_pow,NULL,hash_GEN,_cmp,ell_is_inf};
 
 static GEN
 elllog_modp(GEN e, GEN P, GEN Q, GEN o, GEN p)

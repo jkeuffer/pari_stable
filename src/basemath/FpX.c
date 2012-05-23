@@ -1392,16 +1392,6 @@ _FpXQ_pow(void *data, GEN x, GEN y)
   return FpXQ_pow(x,y, D->T, D->p);
 }
 
-static ulong
-_FpXQ_hash(GEN x)
-{
-  ulong h=0;
-  long i, l=lg(x);
-  for (i=2; i<l; i++)
-    if (signe(gel(x,i))) h ^= mod2BIL(gel(x,i));
-  return h;
-}
-
 static GEN
 _FpXQ_rand(void *data)
 {
@@ -1424,7 +1414,7 @@ _FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
   return Fp_FpXQ_log(constant_term(a),g,ord,s->T,s->p);
 }
 
-static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,_FpXQ_hash,cmp_RgX,gequal1,_FpXQ_easylog};
+static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,hash_GEN,cmp_RgX,gequal1,_FpXQ_easylog};
 
 GEN
 FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
