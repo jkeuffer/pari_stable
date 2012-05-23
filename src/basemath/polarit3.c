@@ -806,6 +806,12 @@ _FpXQXQ_sqr(void *data, GEN x) {
   return FpXQXQ_sqr(x,d->S,d->T,d->p);
 }
 
+static GEN
+_FpXQXQ_one(void *data) {
+  struct FpXQXQ_muldata *d = (struct FpXQXQ_muldata *) data;
+  return pol_1(varn(d->S));
+}
+
 /* x over Fq, return lift(x^n) mod S */
 GEN
 FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
@@ -841,20 +847,10 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 GEN
 FpXQXQ_powers(GEN x, long l, GEN S, GEN T, GEN p)
 {
-  GEN V=cgetg(l+2,t_VEC);
-  long i;
-  gel(V,1) = pol_1(varn(x)); if (l==0) return V;
-  gel(V,2) = gcopy(x);       if (l==1) return V;
-  gel(V,3) = FpXQXQ_sqr(x,S,T,p);
-  if ((degpol(x)<<1) < degpol(S)) {
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = FpXQXQ_mul(gel(V,i-1),x,S,T,p);
-  } else { /* use squarings if degree(x) is large */
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = odd(i)? FpXQXQ_sqr(gel(V, (i+1)>>1),S,T,p)
-                       : FpXQXQ_mul(gel(V, i-1),x,S,T,p);
-  }
-  return V;
+  struct FpXQXQ_muldata D;
+  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  D.S = S; D.T = T; D.p = p;
+  return gen_powers(x, l, use_sqr, (void*)&D, &_FpXQXQ_sqr, &_FpXQXQ_mul,&_FpXQXQ_one);
 }
 
 GEN
