@@ -637,6 +637,14 @@ _F2xq_mul(void *data, GEN x, GEN y)
   return F2xq_mul(x,y, pol);
 }
 
+static GEN
+_F2xq_one(void *data)
+{
+  GEN pol = (GEN) data;
+  return pol1_F2x(pol[1]);
+}
+
+
 GEN
 F2xq_pow(GEN x, GEN n, GEN pol)
 {
@@ -656,21 +664,8 @@ F2xq_pow(GEN x, GEN n, GEN pol)
 GEN
 F2xq_powers(GEN x, long l, GEN T)
 {
-  GEN V = cgetg(l+2,t_VEC);
-  long i, v = T[1];
-  gel(V,1) = pol1_F2x(v);  if (l==0) return V;
-  gel(V,2) = vecsmall_copy(x); if (l==1) return V;
-  gel(V,3) = F2xq_sqr(x,T);
-  if ((F2x_degree(x)<<1) < F2x_degree(T)) {
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = F2xq_mul(gel(V,i-1),x,T);
-  } else {
-    for(i = 4; i < l+2; i++) {
-      gel(V,i) = (i&1)? F2xq_sqr(gel(V, (i+1)>>1),T)
-                      : F2xq_mul(gel(V, i-1),x,T);
-    }
-  }
-  return V;
+  int use_sqr = (F2x_degree(x)<<1) >= F2x_degree(T);
+  return gen_powers(x, l, use_sqr, (void*)T, &_F2xq_sqr, &_F2xq_mul, &_F2xq_one);
 }
 
 GEN
