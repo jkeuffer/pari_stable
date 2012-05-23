@@ -701,7 +701,7 @@ study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
     if (!dG)
     {
       GEN L = FpXQ_matrix_pow(XP, ell+1, ell+1, mpoly, p);
-      long s = ell + 1 - FpM_rank(RgM_Rg_add(L, gen_m1), p);
+      long s = ell + 1 - FpM_rank(RgM_Rg_add_shallow(L, gen_m1), p);
       r = (ell + 1)/s;
       *mt = MTAtkin;
     }
@@ -840,7 +840,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
 
   if (ell <= 13)
   {
-    long lp = bit_prec(p)-bfffo(*int_MSW(p));
+    long lp = expi(p);
     switch(ell)
     {
       case 3: k = 3 + (lp > 160) + (lp > 350); break;
@@ -1321,7 +1321,7 @@ ellsea(GEN E, GEN p, long smallfact)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
-  long i, nb_atkin, lp;
+  long i, nb_atkin;
   GEN res, cat, TR, TR_mod;
   GEN compile_atkin, bound, bound_bsgs, champ;
   GEN prod_atkin = gen_1, max_traces = gen_0;
@@ -1356,8 +1356,7 @@ ellsea(GEN E, GEN p, long smallfact)
   /* compile_atkin is a vector containing informations about Atkin primes,
    * informations about Elkies primes lie in Mod(TR, TR_mod). */
   bound = sqrti(shifti(p, 4));
-  lp = bit_prec(p) - bfffo(*int_MSW(p));
-  bound_bsgs = get_bound_bsgs(lp);
+  bound_bsgs = get_bound_bsgs(expi(p));
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
   while (1)
