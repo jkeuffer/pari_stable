@@ -708,6 +708,16 @@ zv_equal(GEN V, GEN W)
 }
 
 int
+zvV_equal(GEN V, GEN W)
+{
+  long l = lg(V);
+  if (lg(W) != l) return 0;
+  while (--l > 0)
+    if (!zv_equal(gel(V,l),gel(W,l))) return 0;
+  return 1;
+}
+
+int
 ZM_ishnf(GEN x)
 {
   long i,j, lx = lg(x);

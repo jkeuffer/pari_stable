@@ -4044,32 +4044,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
 static GEN
 _pow(void *E, GEN x, GEN n) { return ellpow_Z((GEN)E,x,n); }
 
-static GEN
-topol(GEN x)
-{
-  switch(typ(x))
-  {
-    case t_INTMOD: return gel(x,2);
-    case t_POLMOD: return gtovecrev(gel(x,2));
-    case t_FFELT:  return gtovecrev(FF_to_FpXQ(x));
-  }
-  return x;
-}
-
-static int
-_cmp(GEN x, GEN y)
-{
-  pari_sp av;
-  int r;
-  if (ell_is_inf(x)) return !ell_is_inf(y);
-  if (ell_is_inf(y)) return -1;
-  av = avma;
-  r = lexcmp(topol(gel(x,1)), topol(gel(y,1)));
-  if (!r) r = lexcmp(topol(gel(x,2)), topol(gel(y,2)));
-  avma = av; return r;
-}
-
-static const struct bb_group ell_group={_mul,_pow,NULL,hash_GEN,_cmp,ell_is_inf};
+static const struct bb_group ell_group={_mul,_pow,NULL,hash_GEN,gequal,ell_is_inf};
 
 static GEN
 elllog_modp(GEN e, GEN P, GEN Q, GEN o, GEN p)

@@ -205,15 +205,7 @@ _FlxqE_rand(void *E)
   return random_FlxqE(ell->a4, ell->a6, ell->T, ell->p);
 }
 
-static int
-FlxqE_cmp(GEN x, GEN y)
-{
-  if (ell_is_inf(x)) return !ell_is_inf(y);
-  if (ell_is_inf(y)) return -1;
-  return vecsmall_lexcmp(x,y);
-}
-
-static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,_FlxqE_rand,hash_GEN,FlxqE_cmp,ell_is_inf, NULL};
+static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,_FlxqE_rand,hash_GEN,zvV_equal,ell_is_inf, NULL};
 
 GEN
 FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p)

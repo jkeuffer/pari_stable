@@ -790,7 +790,7 @@ _F2xq_rand(void *data)
   return z;
 }
 
-static const struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,hash_GEN,vecsmall_lexcmp,F2x_equal1,NULL};
+static const struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,hash_GEN,zv_equal,F2x_equal1,NULL};
 
 GEN
 F2xq_order(GEN a, GEN ord, GEN T)
