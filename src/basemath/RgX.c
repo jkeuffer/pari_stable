@@ -1640,6 +1640,8 @@ static GEN
 _sqr(void *data, GEN x) { return RgXQ_sqr(x, (GEN)data); }
 static GEN
 _mul(void *data, GEN x, GEN y) { return RgXQ_mul(x,y, (GEN)data); }
+static GEN
+_one(void *data) { return pol_1(varn((GEN)data)); }
 
 /* x,T in Rg[X], n in N, compute lift(x^n mod T)) */
 GEN
@@ -1675,20 +1677,8 @@ RgXQ_pow(GEN x, GEN n, GEN T)
 GEN
 RgXQ_powers(GEN x, long l, GEN T)
 {
-  GEN V=cgetg(l+2,t_VEC);
-  long i;
-  gel(V,1) = pol_1(varn(T)); if (l==0) return V;
-  gel(V,2) = gcopy(x);       if (l==1) return V;
-  gel(V,3) = RgXQ_sqr(x,T);
-  if ((degpol(x)<<1) < degpol(T)) {
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = RgXQ_mul(gel(V,i-1),x,T);
-  } else { /* use squarings if degree(x) is large */
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = (i&1)? RgXQ_sqr(gel(V, (i+1)>>1),T)
-                      : RgXQ_mul(gel(V, i-1),x,T);
-  }
-  return V;
+  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  return gen_powers(x, l, use_sqr, (void *)T,_sqr,_mul,_one);
 }
 
 /* a in K = Q[X]/(T), returns [a^0, ..., a^n] */
