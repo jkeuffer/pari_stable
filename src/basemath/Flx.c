@@ -1876,7 +1876,7 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
   Flxq_muldata D;
   int use_sqr = (degpol(x)<<1)>=degpol(T);
   D.T = T; D.p = p;
-  if (lg(T) >= Flx_POW_BARRETT_LIMIT)
+  if (l>2 && lg(T) >= Flx_POW_BARRETT_LIMIT)
   {
     D.mg  = Flx_invBarrett(T,p);
     return gen_powers(x, l, use_sqr, (void*)&D, &_sqr_Barrett, &_mul_Barrett,&_Flxq_one);

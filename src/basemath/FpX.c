@@ -1089,13 +1089,13 @@ typedef struct {
 } FpX_muldata;
 
 static GEN
-_sqr_montgomery(void *data, GEN x)
+_sqr_Barrett(void *data, GEN x)
 {
   FpX_muldata *D = (FpX_muldata*)data;
   return FpXQ_sqr_mg(x,D->mg, D->T, D->p);
 }
 static GEN
-_mul_montgomery(void *data, GEN x, GEN y)
+_mul_Barrett(void *data, GEN x, GEN y)
 {
   FpX_muldata *D = (FpX_muldata*)data;
   return FpXQ_mul_mg(x,y,D->mg, D->T, D->p);
@@ -1113,6 +1113,13 @@ _FpXQ_mul(void *data, GEN x, GEN y)
   FpX_muldata *D = (FpX_muldata*)data;
   return FpXQ_mul(x,y, D->T, D->p);
 }
+static GEN
+_FpXQ_one(void *data)
+{
+  FpX_muldata *D = (FpX_muldata*)data;
+  return pol_1(varn(D->T));
+}
+
 
 /* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
 GEN
@@ -1147,7 +1154,7 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
         if (lx<2*lT-2) x = FpX_rem_Barrett(x,D.mg,T,p);
         else x = FpX_rem(x,T,p);
       }
-      y = gen_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
+      y = gen_pow(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
     }
     else
     {
@@ -1162,38 +1169,19 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
 GEN
 FpXQ_powers(GEN x, long l, GEN T, GEN p)
 {
-  GEN V=cgetg(l+2,t_VEC);
-  long i;
-  gel(V,1) = pol_1(varn(T)); if (l==0) return V;
-  gel(V,2) = ZX_copy(x);       if (l==1) return V;
-  if (lgefint(p) == 3) {
+  FpX_muldata D;
+  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  if (l>2 && lgefint(p) == 3) {
     long pp = p[2];
     return FlxC_to_ZXC(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
   }
-  if (lg(T)>FpX_POW_BARRETT_LIMIT)
+  D.T = T; D.p = p;
+  if (l>2 && lg(T)>FpX_POW_BARRETT_LIMIT)
   {
-    GEN mg = FpX_invBarrett(T,p);
-    gel(V,3) = FpXQ_sqr_mg(x,mg,T,p);
-    if ((degpol(x)<<1) < degpol(T)) {
-      for(i = 4; i < l+2; i++)
-        gel(V,i) = FpXQ_mul_mg(gel(V,i-1),x,mg,T,p);
-    } else { /* use squarings if degree(x) is large */
-      for(i = 4; i < l+2; i++)
-        gel(V,i) = odd(i)? FpXQ_sqr_mg(gel(V, (i+1)>>1),mg,T,p)
-                         : FpXQ_mul_mg(gel(V, i-1),x,mg,T,p);
-    }
-  } else {
-    gel(V,3) = FpXQ_sqr(x,T,p);
-    if ((degpol(x)<<1) < degpol(T)) {
-      for(i = 4; i < l+2; i++)
-        gel(V,i) = FpXQ_mul(gel(V,i-1),x,T,p);
-    } else { /* use squarings if degree(x) is large */
-      for(i = 4; i < l+2; i++)
-        gel(V,i) = odd(i)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
-                         : FpXQ_mul(gel(V, i-1),x,T,p);
-    }
-  }
-  return V;
+    D.mg  = FpX_invBarrett(T,p);
+    return gen_powers(x, l, use_sqr, (void*)&D, &_sqr_Barrett, &_mul_Barrett,&_FpXQ_one);
+  } else
+    return gen_powers(x, l, use_sqr, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul,&_FpXQ_one);
 }
 
 GEN

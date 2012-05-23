@@ -173,8 +173,8 @@ GEN
 gen_powers(GEN x, long l, int use_sqr, void *E, GEN (*sqr)(void*,GEN),
                                       GEN (*mul)(void*,GEN,GEN), GEN (*one)(void*))
 {
-  GEN V = cgetg(l+2,t_VEC);
   long i;
+  GEN V = cgetg(l+2,t_VEC);
   gel(V,1) = one(E); if (l==0) return V;
   gel(V,2) = gcopy(x); if (l==1) return V;
   gel(V,3) = sqr(E,x);
