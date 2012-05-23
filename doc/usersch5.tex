@@ -7377,6 +7377,7 @@ do not need this. Leaves some garbage on stack, but suitable for
 To describe the following functions, we use the following private typedefs
 to simplify the description:
 \bprog
+  typedef (*F0)(void *);
   typedef (*F1)(void *, GEN);
   typedef (*F2)(void *, GEN, GEN);
 @eprog
@@ -7405,6 +7406,12 @@ $y$)} returning $xy^2$. In particular \kbd{D} must implicitly contain $x$.
 
 \fun{GEN}{leftright_pow_u_fold}{GEN x, ulong n, void *D, F1 sqr, F1 msqr}, see
 the previous \tet{leftright_pow_fold}
+
+\fun{GEN}{gen_powers}{GEN x, long n, long use_sqr, void *D, F1 sqr, F2 mul, F0 one}
+returns $[\kbd{x}^0, \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC};
+\kbd{mul(D, $x$, $y$)} implements the multiplication
+in the underlying monoid; \kbd{sqr} is a (presumably optimized) shortcut for
+\kbd{mul(D, $x$, $x$)}; \kbd{one} returns the monoid unit.
 
 \fun{GEN}{gen_factorback}{GEN L, GEN e, F2 mul, F2 pow, void *D} generic form
 of \tet{factorback}. The pair $[L,e]$ is of the form

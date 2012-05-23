@@ -169,6 +169,25 @@ gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
   return sliding_window_pow(x, n, 7, E, sqr, mul);
 }
 
+GEN
+gen_powers(GEN x, long l, int use_sqr, void *E, GEN (*sqr)(void*,GEN),
+                                      GEN (*mul)(void*,GEN,GEN), GEN (*one)(void*))
+{
+  GEN V = cgetg(l+2,t_VEC);
+  long i;
+  gel(V,1) = one(E); if (l==0) return V;
+  gel(V,2) = gcopy(x); if (l==1) return V;
+  gel(V,3) = sqr(E,x);
+  if (use_sqr)
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = (i&1)? sqr(E,gel(V, (i+1)>>1))
+                      : mul(E,gel(V, i-1),x);
+  else
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = mul(E,gel(V,i-1),x);
+  return V;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                    DISCRETE LOGARITHM                             **/

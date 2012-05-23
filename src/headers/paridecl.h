@@ -1226,6 +1226,8 @@ GEN gen_order(GEN x, GEN o, void *E, const struct bb_group *grp);
 GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp);
 GEN gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
                                    GEN (*mul)(void*,GEN,GEN));
+GEN gen_powers(GEN x, long l, int use_sqr, void *E, GEN (*sqr)(void*,GEN),
+                                      GEN (*mul)(void*,GEN,GEN), GEN (*one)(void*));
 GEN gen_powu(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
                                       GEN (*mul)(void*,GEN,GEN));
 

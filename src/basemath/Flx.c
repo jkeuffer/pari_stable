@@ -1786,6 +1786,12 @@ _Flxq_mul(void *data, GEN x, GEN y)
   Flxq_muldata *D = (Flxq_muldata*)data;
   return Flxq_mul(x,y, D->T, D->p);
 }
+static GEN
+_Flxq_one(void *data)
+{
+  Flxq_muldata *D = (Flxq_muldata*)data;
+  return pol1_Flx(D->T[1]);
+}
 
 /* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
 GEN
@@ -1867,20 +1873,16 @@ Flxq_div(GEN x,GEN y,GEN T,ulong p)
 GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
-  GEN mg=Flx_invBarrett(T,p);
-  GEN V = cgetg(l+2,t_VEC);
-  long i, v = T[1];
-  gel(V,1) = pol1_Flx(v);  if (l==0) return V;
-  gel(V,2) = Flx_copy(x); if (l==1) return V;
-  gel(V,3) = Flxq_sqr_mg(x,mg,T,p);
-  if ((degpol(x)<<1) < degpol(T))
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = Flxq_mul_mg(gel(V,i-1),x,mg,T,p);
+  Flxq_muldata D;
+  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  D.T = T; D.p = p;
+  if (lg(T) >= Flx_POW_BARRETT_LIMIT)
+  {
+    D.mg  = Flx_invBarrett(T,p);
+    return gen_powers(x, l, use_sqr, (void*)&D, &_sqr_Barrett, &_mul_Barrett,&_Flxq_one);
+  }
   else
-    for(i = 4; i < l+2; i++)
-      gel(V,i) = (i&1)? Flxq_sqr_mg(gel(V, (i+1)>>1),mg,T,p)
-                      : Flxq_mul_mg(gel(V, i-1),x,mg,T,p);
-  return V;
+    return gen_powers(x, l, use_sqr, (void*)&D, &_Flxq_sqr, &_Flxq_mul, &_Flxq_one);
 }
 
 GEN
