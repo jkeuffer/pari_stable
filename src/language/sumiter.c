@@ -75,7 +75,10 @@ forparii(GEN a, GEN b, GEN code)
     if (cmpii(a,b) >= 0) break;
     a = get_lex(-1);
     if (a == aa)
+    {
       a = incloop(a);
+      if (a != aa) { set_lex(-1,a); aa = a; }
+    }
     else
     { /* 'code' modified a ! Be careful (and slow) from now on */
       a = gaddgs(a,1);
