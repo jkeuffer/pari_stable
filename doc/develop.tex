@@ -222,12 +222,12 @@ available to handle group elements:
       GEN (*pow)(void*, GEN, GEN);
       ulong (*hash)(GEN);
       GEN (*rand)(void*);
-      int (*cmp)(GEN, GEN);
+      int (*equal)(GEN, GEN);
       int (*equal1)(GEN);
       GEN   (*easylog)(void *E, GEN, GEN, GEN);
     };
 @eprog
-\kbd{mul(E,x,y)} returns the product $xy$.
+\kbd{mul(E,x,y)} returns the product $x\*y$.
 
 \kbd{pow(E,x,n)} returns $x^n$ ($n$ integer, possibly negative or zero).
 
@@ -235,8 +235,7 @@ available to handle group elements:
 
 \kbd{rand(E)} returns a random element in the group.
 
-\kbd{cmp(x,y)} implements a total ordering on the group elements
-(return value $-1$, $0$ or $1$) (\kbd{universal\_cmp} is suitable for this field).
+\kbd{equal(x,y)} returns one if $x=y$ and zero otherwise.
 
 \kbd{equal1(x)} returns one if $x$ is the neutral element in the group,
 and zero otherwise.

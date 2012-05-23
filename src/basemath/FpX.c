@@ -1414,7 +1414,7 @@ _FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
   return Fp_FpXQ_log(constant_term(a),g,ord,s->T,s->p);
 }
 
-static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,hash_GEN,cmp_RgX,gequal1,_FpXQ_easylog};
+static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,hash_GEN,ZX_equal,ZX_equal1,_FpXQ_easylog};
 
 GEN
 FpXQ_order(GEN a, GEN ord, GEN T, GEN p)

@@ -3257,6 +3257,7 @@ INLINE GEN    ZM_lll(GEN x, double D, long f);
 INLINE int    ZV_dvd(GEN x, GEN y);
 INLINE int    ZV_isscalar(GEN x);
 INLINE GEN    ZV_to_zv(GEN x);
+INLINE int    ZX_equal1(GEN x);
 INLINE GEN    ZX_ZXY_resultant(GEN a, GEN b);
 INLINE GEN    ZXQ_mul(GEN x,GEN y,GEN T);
 INLINE GEN    ZXQ_sqr(GEN x,GEN T);

@@ -204,15 +204,7 @@ _FpE_rand(void *E)
   return random_FpE(e->a4, e->a6, e->p);
 }
 
-static int
-FpE_cmp(GEN x, GEN y)
-{
-  if (ell_is_inf(x)) return !ell_is_inf(y);
-  if (ell_is_inf(y)) return -1;
-  return lexcmp(x,y);
-}
-
-static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,hash_GEN,FpE_cmp,ell_is_inf,NULL};
+static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,hash_GEN,ZV_equal,ell_is_inf,NULL};
 
 GEN
 FpE_order(GEN z, GEN o, GEN a4, GEN p)

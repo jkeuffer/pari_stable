@@ -2353,7 +2353,7 @@ Flxq_easylog(void* E, GEN a, GEN g, GEN ord)
   return Flxq_log_index(a,g,ord,f->T,f->p);
 }
 
-static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,hash_GEN,vecsmall_lexcmp,Flx_equal1,Flxq_easylog};
+static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,hash_GEN,zv_equal,Flx_equal1,Flxq_easylog};
 
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)

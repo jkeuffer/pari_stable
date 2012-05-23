@@ -2276,8 +2276,8 @@ _Fp_rand(void *E) { return addis(randomi(subis((GEN)E,1)),1); }
 
 static GEN Fp_easylog(void *E, GEN a, GEN g, GEN ord);
 
-static const struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,mod2BIL,
-                                      cmpii,gequal1,Fp_easylog};
+static const struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,hash_GEN,
+                                      equalii,equali1,Fp_easylog};
 
 /*********************************************************************/
 /**                                                                 **/

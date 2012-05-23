@@ -221,7 +221,7 @@ gen_Pollard_log(GEN x, GEN g, GEN q, void *E, const struct bb_group *grp)
         gerepileall(av, 2, &A, &B);
       }
       i++;
-    } while (grp->cmp(gel(A,1), gel(B,1)));
+    } while (!grp->equal(gel(A,1), gel(B,1)));
     gel(A,2) = modii(gel(A,2), q);
     gel(B,2) = modii(gel(B,2), q);
     h++;
@@ -268,7 +268,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
       for (i++; table[i] == h && i <= lbaby; i++)
       {
         GEN v=addis(mulss(lbaby-1,k),perm[i]-1);
-        if (!grp->cmp(grp->pow(E,g0,v),x))
+        if (grp->equal(grp->pow(E,g0,v),x))
           return gerepileuptoint(av,v);
         else if (DEBUGLEVEL)
           err_printf("gen_Shanks_log: false positive, giant = %ld: %lu: %Ps\n", k,h,p1);
@@ -295,7 +295,7 @@ gen_plog(GEN x, GEN g, GEN p, void *E, const struct bb_group *grp)
     if (e) return e;
   }
   if (grp->equal1(x)) return gen_0;
-  if (!grp->cmp(x,g)) return gen_1;
+  if (grp->equal(x,g)) return gen_1;
   if (expi(p)<32) return gen_Shanks_log(x,g,p,E,grp);
   return gen_Pollard_log(x, g, p, E, grp);
 }
@@ -353,7 +353,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp)
   GEN fa, ex;
   long e,i,j,l;
 
-  if (grp->cmp(g, a)==0) /* frequent special case */
+  if (grp->equal(g, a)) /* frequent special case */
     return grp->equal1(g)? gen_0: gen_1;
   if (grp->easylog)
   {

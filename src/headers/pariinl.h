@@ -1685,6 +1685,8 @@ INLINE GEN
 vecsmall_copy(GEN x) { return leafcopy(x); }
 INLINE int
 Flx_equal1(GEN x) { return degpol(x)==0 && x[2] == 1; }
+INLINE int
+ZX_equal1(GEN x) { return degpol(x)==0 && equali1(gel(x,2)); }
 
 INLINE GEN
 FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }
