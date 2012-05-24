@@ -260,7 +260,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
 
   for (k=1; k<= lbaby; k++)
   {
-    ulong h = grp->hash(p1);
+    long h = grp->hash(p1);
     long i = zv_search(table, h);
     if (i)
     {

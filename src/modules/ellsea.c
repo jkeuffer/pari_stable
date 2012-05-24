@@ -1268,7 +1268,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   for (i = 1; i < lgiant; i++)
   {
     GEN d;
-    ulong h = hash_GEN(gel(point, 1));
+    long h = hash_GEN(gel(point, 1));
     long s = zv_search(table, h);
     if (s)
     {
