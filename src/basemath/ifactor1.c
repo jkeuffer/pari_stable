@@ -3652,10 +3652,13 @@ core(GEN n)
   switch(lgefint(n))
   {
     case 2: return gen_0;
-    case 3: return utoipos(coreu(n[2]));
+    case 3:
+      p = coreu(n[2]);
+      return signe(n) > 0? utoipos(p): utoineg(p);
   }
 
-  n = absi(n); m = gen_1;
+  m = signe(n) < 0? gen_m1: gen_1;
+  n = absi(n);
   lim = tridiv_bound(n);
   p = 0;
   while (p < lim)
