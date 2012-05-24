@@ -1,3 +1,5 @@
+void nchar2nlong(){}
+void newblock(){}
 void remsBIL(){}
 void bit_accuracy(){}
 void is_bigint(){}
