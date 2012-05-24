@@ -640,25 +640,16 @@ GEN     ZM_gauss(GEN a, GEN b);
 GEN     ZM_imagecompl(GEN x);
 GEN     ZM_inv(GEN M, GEN dM);
 GEN     ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C);
-GEN     apply0(GEN f, GEN A);
 GEN     closemodinvertible(GEN x, GEN y);
 GEN     deplin(GEN x);
 GEN     det(GEN a);
 GEN     det0(GEN a,long flag);
 GEN     det2(GEN a);
 GEN     detint(GEN x);
-GEN     diagonal(GEN x);
-GEN     diagonal_shallow(GEN x);
 GEN     eigen(GEN x, long prec);
-GEN     extract0(GEN x, GEN l1, GEN l2);
 GEN     gauss(GEN a, GEN b);
 GEN     gaussmodulo(GEN M, GEN D, GEN Y);
 GEN     gaussmodulo2(GEN M, GEN D, GEN Y);
-GEN     genapply(void *E, GEN (*f)(void *E, GEN x), GEN A);
-GEN     genindexselect(void *E, long (*f)(void *E, GEN x), GEN A);
-GEN     genselect(void *E, long (*f)(void *E, GEN x), GEN A);
-GEN     gtomat(GEN x);
-GEN     gtrans(GEN x);
 GEN     image(GEN x);
 GEN     image2(GEN x);
 GEN     imagecompl(GEN x);
@@ -668,24 +659,12 @@ GEN     ker(GEN x);
 GEN     keri(GEN x);
 GEN     matimage0(GEN x,long flag);
 GEN     matker0(GEN x, long flag);
-GEN     matmuldiagonal(GEN x, GEN d);
-GEN     matmultodiagonal(GEN x, GEN y);
-GEN     matslice0(GEN A, long x1, long x2, long y1, long y2);
 GEN     matsolvemod0(GEN M, GEN D, GEN Y,long flag);
 long    rank(GEN x);
 GEN     reducemodinvertible(GEN x, GEN y);
 GEN     reducemodlll(GEN x,GEN y);
-GEN     select0(GEN A, GEN f, long flag);
-GEN     shallowextract(GEN x, GEN L);
-GEN     shallowtrans(GEN x);
 GEN     split_realimag(GEN x, long r1, long r2);
 GEN     suppl(GEN x);
-GEN     vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x);
-GEN     vecrange(GEN a, GEN b);
-GEN     vecrangess(long a, long b);
-GEN     vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A);
-GEN     vecselect(void *E, long (*f)(void* E, GEN x), GEN A);
-GEN     vecslice0(GEN A, long y1, long y2);
 
 /* alglin2.c */
 
@@ -719,6 +698,30 @@ GEN     minpoly(GEN x, long v);
 GEN     qfgaussred(GEN a);
 GEN     qfgaussred_positive(GEN a);
 GEN     qfsign(GEN a);
+
+/* alglin3.c */
+
+GEN     apply0(GEN f, GEN A);
+GEN     diagonal(GEN x);
+GEN     diagonal_shallow(GEN x);
+GEN     extract0(GEN x, GEN l1, GEN l2);
+GEN     genapply(void *E, GEN (*f)(void *E, GEN x), GEN A);
+GEN     genindexselect(void *E, long (*f)(void *E, GEN x), GEN A);
+GEN     genselect(void *E, long (*f)(void *E, GEN x), GEN A);
+GEN     gtomat(GEN x);
+GEN     gtrans(GEN x);
+GEN     matmuldiagonal(GEN x, GEN d);
+GEN     matmultodiagonal(GEN x, GEN y);
+GEN     matslice0(GEN A, long x1, long x2, long y1, long y2);
+GEN     select0(GEN A, GEN f, long flag);
+GEN     shallowextract(GEN x, GEN L);
+GEN     shallowtrans(GEN x);
+GEN     vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x);
+GEN     vecrange(GEN a, GEN b);
+GEN     vecrangess(long a, long b);
+GEN     vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A);
+GEN     vecselect(void *E, long (*f)(void* E, GEN x), GEN A);
+GEN     vecslice0(GEN A, long y1, long y2);
 
 /* anal.c */
 
