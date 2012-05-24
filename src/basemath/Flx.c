@@ -3066,10 +3066,10 @@ FlxqX_invBarrett_Newton(GEN S, GEN T, ulong p)
 
   /* initialize */
   gel(x,0) = Flxq_inv(gel(q,0),T, p);
-  if (lQ>1 && signe(gel(q,1)))
+  if (lQ>1 && lgpol(gel(q,1)))
   {
     GEN u = gel(q, 1);
-    if (!equali1(gel(x,0))) u = Flxq_mul(u, Flxq_sqr(gel(x,0), T,p), T,p);
+    if (!Flx_equal1(gel(x,0))) u = Flxq_mul(u, Flxq_sqr(gel(x,0), T,p), T,p);
     gel(x,1) = Flx_neg(u, p); lx = 2;
   }
   else
@@ -3088,7 +3088,7 @@ FlxqX_invBarrett_Newton(GEN S, GEN T, ulong p)
     lz = lgpol(z); if (lz > lnew) lz = lnew;
     z += 2;
     /* subtract 1 [=>first nold words are 0]: renormalize so that z(0) != 0 */
-    for (i = nold; i < lz; i++) if (signe(gel(z,i))) break;
+    for (i = nold; i < lz; i++) if (lgpol(gel(z,i))) break;
     nold = nnew;
     if (i >= lz) continue; /* z-1 = 0(t^(nnew + 1)) */
 
