@@ -1086,7 +1086,7 @@ ggval(GEN x, GEN p)
   pari_sp av, limit;
   GEN p1, p2;
 
-  if (isrationalzero(x)) return LONG_MAX;
+  if (isexactzero(x)) return LONG_MAX;
   if (is_const_t(tx) && tp==t_POL) return 0;
   if (tp == t_INT && (!signe(p) || is_pm1(p)))
     pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
@@ -2405,7 +2405,7 @@ normalize(GEN x)
     i -= 3; y = x + i;
     stackdummy((pari_sp)y, (pari_sp)x);
     gel(y,2) = z;
-    y[1] = evalsigne(0) | evalvalp(valp(x)+i) | evalvarn(varn(x));
+    y[1] = evalsigne(0) | evalvalp(lx-2+valp(x)) | evalvarn(varn(x));
     y[0] = evaltyp(t_SER) | _evallg(3);
     return y;
   }
