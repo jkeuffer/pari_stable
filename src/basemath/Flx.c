@@ -2750,7 +2750,7 @@ FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly)
   {
     lz = ly+2; z = cgetg(lz, t_POL)+2;
     for (i=0; i<lx; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
-    for (   ; i<ly; i++) gel(z,i) = Flx_neg(gel(x,i),p);
+    for (   ; i<ly; i++) gel(z,i) = Flx_neg(gel(y,i),p);
   }
  return FlxX_renormalize(z-2, lz);
 }
@@ -3027,20 +3027,19 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
 static GEN
 FlxqX_invBarrett_basecase(GEN T, GEN Q, ulong p)
 {
-  long i, l=lg(T)-1, k;
+  long i, l=lg(T)-1, lr = l-1, k;
   long sv=Q[1];
-  GEN r=cgetg(l,t_POL); r[1]=T[1];
-  gel(r,2) = pol0_Flx(sv);
-  gel(r,3) = pol1_Flx(sv);
-  for (i=4;i<l;i++)
+  GEN r=cgetg(lr,t_POL); r[1]=T[1];
+  gel(r,2) = pol1_Flx(sv);
+  for (i=3;i<lr;i++)
   {
     pari_sp ltop=avma;
-    GEN z = pol0_Flx(sv);
+    GEN u = Flx_neg(gel(T,l-i+2),p);
     for (k=3;k<i;k++)
-      z = Flx_sub(z,Flxq_mul(gel(T,l-i+k),gel(r,k),Q,p),p);
-    gel(r,i) = gerepileupto(ltop, z);
+      u = Flx_sub(u, Flxq_mul(gel(T,l-i+k),gel(r,k),Q,p),p);
+    gel(r,i) = gerepileupto(ltop, u);
   }
-  r = FlxX_renormalize(r,l);
+  r = FlxX_renormalize(r,lr);
   return r;
 }
 
@@ -3050,7 +3049,7 @@ FlxX_lgrenormalizespec(GEN x, long lx)
 {
   long i;
   for (i = lx-1; i>=0; i--)
-    if (!lgpol(gel(x,i))) break;
+    if (lgpol(gel(x,i))) break;
   return i+1;
 }
 
@@ -3114,10 +3113,10 @@ GEN
 FlxqX_invBarrett(GEN T, GEN Q, ulong p)
 {
   pari_sp ltop=avma;
-  long l=lg(T);
+  long l=lg(T), v = varn(T);
   GEN r;
   GEN c = gel(T,l-1);
-  if (l<5) return pol0_Flx(T[1]);
+  if (l<5) return pol_0(v);
   if (l<=FlxqX_INVBARRETT_LIMIT)
   {
     if (!Flx_equal1(c))
@@ -3153,7 +3152,7 @@ FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p)
   z = FlxX_recipspec(z+2,minss(ld,lgpol(z)),ld,vs);/*z= rec(rec(x)*mg) lz<=ld*/
   z = FlxqX_mulspec(z+2,T+2,Q,p,lgpol(z),lT);    /* z*= pol        lz<=ld+lt*/
   z = FlxX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/*z = x - z    lz<=lt */
-  z[1]=T[1];
+  setvarn(z,varn(x));
   return gerepileupto(ltop,z);
 }
 
