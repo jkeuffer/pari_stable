@@ -2553,6 +2553,7 @@ GEN     FpXQXV_prod(GEN V, GEN Tp, GEN p);
 GEN     FpXV_FpC_mul(GEN V, GEN W, GEN p);
 GEN     FpXX_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpXX_add(GEN x, GEN y, GEN p);
+GEN     FpXX_neg(GEN x, GEN p);
 GEN     FpXX_red(GEN z, GEN p);
 GEN     FpXX_sub(GEN x, GEN y, GEN p);
 GEN     FpXY_eval(GEN Q, GEN y, GEN x, GEN p);

@@ -337,6 +337,16 @@ FpXX_sub(GEN x, GEN y, GEN p)
 }
 
 GEN
+FpXX_neg(GEN x, GEN p)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx,t_POL);
+  y[1] = x[1];
+  for(i=2; i<lx; i++) gel(y,i) = Fq_neg(gel(x,i), NULL, p);
+  return FpXX_renormalize(y, lx);
+}
+
+GEN
 FpXX_Fp_mul(GEN P, GEN u, GEN p)
 {
   long i, lP;
