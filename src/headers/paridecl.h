@@ -3177,6 +3177,7 @@ INLINE GEN    FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z);
 INLINE GEN    FqX_extgcd(GEN P,GEN Q,GEN T,GEN p, GEN *U, GEN *V);
 INLINE GEN    FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 INLINE GEN    FqX_mul(GEN x, GEN y, GEN T, GEN p);
+INLINE GEN    FqX_neg(GEN x,GEN T,GEN p);
 INLINE GEN    FqX_red(GEN z, GEN T, GEN p);
 INLINE GEN    FqX_rem(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FqX_sqr(GEN x, GEN T, GEN p);

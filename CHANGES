@@ -269,7 +269,7 @@ BA 76- FlxqE functions family (for elliptic curves over field of small character
 BA 77- PARI functions Flxq_sqrt, FpXQ_sqrt
    78- bernpol() function
    79- sumformal() function
-BA 80- PARI function ZX_equal1, zvV_equal, FpXX_neg
+BA 80- PARI function ZX_equal1, zvV_equal, FpXX_neg, FqX_neg
 
   Removed
     1- dropped DOS support

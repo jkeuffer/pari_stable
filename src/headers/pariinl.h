@@ -1814,6 +1814,8 @@ FqX_red(GEN z, GEN T, GEN p) { return T? FpXQX_red(z, T, p): FpX_red(z, p); }
 INLINE GEN
 FqX_add(GEN x,GEN y,GEN T,GEN p) { return T? FpXX_add(x,y,p): FpX_add(x,y,p); }
 INLINE GEN
+FqX_neg(GEN x,GEN T,GEN p) { return T? FpXX_neg(x,p): FpX_neg(x,p); }
+INLINE GEN
 FqX_sub(GEN x,GEN y,GEN T,GEN p) { return T? FpXX_sub(x,y,p): FpX_sub(x,y,p); }
 INLINE GEN
 FqX_Fp_mul(GEN P, GEN u, GEN T, GEN p)
