@@ -280,7 +280,7 @@ BA 80- PARI functions ZX_equal1, zvV_equal, ZXV_equal, FpXX_neg, FqX_neg, FpX_mu
 BA 81- FpXQE functions family (for elliptic curves over field of large characteristic)
 BA 82- added GP function ellcard
 BA 83- PARI functions FpXQ_powu, Fq_powu, FpXX_muluu, Fq_mulu, Fq_div
-BA 84- PARI functions FqXQ_powers, FqXQ_matrix_pow
+BA 84- PARI functions FqXQ_powers, FqXQ_matrix_pow, FqX_mulu
 
   Removed
     1- dropped DOS support

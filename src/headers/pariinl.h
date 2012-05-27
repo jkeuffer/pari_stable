@@ -1827,6 +1827,9 @@ INLINE GEN
 FqX_mul(GEN x, GEN y, GEN T, GEN p)
 { return T? FpXQX_mul(x, y, T, p): FpX_mul(x, y, p); }
 INLINE GEN
+FqX_mulu(GEN x, ulong y, GEN T, GEN p)
+{ return T? FpXX_mulu(x, y, p): FpX_mulu(x, y, p); }
+INLINE GEN
 FqX_sqr(GEN x, GEN T, GEN p)
 { return T? FpXQX_sqr(x, T, p): FpX_sqr(x, p); }
 INLINE GEN
