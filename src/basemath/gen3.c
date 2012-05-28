@@ -1320,7 +1320,7 @@ gsubst(GEN x, long v, GEN y)
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);
   long l, vx, vy, e, ex, ey, i, j, k, jb;
   pari_sp av, av2, lim;
-  GEN X, t, p1, p2, z;
+  GEN X, t, p1, p2, modp1, z;
 
   switch(ty)
   {
@@ -1347,9 +1347,18 @@ gsubst(GEN x, long v, GEN y)
     if (typ(p1)!=t_POL)
       pari_err(e_MISC,"forbidden substitution in a scalar type");
     if (varncmp(vy, vx) >= 0) return gerepileupto(av, gmodulo(p2,p1));
+    modp1 = mkpolmod(gen_1,p1);
     lx = lg(p2);
     z = cgetg(lx,t_POL); z[1] = p2[1];
-    for (i=2; i<lx; i++) gel(z,i) = gmodulo(gel(p2,i),p1);
+    for (i=2; i<lx; i++)
+    {
+      GEN c = gel(p2,i);
+      if (varncmp(vx, gvar(c)) <= 0)
+        c = gmodulo(c,p1);
+      else
+        c = gmul(c, modp1);
+      gel(z,i) = c;
+    }
     return gerepileupto(av, normalizepol_lg(z,lx));
   }
 
