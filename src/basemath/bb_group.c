@@ -399,11 +399,12 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp)
     t0 = diviiexact(ord, gel(qj,e));
     a0 = grp->pow(E, a, t0);
     ginv0 = grp->pow(E, ginv, t0); /* order q^e */
-    g_q = grp->pow(E,g, mulii(t0, gel(qj,e-1))); /* order q */
+    do { g_q = grp->pow(E,g, mulii(t0, gel(qj,--e))); /* order q */
+    } while (grp->equal1(g_q));
     n_q = gen_0;
     for (j=0;; j++)
     { /* n_q = sum_{i<j} b_i q^i */
-      b = grp->pow(E,a0, gel(qj,e-1-j));
+      b = grp->pow(E,a0, gel(qj,e-j));
       /* early abort: cheap and very effective */
       if (j == 0 && !grp->equal1(grp->pow(E,b,q))) {
         avma = av; return cgetg(1, t_VEC);
@@ -411,12 +412,12 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp)
       b = gen_plog(b, g_q, q, E, grp);
       if (typ(b) != t_INT) { avma = av; return cgetg(1, t_VEC); }
       n_q = addii(n_q, mulii(b, gel(qj,j)));
-      if (j == e-1) break;
+      if (j == e) break;
 
       a0 = grp->mul(E,a0, grp->pow(E,ginv0, b));
       ginv0 = grp->pow(E,ginv0, q);
     }
-    gel(v,i) = mkintmod(n_q, gel(qj,e));
+    gel(v,i) = mkintmod(n_q, gel(qj,e+1));
   }
   return gerepileuptoint(av, lift(chinese1_coprime_Z(v)));
 }
