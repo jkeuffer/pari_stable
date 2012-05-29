@@ -1,0 +1,22 @@
+oo oo oo oo 
+0 0 0 0 
+0 -1 0 0 
+ERROR ERROR ERROR ERROR 
+0 ERROR 0 0 
+ERROR 0 0 0 
+ERROR ERROR ERROR ERROR 
+1 0 0 0 
+ERROR 1 0 0 
+0 0 ERROR 0 
+1 0 0 0 
+0 1 1 ERROR 
+  ***   at top-level: valuation(0,1)
+  ***                 ^--------------
+  *** valuation: forbidden divisor 1 in ggval.
+  ***   at top-level: valuation(0,-1)
+  ***                 ^---------------
+  *** valuation: forbidden divisor -1 in ggval.
+  ***   at top-level: valuation(0,0)
+  ***                 ^--------------
+  *** valuation: forbidden divisor 0 in ggval.
+Total time spent: 0
