@@ -2682,9 +2682,13 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
 
     case t_SER: v = get_var(varn(g), buf);
       i = valp(g);
-      if (lgpol(g))
-      { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lgpol(g); g -= i-2;
+      l = lgpol(g);
+      if (l)
+      {
+        /* See normalize(): Mod(0,2)*x^i*(1+O(x)), has valp = i+1 */
+        if (l == 1 && !signe(g)) i--;
+        /* hack: we want g[i] = coeff of degree i */
+        l += i; g -= i-2;
         wr_lead_monome(T,S,gel(g,i),v,i,addsign);
         while (++i < l)
         {

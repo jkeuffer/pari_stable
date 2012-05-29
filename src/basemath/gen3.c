@@ -2737,6 +2737,7 @@ gtoser(GEN x, long v, long prec)
       if (varncmp(gvar(x), v) <= 0)
         pari_err(e_MISC,"main variable must have higher priority in gtoser");
       lx = lg(x); if (tx == t_QFR) lx--;
+      /* see normalize() */
       for (i=1; i < lx; i++)
         if (!isrationalzero(gel(x,i))) break;
       if (i == lx) return zeroser(v, lx-1);
@@ -2746,7 +2747,7 @@ gtoser(GEN x, long v, long prec)
       if (i == lx)
       {
         GEN z = cgetg(3, t_SER);
-        z[1] = evalsigne(0) | evalvalp(i-2) | evalvarn(v);
+        z[1] = evalsigne(0) | evalvalp(lx-1) | evalvarn(v);
         gel(z,2) = gcopy(y); return z;
       }
 
