@@ -1082,41 +1082,51 @@ Q_pval(GEN x, GEN p) { return (typ(x) == t_INT)? Z_pval(x, p): ratval(x, p); }
 long
 ggval(GEN x, GEN p)
 {
-  long tx = typ(x), tp = typ(p), vx, vp, i, val;
+  long tx = typ(x), tp = typ(p);
   pari_sp av, limit;
-  GEN p1, p2;
 
-  if (isexactzero(x)) return LONG_MAX;
-  if (is_const_t(tx) && tp==t_POL) return 0;
-  if (tp == t_INT && (!signe(p) || is_pm1(p)))
-    pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
+  switch(tp)
+  {
+    case t_INT:
+      if (signe(p) && !is_pm1(p)) break;
+      pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
+    case t_POL:
+      if (degpol(p) > 0) break;
+    default:
+      pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
+  }
+
   switch(tx)
   {
     case t_INT:
-      if (tp != t_INT) break;
+      if (!signe(x)) return LONG_MAX;
+      if (tp == t_POL) return 0;
       return Z_pval(x,p);
 
-    case t_INTMOD:
-      if (tp != t_INT) break;
+    case t_INTMOD: {
+      GEN a = gel(x,1), b = gel(x,2);
+      long val;
+      if (tp == t_POL) return signe(b)? 0: LONG_MAX;
       av = avma;
-      if (!intdvd(gel(x,1),p, &p1)) break;
-      if (!intdvd(gel(x,2),p, &p2)) { avma = av; return 0; }
-      val = 1; while (intdvd(p1,p,&p1) && intdvd(p2,p,&p2)) val++;
+      if (!intdvd(a, p, &a)) break;
+      if (!intdvd(b, p, &b)) { avma = av; return 0; }
+      val = 1; while (intdvd(a,p,&a) && intdvd(b,p,&b)) val++;
       avma = av; return val;
+    }
 
     case t_FRAC:
-      if (tp != t_INT) break;
+      if (tp == t_POL) return 0;
       return ratval(x, p);
 
     case t_PADIC:
+      if (tp == t_POL) return 0;
       if (!equalii(p,gel(x,2))) break;
       return valp(x);
 
     case t_POLMOD: {
       GEN a = gel(x,1), b = gel(x,2);
-      long v;
+      long v, val;
       if (tp == t_INT) return ggval(b,p);
-      if (tp != t_POL) break;
       v = varn(p);
       if (varn(a) != v) return 0;
       av = avma;
@@ -1129,13 +1139,10 @@ ggval(GEN x, GEN p)
              (b = RgX_divrem(b, p, ONLY_DIVIDES)) ) val++;
       avma = av; return val;
     }
-    case t_POL:
-      if (tp==t_POL)
-      {
-        long vp = varn(p);
-        if (degpol(p) <= 0)
-          pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
-        vx = varn(x);
+    case t_POL: {
+      long i, val;
+      if (tp == t_POL) {
+        long vp = varn(p), vx = varn(x);
         if (vp == vx)
         {
           if (RgX_is_monomial(p)) return RgX_val(x) / degpol(p);
@@ -1153,22 +1160,23 @@ ggval(GEN x, GEN p)
         }
         if (varncmp(vx, vp) > 0) return 0;
       }
-      else
-        if (tp != t_INT) break;
       i=2; while (isrationalzero(gel(x,i))) i++;
       return minval(x,p,i);
+    }
 
-    case t_SER:
-      if (tp!=t_POL && tp!=t_SER && tp!=t_INT) break;
-      vp = gvar(p);
-      vx = varn(x);
-      if (vp == vx) {
-        vp = RgX_val(p);
-        if (!vp) pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
-        return (long)(valp(x) / vp);
+    case t_SER: {
+      if (tp == t_POL) {
+        long vx = varn(x), vp = varn(p), val;
+        if (vp == vx)
+        {
+          val = RgX_val(p);
+          if (!val) pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
+          return (long)(valp(x) / val);
+        }
+        if (varncmp(vx, vp) > 0) return 0;
       }
-      if (varncmp(vx, vp) > 0) return 0;
       return minval(x,p,2);
+    }
 
     case t_RFRAC:
       return ggval(gel(x,1),p) - ggval(gel(x,2),p);
