@@ -4063,7 +4063,7 @@ elllog(GEN e, GEN a, GEN g, GEN o)
   checksmallell(e); checkellpt(a); checkellpt(g);
   if (ell_is_FpE(e, a, &p) && RgV_is_FpV(g, &p) && p)
   {
-    if (!o) o = subii(addis(p,1), ellap(e,p));
+    if (!o) o = ellcard(e,p);
     if (cmpiu(p,3) > 0)
       return gerepileuptoint(av, elllog_modp(e,a,g,o,p));
   }
@@ -4145,7 +4145,7 @@ ellorder(GEN e, GEN z, GEN o)
   {
     GEN p=NULL;
     if (ell_is_FpE(e, z, &p) && p)
-      o = subii(addis(p,1), ellap(e,p));
+      o = ellcard(e,p);
     else
       pari_err(e_MISC,"curve order required");
   }
@@ -4589,6 +4589,28 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   return ellmiller(E, P, Q, m);
 }
 
+GEN
+ellcard(GEN E, GEN p)
+{
+  pari_sp av=avma;
+  GEN N = subii(addis(p, 1), ellap(E, p));
+  GEN D = Rg_to_Fp(ell_get_disc(E), p);
+  if (!signe(D))
+    N = subis(N, 1); /* remove singular point */
+  return gerepileuptoint(av, N);
+}
+
+GEN
+ellcard0(GEN E, GEN p)
+{
+  checksmallell(E);
+  if (!p)
+    p = get_p(E);
+  else
+    if (typ(p)!=t_INT) pari_err_TYPE("ellgroup",p);
+  return ellcard(E, p);
+}
+
 /* D = [d_1, ..., d_r ] the elementary divisors for E(Fp), r = 0,1,2.
  * d_r | ... | d_1 */
 static GEN
@@ -4654,14 +4676,7 @@ static GEN
 ellgroup_m(GEN E, GEN p, GEN *pt_m)
 {
   GEN e, a4, a6;
-  GEN N = subii(addis(p, 1), ellap(E, p));
-  GEN D = Rg_to_Fp(ell_get_disc(E), p);
-  if (!signe(D))
-  {
-    N = subis(N, 1); /* remove singular point */
-    if (equali1(N)) return cgetg(1,t_VEC);
-    return mkvec(N);
-  }
+  GEN N = ellcard(E, p);
   if (equali1(N)) return cgetg(1,t_VEC);
   if (equaliu(p, 2)) return mkvec(N); /* Takes care of p=2 */
   if (equaliu(p, 3))

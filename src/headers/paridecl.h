@@ -1508,6 +1508,8 @@ void    checkell5(GEN e);
 GEN     ell_to_small_red(GEN e, GEN *N);
 GEN     ell_to_small_redfa(GEN e, GEN *N, GEN *faN);
 GEN     ellap(GEN e, GEN p);
+GEN     ellcard(GEN E, GEN p);
+GEN     ellcard0(GEN E, GEN p);
 GEN     ellchangecurve(GEN e, GEN ch);
 GEN     elldivpol(GEN e, long n, long v);
 GEN     elleisnum(GEN om, long k, long flag, long prec);
