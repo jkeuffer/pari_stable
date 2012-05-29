@@ -203,7 +203,7 @@ greffe_aux(GEN x, long l, long lx, long v)
     for (i = 2; i <lx; i++) gel(y,i) = gel(x,i);
     for (     ; i < l; i++) gel(y,i) = gen_0;
   }
-  return y;
+  return normalize(y);
 }
 /* enlarge/truncate t_POL x to a t_SER with lg l */
 GEN
@@ -211,7 +211,7 @@ RgX_to_ser(GEN x, long l)
 {
   long i, lx = lg(x);
   /* analogous to RgX_valrem + normalize */
-  i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
+  i = 2; while (i<lx && isrationalzero(gel(x,i))) i++;
   return greffe_aux(x, l, lx, i - 2);
 }
 GEN
