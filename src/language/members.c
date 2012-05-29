@@ -23,11 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /********************************************************************/
 INLINE int is_ell5(GEN x) {
   long lx = lg(x);
-  return (typ(x) == t_VEC && (lx == 6 || lx == 14 || lx == 20));
+  return (typ(x) == t_VEC && (lx == 6 || lx == 14 || lx == 19 || lx == 20));
 }
 INLINE int is_smallell(GEN x) {
   long lx = lg(x);
-  return (typ(x) == t_VEC && (lx == 14 || lx == 20));
+  return (typ(x) == t_VEC && (lx == 14 || lx == 19 || lx == 20));
 }
 INLINE int is_ell(GEN x) {
   long lx = lg(x);

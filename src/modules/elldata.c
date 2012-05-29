@@ -208,7 +208,7 @@ ellidentify(GEN E)
 }
 
 GEN
-ellgenerators(GEN E)
+elldatagenerators(GEN E)
 {
   pari_sp ltop=avma;
   GEN V=ellidentify(E);

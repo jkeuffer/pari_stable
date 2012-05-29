@@ -830,6 +830,178 @@ FF_primroot(GEN x, GEN *o)
 }
 
 static GEN
+to_FFE(GEN P, GEN fg)
+{
+  if(ell_is_inf(P))
+    return ellinf();
+  else
+    retmkvec2(mkFF_i(fg,gel(P,1)), mkFF_i(fg,gel(P,2)));
+}
+
+static GEN
+to_FFE_vec(GEN x, GEN ff)
+{
+  long i, lx = lg(x);
+  for (i=1; i<lx; i++) gel(x,i) = to_FFE(gel(x,i), ff);
+  return x;
+}
+
+static GEN
+FpXQ_ell_to_a4a6(GEN E, GEN T, GEN p)
+{
+  GEN a1, a3, b2, c4, c6;
+  a1 = Rg_to_FpXQ(ell_get_a1(E),T,p);
+  a3 = Rg_to_FpXQ(ell_get_a3(E),T,p);
+  b2 = Rg_to_FpXQ(ell_get_b2(E),T,p);
+  c4 = Rg_to_FpXQ(ell_get_c4(E),T,p);
+  c6 = Rg_to_FpXQ(ell_get_c6(E),T,p);
+  retmkvec3(FpX_neg(FpX_mulu(c4, 27, p), p), FpX_neg(FpX_mulu(c6, 54, p), p),
+            mkvec4(Z_to_FpX(utoi(6),p,varn(T)),FpX_mulu(b2,3,p),
+                   FpX_mulu(a1,3,p),FpX_mulu(a3,108,p)));
+}
+
+static GEN
+Flxq_ell_to_a4a6(GEN E, GEN T, ulong p)
+{
+  GEN a1, a3, b2, c4, c6;
+  a1 = Rg_to_Flxq(ell_get_a1(E),T,p);
+  a3 = Rg_to_Flxq(ell_get_a3(E),T,p);
+  b2 = Rg_to_Flxq(ell_get_b2(E),T,p);
+  c4 = Rg_to_Flxq(ell_get_c4(E),T,p);
+  c6 = Rg_to_Flxq(ell_get_c6(E),T,p);
+  retmkvec3(Flx_neg(Flx_Fl_mul(c4, 27%p, p), p), Flx_neg(Flx_Fl_mul(c6, 54%p, p), p),
+            mkvec4(Fl_to_Flx(6%p,T[1]),Flx_Fl_mul(b2,3%p,p),
+                   Flx_Fl_mul(a1,3%p,p),Flx_Fl_mul(a3,108%p,p)));
+}
+
+GEN
+FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m)
+{
+  GEN T,p,q,e,N,G;
+  ulong pp;
+  long i;
+  _getFF(fg,&T,&p,&pp);
+  q = powiu(p, degpol(T));
+  switch(fg[1])
+  {
+  case t_FF_FpXQ:
+    e = FpXQ_ell_to_a4a6(E,T,p);
+    N = FpXQ_ellcard(gel(e,1),gel(e,2),T,p);
+    G = FpXQ_ellgroup(gel(e,1),gel(e,2),N,T,p,pt_m);
+    for(i=1;i<=13;i++)
+      gel(E,i) = mkFF_i(fg,Rg_to_FpXQ(gel(E,i),T,p));
+    break;
+  case t_FF_F2xq:
+    pari_err_IMPL("FF_ellgroup");
+  default:
+    e = Flxq_ell_to_a4a6(E,T,pp);
+    N = Flxq_ellcard(gel(e,1),gel(e,2),T,pp);
+    G = Flxq_ellgroup(gel(e,1),gel(e,2),N,T,pp,pt_m);
+    for(i=1;i<=13;i++)
+      gel(E,i) = mkFF_i(fg,Rg_to_Flxq(gel(E,i),T,pp));
+    break;
+  }
+  *pt_e = e; *pt_N = N;
+  return G;
+}
+
+GEN
+FF_ellgens(GEN E)
+{
+  pari_sp av = avma;
+  GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
+  GEN N = ellff_get_card(E), m = ellff_get_m(E);
+  GEN G = ellfffactcyc(E), F;
+  GEN T,p;
+  ulong pp;
+  _getFF(fg,&T,&p,&pp);
+  switch(fg[1])
+  {
+  case t_FF_FpXQ:
+    F = FpXQ_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T, p);
+    break;
+  case t_FF_F2xq:
+    pari_err_IMPL("FF_ellgen");
+  default:
+    F = Flxq_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T, pp);
+  }
+  return gerepilecopy(av, mkvec3(N,G,to_FFE_vec(F,fg)));
+}
+
+GEN
+FF_ellmul(GEN E, GEN P, GEN n)
+{
+  pari_sp av = avma;
+  GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E), Q;
+  GEN T,p, Pp, Qp;
+  ulong pp;
+  _getFF(fg,&T,&p,&pp);
+  switch (fg[1])
+  {
+  case t_FF_FpXQ:
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P, T, p), gel(e,3), T, p);
+    Qp = FpXQE_mul(Pp, n, gel(e,1), T, p);
+    Q = FpXQE_changepoint(Qp, gel(e,3), T, p);
+    break;
+  case t_FF_F2xq:
+    pari_err_IMPL("FF_ellgen");
+  default:
+    Pp = FlxqE_changepointinv(RgE_to_FlxqE(P, T, pp), gel(e,3), T, pp);
+    Qp = FlxqE_mul(Pp, n, gel(e,1), T, pp);
+    Q = FlxqE_changepoint(Qp, gel(e,3), T, pp);
+  }
+  return gerepilecopy(av, to_FFE(Q, fg));
+}
+
+GEN
+FF_ellorder(GEN E, GEN P, GEN o)
+{
+  pari_sp av = avma;
+  GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
+  GEN r,T,p,Pp;
+  ulong pp;
+  _getFF(fg,&T,&p,&pp);
+  switch (fg[1])
+  {
+  case t_FF_FpXQ:
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), gel(e,3), T, p);
+    r = FpXQE_order(Pp, o, gel(e,1), T, p);
+    break;
+  case t_FF_F2xq:
+    pari_err_IMPL("FF_ellgen over F2^k");
+  default:
+    Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
+    r = FlxqE_order(Pp, o, gel(e,1), T, pp);
+  }
+  return gerepileupto(av, r);
+}
+
+GEN
+FF_elllog(GEN E, GEN P, GEN Q, GEN o)
+{
+  pari_sp av = avma;
+  GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
+  GEN r,T,p, Pp,Qp;
+  ulong pp;
+  _getFF(fg,&T,&p,&pp);
+  switch(fg[1])
+  {
+  case t_FF_FpXQ:
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), gel(e,3), T, p);
+    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), gel(e,3), T, p);
+    r = FpXQE_log(Pp, Qp, o, gel(e,1), T, p);
+    break;
+  case t_FF_F2xq:
+    pari_err_IMPL("FF_ellgen over F2^k");
+  default:
+    Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
+    Qp = FlxqE_changepointinv(RgE_to_FlxqE(Q,T,pp), gel(e,3), T, pp);
+    r = FlxqE_log(Pp, Qp, o, gel(e,1), T, pp);
+  }
+  return gerepileupto(av, r);
+}
+
+static GEN
 to_FF(GEN x, GEN ff)
 {
   if (typ(x) == t_INT) return x;

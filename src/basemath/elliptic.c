@@ -220,7 +220,7 @@ initsmall(GEN x, GEN y)
   D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
            gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
   gel(y,12) = D;
-  if (gequal0(D)) return 0;
+  if (gequal0(D)) { gel(y, 13) = gen_0; return 0; }
 
   j = gdiv(gmul(gsqr(c4),c4), D);
   gel(y,13) = j; return 1;
@@ -441,7 +441,7 @@ get_ell(GEN x)
   switch(typ(x))
   {
     case t_STR: return gel(ellsearchcurve(x),2);
-    case t_VEC: switch(lg(x)) { case 3: case 6: case 14: case 20: return x; }
+    case t_VEC: switch(lg(x)) { case 3: case 6: case 14: case 19: case 20: return x; }
     /*fall through*/
   }
   pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
@@ -1019,6 +1019,7 @@ ellmul_Z(GEN e, GEN z, GEN n)
   long s;
   GEN p=NULL;
   if (ell_is_inf(z)) return ellinf();
+  if (lg(e)==19) return ellffmul(e,z,n);
   if (ell_is_FpE(e,z,&p) && p && cmpiu(p,3)>0)
     return ellmul_modp(e, z, n, p);
   s = signe(n);
@@ -3621,6 +3622,7 @@ elllog_modp(GEN e, GEN P, GEN Q, GEN o, GEN p)
   GEN v = ell_to_a4a6_bc(e, p), a4 = gel(v,1), m = gel(v,3);
   GEN Pp = FpE_changepointinv(RgV_to_FpV(P,p), m, p);
   GEN Qp = FpE_changepointinv(RgV_to_FpV(Q,p), m, p);
+  if (!o) o = FpE_order(Qp, ellcard(e,p), a4, p);
   return FpE_log(Pp, Qp, o, a4, p);
 }
 
@@ -3630,11 +3632,12 @@ elllog(GEN e, GEN a, GEN g, GEN o)
   pari_sp av = avma;
   GEN z, p=NULL;
   checksmallell(e); checkellpt(a); checkellpt(g);
+  if (lg(e)==19) return ellfflog(e,a,g,o);
   if (ell_is_FpE(e, a, &p) && RgV_is_FpV(g, &p) && p)
   {
-    if (!o) o = ellcard(e,p);
     if (cmpiu(p,3) > 0)
       return gerepileuptoint(av, elllog_modp(e,a,g,o,p));
+    else if (!o) o = ellorder(e,g,o);
   }
   else if (!o)
     pari_err(e_MISC,"group order required for non-prime finite field");
@@ -3710,6 +3713,7 @@ ellorder(GEN e, GEN z, GEN o)
   if (is_rational_t(typ(disc)) &&
       is_rational_t(typ(gel(z,1))) && is_rational_t(typ(gel(z,2))))
     return utoi( _orderell(e, z) );
+  if (lg(e)==19) return ellfforder(e, z, o);
   if (!o)
   {
     GEN p=NULL;
@@ -4161,11 +4165,16 @@ ellap(GEN e, GEN p)
 GEN
 ellcard(GEN E, GEN p)
 {
-  pari_sp av = avma;
-  GEN N = ellcard_ram(E, p);
-  GEN D = Rg_to_Fp(ell_get_disc(E), p);
-  if (!signe(D)) N = subis(N, 1); /* remove singular point */
-  return gerepileuptoint(av, N);
+  if (lg(E)==19)
+    return icopy(ellff_get_card(E));
+  else
+  {
+    pari_sp av = avma;
+    GEN N = ellcard_ram(E, p);
+    GEN D = Rg_to_Fp(ell_get_disc(E), p);
+    if (!signe(D)) N = subis(N, 1); /* remove singular point */
+    return gerepileuptoint(av, N);
+  }
 }
 
 GEN
@@ -4266,6 +4275,7 @@ GEN
 ellgroup(GEN E, GEN p)
 {
   pari_sp av = avma;
+  if (lg(E)==19) return ellffcyc(E);
   return gerepilecopy(av, ellgroup_m(E, p, NULL));
 }
 
@@ -4278,9 +4288,138 @@ ellgroup0(GEN E, GEN p, long flag)
   p = get_p(E,p,"ellgroup");
   if (flag==0) return ellgroup(E, p);
   if (flag!=1) pari_err_FLAG("ellgroup");
+  if (lg(E)==19) return ellffgen(E);
   G = ellgroup_m(E, p, &m);
   F = FpVV_to_mod(ellgen(E,G,m,p),p);
   return gerepilecopy(av, mkvec3(ZV_prod(G),G,F));
+}
+
+GEN
+ellgenerators(GEN E)
+{
+  pari_sp ltop=avma;
+  if (lg(E)==19)
+    return gerepilecopy(ltop, gel(ellffgen(E),3));
+  else return elldatagenerators(E);
+}
+
+GEN
+ellffinit(GEN x, GEN fg)
+{
+  pari_sp av = avma;
+  GEN E = cgetg(19,t_VEC);
+  GEN e, N, G, m = gen_1, d1;
+  long is_reg = initsmall(get_ell(x), E);
+  if(!is_reg) pari_warn(warner,"curve is singular");
+  if (typ(fg)==t_INTMOD) fg=gel(fg,1);
+  if (typ(fg)==t_FFELT)
+    G = FF_ellinit(E,fg,&e,&N,&m);
+  else if (typ(fg)==t_INT)
+  {
+    long i;
+    GEN p = fg;
+    for(i=1;i<=13;i++)
+      gel(E,i) = Fp_to_mod(Rg_to_Fp(gel(E,i),p),p);
+    e = ell_to_a4a6_bc(E, p);
+    N = ellcard_ram(E, p);
+    G = Fp_ellgroup(gel(e,1),gel(e,2),N,p,&m);
+  }
+  else { pari_err_TYPE("ellffinit",fg); return NULL; /*NOTREACHED*/ }
+  d1 = lg(G)>1 ? gel(G,1): gen_1;
+  gel(E,14) = fg;
+  gel(E,15) = e;
+  gel(E,16) = N;
+  gel(E,17) = mkvec2(d1, Z_factor(d1));
+  gel(E,18) = m;
+  return gerepilecopy(av,E);
+}
+
+GEN
+ellffcyc(GEN E)
+{
+  GEN N = ellff_get_card(E), d1 = ellff_get_d1(E);
+  if (equali1(N))     return cgetg(1,t_VEC);
+  if (equalii(N, d1)) return mkveccopy(N);
+  retmkvec2(icopy(d1), diviiexact(N,d1));
+}
+
+GEN
+ellfffactcyc(GEN E)
+{
+  GEN N = ellff_get_card(E), d1 = ellff_get_d1(E), o = ellff_get_o(E);
+  if (equali1(N))     return cgetg(1,t_VEC);
+  if (equalii(N, d1)) return mkveccopy(o);
+  retmkvec2(gcopy(o), diviiexact(N,d1));
+}
+
+GEN
+ellffgen(GEN E)
+{
+  GEN fg = ellff_get_field(E);
+  if (typ(fg)==t_FFELT)
+    return FF_ellgens(E);
+  else
+  {
+    pari_sp av = avma;
+    GEN p = fg ,e = ellff_get_a4a6(E);
+    GEN N = ellff_get_card(E), m = ellff_get_m(E);
+    GEN G = ellfffactcyc(E), F;
+    F = Fp_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,p);
+    F = FpVV_to_mod(F,p);
+    return gerepilecopy(av, mkvec3(N,G,F));
+  }
+}
+
+GEN
+ellffmul(GEN E, GEN P, GEN n)
+{
+  GEN fg = ellff_get_field(E);
+  if (typ(fg)==t_FFELT)
+    return FF_ellmul(E, P, n);
+  else
+  {
+    pari_sp av = avma;
+    GEN p = fg, e = ellff_get_a4a6(E), Q;
+    GEN Pp = FpE_changepointinv(RgE_to_FpE(P, p), gel(e,3), p);
+    GEN Qp = FpE_mul(Pp, n, gel(e,1), p);
+    Q= FpV_to_mod(FpE_changepoint(Qp, gel(e,3), p), p);
+    return gerepileupto(av, Q);
+  }
+}
+
+GEN
+ellfforder(GEN E, GEN P, GEN o)
+{
+  GEN fg = ellff_get_field(E);
+  if (!o) o = ellff_get_o(E);
+  if (typ(fg)==t_FFELT)
+    return FF_ellorder(E, P, o);
+  else
+  {
+    pari_sp av = avma;
+    GEN p = fg, e = ellff_get_a4a6(E), r;
+    GEN Pp = FpE_changepointinv(RgE_to_FpE(P,p), gel(e,3), p);
+    r = FpE_order(Pp, o, gel(e,1), p);
+    return gerepileuptoint(av, r);
+  }
+}
+
+GEN
+ellfflog(GEN E, GEN P, GEN Q, GEN o)
+{
+  pari_sp av = avma;
+  GEN fg = ellff_get_field(E);
+  if (!o) o = ellff_get_o(E);
+  if (typ(fg)==t_FFELT)
+    return FF_elllog(E, P, Q, o);
+  else
+  {
+    GEN p = fg, e = ellff_get_a4a6(E), r;
+    GEN Pp = FpE_changepointinv(RgE_to_FpE(P,p), gel(e,3), p);
+    GEN Qp = FpE_changepointinv(RgE_to_FpE(Q,p), gel(e,3), p);
+    r = FpE_log(Pp, Qp, o, gel(e,1), p);
+    return gerepileuptoint(av, r);
+  }
 }
 
 static GEN
