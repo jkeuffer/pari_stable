@@ -399,6 +399,11 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp)
     t0 = diviiexact(ord, gel(qj,e));
     a0 = grp->pow(E, a, t0);
     ginv0 = grp->pow(E, ginv, t0); /* order q^e */
+    if (grp->equal1(ginv0))
+    {
+      gel(v,i) = mkintmod(gen_0, gen_1);
+      continue;
+    }
     do { g_q = grp->pow(E,g, mulii(t0, gel(qj,--e))); /* order q */
     } while (grp->equal1(g_q));
     n_q = gen_0;

@@ -24,15 +24,14 @@ Doc: discrete logarithm of the finite field element $x$ in base $g$. If
  ? o = fforder(t)
  %2 = 5602   \\@com \emph{not} a primitive root.
  ? fflog(t^10,t)
- %3 = 11214  \\@com Actually correct modulo o. We are lucky !
+ %3 = 10
  ? fflog(t^10,t, o)
  %4 = 10
  ? g = ffprimroot(t, &o);
  ? o   \\ order is 16806, bundled with its factorization matrix
  %6 = [16806, [2, 1; 3, 1; 2801, 1]]
  ? fforder(g, o)
- %7 = 16806  \\ no surprise there !
- ? fforder(g^10000, g, o)
+ %7 = 16806
  ? fflog(g^10000, g, o)
- %9 = 10000
+ %8 = 10000
  @eprog
