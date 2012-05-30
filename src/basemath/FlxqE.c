@@ -237,7 +237,7 @@ static GEN
 FlxqE_vert(GEN P, GEN Q, GEN T, ulong p)
 {
   if (ell_is_inf(P))
-    return gen_1;
+    return pol1_Flx(T[1]);
   return Flx_sub(gel(Q, 1), gel(P, 1), p);
 }
 
@@ -251,7 +251,7 @@ FlxqE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
   if (ell_is_inf(R))
   {
     *pt_R = ellinf();
-    return gen_1;
+    return pol1_Flx(T[1]);
   }
   else if (!lgpol(gel(R,2)))
   {
@@ -276,7 +276,7 @@ FlxqE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
   if (ell_is_inf(R))
   {
     *pt_R = ellinf();
-    return gen_1;
+    return pol1_Flx(T[1]);
   }
   else if (zv_equal(gel(P, 1), gel(R, 1)))
   {
@@ -346,13 +346,14 @@ FlxqE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN T, ulong p)
 {
   pari_sp ltop = avma;
   struct _FlxqE_miller d;
-  GEN v, result, num, denom;
+  GEN v, result, num, denom, g1;
 
   d.a4 = a4; d.T = T; d.p = p; d.P = P;
-  v = gen_pow(mkvec3(gen_1,gen_1,Q), m, (void*)&d, FlxqE_Miller_dbl, FlxqE_Miller_add);
+  g1 = pol1_Flx(T[1]);
+  v = gen_pow(mkvec3(g1,g1,Q), m, (void*)&d, FlxqE_Miller_dbl, FlxqE_Miller_add);
   num = gel(v,1); denom = gel(v,2);
-  result = lgpol(denom) ? Flxq_div(num, denom, T, p): gen_1;
-  return gerepileupto(ltop, lgpol(result) ? result: gen_1);
+  result = lgpol(denom) ? Flxq_div(num, denom, T, p): g1;
+  return gerepileupto(ltop, lgpol(result) ? result: g1);
 }
 
 GEN
@@ -361,7 +362,7 @@ FlxqE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
   pari_sp ltop = avma;
   GEN num, denom, result;
   if (ell_is_inf(P) || ell_is_inf(Q) || zv_equal(P,Q))
-    return gen_1;
+    return pol1_Flx(T[1]);
   num    = FlxqE_Miller(P, Q, m, a4, T, p);
   denom  = FlxqE_Miller(Q, P, m, a4, T, p);
   result = Flxq_div(num, denom, T, p);
@@ -374,7 +375,7 @@ GEN
 FlxqE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
 {
   if (ell_is_inf(P) || ell_is_inf(Q))
-    return gen_1;
+    return pol1_Flx(T[1]);
   return FlxqE_Miller(P, Q, m, a4, T, p);
 }
 
