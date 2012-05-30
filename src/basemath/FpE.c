@@ -620,3 +620,197 @@ FpXQE_log(GEN a, GEN b, GEN o, GEN a4, GEN T, GEN p)
   e.a4=a4; e.T=T; e.p=p;
   return gerepileuptoint(av, gen_PH_log(a, b, o, (void*)&e, &FpXQE_group));
 }
+
+
+/***********************************************************************/
+/**                                                                   **/
+/**                            Pairings                               **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* Derived from APIP from and by Jerome Milan, 2012 */
+
+static GEN
+FpXQE_vert(GEN P, GEN Q, GEN T, GEN p)
+{
+  if (ell_is_inf(P))
+    return pol_1(varn(T));
+  return FpX_sub(gel(Q, 1), gel(P, 1), p);
+}
+
+/* Computes the equation of the line tangent to R and returns its
+   evaluation at the point Q. Also doubles the point R.
+ */
+
+static GEN
+FpXQE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
+{
+  if (ell_is_inf(R))
+  {
+    *pt_R = ellinf();
+    return pol_1(varn(T));
+  }
+  else if (!signe(gel(R,2)))
+  {
+    *pt_R = ellinf();
+    return FpXQE_vert(R, Q, T, p);
+  } else {
+    GEN slope, tmp1, tmp2;
+    *pt_R = FpXQE_dbl_slope(R, a4, T, p, &slope);
+    tmp1 = FpX_add(gel(Q, 1), FpX_neg(gel(R, 1), p), p);
+    tmp2 = FpX_add(FpXQ_mul(tmp1, slope, T, p), gel(R,2), p);
+    return FpX_sub(gel(Q, 2), tmp2, p);
+  }
+}
+
+/* Computes the equation of the line through R and P, and returns its
+   evaluation at the point Q. Also adds Q to the point R.
+ */
+
+static GEN
+FpXQE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
+{
+  if (ell_is_inf(R))
+  {
+    *pt_R = ellinf();
+    return pol_1(varn(T));
+  }
+  else if (ZX_equal(gel(P, 1), gel(R, 1)))
+  {
+    if (ZX_equal(gel(P, 2), gel(R, 2)))
+      return FpXQE_tangent_update(R, Q, a4, T, p, pt_R);
+    else
+    {
+      *pt_R = ellinf();
+      return FpXQE_vert(R, Q, T, p);
+    }
+  } else {
+    GEN slope, tmp1, tmp2;
+    *pt_R = FpXQE_add_slope(P, R, a4, T, p, &slope);
+    tmp1  = FpXQ_mul(FpX_add(gel(Q, 1), FpX_neg(gel(R, 1), p), p), slope, T, p);
+    tmp2  = FpX_add(tmp1, gel(R, 2), p);
+    return FpX_sub(gel(Q, 2), tmp2, p);
+  }
+}
+
+/* Returns the Miller function f_{m, Q} evaluated at the point P using
+   the standard Miller algorithm.
+ */
+
+struct _FpXQE_miller
+{
+  GEN p;
+  GEN T, a4, P;
+};
+
+static GEN
+FpXQE_Miller_dbl(void* E, GEN d)
+{
+  struct _FpXQE_miller *m = (struct _FpXQE_miller *)E;
+  GEN p  = m->p;
+  GEN T = m->T, a4 = m->a4, P = m->P;
+  GEN v, line;
+  GEN num = FpXQ_sqr(gel(d,1), T, p);
+  GEN denom = FpXQ_sqr(gel(d,2), T, p);
+  GEN point = gel(d,3);
+  line = FpXQE_tangent_update(point, P, a4, T, p, &point);
+  num  = FpXQ_mul(num, line, T, p);
+  v = FpXQE_vert(point, P, T, p);
+  denom = FpXQ_mul(denom, v, T, p);
+  return mkvec3(num, denom, point);
+}
+
+static GEN
+FpXQE_Miller_add(void* E, GEN va, GEN vb)
+{
+  struct _FpXQE_miller *m = (struct _FpXQE_miller *)E;
+  GEN p = m->p;
+  GEN T = m->T, a4 = m->a4, P = m->P;
+  GEN v, line, point;
+  GEN na = gel(va,1), da = gel(va,2), pa = gel(va,3);
+  GEN nb = gel(vb,1), db = gel(vb,2), pb = gel(vb,3);
+  GEN num   = FpXQ_mul(na, nb, T, p);
+  GEN denom = FpXQ_mul(da, db, T, p);
+  line = FpXQE_chord_update(pa, pb, P, a4, T, p, &point);
+  num  = FpXQ_mul(num, line, T, p);
+  v = FpXQE_vert(point, P, T, p);
+  denom = FpXQ_mul(denom, v, T, p);
+  return mkvec3(num, denom, point);
+}
+
+static GEN
+FpXQE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN T, GEN p)
+{
+  pari_sp ltop = avma;
+  struct _FpXQE_miller d;
+  GEN v, result, num, denom, g1;
+
+  d.a4 = a4; d.T = T; d.p = p; d.P = P;
+  g1 = pol_1(varn(T));
+  v = gen_pow(mkvec3(g1,g1,Q), m, (void*)&d, FpXQE_Miller_dbl, FpXQE_Miller_add);
+  num = gel(v,1); denom = gel(v,2);
+  result = signe(denom) ? FpXQ_div(num, denom, T, p): g1;
+  return gerepileupto(ltop, signe(result) ? result: g1);
+}
+
+GEN
+FpXQE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
+{
+  pari_sp ltop = avma;
+  GEN num, denom, result;
+  if (ell_is_inf(P) || ell_is_inf(Q) || ZX_equal(P,Q))
+    return pol_1(varn(T));
+  num    = FpXQE_Miller(P, Q, m, a4, T, p);
+  denom  = FpXQE_Miller(Q, P, m, a4, T, p);
+  result = FpXQ_div(num, denom, T, p);
+  if (mpodd(m))
+    result  = FpX_neg(result, p);
+  return gerepileupto(ltop, result);
+}
+
+GEN
+FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
+{
+  if (ell_is_inf(P) || ell_is_inf(Q))
+    return pol_1(varn(T));
+  return FpXQE_Miller(P, Q, m, a4, T, p);
+}
+
+
+static GEN
+_FpXQE_pairorder(void *E, GEN P, GEN Q, GEN m, GEN F)
+{
+  struct _FpXQE *e = (struct _FpXQE *) E;
+  return  FpXQ_order(FpXQE_weilpairing(P,Q,m,e->a4,e->T,e->p), F, e->T, e->p);
+}
+
+GEN
+FpXQ_ellgroup(GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m)
+{
+  struct _FpXQE e;
+  GEN q = powiu(p, degpol(T));
+  e.a4=a4; e.a6=a6; e.T=T; e.p=p;
+  return gen_ellgroup(N, subis(q,1), pt_m, (void*)&e, &FpXQE_group, _FpXQE_pairorder);
+}
+
+GEN
+FpXQ_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p)
+{
+  GEN P;
+  pari_sp av = avma;
+  struct _FpXQE e;
+  e.a4=a4; e.a6=a6; e.T=T; e.p=p;
+  switch(lg(D)-1)
+  {
+  case 1:
+    P = gen_gener(gel(D,1), (void*)&e, &FpXQE_group);
+    P = mkvec(FpXQE_changepoint(P, ch, T, p));
+    break;
+  default:
+    P = gen_ellgens(gel(D,1), gel(D,2), m, (void*)&e, &FpXQE_group, _FpXQE_pairorder);
+    gel(P,1) = FpXQE_changepoint(gel(P,1), ch, T, p);
+    gel(P,2) = FpXQE_changepoint(gel(P,2), ch, T, p);
+    break;
+  }
+  return gerepilecopy(av, P);
+}

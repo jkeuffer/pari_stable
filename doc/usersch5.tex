@@ -5092,7 +5092,7 @@ point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not exists,
 the result is currently undefined.
 
 \fun{GEN}{FpE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN p} returns the
-reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
+Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
 \fun{GEN}{FpE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN p} returns the
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
@@ -5131,10 +5131,19 @@ point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not exists,
 the result is currently undefined.
 
 \fun{GEN}{FlxqE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p} returns the
-reduced Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
+Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
 \fun{GEN}{FlxqE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN T, ulong p} returns the
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
+
+\fun{GEN}{Flxq_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m}
+Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
+
+\fun{GEN}{Flxq_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p}
+Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$ with the base change \kbd{ch} (see \kbd{FpXQE\_changepoint}),
+where $D$ and $m$ are as returned by \kbd{FpXQ\_ellgroup}.
 
 \subsec{\kbd{FpXQE}}
 Let $p$ a prime number, $T$ an irreducible polynomial mod $p$, and $E$ the
@@ -5160,6 +5169,21 @@ the result is currently undefined.
 \fun{GEN}{FpXQE_order}{GEN P, GEN o, GEN a4, GEN T, GEN p} returns the order of $P$ in
 the group $E(\F_p[X]/(T))$, where $o$ is a multiple of the order of $P$, or its
 factorization.
+
+\fun{GEN}{FpXQE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p} returns the
+Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
+
+\fun{GEN}{FpXQE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN T, GEN p} returns the
+Weil pairing of the points of $m$-torsion $P$ and $Q$.
+
+\fun{GEN}{FpXQ_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m}
+Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
+
+\fun{GEN}{FpXQ_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p}
+Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$ with the base change \kbd{ch} (see \kbd{FpXQE\_changepoint}),
+where $D$ and $m$ are as returned by \kbd{FpXQ\_ellgroup}.
 
 \section{Integral, rational and generic linear algebra}
 \subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}} A \kbd{ZV} (resp.~a~\kbd{ZM},

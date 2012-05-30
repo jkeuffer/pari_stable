@@ -237,6 +237,8 @@ GEN     FpE_order(GEN z, GEN o, GEN a4, GEN p);
 GEN     FpE_sub(GEN P, GEN Q, GEN a4, GEN p);
 GEN     FpE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
 GEN     FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
+GEN     FpXQ_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p);
+GEN     FpXQ_ellgroup(GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m);
 GEN     FpXQE_add(GEN P, GEN Q, GEN a4, GEN T, GEN p);
 GEN     FpXQE_changepoint(GEN x, GEN ch, GEN T, GEN p);
 GEN     FpXQE_changepointinv(GEN x, GEN ch, GEN T, GEN p);
@@ -246,6 +248,8 @@ GEN     FpXQE_mul(GEN P, GEN n, GEN a4, GEN T, GEN p);
 GEN     FpXQE_neg(GEN P, GEN T, GEN p);
 GEN     FpXQE_order(GEN z, GEN o, GEN a4, GEN T, GEN p);
 GEN     FpXQE_sub(GEN P, GEN Q, GEN a4, GEN T, GEN p);
+GEN     FpXQE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
+GEN     FpXQE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
 GEN     random_FpE(GEN a4, GEN a6, GEN p);
 GEN     random_FpXQE(GEN a4, GEN a6, GEN T, GEN p);
 
