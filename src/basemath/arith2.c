@@ -397,7 +397,7 @@ initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
   if (maxnum > maxpr && maxnum <= maxpr+512) maxnum = uprecprime(maxnum);
   if (maxnum <= maxpr)
   {
-    long size;
+    long last;
     ulong prime, lastprime = 0;
     byteptr d;
     if (maxnum == maxpr)
@@ -414,11 +414,11 @@ initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
       NEXT_PRIME_VIADIFF(prime,d);
     }
     if (prime == maxnum) { p = d; lastprime = prime; }
-    size = p-diffptr+1;
-    memcpy(p1, diffptr, size-1);
-    p1[size] = 0;
+    last = p-diffptr;
+    memcpy(p1, diffptr, last);
+    p1[last] = 0;
     *lastp = lastprime;
-    *lenp = size;
+    *lenp = last+1;
     return p1;
   }
   if (maxnum <= 1ul<<17)        /* Arbitrary. */

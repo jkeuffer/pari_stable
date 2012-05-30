@@ -95,6 +95,8 @@ BA 70- ellpointtoz was numerically unstable
    76- sqrt(0.E-97-1.12-97*I) -> div by 0 [#1309]
 BA 77- FpX_gcd(0,x) -> div by 0
    78- x; y; p; q; subst(Mod(q,p), q, x + y) --> Mod(1, p)*x [#1321]
+   79- off-by-1 error when placing prime table sentinel after e.g.
+       default(primelimit, 2);
 
   Changed
     1- mathnf: swapped flag 3 and 5.
