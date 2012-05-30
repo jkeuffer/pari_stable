@@ -860,27 +860,30 @@ DDF(GEN a, int fl)
 {
   GEN lead, prime, famod, z, ap;
   const long da = degpol(a);
-  long chosenp, p, nfacp, np, nmax, ti = 0;
+  long nfacp, np, nmax, ti = 0;
+  ulong chosenp = 0;
   pari_sp av = avma, av1;
-  byteptr pt = diffptr;
   const long MAXNP = 7;
   pari_timer T, T2;
+  forprime_t S;
 
   if (DEBUGLEVEL>2) { timer_start(&T); timer_start(&T2); }
   nmax = da+1;
-  chosenp = 0;
   lead = gel(a,da+2); if (equali1(lead)) lead = NULL;
+  u_forprime_init(&S, 2, ULONG_MAX);
   av1 = avma;
-  for (p = np = 0; np < MAXNP; avma = av1)
+  for (np = 0; np < MAXNP; avma = av1)
   {
-    NEXT_PRIME_VIADIFF_CHECK(p,pt);
-    if (lead && !smodis(lead,p)) continue;
+    ulong p = u_forprime_next(&S);
+
+    if (!p) pari_err_OVERFLOW("DDF [out of small primes]");
+    if (lead && !umodiu(lead,p)) continue;
     z = ZX_to_Flx(a, p);
     if (!Flx_is_squarefree(z, p)) continue;
 
     nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);
     if (DEBUGLEVEL>4)
-      err_printf("...tried prime %3ld (%-3ld %s). Time = %ld\n",
+      err_printf("...tried prime %3lu (%-3ld %s). Time = %ld\n",
                   p, nfacp, fl?"roots": "factors", timer_delay(&T2));
     if (nfacp < nmax)
     {
@@ -904,7 +907,7 @@ DDF(GEN a, int fl)
     pari_err_BUG("DDF: wrong numbers of factors");
   if (DEBUGLEVEL>2)
   {
-    if (DEBUGLEVEL>4) timer_printf(&T2, "splitting mod p = %ld", chosenp);
+    if (DEBUGLEVEL>4) timer_printf(&T2, "splitting mod p = %lu", chosenp);
     ti = timer_delay(&T);
     err_printf("Time setup: %ld\n", ti);
   }

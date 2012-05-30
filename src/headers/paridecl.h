@@ -2703,6 +2703,8 @@ GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 GEN     derivnum(void *E, GEN (*eval)(void *, GEN), GEN x, long prec);
 GEN     derivfun(void *E, GEN (*eval)(void *, GEN), GEN x, long prec);
 GEN     direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c);
+GEN     forprime_next(forprime_t *T);
+int     forprime_init(forprime_t *T, GEN a, GEN b);
 GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
 GEN     polzag(long n, long m);
 GEN     prodeuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, long prec);
@@ -2713,6 +2715,8 @@ GEN     sumalt2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 GEN     sumpos(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 GEN     sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 GEN     suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
+ulong   u_forprime_next(forprime_t *T);
+int     u_forprime_init(forprime_t *T, ulong a, ulong b);
 GEN     zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec);
 
 /* thue.c */

@@ -1965,6 +1965,8 @@ simple direct backtracking algorithm using $C$ \kbd{long}s.
 
 \subsec{Iterating over primes}\label{se:primetable}
 
+\subsubsec{Low-level interface}
+
 After \kbd{pari\_init(size, maxprime)} is called, a ``prime table'' is
 initialized with the successive \emph{differences} of primes up to (possibly
 just a little beyond) \kbd{maxprime}. The prime table occupies roughly
@@ -2035,6 +2037,56 @@ from changing \kbd{diffptr} and call this function instead.
 returns the smallest prime $p \geq a$, and sets \kbd{*pd} to the proper offset
 of \kbd{diffptr} so that \kbd{NEXT\_PRIME\_VIADIFF(p, *pd)} correctly
 returns \kbd{unextprime(p + 1)}.
+
+\subsubsec{High-level interface}
+
+The library provides a high-level iterator, which stores its (private) data
+in a \kbd{struct} \tet{forprime_t} and runs over arbitrary ranges of primes,
+without ever overflowing.
+
+The iterator has two flavors, one providing the successive primes as
+\kbd{ulong}s, the other as \kbd{GEN}. They are initialized as follows,
+where we expect to run over primes $\geq a$ and $\leq b$:
+
+\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b} for the \kbd{GEN}
+variant, where $b = \kbd{NULL}$ means $+\infty$.
+
+\fun{int}{u_forprime_init}{forprime_t *T, ulong a, ulong b} for the
+\kbd{ulong} variant, where $b = \kbd{ULONG\_MAX}$ means we will run through
+all primes representable in a \kbd{ulong} type.
+
+Both variant return $1$ on success, and $0$ if the iterator would run over an
+empty interval (if $a > b$, for instance). They allocate the \tet{forprime_t}
+data structure on the PARI stack.
+
+\noindent The successive primes are then obtained using
+
+\fun{GEN}{forprime_next}{forprime_t *T}, returns \kbd{NULL} if no more primes
+are available in the interval.
+
+\fun{ulong}{u_forprime_next}{forprime_t *T}, returns $0$ if no more primes
+are available in the interval.
+
+These two functions leave alone the PARI stack, and write their state
+information in the preallocated \tet{forprime_t} struct.
+
+The typical usage is thus:
+\bprog
+  forprime_t T;
+  GEN p;
+  pari_sp av = avma, av2;
+
+  forprime_init(&T, gen_2, stoi(1000));
+  av2 = avma;
+  while ( (p = forprime_next(&T)) )
+  {
+    ...
+    if ( prime_is_OK(p) ) break;
+    avma = av2; /* delete garbage accumulated in this iteration */
+  }
+  avma = av; /* delete all */
+  @eprog\noindent Of course, the final \kbd{avma = av} could be replaced
+  by a \kbd{gerepile} call.
 
 \subsec{Numerical analysis}
 

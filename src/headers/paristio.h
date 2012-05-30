@@ -22,6 +22,30 @@ typedef struct {
 typedef unsigned char *byteptr;
 typedef ulong pari_sp;
 
+/* iterator over primes */
+typedef struct {
+  int strategy; /* 1 to 4 */
+  GEN bb; /* iterate through primes <= bb */
+
+  /* strategy 1: private prime table */
+  byteptr d; /* diffptr + n */
+  ulong p; /* current p = n-th prime */
+  ulong b; /* min(bb, ULONG_MAX) */
+
+  /* strategy 2: sieve, use p */
+  unsigned char *sieve;
+  ulong cache[9]; /* look-ahead primes already computed */
+  ulong chunk; /* # of odd integers in sieve */
+  ulong a, end, sieveb; /* [a,end] interval currently being sieved,
+                         * end <= sieveb = min(bb, maxprime^2, ULONG_MAX) */
+  ulong pos, maxpos; /* current cell and max cell */
+
+  /* strategy 3: unextprime, use p */
+
+  /* strategy 4: nextprime */
+  GEN pp;
+} forprime_t;
+
 /* binary I/O */
 typedef struct GENbin {
   size_t len; /* gsizeword(x) */
