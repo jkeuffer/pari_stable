@@ -3338,16 +3338,23 @@ easy_ap(GEN E, GEN p)
 
 /* assume e is at least a 'small ell' */
 static GEN
-get_p(GEN e)
+get_p(GEN e, GEN p, const char *name)
 {
   GEN disc = ell_get_disc(e);
-  switch(typ(disc))
+  GEN pp = p;
+  if (p && (typ(p)!=t_INT || signe(p) <= 0))
+    pari_err_PRIME(name, p);
+  if (lg(e)==19) pp = pp ? p :gen_0;
+  else switch(typ(disc))
   {
-    case t_INTMOD: return gel(disc,1);
-    case t_PADIC: return gel(disc,2);
+    case t_INTMOD: pp = gel(disc,1); break;
+    case t_FFELT:  pp = gel(disc,2); break;
   }
-  pari_err(e_MISC,"cannot determine the prime p in elliptic curve function");
-  return NULL; /*notreached*/
+  if (!pp)
+    pari_err(e_MISC,"cannot determine the prime p in %s", name);
+  if (p && !equalii(p, pp))
+    pari_err(e_MISC,"incompatible prime number in %s", name);
+  return pp;
 }
 
 GEN
@@ -3356,10 +3363,7 @@ ellap(GEN e, GEN p)
   GEN a;
   long lp;
   checksmallell(e);
-  if (!p)
-    p = get_p(e);
-  else
-    if (typ(p)!=t_INT || signe(p) <= 0) pari_err_PRIME("ellap",p);
+  p = get_p(e,p,"ellap");
   if ( (a = easy_ap(e, p)) ) return a;
   lp = expi(p);
   if (lp < 30) return stoi(ellap2(e, itou(p)));
@@ -4604,10 +4608,7 @@ GEN
 ellcard0(GEN E, GEN p)
 {
   checksmallell(E);
-  if (!p)
-    p = get_p(E);
-  else
-    if (typ(p)!=t_INT) pari_err_TYPE("ellgroup",p);
+  p = get_p(E,p,"ellcard");
   return ellcard(E, p);
 }
 
@@ -4710,10 +4711,7 @@ ellgroup0(GEN E, GEN p, long flag)
   pari_sp av = avma;
   GEN G, F,m;
   checksmallell(E);
-  if (!p)
-    p = get_p(E);
-  else
-    if (typ(p)!=t_INT) pari_err_TYPE("ellgroup",p);
+  p = get_p(E,p,"ellgroup");
   if (flag==0) return ellgroup(E, p);
   if (flag!=1) pari_err_FLAG("ellgroup");
   G = ellgroup_m(E, p, &m);
