@@ -13,12 +13,12 @@ Description:
 Function: forprime
 Section: programming/control
 C-Name: forprime
-Prototype: vV=GGI
-Help: forprime(p=a,b,seq): the sequence is evaluated, p running over the
- primes between a and b.
+Prototype: vV=GDGI
+Help: forprime(p=a,{b},seq): the sequence is evaluated, p running over the
+ primes between a and b. Omitting b runs through primes >= a
 Doc: evaluates \var{seq},
  where the formal variable $p$ ranges over the prime numbers between the real
- numbers $a$ to $b$ (including $a$ and $b$ if they are prime). More precisely,
+ numbers $a$ to $b$, including $a$ and $b$ if they are prime. More precisely,
  the value of
  $p$ is incremented to \kbd{nextprime($p$ + 1)}, the smallest prime strictly
  larger than $p$, at the end of each iteration. Nothing is done if $a>b$.
@@ -26,7 +26,10 @@ Doc: evaluates \var{seq},
  ? forprime(p = 4, 10, print(p))
  5
  7
- @eprog\noindent
+ @eprog\noindent Omitting $b$ means we will run through all primes $\geq a$,
+ starting an infinite loop; it is expected that the user will break out of
+ the loop himself at some point, using \kbd{break} or \kbd{return}.
+
  Note that the value of $p$ cannot be modified within \var{seq}:
  \bprog
  ? forprime(p = 2, 10, p = [])

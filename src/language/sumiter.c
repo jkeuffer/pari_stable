@@ -185,53 +185,317 @@ forstep(GEN a, GEN b, GEN s, GEN code)
   pop_lex(1); avma = av0;
 }
 
-static byteptr
-prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
-{
-  byteptr d = diffptr;
+typedef struct {
+  int strategy; /* 1 to 4 */
+  GEN bb; /* iterate through primes <= bb */
 
-  ga = gceil(ga); gb = gfloor(gb);
-  if (typ(ga) != t_INT) pari_err_TYPE("prime_loop_init",ga);
-  if (typ(gb) != t_INT) pari_err_TYPE("prime_loop_init",gb);
-  if (signe(gb) < 0) return NULL;
-  if (signe(ga) < 0) ga = gen_1;
-  if (lgefint(ga)>3 || lgefint(gb)>3)
+  /* strategy 1: private prime table */
+  byteptr d; /* diffptr + n */
+  ulong p; /* current p = n-th prime */
+  ulong b; /* min(bb, ULONG_MAX) */
+
+  /* strategy 2: sieve, use p */
+  unsigned char *sieve;
+  ulong cache[9]; /* look-ahead primes already computed */
+  ulong chunk; /* # of odd integers in sieve */
+  ulong a, end, sieveb; /* [a,end] interval currently being sieved,
+                         * end <= sieveb = min(bb, maxprime^2, ULONG_MAX) */
+  ulong pos, maxpos; /* current cell and max cell */
+
+  /* strategy 3: unextprime, use p */
+
+  /* strategy 4: nextprime */
+  GEN pp;
+} forprime_t;
+
+/* return good chunk size for sieve, 16 | chunk + 2 */
+static ulong
+optimize_chunk(ulong a, ulong b)
+{
+  /* TODO: Optimize size (surely < 512k to stay in L1 cache, but not so large */
+  /* as to force recalculating too often). */
+  /* Guesstimate: greater of sqrt(n) * lg(n) or 1M */
+  ulong chunk = maxuu(0x100000, usqrtsafe(b) * expu(b));
+  ulong tmp = (b - a) / chunk + 1;
+
+  if (tmp == 1)
+    chunk = b - a + 16;
+  else
+    chunk = (b - a) / tmp + 15;
+  /* Don't take up more than 2/3 of the stack */
+  chunk = minuu(chunk, avma - stack_lim(avma, 2));
+  /* ensure 16 | chunk + 2 */
+  return (((chunk + 2)>>4)<<4) - 2;
+}
+static void
+sieve_init(forprime_t *T, ulong a, ulong b)
+{
+  T->sieveb = b;
+  T->chunk = optimize_chunk(a, b);
+  T->sieve = (unsigned char*)stack_malloc(((T->chunk+2) >> 4) + 1);
+  T->cache[0] = 0;
+  /* >> 1 [only odds] + 3 [convert from bits to bytes] */
+  T->a = a;
+  T->end = minuu(a + T->chunk, b);
+  T->pos = T->maxpos = 0;
+}
+
+static void
+u_forprime_set_prime_table(forprime_t *T, ulong a)
+{
+  T->strategy = 1;
+  if (a < 3)
   {
-    if (cmpii(ga, gb) > 0) return NULL;
-    pari_err_MAXPRIME(0);
+    T->p = 0;
+    T->d = diffptr;
   }
-  *a = itou(ga);
-  *b = itou(gb); if (*a > *b) return NULL;
-  maxprime_check(*b);
-  *p = init_primepointer(*a, &d); return d;
+  else
+  {
+    T->p = init_primepointer(a, &T->d);
+    PREC_PRIME_VIADIFF(T->p, T->d);
+  }
+}
+
+int
+u_forprime_init(forprime_t *T, ulong a, ulong b)
+{
+  ulong maxp = maxprime();
+  if (a > b || b < 2) return 0; /* empty */
+  T->strategy = 0; /* unknown */
+  T->sieve = NULL; /* unused for now */
+  T->b = b;
+  if (maxp >= b) { /* [a,b] \subset prime table */
+    u_forprime_set_prime_table(T, a);
+    return 1;
+  }
+  /* b > maxp */
+  if (a >= maxp)
+    T->p = a - 1;
+  else
+    u_forprime_set_prime_table(T, a);
+
+  if (b - maxp < maxp / expu(b)) /* not worth sieving */
+  { if (!T->strategy) T->strategy = 3; }
+  else
+  {
+#ifdef LONG_IS_64BIT
+    const ulong UPRIME_MAX = 18446744073709551557UL;
+#else
+    const ulong UPRIME_MAX = 4294967291;
+#endif
+    pari_sp av = avma;
+    GEN B = sqru(maxp);
+    ulong sieveb;
+    if (b > UPRIME_MAX) b = UPRIME_MAX;
+    if (lgefint(B) == 3)
+      sieveb = minuu(B[2], b);
+    else
+      sieveb = b;
+    avma = av;
+    if (!T->strategy) T->strategy = 2;
+    if (!odd(sieveb)) sieveb--;
+    sieve_init(T, maxuu(maxp+2, a), sieveb);
+  }
+  return 1;
+}
+/* b = NULL: loop forever */
+int
+forprime_init(forprime_t *T, GEN a, GEN b)
+{
+  long lb;
+  a = gceil(a); if (typ(a) != t_INT) pari_err_TYPE("forprime_init",a);
+  if (signe(a) <= 0) a = gen_1;
+  if (b)
+  {
+    b = gfloor(b);
+    if (typ(b) != t_INT) pari_err_TYPE("forprime_init",b);
+    if (signe(b) < 0 || cmpii(a,b) > 0) return 0;
+    lb = lgefint(b);
+  }
+  else
+    lb = lgefint(a) + 4;
+  T->bb = b;
+  T->pp = cgeti(lb);
+  /* a, b are positive integers, a <= b */
+  if (lgefint(a) == 3) /* lb == 3 implies b != NULL */
+    return u_forprime_init(T, a[2], lb == 3? b[2]: ULONG_MAX);
+  T->strategy = 4;
+  affii(subiu(a,1), T->pp);
+  return 1;
+}
+
+/* assume a <= b <= maxprime()^2, a,b odd, sieve[n] corresponds to
+ *   a+16*n, a+16*n+2, ..., a+16*n+14 (bits 0 to 7)
+ * maxpos = index of last sieve cell. */
+static void
+sieve_block(ulong a, ulong b, ulong maxpos, unsigned char* sieve)
+{
+  ulong p = 2, lim = usqrtsafe(b), sz = (b-a) >> 1;
+  byteptr d = diffptr+1;
+  (void)memset(sieve, 0, maxpos+1);
+  for (;;)
+  { /* p is odd */
+    ulong k, r;
+    NEXT_PRIME_VIADIFF(p, d); /* starts at p = 3 */
+    if (p > lim) break;
+
+    /* solve a + 2k = 0 (mod p) */
+    r = a % p;
+    if (r == 0)
+      k = 0;
+    else
+    {
+      k = p - r;
+      if (odd(k)) k += p;
+      k >>= 1;
+    }
+    /* m = a + 2k is the smallest odd m >= a, p | m */
+    /* position n (corresponds to a+2n) is sieve[n>>3], bit n&7 */
+    while (k <= sz) { sieve[k>>3] |= 1 << (k&7); k += p; /* 2k += 2p */ }
+  }
+}
+
+/* T->cache is a 0-terminated list of primes, return the first one and
+ * remove it from list. Most of the time the list contains a single prime */
+static ulong
+shift_cache(forprime_t *T)
+{
+  long i;
+  T->p = T->cache[0];
+  for (i = 1;; i++)  /* remove one prime from cache */
+    if (! (T->cache[i-1] = T->cache[i]) ) break;
+  return T->p;
+}
+
+ulong
+u_forprime_next(forprime_t *T)
+{
+  if (T->strategy == 1)
+  {
+    if (!*(T->d)) T->strategy = T->sieve? 2: 3;
+    else
+    {
+      NEXT_PRIME_VIADIFF(T->p, T->d);
+      if (T->p > T->b) return 0;
+      return T->p;
+    }
+  }
+  if (T->strategy == 2)
+  {
+    ulong n;
+    if (T->cache[0]) return shift_cache(T);
+NEXT_CHUNK:
+    for (n = T->pos; n < T->maxpos; n++)
+      if (T->sieve[n] != 0xFF)
+      {
+        unsigned char mask = T->sieve[n];
+        ulong p = T->a + (n<<4);
+        long i = 0;
+        T->pos = n;
+        if (!(mask &  1)) T->cache[i++] = p;
+        if (!(mask &  2)) T->cache[i++] = p+2;
+        if (!(mask &  4)) T->cache[i++] = p+4;
+        if (!(mask &  8)) T->cache[i++] = p+6;
+        if (!(mask & 16)) T->cache[i++] = p+8;
+        if (!(mask & 32)) T->cache[i++] = p+10;
+        if (!(mask & 64)) T->cache[i++] = p+12;
+        if (!(mask &128)) T->cache[i++] = p+14;
+        T->cache[i] = 0;
+        T->pos = n+1;
+        return shift_cache(T);
+      }
+    /* n = T->maxpos, last cell: check p <= b */
+    if (T->maxpos && n == T->maxpos && T->sieve[n] != 0xFF)
+    {
+      unsigned char mask = T->sieve[n];
+      ulong p = T->a + (n<<4);
+      long i = 0;
+      T->pos = n;
+      if (!(mask &  1) && p   <= T->sieveb) T->cache[i++] = p;
+      if (!(mask &  2) && p+2 <= T->sieveb) T->cache[i++] = p+2;
+      if (!(mask &  4) && p+4 <= T->sieveb) T->cache[i++] = p+4;
+      if (!(mask &  8) && p+6 <= T->sieveb) T->cache[i++] = p+6;
+      if (!(mask & 16) && p+8 <= T->sieveb) T->cache[i++] = p+8;
+      if (!(mask & 32) && p+10<= T->sieveb) T->cache[i++] = p+10;
+      if (!(mask & 64) && p+12<= T->sieveb) T->cache[i++] = p+12;
+      if (!(mask &128) && p+14<= T->sieveb) T->cache[i++] = p+14;
+      if (i)
+      {
+        T->cache[i] = 0;
+        T->pos = n+1;
+        return shift_cache(T);
+      }
+    }
+
+    if (T->end >= T->sieveb) /* done */
+      T->strategy = 3;
+    else
+    { /* initialize next chunk */
+      if (T->maxpos == 0)
+        T->a |= 1; /* first time; ensure odd */
+      else
+        T->a = (T->end + 2) | 1;
+      T->end = T->a + T->chunk;
+      if (T->end > T->sieveb) T->end = T->sieveb;
+      /* end and a are odd; sieve[k] contains the a + 8*2k + (0,2,...,14).
+       * The largest k is (end-a) >> 4 */
+      T->pos = 0;
+      T->maxpos = (T->end - T->a) >> 4;
+      sieve_block(T->a, T->end, T->maxpos, T->sieve);
+      goto NEXT_CHUNK;
+    }
+  }
+  if (T->strategy == 3)
+  {
+    T->p = unextprime(T->p + 1);
+    if (!T->p) /* overflow ulong, switch to GEN */
+      T->strategy = 4;
+    else
+    {
+      if (T->p > T->b) return 0;
+      return T->p;
+    }
+  }
+  return 0; /* overflow */
+}
+
+GEN
+forprime_next(forprime_t *T)
+{
+  pari_sp av;
+  GEN p;
+  if (T->strategy <= 3)
+  {
+    ulong q = u_forprime_next(T);
+    if (q) { affui(q, T->pp); return T->pp; }
+    /* failure */
+    if (T->strategy <= 3) return NULL; /* we're done */
+    /* overflow ulong, switch to GEN */
+    affui(ULONG_MAX, T->pp); /* initialize */
+  }
+  av = avma;
+  p = nextprime(addiu(T->pp, 1));
+  if (T->bb && absi_cmp(p, T->bb) > 0) { avma = av; return NULL; }
+  affii(p, T->pp); avma = av; return T->pp;
 }
 
 void
-forprime(GEN ga, GEN gb, GEN code)
+forprime(GEN a, GEN b, GEN code)
 {
-  long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong *prime = (ulong*)p;
-  ulong a, b;
   pari_sp av = avma;
-  byteptr d;
+  forprime_t T;
 
-  d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
-  if (!d) { avma = av; return; }
+  if (!forprime_init(&T, a,b)) { avma = av; return; }
 
-  avma = av; push_lex((GEN)prime,code);
-  while (prime[2] < b)
+  push_lex(T.pp,code);
+  while(forprime_next(&T))
   {
     closure_evalvoid(code); if (loop_break()) break;
     /* p changed in 'code', complain */
-    if (get_lex(-1) != (GEN) prime)
+    if (get_lex(-1) != T.pp)
       pari_err(e_MISC,"prime index read-only: was changed to %Ps", get_lex(-1));
-    NEXT_PRIME_VIADIFF(prime[2], d);
-    avma = av;
   }
-  /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
-   * (prime[2] <= b)' */
-  if (prime[2] == b) { closure_evalvoid(code); (void)loop_break(); avma = av; }
-  pop_lex(1);
+  pop_lex(1); avma = av;
 }
 
 void
@@ -700,21 +964,18 @@ prodinf0(GEN a, GEN code, long flag, long prec)
 }
 
 GEN
-prodeuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, long prec)
+prodeuler(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 {
-  long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong a, b;
   pari_sp av, av0 = avma, lim;
-  GEN prime = p, x = real_1(prec);
-  byteptr d;
+  GEN x = real_1(prec), prime;
+  forprime_t T;
 
   av = avma;
-  d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
-  if (!d) { avma = av; return x; }
+  if (!forprime_init(&T, a,b)) { avma = av; return x; }
 
   av = avma;
   lim = stack_lim(avma,1);
-  while ((ulong)prime[2] < b)
+  while ( (prime = forprime_next(&T)) )
   {
     x = gmul(x, eval(E, prime));
     if (low_stack(lim, stack_lim(av,1)))
@@ -722,9 +983,7 @@ prodeuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, long prec)
       if (DEBUGMEM>1) pari_warn(warnmem,"prodeuler");
       x = gerepilecopy(av, x);
     }
-    NEXT_PRIME_VIADIFF(prime[2], d);
   }
-  if ((ulong)prime[2] == b) x = gmul(x, eval(E, prime));
   return gerepilecopy(av0,x);
 }
 GEN
@@ -732,24 +991,43 @@ prodeuler0(GEN a, GEN b, GEN code, long prec)
 { EXPR_WRAP(code, prodeuler(EXPR_ARG, a, b, prec)); }
 
 GEN
-direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
+direuler(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, GEN c)
 {
-  long pp[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong a, b, i, k, n, p;
+  ulong i, k, n;
   pari_sp av0 = avma, av, lim = stack_lim(av0, 1);
   long j, tx, lx;
-  GEN x, y, s, polnum, polden, prime = pp;
-  byteptr d;
+  GEN x, y, s, polnum, polden, prime;
+  forprime_t T;
 
-  d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
-  n = c? itou(c): b;
-  if (!d || b < 2 || (c && signe(c) < 0)) return mkvec(gen_1);
-  if (n < b) b = n;
+  if (c)
+  {
+    if (typ(c) != t_INT)
+    {
+      c = gfloor(c);
+      if (typ(c) != t_INT) pari_err_TYPE("direuler", c);
+    }
+    if (signe(c) <= 0) { avma = av0; return mkvec(gen_1); }
+    n = itou(c);
+    if (cmpui(n, b) < 0) b = c;
+  }
+  if (!forprime_init(&T, a,b)) { avma = av0; return mkvec(gen_1); }
+
+  if (c)
+  {
+    n = itou(c);
+    if (cmpui(n, b) < 0) b = c;
+  }
+  else
+  {
+    if (lgefint(b) > 3) pari_err_OVERFLOW("direuler");
+    n = itou(b);
+  }
 
   y = cgetg(n+1,t_VEC); av = avma;
-  x = zerovec(n); gel(x,1) = gen_1; p = prime[2];
-  while (p <= b)
+  x = zerovec(n); gel(x,1) = gen_1;
+  while ( (prime = forprime_next(&T)) )
   {
+    ulong p = prime[2];
     s = eval(E, prime);
     polnum = numer(s);
     polden = denom(s);
@@ -775,7 +1053,7 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
         polnum = gneg(polnum);
         polden = gneg(polden);
       }
-      for (i=1; i<=n; i++) y[i]=x[i];
+      for (i=1; i<=n; i++) gel(y,i) = gel(x,i);
       q = p; qlim = n/p;
       for (j = 1; q<=n && j<=lx; j++)
       {
@@ -814,8 +1092,6 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN ga, GEN gb, GEN c)
       if (DEBUGMEM>1) pari_warn(warnmem,"direuler");
       x = gerepilecopy(av, x);
     }
-    NEXT_PRIME_VIADIFF(p, d);
-    prime[2] = p;
   }
   return gerepilecopy(av0,x);
 }

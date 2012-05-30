@@ -184,6 +184,9 @@ BA 48- agm now returns the optimal AGM
         ***                                   ^---
         ***   prime index read-only: was changed to [].
    58- faster forparii() [ for() with t_INT lower bound ]
+   59- forprime(p = a, b, ...) now iterates over arbitrary ranges of primes,
+       independently of 'primelimit'. Parameter 'b' can be omitted (no upper
+       limit)
 
   Added
     1- mathnf for matrices over K[X] [#41]
