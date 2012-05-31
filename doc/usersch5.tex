@@ -3680,13 +3680,12 @@ work with any non-zero \typ{INT} but is not efficient in this case).
 \fun{GEN}{FpX_eval}{GEN x, GEN y, GEN p} evaluates the \kbd{FpX}~\kbd{x}
 at the \kbd{Fp}~\kbd{y}. The result is an~\kbd{Fp}.
 
-\fun{GEN}{FpXY_eval}{GEN Q, GEN y, GEN x, GEN p} $Q$ an \kbd{FpXY}, i.e.~a
-\typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an element of
-$\F_p[X][Y]$. Returns the \kbd{Fp} $Q(x,y)$.
+\fun{GEN}{FpXY_eval}{GEN Q, GEN y, GEN x, GEN p} $Q$ being an \kbd{FpXY},
+i.e.~a \typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an
+element of $\F_p[X][Y]$. Returns the \kbd{Fp} $Q(x,y)$.
 
-\fun{GEN}{FpXY_evalx}{GEN Q, GEN x, GEN p} $Q$ an \kbd{FpXY}, i.e.~a
-\typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an element of
-$\F_p[X][Y]$. Returns the \kbd{FpY} $Q(x,Y)$.
+\fun{GEN}{FpXY_evalx}{GEN Q, GEN x, GEN p} $Q$ being an \kbd{FpXY}, returns the
+\kbd{FpX} $Q(x,Y)$, where $Y$ is the main variable of $Q$.
 
 \fun{GEN}{FpXY_evaly}{GEN Q, GEN y, GEN p, long vy} $Q$ an \kbd{FpXY}, i.e.~a
 \typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an element of
@@ -4027,6 +4026,13 @@ returns $d = \text{GCD}(\kbd{x},\kbd{y})$ (not necessarily monic), and sets
 
 \fun{GEN}{FqX_eval}{GEN x, GEN y, GEN T, GEN p} evaluates the \kbd{FqX}~\kbd{x}
 at the \kbd{Fq}~\kbd{y}. The result is an~\kbd{Fq}.
+
+\fun{GEN}{FqXY_eval}{GEN Q, GEN y, GEN x, GEN T, GEN p} $Q$ an \kbd{FqXY}, i.e.~a
+\typ{POL} with \kbd{Fq} or \kbd{FqX} coefficients representing an element of
+$\F_q[X][Y]$. Returns the \kbd{Fq} $Q(x,y)$.
+
+\fun{GEN}{FqXY_evalx}{GEN Q, GEN x, GEN T, GEN p} $Q$ being an \kbd{FqXY}, returns the
+\kbd{FqX} $Q(x,Y)$, where $Y$ is the main variable of $Q$.
 
 \fun{GEN}{FpXQX_red}{GEN z, GEN T, GEN p} \kbd{z} a \typ{POL} whose
 coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.

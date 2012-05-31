@@ -481,6 +481,30 @@ FqX_eval(GEN x, GEN y, GEN T, GEN p)
   return gerepileupto(av, p1);
 }
 
+GEN
+FqXY_evalx(GEN Q, GEN x, GEN T, GEN p)
+{
+  long i, lb = lg(Q);
+  GEN z;
+  if (!T) return FpXY_evalx(Q, x, p);
+  z = cgetg(lb, t_POL); z[1] = Q[1];
+  for (i=2; i<lb; i++)
+  {
+    GEN q = gel(Q,i);
+    gel(z,i) = typ(q) == t_INT? modii(q,p): FqX_eval(q, x, T, p);
+  }
+  return FpXQX_renormalize(z, lb);
+}
+
+/* Q an FpXY, evaluate at (X,Y) = (x,y) */
+GEN
+FqXY_eval(GEN Q, GEN y, GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  if (!T) return FpXY_eval(Q, y, x, p);
+  return gerepileupto(av, FqX_eval(FqXY_evalx(Q, x, T, p), y, T, p));
+}
+
 /* a X^d */
 GEN
 monomial(GEN a, long d, long v)
