@@ -175,6 +175,30 @@ ZX_to_Flx(GEN x, ulong p)
   for (i=2; i<lx; i++) a[i] = umodiu(gel(x,i), p);
   return Flx_renormalize(a,lx);
 }
+
+ulong
+Rg_to_Fl(GEN x, ulong p)
+{
+  switch(typ(x))
+  {
+    case t_INT: return umodiu(x, p);
+    case t_FRAC: {
+      ulong z = umodiu(gel(x,1), p);
+      if (!z) return 0;
+      return Fl_div(z, umodiu(gel(x,2), p), p);
+    }
+    case t_PADIC: return padic_to_Fl(x, p);
+    case t_INTMOD: {
+      GEN q = gel(x,1), a = gel(x,2);
+      if (equaliu(q, p)) return itou(a);
+      if (!dvdiu(q,p)) pari_err_MODULUS("Rg_to_Fl", q, utoi(p));
+      return umodiu(a, p);
+    }
+    default: pari_err_TYPE("Rg_to_Fl",x);
+      return 0; /* not reached */
+  }
+}
+
 GEN
 RgX_to_Flx(GEN x, ulong p)
 {
@@ -183,6 +207,39 @@ RgX_to_Flx(GEN x, ulong p)
   a[1]=((ulong)x[1])&VARNBITS;
   for (i=2; i<lx; i++) a[i] = Rg_to_Fl(gel(x,i), p);
   return Flx_renormalize(a,lx);
+}
+
+/* If x is a POLMOD, assume modulus is a multiple of T. */
+GEN
+Rg_to_Flxq(GEN x, GEN T, ulong p)
+{
+  long ta, tx = typ(x), v = T[1];
+  GEN a, b;
+  if (is_const_t(tx))
+  {
+    if (tx == t_FFELT) return FF_to_Flxq(x);
+    return Fl_to_Flx(Rg_to_Fl(x, p), v);
+  }
+  switch(tx)
+  {
+    case t_POLMOD:
+      b = gel(x,1);
+      a = gel(x,2); ta = typ(a);
+      if (is_const_t(ta)) return Fl_to_Flx(Rg_to_Fl(a, p), v);
+      b = RgX_to_Flx(b, p); if (b[1] != v) break;
+      a = RgX_to_Flx(a, p); if (zv_equal(b,T)) return a;
+      return Flx_rem(a, T, p);
+    case t_POL:
+      x = RgX_to_Flx(x,p);
+      if (x[1] != v) break;
+      return Flx_rem(x, T, p);
+    case t_RFRAC:
+      a = Rg_to_Flxq(gel(x,1), T,p);
+      b = Rg_to_Flxq(gel(x,2), T,p);
+      return Flxq_div(a,b, T,p);
+  }
+  pari_err_TYPE("Rg_to_Flxq",x);
+  return NULL; /* not reached */
 }
 
 /***********************************************************************/

@@ -150,28 +150,6 @@ Rg_to_Fp(GEN x, GEN p)
       return NULL; /* not reached */
   }
 }
-ulong
-Rg_to_Fl(GEN x, ulong p)
-{
-  switch(typ(x))
-  {
-    case t_INT: return umodiu(x, p);
-    case t_FRAC: {
-      ulong z = umodiu(gel(x,1), p);
-      if (!z) return 0;
-      return Fl_div(z, umodiu(gel(x,2), p), p);
-    }
-    case t_PADIC: return padic_to_Fl(x, p);
-    case t_INTMOD: {
-      GEN q = gel(x,1), a = gel(x,2);
-      if (equaliu(q, p)) return itou(a);
-      if (!dvdiu(q,p)) pari_err_MODULUS("Rg_to_Fl", q, utoi(p));
-      return umodiu(a, p);
-    }
-    default: pari_err_TYPE("Rg_to_Fl",x);
-      return 0; /* not reached */
-  }
-}
 /* If x is a POLMOD, assume modulus is a multiple of T. */
 GEN
 Rg_to_FpXQ(GEN x, GEN T, GEN p)
