@@ -807,8 +807,8 @@ static struct {
   {   373587883,   20000000,   20000000},
   {   982451653,   50000000,   50000003},
   {  2038074743,  100000000,  100000027},
-  {  4000000483,  189961831,  189961927},
-  {  4222234741,  200000000,  200000115},
+  {  4000000483UL,  189961831,  189961927},
+  {  4222234741UL,  200000000,  200000115},
 #if BITS_IN_LONG == 64
   { 11037271757,  500000000,  500000668},
   { 22801763489, 1000000000, 1000002238},
@@ -827,7 +827,8 @@ pari_err_Dusart(long m)
 void
 prime_table_closest_p(ulong n, byteptr *pd, ulong *pp, ulong *pn)
 {
-  ulong i, maxp = maxprime();
+  ulong maxp = maxprime();
+  long i;
   for (i = 1; i < prime_table_len; i++)
   {
     ulong p = prime_table[i].p;
@@ -849,7 +850,8 @@ void
 prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
 {
   byteptr d;
-  ulong i, n, p, maxp = maxprime();
+  ulong n, p, maxp = maxprime();
+  long i;
   for (i = 1; i < prime_table_len; i++)
   {
     n = prime_table[i].n;
