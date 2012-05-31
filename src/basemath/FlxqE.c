@@ -32,6 +32,13 @@ small characteristic. */
  */
 
 GEN
+RgE_to_FlxqE(GEN x, GEN T, ulong p)
+{
+  if (ell_is_inf(x)) return x;
+  retmkvec2(Rg_to_Flxq(gel(x,1),T,p),Rg_to_Flxq(gel(x,2),T,p));
+}
+
+GEN
 FlxqE_changepoint(GEN x, GEN ch, GEN T, ulong p)
 {
   pari_sp av = avma;

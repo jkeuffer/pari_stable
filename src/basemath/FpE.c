@@ -31,6 +31,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  */
 
 GEN
+RgE_to_FpE(GEN x, GEN p)
+{
+  if (ell_is_inf(x)) return x;
+  retmkvec2(Rg_to_Fp(gel(x,1),p),Rg_to_Fp(gel(x,2),p));
+}
+
+GEN
 FpE_changepoint(GEN x, GEN ch, GEN p)
 {
   pari_sp av = avma;
@@ -425,6 +432,13 @@ Fp_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p)
  * Most of the time a6 is omitted since it can be recovered from any point
  * on the curve.
  */
+
+GEN
+RgE_to_FpXQE(GEN x, GEN T, GEN p)
+{
+  if (ell_is_inf(x)) return x;
+  retmkvec2(Rg_to_FpXQ(gel(x,1),T,p),Rg_to_FpXQ(gel(x,2),T,p));
+}
 
 GEN
 FpXQE_changepoint(GEN x, GEN ch, GEN T, GEN p)

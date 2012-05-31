@@ -5103,10 +5103,24 @@ Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 \fun{GEN}{FpE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN p} returns the
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
-\subsec{\kbd{FlxqE}}
+\fun{GEN}{RgE_to_FpE}{GEN P, GEN p} returns the \kbd{FpE} obtained by applying
+\kbd{Rg\_to\_Fp} coefficientwise.
+
+\subsec{Elliptic curves over $\F_q$, small characteristic $p>3$ }
 Let $p$ a prime \kbd{ulong}, $T$ an irreducible \kbd{Flx} mod $p$, and $E$ the
 elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
 being \kbd{Flx} in $\F_p[X]/(T)$.  A \kbd{FlxqE} is a point of $E(\F_p[X]/(T))$.
+
+\fun{GEN}{Flxq_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m}
+Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
+
+\fun{GEN}{Flxq_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p}
+Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
+$F_p$ with the base change \kbd{ch} (see \kbd{FpXQE\_changepoint}),
+where $D$ and $m$ are as returned by \kbd{FpXQ\_ellgroup}.
+
+\subsec{\kbd{FlxqE}}
 
 \fun{GEN}{FlxqE_changepoint}{GEN P, GEN m, GEN a4, GEN T, ulong p} returns the image
 $Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
@@ -5142,19 +5156,34 @@ Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 \fun{GEN}{FlxqE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN T, ulong p} returns the
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
-\fun{GEN}{Flxq_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m}
+\fun{GEN}{RgE_to_FlxqE}{GEN P, GEN T, ulong p} returns the \kbd{FlxqE} obtained by applying
+\kbd{Rg\_to\_Flxq} coefficientwise.
+
+
+\subsec{Elliptic curves over $\F_q$, large characteristic }
+
+Let $p$ a prime number, $T$ an irreducible polynomial mod $p$, and $E$ the
+elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
+in $\F_p[X]/(T)$.  A \kbd{FpXQE} is a point of $E(\F_p[X]/(T))$.
+
+\fun{GEN}{FpXQ_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m}
 Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
 $F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
 
-\fun{GEN}{Flxq_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p}
+\fun{GEN}{FpXQ_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p}
 Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
 $F_p$ with the base change \kbd{ch} (see \kbd{FpXQE\_changepoint}),
 where $D$ and $m$ are as returned by \kbd{FpXQ\_ellgroup}.
 
 \subsec{\kbd{FpXQE}}
-Let $p$ a prime number, $T$ an irreducible polynomial mod $p$, and $E$ the
-elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
-in $\F_p[X]/(T)$.  A \kbd{FpXQE} is a point of $E(\F_p[X]/(T))$.
+
+\fun{GEN}{FpXQE_changepoint}{GEN P, GEN m, GEN a4, GEN T, GEN p} returns the image
+$Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
+change $m$ (which is a \kbd{FpXQV}).
+
+\fun{GEN}{FpXQE_changepointinv}{GEN P, GEN m, GEN a4, GEN T, GEN p} returns the image
+$Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
+coordinate change $m$ (which is a \kbd{FpXQV}).
 
 \fun{GEN}{FpXQE_add}{GEN P, GEN Q, GEN a4, GEN T, GEN p}
 
@@ -5182,14 +5211,8 @@ Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 \fun{GEN}{FpXQE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a4, GEN T, GEN p} returns the
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
-\fun{GEN}{FpXQ_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m}
-Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
-
-\fun{GEN}{FpXQ_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p}
-Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$ with the base change \kbd{ch} (see \kbd{FpXQE\_changepoint}),
-where $D$ and $m$ are as returned by \kbd{FpXQ\_ellgroup}.
+\fun{GEN}{RgE_to_FpXQE}{GEN P, GEN T, GEN p} returns the \kbd{FpXQE} obtained by applying
+\kbd{Rg\_to\_FpXQ} coefficientwise.
 
 \section{Integral, rational and generic linear algebra}
 \subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}} A \kbd{ZV} (resp.~a~\kbd{ZM},
