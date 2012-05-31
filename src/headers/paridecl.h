@@ -2584,6 +2584,7 @@ GEN     FpXX_mulu(GEN P, ulong u, GEN p);
 GEN     FpXX_neg(GEN x, GEN p);
 GEN     FpXX_red(GEN z, GEN p);
 GEN     FpXX_sub(GEN x, GEN y, GEN p);
+GEN     FpXY_Fq_evaly(GEN Q, GEN y, GEN T, GEN p, long vx);
 GEN     FpXY_eval(GEN Q, GEN y, GEN x, GEN p);
 GEN     FpXY_evalx(GEN Q, GEN x, GEN p);
 GEN     FpXY_evaly(GEN Q, GEN y, GEN p, long vy);

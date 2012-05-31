@@ -2297,6 +2297,22 @@ FpXY_eval(GEN Q, GEN y, GEN x, GEN p)
   return gerepileuptoint(av, FpX_eval(FpXY_evalx(Q, x, p), y, p));
 }
 
+GEN
+FpXY_Fq_evaly(GEN Q, GEN y, GEN T, GEN p, long vx)
+{
+  pari_sp av = avma;
+  long i, lb = lg(Q);
+  GEN z;
+  if (!T) return FpXY_evaly(Q, y, p, vx);
+  if (lb == 2) return pol_0(vx);
+  z = gel(Q, lb-1);
+  if (lb == 3 || !signe(y)) return typ(z)==t_INT? scalar_ZX(z, vx): ZX_copy(z);
+
+  if (typ(z) == t_INT) z = scalar_ZX_shallow(z, vx);
+  for (i=lb-2; i>=2; i--) z = FqX_add(gel(Q,i), FqX_Fq_mul(z, y, T, p), T, p);
+  return gerepileupto(av, z);
+}
+
 static GEN
 ZX_norml1(GEN x)
 {

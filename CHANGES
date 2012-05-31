@@ -281,7 +281,7 @@ BA 81- FpXQE functions family (for elliptic curves over field of large character
 BA 82- added GP function ellcard
 BA 83- PARI functions FpXQ_powu, Fq_powu, FpXX_muluu, Fq_mulu, Fq_div
 BA 84- PARI functions FqXQ_powers, FqXQ_matrix_pow, FqX_mulu, FqX_Fq_add
-BA 85- PARI functions FqXY_eval, FqXY_evalx
+BA 85- PARI functions FqXY_eval, FqXY_evalx, FpXY_Fq_evaly
 
   Removed
     1- dropped DOS support
