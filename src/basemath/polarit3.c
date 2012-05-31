@@ -981,6 +981,19 @@ Fq_inv(GEN x, GEN pol, GEN p)
 }
 
 GEN
+Fq_div(GEN x, GEN y, GEN pol, GEN p)
+{
+  switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
+  {
+    case 0: return Fp_div(x,y,p);
+    case 1: return FpX_Fp_mul(x,Fp_inv(y,p),p);
+    case 2: return FpX_Fp_mul(FpXQ_inv(y,pol,p),x,p);
+    case 3: return FpXQ_div(x,y,pol,p);
+  }
+  return NULL;
+}
+
+GEN
 Fq_pow(GEN x, GEN n, GEN pol, GEN p)
 {
   if (typ(x) == t_INT) return Fp_pow(x,n,p);

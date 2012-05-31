@@ -3877,6 +3877,8 @@ error if \kbd{x} is not invertible.
 \fun{GEN}{Fq_invsafe}{GEN x, GEN pol, GEN p} as \kbd{Fq\_inv}, but returns
 \kbd{NULL} if \kbd{x} is not invertible.
 
+\fun{GEN}{Fq_div}{GEN x, GEN y, GEN T, GEN p}
+
 \fun{GEN}{FqV_inv}{GEN x, GEN T, GEN p} $x$ being a vector of \typ{Fq}s,
 return the vector of inverses of the $x[i]$. The routine uses Montgomery's
 trick, and involves a single inversion, plus $3(N-1)$ multiplications for
