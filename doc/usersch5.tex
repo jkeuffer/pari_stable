@@ -3862,6 +3862,9 @@ primitive \kbd{n}-th root of the unity. Assumes that \kbd{T} is irreducible mod 
 \fun{GEN}{Fq_Fp_mul}{GEN x, GEN y, GEN T, GEN p} multiplies the \kbd{Fq} $x$
 by the \typ{INT} $y$.
 
+\fun{GEN}{Fq_mulu}{GEN x, ulong y, GEN T, GEN p} multiplies the \kbd{Fq} $x$
+by the scalar $y$.
+
 \fun{GEN}{Fq_sqr}{GEN x, GEN T, GEN p}
 
 \fun{GEN}{Fq_neg}{GEN x, GEN T, GEN p}
@@ -3948,6 +3951,9 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{FpXX_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{FpXX}~\kbd{x}
 by the \kbd{Fp}~\kbd{y}.
+
+\fun{GEN}{FpXX_mulu}{GEN x, GEN y, GEN p} multiplies the \kbd{FpXX}~\kbd{x}
+by the scalar \kbd{y}.
 
 \subsec{\kbd{FpXQX}, \kbd{FqX}}
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose

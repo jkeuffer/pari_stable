@@ -337,6 +337,19 @@ FpXX_Fp_mul(GEN P, GEN u, GEN p)
   return FpXX_renormalize(res,lP);
 }
 
+GEN
+FpXX_mulu(GEN P, ulong u, GEN p)
+{
+  long i, lP;
+  GEN res = cgetg_copy(P, &lP); res[1] = P[1];
+  for(i=2; i<lP; i++)
+  {
+    GEN x = gel(P,i);
+    gel(res,i) = typ(x)==t_INT? Fp_mulu(x,u,p): FpX_mulu(x,u,p);
+  }
+  return FpXX_renormalize(res,lP);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                             (Fp[X]/(Q))[Y]                      */
@@ -903,6 +916,15 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
   }
   return NULL;
 }
+
+/* If T==NULL do not reduce*/
+GEN
+Fq_mulu(GEN x, ulong y, /*unused*/GEN T, GEN p)
+{
+  (void) T;
+  return typ(x)==t_POL ? FpX_Fp_mul(x,utoi(y),p): Fp_mulu(x, y, p);
+}
+
 /* y t_INT */
 GEN
 Fq_Fp_mul(GEN x, GEN y, GEN T/*unused*/, GEN p)
