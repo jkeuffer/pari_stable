@@ -664,9 +664,11 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       Ni++; i = 0;
       if (DEBUGLEVEL>=4) timer_start(&ti);
     }
-    for (j = 2; j < m && pf[j-1] >= pf[j]; j++);
+    for (j = 2; j < m && pf[j-1] >= pf[j]; j++)
+      /*empty*/; /* to kill clang Warning */
     for (k = 1; k < j-k && pf[k] != pf[j-k]; k++) { lswap(pf[k], pf[j-k]); }
-    for (k = j - 1; pf[k] >= pf[j]; k--);
+    for (k = j - 1; pf[k] >= pf[j]; k--)
+      /*empty*/;
     lswap(pf[j], pf[k]); c_idx = j;
   }
   if (DEBUGLEVEL>=4) err_printf("GaloisConj: not found, %d hops \n",hop);
