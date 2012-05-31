@@ -97,6 +97,7 @@ BA 77- FpX_gcd(0,x) -> div by 0
    78- x; y; p; q; subst(Mod(q,p), q, x + y) --> Mod(1, p)*x [#1321]
    79- off-by-1 error when placing prime table sentinel after e.g.
        default(primelimit, 2);
+   80- t_REAL with huge exponents print incorrectly [#1322]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

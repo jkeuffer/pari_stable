@@ -465,9 +465,28 @@ pari_flush(void) { pariOut->flush(); }
 void
 err_flush(void) { pariErr->flush(); }
 
+static GEN
+log10_2()
+{ return divrr(mplog2(LOWDEFAULTPREC), mplog(utor(10,LOWDEFAULTPREC))); }
+
 /* e binary exponent, return exponent in base ten */
 static long
-ex10(long e) { return (long) ((e >= 0)? e*LOG10_2: -(-e*LOG10_2)-1); }
+ex10(long e) {
+  pari_sp av;
+  GEN z;
+  if (e >= 0) {
+    if (e < 1e15) return e*LOG10_2;
+    av = avma; z = mulur(e, log10_2());
+    z = floorr(z); e = itos(z);
+  }
+  else /* e < 0 */
+  {
+    if (e > -1e15) return -(-e*LOG10_2)-1;
+    av = avma; z = mulsr(e, log10_2());
+    z = floorr(z); e = itos(z) - 1;
+  }
+  avma = av; return e;
+}
 
 static char *
 zeros(char *b, long nb) { while (nb-- > 0) *b++ = '0'; *b = 0; return b; }
@@ -650,12 +669,12 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 0)
     {
-      if (beta > 4e9) lx++;
+      if (beta > 4e9) { lx++; x = rtor(x, lx); }
       z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
     }
     else
     {
-      if (beta < -4e9) lx++;
+      if (beta < -4e9) { lx++; x = rtor(x, lx); }
       z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
     }
     setsigne(z, 1);
