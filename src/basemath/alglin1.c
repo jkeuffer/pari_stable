@@ -1708,7 +1708,6 @@ FqM_suppl(GEN x, GEN T, GEN p)
   GEN d;
   long r;
 
-  if (!T) return FpM_suppl(x,p);
   init_suppl(x);
   d = FqM_gauss_pivot(x,T,p,&r);
   avma = av; return get_suppl(x,d,r);
@@ -2462,6 +2461,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
   GEN c, d;
   long i, j, k, r, t, n, m;
 
+  if (!T) return FpM_gauss_pivot(x,p,rr);
   n=lg(x)-1; if (!n) { *rr=0; return NULL; }
   m=lg(x[1])-1; r=0;
   d = cgetg(n+1, t_VECSMALL);
