@@ -3163,13 +3163,11 @@ with \typ{INTMOD} and \typ{POLMOD} coefficients and using generic routines,
 at a considerable loss of efficiency. Also, specialized routines are
 available that have no obvious generic equivalent.
 
-\subsec{\kbd{FpC} / \kbd{FpV}, \kbd{FpM}, \kbd{FqM}} A \kbd{ZV}
+\subsec{\kbd{FpC} / \kbd{FpV}, \kbd{FpM}} A \kbd{ZV}
 (resp.~a~\kbd{ZM}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT}) with
 \typ{INT} coefficients. An \kbd{FpV} or \kbd{FpM}, with respect to a given
 \typ{INT}~\kbd{p}, is the same with \kbd{Fp} coordinates; operations are
-understood over $\Z/p\Z$. An \kbd{FqM} is a matrix with \kbd{Fq} coefficients
-(with respect to given \kbd{T}, \kbd{p}), not necessarily reduced (i.e
-arbitrary \typ{INT}s and \kbd{ZX}s in the same variable as \kbd{T}).
+understood over $\Z/p\Z$.
 
 \subsubsec{Conversions}
 
@@ -3314,7 +3312,18 @@ or \kbd{NULL} if none exist.
 
 \fun{GEN}{FpM_suppl}{GEN x, GEN p} as \kbd{suppl}
 
-\subsubsec{\kbd{Fq}-linear algebra}
+\subsubsec{\kbd{FqC}, \kbd{FqM} and \kbd{Fq}-linear algebra}
+
+An \kbd{FqM} (resp. \kbd{FqC}) is a matrix (resp a \typ{COL}) with
+\kbd{Fq} coefficients (with respect to given \kbd{T}, \kbd{p}), not necessarily
+reduced (i.e arbitrary \typ{INT}s and \kbd{ZX}s in the same variable as
+\kbd{T}).
+
+\fun{GEN}{FqC_add}{GEN a, GEN b, GEN T, GEN p}
+
+\fun{GEN}{FqC_sub}{GEN a, GEN b, GEN T, GEN p}
+
+\fun{GEN}{FqC_Fq_mul}{GEN a, GEN b, GEN T, GEN p}
 
 \fun{GEN}{FqM_gauss}{GEN a, GEN b, GEN T, GEN p} as \kbd{gauss}
 

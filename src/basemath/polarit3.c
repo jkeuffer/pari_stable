@@ -1121,6 +1121,37 @@ FqV_red(GEN z, GEN T, GEN p)
 }
 
 GEN
+FqC_add(GEN x, GEN y, GEN T, GEN p)
+{
+  long i, lx = lg(x);
+  if (!T) return FpC_add(x, y, p);
+  GEN z = cgetg(lx, t_COL);
+  for (i = 1; i < lx; i++) gel(z, i) = Fq_add(gel(x, i), gel(y, i), T, p);
+  return z;
+}
+
+GEN
+FqC_sub(GEN x, GEN y, GEN T, GEN p)
+{
+  long i, lx = lg(x);
+  if (!T) return FpC_sub(x, y, p);
+  GEN z = cgetg(lx, t_COL);
+  for (i = 1; i < lx; i++) gel(z, i) = Fq_sub(gel(x, i), gel(y, i), T, p);
+  return z;
+}
+
+GEN
+FqC_Fq_mul(GEN x, GEN y, GEN T, GEN p)
+{
+  long i, l = lg(x);
+  GEN z;
+  if (!T) return FpC_Fp_mul(x, y, p);
+  z = cgetg(l, t_COL);
+  for (i=1;i<l;i++) gel(z,i) = Fq_mul(gel(x,i),y,T,p);
+  return z;
+}
+
+GEN
 FqV_to_FlxV(GEN v, GEN T, GEN pp)
 {
   long j, N = lg(v);
