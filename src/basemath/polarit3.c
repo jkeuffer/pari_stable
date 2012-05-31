@@ -423,6 +423,21 @@ FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
 }
 
 GEN
+FqX_Fq_add(GEN y, GEN x, GEN T, GEN p)
+{
+  long i, lz = lg(y);
+  GEN z;
+  if (!T) return FpX_Fp_add(y, x, p);
+  if (lz == 2) return scalarpol(x, varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = Fq_add(gel(y,2),x, T, p);
+  if (lz == 3) z = FpXX_renormalize(z,lz);
+  else
+    for(i=3;i<lz;i++) gel(z,i) = gcopy(gel(y,i));
+  return z;
+}
+
+GEN
 FqX_Fq_mul_to_monic(GEN P, GEN U, GEN T, GEN p)
 {
   long i, lP;

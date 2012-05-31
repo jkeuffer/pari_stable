@@ -2606,6 +2606,7 @@ GEN     FqM_to_FlxM(GEN x, GEN T, GEN pp);
 GEN     FqV_roots_to_pol(GEN V, GEN T, GEN p, long v);
 GEN     FqV_red(GEN z, GEN T, GEN p);
 GEN     FqV_to_FlxV(GEN v, GEN T, GEN pp);
+GEN     FqX_Fq_add(GEN y, GEN x, GEN T, GEN p);
 GEN     FqX_Fq_mul_to_monic(GEN P, GEN U, GEN T, GEN p);
 GEN     FqX_eval(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_normalize(GEN z, GEN T, GEN p);
