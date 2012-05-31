@@ -7658,6 +7658,13 @@ display $g$.
 
 \fun{GEN}{FF_to_FpXQ_i}{GEN a} shallow version of \kbd{FF\_to\_FpXQ}.
 
+\fun{GEN}{FF_to_Flxq}{GEN a} converts the \typ{FFELT} \kbd{a} to a \kbd{Flx}
+$P$ such that $a=P(g)$ where $g$ is the
+generator of the finite field returned by \kbd{ffgen}, in the variable used to
+display $g$. This only work if the characteristic is small enough.
+
+\fun{GEN}{FF_to_Flxq_i}{GEN a} shallow version of \kbd{FF\_to\_Flxq}.
+
 \fun{GEN}{FF_1}{GEN a} returns the unity in the definition field of the
 \typ{FFELT} element \kbd{a}.
 
