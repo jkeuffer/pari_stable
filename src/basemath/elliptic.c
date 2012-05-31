@@ -145,9 +145,7 @@ static int
 initsmall(GEN x, GEN y)
 {
   GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D, j, a11, a13, a33, b22;
-  long l = lg(x);
-
-  switch(l)
+  switch(lg(x))
   {
     case 1:
     case 2:
@@ -168,8 +166,6 @@ initsmall(GEN x, GEN y)
       a6 = gel(x,5);
       break;
   }
-  if (typ(x)!=t_VEC)
-    pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
   gel(y,1) = a1;
   gel(y,2) = a2;
   gel(y,3) = a3;
@@ -4540,7 +4536,6 @@ static GEN
 ell_to_a4a6(GEN E, GEN p)
 {
   GEN a1, a3, b2, c4, c6;
-  checkell5(E);
   a1 = Rg_to_Fp(ell_get_a1(E),p);
   a3 = Rg_to_Fp(ell_get_a3(E),p);
   b2 = Rg_to_Fp(ell_get_b2(E),p);
