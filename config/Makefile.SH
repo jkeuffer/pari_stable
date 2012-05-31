@@ -221,8 +221,9 @@ RUNPTH_FINAL = $RUNPTH_FINAL
 LDDYN        = $LDDYN
 LIBS         = $LIBS
 GMPLIBS      = $GMPLIBS
+RT_LIBS      = $RT_LIBS
 DL_LIBS      = $DL_LIBS
-STA_LIBS     = \$(GMPLIBS) \$(LIBS)
+STA_LIBS     = \$(GMPLIBS) \$(RT_LIBS) \$(LIBS)
 
 RM = rm -f
 MV = mv -f
@@ -473,7 +474,7 @@ install-lib-sta: \$(LIBPARI_STA)
 install-lib-dyn-base:
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME) \$(LIBDIR)/\$(LIBPARI_SO)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
 install-lib-dyn-link: install-lib-dyn-base
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME);\
@@ -553,7 +554,7 @@ gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(TOPLDDYN)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(EXPORT_FILE)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(TOPLDDYN)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(EXPORT_FILE)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SO)"; then \
 	  \$(RM) \$(LIBPARI_SO);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO); fi

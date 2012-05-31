@@ -109,12 +109,15 @@ yes) echo '#define HAS_ALARM' >> $file;;
 esac
 
 
-case "$has_getrusage" in
-yes) echo '#define USE_GETRUSAGE 1' >> $file;;
-  *) case "$has_times" in
-     yes) echo '#define USE_TIMES 1' >> $file;;
-       *) case "$has_ftime" in
-          yes) echo '#define USE_FTIME 1' >> $file;;
+case "$has_clock_gettime" in
+yes) echo '#define USE_CLOCK_GETTIME 1' >> $file;;
+  *) case "$has_getrusage" in
+     yes) echo '#define USE_GETRUSAGE 1' >> $file;;
+       *) case "$has_times" in
+          yes) echo '#define USE_TIMES 1' >> $file;;
+            *) case "$has_ftime" in
+               yes) echo '#define USE_FTIME 1' >> $file;;
+               esac;;
           esac;;
      esac;;
 esac

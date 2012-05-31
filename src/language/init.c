@@ -1966,7 +1966,17 @@ getstack(void) { return top-avma; }
 /*                                                                 */
 /*******************************************************************/
 
-#if defined(USE_GETRUSAGE)
+#if defined(USE_CLOCK_GETTIME)
+#include <time.h>
+void
+timer_start(pari_timer *T)
+{
+  struct timespec t;
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&t);
+  T->us = t.tv_nsec / 1000;
+  T->s  = t.tv_sec;
+}
+#elif defined(USE_GETRUSAGE)
 # include <sys/time.h>
 # include <sys/resource.h>
 void
