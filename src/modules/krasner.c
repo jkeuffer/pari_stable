@@ -549,7 +549,7 @@ TamelyRamifiedCase(KRASNER_t *data)
     while (r)
     {
       long gr;
-      GEN p1 = FpXQ_pow(pol_x(data->v), stoi(r), data->uplr, data->p);
+      GEN p1 = FpXQ_powu(pol_x(data->v), r, data->uplr, data->p);
       eis = gadd(Xe, ZX_Z_mul(p1, data->p)); /* Adding a ZX and a ZY (cste coefficient) */
       ct++;
       topx = get_topx(data, eis);

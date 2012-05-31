@@ -1361,7 +1361,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
    * pi = nu^r / p^s is an element of valuation 1/E,
    * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
   q = powiu(S->p, s); qp = mulii(q, S->p);
-  nup = FpXQ_pow(nup, utoipos(r), S->chi, qp);
+  nup = FpXQ_powu(nup, r, S->chi, qp);
   if (!phi) return RgX_Rg_div(nup, q); /* phi = X : no composition */
   return compmod(S->p, nup, phi, S->chi, qp, -s);
 }
@@ -1497,7 +1497,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
       vDg += er * S->vDinvnu;
     }
     q = mulii(S->p, Dg);
-    g = ZX_mul(g, FpXQ_pow(S->invnu, stoi(er), S->chi, q));
+    g = ZX_mul(g, FpXQ_powu(S->invnu, er, S->chi, q));
     g = FpX_rem(g, S->chi, q);
     update_den(S->p, &g, &Dg, &vDg, NULL);
     g = centermod(g, mulii(S->p, Dg));
@@ -1514,7 +1514,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
   GEN R, w, chib, beta, gamm, chig, nug, delt = NULL;
   long L, E, i, l, Fg, eq = 0, er = 0, N = degpol(S->f), v = varn(S->f);
 
-  beta  = FpXQ_pow(S->nu, stoi(Ea), S->chi, S->p);
+  beta  = FpXQ_powu(S->nu, Ea, S->chi, S->p);
   S->invnu = NULL;
   chib = chig = NULL; /* -Wall */
   for (;;)

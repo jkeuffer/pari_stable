@@ -954,6 +954,13 @@ Fq_pow(GEN x, GEN n, GEN pol, GEN p)
 }
 
 GEN
+Fq_powu(GEN x, ulong n, GEN pol, GEN p)
+{
+  if (typ(x) == t_INT) return Fp_powu(x,n,p);
+  return FpXQ_powu(x,n,pol,p);
+}
+
+GEN
 Fq_sqrt(GEN x, GEN T, GEN p)
 {
   if (typ(x) == t_POL)

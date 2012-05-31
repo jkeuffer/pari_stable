@@ -3826,6 +3826,9 @@ whose coefficients are \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FpXQ_pow}{GEN x, GEN n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$.
 
+\fun{GEN}{FpXQ_powu}{GEN x, ulong n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$
+for small $n$.
+
 \fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let \kbd{g} be of
 order \kbd{ord} in the finite field $\F_p[X]/(T)$, return $e$ such that
 $a^e=g$. If $e$ does not exists, the result is currently undefined. Assumes
@@ -3878,6 +3881,9 @@ $N$ entries. The routine is not stack-clean: $2N$ \kbd{FpXQ} are left on
 stack, besides the $N$ in the result.
 
 \fun{GEN}{Fq_pow}{GEN x, GEN n, GEN pol, GEN p} returns $\kbd{x}^\kbd{n}$.
+
+\fun{GEN}{Fq_powu}{GEN x, ulong n, GEN pol, GEN p} returns $\kbd{x}^\kbd{n}$
+for small $n$.
 
 \fun{int}{Fq_issquare}{GEN x, GEN T, GEN p} returns $1$ if $x$ is a square
 and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}. $T =

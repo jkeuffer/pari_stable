@@ -1131,7 +1131,6 @@ _FpXQ_one(void *data)
   return pol_1(varn(D->T));
 }
 
-
 /* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
 GEN
 FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
@@ -1172,6 +1171,31 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
       if (lx>=lT) x = FpX_rem(x,T,p);
       y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
     }
+  }
+  return gerepileupto(av, y);
+}
+
+GEN /*Assume n is very small*/
+FpXQ_powu(GEN x, ulong n, GEN T, GEN p)
+{
+  FpX_muldata D;
+  pari_sp av;
+  GEN y;
+  if (!n) return pol_1(varn(x));
+  if (n==1) return FpXQ_red(x,T,p);
+  av = avma;
+  if (!is_bigint(p))
+  {
+    ulong pp = p[2];
+    T = ZX_to_Flx(T, pp);
+    x = ZX_to_Flx(x, pp);
+    y = Flx_to_ZX( Flxq_powu(x, n, T, pp) );
+  }
+  else
+  {
+    D.T = T; D.p = p;
+    x = FpX_rem(x,T,p);
+    y = gen_powu(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   }
   return gerepileupto(av, y);
 }
