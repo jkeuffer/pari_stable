@@ -3334,20 +3334,42 @@ FlxqXQ_inv(GEN x, GEN S, GEN T,ulong p)
   return gerepileupto(av, U);
 }
 
+static GEN
+FlxqXQ_mul_mg(GEN x,GEN y,GEN mg, GEN S, GEN T,ulong p)
+{
+  GEN z = FlxqX_mul(x,y,T,p);
+  if (lg(S) > lg(z)) return z;
+  return FlxqX_rem_Barrett(z, mg, S, T, p);
+}
+
+static GEN
+FlxqXQ_sqr_mg(GEN y,GEN mg,GEN S, GEN T,ulong p)
+{
+  GEN z = FlxqX_sqr(y,T,p);
+  if (lg(S) > lg(z)) return z;
+  return FlxqX_rem_Barrett(z, mg, S, T, p);
+}
+
 typedef struct {
-  GEN T, S;
+  GEN T, S, mg;
   ulong p;
 } FlxqXQ_muldata;
 
 static GEN
 _FlxqXQ_mul(void *data, GEN x, GEN y) {
   FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
-  return FlxqXQ_mul(x,y, d->S,d->T, d->p);
+  return FlxqXQ_mul_mg(x,y, d->mg, d->S,d->T, d->p);
 }
 static GEN
 _FlxqXQ_sqr(void *data, GEN x) {
   FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
-  return FlxqXQ_sqr(x, d->S,d->T, d->p);
+  return FlxqXQ_sqr_mg(x, d->mg, d->S,d->T, d->p);
+}
+
+static GEN
+_FlxqXQ_one(void *data) {
+  FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
+  return pol_1(varn(d->S));
 }
 
 /* x over Fq, return lift(x^n) mod S */
@@ -3359,10 +3381,27 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   if (!s) return pol1_FlxX(varn(S),T[1]);
   if (s < 0) x = FlxqXQ_inv(x,S,T,p);
   if (is_pm1(n)) return s < 0 ? x : gcopy(x);
+  D.mg = FlxqX_invBarrett(S,T,p);
   D.S = S;
   D.T = T;
   D.p = p;
   return gen_pow(x, n, (void*)&D, &_FlxqXQ_sqr, &_FlxqXQ_mul);
+}
+
+GEN
+FlxqXQ_powers(GEN x, long l, GEN S, GEN T, ulong p)
+{
+  FlxqXQ_muldata D;
+  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  D.mg = FlxqX_invBarrett(S,T,p);
+  D.S = S; D.T = T; D.p = p;
+  return gen_powers(x, l, use_sqr, (void*)&D, &_FlxqXQ_sqr, &_FlxqXQ_mul,&_FlxqXQ_one);
+}
+
+GEN
+FlxqXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, ulong p)
+{
+  return RgXV_to_RgM(FlxqXQ_powers(y,m-1,S,T,p),n);
 }
 
 /*******************************************************************/
