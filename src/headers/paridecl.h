@@ -2609,6 +2609,8 @@ GEN     FqX_Fq_mul_to_monic(GEN P, GEN U, GEN T, GEN p);
 GEN     FqX_eval(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_normalize(GEN z, GEN T, GEN p);
 GEN     FqX_translate(GEN P, GEN c, GEN T, GEN p);
+GEN     FqXQ_powers(GEN x, long l, GEN S, GEN T, GEN p);
+GEN     FqXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, GEN p);
 GEN     QX_disc(GEN x);
 GEN     QX_gcd(GEN a,GEN b);
 GEN     QX_resultant(GEN A, GEN B);

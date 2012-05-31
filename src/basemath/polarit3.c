@@ -855,9 +855,21 @@ FpXQXQ_powers(GEN x, long l, GEN S, GEN T, GEN p)
 }
 
 GEN
+FqXQ_powers(GEN x, long l, GEN S, GEN T, GEN p)
+{
+  return T ? FpXQXQ_powers(x, l, S, T, p): FpXQ_powers(x, l, S, p);
+}
+
+GEN
 FpXQXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, GEN p)
 {
   return RgXV_to_RgM(FpXQXQ_powers(y,m-1,S,T,p),n);
+}
+
+GEN
+FqXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, GEN p)
+{
+  return T ? FpXQXQ_matrix_pow(y, n, m, S, T, p): FpXQ_matrix_pow(y, n, m, S, p);
 }
 
 /*******************************************************************/
