@@ -4156,16 +4156,6 @@ variable $v$, then the coefficients by increasing degree. An \kbd{FlxX} is a
 
 \subsubsec{Basic operations}
 
-\fun{ulong}{Rg_to_Fl}{GEN z, ulong p}, \kbd{z} which can be mapped to
-$\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
-a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
-underlying prime $\ell$ satisfying $p = \ell^n$ for some $n$ (less than the
-accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
-\kbd{Fl}.
-
-\fun{ulong}{padic_to_Fl}{GEN x, ulong p} special case of \tet{Rg_to_Fl},
-for a $x$ a \typ{PADIC}.
-
 \fun{GEN}{Flx_red}{GEN z, ulong p} converts from \kbd{zx} with
 non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
@@ -4885,8 +4875,24 @@ usually more efficient than computations using a priori bounds.
 
 \subsubsec{To single precision}
 
+\fun{ulong}{Rg_to_Fl}{GEN z, ulong p}, \kbd{z} which can be mapped to
+$\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
+a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
+underlying prime $\ell$ satisfying $p = \ell^n$ for some $n$ (less than the
+accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
+\kbd{Fl}.
+
+\fun{ulong}{padic_to_Fl}{GEN x, ulong p} special case of \tet{Rg_to_Fl},
+for a $x$ a \typ{PADIC}.
+
 \fun{GEN}{RgX_to_Flx}{GEN x, ulong p}, \kbd{x} a \typ{POL}, returns the
 \kbd{Flx} obtained by applying \kbd{Rg\_to\_Fl} coefficientwise.
+
+\fun{GEN}{Rg_to_Flxq}{GEN z, GEN T, ulong p}, \kbd{z} a \kbd{GEN} which can be
+mapped to $\F_p[X]/(T)$: anything \kbd{Rg\_to\_Fl} can be applied to,
+a \typ{POL} to which \kbd{RgX\_to\_Flx} can be applied to, a \typ{POLMOD}
+whose modulus is divisible by $T$ (once mapped to a \kbd{Flx}), a suitable
+\typ{RFRAC}. Returns \kbd{z} as an \kbd{Flxq}, normalized.
 
 \fun{GEN}{ZX_to_Flx}{GEN x, ulong p} reduce \kbd{ZX}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flx}). Faster than \kbd{RgX\_to\_Flx}.
