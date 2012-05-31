@@ -168,10 +168,11 @@ GEN
 ZX_unscale(GEN P, GEN h)
 {
   long i, l = lg(P);
-  GEN hi = gen_1, Q = cgetg(l, t_POL);
+  GEN Q = cgetg(l, t_POL);
   Q[1] = P[1];
   if (l == 2) return Q;
   gel(Q,2) = gel(P,2);
+  if (l == 3) return Q;
   if (equalim1(h))
     for (i=3; i<l; i++)
     {
@@ -180,11 +181,36 @@ ZX_unscale(GEN P, GEN h)
       gel(Q,i) = gel(P,i);
     }
   else
-    for (i=3; i<l; i++)
+  {
+    GEN hi = h;
+    gel(Q,3) = mulii(gel(P,3), hi);
+    for (i=4; i<l; i++)
     {
       hi = mulii(hi,h);
       gel(Q,i) = mulii(gel(P,i), hi);
     }
+  }
+  return Q;
+}
+/* P(h*X) / h, assuming h | P(0), i.e. the result is a ZX */
+GEN
+ZX_unscale_div(GEN P, GEN h)
+{
+  long i, l = lg(P);
+  GEN hi, Q = cgetg(l, t_POL);
+  Q[1] = P[1];
+  if (l == 2) return Q;
+  gel(Q,2) = diviiexact(gel(P,2), h);
+  if (l == 3) return Q;
+  gel(Q,3) = gel(P,3);
+  if (l == 4) return Q;
+  hi = h;
+  gel(Q,4) = mulii(gel(P,4), hi);
+  for (i=5; i<l; i++)
+  {
+    hi = mulii(hi,h);
+    gel(Q,i) = mulii(gel(P,i), hi);
+  }
   return Q;
 }
 

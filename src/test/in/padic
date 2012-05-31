@@ -15,3 +15,5 @@ test(3)
 test(3,3)
 test(11,3)
 test(nextprime(2^64),3)
+polrootspadic(x^3-x+8, 2, 6)
+

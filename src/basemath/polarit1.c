@@ -1865,14 +1865,14 @@ QpXQ_to_ZXY(GEN f, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-/* f primitive ZX, squarefree, leading term prime to p. a in Z such that
+/* f primitive ZX, squarefree, leading term prime to p; a in Z such that
  * f(a) = 0 mod p. Return p-adic roots of f equal to a mod p, in
  * precision >= prec */
 static GEN
 ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
 {
   GEN z, R, a0 = modii(a, p);
-  long i, j, k;
+  long i, j, k, v;
 
   if (signe(FpX_eval(FpX_deriv(f, p), a0, p)))
   { /* simple zero mod p, go all the way to p^prec */
@@ -1880,8 +1880,9 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
     return mkcol(a0);
   }
 
-  f = poleval(f, deg1pol_shallow(p, a, varn(f)));
-  f = ZX_Z_divexact(f, powiu(p,ggval(f, p)));
+  f = ZX_unscale_div(RgX_translate(f,a), p); /* f(pX + a) / p */
+  v = ZX_pval(f,p);
+  if (v) f = ZX_Z_divexact(f, powiu(p,v));
   z = cgetg(degpol(f)+1,t_COL);
 
   R = FpX_roots(f, p);

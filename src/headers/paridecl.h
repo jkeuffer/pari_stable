@@ -504,6 +504,7 @@ GEN     RgX_translate(GEN P, GEN c);
 GEN     RgX_unscale(GEN P, GEN h);
 GEN     Rg_RgX_sub(GEN x, GEN y);
 GEN     ZX_unscale(GEN P, GEN h);
+GEN     ZX_unscale_div(GEN P, GEN h);
 
 /* ZV.c */
 
