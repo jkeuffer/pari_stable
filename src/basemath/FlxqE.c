@@ -214,6 +214,15 @@ _FlxqE_rand(void *E)
 
 static const struct bb_group FlxqE_group={_FlxqE_add,_FlxqE_mul,_FlxqE_rand,hash_GEN,zvV_equal,ell_is_inf, NULL};
 
+const struct bb_group *
+get_FlxqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, ulong p)
+{
+  struct _FlxqE *e = (struct _FlxqE *) stack_malloc(sizeof(struct _FlxqE));
+  e->a4 = a4; e->a6 = a6; e->T = T; e->p = p;
+  *pt_E = (void *) e;
+  return &FlxqE_group;
+}
+
 GEN
 FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p)
 {

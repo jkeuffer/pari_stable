@@ -213,6 +213,15 @@ _FpE_rand(void *E)
 
 static const struct bb_group FpE_group={_FpE_add,_FpE_mul,_FpE_rand,hash_GEN,ZV_equal,ell_is_inf,NULL};
 
+const struct bb_group *
+get_FpE_group(void ** pt_E, GEN a4, GEN a6, GEN p)
+{
+  struct _FpE *e = (struct _FpE *) stack_malloc(sizeof(struct _FpE));
+  e->a4 = a4; e->a6 = a6; e->p  = p;
+  *pt_E = (void *) e;
+  return &FpE_group;
+}
+
 GEN
 FpE_order(GEN z, GEN o, GEN a4, GEN p)
 {
@@ -616,6 +625,15 @@ _FpXQE_rand(void *E)
 }
 
 static const struct bb_group FpXQE_group={_FpXQE_add,_FpXQE_mul,_FpXQE_rand,hash_GEN,ZXV_equal,ell_is_inf};
+
+const struct bb_group *
+get_FpXQE_group(void ** pt_E, GEN a4, GEN a6, GEN T, GEN p)
+{
+  struct _FpXQE *e = (struct _FpXQE *) stack_malloc(sizeof(struct _FpXQE));
+  e->a4 = a4; e->a6 = a6; e->T = T; e->p = p;
+  *pt_E = (void *) e;
+  return &FpXQE_group;
+}
 
 GEN
 FpXQE_order(GEN z, GEN o, GEN a4, GEN T, GEN p)

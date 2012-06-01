@@ -222,6 +222,7 @@ GEN     FlxqE_order(GEN z, GEN o, GEN a4, GEN T, ulong p);
 GEN     FlxqE_sub(GEN P, GEN Q, GEN a4, GEN T, ulong p);
 GEN     FlxqE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, ulong p);
 GEN     FlxqE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, ulong p);
+const struct bb_group * get_FlxqE_group(void **E, GEN a4, GEN a6, GEN T, ulong p);
 GEN     RgE_to_FlxqE(GEN x, GEN T, ulong p);
 GEN     random_FlxqE(GEN a4, GEN a6, GEN T, ulong p);
 
@@ -255,6 +256,8 @@ GEN     FpXQE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
 GEN     FpXQE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
 GEN     RgE_to_FpE(GEN x, GEN p);
 GEN     RgE_to_FpXQE(GEN x, GEN T, GEN p);
+const struct bb_group * get_FpE_group(void **E, GEN a4, GEN a6, GEN p);
+const struct bb_group * get_FpXQE_group(void **E, GEN a4, GEN a6, GEN T, GEN p);
 GEN     random_FpE(GEN a4, GEN a6, GEN p);
 GEN     random_FpXQE(GEN a4, GEN a6, GEN T, GEN p);
 

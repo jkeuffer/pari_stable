@@ -302,7 +302,7 @@ of $o$. If $N$ is not \kbd{NULL} it is a multiple of the order, as a
 returns a random generator of the group, assuming it is of order exactly
 $o$ (which can be given by a factorization matrix).
 
-\subsec{Black box groups with pairing}
+\subsec{Black-box groups with pairing}
 
 Theses functions handle groups of rank at most $2$ equipped with a family of
 bilinear pairings which behave like the Weil pairing on elliptic curves over
@@ -325,6 +325,21 @@ pairing required to verify a generating set which is to be used with \kbd{gen\_e
 the parameters $d_1$, $d_2$, $m$ being as returned by \kbd{gen\_ellgroup}, returns a pair
 of generators $[P,Q]$ such that $P$ is of order $d_1$ and the $m$-pairing of $P$ and
 $Q$ is of order $m$. (Note: $Q$ needs not be of order $d_2$).
+
+\subsec{Functions returning black-box groups}
+
+\fun{const struct bb_group *}{get_FpE_group}{void **pt_E, GEN a4, GEN a6, GEN p}
+returns a pointer to a black-box group and set \kbd{*pt\_E} to the necessary data for
+computing in the group $E(\F_p)$ where $E$ is the elliptic curve $E:y^2=x^3+a_4\*x+a_6$,
+with $a_4$ and $a_6$ in $\F_p$.
+
+\fun{const struct bb_group *}{get_FpXQE_group}{void **pt_E, GEN a4, GEN a6, GEN T, GEN p}
+returns a pointer to a black-box group and set \kbd{*pt\_E} to the necessary data for
+computing in the group $E(\F_p[X]/(T))$ where $E$ is the elliptic curve $E:y^2=x^3+a_4\*x+a_6$,
+with $a_4$ and $a_6$ in $\F_p[X]/(T)$.
+
+\fun{const struct bb_group *}{get_FlxqE_group}{void **pt_E, GEN a4, GEN a6, GEN T, ulong p}
+idem for small $p$.
 
 \section{Public functions useless outside of GP context}
 
