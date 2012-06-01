@@ -1841,7 +1841,7 @@ ZXV_to_ZpXQV(GEN z, GEN T, GEN p, long prec)
 }
 
 static GEN
-QpXQ_to_ZXY(GEN f, GEN p)
+QpXQX_to_ZXY(GEN f, GEN p)
 {
   GEN c = get_padic_content(f, p);
   long i, l = lg(f);
@@ -1851,6 +1851,10 @@ QpXQ_to_ZXY(GEN f, GEN p)
     GEN t = gel(f,i);
     switch(typ(t))
     {
+      case t_POLMOD:
+        t = gel(t,2);
+        t = (typ(t) == t_POL)? ZpX_to_ZX(t, p): Zp_to_Z(t, p);
+        break;
       case t_POL: t = ZpX_to_ZX(t, p); break;
       default: t = Zp_to_Z(t, p); break;
     }
@@ -2023,9 +2027,8 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
     if (prec > 1) a = ZpXQX_liftroot(f, a, T, p, prec);
     return mkcol(a);
   }
-  /* TODO: need RgX_RgYQX_compo ? */
-  f = lift_intern(poleval(f, deg1pol_shallow(p, mkpolmod(a,T), varn(f))));
-  f = gdiv(f, powiu(p, ggval(f,p)));
+  f = RgX_unscale(RgXQX_translate(f, a, T), p);
+  f = RgX_Rg_div(f, powiu(p, ggval(f,p)));
   z = cgetg(degpol(f)+1,t_COL);
   R = FqX_roots_i(FqX_red(f,T,p), T, p); lR = lg(R);
   for(j=i=1; i<lR; i++)
@@ -2058,7 +2061,7 @@ padicappr(GEN f, GEN a)
   p = NULL; prec = LONG_MAX;
   getprec(a, &prec, &p);
   getprec(T, &prec, &p); if (!p) pari_err_TYPE("padicappr",T);
-  f = QpXQ_to_ZXY(f, p);
+  f = QpXQX_to_ZXY(f, p);
   a = QpX_to_ZX(a,p);
   T = QpX_to_ZX(T,p);
   z = ZXY_ZpQ_root(f, a, T, p, prec);
