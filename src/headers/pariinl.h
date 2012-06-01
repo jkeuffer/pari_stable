@@ -1707,7 +1707,7 @@ resultant(GEN x, GEN y) { return resultant_all(x,y,NULL); }
 INLINE long
 gval(GEN x, long v) {
   pari_sp av = avma;
-  long n = ggval(x, pol_x(v));
+  long n = gvaluation(x, pol_x(v));
   avma = av; return n;
 }
 

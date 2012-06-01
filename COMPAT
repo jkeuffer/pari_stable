@@ -25,6 +25,7 @@ This file lists the incompatible changes between Version 2.x and older versions
      ***   at top-level: forprime(p=2,10,p=[])
      ***                                   ^---
      ***   prime index read-only: was changed to [].
+  - rename ggval -> gvaluation
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

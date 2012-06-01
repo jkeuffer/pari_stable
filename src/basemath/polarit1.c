@@ -2028,7 +2028,7 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
     return mkcol(a);
   }
   f = RgX_unscale(RgXQX_translate(f, a, T), p);
-  f = RgX_Rg_div(f, powiu(p, ggval(f,p)));
+  f = RgX_Rg_div(f, powiu(p, gvaluation(f,p)));
   z = cgetg(degpol(f)+1,t_COL);
   R = FqX_roots_i(FqX_red(f,T,p), T, p); lR = lg(R);
   for(j=i=1; i<lR; i++)

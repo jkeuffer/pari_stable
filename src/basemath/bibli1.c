@@ -698,7 +698,7 @@ plindep(GEN x)
     if (!p) p = q; else if (!equalii(p, q)) pari_err_MODULUS("plindep", p, q);
   }
   if (!p) pari_err_TYPE("plindep [not a p-adic vector]",x);
-  v = ggval(x,p); pn = powiu(p,prec);
+  v = gvaluation(x,p); pn = powiu(p,prec);
   if (v != 0) x = gmul(x, powis(p, -v));
   x = RgV_to_FpV(x, pn);
 

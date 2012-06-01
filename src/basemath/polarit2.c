@@ -989,7 +989,7 @@ static GEN
 padic_gcd(GEN x, GEN y)
 {
   GEN p = gel(y,2);
-  long v = ggval(x,p), w = valp(y);
+  long v = gvaluation(x,p), w = valp(y);
   if (w < v) v = w;
   return powis(p, v);
 }
@@ -3072,7 +3072,7 @@ newtonpoly(GEN x, GEN p)
   n=degpol(x); if (n<=0) return cgetg(1,t_VEC);
   y = cgetg(n+1,t_VEC); x += 2; /* now x[i] = term of degree i */
   vval = (long *) pari_malloc(sizeof(long)*(n+1));
-  for (a=0; a<=n; a++) vval[a] = ggval(gel(x,a),p);
+  for (a=0; a<=n; a++) vval[a] = gvaluation(gel(x,a),p);
   for (a=0, ind=1; a<n; a++)
   {
     if (vval[a] != LONG_MAX) break;

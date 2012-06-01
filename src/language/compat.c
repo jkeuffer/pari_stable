@@ -693,7 +693,7 @@ entree oldfonctions[]={
 {"twototwo",0,(void*)suppressed,6,"GGG","twototwo(nf,a,b)=returns a 3-component vector [d,e,U] such that U is a unimodular 2x2 matrix with algebraic integer coefficients such that [a,b]*U=[d,e] and d,e are hopefully smaller."},
 {"unit",1,(void*)quadunit,4,"G","unit(x)=fundamental unit of the quadratic field of discriminant x where x must be positive."},
 {"until",0,(void*)untilpari,11,"vEI","until(a,seq): evaluate the expression sequence seq until a is nonzero."},
-{"valuation",20,(void*)ggval,2,"lGG","valuation(x,p)=valuation of x with respect to p."},
+{"valuation",20,(void*)gvaluation,2,"lGG","valuation(x,p)=valuation of x with respect to p."},
 {"vec",1,(void*)gtovec,2,"G","vec(x)=transforms the object x into a vector. Used mainly if x is a polynomial or a power series."},
 {"vecindexsort",2,(void*)indexsort,8,"G","vecindexsort(x): indirect sorting of the vector x."},
 {"veclexsort",2,(void*)lexsort,8,"G","veclexsort(x): sort the elements of the vector x in ascending lexicographic order."},

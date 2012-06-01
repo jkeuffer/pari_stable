@@ -1059,7 +1059,7 @@ minval(GEN x, GEN p, long first)
   long i,k, val = LONG_MAX, lx = lg(x);
   for (i=first; i<lx; i++)
   {
-    k = ggval(gel(x,i),p);
+    k = gvaluation(gel(x,i),p);
     if (k < val) val = k;
   }
   return val;
@@ -1080,7 +1080,7 @@ long
 Q_pval(GEN x, GEN p) { return (typ(x) == t_INT)? Z_pval(x, p): ratval(x, p); }
 
 long
-ggval(GEN x, GEN p)
+gvaluation(GEN x, GEN p)
 {
   long tx = typ(x), tp = typ(p);
   pari_sp av, limit;
@@ -1089,11 +1089,11 @@ ggval(GEN x, GEN p)
   {
     case t_INT:
       if (signe(p) && !is_pm1(p)) break;
-      pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
+      pari_err(e_MISC, "forbidden divisor %Ps in gvaluation", p);
     case t_POL:
       if (degpol(p) > 0) break;
     default:
-      pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
+      pari_err(e_MISC, "forbidden divisor %Ps in gvaluation", p);
   }
 
   switch(tx)
@@ -1126,7 +1126,7 @@ ggval(GEN x, GEN p)
     case t_POLMOD: {
       GEN a = gel(x,1), b = gel(x,2);
       long v, val;
-      if (tp == t_INT) return ggval(b,p);
+      if (tp == t_INT) return gvaluation(b,p);
       v = varn(p);
       if (varn(a) != v) return 0;
       av = avma;
@@ -1153,7 +1153,7 @@ ggval(GEN x, GEN p)
             if (!x) { avma = av; return val; }
             if (low_stack(limit, stack_lim(av,1)))
             {
-              if(DEBUGMEM>1) pari_warn(warnmem,"ggval");
+              if(DEBUGMEM>1) pari_warn(warnmem,"gvaluation");
               x = gerepilecopy(av, x);
             }
           }
@@ -1170,7 +1170,7 @@ ggval(GEN x, GEN p)
         if (vp == vx)
         {
           val = RgX_val(p);
-          if (!val) pari_err(e_MISC, "forbidden divisor %Ps in ggval", p);
+          if (!val) pari_err(e_MISC, "forbidden divisor %Ps in gvaluation", p);
           return (long)(valp(x) / val);
         }
         if (varncmp(vx, vp) > 0) return 0;
@@ -1179,7 +1179,7 @@ ggval(GEN x, GEN p)
     }
 
     case t_RFRAC:
-      return ggval(gel(x,1),p) - ggval(gel(x,2),p);
+      return gvaluation(gel(x,1),p) - gvaluation(gel(x,2),p);
 
     case t_COMPLEX: case t_QUAD: case t_VEC: case t_COL: case t_MAT:
       return minval(x,p,1);
@@ -2219,7 +2219,7 @@ ctop(GEN x, GEN p, long d)
   pari_sp av = avma;
   GEN z, u = gel(x,1), v = gel(x,2);
   if (isrationalzero(v)) return cvtop(u, p, d);
-  z = Qp_sqrt(cvtop(gen_m1, p, d - ggval(v, p))); /* = I */
+  z = Qp_sqrt(cvtop(gen_m1, p, d - gvaluation(v, p))); /* = I */
 
   z = gadd(u, gmul(v, z));
   if (typ(z) != t_PADIC) /* t_INTMOD for t_COMPLEX of t_INTMODs... */

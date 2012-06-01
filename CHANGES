@@ -190,6 +190,7 @@ BA 48- agm now returns the optimal AGM
    59- forprime(p = a, b, ...) now iterates over arbitrary ranges of primes,
        independently of 'primelimit'. Parameter 'b' can be omitted (no upper
        limit)
+   60- rename ggval -> gvaluation
 
   Added
     1- mathnf for matrices over K[X] [#41]

@@ -76,7 +76,7 @@ gauss_get_pivot_padic(GEN X, GEN p, long ix, GEN c)
     for (i=1; i<lx; i++)
       if (!c[i] && !gequal0(gel(x,i)))
       {
-        long e = ggval(gel(x,i), p);
+        long e = gvaluation(gel(x,i), p);
         if (e < ex) { ex = e; k = i; }
       }
   }
@@ -85,7 +85,7 @@ gauss_get_pivot_padic(GEN X, GEN p, long ix, GEN c)
     for (i=ix; i<lx; i++)
       if (!gequal0(gel(x,i)))
       {
-        long e = ggval(gel(x,i), p);
+        long e = gvaluation(gel(x,i), p);
         if (e < ex) { ex = e; k = i; }
       }
   }

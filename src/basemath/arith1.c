@@ -2755,7 +2755,7 @@ znlog(GEN h, GEN g, GEN o)
       long v = valp(g);
       if (v < 0) pari_err_DIM("znlog");
       if (v > 0) {
-        long k = ggval(h, p);
+        long k = gvaluation(h, p);
         if (k % v) return cgetg(1,t_VEC);
         k /= v;
         if (!gequal(h, gpowgs(g,k))) { avma = av; return cgetg(1,t_VEC); }
