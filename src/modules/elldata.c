@@ -120,21 +120,19 @@ ellcondfile(long f)
 }
 
 /* return the vector of all curves of conductor f */
+static int cmpi1(GEN x, GEN v) { return cmpii(x, gel(v,1)); }
 static GEN
 ellcondlist(long f)
 {
+  pari_sp av = avma;
   GEN V = ellcondfile(f);
-  long i;
-  for (i=1; i<lg(V); i++)
-  { /* not worth using a binary search */
+  long i = tablesearch(V, utoipos(f), &cmpi1);
+  if (i)
+  {
     GEN v = gel(V,i);
-    int cmp = cmpis(gel(v,1), f);
-    if (cmp >= 0) {
-      if (cmp) break;
-      return vecslice(v,2, lg(v)-1);
-    }
+    return vecslice(v,2, lg(v)-1);
   }
-  return cgetg(1,t_VEC);
+  avma = av; return cgetg(1,t_VEC);
 }
 
 static GEN
@@ -198,14 +196,14 @@ GEN
 ellidentify(GEN E)
 {
   pari_sp ltop=avma;
-  GEN V, M, G = ellglobalred(E);
+  GEN V, M, G = ellglobalred(E), N = gel(G,1);
   long j;
-  V = ellcondlist(itos(gel(G,1)));
+  V = ellcondlist(itos(N));
   M = ellchangecurve(vecslice(E,1,5),gel(G,2));
   for (j=1; j<lg(V); j++)
     if (ZV_equal(gmael(V,j,2), M))
       return gerepilecopy(ltop, mkvec2(gel(V,j),gel(G,2)));
-  pari_err(e_MISC,"No such elliptic curve in database");
+  pari_err_BUG("ellidentify [missing curve]");
   return NULL;
 }
 
