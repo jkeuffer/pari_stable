@@ -12,12 +12,12 @@ ERROR 1 0 0
 0 1 1 ERROR 
   ***   at top-level: valuation(0,1)
   ***                 ^--------------
-  *** valuation: forbidden divisor 1 in ggval.
+  *** valuation: forbidden divisor 1 in gvaluation.
   ***   at top-level: valuation(0,-1)
   ***                 ^---------------
-  *** valuation: forbidden divisor -1 in ggval.
+  *** valuation: forbidden divisor -1 in gvaluation.
   ***   at top-level: valuation(0,0)
   ***                 ^--------------
-  *** valuation: forbidden divisor 0 in ggval.
+  *** valuation: forbidden divisor 0 in gvaluation.
 2
-Total time spent: 0
+Total time spent: 8
