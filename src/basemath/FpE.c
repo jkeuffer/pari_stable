@@ -808,6 +808,20 @@ FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
   return FpXQE_Miller(P, Q, m, a4, T, p);
 }
 
+GEN
+FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN q = powiu(p, degpol(T)), r;
+  if (lgefint(p)==3 && expi(q)<=62)
+  {
+    ulong pp = p[2];
+    r =  Flxq_ellShanks(ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),q,ZX_to_Flx(T,pp),pp);
+  }
+  else
+    r = Fq_ellsea(a4, a6, q, T, p, 0);
+  return gerepileuptoint(av, r);
+}
 
 static GEN
 _FpXQE_pairorder(void *E, GEN P, GEN Q, GEN m, GEN F)

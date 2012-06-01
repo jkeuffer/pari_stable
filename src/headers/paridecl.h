@@ -207,8 +207,7 @@ GEN     pol1_FlxX(long v, long sv);
 GEN     random_Flx(long d1, long v, ulong p);
 
 /* FlxqE.c */
-
-GEN     Flxq_ellap(GEN a4, GEN a6, GEN T, ulong p);
+GEN     Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p);
 GEN     Flxq_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p);
 GEN     Flxq_ellgroup(GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m);
 GEN     FlxqE_add(GEN P, GEN Q, GEN a4, GEN T, ulong p);
@@ -241,6 +240,7 @@ GEN     FpE_order(GEN z, GEN o, GEN a4, GEN p);
 GEN     FpE_sub(GEN P, GEN Q, GEN a4, GEN p);
 GEN     FpE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
 GEN     FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
+GEN     FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p);
 GEN     FpXQ_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p);
 GEN     FpXQ_ellgroup(GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m);
 GEN     FpXQE_add(GEN P, GEN Q, GEN a4, GEN T, GEN p);
@@ -1574,7 +1574,7 @@ GEN     zell(GEN e, GEN z, long prec);
 /* ellsea.c */
 
 GEN     Fp_ellsea(GEN a4, GEN a6, GEN p, long early_abort);
-GEN     Fq_ellsea(GEN a4, GEN a6, GEN T, GEN p, long early_abort);
+GEN     Fq_ellsea(GEN a4, GEN a6, GEN q, GEN T, GEN p, long early_abort);
 GEN     ellmodulareqn(long l, long vx, long vy);
 GEN     ellsea(GEN E, GEN p, long early_abort);
 

@@ -5102,13 +5102,13 @@ A \kbd{FpE} is either the point at infinity (\kbd{ellinf()}) or a $FpV$ whith tw
 components. The parameters $a_4$ and $a_6$ are given as \typ{INT}s when required.
 
 \fun{GEN}{Fp_ellgroup}{GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m}
-Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
+Return the group structure $D$ of the group $E(\F_p)$,
+which is assumed to be of order $N$ and set $*pt_m=m$.
 
 \fun{GEN}{Fp_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p}
-Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$ with the base change \kbd{ch} (see \kbd{FpE\_changepoint}),
-where $D$ and $m$ are as returned by \kbd{Fp\_ellgroup}.
+Returns generators of the group $E(\F_p)$ with the base change \kbd{ch}
+(see \kbd{FpE\_changepoint}), where $D$ and $m$ are as returned by
+\kbd{Fp\_ellgroup}.
 
 \subsec{\kbd{FpE}}
 
@@ -5157,14 +5157,17 @@ Let $p$ a prime \kbd{ulong}, $T$ an irreducible \kbd{Flx} mod $p$, and $E$ the
 elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
 being \kbd{Flx} in $\F_p[X]/(T)$.  A \kbd{FlxqE} is a point of $E(\F_p[X]/(T))$.
 
+\fun{GEN}{Flxq_ellcard}{GEN a4, GEN a6, GEN T, ulong p}
+Return the order of the group $E(\F_p[X]/(T))$.
+
 \fun{GEN}{Flxq_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m}
-Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
+Return the group structure $D$ of the group $E(\F_p[X]/(T))$,
+which is assumed to be of order $N$ and set $*pt_m=m$.
 
 \fun{GEN}{Flxq_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p}
-Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$ with the base change \kbd{ch} (see \kbd{FpXQE\_changepoint}),
-where $D$ and $m$ are as returned by \kbd{FpXQ\_ellgroup}.
+Returns generators of the group $E(\F_p[X]/(T))$ with the base change \kbd{ch}
+(see \kbd{FlxqE\_changepoint}), where $D$ and $m$ are as returned by
+\kbd{Flxq\_ellgroup}.
 
 \subsec{\kbd{FlxqE}}
 
@@ -5212,14 +5215,17 @@ Let $p$ a prime number, $T$ an irreducible polynomial mod $p$, and $E$ the
 elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
 in $\F_p[X]/(T)$.  A \kbd{FpXQE} is a point of $E(\F_p[X]/(T))$.
 
+\fun{GEN}{FpXQ_ellcard}{GEN a4, GEN a6, GEN T, GEN p}
+Return the order of the group $E(\F_p[X]/(T))$.
+
 \fun{GEN}{FpXQ_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m}
-Return the group structure $D$ of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$, which is assumed to be of order $N$ and set $*pt_m=m$.
+Return the group structure $D$ of the group $E(\F_p[X]/(T))$,
+which is assumed to be of order $N$ and set $*pt_m=m$.
 
 \fun{GEN}{FpXQ_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p}
-Returns generators of the curve $E:y^2=x^3+a_4\*x+a_6$ over
-$F_p$ with the base change \kbd{ch} (see \kbd{FpXQE\_changepoint}),
-where $D$ and $m$ are as returned by \kbd{FpXQ\_ellgroup}.
+Returns generators of the group $E(\F_p[X]/(T))$ with the base change \kbd{ch}
+(see \kbd{FpXQE\_changepoint}), where $D$ and $m$ are as returned by
+\kbd{FpXQ\_ellgroup}.
 
 \subsec{\kbd{FpXQE}}
 

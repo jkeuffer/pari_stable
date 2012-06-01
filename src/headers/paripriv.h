@@ -423,6 +423,10 @@ GEN     Kronecker_to_FlxqX(GEN z, GEN T, ulong p);
 GEN     FlxqX_invBarrett(GEN T, GEN Q, ulong p);
 GEN     FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 
+/* FlxqE.c */
+
+GEN     Flxq_ellShanks(GEN a4, GEN a6, GEN q, GEN T, ulong p);
+
 /* Qfb.c */
 
 GEN     redimagsl2(GEN q, GEN *U);

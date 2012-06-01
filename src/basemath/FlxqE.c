@@ -522,14 +522,14 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
 }
 
 GEN
-Flxq_ellap(GEN a4, GEN a6, GEN T, ulong p)
+Flxq_ellShanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
 {
   pari_sp av = avma;
   long vn = T[1];
   long i, twistp, twistpold=0;
   GEN h,f, ta4, u, x, A, B;
   long n = degpol(T);
-  GEN q = powuu(p, n), q1p = addsi(1, q), q2p = shifti(q1p, 1);
+  GEN q1p = addsi(1, q), q2p = shifti(q1p, 1);
   GEN bound = addis(sqrti(gmul2n(q,4)), 1); /* ceil( 4sqrt(q) ) */
   /* once #E(Flxq) is know mod B >= bound, it is completely determined */
   /* how many 2-torsion points ? */
@@ -568,11 +568,23 @@ Flxq_ellap(GEN a4, GEN a6, GEN T, ulong p)
     i = (cmpii(B, bound) < 0);
     /* If we are not done, update A mod B for the _next_ curve, isomorphic to
      * the quadratic twist of this one */
-    if (i) A = remii(subii(q2p,A), B); /* #E(Flxq)+#E'(Flxq) = 2p+2 */
+    if (i) A = remii(subii(q2p,A), B); /* #E(Fq)+#E'(Fq) = 2q+2 */
 
     /* h = A mod B, closest lift to p+1 */
     h = closest_lift(A, B, q1p);
     if (!i) break;
   }
-  return gerepileuptoint(av, twistp? subii(q1p,h): subii(h,q1p));
+  return gerepileuptoint(av, twistp? h: subii(shifti(q1p,1),h));
+}
+
+GEN
+Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  GEN q = powuu(p, degpol(T)), r;
+  if (expi(q)<=62)
+    r = Flxq_ellShanks(a4, a6, q, T, p);
+  else
+    r = Fq_ellsea(Flx_to_ZX(a4),Flx_to_ZX(a6),q,Flx_to_ZX(T),utoi(p),0);
+  return gerepileuptoint(av, r);
 }
