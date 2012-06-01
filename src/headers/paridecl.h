@@ -1573,6 +1573,8 @@ GEN     zell(GEN e, GEN z, long prec);
 
 /* ellsea.c */
 
+GEN     Fp_ellsea(GEN a4, GEN a6, GEN p, long early_abort);
+GEN     Fq_ellsea(GEN a4, GEN a6, GEN T, GEN p, long early_abort);
 GEN     ellmodulareqn(long l, long vx, long vy);
 GEN     ellsea(GEN E, GEN p, long early_abort);
 

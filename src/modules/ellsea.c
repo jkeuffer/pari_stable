@@ -30,6 +30,8 @@ terms of the GNU General Public License as published by the Free Software
 Foundation. It is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY WHATSOEVER. */
 
+/* Extension to non prime finite fields by Bill Allombert 2012 */
+
 #include "pari.h"
 #include "paripriv.h"
 
@@ -39,6 +41,9 @@ void
 pari_init_seadata(void)  { modular_eqn = NULL; }
 void
 pari_close_seadata(void) { if (modular_eqn) gunclone(modular_eqn); }
+
+static int
+FqX_equal(GEN x, GEN y) { return gequal(x,y); }
 
 static GEN
 get_seadata(ulong ell)
@@ -118,29 +123,29 @@ ellmodulareqn(long ell, long vx, long vy)
 /*E: y^2 = x^3 + a4x + a6.  Assumes (precS-2)*(2precS+3) < ULONG_MAX, i.e.
  * precS < 46342 in 32-bit machines */
 static GEN
-find_coeff(GEN a4, GEN a6, GEN p, long precS)
+find_coeff(GEN a4, GEN a6, GEN T, GEN p, long precS)
 {
   GEN res = cgetg(precS+1, t_VEC);
   long k, h;
   if (precS == 0) return res;
-  gel(res, 1) = Fp_div(a4, stoi(-5), p);
+  gel(res, 1) = Fq_div(a4, stoi(-5), T, p);
   if (precS == 1) return res;
-  gel(res, 2) = Fp_div(a6, stoi(-7), p);
+  gel(res, 2) = Fq_div(a6, stoi(-7), T, p);
   for (k = 3; k <= precS; ++k)
   {
     pari_sp btop = avma;
     GEN a = gen_0;
     for (h = 1; h <= k-2; h++)
-      a = Fp_add(a, Fp_mul(gel(res, h), gel(res, k-1-h), p), p);
-    a = Fp_div(Fp_mulu(a, 3, p), utoi((k-2) * (2*k + 3)), p);
-    gel(res, k) = gerepileuptoint(btop, a);
+      a = Fq_add(a, Fq_mul(gel(res, h), gel(res, k-1-h), T, p), T, p);
+    a = Fq_div(Fq_mulu(a, 3, T, p), utoi((k-2) * (2*k + 3)), T, p);
+    gel(res, k) = gerepileupto(btop, a);
   }
   return res;
 }
 
-/*Computes the n-division polynomial modulo the polynomial h \in Fp[x] */
+/*Computes the n-division polynomial modulo the polynomial h \in Fq[x] */
 static GEN
-a4a6_divpolmod(GEN a4, GEN a6, long n, GEN h, GEN p)
+a4a6_divpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   GEN f, f2, ff, rhs, inv2y, a42, res;
@@ -150,53 +155,53 @@ a4a6_divpolmod(GEN a4, GEN a6, long n, GEN h, GEN p)
   f  = cgetg(N+1, t_VEC);
   f2 = cgetg(N+1, t_VEC); /*f2[m]=f[m]^2 */
   ff = cgetg(N+1, t_VEC); /*ff[m]=f[m]*f[m-2] */
-  rhs = FpX_rem(mkpoln(4, gen_1, gen_0, a4, a6), h, p);
-  inv2y = FpXQ_inv(FpX_Fp_mul(rhs, gen_2, p), h, p);
+  rhs = FqX_rem(mkpoln(4, gen_1, gen_0, a4, a6), h, T, p);
+  inv2y = FqXQ_inv(FqX_mulu(rhs, 2, T, p), h, T, p);
   gel(f, 2) = scalarpol(gen_2,0);
-  gel(f2, 2) = FpX_Fp_mul(rhs, utoi(4), p);
-  a42 = Fp_sqr(a4, p);
-  gel(f, 3) = FpX_rem(mkpoln(5, utoi(3), gen_0, Fp_mul(utoi(6), a4, p),
-                        Fp_mul(utoi(12), a6, p), Fp_neg(a42, p)), h, p);
+  gel(f2, 2) = FqX_mulu(rhs, 4, T, p);
+  a42 = Fq_sqr(a4, T, p);
+  gel(f, 3) = FqX_rem(mkpoln(5, utoi(3), gen_0, Fq_mulu(a4, 6, T, p),
+                        Fq_mulu(a6, 12, T, p), Fq_neg(a42, T, p)), h, T, p);
   if (n == 3) return gerepileupto(ltop, gel(f, 3));
-  gel(f, 4) = FpX_rem(FpX_Fp_mul(mkpoln(7, gen_1, gen_0,
-    Fp_mul(utoi(5), a4, p), Fp_mul(utoi(20), a6, p),
-    Fp_mul(a42,subis(p,5), p), Fp_mul(Fp_mul(a4, a6, p), subis(p,4), p),
-    Fp_sub(Fp_mul(Fp_sqr(a6, p), subis(p,8), p), Fp_mul(a4,a42, p), p)),
-                                 utoi(4), p), h, p);
+  gel(f, 4) = FqX_rem(FqX_mulu(mkpoln(7, gen_1, gen_0,
+    Fq_mulu(a4, 5, T, p), Fq_mulu(a6, 20, T, p),
+    Fq_Fp_mul(a42,stoi(-5), T, p), Fq_Fp_mul(Fq_mul(a4, a6, T, p), stoi(-4), T, p),
+    Fq_sub(Fq_Fp_mul(Fq_sqr(a6, T, p), stoi(-8), T, p), Fq_mul(a4,a42, T, p), T, p)),
+                                  4, T, p), h, T, p);
   if (n == 4) return gerepileupto(ltop, gel(f, 4));
-  gel(f2, 3) = FpXQ_sqr(gel(f, 3), h, p);
+  gel(f2, 3) = FqXQ_sqr(gel(f, 3), h, T, p);
   gel(ff, 3) = gel(f, 3);
-  gel(ff, 4) = FpX_Fp_mul(FpXQ_mul(rhs, gel(f, 4), h, p), gen_2, p);
-  gel(f, 5)  = FpX_sub(FpXQ_mul(gel(ff, 4), gel(f2, 2), h, p),
-                      FpXQ_mul(gel(ff, 3), gel(f2, 3), h, p), p);
+  gel(ff, 4) = FqX_mulu(FqXQ_mul(rhs, gel(f, 4), h, T, p), 2, T, p);
+  gel(f, 5)  = FqX_sub(FqXQ_mul(gel(ff, 4), gel(f2, 2), h, T, p),
+                      FqXQ_mul(gel(ff, 3), gel(f2, 3), h, T, p), T, p);
   if (n == 5) return gerepileupto(ltop, gel(f, 5));
-  gel(f2, 4) = FpXQ_mul(rhs, FpXQ_sqr(gel(f, 4), h, p), h, p);
-  gel(f2, 5) = FpXQ_sqr(gel(f, 5), h, p);
-  gel(ff, 5) = FpXQ_mul(gel(f, 3), gel(f, 5), h, p);
+  gel(f2, 4) = FqXQ_mul(rhs, FqXQ_sqr(gel(f, 4), h, T, p), h, T, p);
+  gel(f2, 5) = FqXQ_sqr(gel(f, 5), h, T, p);
+  gel(ff, 5) = FqXQ_mul(gel(f, 3), gel(f, 5), h, T, p);
   l = ((n/2) + 2)/2;
   for (m = 3; m <= l; m++)
   {
-    gel(f, 2*m) = FpXQ_mul(
-                      FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m-1), h, p),
-                              FpXQ_mul(gel(ff, m), gel(f2, m+1), h, p), p),
-                      inv2y, h, p);
-    gel(f2, 2*m) = FpXQ_mul(rhs, FpXQ_sqr(gel(f, 2*m), h, p), h, p);
-    gel(ff, 2*m) = FpXQ_mul(rhs,
-                            FpXQ_mul(gel(f, 2*m), gel(f, 2*m-2), h, p), h, p);
-    gel(f, 2*m+1) = FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m), h, p),
-                            FpXQ_mul(gel(ff, m+1), gel(f2, m+1), h, p), p);
-    gel(f2, 2*m+1) = FpXQ_sqr(gel(f, 2*m+1), h, p);
-    gel(ff, 2*m+1) = FpXQ_mul(gel(f, 2*m+1), gel(f, 2*m-1), h, p);
+    gel(f, 2*m) = FqXQ_mul(
+                      FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m-1), h, T, p),
+                              FqXQ_mul(gel(ff, m), gel(f2, m+1), h, T, p), T, p),
+                      inv2y, h, T, p);
+    gel(f2, 2*m) = FqXQ_mul(rhs, FqXQ_sqr(gel(f, 2*m), h, T, p), h, T, p);
+    gel(ff, 2*m) = FqXQ_mul(rhs,
+                            FqXQ_mul(gel(f, 2*m), gel(f, 2*m-2), h, T, p), h, T, p);
+    gel(f, 2*m+1) = FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m), h, T, p),
+                            FqXQ_mul(gel(ff, m+1), gel(f2, m+1), h, T, p), T, p);
+    gel(f2, 2*m+1) = FqXQ_sqr(gel(f, 2*m+1), h, T, p);
+    gel(ff, 2*m+1) = FqXQ_mul(gel(f, 2*m+1), gel(f, 2*m-1), h, T, p);
   }
   m = n/2;
   if (n&1L)
-    res = FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m), h, p),
-                  FpXQ_mul(gel(ff, m+1), gel(f2, m+1), h, p), p);
+    res = FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m), h, T, p),
+                  FqXQ_mul(gel(ff, m+1), gel(f2, m+1), h, T, p), T, p);
   else
-    res = FpXQ_mul(
-               FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m-1), h, p),
-                       FpXQ_mul(gel(ff, m), gel(f2, m+1), h, p), p),
-               inv2y, h, p);
+    res = FqXQ_mul(
+               FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m-1), h, T, p),
+                       FqXQ_mul(gel(ff, m), gel(f2, m+1), h, T, p), T, p),
+               inv2y, h, T, p);
   return gerepileupto(ltop, res);
 }
 
@@ -223,10 +228,10 @@ find_transformation(GEN s2, GEN s1)
 }
 
 static GEN
-compute_W(GEN a4, GEN a6, GEN p, long vx, long precS)
+compute_W(GEN a4, GEN a6, GEN T, GEN p, long vx, long precS)
 {
   pari_sp ltop = avma;
-  GEN c  = find_coeff(a4, a6, p, precS);
+  GEN c  = find_coeff(a4, a6, T, p, precS);
   GEN s  = RgX_inflate(RgV_to_RgX(c,vx), 2);
   GEN z2 = monomial(gen_1, 2, vx);
   s = gadd(gadd(ginv(z2), gmul(s, z2)), zeroser(vx, 2*precS));
@@ -235,27 +240,28 @@ compute_W(GEN a4, GEN a6, GEN p, long vx, long precS)
 
 /*Finds numerator phi of the isogeny between Eb and Ec whose denominator is h*/
 static GEN
-find_numerator_isogeny(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, GEN h, GEN p,
+find_numerator_isogeny(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, GEN h, GEN T, GEN p,
                        long precS)
 {
   pari_sp ltop = avma;
-  GEN WEb = gmul(compute_W(Eba4, Eba6, p, varn(h), precS), gmodulsg(1,p));
-  GEN WEc = gmul(compute_W(Eca4, Eca6, p, varn(h), precS), gmodulsg(1,p));
+  GEN mod = T ? gmodulo(gmodulsg(1,p),gmul(T,gmodulsg(1,p))): gmodulsg(1,p);
+  GEN WEb = gmul(compute_W(Eba4, Eba6, T, p, varn(h), precS), mod);
+  GEN WEc = gmul(compute_W(Eca4, Eca6, T, p, varn(h), precS), mod);
   GEN den = poleval(h, WEb);
   return gerepileupto(ltop, find_transformation(gmul(gsqr(den), WEc), WEb));
 }
 
 /****************************************************************************/
-/*               SIMPLE ELLIPTIC CURVE OVER Fp                              */
+/*               SIMPLE ELLIPTIC CURVE OVER Fq                              */
 /****************************************************************************/
 
 static GEN
-a4a6_j(GEN a4, GEN a6, GEN p)
+Fq_ellj(GEN a4, GEN a6, GEN T, GEN p)
 {
   pari_sp ltop=avma;
-  GEN a43 = Fp_mulu(Fp_powu(a4, 3, p), 4, p);
-  GEN j   = Fp_div(Fp_mulu(a43, 1728, p),
-                   Fp_add(a43, Fp_mulu(Fp_sqr(a6, p), 27, p), p), p);
+  GEN a43 = Fq_mulu(Fq_powu(a4, 3, T, p), 4, T, p);
+  GEN j   = Fq_div(Fq_mulu(a43, 1728, T, p),
+                   Fq_add(a43, Fq_mulu(Fq_sqr(a6, T, p), 27, T, p), T, p), T, p);
   return gerepileupto(ltop, j);
 }
 
@@ -267,6 +273,7 @@ struct eigen_ellinit
 {
   GEN a4;
   GEN h;
+  GEN T;
   GEN p;
   GEN RHS;
   GEN DRHS;
@@ -275,20 +282,22 @@ struct eigen_ellinit
 };
 
 static void
-init_eigen(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN p)
+init_eigen(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN T, GEN p)
 {
   pari_sp ltop = avma;
-  GEN RHS  = FpX_rem(mkpoln(4, gen_1, gen_0, a4, a6), h, p);
-  GEN DRHS = FpX_rem(mkpoln(3, utoi(3), gen_0, a4), h, p);
-  GEN lambda = FpXQ_div(DRHS, FpX_Fp_mul(RHS, utoi(4), p), h, p);
-  GEN C = FpX_sub(FpXQ_mul(lambda, DRHS, h, p), monomial(gen_2,1,0), p);
-  GEN D = FpXQ_mul(FpX_Fp_mul(lambda, gen_2, p),FpX_sub(pol_x(0), C, p), h, p);
-  GEN X12 = mkvec2(C, FpX_Fp_add(D, gen_m1, p));
-  GEN Gr = FpXQ_pow(RHS, shifti(p, -1), h, p);
+  GEN RHS  = FqX_rem(mkpoln(4, gen_1, gen_0, a4, a6), h, T, p);
+  GEN DRHS = FqX_rem(mkpoln(3, utoi(3), gen_0, a4), h, T, p);
+  GEN lambda = FqXQ_div(DRHS, FqX_mulu(RHS, 4, T, p), h, T, p);
+  GEN C = FqX_sub(FqXQ_mul(lambda, DRHS, h, T, p), monomial(gen_2,1,0), T, p);
+  GEN D = FqXQ_mul(FqX_mulu(lambda, 2, T, p),FqX_sub(pol_x(0), C, T, p), h, T, p);
+  GEN X12 = mkvec2(C, FqX_Fq_add(D, gen_m1, T, p));
+  GEN q = T ? powiu(p, degpol(T)) : p;
+  GEN Gr = FqXQ_pow(RHS, shifti(q, -1), h, T, p);
   gerepileall(ltop, 4, &RHS, &DRHS, &X12, &Gr);
-  Edat->a4    = icopy(a4);
-  Edat->h     = ZX_copy(h);
-  Edat->p     = icopy(p);
+  Edat->a4    = gcopy(a4);
+  Edat->h     = gcopy(h);
+  Edat->T     = T;
+  Edat->p     = p;
   Edat->RHS   = RHS;
   Edat->DRHS  = DRHS;
   Edat->X12   = X12;
@@ -300,19 +309,19 @@ eigen_elldbl(void *E, GEN P)
 {
   pari_sp ltop = avma;
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
-  GEN p = Edat->p, h = Edat->h, x, y;
+  GEN T = Edat->T, p = Edat->p, h = Edat->h, x, y;
   if (ell_is_inf(P)) return gcopy(P);
   x = gel(P,1), y = gel(P,2);
-  if (ZX_equal(x, pol_x(0)) && ZX_equal(y, pol_1(0)))
+  if (FqX_equal(x, pol_x(0)) && FqX_equal(y, pol_1(0)))
     return Edat->X12;
   else
   {
-    GEN t1 = FpX_Fp_add(FpX_Fp_mul(FpXQ_sqr(x,h,p),utoi(3),p), Edat->a4, p);
-    GEN t2 = FpXQ_mul(FpX_Fp_mul(y, gen_2, p), Edat->RHS, h, p);
-    GEN lambda = FpXQ_div(t1, t2, h, p);
-    GEN C = FpX_sub(FpXQ_mul(FpXQ_sqr(lambda, h, p), Edat->RHS, h, p),
-                    FpX_Fp_mul(x, gen_2, p), p);
-    GEN D = FpX_sub(FpXQ_mul(lambda, FpX_sub(x, C, p), h, p), y, p);
+    GEN t1 = FqX_Fq_add(FqX_mulu(FqXQ_sqr(x,h,T,p),3,T, p), Edat->a4, T, p);
+    GEN t2 = FqXQ_mul(FqX_mulu(y, 2, T, p), Edat->RHS, h, T, p);
+    GEN lambda = FqXQ_div(t1, t2, h, T, p);
+    GEN C = FqX_sub(FqXQ_mul(FqXQ_sqr(lambda, h, T, p), Edat->RHS, h, T, p),
+                    FqX_mulu(x, 2, T, p), T, p);
+    GEN D = FqX_sub(FqXQ_mul(lambda, FqX_sub(x, C, T, p), h, T, p), y, T, p);
     return gerepilecopy(ltop, mkvec2(C,D));
   }
 }
@@ -328,21 +337,21 @@ eigen_elladd(void *E, GEN P, GEN Q)
   pari_sp ltop = avma;
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
   GEN Px, Py, Qx, Qy;
-  GEN p = Edat->p, h = Edat->h, lambda, C, D;
+  GEN T = Edat->T, p = Edat->p, h = Edat->h, lambda, C, D;
   if (ell_is_inf(P)) return gcopy(Q);
   if (ell_is_inf(Q)) return gcopy(P);
   Px = gel(P,1); Py = gel(P,2);
   Qx = gel(Q,1); Qy = gel(Q,2);
-  if (ZX_equal(Px, Qx))
+  if (FqX_equal(Px, Qx))
   {
-    if (ZX_equal(Py, Qy))
+    if (FqX_equal(Py, Qy))
       return eigen_elldbl(E, P);
     else
       return mkvec(gen_0);
   }
-  lambda = FpXQ_div(FpX_sub(Py, Qy, p), FpX_sub(Px, Qx, p), h, p);
-  C = FpX_sub(FpX_sub(FpXQ_mul(FpXQ_sqr(lambda, h, p), Edat->RHS, h, p), Px, p), Qx, p);
-  D = FpX_sub(FpXQ_mul(lambda, FpX_sub(Px, C, p), h, p), Py, p);
+  lambda = FqXQ_div(FqX_sub(Py, Qy, T, p), FqX_sub(Px, Qx, T, p), h, T, p);
+  C = FqX_sub(FqX_sub(FqXQ_mul(FqXQ_sqr(lambda, h, T, p), Edat->RHS, h, T, p), Px, T, p), Qx, T, p);
+  D = FqX_sub(FqXQ_mul(lambda, FqX_sub(Px, C, T, p), h, T, p), Py, T, p);
   return gerepilecopy(ltop, mkvec2(C,D));
 }
 
@@ -359,14 +368,14 @@ eigen_ellpowu(struct eigen_ellinit *E, GEN z, ulong n)
  *ell-division polynomial, p and tr the possible values for the trace
  *(useful for primes with one root)*/
 static ulong
-find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
+find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN T, GEN p, GEN tr)
 {
   pari_sp ltop = avma;
   GEN BP, Dr, nGr;
   ulong t;
   struct eigen_ellinit Edat;
-  init_eigen(&Edat, a4, a6, h, p);
-  nGr = FpX_neg(Edat.Gr, p);
+  init_eigen(&Edat, a4, a6, h, T, p);
+  nGr = FqX_neg(Edat.Gr, T, p);
   Dr = BP = mkvec2(pol_x(0), pol_1(0));
   /*[0,Gr], BP, Dr are not points on the curve. */
   /*To obtain the corresponding points, multiply the y-coordinates by Y */
@@ -375,8 +384,8 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
     pari_sp btop = avma;
     for (t = 1; t <= (ell>>1); t++)
     {
-      if (ZX_equal(gel(Dr,2), Edat.Gr)) { avma = ltop; return t; }
-      if (ZX_equal(gel(Dr,2), nGr))     { avma = ltop; return ell-t; }
+      if (FqX_equal(gel(Dr,2), Edat.Gr)) { avma = ltop; return t; }
+      if (FqX_equal(gel(Dr,2), nGr))     { avma = ltop; return ell-t; }
       Dr = gerepileupto(btop, eigen_elladd((void*)&Edat, Dr, BP));
     }
     pari_err_BUG("find_eigen_value_power");
@@ -387,7 +396,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
     t = Fl_div(tr[1], 2, ell);
     if (t < (ell>>1)) t = ell - t;
     Dr = eigen_ellpowu(&Edat, BP, t);
-    if (!ZX_equal(gel(Dr,2), Edat.Gr)) t = ell - t;
+    if (!FqX_equal(gel(Dr,2), Edat.Gr)) t = ell - t;
     avma = ltop; return t;
   }
 }
@@ -395,7 +404,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
 /*Finds the eigenvalue of the Frobenius modulo ell^k given E, ell, k, h factor
  *of the ell-division polynomial, lambda the previous eigen value and p */
 static ulong
-find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, GEN p)
+find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   pari_sp btop, st_lim;
@@ -404,18 +413,18 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
   /*[0,Gr], BP, Dr are not points on the curve. */
   /*To obtain the corresponding points, multiply the y-coordinates by Y */
   ulong t, ellk1 = upowuu(ell, k-1), ellk = ell*ellk1;
-  init_eigen(&Edat, a4, a6, h, p);
+  init_eigen(&Edat, a4, a6, h, T, p);
   P = mkvec2(pol_x(0), pol_1(0));
   BP = eigen_ellpowu(&Edat, P, ellk1);
   Dr = eigen_ellpowu(&Edat, P, lambda);
   Gr = Edat.Gr;
-  negGr = FpX_neg(Edat.Gr, p);
+  negGr = FqX_neg(Edat.Gr, T, p);
 
   btop = avma; st_lim = stack_lim(btop, 1);
   for (t = 0; t < ellk; t += ellk1)
   {
-    if (ZX_equal(gel(Dr,2), Gr)) { avma = ltop; return t+lambda; }
-    if (ZX_equal(gel(Dr,2), negGr)) { avma = ltop; return ellk-(t+lambda); }
+    if (FqX_equal(gel(Dr,2), Gr)) { avma = ltop; return t+lambda; }
+    if (FqX_equal(gel(Dr,2), negGr)) { avma = ltop; return ellk-(t+lambda); }
     Dr = eigen_elladd((void*)&Edat, Dr, BP);
     if (low_stack(st_lim, stack_lim(btop, 1))) Dr = gerepileupto(btop, Dr);
   }
@@ -427,50 +436,50 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
   isogenous curve Eb and trace term pp1. Uses CCR algorithm and returns h.
   Return NULL if E and Eb are *not* isogenous. */
 static GEN
-find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p)
+find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN T, GEN p)
 {
   const long ext = 2;
   pari_sp ltop = avma;
   GEN M, N, V, K, K1, K2, v, tlist, res;
   long i, j, k;
   long deg = (ell - 1)/2, dim = deg + ext;
-  GEN Coeff  = find_coeff(a4, a6, p, dim);
-  GEN Coefft = find_coeff(a4t, a6t, p, dim);
-  GEN psi2  = mkpoln(4, utoi(4), gen_0, Fp_mulu(a4, 4, p), Fp_mulu(a6, 4, p));
+  GEN Coeff  = find_coeff(a4, a6, T, p, dim);
+  GEN Coefft = find_coeff(a4t, a6t, T, p, dim);
+  GEN psi2  = mkpoln(4, utoi(4), gen_0, Fq_mulu(a4, 4, T, p), Fq_mulu(a6, 4, T, p));
   GEN list  = cgetg(dim+1, t_VEC);
-  GEN Dpsi2 = mkpoln(3, utoi(6), gen_0, Fp_mulu(a4, 2, p));
+  GEN Dpsi2 = mkpoln(3, utoi(6), gen_0, Fq_mulu(a4, 2, T, p));
   gel(list, 1) = Dpsi2;
   for (k = 2; k <= dim; k++)
   {
     pari_sp btop = avma;
     GEN tsil = gel(list, k-1);
-    GEN r = FpX_Fp_mul(Dpsi2, gel(tsil,3), p);
+    GEN r = FqX_Fq_mul(Dpsi2, gel(tsil,3), T, p);
     for (j = 4; j < lg(tsil); j++)
     {
       long o = j - 2;
-      GEN D = FpX_add(RgX_shift(Dpsi2, 1), FpX_Fp_mul(psi2, utoi(o-1), p), p);
-      GEN E = FpX_Fp_mul(D, Fp_mulu(gel(tsil, j), o, p), p);
-      r = FpX_add(r, RgX_shift(E, o-2), p);
+      GEN D = FqX_add(RgX_shift(Dpsi2, 1), FqX_mulu(psi2, o-1, T, p), T, p);
+      GEN E = FqX_Fq_mul(D, Fq_mulu(gel(tsil, j), o, T, p), T, p);
+      r = FqX_add(r, RgX_shift(E, o-2), T, p);
     }
     gel(list, k) = gerepileupto(btop, r);
   }
   for (k = 2; k <= dim; k++)
   {
-     GEN C = Fp_inv(shifti(mpfact(2*k),-1), p);
-     gel(list, k) = FpX_Fp_mul(gel(list, k), C, p);
+     GEN C = Fq_inv(shifti(mpfact(2*k),-1), T, p);
+     gel(list, k) = FqX_Fq_mul(gel(list, k), C, T, p);
   }
   M = shallowtrans(RgXV_to_RgM(list, dim+2));
   N = vecslice(M, 1, dim);
-  V = FpC_sub(Coefft, Coeff, p);
-  v = shallowconcat(FpM_gauss(N, V, p), mkcol2(gen_0, gen_0));
-  K = FpM_ker(M, p);
+  V = FqC_sub(Coefft, Coeff, T, p);
+  v = shallowconcat(FqM_gauss(N, V, T, p), mkcol2(gen_0, gen_0));
+  K = FqM_ker(M, T, p);
   if (lg(K) != 3) pari_err_BUG("trace not determined in a unique way");
-  K1 = FpC_Fp_mul(gel(K,1), Fp_inv(gcoeff(K,1,1), p), p);
-  K2 = FpC_sub(gel(K,2), FpC_Fp_mul(K1, gcoeff(K,1,2), p), p);
-  K2 = FpC_Fp_mul(K2, Fp_inv(gel(K2,2), p), p);
-  K1 = FpC_sub(K1, FpC_Fp_mul(K2, gel(K1,2), p), p);
-  v = FpC_add(v, FpC_Fp_mul(K1, Fp_sub(utoi(deg), gel(v,1), p), p), p);
-  v = FpC_add(v, FpC_Fp_mul(K2, Fp_sub(pp1, gel(v,2), p), p), p);
+  K1 = FqC_Fq_mul(gel(K,1), Fq_inv(gcoeff(K,1,1), T, p), T, p);
+  K2 = FqC_sub(gel(K,2), FqC_Fq_mul(K1, gcoeff(K,1,2), T, p), T, p);
+  K2 = FqC_Fq_mul(K2, Fq_inv(gel(K2,2), T, p), T, p);
+  K1 = FqC_sub(K1, FqC_Fq_mul(K2, gel(K1,2), T, p), T, p);
+  v = FqC_add(v, FqC_Fq_mul(K1, Fq_sub(utoi(deg), gel(v,1), T, p), T, p), T, p);
+  v = FqC_add(v, FqC_Fq_mul(K2, Fq_sub(pp1, gel(v,2), T, p), T, p), T, p);
   tlist = cgetg(dim+2, t_VEC);
   gel(tlist, dim+1) = gen_1;
   for (k = 1; k <= dim; k++)
@@ -478,8 +487,8 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p)
     pari_sp btop = avma;
     GEN s = gel(v, k+1);
     for (i = 1; i < k; i++)
-      s = Fp_add(s, Fp_mul(gel(tlist, dim-i+1), gel(v, k-i+1), p), p);
-    gel(tlist, dim-k+1) = gerepileuptoint(btop, Fp_div(s, stoi(-k), p));
+      s = Fq_add(s, Fq_mul(gel(tlist, dim-i+1), gel(v, k-i+1), T, p), T, p);
+    gel(tlist, dim-k+1) = gerepileupto(btop, Fq_div(s, stoi(-k), T, p));
   }
   for (i = 1; i <= ext; i++)
     if (signe(gel(tlist, i))) { avma = ltop; return NULL; }
@@ -489,20 +498,20 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p)
 }
 
 static GEN
-compute_u(GEN gprime, GEN Dxxg, GEN DxJg, GEN DJJg, GEN j, GEN pJ, GEN px, ulong q, GEN E4, GEN E6, GEN p)
+compute_u(GEN gprime, GEN Dxxg, GEN DxJg, GEN DJJg, GEN j, GEN pJ, GEN px, ulong q, GEN E4, GEN E6, GEN T, GEN p)
 {
   pari_sp ltop = avma;
-  GEN dxxgj = FpX_eval(Dxxg, j, p);
-  GEN dxJgj = FpX_eval(DxJg, j, p);
-  GEN dJJgj = FpX_eval(DJJg, j, p);
-  GEN E42 = Fp_sqr(E4, p), E6ovE4 = Fp_div(E6, E4, p);
-  GEN a = Fp_mul(gprime, dxxgj, p);
-  GEN b = Fp_mul(Fp_mul(Fp_mulu(j,2*q, p), dxJgj, p), E6ovE4, p);
-  GEN c = Fp_mul(Fp_div(Fp_sqr(E6ovE4, p), gprime, p), j, p);
-  GEN d = Fp_mul(Fp_mul(c,sqru(q), p), Fp_add(pJ, Fp_mul(j, dJJgj, p), p), p);
-  GEN e = Fp_sub(Fp_div(E6ovE4,utoi(3), p), Fp_div(E42, Fp_mulu(E6,2,p), p), p);
-  GEN f = Fp_sub(Fp_sub(b,a,p), d, p);
-  return gerepileuptoint(ltop, Fp_add(Fp_div(f,px,p), Fp_mulu(e,q,p), p));
+  GEN dxxgj = FqX_eval(Dxxg, j, T, p);
+  GEN dxJgj = FqX_eval(DxJg, j, T, p);
+  GEN dJJgj = FqX_eval(DJJg, j, T, p);
+  GEN E42 = Fq_sqr(E4, T, p), E6ovE4 = Fq_div(E6, E4, T, p);
+  GEN a = Fq_mul(gprime, dxxgj, T, p);
+  GEN b = Fq_mul(Fq_mul(Fq_mulu(j,2*q, T, p), dxJgj, T, p), E6ovE4, T, p);
+  GEN c = Fq_mul(Fq_div(Fq_sqr(E6ovE4, T, p), gprime, T, p), j, T, p);
+  GEN d = Fq_mul(Fq_mul(c,sqru(q), T, p), Fq_add(pJ, Fq_mul(j, dJJgj, T, p), T, p), T, p);
+  GEN e = Fq_sub(Fq_div(E6ovE4,utoi(3), T, p), Fq_div(E42, Fq_mulu(E6,2,T, p), T, p), T, p);
+  GEN f = Fq_sub(Fq_sub(b,a,T,p), d, T, p);
+  return gerepileupto(ltop, Fq_add(Fq_div(f,px,T,p), Fq_mulu(e,q,T,p), T, p));
 }
 
 /* Finds the isogenous EC, and the sum of the x-coordinates of the points in
@@ -510,59 +519,59 @@ compute_u(GEN gprime, GEN Dxxg, GEN DxJg, GEN DJJg, GEN j, GEN pJ, GEN px, ulong
  * E: elliptic curve, ell: a prime, meqn: Atkin modular equation
  * g: root of meqn defining isogenous curve Eb. */
 static GEN
-find_isogenous_from_Atkin(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
+find_isogenous_from_Atkin(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN T, GEN p)
 {
   pari_sp ltop = avma, btop;
   GEN Roots, gprime, u1;
   long k, vx = 0, vJ = MAXVARN;
-  GEN E4 = Fp_div(a4, stoi(-3), p);
-  GEN E6 = Fp_mul(a6, shifti(p, -1), p);
-  GEN E42 = Fp_sqr(E4, p);
-  GEN E43 = Fp_mul(E4, E42, p);
-  GEN E62 = Fp_sqr(E6, p);
-  GEN delta = Fp_div(Fp_sub(E43, E62, p), utoi(1728), p);
-  GEN j = Fp_div(E43, delta, p);
+  GEN E4 = Fq_div(a4, stoi(-3), T, p);
+  GEN E6 = Fq_mul(a6, shifti(p, -1), T, p);
+  GEN E42 = Fq_sqr(E4, T, p);
+  GEN E43 = Fq_mul(E4, E42, T, p);
+  GEN E62 = Fq_sqr(E6, T, p);
+  GEN delta = Fq_div(Fq_sub(E43, E62, T, p), utoi(1728), T, p);
+  GEN j = Fq_div(E43, delta, T, p);
   GEN Dx = deriv(meqn, vx);
   GEN DJ = deriv(meqn, vJ);
-  GEN Dxg = FpXY_evaly(Dx, g, p, vJ);
-  GEN px = FpX_eval(Dxg, j, p), dx = Fp_mul(px, g, p);
-  GEN DJg = FpXY_evaly(DJ, g, p, vJ);
-  GEN pJ = FpX_eval(DJg, j, p), dJ = Fp_mul(pJ, j, p);
+  GEN Dxg = FpXY_Fq_evaly(Dx, g, T, p, vJ);
+  GEN px = FqX_eval(Dxg, j, T, p), dx = Fq_mul(px, g, T, p);
+  GEN DJg = FpXY_Fq_evaly(DJ, g, T, p, vJ);
+  GEN pJ = FqX_eval(DJg, j, T, p), dJ = Fq_mul(pJ, j, T, p);
   GEN Dxx = deriv(Dx, vx);
-  GEN DxJg = FpX_deriv(Dxg, p);
+  GEN DxJg = FqX_deriv(Dxg, T, p);
 
-  GEN Dxxg = FpXY_evaly(Dxx, g, p, vJ);
-  GEN DJJg = FpX_deriv(DJg, p);
+  GEN Dxxg = FpXY_Fq_evaly(Dxx, g, T, p, vJ);
+  GEN DJJg = FqX_deriv(DJg, T, p);
 
-  GEN a = Fp_mul(dJ, Fp_mul(g, E6, p), p);
-  GEN b = Fp_mul(E4, dx, p);
+  GEN a = Fq_mul(dJ, Fq_mul(g, E6, T, p), T, p);
+  GEN b = Fq_mul(E4, dx, T, p);
   if (!signe(a) || !signe(b))
   { /* TODO: understand what this means and use the information */
     if (DEBUGLEVEL)
       err_printf("find_isogenous_from_Atkin: division by zero at prime %ld", ell);
     avma = ltop; return NULL;
   }
-  gprime = Fp_div(a, b, p);
+  gprime = Fq_div(a, b, T, p);
 
-  u1 = compute_u(gprime, Dxxg, DxJg, DJJg, j, pJ, px, 1, E4, E6, p);
-  Roots = FpX_roots(FpXY_evaly(meqn, g, p, vJ), p);
+  u1 = compute_u(gprime, Dxxg, DxJg, DJJg, j, pJ, px, 1, E4, E6, T, p);
+  Roots = FqX_roots(FpXY_Fq_evaly(meqn, g, T, p, vJ), T, p);
   btop = avma;
   for (k = lg(Roots)-1; k >= 1; k--, avma = btop)
   {
     GEN jt = gel(Roots, k);
-    GEN pxstar = FpX_eval(Dxg, jt, p);
-    GEN dxstar = Fp_mul(pxstar, g, p);
-    GEN pJstar = FpX_eval(DJg, jt, p);
-    GEN dJstar = Fp_mul(Fp_mulu(jt, ell, p), pJstar, p);
-    GEN u = Fp_mul(Fp_mul(dxstar, dJ, p), E6, p);
-    GEN v = Fp_mul(Fp_mul(dJstar, dx, p), E4, p);
-    GEN E4t = Fp_div(Fp_mul(Fp_sqr(u, p), jt, p), Fp_mul(Fp_sqr(v, p), Fp_sub(jt, utoi(1728), p), p), p);
-    GEN E6t = Fp_div(Fp_mul(u, E4t, p), v, p);
-    GEN u2 = compute_u(gprime, Dxxg, DxJg, DJJg, jt, pJstar, pxstar, ell, E4t, E6t, p);
-    GEN pp1 = Fp_mulu(Fp_sub(u1, u2, p), 3*ell, p);
-    GEN a4t = Fp_mul(mulsi(-3, powuu(ell,4)), E4t, p);
-    GEN a6t = Fp_mul(mulsi(-2, powuu(ell,6)), E6t, p);
-    GEN h = find_kernel(a4, a6, ell, a4t, a6t, pp1, p);
+    GEN pxstar = FqX_eval(Dxg, jt, T, p);
+    GEN dxstar = Fq_mul(pxstar, g, T, p);
+    GEN pJstar = FqX_eval(DJg, jt, T, p);
+    GEN dJstar = Fq_mul(Fq_mulu(jt, ell, T, p), pJstar, T, p);
+    GEN u = Fq_mul(Fq_mul(dxstar, dJ, T, p), E6, T, p);
+    GEN v = Fq_mul(Fq_mul(dJstar, dx, T, p), E4, T, p);
+    GEN E4t = Fq_div(Fq_mul(Fq_sqr(u, T, p), jt, T, p), Fq_mul(Fq_sqr(v, T, p), Fq_sub(jt, utoi(1728), T, p), T, p), T, p);
+    GEN E6t = Fq_div(Fq_mul(u, E4t, T, p), v, T, p);
+    GEN u2 = compute_u(gprime, Dxxg, DxJg, DJJg, jt, pJstar, pxstar, ell, E4t, E6t, T, p);
+    GEN pp1 = Fq_mulu(Fq_sub(u1, u2, T, p), 3*ell, T, p);
+    GEN a4t = Fq_mul(mulsi(-3, powuu(ell,4)), E4t, T, p);
+    GEN a6t = Fq_mul(mulsi(-2, powuu(ell,6)), E6t, T, p);
+    GEN h = find_kernel(a4, a6, ell, a4t, a6t, pp1, T, p);
     if (h) return gerepilecopy(ltop, mkvec3(a4t, a6t, h));
   }
   pari_err_BUG("find_isogenous_from_Atkin, kernel not found");
@@ -574,103 +583,103 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
  * E: elliptic curve, ell: a prime, meqn: canonical modular equation
  * g: root of meqn defining isogenous curve Eb. */
 static GEN
-find_isogenous_from_canonical(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN p)
+find_isogenous_from_canonical(GEN a4, GEN a6, long ell, GEN meqn, GEN g, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   long vx = 0, vJ = MAXVARN;
   GEN h;
-  GEN E4 = Fp_div(a4, stoi(-3), p);
-  GEN E6 = Fp_mul(a6, shifti(p, -1), p);
-  GEN E42 = Fp_sqr(E4, p);
-  GEN E43 = Fp_mul(E4, E42, p);
-  GEN E62 = Fp_sqr(E6, p);
-  GEN delta = Fp_div(Fp_sub(E43, E62, p), utoi(1728), p);
-  GEN j = Fp_div(E43, delta, p);
+  GEN E4 = Fq_div(a4, stoi(-3), T, p);
+  GEN E6 = Fq_mul(a6, shifti(p, -1), T, p);
+  GEN E42 = Fq_sqr(E4, T, p);
+  GEN E43 = Fq_mul(E4, E42, T, p);
+  GEN E62 = Fq_sqr(E6, T, p);
+  GEN delta = Fq_div(Fq_sub(E43, E62, T, p), utoi(1728), T, p);
+  GEN j = Fq_div(E43, delta, T, p);
   GEN Dx = deriv(meqn, vx);
   GEN DJ = deriv(meqn, vJ);
-  GEN Dxg = FpXY_evaly(Dx, g, p, vJ);
-  GEN px  = FpX_eval(Dxg, j, p), dx  = Fp_mul(px, g, p);
-  GEN DJg = FpXY_evaly(DJ, g, p, vJ);
-  GEN pJ = FpX_eval(DJg, j, p), dJ = Fp_mul(j, pJ, p);
+  GEN Dxg = FpXY_Fq_evaly(Dx, g, T, p, vJ);
+  GEN px  = FqX_eval(Dxg, j, T, p), dx  = Fq_mul(px, g, T, p);
+  GEN DJg = FpXY_Fq_evaly(DJ, g, T, p, vJ);
+  GEN pJ = FqX_eval(DJg, j, T, p), dJ = Fq_mul(j, pJ, T, p);
   GEN Dxx = deriv(Dx, vx);
-  GEN DxJg = FpX_deriv(Dxg, p);
+  GEN DxJg = FqX_deriv(Dxg, T, p);
 
-  GEN ExJ = FpX_eval(DxJg, j, p);
+  GEN ExJ = FqX_eval(DxJg, j, T, p);
   ulong tis = ugcd(12, ell-1), is = 12 / tis;
-  GEN itis = Fp_inv(stoi(-tis), p);
-  GEN deltal = Fp_div(Fp_mul(delta, Fp_powu(g, tis, p), p), powuu(ell, 12), p);
+  GEN itis = Fq_inv(stoi(-tis), T, p);
+  GEN deltal = Fq_div(Fq_mul(delta, Fq_powu(g, tis, T, p), T, p), powuu(ell, 12), T, p);
   GEN E4l, E6l, a4tilde, a6tilde, p_1;
   if (signe(dJ)==0)
   {
     GEN jl;
-    if (DEBUGLEVEL) err_printf("Division by zero for prime %Ps\n", p);
-    E4l = Fp_div(E4, sqru(ell), p);
-    jl  = Fp_div(Fp_powu(E4l, 3, p), deltal, p);
-    E6l = Fp_sqrt(Fp_mul(Fp_sub(jl, utoi(1728), p), deltal, p), p);
+    if (DEBUGLEVEL) err_printf("Division by zero for prime %Ps\n", T, p);
+    E4l = Fq_div(E4, sqru(ell), T, p);
+    jl  = Fq_div(Fq_powu(E4l, 3, T, p), deltal, T, p);
+    E6l = Fq_sqrt(Fq_mul(Fq_sub(jl, utoi(1728), T, p), deltal, T, p), T, p);
     p_1 = gen_0;
   }
   else
   {
     GEN jl, f, fd, Dgs, Djs, jld;
-    GEN E2s = Fp_div(Fp_mul(Fp_neg(Fp_mulu(E6, 12, p), p), dJ, p), Fp_mul(Fp_mulu(E4, is, p), dx, p), p);
-    GEN gd = Fp_mul(Fp_mul(E2s, itis, p), g, p);
-    GEN jd = Fp_div(Fp_mul(Fp_neg(E42, p), E6, p), delta, p);
-    GEN E0b = Fp_div(E6, Fp_mul(E4, E2s, p), p);
-    GEN Dxxgj = FpXY_eval(Dxx, g, j, p);
-    GEN Dgd = Fp_add(Fp_mul(gd, px, p), Fp_mul(g, Fp_add(Fp_mul(gd, Dxxgj, p), Fp_mul(jd, ExJ, p), p), p), p);
-    GEN DJgJj = FpX_eval(FpX_deriv(DJg, p), j, p);
-    GEN Djd = Fp_add(Fp_mul(jd, pJ, p), Fp_mul(j, Fp_add(Fp_mul(jd, DJgJj, p), Fp_mul(gd, ExJ, p), p), p), p);
-    GEN E0bd = Fp_div(Fp_sub(Fp_mul(Dgd, itis, p), Fp_mul(E0b, Djd, p), p), dJ, p);
-    E4l = Fp_div(Fp_sub(E4, Fp_mul(E2s, Fp_sub(Fp_sub(Fp_add(Fp_div(Fp_mulu(E0bd, 12, p), E0b, p), Fp_div(Fp_mulu(E42, 6, p), E6, p), p), Fp_div(Fp_mulu(E6, 4, p), E4, p), p), E2s, p), p), p), sqru(ell), p);
-    jl = Fp_div(Fp_powu(E4l, 3, p), deltal, p);
-    f =  Fp_div(powuu(ell, is), g, p);
-    fd = Fp_neg(Fp_mul(Fp_mul(E2s, f, p), itis, p), p);
-    Dgs = FpXY_eval(Dx, f, jl, p);
-    Djs = FpXY_eval(DJ, f, jl, p);
-    jld = Fp_div(Fp_mul(Fp_neg(fd, p), Dgs, p), Fp_mulu(Djs, ell, p), p);
-    E6l = Fp_div(Fp_mul(Fp_neg(E4l, p), jld, p), jl, p);
-    p_1 = Fp_mul(Fp_mulu(E2s, ell, p), shifti(p, -1), p);
+    GEN E2s = Fq_div(Fq_mul(Fq_neg(Fq_mulu(E6, 12, T, p), T, p), dJ, T, p), Fq_mul(Fq_mulu(E4, is, T, p), dx, T, p), T, p);
+    GEN gd = Fq_mul(Fq_mul(E2s, itis, T, p), g, T, p);
+    GEN jd = Fq_div(Fq_mul(Fq_neg(E42, T, p), E6, T, p), delta, T, p);
+    GEN E0b = Fq_div(E6, Fq_mul(E4, E2s, T, p), T, p);
+    GEN Dxxgj = FqXY_eval(Dxx, g, j, T, p);
+    GEN Dgd = Fq_add(Fq_mul(gd, px, T, p), Fq_mul(g, Fq_add(Fq_mul(gd, Dxxgj, T, p), Fq_mul(jd, ExJ, T, p), T, p), T, p), T, p);
+    GEN DJgJj = FqX_eval(FqX_deriv(DJg, T, p), j, T, p);
+    GEN Djd = Fq_add(Fq_mul(jd, pJ, T, p), Fq_mul(j, Fq_add(Fq_mul(jd, DJgJj, T, p), Fq_mul(gd, ExJ, T, p), T, p), T, p), T, p);
+    GEN E0bd = Fq_div(Fq_sub(Fq_mul(Dgd, itis, T, p), Fq_mul(E0b, Djd, T, p), T, p), dJ, T, p);
+    E4l = Fq_div(Fq_sub(E4, Fq_mul(E2s, Fq_sub(Fq_sub(Fq_add(Fq_div(Fq_mulu(E0bd, 12, T, p), E0b, T, p), Fq_div(Fq_mulu(E42, 6, T, p), E6, T, p), T, p), Fq_div(Fq_mulu(E6, 4, T, p), E4, T, p), T, p), E2s, T, p), T, p), T, p), sqru(ell), T, p);
+    jl = Fq_div(Fq_powu(E4l, 3, T, p), deltal, T, p);
+    f =  Fq_div(powuu(ell, is), g, T, p);
+    fd = Fq_neg(Fq_mul(Fq_mul(E2s, f, T, p), itis, T, p), T, p);
+    Dgs = FqXY_eval(Dx, f, jl, T, p);
+    Djs = FqXY_eval(DJ, f, jl, T, p);
+    jld = Fq_div(Fq_mul(Fq_neg(fd, T, p), Dgs, T, p), Fq_mulu(Djs, ell, T, p), T, p);
+    E6l = Fq_div(Fq_mul(Fq_neg(E4l, T, p), jld, T, p), jl, T, p);
+    p_1 = Fq_mul(Fq_mulu(E2s, ell, T, p), shifti(p, -1), T, p);
   }
-  a4tilde = Fp_mul(Fp_mul(stoi(-3), powuu(ell,4), p), E4l, p);
-  a6tilde = Fp_mul(Fp_mul(stoi(-2), powuu(ell,6), p), E6l, p);
-  h = find_kernel(a4, a6, ell, a4tilde, a6tilde, p_1, p);
+  a4tilde = Fq_mul(Fq_mul(stoi(-3), powuu(ell,4), T, p), E4l, T, p);
+  a6tilde = Fq_mul(Fq_mul(stoi(-2), powuu(ell,6), T, p), E6l, T, p);
+  h = find_kernel(a4, a6, ell, a4tilde, a6tilde, p_1, T, p);
   return gerepilecopy(ltop, mkvec3(a4tilde, a6tilde, h));
 }
 
 static GEN
-find_isogenous(GEN a4, GEN a6, long ell, struct meqn *MEQN, GEN g, GEN p)
+find_isogenous(GEN a4, GEN a6, long ell, struct meqn *MEQN, GEN g, GEN T, GEN p)
 {
   return (MEQN->type == 'C')
-    ? find_isogenous_from_canonical(a4, a6, ell, MEQN->eq, g, p)
-    : find_isogenous_from_Atkin(a4, a6, ell, MEQN->eq, g, p);
+    ? find_isogenous_from_canonical(a4, a6, ell, MEQN->eq, g, T, p)
+    : find_isogenous_from_Atkin(a4, a6, ell, MEQN->eq, g, T, p);
 }
 
 static GEN
-find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn *MEQN, GEN kpoly, GEN Ib, GEN p)
+find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn *MEQN, GEN kpoly, GEN Ib, GEN T, GEN p)
 {
   pari_sp ltop = avma, btop;
   GEN a4t, a6t, gtmp;
-  GEN num_iso = find_numerator_isogeny(Eba4, Eba6, Eca4, Eca6, kpoly, p, ell+1);
-  GEN mpoly = FpXY_evalx(MEQN->eq, a4a6_j(Eca4, Eca6, p), p);
-  GEN tmp, mroots = FpX_roots(mpoly, p);
+  GEN num_iso = find_numerator_isogeny(Eba4, Eba6, Eca4, Eca6, kpoly, T, p, ell+1);
+  GEN mpoly = FqXY_evalx(MEQN->eq, Fq_ellj(Eca4, Eca6, T, p), T, p);
+  GEN tmp, mroots = FqX_roots(mpoly, T, p);
   long i, vx = 0, l1 = lg(mroots);
   btop = avma;
   for (i = 1; i < l1; i++)
   {
     GEN kpoly2, h;
-    tmp = find_isogenous(Eca4, Eca6, ell, MEQN, gel(mroots, i), p);
+    tmp = find_isogenous(Eca4, Eca6, ell, MEQN, gel(mroots, i), T, p);
     if (!tmp) { avma = ltop; return NULL; }
     a4t =  gel(tmp, 1);
     a6t =  gel(tmp, 2);
     gtmp = gel(tmp, 3);
 
     /*check that the kernel kpoly is the good one */
-    kpoly2 = FpX_sqr(kpoly, p);
-    h = lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2))));
-    if (signe(a4a6_divpolmod(Eba4, Eba6, ell, h, p)))
+    kpoly2 = FqX_sqr(kpoly, T, p);
+    h = lift(lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2)))));
+    if (signe(a4a6_divpolmod(Eba4, Eba6, ell, h, T, p)))
     {
       GEN Ic = gdiv(gsubst(num_iso, vx, Ib), gsqr(gsubst(kpoly, vx, Ib)));
-      GEN kpoly_new = lift(numer(gsubst(gtmp, vx, Ic)));
+      GEN kpoly_new = lift(lift(numer(gsubst(gtmp, vx, Ic))));
       return gerepilecopy(ltop, mkvecn(5, a4t, a6t, kpoly_new, gtmp, Ic));
     }
     avma = btop;
@@ -684,39 +693,64 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
 /****************************************************************************/
 enum mod_type {MTpathological, MTAtkin, MTElkies, MTone_root, MTroots};
 
+static GEN
+Fp_study_eqn(long ell, GEN q, GEN mpoly, GEN p, long *pt_dG, long *pt_r)
+{
+  GEN XP = FpXQ_pow(pol_x(0), q, mpoly, p);
+  GEN G  = FpX_gcd(FpX_sub(XP, pol_x(0), p), mpoly, p);
+  *pt_dG = degpol(G);
+  if (!*pt_dG)
+  {
+    GEN L = FpXQ_matrix_pow(XP, ell+1, ell+1, mpoly, p);
+    long s = ell + 1 - FpM_rank(RgM_Rg_add_shallow(L, gen_m1), p);
+    *pt_r = (ell + 1)/s;
+    return NULL;
+  } else *pt_r = 0;
+  return FpX_oneroot(G, p);
+}
+
+static GEN
+Fq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
+{
+  GEN G;
+  {
+    GEN XP = FqXQ_pow(pol_x(0), q, mpoly, T, p);
+    G  = FqX_gcd(FqX_sub(XP, pol_x(0), T, p), mpoly, T, p);
+    *pt_dG = degpol(G);
+    if (!*pt_dG)
+    {
+      GEN L = FqXQ_matrix_pow(XP, ell+1, ell+1, mpoly, T, p);
+      long s = ell + 1 - FqM_rank(RgM_Rg_add(L, gen_m1), T, p);
+      *pt_r = (ell + 1)/s;
+      return NULL;
+    } else *pt_r = 0;
+  }
+  return gel(FqX_roots(G, T, p), 1);
+}
+
 /* Berlekamp variant */
 static GEN
-study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
+study_modular_eqn(long ell, GEN mpoly, GEN q, GEN T, GEN p, enum mod_type *mt, long *ptr_r)
 {
   pari_sp ltop = avma;
-  long r = 0;
   GEN g = gen_0;
-  if (degpol(FpX_gcd(mpoly, FpX_deriv(mpoly,p), p)) > 0)
-    *mt = MTpathological;
+  if (degpol(FqX_gcd(mpoly, FqX_deriv(mpoly, T, p), T, p)) > 0)
+  {
+    *mt = MTpathological; *ptr_r = 0;
+  }
   else
   {
-    GEN XP = FpXQ_pow(pol_x(0), p, mpoly, p);
-    GEN G  = FpX_gcd(ZX_sub(XP, pol_x(0)), mpoly, p);
-    long dG = degpol(G);
-    if (!dG)
+    long dG;
+    g = T ? Fq_study_eqn(ell, q, mpoly, T, p, &dG, ptr_r)
+          : Fp_study_eqn(ell, q, mpoly, p, &dG, ptr_r);
+    switch(dG)
     {
-      GEN L = FpXQ_matrix_pow(XP, ell+1, ell+1, mpoly, p);
-      long s = ell + 1 - FpM_rank(RgM_Rg_add_shallow(L, gen_m1), p);
-      r = (ell + 1)/s;
-      *mt = MTAtkin;
-    }
-    else
-    {
-      g = FpX_oneroot(G, p);
-      switch(dG)
-      {
-        case 1:  *mt = MTone_root; break;
-        case 2:  *mt = MTElkies;   break;
-        default: *mt = (dG == ell + 1)? MTroots: MTpathological;
-      }
+      case 0:  *mt = MTAtkin; break;
+      case 1:  *mt = MTone_root; break;
+      case 2:  *mt = MTElkies;   break;
+      default: *mt = (dG == ell + 1)? MTroots: MTpathological;
     }
   }
-  *ptr_r = r;
   if (DEBUGLEVEL) switch(*mt)
   {
     case MTone_root: err_printf("One root\t"); break;
@@ -725,29 +759,29 @@ study_modular_eqn(long ell, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
     case MTAtkin: err_printf("Atkin\t"); break;
     case MTpathological: err_printf("Pathological\n"); break;
   }
-  return gerepilecopy(ltop, g);
+  return g ? gerepilecopy(ltop, g): NULL;
 }
 
 /*Returns the trace modulo ell^k when ell is an Elkies prime */
 static GEN
-find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GEN g, GEN tr, GEN p, ulong smallfact, pari_timer *T)
+find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GEN g, GEN tr, GEN q, GEN T, GEN p, ulong smallfact, pari_timer *ti)
 {
   pari_sp ltop = avma, btop, st_lim;
   GEN tmp, Eba4, Eba6, Eca4, Eca6, Ib, kpoly;
-  ulong lambda, ellk = upowuu(ell, k), pellk = umodiu(p, ellk);
+  ulong lambda, ellk = upowuu(ell, k), pellk = umodiu(q, ellk);
   long cnt;
 
   if (DEBUGLEVEL) { err_printf("Trace mod %ld", ell); }
   Eba4 = a4;
   Eba6 = a6;
-  tmp = find_isogenous(a4,a6, ell, MEQN, g, p);
+  tmp = find_isogenous(a4,a6, ell, MEQN, g, T, p);
   if (!tmp) { avma = ltop; return NULL; }
   Eca4 =  gel(tmp, 1);
   Eca6 =  gel(tmp, 2);
   kpoly = gel(tmp, 3);
   Ib = pol_x(0);
-  lambda = find_eigen_value(a4, a6, ell, kpoly, p, tr);
-  if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(T));
+  lambda = find_eigen_value(a4, a6, ell, kpoly, T, p, tr);
+  if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(ti));
   if (smallfact && ell>smallfact)
   {
     ulong pell = pellk%ell;
@@ -759,9 +793,9 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
   {
     GEN tmp;
     if (DEBUGLEVEL) err_printf(", %Ps", powuu(ell, cnt));
-    tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, MEQN, kpoly, Ib, p);
+    tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, MEQN, kpoly, Ib, T, p);
     if (!tmp) { avma = ltop; return NULL; }
-    lambda = find_eigen_value_power(a4, a6, ell, cnt, gel(tmp,3), lambda, p);
+    lambda = find_eigen_value_power(a4, a6, ell, cnt, gel(tmp,3), lambda, T, p);
     Eba4 = Eca4;
     Eba6 = Eca6;
     Eca4 = gel(tmp,1);
@@ -770,7 +804,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
     Ib = gel(tmp, 5);
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 6, &Eba4, &Eba6, &Eca4, &Eca6, &kpoly, &Ib);
-    if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(T));
+    if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(ti));
   }
   avma = ltop;
   return mkvecsmall(Fl_add(lambda, Fl_div(pellk, lambda, ellk), ellk));
@@ -779,13 +813,13 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, struct meqn *MEQN, GE
 /*Returns the possible values of the trace when ell is an Atkin prime, */
 /*given r the splitting degree of the modular equation at J = E.j */
 static GEN
-find_trace_Atkin(ulong ell, long r, GEN p)
+find_trace_Atkin(ulong ell, long r, GEN q)
 {
   pari_sp ltop = avma;
   long nval = 0;
-  ulong teta, pell = umodiu(p, ell), invp = Fl_inv(pell, ell);
+  ulong teta, pell = umodiu(q, ell), invp = Fl_inv(pell, ell);
   GEN val_pos = cgetg(1+ell, t_VECSMALL), P = gel(factoru(r), 1);
-  GEN T = mkvecsmall4(0, pell, 0, 1);
+  GEN S = mkvecsmall4(0, pell, 0, 1);
   GEN U = mkvecsmall3(0, ell-1, 0);
   pari_sp btop = avma;
   if (r==2 && krouu(ell-pell, ell) < 0)
@@ -795,15 +829,15 @@ find_trace_Atkin(ulong ell, long r, GEN p)
     ulong disc = Fl_sub(Fl_sqr(teta,ell), Fl_mul(4UL,pell,ell), ell);
     GEN a;
     if (krouu(disc, ell) >= 0) continue;
-    T[3] = Fl_neg(teta, ell);
+    S[3] = Fl_neg(teta, ell);
     U[3] = Fl_mul(invp, teta, ell);
-    a = Flxq_powu(U, r/P[1], T, ell);
-    if (!Flx_equal1(a) && Flx_equal1(Flxq_powu(a, P[1], T, ell)))
+    a = Flxq_powu(U, r/P[1], S, ell);
+    if (!Flx_equal1(a) && Flx_equal1(Flxq_powu(a, P[1], S, ell)))
     {
       pari_sp av = avma;
       long i, l=lg(P);
       for (i = 2; i < l; i++, avma = av)
-        if (Flx_equal1(Flxq_powu(U, r/P[i], T, ell))) break;
+        if (Flx_equal1(Flxq_powu(U, r/P[i], S, ell))) break;
       if (i==l) val_pos[++nval] = teta;
     }
   }
@@ -812,16 +846,16 @@ find_trace_Atkin(ulong ell, long r, GEN p)
 
 /*Returns the possible traces when there is only one root */
 static GEN
-find_trace_one_root(ulong ell, GEN p)
+find_trace_one_root(ulong ell, GEN q)
 {
-  ulong a = Fl_mul(Fl_sqrt(umodiu(p,ell), ell), 2, ell);
+  ulong a = Fl_mul(Fl_sqrt(umodiu(q,ell), ell), 2, ell);
   return mkvecsmall2(a, ell - a);
 }
 
 static GEN
-find_trace_lp1_roots(long ell, GEN p)
+find_trace_lp1_roots(long ell, GEN q)
 {
-  ulong ell2 = ell * ell, pell = umodiu(p, ell2);
+  ulong ell2 = ell * ell, pell = umodiu(q, ell2);
   ulong a  = Fl_sqrt(pell%ell, ell);
   ulong pa = Fl_add(Fl_div(pell, a, ell2), a, ell2);
   return mkvecsmall2(pa, ell2 - pa);
@@ -829,18 +863,18 @@ find_trace_lp1_roots(long ell, GEN p)
 
 /*trace modulo ell^k: [], [t] or [t1,...,td] */
 static GEN
-find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
+find_trace(GEN a4, GEN a6, ulong ell, GEN q, GEN T, GEN p, long *ptr_kt, ulong smallfact)
 {
   pari_sp ltop = avma;
-  GEN  g, meqnj, tr, tr2;
+  GEN g, meqnj, tr, tr2;
   long k = 1, kt, r;
   enum mod_type mt;
   struct meqn MEQN;
-  pari_timer T;
+  pari_timer ti;
 
   if (ell <= 13)
   {
-    long lp = expi(p);
+    long lp = expi(q);
     switch(ell)
     {
       case 3: k = 3 + (lp > 160) + (lp > 350); break;
@@ -852,33 +886,33 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
   kt = k;
   if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN)) return gen_0;
   if (DEBUGLEVEL)
-  { err_printf("Process prime %5ld. ", ell); timer_start(&T); }
-  meqnj = FpXY_evalx(MEQN.eq, a4a6_j(a4, a6, p), p);
-  g = study_modular_eqn(ell, meqnj, p, &mt, &r);
+  { err_printf("Process prime %5ld. ", ell); timer_start(&ti); }
+  meqnj = FqXY_evalx(MEQN.eq, Fq_ellj(a4, a6, T, p), T, p);
+  g = study_modular_eqn(ell, meqnj, q, T, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
   * Then deduce the trace by looking for eigenvalues of the Frobenius by
   * computing modulo this factor */
   switch (mt)
   {
   case MTone_root:
-    tr2 = find_trace_one_root(ell, p);
+    tr2 = find_trace_one_root(ell, q);
     kt = k = 1;
     /* Must take k = 1 because we can't apply Hensel: no guarantee that a
      * root mod ell^2 exists */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, tr2, p, smallfact, &T);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, tr2, q, T, p, smallfact, &ti);
     if (!tr) tr = tr2;
     break;
   case MTElkies:
     /* Contrary to MTone_root, may look mod higher powers of ell */
-    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, NULL, p, smallfact, &T);
+    tr = find_trace_Elkies_power(a4,a6,ell, k, &MEQN, g, NULL, q, T, p, smallfact, &ti);
     if (!tr) { avma = ltop; return NULL; }
     break;
   case MTroots:
-    tr = find_trace_lp1_roots(ell, p);
+    tr = find_trace_lp1_roots(ell, q);
     kt = 2;
     break;
   case MTAtkin:
-    tr = find_trace_Atkin(ell, r, p);
+    tr = find_trace_Atkin(ell, r, q);
     if (lg(tr)==1) pari_err_PRIME("ellsea",p);
     kt = 1;
     break;
@@ -890,7 +924,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, ulong smallfact)
     if (n > 1 || mt == MTAtkin)
     {
       err_printf("%3ld trace(s)",n);
-      if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(&T));
+      if (DEBUGLEVEL>1) err_printf(" [%ld ms]", timer_delay(&ti));
     }
     err_printf("\n");
   }
@@ -1003,7 +1037,7 @@ possible_traces(GEN compile, GEN mask, GEN *P, int larger)
 /* E has order o[1], ..., or o[#o], draw random points until all solutions
  * but one are eliminated */
 static GEN
-choose_card(GEN o, GEN a4, GEN a6, GEN p)
+choose_card(GEN o, void *E, const struct bb_group *grp)
 {
   pari_sp ltop = avma, btop;
   GEN lastgood, so, vo;
@@ -1016,13 +1050,13 @@ choose_card(GEN o, GEN a4, GEN a6, GEN p)
   for(;;)
   {
     GEN lasto = gen_0;
-    GEN P = random_FpE(a4, a6, p), t = mkvec(gen_0);
+    GEN P = grp->rand(E), t = mkvec(gen_0);
     long i;
     for (i = 1; i < lo; i++)
     {
       GEN newo = gel(o, so[i]);
       if (vo[i]) continue;
-      t = FpE_add(t, FpE_mul(P, subii(newo,lasto), a4,p), a4,p);/*P^o[i]*/
+      t = grp->mul(E,t, grp->pow(E, P, subii(newo,lasto)));/*P^o[i]*/
       lasto = newo;
       if (lg(t) != 2)
       {
@@ -1163,18 +1197,18 @@ add_atkin(GEN atkin, GEN trace, long *nb)
 
 /* V = baby / giant, P = Pb / Pg */
 static GEN
-BSGS_pre(GEN *pdiff, GEN V, GEN P, GEN a4, GEN p)
+BSGS_pre(GEN *pdiff, GEN V, GEN P, void *E, const struct bb_group *grp)
 {
   GEN diff = compute_diff(V);
   GEN pre = cgetg(lg(diff), t_VEC);
   long i, l = lg(diff);
-  gel(pre, 1) = FpE_mul(P, gel(diff, 1), a4, p);
+  gel(pre, 1) = grp->pow(E, P, gel(diff, 1));
   /* what we'd _really_ want here is a hashtable diff[i] -> pre[i]  */
   for (i = 2; i < l; i++)
   {
     pari_sp av = avma;
     GEN d = subii(gel(diff, i), gel(diff, i-1));
-    GEN Q = FpE_add(gel(pre, i-1), FpE_mul(P, d, a4, p), a4, p);
+    GEN Q = grp->mul(E, gel(pre, i-1), grp->pow(E, P, d));
     gel(pre, i) = gerepilecopy(av, Q);
   }
   *pdiff = diff; return pre;
@@ -1186,12 +1220,13 @@ BSGS_pre(GEN *pdiff, GEN V, GEN P, GEN a4, GEN p)
  *   size(baby)+size(giant)+size(table)+size(table_ind) + O(log p)
  * bits of stack */
 static GEN
-match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
+match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN q, void *E, const struct bb_group *grp)
 {
-  pari_sp av1, av2;
-  GEN baby, giant, SgMb, Mb, Mg, den, Sg, dec_inf, div, pp1 = addis(p,1);
+  pari_sp av1, av2, lim;
+  GEN baby, giant, SgMb, Mb, Mg, den, Sg, dec_inf, div, pp1 = addis(q,1);
   GEN P, Pb, Pg, point, diff, pre, table, table_ind;
   long best_i, i, lbaby, lgiant, k = lg(compile_atkin)-1;
+  pari_timer ti;
 
   if (k == 1)
   { /*only one Atkin prime, check the cardinality with random points */
@@ -1205,8 +1240,9 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
       GEN t = Z_chinese_post(u, stoi(r2[i]), C, U, NULL);
       gel(card, i) = subii(pp1, Fp_center(t, C, Cs2));
     }
-    return choose_card(card, a4, a6, p);
+    return choose_card(card, E, grp);
   }
+  if (DEBUGLEVEL>=2) timer_start(&ti);
   av1 = avma;
   best_i = separation( get_lgatkin(compile_atkin, k) );
   avma = av1;
@@ -1235,62 +1271,72 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   gen_sort_inplace(baby, (void*)&cmpii, &cmp_nodata, NULL);
 
   SgMb = mulii(Sg, Mb);
-  P = random_FpE(a4, a6, p);
-  point = FpE_mul(P, Mu, a4, p);
-  Pb = FpE_mul(point, Mg, a4, p);
-  Pg = FpE_mul(point, Mb, a4, p);
+  P = grp->rand(E);
+  point = grp->pow(E,P, Mu);
+  Pb = grp->pow(E,point, Mg);
+  Pg = grp->pow(E,point, Mb);
   /* Precomputation for babies */
-  pre = BSGS_pre(&diff, baby, Pb, a4, p);
+  pre = BSGS_pre(&diff, baby, Pb, E, grp);
 
   /*Now we compute the table of babies, this table contains only the */
   /*lifted x-coordinate of the points in order to use less memory */
   table = cgetg(lbaby, t_VECSMALL);
-  av1 = avma;
+  av1 = avma; lim = stack_lim(av1,3);
   /* (p+1 - u - Mu*Mb*Sg) P - (baby[1]) Pb */
-  point = FpE_mul(P, subii(subii(pp1, u), mulii(Mu, addii(SgMb, mulii(Mg, gel(baby,1))))), a4, p);
-  table[1] = hash_GEN(gel(point,1));
+  point = grp->pow(E,P, subii(subii(pp1, u), mulii(Mu, addii(SgMb, mulii(Mg, gel(baby,1))))));
+  table[1] = grp->hash(gel(point,1));
   for (i = 2; i < lbaby; i++)
   {
     GEN d = subii(gel(baby, i), gel(baby, i-1));
-    point = FpE_sub(point, gel(pre, ZV_search(diff, d)), a4, p);
-    table[i] = hash_GEN(gel(point,1));
-    if ((i & 0xff) == 0) point = gerepileupto(av1, point);
+    point =  grp->mul(E, point, grp->pow(E, gel(pre, ZV_search(diff, d)), gen_m1));
+    table[i] = grp->hash(gel(point,1));
+    if (low_stack(lim, stack_lim(av1,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"match_and_sort, baby = %ld", i);
+      point = gerepileupto(av1, point);
+    }
   }
+  avma = av1;
   /* Precomputations for giants */
-  pre = BSGS_pre(&diff, giant, Pg, a4, p);
+  pre = BSGS_pre(&diff, giant, Pg, E, grp);
 
   /* Look for a collision among the x-coordinates */
   table_ind = vecsmall_indexsort(table);
   table = perm_mul(table,table_ind);
 
-  av1 = avma;
-  point = FpE_mul(Pg, gel(giant, 1), a4, p);
-  for (i = 1; i < lgiant; i++)
+  av1 = avma; lim = stack_lim(av1,3);
+  point = grp->pow(E, Pg, gel(giant, 1));
+  for (i = 1; ; i++)
   {
     GEN d;
-    long h = hash_GEN(gel(point, 1));
+    long h = grp->hash(gel(point, 1));
     long s = zv_search(table, h);
-    if (s)
-    {
+    if (s) {
       while (table[s] == h && s) s--;
       for (s++; table[s] == h && s < lbaby; s++)
       {
         GEN B = gel(baby,table_ind[s]), G = gel(giant,i);
         GEN GMb = mulii(G, Mb), BMg = mulii(B, Mg);
         GEN Be = subii(subii(pp1, u), mulii(Mu, addii(SgMb, BMg)));
-        GEN Bp = FpE_mul(P, Be, a4, p);
+        GEN Bp = grp->pow(E,P, Be);
         /* p+1 - u - Mu (Sg Mb + GIANT Mb + BABY Mg) */
-        if (equalii(gel(Bp,1),gel(point,1)))
+        if (gequal(gel(Bp,1),gel(point,1)))
         {
           GEN card = subii(Be, mulii(Mu, GMb));
           card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));
-          return choose_card(card, a4, a6, p);
+          if (DEBUGLEVEL>=2) timer_printf(&ti,"match_and_sort");
+          return choose_card(card, E, grp);
         }
       }
     }
+    if (i==lgiant-1) break;
     d = subii(gel(giant, i+1), gel(giant, i));
-    point = FpE_add(point, gel(pre, ZV_search(diff, d)), a4, p);
-    if ((i & 0xff) == 0) point = gerepilecopy(av1, point);
+    point = grp->mul(E,point, gel(pre, ZV_search(diff, d)));
+    if (low_stack(lim, stack_lim(av1,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"match_and_sort, giant = %ld", i);
+      point = gerepileupto(av1, point);
+    }
   }
   /* no match ? */
   pari_err_BUG("match_and_sort");
@@ -1317,7 +1363,7 @@ get_bound_bsgs(long lp)
  * detected. Useful when searching for a good curve for cryptographic
  * applications */
 GEN
-ellsea(GEN E, GEN p, long smallfact)
+Fq_ellsea(GEN a4, GEN a6, GEN T, GEN p, long smallfact)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
@@ -1325,19 +1371,20 @@ ellsea(GEN E, GEN p, long smallfact)
   GEN res, cat, TR, TR_mod;
   GEN compile_atkin, bound, bound_bsgs, champ;
   GEN prod_atkin = gen_1, max_traces = gen_0;
-  GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
-  GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
+  GEN q = T ? powiu(p, degpol(T)): p;
   double bound_gr = 1.;
   const double growth_factor = 1.26;
   long ell = 2;
   byteptr primepointer = diffptr + 1;
+  const struct bb_group *grp;
+  void *E;
 
   if (!modular_eqn && !get_seadata(0)) return NULL;
   /*First compute the trace modulo 2 */
-  switch(FpX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), p))
+  switch(FqX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), T, p))
   {
-    case 3: /* bonus time: 4 | #E(Fp) = p+1 - a_p */
-      i = mod4(p)+1; if (i > 2) i -= 4;
+    case 3: /* bonus time: 4 | #E(Fq) = q+1 - a_p */
+      i = mod4(q)+1; if (i > 2) i -= 4;
       TR_mod = utoipos(4);
       TR = stoi(i); break;
     case 1:
@@ -1349,14 +1396,14 @@ ellsea(GEN E, GEN p, long smallfact)
   }
   if (smallfact == 1 && !mpodd(TR))
   {
-    if (DEBUGLEVEL) err_printf("Aborting: #E(Fp) divisible by 2\n");
+    if (DEBUGLEVEL) err_printf("Aborting: #E(Fq) divisible by 2\n");
     avma = ltop; return gen_0;
   }
 
   /* compile_atkin is a vector containing informations about Atkin primes,
    * informations about Elkies primes lie in Mod(TR, TR_mod). */
-  bound = sqrti(shifti(p, 4));
-  bound_bsgs = get_bound_bsgs(expi(p));
+  bound = sqrti(shifti(q, 4));
+  bound_bsgs = get_bound_bsgs(expi(q));
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
   while (1)
@@ -1364,7 +1411,7 @@ ellsea(GEN E, GEN p, long smallfact)
     long ellkt, kt = 1, nbtrace;
     GEN trace_mod;
     NEXT_PRIME_VIADIFF(ell, primepointer);
-    trace_mod = find_trace(a4, a6, ell, p, &kt, smallfact);
+    trace_mod = find_trace(a4, a6, ell, q, T, p, &kt, smallfact);
     if (trace_mod==gen_0) pari_err(e_MISC,"not enough modular polynomials");
     if (!trace_mod) continue;
 
@@ -1374,12 +1421,12 @@ ellsea(GEN E, GEN p, long smallfact)
     {
       long ap_mod_ellkt = trace_mod[1];
       if (smallfact && ell > smallfact)
-      { /* does ell divide p + 1 - ap ? */
-        long card_mod_ell = (smodis(p, ell) + 1 - ap_mod_ellkt) % ell ;
+      { /* does ell divide q + 1 - ap ? */
+        long card_mod_ell = (smodis(q, ell) + 1 - ap_mod_ellkt) % ell ;
         if (!card_mod_ell)
         {
           if (DEBUGLEVEL)
-            err_printf("\nAborting: #E(Fp) divisible by %ld\n",ell);
+            err_printf("\nAborting: #E(Fq) divisible by %ld\n",ell);
           avma = ltop; return gen_0;
         }
       }
@@ -1418,6 +1465,21 @@ ellsea(GEN E, GEN p, long smallfact)
   cat = shallowextract(compile_atkin, gel(champ, 1));
   if (DEBUGLEVEL)
     err_printf("Match and sort for %Ps possibilities.\n",gel(champ, 2));
-  res = match_and_sort(cat, TR_mod, TR, a4,a6,p);
-  return gerepileuptoint(ltop, subii(addis(p, 1), res));
+  grp = T ? get_FpXQE_group(&E, a4,a6,T,p) : get_FpE_group(&E,a4,a6,p);
+  res = match_and_sort(cat, TR_mod, TR, q, E, grp);
+  return gerepileuptoint(ltop, subii(addis(q, 1), res));
+}
+
+GEN
+Fp_ellsea(GEN a4, GEN a6, GEN p, long smallfact)
+{
+  return Fq_ellsea(a4, a6, NULL, p, smallfact);
+}
+
+GEN
+ellsea(GEN E, GEN p, long smallfact)
+{
+  GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
+  GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
+  return Fp_ellsea(a4, a6, p, smallfact);
 }
