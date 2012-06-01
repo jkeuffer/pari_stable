@@ -776,7 +776,8 @@ isprime(GEN x) { return BPSW_psp(x) && BPSW_isprime(x); }
 /***********************************************************************/
 
 static struct {
-  long p, n, off;
+  ulong p;
+  long n, off;
 } prime_table[] = {
   {           0,          0,          0},
   {        7919,       1000,       1000},
