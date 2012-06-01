@@ -3671,6 +3671,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   long done_small, small_fail, fail_limit, squash_index;
   double lim, drc, LOGD, LOGD2;
   GEN zu, nf, D, Dp, A, W, R, h, PERM, fu = NULL /*-Wall*/;
+  GEN small_multiplier;
   GEN res, L, invhr, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   GEN auts, cyclic;
   const char *precpb = NULL;
@@ -3779,6 +3780,7 @@ START:
   fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
   PERM = leafcopy(F.perm); /* to be restored in case of precision increase */
   cache.basis = zero_Flm_copy(F.KC,F.KC);
+  small_multiplier = zero_Flv(F.KC);
   F.id2 = zerovec(F.KC);
   done_small = 0; small_fail = 0; squash_index = 0;
   fail_limit = F.KC + 1;
@@ -3829,13 +3831,20 @@ START:
         j = done_small % (F.KC+1);
         if (j)
         {
-          j = PERM[F.KC + 1 - j];
+          long mj = small_multiplier[j];
           p0 = gel(F.LP, j);
           if (!A)
           {
             /* Prevent considering both P_iP_j and P_jP_i in small_norm */
+            /* Since not all elements end up in F.L_jid (because they can
+             * be eliminated by hnfspec/add or by trim_list, keep track
+             * of which ideals are being considered at each run. */
             for (i = k = 1; i < lg(F.L_jid); i++)
-              if (F.L_jid[i] <= j) F.L_jid[k++] = F.L_jid[i];
+              if (F.L_jid[i] > mj)
+              {
+                small_multiplier[F.L_jid[i]] = j;
+                F.L_jid[k++] = F.L_jid[i];
+              }
             setlg(F.L_jid, k);
           }
         }
