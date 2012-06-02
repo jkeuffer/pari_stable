@@ -89,6 +89,19 @@ If you are using GMP, tune it first, then PARI. Make sure you tune PARI on
 the machine that will actually run your computations, and do not use a
 heavily loaded machine for tunings.
 
+\kbd{./Configure --time=<fun>}
+
+\noindent choose a timing function. The default timing function will usually
+work fine, however you can use a different one that better fit your need. Not
+all timing functions are available on all platforms. PARI can use
+\kbd{getrusage}, \kbd{clock\_gettime}, \kbd{times} or \kbd{ftime} as timing
+functions. The three first functions give timings in terms of CPU usage of the
+current task; this gives a good approximation of the complexity of the
+algorithm. The last one, \kbd{ftime}, gives timings in terms of absolute time
+which might be important in case of parallelism. Moreover the
+\kbd{clock\_gettime} function is more precise, but much slower (at the time of
+this writing), than \kbd{getrusage} or \kbd{times}.
+
 \misctitle{Technical note} \kbd{Configure} accepts many other flags
 besides \kbd{--prefix}. See \kbd{Configure --help} for a complete list. In
 particular, there are sets of flags related to GNU MP (\kbd{--with-gmp*}) and
