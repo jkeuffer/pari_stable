@@ -241,8 +241,8 @@ multi-precision integer and real).
 
 L0: \kbd{auto}, \kbd{none} and
 \bprog
-  alpha hppa hppa64 ia64 ix86 x86_64 m68k ppc sparcv7
-  sparcv8_micro sparcv8_super
+  alpha hppa hppa64 ia64 ix86 x86_64 m68k ppc ppc64
+  sparcv7 sparcv8_micro sparcv8_super
 @eprog
 
 L1: \kbd{auto}, \kbd{none} and \kbd{gmp}
@@ -258,7 +258,7 @@ PARI L1 kernel.
 An alias stands for \kbd{\emph{name}-none}, but \kbd{gmp} stands for
 \kbd{auto-gmp}.
 
-\noindent$\bullet$ The default kernel is \kbd{auto-none}.
+\noindent$\bullet$ The default kernel is \kbd{auto-auto}.
 
 \subsec{Problems related to readline:}
 \kbd{Configure} does not try very hard to find the \kbd{readline} library and
@@ -529,7 +529,7 @@ following form (BibTeX format):
 @@manual{PARI2,
     organization = "{The PARI~Group}",
     title        = "{PARI/GP, Version @vers}",
-    year         = 2011,
+    year         = 2012,
     address      = "Bordeaux",
     note         = "available from {\tt http://pari.math.u-bordeaux.fr/}"
 }
