@@ -8615,6 +8615,14 @@ inconsistent variables. E.g., considering the algebraic number
 
 \subsec{Overflows}
 
+\subsubsec{e\_DOMAIN} An argument $x$ is not in the function's domain (as in
+\kbd{moebius(0)} or \kbd{zeta(1)}).
+\bprog
+  pari_err(e_DOMAIN, const char *f, const char *v, const char *op, GEN lim, GEN x)
+  pari_err_DOMAIN(const char *f, const char *v, const char *op, GEN lim, GEN x)
+@eprog\noindent prints the error message: \kbd{domain error in $f$: $v$
+\var{op} \var{lim}}.
+
 \subsubsec{e\_MAXPRIME} A function using the precomputed list of prime numbers
 ran out of primes.
 \bprog

@@ -87,6 +87,14 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
 
   \misctitle{Overflows}
 
+  \item \kbd{"e\_DOMAIN"}. An argument is not in the function's domain.
+  \var{E} has five components, 1 (\typ{STR}): the function name,
+  2 (\typ{STR}): the mathematical name of the out-of-domain argument
+  3 (\typ{STR}): an operator $\var{op}$ describing the domain error,
+  4 (\typ{GEN}): the numerical limit $l$ describing the domain error,
+  5 (\kbd{GEN}): the out-of-domain argument $x$. The argument satisfies $x$
+  \var{op} $l$, which prevents it from belonging to the function's domain.
+
   \item \kbd{"e\_MAXPRIME"}. A function using the precomputed list of prime
   numbers ran out of primes.
   \var{E} has one component, 1 (\typ{INT}): the requested prime bound, which

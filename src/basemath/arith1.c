@@ -848,7 +848,7 @@ ispolygonal(GEN x, GEN S, GEN *N)
   GEN D, d, n;
   if (typ(x) != t_INT) pari_err_TYPE("ispolygonal", x);
   if (typ(S) != t_INT) pari_err_TYPE("ispolygonal", S);
-  if (cmpiu(S,3) < 0) pari_err(e_MISC,"s < 3 in ispolygonal");
+  if (cmpiu(S,3) < 0) pari_err_DOMAIN("ispolygonal","s","<", utoipos(3),S);
   if (signe(x) < 0) return 0;
   if (signe(x) == 0) { if (N) *N = gen_0; return 1; }
   if (is_pm1(x)) { if (N) *N = gen_1; return 1; }

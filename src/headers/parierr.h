@@ -23,7 +23,7 @@ enum err_list {
 
   e_PREC, e_TYPE, e_DIM, e_VAR, e_USER,
 
-  e_STACK, e_OVERFLOW,
+  e_STACK, e_OVERFLOW, e_DOMAIN,
 
   e_MAXPRIME, e_INTMOD,
 

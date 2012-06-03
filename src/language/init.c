@@ -970,6 +970,14 @@ pari_sigint(const char *time_s)
        gel(_v,2) = (y);\
        gel(_v,3) = (z);\
        gel(_v,4) = (t); return _v; } while(0)
+#define retmkerr6(x,y,z,t,u,v)\
+  do { GEN _v = cgetg(7, t_ERROR);\
+       _v[1] = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t);\
+       gel(_v,5) = (u);\
+       gel(_v,6) = (v); return _v; } while(0)
 
 /* if numerr=e_STACK, return NULL */
 static GEN
@@ -1032,6 +1040,15 @@ pari_err2GEN(long numerr, va_list ap)
       GEN x = va_arg(ap, GEN);
       GEN y = va_arg(ap, GEN);
       retmkerr4(numerr,strtoGENstr(f),x,y);
+    }
+  case e_DOMAIN:
+    {
+      const char *f = va_arg(ap, const char*);
+      const char *v = va_arg(ap, const char *);
+      const char *op = va_arg(ap, const char *);
+      GEN l = va_arg(ap, GEN);
+      GEN x = va_arg(ap, GEN);
+      retmkerr6(numerr,strtoGENstr(f),strtoGENstr(v),strtoGENstr(op),l,x);
     }
   case e_MAXPRIME:
     retmkerr2(numerr, utoi(va_arg(ap, ulong)));
@@ -1144,6 +1161,14 @@ pari_err2str(GEN err)
       v = pari_sprintf("%s %s %s %s %s.", what,f,type_dim(x),op,type_dim(y));
       avma = av; return v;
     }
+  case e_DOMAIN:
+    {
+      const char *f = GSTR(gel(err,2));
+      const char *v = GSTR(gel(err,3));
+      const char *op= GSTR(gel(err,4));
+      GEN l = gel(err,5);
+      return pari_sprintf("domain error in %s: %s %s %Ps",f,v,op,l);
+    }
   case e_OVERFLOW:
     return pari_sprintf("overflow in %Ps.", gel(err,2));
   case e_PREC:
@@ -1252,6 +1277,8 @@ pari_err_IMPL(const char *f) { pari_err(e_IMPL,f); }
 void
 pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
 void
+pari_err_DOMAIN(const char *f, const char *v, const char *op, GEN l, GEN x) { pari_err(e_DOMAIN, f,v,op,l,x); }
+void
 pari_err_MAXPRIME(ulong c) { pari_err(e_MAXPRIME, c); }
 void
 pari_err_NEGVAL(const char *f) { pari_err(e_NEGVAL, f); }
@@ -1287,6 +1314,7 @@ numerr_name(long numerr)
   case e_CONSTPOL: return "e_CONSTPOL";
   case e_COPRIME:  return "e_COPRIME";
   case e_DIM:      return "e_DIM";
+  case e_DOMAIN:   return "e_DOMAIN";
   case e_FILE:     return "e_FILE";
   case e_FLAG:     return "e_FLAG";
   case e_IMPL:     return "e_IMPL";
@@ -1325,6 +1353,7 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_CONSTPOL")) return e_CONSTPOL;
   if (!strcmp(s,"e_COPRIME"))  return e_COPRIME;
   if (!strcmp(s,"e_DIM"))      return e_DIM;
+  if (!strcmp(s,"e_DOMAIN"))   return e_DOMAIN;
   if (!strcmp(s,"e_FILE"))     return e_FILE;
   if (!strcmp(s,"e_FLAG"))     return e_FLAG;
   if (!strcmp(s,"e_IMPL"))     return e_IMPL;
