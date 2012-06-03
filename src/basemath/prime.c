@@ -992,7 +992,7 @@ primes(long m)
   long n = m;
   GEN y, z;
 
-  if (n < 0)  pari_err_TYPE("primes [negative dimension]", stoi(m));
+  if (n < 0)  pari_err_DOMAIN("primes", "dimension", "<", gen_0, stoi(m));
   z = y = cgetg(n+1,t_VEC);
   while (n--)
   {

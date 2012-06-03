@@ -950,7 +950,7 @@ padicfields0(GEN p, GEN N, long flag)
       N = gel(N,1); /* fall through */
     case t_INT:
       m = itos(N);
-      if (m <= 0) pari_err_TYPE("padicfields [degree<=0]",N);
+      if (m <= 0) pari_err_DOMAIN("padicfields", "degree", "<=", gen_0,N);
       break;
     default:
       pari_err_TYPE("padicfields",N);

@@ -480,7 +480,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     X = gfloor(X);
     if (typ(X) != t_INT) pari_err_TYPE("zncoppersmith",X);
   }
-  if (signe(X) < 0) pari_err_TYPE("zncoppersmith [negative bound]",X);
+  if (signe(X) < 0) pari_err_DOMAIN("zncoppersmith", "X", "<", gen_0, X);
   if (!B) B = N;
   if (typ(B) != t_INT) B = gceil(B);
 
@@ -633,7 +633,7 @@ lindep2(GEN x, long bit)
 
   if (! is_vec_t(tx)) pari_err_TYPE("lindep2",x);
   if (lx<=2) return cgetg(1,t_COL);
-  if (bit < 0) pari_err_TYPE("lindep2 [negative accuracy]", stoi(bit));
+  if (bit < 0) pari_err_DOMAIN("lindep2", "accuracy", "<", gen_0, stoi(bit));
   if (!bit)
   {
     bit = gprecision(x);

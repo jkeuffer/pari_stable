@@ -37,15 +37,18 @@ galoisgetpol(long a, long b, long sig)
   GEN V;
   const char *si;
   char *s;
-  if (a<=0) pari_err_TYPE("galoisgetpol [a<=0]",stoi(a));
-  if (b<0) pari_err_TYPE("galoisgetpol [b<0]",stoi(b));
+  if (a<=0) pari_err_DOMAIN("galoisgetpol", "degree", "<=", gen_0, stoi(a));
+  if (b<0) pari_err_DOMAIN("galoisgetpol", "index", "<", gen_0, stoi(b));
   if (!b) return galoisnbpol(a);
   switch(sig)
   {
     case 1: si="real"; break;
     case 2: if (a%2==0) { si="complex"; break; }
     default: /*FALL THROUGH*/
-      pari_err_TYPE("galoisgetpol [invalid signature]", stoi(sig));
+      if (sig < 0)
+        pari_err_DOMAIN("galoisgetpol", "signature flag", "<", gen_0,stoi(sig));
+      if (sig > 2)
+        pari_err_DOMAIN("galoisgetpol", "signature flag", ">", gen_2,stoi(sig));
       return NULL;
   }
   s = pari_sprintf("%s/galpol/%ld/%ld/%s", pari_datadir, a,b,si);

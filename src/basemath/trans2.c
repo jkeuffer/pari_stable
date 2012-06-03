@@ -902,7 +902,7 @@ bernpol_i(long k, long v)
   GEN B, C;
   long i;
   if (v < 0) v = 0;
-  if (k < 0) pari_err_TYPE("bernpol [negative index]", stoi(k));
+  if (k < 0) pari_err_DOMAIN("bernpol", "index", "<", gen_0, stoi(k));
   mpbern(k >> 1, 0); /* cache B_2, ..., B_2[k/2] */
   C = vecbinome(k);
   B = cgetg(k + 3, t_POL);

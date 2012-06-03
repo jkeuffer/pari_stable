@@ -3261,7 +3261,7 @@ static GEN
 init_Fq_i(GEN p, long n, long v)
 {
   GEN P;
-  if (n <= 0) pari_err_TYPE("ffinit [degree <= 0]", stoi(n));
+  if (n <= 0) pari_err_DOMAIN("ffinit", "degree", "<=", gen_0, stoi(n));
   if (typ(p) != t_INT) pari_err_TYPE("ffinit",p);
   if (signe(p) <= 0) pari_err_PRIME("ffinit",p);
   if (v < 0) v = 0;
@@ -3335,10 +3335,8 @@ ffsumnbirred(GEN p, long n)
 GEN
 ffnbirred0(GEN p, long n, long flag)
 {
-  if (typ(p) != t_INT)
-    pari_err_TYPE("ffnbirred", p);
-  if (n <= 0)
-    pari_err_TYPE("ffnbirred [degree <= 0]", stoi(n));
+  if (typ(p) != t_INT) pari_err_TYPE("ffnbirred", p);
+  if (n <= 0) pari_err_DOMAIN("ffnbirred", "degree", "<=", gen_0, stoi(n));
   switch(flag)
   {
     case 0:

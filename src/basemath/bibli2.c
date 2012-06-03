@@ -1402,7 +1402,7 @@ check_positive_entries(GEN k)
 {
   long i, l = lg(k);
   for (i=1; i<l; i++)
-    if (k[i] <= 0) pari_err_TYPE("sort_function, negative index", stoi(k[i]));
+    if (k[i] <= 0) pari_err_DOMAIN("sort_function", "index", "<", gen_0, stoi(k[i]));
 }
 
 typedef int (*CMP_FUN)(void*,GEN,GEN);

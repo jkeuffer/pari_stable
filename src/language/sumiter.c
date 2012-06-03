@@ -1121,7 +1121,7 @@ vecteur(GEN nmax, GEN code)
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   m = gtos(nmax);
-  if (m < 0)  pari_err_TYPE("vector [negative dimension]", stoi(m));
+  if (m < 0)  pari_err_DOMAIN("vector", "dimension", "<", gen_0, stoi(m));
   if (!code) return zerovec(m);
   y = cgetg(m+1,t_VEC); push_lex(c, code);
   for (i=1; i<=m; i++)
@@ -1141,7 +1141,7 @@ vecteursmall(GEN nmax, GEN code)
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
   m = gtos(nmax);
-  if (m < 0)  pari_err_TYPE("vectorsmall [negative dimension]", stoi(m));
+  if (m < 0)  pari_err_DOMAIN("vectorsmall", "dimension", "<", gen_0, stoi(m));
   if (!code) return const_vecsmall(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_lex(c,code);
   for (i=1; i<=m; i++)
@@ -1170,8 +1170,8 @@ matrice(GEN nlig, GEN ncol, GEN code)
 
   m = gtos(ncol);
   n = gtos(nlig);
-  if (m < 0)  pari_err_TYPE("matrix [negative nbcols]", stoi(m));
-  if (n < 0)  pari_err_TYPE("matrix [negative nbrows]", stoi(n));
+  if (m < 0)  pari_err_DOMAIN("matrix", "nbcols", "<", gen_0, stoi(m));
+  if (n < 0)  pari_err_DOMAIN("matrix", "nbrows", "<", gen_0, stoi(n));
   if (!m) return cgetg(1,t_MAT);
   if (!code || !n) return zeromatcopy(n, m);
   push_lex(c1,code);

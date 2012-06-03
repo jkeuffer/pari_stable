@@ -399,7 +399,7 @@ parse_bound(subgp_iter *T)
   default: pari_err_TYPE("subgroup",B);
   }
   if (signe(T->bound) <= 0)
-    pari_err_TYPE("subgroup [index bound <=0]", T->bound);
+    pari_err_DOMAIN("subgroup", "index bound", "<=", gen_0, T->bound);
 }
 
 static GEN

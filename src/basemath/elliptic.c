@@ -1472,7 +1472,8 @@ elleisnum(GEN om, long k, long flag, long prec)
   GEN p1, y;
   SL2_red T;
 
-  if (k&1 || k<=0) pari_err_TYPE("elleisnum [k not positive even]",stoi(k));
+  if (k<=0) pari_err_DOMAIN("elleisnum", "k", "<=", gen_0, stoi(k));
+  if (k&1) pari_err_DOMAIN("elleisnum", "k % 2", "!=", gen_0, stoi(k));
   if (!get_periods(om, &T)) pari_err_TYPE("elleisnum",om);
   y = _elleisnum(&T, k, prec);
   if (k==2 && signe(T.c))
