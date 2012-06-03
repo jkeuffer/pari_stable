@@ -1148,8 +1148,9 @@ GEN
 FqC_add(GEN x, GEN y, GEN T, GEN p)
 {
   long i, lx = lg(x);
+  GEN z;
   if (!T) return FpC_add(x, y, p);
-  GEN z = cgetg(lx, t_COL);
+  z = cgetg(lx, t_COL);
   for (i = 1; i < lx; i++) gel(z, i) = Fq_add(gel(x, i), gel(y, i), T, p);
   return z;
 }
@@ -1158,8 +1159,9 @@ GEN
 FqC_sub(GEN x, GEN y, GEN T, GEN p)
 {
   long i, lx = lg(x);
+  GEN z;
   if (!T) return FpC_sub(x, y, p);
-  GEN z = cgetg(lx, t_COL);
+  z = cgetg(lx, t_COL);
   for (i = 1; i < lx; i++) gel(z, i) = Fq_sub(gel(x, i), gel(y, i), T, p);
   return z;
 }
