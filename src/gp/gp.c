@@ -1218,7 +1218,7 @@ get_preproc_value(char **s)
 
 /* PARSE GPRC */
 
-/* 1) replace next separator by '\0' (t must be writeable)
+/* 1) replace next separator by '\0' (t must be writable)
  * 2) return the next expression ("" if none)
  * see get_sep() */
 static char *

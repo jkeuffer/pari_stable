@@ -4600,7 +4600,7 @@ env_ok(const char *s)
   char *t = os_getenv(s);
   if (t && !pari_is_rwx(t))
   {
-    pari_warn(warner,"%s is set (%s), but is not writeable", s,t);
+    pari_warn(warner,"%s is set (%s), but is not writable", s,t);
     t = NULL;
   }
   if (t && !pari_is_dir(t))

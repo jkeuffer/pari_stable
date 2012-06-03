@@ -3,7 +3,7 @@ Section: programming/specific
 C-Name: trap0
 Prototype: DrDEDE
 Help: trap({e}, {rec}, seq): try to execute seq, trapping runtime error e (all
- of them if e ommitted); sequence rec is executed if the error occurs and
+ of them if e omitted); sequence rec is executed if the error occurs and
  is the result of the command. THIS FUNCTION IS OBSOLETE: use "IFERR"
 Wrapper: (,_,_)
 Description:
