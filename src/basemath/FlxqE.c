@@ -522,7 +522,7 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
 }
 
 GEN
-Flxq_ellShanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
+Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
 {
   pari_sp av = avma;
   long vn = T[1];
@@ -583,8 +583,8 @@ Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
   pari_sp av = avma;
   GEN q = powuu(p, degpol(T)), r;
   if (expi(q)<=62)
-    r = Flxq_ellShanks(a4, a6, q, T, p);
+    r = Flxq_ellcard_Shanks(a4, a6, q, T, p);
   else
-    r = Fq_ellsea(Flx_to_ZX(a4),Flx_to_ZX(a6),q,Flx_to_ZX(T),utoi(p),0);
+    r = Fq_ellcard_SEA(Flx_to_ZX(a4),Flx_to_ZX(a6),q,Flx_to_ZX(T),utoi(p),0);
   return gerepileuptoint(av, r);
 }

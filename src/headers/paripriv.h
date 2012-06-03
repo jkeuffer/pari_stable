@@ -425,7 +425,7 @@ GEN     FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 
 /* FlxqE.c */
 
-GEN     Flxq_ellShanks(GEN a4, GEN a6, GEN q, GEN T, ulong p);
+GEN     Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p);
 
 /* Qfb.c */
 

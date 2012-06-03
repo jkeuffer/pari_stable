@@ -1363,7 +1363,7 @@ get_bound_bsgs(long lp)
  * detected. Useful when searching for a good curve for cryptographic
  * applications */
 GEN
-Fq_ellsea(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
+Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
@@ -1470,9 +1470,9 @@ Fq_ellsea(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
 }
 
 GEN
-Fp_ellsea(GEN a4, GEN a6, GEN p, long smallfact)
+Fp_ellcard_SEA(GEN a4, GEN a6, GEN p, long smallfact)
 {
-  return Fq_ellsea(a4, a6, p, NULL, p, smallfact);
+  return Fq_ellcard_SEA(a4, a6, p, NULL, p, smallfact);
 }
 
 GEN
@@ -1481,5 +1481,5 @@ ellsea(GEN E, GEN p, long smallfact)
   pari_sp av = avma;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
-  return gerepileuptoint(av, subii(addis(p,1),Fp_ellsea(a4, a6, p, smallfact)));
+  return gerepileuptoint(av, subii(addis(p,1),Fp_ellcard_SEA(a4, a6, p, smallfact)));
 }
