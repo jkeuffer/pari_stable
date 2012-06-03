@@ -113,17 +113,17 @@
     t^2 + 1
   ***   at top-level: vector(-1,i,0)
   ***                 ^--------------
-  *** vector: incorrect type in vector [negative dimension] (t_INT).
+  *** vector: domain error in vector: dimension < 0
   ***   at top-level: vectorv(-1,i,0)
   ***                 ^---------------
-  *** vectorv: incorrect type in vector [negative dimension] (t_INT).
+  *** vectorv: domain error in vector: dimension < 0
   ***   at top-level: vectorsmall(-1,i,0)
   ***                 ^-------------------
-  *** vectorsmall: incorrect type in vectorsmall [negative dimension] (t_INT).
+  *** vectorsmall: domain error in vectorsmall: dimension < 0
   ***   at top-level: matrix(-1,1,i,j,0)
   ***                 ^------------------
-  *** matrix: incorrect type in matrix [negative nbrows] (t_INT).
+  *** matrix: domain error in matrix: nbrows < 0
   ***   at top-level: matrix(1,-1,i,j,0)
   ***                 ^------------------
-  *** matrix: incorrect type in matrix [negative nbcols] (t_INT).
-Total time spent: 12
+  *** matrix: domain error in matrix: nbcols < 0
+Total time spent: 20
