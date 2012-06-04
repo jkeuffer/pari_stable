@@ -473,10 +473,10 @@ FqX_eval(GEN x, GEN y, GEN T, GEN p)
       if (j==2)
       {
         if (i!=j) y = Fq_pow(y,utoipos(i-j+1), T, p);
-        return gerepileupto(av, gmul(p1,y));
+        return gerepileupto(av, Fq_mul(p1,y, T, p));
       }
     r = (i==j)? y: Fq_pow(y, utoipos(i-j+1), T, p);
-    p1 = Fq_red(gadd(gmul(p1,r), gel(x,j)), T, p);
+    p1 = Fq_add(Fq_mul(p1,r,T,p), gel(x,j), T, p);
   }
   return gerepileupto(av, p1);
 }
