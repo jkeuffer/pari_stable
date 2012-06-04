@@ -363,6 +363,22 @@ gen_Gauss(GEN a, GEN b, void *E, const struct bb_field *ff)
   for (j=1; j<=bco; j++) gel(u,j) = _gen_get_col(a, gel(b,j), aco, E, ff);
   return u;
 }
+
+static GEN
+image_from_pivot(GEN x, GEN d, long r)
+{
+  GEN y;
+  long j, k;
+
+  if (!d) return gcopy(x);
+  /* d left on stack for efficiency */
+  r = lg(x)-1 - r; /* = dim Im(x) */
+  y = cgetg(r+1,t_MAT);
+  for (j=k=1; j<=r; k++)
+    if (d[k]) gel(y,j++) = gcopy(gel(x,k));
+  return y;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                    LINEAR ALGEBRA MODULO P                      */
@@ -814,18 +830,10 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
 GEN
 FpM_image(GEN x, GEN p)
 {
-  pari_sp av = avma;
-  GEN d, y;
-  long j, k, r;
-
-  d = FpM_gauss_pivot(x,p,&r);
-  if (!d) { avma = av; return ZM_copy(x); }
+  long r;
+  GEN d = FpM_gauss_pivot(x,p,&r);
   /* d left on stack for efficiency */
-  r = lg(x)-1 - r; /* = dim Im(x) */
-  y = cgetg(r+1,t_MAT);
-  for (j=k=1; j<=r; k++)
-    if (d[k]) gel(y,j++) = ZC_copy(gel(x,k));
-  return y;
+  return image_from_pivot(x,d,r);
 }
 
 long
@@ -840,18 +848,10 @@ FpM_rank(GEN x, GEN p)
 GEN
 FqM_image(GEN x, GEN T, GEN p)
 {
-  pari_sp av = avma;
-  GEN d, y;
-  long j, k, r;
-
-  d = FqM_gauss_pivot(x,T,p,&r);
-  if (!d) { avma = av; return gcopy(x); }
+  long r;
+  GEN d = FqM_gauss_pivot(x,T,p,&r);
   /* d left on stack for efficiency */
-  r = lg(x)-1 - r; /* = dim Im(x) */
-  y = cgetg(r+1,t_MAT);
-  for (j=k=1; j<=r; k++)
-    if (d[k]) gel(y,j++) = gcopy(gel(x,k));
-  return y;
+  return image_from_pivot(x,d,r);
 }
 
 long
@@ -866,35 +866,19 @@ FqM_rank(GEN x, GEN T, GEN p)
 GEN
 F2m_image(GEN x)
 {
-  pari_sp av = avma;
-  GEN d,y;
-  long j,k,r;
-
-  d = F2m_gauss_pivot(F2m_copy(x),&r);
-  if (!d) { avma = av; return F2m_copy(x); }
-  /* d left on stack */
-  r = lg(x)-1 - r; /* = dim Im(x) */
-  y = cgetg(r+1,t_MAT);
-  for (j=k=1; j<=r; k++)
-    if (d[k]) gel(y,j++) = F2v_copy(gel(x,k));
-  return y;
+  long r;
+  GEN d = F2m_gauss_pivot(F2m_copy(x),&r);
+  /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
 }
 
 GEN
 Flm_image(GEN x, ulong p)
 {
-  pari_sp av = avma;
-  GEN d,y;
-  long j,k,r;
-
-  d = Flm_gauss_pivot(Flm_copy(x),p,&r);
-  if (!d) { avma = av; return Flm_copy(x); }
-  /* d left on stack */
-  r = lg(x)-1 - r; /* = dim Im(x) */
-  y = cgetg(r+1,t_MAT);
-  for (j=k=1; j<=r; k++)
-    if (d[k]) gel(y,j++) = Flv_copy(gel(x,k));
-  return y;
+  long r;
+  GEN d = Flm_gauss_pivot(Flm_copy(x),p,&r);
+  /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
 }
 
 long
@@ -2358,20 +2342,14 @@ GEN
 image(GEN x)
 {
   pari_sp av = avma;
-  GEN d, y, p = NULL;
-  long j, k, r;
+  GEN d, p = NULL;
+  long r;
 
   if (typ(x)!=t_MAT) pari_err_TYPE("matimage",x);
   if (RgM_is_FpM(x, &p) && p)
     return gerepileupto(av, FpM_to_mod(FpM_image(RgM_to_FpM(x, p), p), p));
-  d = gauss_pivot(x,&r);
-  if (!d) { avma = av; return gcopy(x); }
-  /* d left on stack for efficiency */
-  r = lg(x)-1 - r; /* = dim Im(x) */
-  y = cgetg(r+1,t_MAT);
-  for (j=k=1; j<=r; k++)
-    if (d[k]) gel(y,j++) = gcopy(gel(x,k));
-  return y;
+  d = gauss_pivot(x,&r); /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
 }
 
 static GEN
