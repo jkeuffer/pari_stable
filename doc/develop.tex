@@ -211,7 +211,7 @@ to delay an eventual pending alarm.
 (\kbd{SIGINT} was blocked) or \kbd{SIGALRM} (\kbd{SIGALRM} was blocked).
 Take action as appropriate.
 
-\section{Finite fields and black-box groups}
+\section{Black-box groups}
 
 A black box group is defined by a \tet{bb_group} struct, describing methods
 available to handle group elements:
@@ -244,7 +244,7 @@ and zero otherwise.
 $n$ such that $g^n=a$, the element $g$ being of order $o$. This provides a
 short-cut in situation where a better algorithm than the generic one is known.
 
-A group is thus described by a \kbd{const bb\_struct} as above and auxiliary
+A group is thus described by a \kbd{struct bb\_group} as above and auxiliary
 data typecast to \kbd{void*}. The following functions operate on black-box
 groups:
 
@@ -340,6 +340,58 @@ with $a_4$ and $a_6$ in $\F_p[X]/(T)$.
 
 \fun{const struct bb_group *}{get_FlxqE_group}{void **pt_E, GEN a4, GEN a6, GEN T, ulong p}
 idem for small $p$.
+
+\section{Black-box finite fields}
+
+A black box finite field is defined by a \tet{bb_field} struct, describing methods
+available to handle field elements:
+\bprog
+  struct bb_field
+  {
+    GEN (*red)(void *E ,GEN);
+    GEN (*add)(void *E ,GEN, GEN);
+    GEN (*mul)(void *E ,GEN, GEN);
+    GEN (*neg)(void *E ,GEN);
+    GEN (*inv)(void *E ,GEN);
+    int (*equal0)(GEN);
+    GEN (*s)(void *E, long);
+  };
+@eprog
+
+Note that, in contrast of black box group, elements can have non canonical forms, and
+only \kbd{red} is required to return a canonical form.
+
+\kbd{red(E,x)} returns the canonical form of $x$.
+
+\kbd{add(E,x,y)} returns the sum $x+y$.
+
+\kbd{neg(E,x,y)} returns $-x$.
+
+\kbd{inv(E)} returns the inverse of $x$.
+
+\kbd{equal0(x)} $x$ being in canonical form, returns one if $x=0$ and zero otherwise.
+
+\kbd{s(x)} $x$ being a small signed integer, returns $s$ times the unit element.
+
+A field is thus described by a \kbd{struct bb\_field} as above and auxiliary
+data typecast to \kbd{void*}. The following functions operate on black-box
+groups:
+
+\fun{GEN}{gen_Gauss}{GEN a, GEN b, void *E, const struct bb_field *ff}
+
+\fun{GEN}{gen_Gauss_pivot}{GEN x, long *rr, void *E, const struct bb_field *ff}
+
+\fun{GEN}{gen_det}{GEN a, void *E, const struct bb_field *ff}
+
+\fun{GEN}{gen_ker}{GEN x, long deplin, void *E, const struct bb_field *ff}
+
+\subsec{Functions returning black-box fields}
+
+\fun{const struct bb_field *}{get_Fp_field}{void **pt_E, GEN p}
+
+\fun{const struct bb_field *}{get_Fq_field}{void **pt_E, GEN T, GEN p}
+
+\fun{const struct bb_field *}{get_Flxq_field}{void **pt_E, GEN T, ulong p}
 
 \section{Public functions useless outside of GP context}
 
