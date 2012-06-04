@@ -45,10 +45,7 @@ galoisgetpol(long a, long b, long sig)
     case 1: si="real"; break;
     case 2: if (a%2==0) { si="complex"; break; }
     default: /*FALL THROUGH*/
-      if (sig < 0)
-        pari_err_DOMAIN("galoisgetpol", "signature flag", "<", gen_0,stoi(sig));
-      if (sig > 2)
-        pari_err_DOMAIN("galoisgetpol", "signature flag", ">", gen_2,stoi(sig));
+      pari_err_FLAG("galoisgetpol");
       return NULL;
   }
   s = pari_sprintf("%s/galpol/%ld/%ld/%s", pari_datadir, a,b,si);
