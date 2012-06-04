@@ -3427,6 +3427,7 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   if (!s) return pol1_FlxX(varn(S),T[1]);
   if (s < 0) x = FlxqXQ_inv(x,S,T,p);
   if (is_pm1(n)) return s < 0 ? x : gcopy(x);
+  if (degpol(x)>=degpol(S)) x = FlxqX_rem(x,S,T,p);
   D.mg = FlxqX_invBarrett(S,T,p);
   D.S = S;
   D.T = T;
@@ -3438,7 +3439,9 @@ GEN
 FlxqXQ_powers(GEN x, long l, GEN S, GEN T, ulong p)
 {
   FlxqXQ_muldata D;
-  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  int use_sqr;
+  if (degpol(x)>=degpol(S)) x = FlxqX_rem(x,S,T,p);
+  use_sqr = (degpol(x)<<1)>=degpol(S);
   D.mg = FlxqX_invBarrett(S,T,p);
   D.S = S; D.T = T; D.p = p;
   return gen_powers(x, l, use_sqr, (void*)&D, &_FlxqXQ_sqr, &_FlxqXQ_mul,&_FlxqXQ_one);
