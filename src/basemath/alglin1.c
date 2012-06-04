@@ -753,6 +753,24 @@ F2m_gauss_pivot(GEN x, long *rr)
   *rr = r; avma = (pari_sp)d; return d;
 }
 
+GEN
+F2m_image(GEN x)
+{
+  long r;
+  GEN d = F2m_gauss_pivot(F2m_copy(x),&r);
+  /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
+}
+
+long
+F2m_rank(GEN x)
+{
+  pari_sp av = avma;
+  long r;
+  (void)F2m_gauss_pivot(F2m_copy(x),&r);
+  avma = av; return lg(x)-1 - r;
+}
+
 /* Destroy x */
 static GEN
 Flm_gauss_pivot(GEN x, ulong p, long *rr)
@@ -798,6 +816,25 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
   *rr = r; avma = (pari_sp)d; return d;
 }
 
+GEN
+Flm_image(GEN x, ulong p)
+{
+  long r;
+  GEN d = Flm_gauss_pivot(Flm_copy(x),p,&r);
+  /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
+}
+
+long
+Flm_rank(GEN x, ulong p)
+{
+  pari_sp av = avma;
+  long r;
+  (void)Flm_gauss_pivot(Flm_copy(x),p,&r);
+  avma = av; return lg(x)-1 - r;
+}
+
+
 static GEN
 FpM_gauss_pivot(GEN x, GEN p, long *rr)
 {
@@ -814,16 +851,6 @@ FpM_gauss_pivot(GEN x, GEN p, long *rr)
       return Flm_gauss_pivot(ZM_to_Flm(x, pp), pp, rr);
   }
   ff = get_Fp_field(&E,p);
-  return gen_Gauss_pivot(x, rr, E, ff);
-}
-
-static GEN
-FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
-{
-  const struct bb_field *ff;
-  void *E;
-  if (!T) return FpM_gauss_pivot(x, p, rr);
-  ff = get_Fq_field(&E, T, p);
   return gen_Gauss_pivot(x, rr, E, ff);
 }
 
@@ -845,6 +872,51 @@ FpM_rank(GEN x, GEN p)
   avma = av; return lg(x)-1 - r;
 }
 
+static GEN
+FlxqM_gauss_pivot(GEN x, GEN T, ulong p, long *rr)
+{
+  const struct bb_field *ff;
+  void *E;
+  ff = get_Flxq_field(&E, T, p);
+  return gen_Gauss_pivot(x, rr, E, ff);
+}
+
+GEN
+FlxqM_image(GEN x, GEN T, ulong p)
+{
+  long r;
+  GEN d = FlxqM_gauss_pivot(x,T,p,&r);
+  /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
+}
+
+long
+FlxqM_rank(GEN x, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  long r;
+  (void)FlxqM_gauss_pivot(x,T,p,&r);
+  avma = av; return lg(x)-1 - r;
+}
+
+static GEN
+FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
+{
+  const struct bb_field *ff;
+  void *E;
+  if (lg(x)==1) { *rr = 0; return NULL; }
+  if (!T) return FpM_gauss_pivot(x, p, rr);
+  if (lgefint(p) == 3)
+  {
+    pari_sp av = avma;
+    ulong pp = (ulong)p[2];
+    GEN d = FlxqM_gauss_pivot(FqM_to_FlxM(x, T, p), ZX_to_Flx(T,pp), pp, rr);
+    return d ? gerepileuptoleaf(av, d): d;
+  }
+  ff = get_Fq_field(&E, T, p);
+  return gen_Gauss_pivot(x, rr, E, ff);
+}
+
 GEN
 FqM_image(GEN x, GEN T, GEN p)
 {
@@ -860,42 +932,6 @@ FqM_rank(GEN x, GEN T, GEN p)
   pari_sp av = avma;
   long r;
   (void)FqM_gauss_pivot(x,T,p,&r);
-  avma = av; return lg(x)-1 - r;
-}
-
-GEN
-F2m_image(GEN x)
-{
-  long r;
-  GEN d = F2m_gauss_pivot(F2m_copy(x),&r);
-  /* d left on stack for efficiency */
-  return image_from_pivot(x,d,r);
-}
-
-GEN
-Flm_image(GEN x, ulong p)
-{
-  long r;
-  GEN d = Flm_gauss_pivot(Flm_copy(x),p,&r);
-  /* d left on stack for efficiency */
-  return image_from_pivot(x,d,r);
-}
-
-long
-F2m_rank(GEN x)
-{
-  pari_sp av = avma;
-  long r;
-  (void)F2m_gauss_pivot(F2m_copy(x),&r);
-  avma = av; return lg(x)-1 - r;
-}
-
-long
-Flm_rank(GEN x, ulong p)
-{
-  pari_sp av = avma;
-  long r;
-  (void)Flm_gauss_pivot(Flm_copy(x),p,&r);
   avma = av; return lg(x)-1 - r;
 }
 
