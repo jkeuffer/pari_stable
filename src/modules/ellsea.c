@@ -721,7 +721,7 @@ Fp_study_eqn(long ell, GEN q, GEN mpoly, GEN p, long *pt_dG, long *pt_r)
     long s = ell + 1 - FpM_rank(RgM_Rg_add_shallow(L, gen_m1), p);
     *pt_r = (ell + 1)/s;
     return NULL;
-  } else *pt_r = 0;
+  }
   return FpX_oneroot(G, p);
 }
 
@@ -749,7 +749,7 @@ Fq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
       long s = ell + 1 - FqM_rank(RgM_Rg_add(L, gen_m1), T, p);
       *pt_r = (ell + 1)/s;
       return NULL;
-    } else *pt_r = 0;
+    }
   }
   return gel(FqX_roots(G, T, p), 1);
 }
@@ -760,10 +760,9 @@ study_modular_eqn(long ell, GEN mpoly, GEN q, GEN T, GEN p, enum mod_type *mt, l
 {
   pari_sp ltop = avma;
   GEN g = gen_0;
+  *ptr_r = 0; /*gcc -Wall*/
   if (degpol(FqX_gcd(mpoly, FqX_deriv(mpoly, T, p), T, p)) > 0)
-  {
-    *mt = MTpathological; *ptr_r = 0;
-  }
+    *mt = MTpathological;
   else
   {
     long dG;
