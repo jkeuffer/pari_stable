@@ -21,7 +21,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-static GEN ell_to_a4a6(GEN E, GEN p);
+/* Transforms a curve E into short Weierstrass form E' modulo p.
+   Returns a vector, the first two entries of which are a4' and a6'.
+   The third entry is a vector describing the isomorphism E' \to E.
+*/
+
+static GEN
+ell_to_a4a6_bc(GEN E, GEN p)
+{
+  GEN a1, a3, b2, c4, c6;
+  a1 = Rg_to_Fp(ell_get_a1(E),p);
+  a3 = Rg_to_Fp(ell_get_a3(E),p);
+  b2 = Rg_to_Fp(ell_get_b2(E),p);
+  c4 = Rg_to_Fp(ell_get_c4(E),p);
+  c6 = Rg_to_Fp(ell_get_c6(E),p);
+  retmkvec3(Fp_neg(Fp_mulu(c4, 27, p), p), Fp_neg(Fp_mulu(c6, 54, p), p),
+            mkvec4(modsi(6,p),Fp_mulu(b2,3,p),Fp_mulu(a1,3,p),Fp_mulu(a3,108,p)));
+}
 
 void
 checkellpt(GEN z)
@@ -966,7 +982,7 @@ _mul(void *e, GEN x, GEN y) { return addell((GEN)e, x, y); }
 static GEN
 ellpow_modp(GEN e, GEN P, GEN n, GEN p)
 {
-  GEN v = ell_to_a4a6(e, p), a4 = gel(v,1), m = gel(v,3);
+  GEN v = ell_to_a4a6_bc(e, p), a4 = gel(v,1), m = gel(v,3);
   GEN Pp = FpE_changepointinv(RgV_to_FpV(P,p), m, p);
   GEN Qp = FpE_mul(Pp, n, a4, p);
   return FpV_to_mod(FpE_changepoint(Qp, m, p), p);
@@ -4050,7 +4066,7 @@ static const struct bb_group ell_group={_mul,_pow,NULL,hash_GEN,gequal,ell_is_in
 static GEN
 elllog_modp(GEN e, GEN P, GEN Q, GEN o, GEN p)
 {
-  GEN v = ell_to_a4a6(e, p), a4 = gel(v,1), m = gel(v,3);
+  GEN v = ell_to_a4a6_bc(e, p), a4 = gel(v,1), m = gel(v,3);
   GEN Pp = FpE_changepointinv(RgV_to_FpV(P,p), m, p);
   GEN Qp = FpE_changepointinv(RgV_to_FpV(Q,p), m, p);
   return FpE_log(Pp, Qp, o, a4, p);
@@ -4112,7 +4128,7 @@ _orderell(GEN E, GEN P)
   /* transform E into short Weierstrass form Ep modulo p
      and P to Pp on Ep */
   p = utoipos(pp);
-  tmp = ell_to_a4a6(E, p);
+  tmp = ell_to_a4a6_bc(E, p);
   a4 = gel(tmp, 1);
   Pp = FpE_changepointinv(RgV_to_FpV(P, p), gel(tmp,3), p);
 
@@ -4528,24 +4544,6 @@ ellmiller(GEN E, GEN Q, GEN P, GEN m)
   return gerepileupto(ltop, gequal0(result)? gen_1: result);
 }
 
-/* Transforms a curve E into short Weierstrass form E' modulo p.
-   Returns a vector, the first two entries of which are a4' and a6'.
-   The third entry is a vector describing the isomorphism E' \to E.
-*/
-
-static GEN
-ell_to_a4a6(GEN E, GEN p)
-{
-  GEN a1, a3, b2, c4, c6;
-  a1 = Rg_to_Fp(ell_get_a1(E),p);
-  a3 = Rg_to_Fp(ell_get_a3(E),p);
-  b2 = Rg_to_Fp(ell_get_b2(E),p);
-  c4 = Rg_to_Fp(ell_get_c4(E),p);
-  c6 = Rg_to_Fp(ell_get_c6(E),p);
-  retmkvec3(Fp_neg(Fp_mulu(c4, 27, p), p), Fp_neg(Fp_mulu(c6, 54, p), p),
-            mkvec4(modsi(6,p),Fp_mulu(b2,3,p),Fp_mulu(a1,3,p),Fp_mulu(a3,108,p)));
-}
-
 GEN
 ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
 {
@@ -4557,7 +4555,7 @@ ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
     return gpowgs(ell_get_disc(E), 0);
   if (ell_is_FpE(E, P, &p) && RgV_is_FpV(Q, &p) && p && cmpiu(p,3)>0)
   {
-    GEN S = ell_to_a4a6(E, p);
+    GEN S = ell_to_a4a6_bc(E, p);
     GEN z = FpE_weilpairing(FpE_changepointinv(RgV_to_FpV(P,p),gel(S,3),p),
                             FpE_changepointinv(RgV_to_FpV(Q,p),gel(S,3),p),m,gel(S,1),p);
     return gerepileupto(ltop, Fp_to_mod(z, p));
@@ -4581,7 +4579,7 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   if (ell_is_FpE(E, P, &p) && RgV_is_FpV(Q, &p) && p && cmpiu(p,3)>0)
   {
     pari_sp ltop = avma;
-    GEN S = ell_to_a4a6(E, p);
+    GEN S = ell_to_a4a6_bc(E, p);
     GEN z = FpE_tatepairing(FpE_changepointinv(RgV_to_FpV(P,p),gel(S,3),p),
                             FpE_changepointinv(RgV_to_FpV(Q,p),gel(S,3),p),m,gel(S,1),p);
     return gerepileupto(ltop, Fp_to_mod(z, p));
@@ -4664,7 +4662,7 @@ ellgen(GEN E, GEN D, GEN m, GEN p)
   }
   else
   {
-    GEN e = ell_to_a4a6(E, p), a4 = gel(e, 1), a6 = gel(e, 2);
+    GEN e = ell_to_a4a6_bc(E, p), a4 = gel(e, 1), a6 = gel(e, 2);
     return gerepileupto(av, Fp_ellgens(a4,a6,gel(e,3),D,m,p));
   }
 }
@@ -4690,7 +4688,7 @@ ellgroup_m(GEN E, GEN p, GEN *pt_m)
     if ((1 + b2 + (b4<<1)) % 3) return mkvec(N);
     return mkvec2s(2, 2);
   } /* Now assume p > 3 */
-  e = ell_to_a4a6(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
+  e = ell_to_a4a6_bc(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
   return Fp_ellgroup(a4,a6,N,p,pt_m);
 }
 
