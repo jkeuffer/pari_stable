@@ -521,7 +521,41 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
   }
 }
 
-GEN
+static void
+Flx_cnext(GEN t, ulong p)
+{
+  long i;
+  for(i=2;;i++)
+    if (t[i]==p)
+      t[i]=0;
+    else
+    {
+      t[i]++;
+      break;
+    }
+}
+
+static ulong
+Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  long i, d = degpol(T), lx = d+1;
+  ulong q = upowuu(p, d), a;
+  GEN x = const_vecsmall(lx,0);
+  for(a=0, i=0; i<q; i++)
+  {
+    GEN x2, rhs;
+    x = Flx_renormalize(x,lx);
+    x2  = Flxq_sqr(x, T, p);
+    rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
+    if (!lgpol(rhs)) a++; else if (Flxq_issquare(x,T,p)) a+=2;
+    Flx_cnext(x,p);
+  }
+  avma = av;
+  return p+1-a;
+}
+
+static GEN
 Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
 {
   pari_sp av = avma;
@@ -581,7 +615,9 @@ GEN
 Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
-  GEN q = powuu(p, degpol(T)), r;
+  GEN r, q = powuu(p, degpol(T));
+  if (cmpis(q,100)<0)
+    return utoi(Flxq_ellcard_naive(a4, a6, T, p));
   if (expi(q)<=62)
     r = Flxq_ellcard_Shanks(a4, a6, q, T, p);
   else

@@ -816,7 +816,7 @@ FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
   if (lgefint(p)==3 && expi(q)<=62)
   {
     ulong pp = p[2];
-    r =  Flxq_ellcard_Shanks(ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),q,ZX_to_Flx(T,pp),pp);
+    r =  Flxq_ellcard(ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZX_to_Flx(T,pp),pp);
   }
   else
     r = Fq_ellcard_SEA(a4, a6, q, T, p, 0);
