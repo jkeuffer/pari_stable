@@ -2799,19 +2799,17 @@ get_table_size(GEN pordmin, GEN B)
 
 /* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 457 */
 static GEN
-ellap1(GEN e, GEN p)
+Fp_ellcard_Shanks(GEN c4, GEN c6, GEN p)
 {
   pari_timer T;
   long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, nb;
   ulong x;
   pari_sp av = avma, av2;
-  GEN p1, P, h, mfh, F,f, fh,fg, pordmin, u, v, p1p, p2p, A, B, c4,c6, a4, pts;
+  GEN p1, P, h, mfh, F,f, fh,fg, pordmin, u, v, p1p, p2p, A, B, a4, pts;
   tx = NULL;
   ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) timer_start(&T);
-  c4 = Rg_to_Fp(gdivgs(ell_get_c4(e),  -48), p);
-  c6 = Rg_to_Fp(gdivgs(ell_get_c6(e), -864), p);
   /* once #E(Fp) is know mod B >= pordmin, it is completely determined */
   pordmin = addis(sqrti(gmul2n(p,4)), 1); /* ceil( 4sqrt(p) ) */
   p1p = addsi(1, p);
@@ -2917,7 +2915,7 @@ ellap1(GEN e, GEN p)
     }
     P = FpE_add(gel(pts,j-1),mfh,a4,p); /* = (s-1).F */
     if (ell_is_inf(P)) { h = mului(s-1,B); goto FOUND; }
-    if (DEBUGLEVEL) timer_printf(&T, "[ellap1] baby steps, s = %ld",s);
+    if (DEBUGLEVEL) timer_printf(&T, "[Fp_ellcard_Shanks] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
     fg = FpE_add(P,F,a4,p);
@@ -2932,7 +2930,7 @@ ellap1(GEN e, GEN p)
     /* tx is sorted. ti = ty sorted */
     for (i=1; i<=s; i++) { ty[i] = ti[i]; ti[i] = p1[i]; }
     /* ty is sorted. ti = permutation sorting tx */
-    if (DEBUGLEVEL) timer_printf(&T, "[ellap1] sorting");
+    if (DEBUGLEVEL) timer_printf(&T, "[Fp_ellcard_Shanks] sorting");
     avma = av2;
 
     gaffect(fg, gel(pts,1));
@@ -2968,7 +2966,7 @@ ellap1(GEN e, GEN p)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == +/- ftest (= [i.s] f)? */
             j2 = ti[r] - 1;
-            if (DEBUGLEVEL) timer_printf(&T, "[ellap1] giant steps, i = %ld",i);
+            if (DEBUGLEVEL) timer_printf(&T, "[Fp_ellcard_Shanks] giant steps, i = %ld",i);
             P = FpE_add(FpE_mul(F,stoi(j2),a4,p),fh,a4,p);
             if (equalii(gel(P,1), gel(ftest,1)))
             {
@@ -3016,7 +3014,7 @@ FOUND: /* found a point of exponent h on E_u */
     if (!i) break;
   }
   if (tx) killblock(tx);
-  return gerepileuptoint(av, KRO==1? subii(p1p,h): subii(h,p1p));
+  return gerepileuptoint(av, KRO==1? h: subii(shifti(p1p,1),h));
 }
 
 typedef struct
@@ -3106,20 +3104,18 @@ sclosest_lift(long A, long B, ulong p2p)
 }
 
 /* assume p > 99 and e has good reduction at p. Should use Montgomery.
- * See ellap1() */
+ * See Fp_ellcard_Shanks() */
 static long
-ellap2(GEN e, ulong p)
+Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
 {
   sellpt f, fh, fg, ftest, F;
-  ulong x, u, c4, c6, cp4, p1p, p2p, h;
+  ulong x, u, cp4, p1p, p2p, h;
   long pordmin,A,B;
   long i, s, KRO, KROold, l, r, m;
   pari_sp av;
   multiple *table = NULL;
 
   av = avma;
-  c4 = Rg_to_Fl(gdivgs(ell_get_c4(e),  -48), p);
-  c6 = Rg_to_Fl(gdivgs(ell_get_c6(e), -864), p);
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
@@ -3207,7 +3203,7 @@ FOUND:
     avma = av; if (!i) break;
   }
   if (table) pari_free(table);
-  return KRO==1? p1p-h: h-p1p;
+  return KRO==1? h: 2*p1p-h;
 }
 
 /** ellap from CM (original code contributed by Mark Watkins) **/
@@ -3379,31 +3375,23 @@ get_p(GEN e, GEN p, const char *name)
   return pp;
 }
 
-GEN
-ellap(GEN e, GEN p)
-{
-  GEN a;
-  long lp;
-  checksmallell(e);
-  p = get_p(e,p,"ellap");
-  if ( (a = easy_ap(e, p)) ) return a;
-  lp = expi(p);
-  if (lp < 30) return stoi(ellap2(e, itou(p)));
-  if (lp >= 62) { a = ellsea(e, p, 0); if (a) return a; }
-  return ellap1(e, p);
-}
-
 /* assume e has good reduction mod p */
 static long
 ellap_small_goodred(GEN E, ulong p)
 {
   pari_sp av;
-  GEN a;
+  GEN a, a4, a6, pp;
   if (p < 99) return ap_jacobi(E, p);
   av = avma; a = CM_ellap(E, utoipos(p));
   avma = av; if (a) return itos(a);
-  if (p > 0x3fffffff) { a = ellap1(E, utoipos(p)); avma = av; return itos(a); }
-  return ellap2(E, p);
+  pp = utoipos(p);
+  a4 = ell_to_a4a6(E,pp,&a6);
+  if (p > 0x3fffffff)
+  {
+    a = Fp_ellcard_Shanks(a4, a6, pp);
+    avma = av; return itos(a);
+  }
+  return p+1-Fl_ellcard_Shanks(itou(a4), itou(a6), p);
 }
 
 static void
@@ -4595,15 +4583,40 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   }
   return ellmiller(E, P, Q, m);
 }
+/* Cardinal including th ramified point */
+static GEN
+ellcard_ram(GEN E, GEN p)
+{
+  GEN a, a4, a6;
+  long lp;
+  a = easy_ap(E, p); if (a) return subii(addis(p,1),a);
+  lp = expi(p);
+  a4 = ell_to_a4a6(E,p,&a6);
+  if (lp < 30)
+  {
+    ulong pp = p[2];
+    return utoi(Fl_ellcard_Shanks(itou(a4), itou(a6), pp));
+  }
+  if (lp >= 62) { a = Fp_ellcard_SEA(a4, a6, p, 0); if (a) return a; }
+  return Fp_ellcard_Shanks(a4, a6, p);
+}
+
+GEN
+ellap(GEN e, GEN p)
+{
+  pari_sp av = avma;
+  checksmallell(e);
+  p = get_p(e,p,"ellap");
+  return gerepileuptoint(av, subii(addis(p,1),ellcard_ram(e,p)));
+}
 
 GEN
 ellcard(GEN E, GEN p)
 {
-  pari_sp av=avma;
-  GEN N = subii(addis(p, 1), ellap(E, p));
+  pari_sp av = avma;
+  GEN N = ellcard_ram(E, p);
   GEN D = Rg_to_Fp(ell_get_disc(E), p);
-  if (!signe(D))
-    N = subis(N, 1); /* remove singular point */
+  if (!signe(D)) N = subis(N, 1); /* remove singular point */
   return gerepileuptoint(av, N);
 }
 
