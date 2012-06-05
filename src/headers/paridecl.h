@@ -653,6 +653,7 @@ GEN     FpM_invimage(GEN m, GEN v, GEN p);
 GEN     FpM_ker(GEN x, GEN p);
 long    FpM_rank(GEN x, GEN p);
 GEN     FpM_suppl(GEN x, GEN p);
+GEN     FqM_deplin(GEN x, GEN T, GEN p);
 GEN     FqM_gauss(GEN a, GEN b, GEN T, GEN p);
 GEN     FqM_ker(GEN x, GEN T, GEN p);
 GEN     FqM_image(GEN x, GEN T, GEN p);

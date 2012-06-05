@@ -3325,6 +3325,9 @@ reduced (i.e arbitrary \typ{INT}s and \kbd{ZX}s in the same variable as
 
 \fun{GEN}{FqC_Fq_mul}{GEN a, GEN b, GEN T, GEN p}
 
+\fun{GEN}{FqM_deplin}{GEN x, GEN T, GEN p} returns a non-trivial kernel vector,
+or \kbd{NULL} if none exist.
+
 \fun{GEN}{FqM_gauss}{GEN a, GEN b, GEN T, GEN p} as \kbd{gauss}
 
 \fun{GEN}{FqM_ker}{GEN x, GEN T, GEN p} as \kbd{ker}
@@ -3529,7 +3532,7 @@ and \kbd{y}
 \subsec{\kbd{FlxqV}, \kbd{FlxqM}} See \kbd{FqV}, \kbd{FqM} operations.
 
 \fun{GEN}{FlxM_Flx_add_shallow}{GEN x, GEN y, ulong p} as
-\kbd{RgM_Rg_add_shallow}.
+\kbd{RgM\_Rg\_add\_shallow}.
 
 \fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
 
