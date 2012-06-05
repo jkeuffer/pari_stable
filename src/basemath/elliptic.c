@@ -27,6 +27,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 */
 
 static GEN
+ell_to_a4a6(GEN E, GEN p, GEN *a6)
+{
+  GEN c4 = Rg_to_Fp(ell_get_c4(E),p);
+  GEN c6 = Rg_to_Fp(ell_get_c6(E),p);
+  *a6 = Fp_neg(Fp_mulu(c6, 54, p), p);
+  return Fp_neg(Fp_mulu(c4, 27, p), p);
+}
+
+static GEN
 ell_to_a4a6_bc(GEN E, GEN p)
 {
   GEN a1, a3, b2, c4, c6;
@@ -4670,7 +4679,7 @@ ellgen(GEN E, GEN D, GEN m, GEN p)
 static GEN
 ellgroup_m(GEN E, GEN p, GEN *pt_m)
 {
-  GEN e, a4, a6;
+  GEN a4, a6;
   GEN N = ellcard(E, p);
   if (equali1(N)) return cgetg(1,t_VEC);
   if (equaliu(p, 2)) return mkvec(N); /* Takes care of p=2 */
@@ -4688,7 +4697,7 @@ ellgroup_m(GEN E, GEN p, GEN *pt_m)
     if ((1 + b2 + (b4<<1)) % 3) return mkvec(N);
     return mkvec2s(2, 2);
   } /* Now assume p > 3 */
-  e = ell_to_a4a6_bc(E, p); a4 = gel(e, 1); a6 = gel(e, 2);
+  a4 = ell_to_a4a6(E, p, &a6);
   return Fp_ellgroup(a4,a6,N,p,pt_m);
 }
 
