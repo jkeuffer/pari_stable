@@ -1381,6 +1381,19 @@ get_bound_bsgs(long lp)
   return mulru(B, 1000000);
 }
 
+/*FIXME: the name of the function does not quite match what it does*/
+static const struct bb_group *
+get_FqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, GEN p)
+{
+  if (!T) return get_FpE_group(pt_E,a4,a6,p);
+  else if (lgefint(p)==3)
+  {
+    ulong pp=(ulong) p[2];
+    return get_FlxqE_group(pt_E, ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZX_to_Flx(T,pp),pp);
+  }
+  return get_FpXQE_group(pt_E,a4,a6,T,p);
+}
+
 /* E is an elliptic curve defined over Z or over Fp in ellinit format, defined
  * by the equation E: y^2 + a1*x*y + a2*y = x^3 + a2*x^2 + a4*x + a6
  * p is a prime number
@@ -1489,7 +1502,7 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
   cat = shallowextract(compile_atkin, gel(champ, 1));
   if (DEBUGLEVEL)
     err_printf("Match and sort for %Ps possibilities.\n",gel(champ, 2));
-  grp = T ? get_FpXQE_group(&E, a4,a6,T,p) : get_FpE_group(&E,a4,a6,p);
+  grp = get_FqE_group(&E,a4,a6,T,p);
   res = match_and_sort(cat, TR_mod, TR, q, E, grp);
   return gerepileuptoint(ltop, res);
 }
