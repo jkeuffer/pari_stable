@@ -21,7 +21,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error occurs,
  ? ecm(N, B = 1000!, nb = 100)=
    {
      for(a = 1, nb,
-       iferr(ellpow(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
+       iferr(ellmul(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
          E, if(errname(E)=="e_INTMOD",
               return(gcd(lift(component(E,1)),N)),
               error(E))));

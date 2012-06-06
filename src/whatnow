@@ -483,7 +483,7 @@ postdraw(list)=psdraw(list);
 postploth(X=a,b,expr)=psploth(X=a,b,expr);
 postploth2(X=a,b,expr)=psploth(X=a,b,expr,1);
 postplothraw(listx,listy)=psplothraw(listx,listy);
-powell(e,x,n)=ellpow(e,x,n);
+powell(e,x,n)=ellmul(e,x,n);
 powrealraw(x,n)=qfbpowraw(x,n);
 pprint(x)=;
 pprint1(x)=;

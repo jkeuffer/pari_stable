@@ -1474,9 +1474,9 @@ Here, \kbd{q=[0,0]} obviously lies on \kbd{e}, which has equation
 $y^2+y = x^3-x$.  Let us now play a little with points on \kbd{e}.
 The group law on an elliptic curve is implemented with the functions
 \kbd{elladd} for addition, \kbd{ellsub} for subtraction and
-\kbd{ellpow} for multiplication by an integer (``powering'').  For
+\kbd{ellmul} for multiplication by an integer.  For
 example, the negative of \kbd{q} is \kbd{ellsub(e,[0],q)}, and the
-double is obtained either as \kbd{ellpow(e,q,2)} or as
+double is obtained either as \kbd{ellmul(e,q,2)} or as
 \kbd{elladd(e,q,q)}.
 
 Now \kbd{q} may be a torsion point. Type \kbd{ellheight(e, q)}, which
@@ -1485,14 +1485,14 @@ computes the canonical Neron-Tate height of \kbd{q}. Note that
 This is non-zero, hence \kbd{q} is not torsion. To see this even better,
 type
 \bprog
-  for(k = 1, 20, print(ellpow(e, q, k)))
+  for(k = 1, 20, print(ellmul(e, q, k)))
 @eprog\noindent and we see the characteristic parabolic explosion of the size
 of the points. (And another proof that \kbd{q} is not torsion, assuming
 Mazur's bound on the size of the rational torsion.) We could can also type
 \kbd{ellorder(e, q)} which returns 0, telling us yet again that \kbd{q} is
 non-torsion. As a consistency check, type
 \bprog
-  ellheight(e, ellpow(e, q,20)) / ellheight(e, q)
+  ellheight(e, ellmul(e, q,20)) / ellheight(e, q)
 @eprog\noindent
 We indeed find $400=20^2$ as it should be.
 
@@ -1514,7 +1514,7 @@ conductor is equal to 11, and if you type \kbd{ellminimalmodel(E)} you will
 see that the equation  for \kbd{E} is minimal. This time the height is very
 close to zero, hence \kbd{q} must be a torsion point. Indeed, typing
 \bprog
-  for(k=1, 5, print(ellpow(E, q,k)))
+  for(k=1, 5, print(ellmul(E, q,k)))
   ellorder(E, q)   \\@com simpler
 @eprog\noindent
 we see in two different ways that \kbd{q} is a point of order 5. Moreover,

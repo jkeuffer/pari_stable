@@ -14,7 +14,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
    {
      for(a = 1, t,
        iferrname("e_INTMOD",
-         ellpow(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
+         ellmul(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
          E, return(gcd(lift(component(E,1)),N))));
    }
  ? ecm(2^101-1)
