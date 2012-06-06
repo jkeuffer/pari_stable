@@ -25,22 +25,22 @@ testgroup(v,p)=
   forvec(v=vector(2,i,[0,4]), testgroup(v,5));
 }
 a=ffgen(ffinit(2,8),'a); E=ellinit([a,1,0,0,1]);
-P=[a^3,ellordinate(E,a^3)[1]]; Q=ellpow(E,P,113);
+P=[a^3,ellordinate(E,a^3)[1]]; Q=ellmul(E,P,113);
 e=elllog(E,P,Q,242)
-ellpow(E,Q,e) == P
+ellmul(E,Q,e) == P
 
 p=655637;
 E=ellinit([123,47]*Mod(1,p));
 X=1;until(Y!=[],X++;Y=ellordinate(E,X));
-P=[X,Y[1]]; Q=ellpow(E,P,113);
+P=[X,Y[1]]; Q=ellmul(E,P,113);
 o=ellorder(E,P, p+1-ellap(E,p))
 e=elllog(E,P,Q,o)
-ellpow(E,Q,e) == P
+ellmul(E,Q,e) == P
 
 p=1073741827;
 E=ellinit([1,3]*Mod(1,p));
 G=[Mod(1050932506,p),Mod(12325986,p)];
-P=ellpow(E,G,1023);
+P=ellmul(E,G,1023);
 elllog(E,P,G)
 
 ellorder(ellinit([0,2],1),[-1,-1]*Mod(1,997))
@@ -51,7 +51,7 @@ ellorder(E, [0,0])
 ellorder(E, [2147484185, 0])
 ellorder(E, [2147484185/3, 1/11])
 E = ellinit([1,1]); P = [72, 611];
-ellorder (E, ellpow(E, P, 20))
+ellorder (E, ellmul(E, P, 20))
 
 elldivpol(ellinit([1,2,3,5,7]),4)
 elldivpol(ellinit([0,0,0,0,1]),8)
@@ -60,7 +60,7 @@ elldivpol(ellinit([0,0,0,0,1]),8)
 ellwp(ellinit([0,-1,1,-10,-20]),x+O(x^12))
 
 \\#1186
-ellpow(ellinit([3,0]), [1,2], -quadgen(-4))
+ellmul(ellinit([3,0]), [1,2], -quadgen(-4))
 
 v = [ellwp,ellzeta,ellsigma]
 e = ellinit([1,1]);
