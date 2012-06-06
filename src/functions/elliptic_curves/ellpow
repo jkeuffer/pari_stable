@@ -1,28 +1,7 @@
 Function: ellpow
 Section: elliptic_curves
-C-Name: powell
+C-Name: ellmul
 Prototype: GGG
-Help: ellpow(E,z,n): n times the point z on elliptic curve E (n in Z).
+Help: ellpow(E,z,n): deprecated alias for ellmul.
 Doc:
- computes $[n]z$, where $z$ is a point on the elliptic curve $E$. The
- exponent $n$ is in $\Z$, or may be a complex quadratic integer if the curve $E$
- has complex multiplication by $n$ (if not, an error message is issued).
- \bprog
- ? Ei = ellinit([1,0]); z = [0,0];
- ? ellpow(Ei, z, 10)
- %2 = [0]     \\ unsurprising: z has order 2
- ? ellpow(Ei, z, I)
- %3 = [0, 0]  \\ Ei has complex multiplication by Z[i]
- ? ellpow(Ei, z, quadgen(-4))
- %4 = [0, 0]  \\ an alternative syntax for the same query
- ? Ej  = ellinit([0,1]); z = [-1,0];
- ? ellpow(Ej, z, I)
-   ***   at top-level: ellpow(Ej,z,I)
-   ***                 ^--------------
-   *** ellpow: not a complex multiplication in powell.
- ? ellpow(Ej, z, 1+quadgen(-3))
- %6 = [1 - w, 0]
- @eprog
- The simple-minded algorithm for the CM case assumes that we are in
- characteristic $0$, and that the quadratic order to which $n$ belongs has
- small discriminant.
+ ellpow is deprecated in favor of ellmul.

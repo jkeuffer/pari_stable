@@ -10,22 +10,27 @@ This file lists the incompatible changes between Version 2.x and older versions
   - [non-Unix systems] the name of the preferences file is now "gprc.txt"
     (it remains ".gprc" on Unix systems)
   - removed rootsold() code : polroots(x, 1) is no longer accepted.
-  - renamed all libpari error codes [ pari_err() arguments ]
-  - ellwp0(): remove precdl argument
-  - rename stackmalloc -> stack_malloc
   - format of cached Bernoulli table: now a t_VEC of t_FRAC / t_REALs.
     Removed bern() macro. The new data must be accessed using bernfrac /
     bernreal.
-  - simplify init_primepointer(n, p, &pd) interface
-    => init_primepointer(n, &pd). Remove argument 'p', ignore the previous
-    value of pd [ remove assumption that it pointed into a prime table ]
-    and always set pd to a pointer into the private prime table.
   - forprime loop: no longer allow to modify the loop index
     ? forprime(p = 2, 10, p = [])
      ***   at top-level: forprime(p=2,10,p=[])
      ***                                   ^---
      ***   prime index read-only: was changed to [].
+  - rename ellpow -> ellmul
+
+* Specific to the PARI library:
+===============================
+  - renamed all libpari error codes [ pari_err() arguments ]
+  - ellwp0(): remove precdl argument
+  - rename stackmalloc -> stack_malloc
   - rename ggval -> gvaluation
+  - rename powell -> ellmul
+  - simplify init_primepointer(n, p, &pd) interface
+    => init_primepointer(n, &pd). Remove argument 'p', ignore the previous
+    value of pd [ remove assumption that it pointed into a prime table ]
+    and always set pd to a pointer into the private prime table.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

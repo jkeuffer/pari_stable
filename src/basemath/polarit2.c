@@ -883,7 +883,7 @@ powi(void *a, GEN x, GEN y) { (void)a; return powgi(x,y);}
 static GEN
 ellmul(void *ell, GEN x, GEN y) { return addell((GEN) ell, x, y); }
 static GEN
-ellpow(void *ell, GEN x, GEN n) { return powell((GEN) ell, x, n); }
+ellpow(void *ell, GEN x, GEN n) { return ellmul((GEN) ell, x, n); }
 #endif
 
 /* [L,e] = [fa, NULL] or [elts, NULL] or [elts, exponents] */

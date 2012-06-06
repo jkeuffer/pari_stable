@@ -939,7 +939,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
   long ln, ep, vn;
 
   if (typ(N) != t_INT)
-    pari_err_TYPE("powell (non integral CM exponent)",N);
+    pari_err_TYPE("ellmul (non integral CM exponent)",N);
   ln = itos_or_0(shifti(addsi(1, N), 3));
   if (!ln) pari_err_OVERFLOW("ellpow_CM [norm too large]");
   vn = ((ln>>1)-4)>>2;
@@ -964,7 +964,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
   }
   while (degpol(p1) < vn);
   if (degpol(p1) > vn || signe(z2))
-    pari_err_TYPE("powell [not a complex multiplication]", n);
+    pari_err_TYPE("ellmul [not a complex multiplication]", n);
   q1p = RgX_deriv(q1);
   b2ov12 = gdivgs(ell_get_b2(e), 12); /* x - b2/12 */
   grdx = gadd(gel(z,1), b2ov12);
@@ -1099,7 +1099,7 @@ ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
   GEN A, B, q;
   if (typ(a) != t_INT) pari_err_TYPE("ellpow_Z",a);
   q = CM_factor(e, w);
-  if (!q) pari_err_TYPE("powell [not a complex multiplication]",w);
+  if (!q) pari_err_TYPE("ellmul [not a complex multiplication]",w);
   if (q != gen_1) w = gdiv(w, q);
   /* compute [a + q w] z, z has CM by w */
   if (typ(w) == t_QUAD && is_pm1(gel(gel(w,1), 3)))
@@ -1121,7 +1121,7 @@ ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
   return addell(e, A, B);
 }
 GEN
-powell(GEN e, GEN z, GEN n)
+ellmul(GEN e, GEN z, GEN n)
 {
   pari_sp av = avma;
 
@@ -1140,7 +1140,7 @@ powell(GEN e, GEN z, GEN n)
       return gerepileupto(av, ellpow_CM_aux(e,z,a,mkcomplex(gen_0,b)));
     }
   }
-  pari_err_TYPE("powell (non integral, non CM exponent)",n);
+  pari_err_TYPE("ellmul (non integral, non CM exponent)",n);
   return NULL; /* not reached */
 }
 
@@ -3050,7 +3050,7 @@ s_addell(sellpt *P, sellpt *Q, long c4, long p)
 
 /* Q <-- P^n */
 static void
-s_powell(sellpt *Q, sellpt *P, long n, long c4, long p)
+s_ellmul(sellpt *Q, sellpt *P, long n, long c4, long p)
 {
   sellpt R = *P;
 
@@ -3081,7 +3081,7 @@ sexact_order(long H, sellpt *f, long c4, long p)
     for (j=e[i]; j; j--)
     {
       long n = h / pp;
-      s_powell(&fh, f, n, c4, p);
+      s_ellmul(&fh, f, n, c4, p);
       if (!fh.isnull) break;
       h = n;
     }
@@ -3143,7 +3143,7 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
     f.x = Fl_mul(x, u, p);
     f.y = Fl_mul(u, u, p);
     cp4 = Fl_mul(c4, f.y, p);
-    s_powell(&fh, &f, h, cp4, p);
+    s_ellmul(&fh, &f, h, cp4, p);
     s = (long) (sqrt(((float)pordmin)/B) / 2);
     if (!s) s = 1;
     if (!table)
@@ -3151,7 +3151,7 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
       table = (multiple *) pari_malloc((s+1) * sizeof(multiple));
       F = f;
     }
-    s_powell(&F, &f, B, cp4, p);
+    s_ellmul(&F, &f, B, cp4, p);
     for (i=0; i < s; i++)
     {
       if (fh.isnull) { h += B*i; goto FOUND; }
@@ -3161,7 +3161,7 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
       s_addell(&fh, &F, cp4, p);
     }
     qsort(table,s,sizeof(multiple),(QSCOMP)compare_multiples);
-    s_powell(&fg, &F, s, cp4, p); ftest = fg;
+    s_ellmul(&fg, &F, s, cp4, p); ftest = fg;
     for (i=1; ; i++)
     {
       if (ftest.isnull) {
