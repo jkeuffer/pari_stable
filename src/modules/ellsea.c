@@ -356,7 +356,7 @@ eigen_elladd(void *E, GEN P, GEN Q)
 }
 
 static GEN
-eigen_ellpowu(struct eigen_ellinit *E, GEN z, ulong n)
+eigen_ellmulu(struct eigen_ellinit *E, GEN z, ulong n)
 {
   pari_sp av = avma;
   if (!n || ell_is_inf(z)) return mkvec(gen_0);
@@ -395,7 +395,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN T, GEN p, GEN tr)
   {
     t = Fl_div(tr[1], 2, ell);
     if (t < (ell>>1)) t = ell - t;
-    Dr = eigen_ellpowu(&Edat, BP, t);
+    Dr = eigen_ellmulu(&Edat, BP, t);
     if (!FqX_equal(gel(Dr,2), Edat.Gr)) t = ell - t;
     avma = ltop; return t;
   }
@@ -415,8 +415,8 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
   ulong t, ellk1 = upowuu(ell, k-1), ellk = ell*ellk1;
   init_eigen(&Edat, a4, a6, h, T, p);
   P = mkvec2(pol_x(0), pol_1(0));
-  BP = eigen_ellpowu(&Edat, P, ellk1);
-  Dr = eigen_ellpowu(&Edat, P, lambda);
+  BP = eigen_ellmulu(&Edat, P, ellk1);
+  Dr = eigen_ellmulu(&Edat, P, lambda);
   Gr = Edat.Gr;
   negGr = FqX_neg(Edat.Gr, T, p);
 
