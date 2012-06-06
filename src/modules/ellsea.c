@@ -1417,19 +1417,25 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
   void *E;
 
   if (!modular_eqn && !get_seadata(0)) return NULL;
+  if (T && varn(T)==0) /* 0 is used by the modular polynomial */
+  {
+    T = ZX_copy(T); setvarn(T,1);
+    a4 = ZX_copy(a4); setvarn(a4,1);
+    a6 = ZX_copy(a6); setvarn(a6,1);
+  }
   /*First compute the trace modulo 2 */
   switch(FqX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), T, p))
   {
-    case 3: /* bonus time: 4 | #E(Fq) = q+1 - a_p */
-      i = mod4(q)+1; if (i > 2) i -= 4;
-      TR_mod = utoipos(4);
-      TR = stoi(i); break;
-    case 1:
-      TR_mod = gen_2;
-      TR = gen_0; break;
-    default : /* 0 */
-      TR_mod = gen_2;
-      TR = gen_1; break;
+  case 3: /* bonus time: 4 | #E(Fq) = q+1 - a_p */
+    i = mod4(q)+1; if (i > 2) i -= 4;
+    TR_mod = utoipos(4);
+    TR = stoi(i); break;
+  case 1:
+    TR_mod = gen_2;
+    TR = gen_0; break;
+  default : /* 0 */
+    TR_mod = gen_2;
+    TR = gen_1; break;
   }
   if (smallfact == 1 && !mpodd(TR))
   {
