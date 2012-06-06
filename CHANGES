@@ -290,6 +290,7 @@ LGr87- Add clock_gettime timer option
    88- add new error type e_DOMAIN
 BA 89- Add blackbox finite field for generic linear algebra
 BA 90- PARI functions FlxqM_image, FlxqM_ker, FqM_deplin
+BA 91- GP function ellneg
 
   Removed
     1- dropped DOS support

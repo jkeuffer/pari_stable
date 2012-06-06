@@ -812,7 +812,7 @@ elladd(GEN e, GEN z1, GEN z2)
 }
 
 static GEN
-ellneg(GEN e, GEN z)
+ellneg_i(GEN e, GEN z)
 {
   GEN t;
   if (ell_is_inf(z)) return z;
@@ -823,11 +823,26 @@ ellneg(GEN e, GEN z)
 }
 
 GEN
+ellneg(GEN e, GEN z)
+{
+  pari_sp av;
+  GEN t, y;
+  checkell5(e); checkellpt(z);
+  if (ell_is_inf(z)) return z;
+  t = cgetg(3,t_VEC);
+  gel(t,1) = gcopy(gel(z,1));
+  av = avma;
+  y = gadd(gel(z,2), ellLHS0(e,gel(z,1)));
+  gel(t,2) = gerepileupto(av, y);
+  return t;
+}
+
+GEN
 ellsub(GEN e, GEN z1, GEN z2)
 {
   pari_sp av = avma;
   checkell5(e); checkellpt(z2);
-  return gerepileupto(av, elladd(e, z1, ellneg(e,z2)));
+  return gerepileupto(av, elladd(e, z1, ellneg_i(e,z2)));
 }
 
 /* e an ell5, x a scalar */
@@ -1008,7 +1023,7 @@ ellmul_Z(GEN e, GEN z, GEN n)
     return ellmul_modp(e, z, n, p);
   s = signe(n);
   if (!s) return ellinf();
-  if (s < 0) z = ellneg(e,z);
+  if (s < 0) z = ellneg_i(e,z);
   if (is_pm1(n)) return z;
   return gen_pow(z, n, (void*)e, &_sqr, &_mul);
 }
@@ -4005,7 +4020,7 @@ best_in_cycle(GEN e, GEN p, long k)
     q = elladd(e,q,p0);
     if (ugcd(i,k)==1 && smaller_x(gel(q,1), gel(p,1))) p = q;
   }
-  return (gsigne(d_ellLHS(e,p)) < 0)? ellneg(e,p): p;
+  return (gsigne(d_ellLHS(e,p)) < 0)? ellneg_i(e,p): p;
 }
 
 /* <p,q> = E_tors, possibly NULL (= oo), p,q independent unless NULL
