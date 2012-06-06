@@ -552,24 +552,27 @@ gen_lgener(GEN l, long e, GEN r,GEN *zeta, void *E, const struct bb_group *grp)
 GEN
 gen_gener(GEN o, void *E, const struct bb_group *grp)
 {
-  GEN F = dlog_get_ordfa(o);
-  GEN N = gel(F,1), pr = gel(F,2), z = NULL;
-  long i, lpr = lg(gel(pr,1));
-  pari_sp av = avma, lim = stack_lim(av,2);
+  pari_sp ltop = avma, av, lim;
+  long i, lpr;
+  GEN F, N, pr, z=NULL;
+  F = dlog_get_ordfa(o);
+  N = gel(F,1); pr = gel(F,2); lpr = lg(gel(pr,1));
+  av = avma; lim = stack_lim(av,2);
+
   for (i = 1; i < lpr; i++)
   {
     GEN l = gcoeff(pr,i,1);
     long e = itos(gcoeff(pr,i,2));
     GEN r = diviiexact(N,powis(l,e));
     GEN zetan, zl = gen_lgener(l,e,r,&zetan,E,grp);
-    z = i==1 ? zl: grp->mul(E,z, zl);
+    z = i==1 ? zl: grp->mul(E,z,zl);
     if (low_stack(lim, stack_lim(av,2)))
     { /* n can have lots of prime factors*/
-      if(DEBUGMEM>1) pari_warn(warnmem,"gen_Shanks_sqrtn");
+      if(DEBUGMEM>1) pari_warn(warnmem,"gen_gener");
       z = gerepileupto(av, z);
     }
   }
-  return gerepileupto(av, z);
+  return gerepileupto(ltop, z);
 }
 
 /* solve x^l = a , l prime in G of order q.
@@ -741,12 +744,14 @@ gen_ellgroup(GEN N, GEN d, GEN *pt_m, void *E, const struct bb_group *grp,
 }
 
 GEN
-gen_ellgens(GEN d1, GEN d2, GEN m, void *E, const struct bb_group *grp,
+gen_ellgens(GEN D1, GEN d2, GEN m, void *E, const struct bb_group *grp,
              GEN pairorder(void *E, GEN P, GEN Q, GEN m, GEN F))
 {
-  GEN F = mkvec2(d1, Z_factor(d1));
-  GEN dm = diviiexact(d1,m);
-  pari_sp av = avma;
+  pari_sp ltop = avma, av;
+  GEN F, d1, dm;
+  F = dlog_get_ordfa(D1);
+  d1 = gel(F, 1), dm =  diviiexact(d1,m);
+  av = avma;
   while(1)
   {
     GEN P = grp->rand(E);
@@ -755,7 +760,7 @@ gen_ellgens(GEN d1, GEN d2, GEN m, void *E, const struct bb_group *grp,
     {
       GEN Q = grp->rand(E);
       GEN d = pairorder(E, grp->pow(E, P, dm), grp->pow(E, Q, dm), m, F);
-      if (equalii(d, d2)) return mkvec2(P,Q);
+      if (equalii(d, d2)) return gerepilecopy(ltop, mkvec2(P,Q));
     }
     avma = av;
   }
