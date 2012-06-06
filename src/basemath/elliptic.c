@@ -933,7 +933,7 @@ ellrandom(GEN e)
 
 /* n t_QUAD or t_COMPLEX, z != [0] */
 static GEN
-ellpow_CM(GEN e, GEN z, GEN n)
+ellmul_CM(GEN e, GEN z, GEN n)
 {
   GEN p1p, q1p, x, y, p0, p1, q0, q1, z1, z2, grdx, b2ov12, N = gnorm(n);
   long ln, ep, vn;
@@ -941,7 +941,7 @@ ellpow_CM(GEN e, GEN z, GEN n)
   if (typ(N) != t_INT)
     pari_err_TYPE("ellmul (non integral CM exponent)",N);
   ln = itos_or_0(shifti(addsi(1, N), 3));
-  if (!ln) pari_err_OVERFLOW("ellpow_CM [norm too large]");
+  if (!ln) pari_err_OVERFLOW("ellmul_CM [norm too large]");
   vn = ((ln>>1)-4)>>2;
   z1 = ellwpseries(e, 0, ln);
   z2 = gsubst(z1, 0, monomial(n, 1, 0));
@@ -989,7 +989,7 @@ static GEN
 _mul(void *e, GEN x, GEN y) { return elladd((GEN)e, x, y); }
 
 static GEN
-ellpow_modp(GEN e, GEN P, GEN n, GEN p)
+ellmul_modp(GEN e, GEN P, GEN n, GEN p)
 {
   GEN v = ell_to_a4a6_bc(e, p), a4 = gel(v,1), m = gel(v,3);
   GEN Pp = FpE_changepointinv(RgV_to_FpV(P,p), m, p);
@@ -999,13 +999,13 @@ ellpow_modp(GEN e, GEN P, GEN n, GEN p)
 
 /* [n] z, n integral */
 static GEN
-ellpow_Z(GEN e, GEN z, GEN n)
+ellmul_Z(GEN e, GEN z, GEN n)
 {
   long s;
   GEN p=NULL;
   if (ell_is_inf(z)) return ellinf();
   if (ell_is_FpE(e,z,&p) && p && cmpiu(p,3)>0)
-    return ellpow_modp(e, z, n, p);
+    return ellmul_modp(e, z, n, p);
   s = signe(n);
   if (!s) return ellinf();
   if (s < 0) z = ellneg(e,z);
@@ -1094,10 +1094,10 @@ CM_factor(GEN E, GEN Q)
 
 /* [a + w] z, a integral, w pure imaginary */
 static GEN
-ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
+ellmul_CM_aux(GEN e, GEN z, GEN a, GEN w)
 {
   GEN A, B, q;
-  if (typ(a) != t_INT) pari_err_TYPE("ellpow_Z",a);
+  if (typ(a) != t_INT) pari_err_TYPE("ellmul_Z",a);
   q = CM_factor(e, w);
   if (!q) pari_err_TYPE("ellmul [not a complex multiplication]",w);
   if (q != gen_1) w = gdiv(w, q);
@@ -1106,7 +1106,7 @@ ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
   { /* replace w by w - u, u in Z, so that N(w-u) is minimal
      * N(w - u) = N w - Tr w u + u^2, minimal for u = Tr w / 2 */
     GEN u = gtrace(w);
-    if (typ(u) != t_INT) pari_err_TYPE("ellpow_CM",w);
+    if (typ(u) != t_INT) pari_err_TYPE("ellmul_CM",w);
     u = shifti(u, -1);
     if (signe(u))
     {
@@ -1115,9 +1115,9 @@ ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
     }
     /* [a + w]z = [(a + qu)] z + [q] [(w - u)] z */
   }
-  A = ellpow_Z(e,z,a);
-  B = ellpow_CM(e,z,w);
-  if (q != gen_1) B = ellpow_Z(e, B, q);
+  A = ellmul_Z(e,z,a);
+  B = ellmul_CM(e,z,w);
+  if (q != gen_1) B = ellmul_Z(e, B, q);
   return elladd(e, A, B);
 }
 GEN
@@ -1129,15 +1129,15 @@ ellmul(GEN e, GEN z, GEN n)
   if (ell_is_inf(z)) return ellinf();
   switch(typ(n))
   {
-    case t_INT: return gerepilecopy(av, ellpow_Z(e,z,n));
+    case t_INT: return gerepilecopy(av, ellmul_Z(e,z,n));
     case t_QUAD: {
       GEN pol = gel(n,1), a = gel(n,2), b = gel(n,3);
-      if (signe(pol[2]) < 0) pari_err_TYPE("ellpow_CM",n); /* disc > 0 ? */
-      return gerepileupto(av, ellpow_CM_aux(e,z,a,mkquad(pol, gen_0,b)));
+      if (signe(pol[2]) < 0) pari_err_TYPE("ellmul_CM",n); /* disc > 0 ? */
+      return gerepileupto(av, ellmul_CM_aux(e,z,a,mkquad(pol, gen_0,b)));
     }
     case t_COMPLEX: {
       GEN a = gel(n,1), b = gel(n,2);
-      return gerepileupto(av, ellpow_CM_aux(e,z,a,mkcomplex(gen_0,b)));
+      return gerepileupto(av, ellmul_CM_aux(e,z,a,mkcomplex(gen_0,b)));
     }
   }
   pari_err_TYPE("ellmul (non integral, non CM exponent)",n);
@@ -4017,7 +4017,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
   if (q)
   {
     long n = k>>1;
-    GEN p1, best = q, np = ellpow_Z(e,p,utoipos(n));
+    GEN p1, best = q, np = ellmul_Z(e,p,utoipos(n));
     if (n % 2 && smaller_x(gel(np,1), gel(best,1))) best = np;
     p1 = elladd(e,q,np);
     if (smaller_x(gel(p1,1), gel(best,1))) q = p1;
@@ -4056,7 +4056,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
 }
 
 static GEN
-_pow(void *E, GEN x, GEN n) { return ellpow_Z((GEN)E,x,n); }
+_pow(void *E, GEN x, GEN n) { return ellmul_Z((GEN)E,x,n); }
 
 static const struct bb_group ell_group={_mul,_pow,NULL,hash_GEN,gequal,ell_is_inf};
 
@@ -4271,7 +4271,7 @@ nagelllutz(GEN e)
       if (_orderell(e,gel(r,k)) == t2) break;
     if (k>t) pari_err_BUG("elltors (bug3)");
 
-    p1 = ellpow_Z(e,gel(r,k),utoipos(t>>2));
+    p1 = ellmul_Z(e,gel(r,k),utoipos(t>>2));
     k2 = (!ell_is_inf(p1) && gequal(gel(r,2),p1))? 3: 2;
     w3 = mkvec2(gel(r,k), gel(r,k2));
   }
@@ -4331,7 +4331,7 @@ torspnt(GEN E, GEN w, long n, long prec)
   gel(p,2) = gmul2n(myround(gmul2n(gel(q,2),3), &e),-3);
   if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
   return (oncurve(E,p)
-      && ell_is_inf(ellpow_Z(E,p,utoipos(n)))
+      && ell_is_inf(ellmul_Z(E,p,utoipos(n)))
       && _orderell(E,p) == n)? p: NULL;
 }
 
