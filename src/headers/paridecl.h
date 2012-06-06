@@ -1520,7 +1520,6 @@ void    forell(void *E, long call(void*, GEN), long a, long b);
 
 /* elliptic.c */
 
-GEN     addell(GEN e, GEN z1, GEN z2);
 GEN     akell(GEN e, GEN n);
 GEN     anell(GEN e, long n);
 GEN     anellsmall(GEN e, long n);
@@ -1533,6 +1532,7 @@ void    checkellpt(GEN z);
 void    checkell5(GEN e);
 GEN     ell_to_small_red(GEN e, GEN *N);
 GEN     ell_to_small_redfa(GEN e, GEN *N, GEN *faN);
+GEN     elladd(GEN e, GEN z1, GEN z2);
 GEN     ellap(GEN e, GEN p);
 GEN     ellcard(GEN E, GEN p);
 GEN     ellcard0(GEN E, GEN p);
@@ -1562,6 +1562,7 @@ GEN     ellrandom(GEN e);
 long    ellrootno(GEN e, GEN p);
 long    ellrootno_global(GEN e, GEN N);
 GEN     ellsigma(GEN om, GEN z, long flag, long prec);
+GEN     ellsub(GEN e, GEN z1, GEN z2);
 GEN     elltaniyama(GEN e, long prec);
 GEN     elltatepairing(GEN E, GEN t, GEN s, GEN m);
 GEN     elltors0(GEN e, long flag);
@@ -1578,7 +1579,6 @@ GEN     ellchangepoint(GEN x, GEN ch);
 GEN     ellchangepointinv(GEN x, GEN ch);
 GEN     pointell(GEN e, GEN z, long prec);
 GEN     smallellinit(GEN x);
-GEN     subell(GEN e, GEN z1, GEN z2);
 GEN     elltors(GEN e);
 GEN     weipell(GEN e, long precdl);
 GEN     zell(GEN e, GEN z, long prec);

@@ -191,7 +191,8 @@ BA 48- agm now returns the optimal AGM
        independently of 'primelimit'. Parameter 'b' can be omitted (no upper
        limit)
    60- rename ggval -> gvaluation
-BA 70- GP function ellpow is renamed to ellmul, PARI powell->ellmul
+BA 70- GP function ellpow is renamed to ellmul
+BA 71- rename powell->ellmul, addell->elladd, subell->ellsub
 
   Added
     1- mathnf for matrices over K[X] [#41]

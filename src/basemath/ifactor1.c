@@ -353,12 +353,12 @@ int factor_add_primes = 0, factor_proven = 0;
  * (Phase 2 creates 12 items on the stack, per iteration, of which
  * four are twice as long and one is thrice as long as N -- makes 18 units
  * per iteration.  Phase  1 creates 4 units.  Total can be as large as
- * about 4*nbcmax + 18*8 units.  And elladd2() is just as bad, and
+ * about 4*nbcmax + 18*8 units.  And ecm_elladd2() is just as bad, and
  * elldouble() comes to about 3*nbcmax + 29*8 units.  A few strategic garbage
  * collections every 8 iterations may help when nbc is large.) */
 
 static int
-elladd0(GEN N, GEN *gl, long nbc, long nbc1,
+ecm_elladd0(GEN N, GEN *gl, long nbc, long nbc1,
         GEN *X1, GEN *Y1, GEN *X2, GEN *Y2, GEN *X3, GEN *Y3)
 {
   GEN W[2*nbcmax], *A = W+nbc; /* W[0],A[0] unused */
@@ -368,7 +368,7 @@ elladd0(GEN N, GEN *gl, long nbc, long nbc1,
 
   /* actually, this is only ever called with nbc1==nbc or nbc1==4, so: */
   if (nbc1 == 4) mask = 3;
-  else if (nbc1 < nbc) pari_err_BUG("[caller of] elladd0");
+  else if (nbc1 < nbc) pari_err_BUG("[caller of] ecm_elladd0");
 
   W[1] = subii(X1[0], X2[0]);
   for (i=1; i<nbc; i++)
@@ -411,16 +411,16 @@ elladd0(GEN N, GEN *gl, long nbc, long nbc1,
 /* Shortcut, for use in cases where Y coordinates follow their corresponding
  * X coordinates, and first summand doesn't need to be repeated */
 static int
-elladd(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2, GEN *X3) {
-  return elladd0(N, gl, nbc, nbc, X1, X1+nbc, X2, X2+nbc, X3, X3+nbc);
+ecm_elladd(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2, GEN *X3) {
+  return ecm_elladd0(N, gl, nbc, nbc, X1, X1+nbc, X2, X2+nbc, X3, X3+nbc);
 }
 
-/* As elladd except it does twice as many additions (and thus hides even more
+/* As ecm_elladd except it does twice as many additions (and thus hides even more
  * of the cost of the modular inverse); the net effect is the same as
- * elladd(nbc,X1,X2,X3) followed by elladd(nbc,X4,X5,X6).  Safe to have
+ * ecm_elladd(nbc,X1,X2,X3) followed by ecm_elladd(nbc,X4,X5,X6).  Safe to have
  * X2==X3, X5==X6, or X1 or X2 coincide with X4 or X5, in any order. */
 static int
-elladd2(GEN N, GEN *gl, long nbc,
+ecm_elladd2(GEN N, GEN *gl, long nbc,
         GEN *X1, GEN *X2, GEN *X3, GEN *X4, GEN *X5, GEN *X6)
 {
   GEN *Y1 = X1+nbc, *Y2 = X2+nbc, *Y3 = X3+nbc;
@@ -487,7 +487,7 @@ elladd2(GEN N, GEN *gl, long nbc,
 
 /* Parallel doubling on nbc curves, assigning the result to locations at
  * and following *X2.  Safe to be called with X2 equal to X1.  Return
- * value as for elladd.  If we find a point at infinity mod N,
+ * value as for ecm_elladd.  If we find a point at infinity mod N,
  * and if X1 != X2, we copy the points at X1 to X2. */
 static int
 elldouble(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2)
@@ -536,7 +536,7 @@ elldouble(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2)
 
 /* Parallel multiplication by an odd prime k on nbc curves, storing the
  * result to locations at and following *X2.  Safe to be called with X2 = X1.
- * Return values as elladd. Uses (a simplified variant of) Peter Montgomery's
+ * Return values as ecm_elladd. Uses (a simplified variant of) Peter Montgomery's
  * PRAC (PRactical Addition Chain) algorithm;
  * see ftp://ftp.cwi.nl/pub/pmontgom/Lucas.ps.gz .
  * With thanks to Paul Zimmermann for the reference.  --GN1998Aug13 */
@@ -586,12 +586,12 @@ ellmult(GEN N, GEN *gl, long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
     {
     case 0:                        /* rule 1 */
       e1 = d - e; d = (d + e1)/3; e = (e - e1)/3;
-      if ( (res = elladd(N, gl, nbc, A, B, T)) ) return res;
-      if ( (res = elladd2(N, gl, nbc, T, A, A, T, B, B)) != 0) return res;
+      if ( (res = ecm_elladd(N, gl, nbc, A, B, T)) ) return res;
+      if ( (res = ecm_elladd2(N, gl, nbc, T, A, A, T, B, B)) != 0) return res;
       break;                        /* end of rule 1 */
     case 1:                        /* rules 2 and 4, part 1 */
       d -= e;
-      if ( (res = elladd(N, gl, nbc, A, B, B)) ) return res;
+      if ( (res = ecm_elladd(N, gl, nbc, A, B, B)) ) return res;
       /* FALL THROUGH */
     case 3:                        /* rule 5, and 2nd part of rules 2 and 4 */
       d >>= 1;
@@ -600,22 +600,22 @@ ellmult(GEN N, GEN *gl, long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
     case 4:                        /* rule 6 */
       d /= 3;
       if ( (res = elldouble(N, gl, nbc, A, T)) ) return res;
-      if ( (res = elladd(N, gl, nbc, T, A, A)) ) return res;
+      if ( (res = ecm_elladd(N, gl, nbc, T, A, A)) ) return res;
       /* FALL THROUGH */
     case 2:                        /* rule 3, and 2nd part of rule 6 */
       d -= e;
-      if ( (res = elladd(N, gl, nbc, A, B, B)) ) return res;
+      if ( (res = ecm_elladd(N, gl, nbc, A, B, B)) ) return res;
       break;                        /* end of rules 3 and 6 */
     case 5:                        /* rule 7 */
       d = (d - e - e)/3;
       if ( (res = elldouble(N, gl, nbc, A, T)) ) return res;
-      if ( (res = elladd2(N, gl, nbc, T, A, A, T, B, B)) != 0) return res;
+      if ( (res = ecm_elladd2(N, gl, nbc, T, A, A, T, B, B)) != 0) return res;
       break;                        /* end of rule 7 */
     case 6:                        /* rule 8 */
       d = (d - e)/3;
-      if ( (res = elladd(N, gl, nbc, A, B, B)) ) return res;
+      if ( (res = ecm_elladd(N, gl, nbc, A, B, B)) ) return res;
       if ( (res = elldouble(N, gl, nbc, A, T)) ) return res;
-      if ( (res = elladd(N, gl, nbc, T, A, A)) ) return res;
+      if ( (res = ecm_elladd(N, gl, nbc, T, A, A)) ) return res;
       break;                        /* end of rule 8 */
     case 7:                        /* rule 9 */
       e >>= 1;
@@ -628,7 +628,7 @@ ellmult(GEN N, GEN *gl, long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
     /* swap d <-> e and A <-> B if necessary */
     if (d < e) { r = d; d = e; e = r; S = A; A = B; B = S; }
   } /* while */
-  return elladd(N, gl, nbc, XAUX, X2, X2);
+  return ecm_elladd(N, gl, nbc, XAUX, X2, X2);
 }
 
 /* Auxiliary routines need < (3*nbc+240)*tf words on the PARI stack, in
@@ -653,7 +653,7 @@ alloc_scratch(long nbc, long spc, long tf)
 
 /* PRAC implementation notes - main changes against the paper version:
  * (1) The general function  [m+n]P = f([m]P,[n]P,[m-n]P)  collapses  (for
- * m!=n)  to an elladd() which does not depend on the third argument;  and
+ * m!=n)  to an ecm_elladd() which does not depend on the third argument;  and
  * thus all references to the third variable (C in the paper) can be elimi-
  * nated. (2) Since our multipliers are prime, the outer loop of the paper
  * version executes only once, and thus is invisible above. (3) The first
@@ -662,7 +662,7 @@ alloc_scratch(long nbc, long spc, long tf)
  * always be followed by a swap, so we have unrolled this first iteration.
  * (4) Some simplifications in rules 6 and 7 are possible given the above,
  * and we can save one addition in each of the two cases.  NB one can show
- * that none of the other elladd()s in the loop can ever turn out to de-
+ * that none of the other ecm_elladd()s in the loop can ever turn out to de-
  * generate into an elldouble. (5) I tried to optimize for rule 3, which
  * is used far more frequently than all others together, but it didn't
  * improve things, so I removed the nested tight loop again.  --GN
@@ -959,9 +959,9 @@ ellfacteur(GEN N, int insist)
       goto fin;        /* [2]Q */
     if (elldouble(N, &gl, nbc, XD, XD + nbc2) > 1)
       goto fin;        /* [4]Q */
-    if (elladd(N, &gl, nbc, XD, XD + nbc2, XD + (nbc<<2)) > 1)
+    if (ecm_elladd(N, &gl, nbc, XD, XD + nbc2, XD + (nbc<<2)) > 1)
       goto fin;        /* [6]Q */
-    if (elladd2(N, &gl, nbc,
+    if (ecm_elladd2(N, &gl, nbc,
                 XD, XD + (nbc<<2), XT + (nbc<<3),
                 XD + nbc2, XD + (nbc<<2), XD + (nbc<<3)) > 1)
       goto fin;        /* [8]Q and [10]Q */
@@ -1000,10 +1000,10 @@ ellfacteur(GEN N, int insist)
       p += (dp = (ulong)prc210_d1[rcn]);
       if (rcn == 47)
       {        /* wrap mod 210 */
-        if (elladd(N, &gl, nbc, XT + dp*nbc, XH + rcn*nbc2, XH) > 1) goto fin;
+        if (ecm_elladd(N, &gl, nbc, XT + dp*nbc, XH + rcn*nbc2, XH) > 1) goto fin;
         rcn = 0; continue;
       }
-      if (elladd(N, &gl, nbc, XT + dp*nbc, XH + rcn*nbc2, XH + rcn*nbc2 + nbc2) > 1)
+      if (ecm_elladd(N, &gl, nbc, XT + dp*nbc, XH + rcn*nbc2, XH + rcn*nbc2 + nbc2) > 1)
         goto fin;
       rcn++;
     }
@@ -1015,8 +1015,8 @@ ellfacteur(GEN N, int insist)
     /* this was the last call to ellmult() in the main loop body; may now
      * overwrite XAUX and slots XD and following */
     if (elldouble(N, &gl, nbc, X, XAUX) > 1) goto fin; /* [420]Q */
-    if (elladd(N, &gl, nbc, X, XAUX, XT) > 1) goto fin;/* [630]Q */
-    if (elladd(N, &gl, nbc, X, XT, XD) > 1) goto fin;  /* [840]Q */
+    if (ecm_elladd(N, &gl, nbc, X, XAUX, XT) > 1) goto fin;/* [630]Q */
+    if (ecm_elladd(N, &gl, nbc, X, XT, XD) > 1) goto fin;  /* [840]Q */
     for (i=1; i <= gse; i++)
       if (elldouble(N, &gl, nbc, XT + i*nbc2, XD + i*nbc2) > 1) goto fin;
     /* (the last iteration has initialized XG to [210*2^(gse+1)]Q) */
@@ -1036,7 +1036,7 @@ ellfacteur(GEN N, int insist)
        * Xh is: four X coords for 1 mod 210, four for 11 mod 210, ..., four
        * for 209 mod 210, then the corresponding Y coordinates in the same
        * order.  This will allow us to do a giant step on Xh using just three
-       * calls to elladd0() each acting on 64 points in parallel */
+       * calls to ecm_elladd0() each acting on 64 points in parallel */
       for (j = 48; j--; )
       {
         k = nbc2*j + i;
@@ -1075,12 +1075,12 @@ ellfacteur(GEN N, int insist)
       if (DEBUGLEVEL >= 7)
         err_printf("\t(extracted precomputed helix / baby step entries)\n");
       /* ... glue in between, up to 16*210 ... */
-      if (elladd0(N, &gl, 12, 4,        /* 12 pts + (4 pts replicated thrice) */
+      if (ecm_elladd0(N, &gl, 12, 4,        /* 12 pts + (4 pts replicated thrice) */
                   XB + 12, XB2 + 12,
                   XB,      XB2,
                   XB + 16, XB2 + 16)
           > 1) goto fin;        /* 4 + {1,2,3} = {5,6,7} */
-      if (elladd0(N, &gl, 28, 4,        /* 28 pts + (4 pts replicated 7fold) */
+      if (ecm_elladd0(N, &gl, 28, 4,        /* 28 pts + (4 pts replicated 7fold) */
                   XB + 28, XB2 + 28,
                   XB,      XB2,
                   XB + 32, XB2 + 32)
@@ -1092,14 +1092,14 @@ ellfacteur(GEN N, int insist)
         ulong m2 = 2UL << m;        /* will point at 2^(m-1)+1 */
         for (j = 0; (ulong)j < m2-64; j+=64) /* executed 0 times when m == 5 */
         {
-          if (elladd0(N, &gl, 64, 4,
+          if (ecm_elladd0(N, &gl, 64, 4,
                       XB + m2 - 4, XB2 + m2 - 4,
                       XB + j,      XB2 + j,
                       XB + m2 + j,
                       (m<(ulong)gse ? XB2 + m2 + j : NULL))
               > 1) goto fin;
         } /* j == m2-64 here, 60 points left */
-        if (elladd0(N, &gl, 60, 4,
+        if (ecm_elladd0(N, &gl, 60, 4,
                     XB + m2 - 4, XB2 + m2 - 4,
                     XB + j,      XB2 + j,
                     XB + m2 + j,
@@ -1147,13 +1147,13 @@ ellfacteur(GEN N, int insist)
           while (k > gss) /* hm, just how large are those prime gaps? */
           { /* giant step */
             if (DEBUGLEVEL >= 7) err_printf("\t(giant step at p = %lu)\n", p);
-            if (elladd0(N, &gl, 64, 4,
+            if (ecm_elladd0(N, &gl, 64, 4,
                         XG + i, YG + i,
                         Xh, Yh, Xh, Yh) > 1) goto fin;
-            if (elladd0(N, &gl, 64, 4,
+            if (ecm_elladd0(N, &gl, 64, 4,
                         XG + i, YG + i,
                         Xh + 64, Yh + 64, Xh + 64, Yh + 64) > 1) goto fin;
-            if (elladd0(N, &gl, 64, 4,
+            if (ecm_elladd0(N, &gl, 64, 4,
                         XG + i, YG + i,
                         Xh + 128, Yh + 128, Xh + 128, Yh + 128) > 1) goto fin;
             bstp -= (gss << 1);

@@ -881,9 +881,9 @@ powi(void *a, GEN x, GEN y) { (void)a; return powgi(x,y);}
 
 #if 0
 static GEN
-ellmul(void *ell, GEN x, GEN y) { return addell((GEN) ell, x, y); }
+_ellmul(void *ell, GEN x, GEN y) { return elladd((GEN) ell, x, y); }
 static GEN
-ellpow(void *ell, GEN x, GEN n) { return ellmul((GEN) ell, x, n); }
+_ellpow(void *ell, GEN x, GEN n) { return ellmul((GEN) ell, x, n); }
 #endif
 
 /* [L,e] = [fa, NULL] or [elts, NULL] or [elts, exponents] */

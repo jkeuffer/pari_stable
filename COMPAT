@@ -26,11 +26,11 @@ This file lists the incompatible changes between Version 2.x and older versions
   - ellwp0(): remove precdl argument
   - rename stackmalloc -> stack_malloc
   - rename ggval -> gvaluation
-  - rename powell -> ellmul
   - simplify init_primepointer(n, p, &pd) interface
     => init_primepointer(n, &pd). Remove argument 'p', ignore the previous
     value of pd [ remove assumption that it pointed into a prime table ]
     and always set pd to a pointer into the private prime table.
+  - powell, addell, subell renamed to ellpow, elladd, ellsub.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

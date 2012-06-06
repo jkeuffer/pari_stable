@@ -1117,16 +1117,16 @@ is_tors(GEN E, GEN torsion, GEN P)
   if (!odd(a))
   {
     if (a==2) return gequal(P,Q);
-    P = addell(E,P,P);
+    P = elladd(E,P,P);
     if (ell_is_inf(P)) return 1;
-    Q = addell(E,Q,Q);
+    Q = elladd(E,Q,Q);
     a >>=1;
   }
   if (gequal(P,Q)) return 1;
   R = Q;
   for(i=2; i<=a; i++)
   {
-    R = addell(E,R,Q);
+    R = elladd(E,R,Q);
     if (gequal(R,P)) return 1;
   }
   return 0;

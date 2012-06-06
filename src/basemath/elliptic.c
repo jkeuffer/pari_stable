@@ -772,7 +772,7 @@ ellisoncurve(GEN e, GEN x)
 }
 
 GEN
-addell(GEN e, GEN z1, GEN z2)
+elladd(GEN e, GEN z1, GEN z2)
 {
   GEN p1, p2, x, y, x1, x2, y1, y2;
   pari_sp av = avma, tetpil;
@@ -812,7 +812,7 @@ addell(GEN e, GEN z1, GEN z2)
 }
 
 static GEN
-invell(GEN e, GEN z)
+ellneg(GEN e, GEN z)
 {
   GEN t;
   if (ell_is_inf(z)) return z;
@@ -823,11 +823,11 @@ invell(GEN e, GEN z)
 }
 
 GEN
-subell(GEN e, GEN z1, GEN z2)
+ellsub(GEN e, GEN z1, GEN z2)
 {
   pari_sp av = avma;
   checkell5(e); checkellpt(z2);
-  return gerepileupto(av, addell(e, z1, invell(e,z2)));
+  return gerepileupto(av, elladd(e, z1, ellneg(e,z2)));
 }
 
 /* e an ell5, x a scalar */
@@ -984,9 +984,9 @@ ellpow_CM(GEN e, GEN z, GEN n)
 }
 
 static GEN
-_sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
+_sqr(void *e, GEN x) { return elladd((GEN)e, x, x); }
 static GEN
-_mul(void *e, GEN x, GEN y) { return addell((GEN)e, x, y); }
+_mul(void *e, GEN x, GEN y) { return elladd((GEN)e, x, y); }
 
 static GEN
 ellpow_modp(GEN e, GEN P, GEN n, GEN p)
@@ -1008,7 +1008,7 @@ ellpow_Z(GEN e, GEN z, GEN n)
     return ellpow_modp(e, z, n, p);
   s = signe(n);
   if (!s) return ellinf();
-  if (s < 0) z = invell(e,z);
+  if (s < 0) z = ellneg(e,z);
   if (is_pm1(n)) return z;
   return gen_pow(z, n, (void*)e, &_sqr, &_mul);
 }
@@ -1118,7 +1118,7 @@ ellpow_CM_aux(GEN e, GEN z, GEN a, GEN w)
   A = ellpow_Z(e,z,a);
   B = ellpow_CM(e,z,w);
   if (q != gen_1) B = ellpow_Z(e, B, q);
-  return addell(e, A, B);
+  return elladd(e, A, B);
 }
 GEN
 ellmul(GEN e, GEN z, GEN n)
@@ -3025,7 +3025,7 @@ typedef struct
 
 /* P <-- P + Q, safe with P = Q */
 static void
-s_addell(sellpt *P, sellpt *Q, long c4, long p)
+s_elladd(sellpt *P, sellpt *Q, long c4, long p)
 {
   ulong num, den, lambda;
 
@@ -3059,9 +3059,9 @@ s_ellmul(sellpt *Q, sellpt *P, long n, long c4, long p)
   Q->x = Q->y = 0; /* -Wall */
   for(;;)
   {
-    if (n&1) s_addell(Q, &R, c4, p);
+    if (n&1) s_elladd(Q, &R, c4, p);
     n >>= 1; if (!n) return;
-    s_addell(&R, &R, c4, p);
+    s_elladd(&R, &R, c4, p);
   }
 }
 
@@ -3158,7 +3158,7 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
       table[i].x = fh.x;
       table[i].y = fh.y;
       table[i].i = i;
-      s_addell(&fh, &F, cp4, p);
+      s_elladd(&fh, &F, cp4, p);
     }
     qsort(table,s,sizeof(multiple),(QSCOMP)compare_multiples);
     s_ellmul(&fg, &F, s, cp4, p); ftest = fg;
@@ -3175,7 +3175,7 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
         if (table[m].x < ftest.x) l=m+1; else r=m;
       }
       if (r < s && table[r].x == ftest.x) break;
-      s_addell(&ftest, &fg, cp4, p);
+      s_elladd(&ftest, &fg, cp4, p);
     }
     h += table[r].i * B;
     if (table[r].y == ftest.y) i = -i;
@@ -3716,7 +3716,7 @@ exp4hellagm(GEN e, GEN z, long prec)
   GEN e1 = ell_realrootprec(e, prec+EXTRAPRECWORD), x = gel(z,1);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
-    GEN eh = exphellagm(e, addell(e, z,z), e1, 0, prec);
+    GEN eh = exphellagm(e, elladd(e, z,z), e1, 0, prec);
     /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
     return gmul(eh, gabs(d_ellLHS(e, z), prec));
   }
@@ -3732,7 +3732,7 @@ ellheightoo(GEN e, GEN z, long prec)
   e1 = ell_realrootprec(e, prec+EXTRAPRECWORD);
   if (gcmp(x, e1) < 0) /* z not on neutral component */
   {
-    GEN eh = exphellagm(e, addell(e, z,z), e1, 0, prec);
+    GEN eh = exphellagm(e, elladd(e, z,z), e1, 0, prec);
     /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
     h = gmul(eh, gabs(d_ellLHS(e, z), prec));
   }
@@ -3836,7 +3836,7 @@ mathell(GEN e, GEN x, long prec)
     gcoeff(y,i,i) = gel(pdiag,i);
     for (j=i+1; j<lx; j++)
     {
-      h = ghell(e, addell(e,gel(x,i),gel(x,j)), prec);
+      h = ghell(e, elladd(e,gel(x,i),gel(x,j)), prec);
       h = gsub(h, gadd(gel(pdiag,i),gel(pdiag,j)));
       gcoeff(y,j,i) = gcoeff(y,i,j) = gmul2n(h, -1);
     }
@@ -3856,7 +3856,7 @@ bilhells(GEN e, GEN z1, GEN z2, GEN h2, long prec)
   tx = typ(z1[1]);
   if (!is_matvec_t(tx))
   {
-    p1 = ghell(e, addell(e,z1,z2),prec);
+    p1 = ghell(e, elladd(e,z1,z2),prec);
     p2 = gadd(h2, ghell(e,z1,prec));
     return gerepileupto(av, gmul2n(gsub(p1,p2), -1));
   }
@@ -4002,10 +4002,10 @@ best_in_cycle(GEN e, GEN p, long k)
 
   for (i=2; i+i<k; i++)
   {
-    q = addell(e,q,p0);
+    q = elladd(e,q,p0);
     if (ugcd(i,k)==1 && smaller_x(gel(q,1), gel(p,1))) p = q;
   }
-  return (gsigne(d_ellLHS(e,p)) < 0)? invell(e,p): p;
+  return (gsigne(d_ellLHS(e,p)) < 0)? ellneg(e,p): p;
 }
 
 /* <p,q> = E_tors, possibly NULL (= oo), p,q independent unless NULL
@@ -4019,9 +4019,9 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     long n = k>>1;
     GEN p1, best = q, np = ellpow_Z(e,p,utoipos(n));
     if (n % 2 && smaller_x(gel(np,1), gel(best,1))) best = np;
-    p1 = addell(e,q,np);
+    p1 = elladd(e,q,np);
     if (smaller_x(gel(p1,1), gel(best,1))) q = p1;
-    else if (best == np) { p = addell(e,p,q); q = np; }
+    else if (best == np) { p = elladd(e,p,q); q = np; }
     p = best_in_cycle(e,p,k);
     if (v)
     {
@@ -4136,9 +4136,9 @@ _orderell(GEN E, GEN P)
 
   if (k != 13)
     /* check over Q; one could also run more tests modulo primes */
-    for (Q = addell(E, P, P), k = 2;
+    for (Q = elladd(E, P, P), k = 2;
         !ell_is_inf(Q) && k <= 12;
-        Q = addell(E, Q, P), k++) /* empty */;
+        Q = elladd(E, Q, P), k++) /* empty */;
 
   avma = av;
   return (k == 13 ? 0 : k);
@@ -4201,7 +4201,7 @@ is_new_torsion(GEN e, GEN v, GEN p, long t2) {
 
   for (k=2; k<=6; k++)
   {
-    pk = addell(e,pk,p); /* = [k] p */
+    pk = elladd(e,pk,p); /* = [k] p */
     if (ell_is_inf(pk)) return 1;
 
     for (l=2; l<=t2; l++)
@@ -4503,7 +4503,7 @@ ellmiller_dbl(void* data, GEN d)
   GEN point = gel(d,3);
   line = ellfftang(E, point, P);
   num  = gmul(num, line);
-  point = addell(E, point, point);
+  point = elladd(E, point, point);
   v = ellffvert(point, P);
   denom = gmul(denom, v);
   return mkvec3(num, denom, point);
@@ -4520,7 +4520,7 @@ ellmiller_add(void* data, GEN va, GEN vb)
   GEN num   = gmul(na, nb);
   GEN denom = gmul(da, db);
   line = ellffchord(E, pa, pb, P);
-  point = addell(E, pa, pb);
+  point = elladd(E, pa, pb);
   num  = gmul(num, line);
   v = ellffvert(point, P);
   denom = gmul(denom, v);
