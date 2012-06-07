@@ -615,10 +615,13 @@ GEN
 Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
-  GEN r, q = powuu(p, degpol(T));
-  if (cmpis(q,100)<0)
-    return utoi(Flxq_ellcard_naive(a4, a6, T, p));
-  if (expi(q)<=62)
+  long n = degpol(T);
+  GEN r, q = powuu(p,  n);
+  if (degpol(a4)<=0 && degpol(a6)<=0)
+    r = Fp_ffellcard(utoi(Flx_eval(a4,0,p)),utoi(Flx_eval(a6,0,p)),q,n,utoi(p));
+  else if (cmpis(q,100)<0)
+    r = utoi(Flxq_ellcard_naive(a4, a6, T, p));
+  else if (expi(q)<=62)
     r = Flxq_ellcard_Shanks(a4, a6, q, T, p);
   else
     r = Fq_ellcard_SEA(Flx_to_ZX(a4),Flx_to_ZX(a6),q,Flx_to_ZX(T),utoi(p),0);

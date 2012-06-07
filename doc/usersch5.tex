@@ -5118,6 +5118,9 @@ components. The parameters $a_4$ and $a_6$ are given as \typ{INT}s when required
 \fun{GEN}{Fp_ellcard}{GEN a4, GEN a6, GEN p} returns the cardinal of the group
 $E(\F_p)$.
 
+\fun{GEN}{Fp_ffellcard}{GEN a4, GEN a6, GEN q, long n, GEN p} returns the
+cardinal of the group $E(\F_q)$ where $q=p^n$.
+
 \fun{GEN}{Fp_ellgroup}{GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m} returns the
 group structure $D$ of the group $E(\F_p)$, which is assumed to be of order $N$
 and set $*pt_m=m$.

@@ -1293,11 +1293,22 @@ FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 }
 
 GEN
+Fp_ffellcard(GEN a4, GEN a6, GEN q, long n, GEN p)
+{
+  GEN nap = subii(Fp_ellcard(a4,a6,p),addis(p,1));
+  GEN v = RgX_to_RgV(RgXQ_powu(pol_x(0),n,mkpoln(3,gen_1,nap,p)),2);
+  return subii(addis(q,1),subii(shifti(gel(v,1),1),mulii(nap,gel(v,2))));
+}
+
+GEN
 FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN q = powiu(p, degpol(T)), r;
-  if (lgefint(p)==3 && expi(q)<=62)
+  long n = degpol(T);
+  GEN q = powiu(p, n), r;
+  if (degpol(a4)<=0 && degpol(a6)<=0)
+    r = Fp_ffellcard(constant_term(a4),constant_term(a6),q,n,p);
+  else if (lgefint(p)==3 && expi(q)<=62)
   {
     ulong pp = p[2];
     r =  Flxq_ellcard(ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZX_to_Flx(T,pp),pp);

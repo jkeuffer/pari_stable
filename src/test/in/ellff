@@ -1,7 +1,7 @@
 test(p,n=0,v='a)=
 {
   my(a=if(n,ffgen(ffinit(p,n),v),p));
-  my(E=ellffinit([1,3],a));
+  my(E=ellffinit([1,a+3],a));
   my(G=ellgenerators(E)[1]);
   my(P=random(E));
   [d1]=ellgroup(E);
@@ -24,10 +24,10 @@ test(1009,11,'x);
 test(17);
 test(41);
 test(1073741827);
-test(nextprime(2^65),3);
+test(nextprime(2^65),2);
 
 a=ffgen(ffinit(101,3),'a);
-E=ellffinit([1,a],a); E.j
+E=ellffinit([1,3],a); E.j
 P=random(E);Q=random(E);
 R=elladd(E,P,Q);
 elladd(E,ellsub(E,R,P),ellneg(E,Q))
