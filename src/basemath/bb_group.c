@@ -749,19 +749,22 @@ gen_ellgens(GEN D1, GEN d2, GEN m, void *E, const struct bb_group *grp,
 {
   pari_sp ltop = avma, av;
   GEN F, d1, dm;
+  GEN P, Q, d, s;
   F = dlog_get_ordfa(D1);
   d1 = gel(F, 1), dm =  diviiexact(d1,m);
   av = avma;
-  while(1)
+  do
   {
-    GEN P = grp->rand(E);
-    GEN s = gen_order(P, F, E, grp);
-    if (equalii(s, d1))
-    {
-      GEN Q = grp->rand(E);
-      GEN d = pairorder(E, grp->pow(E, P, dm), grp->pow(E, Q, dm), m, F);
-      if (equalii(d, d2)) return gerepilecopy(ltop, mkvec2(P,Q));
-    }
     avma = av;
-  }
+    P = grp->rand(E);
+    s = gen_order(P, F, E, grp);
+  } while (!equalii(s, d1));
+  av = avma;
+  do
+  {
+    avma = av;
+    Q = grp->rand(E);
+    d = pairorder(E, grp->pow(E, P, dm), grp->pow(E, Q, dm), m, F);
+  } while (!equalii(d, d2));
+  return gerepilecopy(ltop, mkvec2(P,Q));
 }
