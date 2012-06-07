@@ -397,6 +397,16 @@ FpE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
 /**                                                                   **/
 /***********************************************************************/
 
+static ulong /*assume p < 500 */
+Fl_ellcard_naive(ulong a4, ulong a6, ulong p)
+{
+  ulong i;
+  long a = p+1;
+  for(i=0; i<p; i++)
+    a += krouu((i*i+a4)*i+a6,p);
+  return a;
+}
+
 /* z1 <-- z1 + z2, with precomputed inverse */
 static void
 FpE_add_ip(GEN z1, GEN z2, GEN a4, GEN p, GEN p2inv)
@@ -856,11 +866,11 @@ GEN
 Fp_ellcard(GEN a4, GEN a6, GEN p)
 {
   long lp = expi(p);
+  ulong pp = p[2];
+  if (lp < 7)
+    return utoi(Fl_ellcard_naive(itou(a4), itou(a6), pp));
   if (lp < 30)
-  {
-    ulong pp = p[2];
     return utoi(Fl_ellcard_Shanks(itou(a4), itou(a6), pp));
-  }
   if (lp >= 62) { GEN a = Fp_ellcard_SEA(a4, a6, p, 0); if (a) return a; }
   return Fp_ellcard_Shanks(a4, a6, p);
 }
