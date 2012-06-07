@@ -258,7 +258,7 @@ u_forprime_init(forprime_t *T, ulong a, ulong b)
 #ifdef LONG_IS_64BIT
     const ulong UPRIME_MAX = 18446744073709551557UL;
 #else
-    const ulong UPRIME_MAX = 4294967291;
+    const ulong UPRIME_MAX = 4294967291UL;
 #endif
     pari_sp av = avma;
     GEN B = sqru(maxp);
