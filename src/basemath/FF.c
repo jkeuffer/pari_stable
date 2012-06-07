@@ -1001,6 +1001,32 @@ FF_elllog(GEN E, GEN P, GEN Q, GEN o)
   return gerepileupto(av, r);
 }
 
+GEN
+FF_ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
+{
+  GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
+  GEN r,T,p, Pp,Qp;
+  ulong pp;
+  GEN z=_initFF(fg,&T,&p,&pp);
+  pari_sp av = avma;
+  switch(fg[1])
+  {
+  case t_FF_FpXQ:
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), gel(e,3), T, p);
+    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), gel(e,3), T, p);
+    r = FpXQE_weilpairing(Pp, Qp, m, gel(e,1), T, p);
+    break;
+  case t_FF_F2xq:
+    pari_err_IMPL("FF_ellgen over F2^k");
+  default:
+    Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
+    Qp = FlxqE_changepointinv(RgE_to_FlxqE(Q,T,pp), gel(e,3), T, pp);
+    r = FlxqE_weilpairing(Pp, Qp, m, gel(e,1), T, pp);
+  }
+  r = gerepileupto(av, r);
+  return _mkFF(fg,z,r);
+}
+
 static GEN
 to_FF(GEN x, GEN ff)
 {

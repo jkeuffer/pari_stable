@@ -4106,6 +4106,7 @@ ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
   pari_sp ltop = avma;
   GEN num, denom, result, p=NULL;
   checksmallell(E); checkellpt(P); checkellpt(Q);
+  if (lg(E)==19) return ellffweilpairing(E,P,Q,m);
   if (typ(m)!=t_INT) pari_err_TYPE("ellweilpairing",m);
   if (ell_is_inf(P) || ell_is_inf(Q) || gequal(P,Q))
     return gpowgs(ell_get_disc(E), 0);
@@ -4419,6 +4420,22 @@ ellfflog(GEN E, GEN P, GEN Q, GEN o)
     GEN Qp = FpE_changepointinv(RgE_to_FpE(Q,p), gel(e,3), p);
     r = FpE_log(Pp, Qp, o, gel(e,1), p);
     return gerepileuptoint(av, r);
+  }
+}
+
+GEN
+ellffweilpairing(GEN E, GEN P, GEN Q, GEN m)
+{
+  GEN fg = ellff_get_field(E);
+  if (typ(fg)==t_FFELT)
+    return FF_ellweilpairing(E, P, Q, m);
+  else
+  {
+    pari_sp av = avma;
+    GEN p = fg, e = ellff_get_a4a6(E);
+    GEN z = FpE_weilpairing(FpE_changepointinv(RgV_to_FpV(P,p),gel(e,3),p),
+                            FpE_changepointinv(RgV_to_FpV(Q,p),gel(e,3),p),m,gel(e,1),p);
+    return gerepileupto(av, Fp_to_mod(z, p));
   }
 }
 
