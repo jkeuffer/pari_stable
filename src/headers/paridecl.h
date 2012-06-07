@@ -231,6 +231,7 @@ GEN     random_FlxqE(GEN a4, GEN a6, GEN T, ulong p);
 
 /* FpE.c */
 
+GEN     Fp_ellcard(GEN a4, GEN a6, GEN p);
 GEN     Fp_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p);
 GEN     Fp_ellgroup(GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m);
 GEN     FpE_add(GEN P, GEN Q, GEN a4, GEN p);

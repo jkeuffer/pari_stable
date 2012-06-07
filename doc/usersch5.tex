@@ -5115,13 +5115,16 @@ functions do not take $a_6$ as an argument.
 A \kbd{FpE} is either the point at infinity (\kbd{ellinf()}) or a $FpV$ whith two
 components. The parameters $a_4$ and $a_6$ are given as \typ{INT}s when required.
 
-\fun{GEN}{Fp_ellgroup}{GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m}
-Return the group structure $D$ of the group $E(\F_p)$,
-which is assumed to be of order $N$ and set $*pt_m=m$.
+\fun{GEN}{Fp_ellcard}{GEN a4, GEN a6, GEN p} returns the cardinal of the group
+$E(\F_p)$.
 
-\fun{GEN}{Fp_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p}
-Returns generators of the group $E(\F_p)$ with the base change \kbd{ch}
-(see \kbd{FpE\_changepoint}), where $D$ and $m$ are as returned by
+\fun{GEN}{Fp_ellgroup}{GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m} returns the
+group structure $D$ of the group $E(\F_p)$, which is assumed to be of order $N$
+and set $*pt_m=m$.
+
+\fun{GEN}{Fp_ellgens}{GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p} returns
+generators of the group $E(\F_p)$ with the base change \kbd{ch} (see
+\kbd{FpE\_changepoint}), where $D$ and $m$ are as returned by
 \kbd{Fp\_ellgroup}.
 
 \subsec{\kbd{FpE}}

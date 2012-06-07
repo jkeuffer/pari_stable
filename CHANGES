@@ -291,6 +291,7 @@ LGr87- Add clock_gettime timer option
 BA 89- Add blackbox finite field for generic linear algebra
 BA 90- PARI functions FlxqM_image, FlxqM_ker, FqM_deplin
 BA 91- GP function ellneg
+BA 92- PARI functions Fp_ellcard, FpXQ_ellcard, Flxq_ellcard
 
   Removed
     1- dropped DOS support
