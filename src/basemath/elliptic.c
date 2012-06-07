@@ -832,7 +832,7 @@ ellneg(GEN e, GEN z)
   t = cgetg(3,t_VEC);
   gel(t,1) = gcopy(gel(z,1));
   av = avma;
-  y = gadd(gel(z,2), ellLHS0(e,gel(z,1)));
+  y = gneg(gadd(gel(z,2), ellLHS0(e,gel(z,1))));
   gel(t,2) = gerepileupto(av, y);
   return t;
 }
