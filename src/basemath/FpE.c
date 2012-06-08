@@ -203,9 +203,8 @@ random_FpE(GEN a4, GEN a6, GEN p)
     x   = randomi(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     x2  = Fp_sqr(x, p);
     rhs = Fp_add(Fp_mul(x, Fp_add(x2, a4, p), p), a6, p);
-    if (!signe(rhs) && !signe(Fp_add(mului(3,x2),a4,p)))
-      continue;
-  } while (kronecker(rhs, p) < 0);
+  } while ((!signe(rhs) && !signe(Fp_add(Fp_mulu(x2,3,p),a4,p)))
+          || kronecker(rhs, p) < 0);
   y = Fp_sqrt(rhs, p);
   if (!y) pari_err_PRIME("random_FpE", p);
   return gerepilecopy(ltop, mkvec2(x, y));
@@ -1100,9 +1099,8 @@ random_FpXQE(GEN a4, GEN a6, GEN T, GEN p)
     x   = random_FpX(d,v,p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     x2  = FpXQ_sqr(x, T, p);
     rhs = FpX_add(FpXQ_mul(x, FpX_add(x2, a4, p), T, p), a6, p);
-    if (!signe(rhs) && !signe(FpX_add(FpX_mulu(x2,3,p), a4, p)))
-      continue;
-  } while (!FpXQ_issquare(rhs, T, p));
+  } while ((!signe(rhs) && !signe(FpX_add(FpX_mulu(x2,3,p), a4, p)))
+          || !FpXQ_issquare(rhs, T, p));
   y = FpXQ_sqrt(rhs, T, p);
   if (!y) pari_err_PRIME("random_FpE", p);
   return gerepilecopy(ltop, mkvec2(x, y));

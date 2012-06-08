@@ -197,9 +197,8 @@ random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
     x   = random_Flx(degpol(T),T[1],p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     x2  = Flxq_sqr(x, T, p);
     rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
-    if (!lgpol(rhs) && !lgpol(Flx_add(Flx_Fl_mul(x2, 3, p), a4, p)))
-      continue;
-  } while (!Flxq_issquare(rhs, T, p));
+  } while ((!lgpol(rhs) && !lgpol(Flx_add(Flx_Fl_mul(x2, 3, p), a4, p)))
+          || !Flxq_issquare(rhs, T, p));
   y = Flxq_sqrt(rhs, T, p);
   if (!y) pari_err_PRIME("random_FlxqE", T);
   return gerepilecopy(ltop, mkvec2(x, y));
