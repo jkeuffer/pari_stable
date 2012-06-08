@@ -244,6 +244,7 @@ GEN     FpE_mul(GEN P, GEN n, GEN a4, GEN p);
 GEN     FpE_neg(GEN P, GEN p);
 GEN     FpE_order(GEN z, GEN o, GEN a4, GEN p);
 GEN     FpE_sub(GEN P, GEN Q, GEN a4, GEN p);
+GEN     FpE_to_mod(GEN P, GEN p);
 GEN     FpE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
 GEN     FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
 GEN     FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p);

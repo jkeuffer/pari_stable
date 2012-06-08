@@ -38,6 +38,13 @@ RgE_to_FpE(GEN x, GEN p)
 }
 
 GEN
+FpE_to_mod(GEN x, GEN p)
+{
+  if (ell_is_inf(x)) return x;
+  retmkvec2(Fp_to_mod(gel(x,1),p),Fp_to_mod(gel(x,2),p));
+}
+
+GEN
 FpE_changepoint(GEN x, GEN ch, GEN p)
 {
   pari_sp av = avma;

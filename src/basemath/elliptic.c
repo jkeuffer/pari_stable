@@ -1009,7 +1009,7 @@ ellmul_modp(GEN e, GEN P, GEN n, GEN p)
   GEN v = ell_to_a4a6_bc(e, p), a4 = gel(v,1), m = gel(v,3);
   GEN Pp = FpE_changepointinv(RgV_to_FpV(P,p), m, p);
   GEN Qp = FpE_mul(Pp, n, a4, p);
-  return FpV_to_mod(FpE_changepoint(Qp, m, p), p);
+  return FpE_to_mod(FpE_changepoint(Qp, m, p), p);
 }
 
 /* [n] z, n integral */
@@ -4383,7 +4383,7 @@ ellffmul(GEN E, GEN P, GEN n)
     GEN p = fg, e = ellff_get_a4a6(E), Q;
     GEN Pp = FpE_changepointinv(RgE_to_FpE(P, p), gel(e,3), p);
     GEN Qp = FpE_mul(Pp, n, gel(e,1), p);
-    Q= FpV_to_mod(FpE_changepoint(Qp, gel(e,3), p), p);
+    Q= FpE_to_mod(FpE_changepoint(Qp, gel(e,3), p), p);
     return gerepileupto(av, Q);
   }
 }
