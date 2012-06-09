@@ -61,5 +61,14 @@ break> z
 13
 ? z
 z
+? iferrname("e_INTMOD",vector(10000,i,1/(i-100)),E,Vec(E))
+  ***   at top-level: ..._INTMOD",vector(10000,i,1/(i-100)),E,Vec(E))
+  ***                                             ^-------------------
+  *** _/_: division by a non-invertible object
+  ***   Break loop: type 'break' to go back to GP
+break> i
+100
+break> break
+
 ? print("Total time spent: ",gettime);
 Total time spent: 0

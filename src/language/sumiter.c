@@ -1118,7 +1118,7 @@ vecteur(GEN nmax, GEN code)
 {
   GEN y,p1;
   long i,m;
-  long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  GEN c=utoipos(1);
 
   m = gtos(nmax);
   if (m < 0)  pari_err_DOMAIN("vector", "dimension", "<", gen_0, stoi(m));
@@ -1138,7 +1138,7 @@ vecteursmall(GEN nmax, GEN code)
 {
   GEN y;
   long i,m;
-  long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  GEN c=utoipos(1);
 
   m = gtos(nmax);
   if (m < 0)  pari_err_DOMAIN("vectorsmall", "dimension", "<", gen_0, stoi(m));
@@ -1165,8 +1165,7 @@ matrice(GEN nlig, GEN ncol, GEN code)
 {
   GEN y, z, p1;
   long i, j, m, n;
-  long c1[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
-  long c2[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
+  GEN c1 = utoipos(1), c2 = utoipos(1);
 
   m = gtos(ncol);
   n = gtos(nlig);
