@@ -877,11 +877,10 @@ Flxq_ell_to_a4a6(GEN E, GEN T, ulong p)
 GEN
 FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m)
 {
-  GEN T,p,q,e,N,G;
+  GEN T,p,e,N,G;
   ulong pp;
   long i;
   _getFF(fg,&T,&p,&pp);
-  q = powiu(p, degpol(T));
   switch(fg[1])
   {
   case t_FF_FpXQ:
