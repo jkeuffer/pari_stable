@@ -329,6 +329,7 @@ BA 98- GP function digits
 LGr100- allow polylog(n, t_SER) around a != 0
 BA 101- PARI functions ZX_shifti, ZX_remi2n
    102- PARI functions cxexp1, mpsincos1
+BA 103- GP function ellfromj
 
   Removed
     1- dropped DOS support

@@ -1600,6 +1600,7 @@ GEN     ellfflog(GEN E, GEN P, GEN Q, GEN o);
 GEN     ellffmul(GEN E, GEN P, GEN n);
 GEN     ellfforder(GEN E, GEN P, GEN o);
 GEN     ellffweilpairing(GEN E, GEN P, GEN Q, GEN m);
+GEN     ellfromj(GEN j);
 GEN     ellgenerators(GEN E);
 GEN     ellglobalred(GEN e1);
 GEN     ellgroup(GEN E, GEN p);

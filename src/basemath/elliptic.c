@@ -4194,6 +4194,36 @@ ellgenerators(GEN E)
 }
 
 GEN
+ellfromj(GEN j)
+{
+  pari_sp av=avma;
+  GEN k, kj, k2j, T=NULL, p=NULL;
+  if (Rg_is_FpXQ(j,&T,&p) && p)
+  {
+    if (equaliu(p,2))
+    {
+      if (gequal0(j))
+        retmkvec5(gen_0,gen_0,mkintmodu(1,2),gen_0,gen_0);
+      else
+        retmkvec5(mkintmodu(1,2),gen_0,gen_0,gen_0,ginv(j));
+    }
+    if (equaliu(p,3))
+    {
+      if (gequal0(j))
+        retmkvec5(gen_0,gen_0,gen_0,mkintmodu(1,3),gen_0);
+      else
+        return gerepilecopy(av, mkvec5(gen_0,j,gen_0,gen_0,gneg(gsqr(j))));
+    }
+  }
+  if (gequal0(j))
+    retmkvec5(gen_0,gen_0,gen_0,gen_0,gen_1);
+  if (gequalgs(j,1728))
+    retmkvec5(gen_0,gen_0,gen_0,gen_1,gen_0);
+  k = gsubsg(1728,j); kj = gmul(k, j); k2j = gmul(kj, k);
+  return gerepilecopy(av, mkvec5(gen_0,gen_0,gen_0,gmulsg(3,kj),gmulsg(2,k2j)));
+}
+
+GEN
 ellffinit(GEN x, GEN fg, long flag)
 {
   pari_sp av = avma;
