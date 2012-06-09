@@ -868,6 +868,140 @@ FOUND:
   return KRO==1? h: 2*p1p-h;
 }
 
+/** ellap from CM (original code contributed by Mark Watkins) **/
+
+static ulong
+Mod16(GEN x) {
+  long s = signe(x);
+  ulong m;
+  if (!s) return 0;
+  m = mod16(x); if (!m) return m;
+  if (s < 0) m = 16 - m;
+  return m;
+}
+#define Mod2(x) (Mod16(x) & 1)
+#define Mod4(x) (Mod16(x) & 3)
+#define Mod8(x) (Mod16(x) & 7)
+
+static GEN
+ap_j0(GEN a6,GEN p)
+{
+  GEN a, b, e, d;
+  if (umodiu(p,3) != 1) return gen_0;
+  (void)cornacchia2(utoipos(27),p, &a,&b);
+  if (umodiu(a, 3) == 1) a = negi(a);
+  d = mulis(a6,-108);
+  e = diviuexact(shifti(p,-1), 3); /* (p-1) / 6 */
+  return centermod(mulii(a, Fp_pow(d, e, p)), p);
+}
+static GEN
+ap_j1728(GEN a4,GEN p)
+{
+  GEN a, b, e;
+  if (mod4(p) != 1) return gen_0;
+  (void)cornacchia2(utoipos(4),p, &a,&b);
+  if (Mod4(a)==0) a = b;
+  if (Mod2(a)==1) a = shifti(a,1);
+  if (Mod8(a)==6) a = negi(a);
+  e = shifti(p,-2); /* (p-1) / 4 */
+  return centermod(mulii(a, Fp_pow(a4, e, p)), p);
+}
+static GEN
+ap_j8000(GEN p)
+{
+  GEN a, b;
+  long r = mod8(p);
+  if (r != 1 && r != 3) return gen_0;
+  (void)cornacchia2(utoipos(8),p, &a,&b);
+  switch(Mod16(a)) {
+    case 2: case 6:   if (Mod4(b)) a = negi(a);
+      break;
+    case 10: case 14: if (!Mod4(b)) a = negi(a);
+      break;
+  }
+  return a;
+}
+static GEN
+ap_j287496(GEN p)
+{
+  GEN a, b;
+  if (mod4(p) != 1) return gen_0;
+  (void)cornacchia2(utoipos(4),p, &a,&b);
+  if (Mod4(a)==0) a = b;
+  if (Mod2(a)==1) a = shifti(a,1);
+  if (Mod8(a)==6) a = negi(a);
+  if (krosi(2,p) < 0) a = negi(a);
+  return a;
+}
+static GEN
+ap_cm(int CM, GEN p)
+{
+  GEN a, b;
+  if (krosi(CM,p) < 0) return gen_0;
+  (void)cornacchia2(utoipos(-CM),p, &a, &b);
+  if ((CM&3) == 0) CM >>= 2;
+  if ((krois(a, -CM) > 0) ^ (CM == -7)) a = negi(a);
+  return a;
+}
+static GEN
+ec_ap_cm(GEN J,long A6B,GEN a6,int CM,GEN jd,GEN jn,GEN p)
+{
+  GEN a;
+  if (!equalii(modii(mulii(jd,J),p), jn)) return NULL;
+  if      (CM == -8)  a = ap_j8000(p);
+  else if (CM == -16) a = ap_j287496(p);
+  else                a = ap_cm(CM,p);
+  if (kronecker(mulis(a6,A6B), p) < 0) a = negi(a);
+  return a;
+}
+
+static GEN
+u2tonegi(ulong a, ulong b) { GEN z = uu32toi(a,b); setsigne(z, -1); return z; }
+
+static GEN
+CM_ellap(GEN a4, GEN a6, GEN jn, GEN jd, GEN p)
+{
+  pari_sp av = avma;
+  GEN a, t;
+
+#define CHECK(CM,J,A6B) a = ec_ap_cm(J,A6B,a6,CM,jd,jn,p); if (a) goto DONE;
+  if (!signe(a4)) { a = ap_j0(a6,p); goto DONE;}
+  if (!signe(a6)) { a = ap_j1728(a4,p); goto DONE;}
+  CHECK(-7,  utoineg(3375), -2);
+  CHECK(-8,  utoipos(8000), 42);
+  CHECK(-12, utoipos(54000), 22);
+  CHECK(-11, utoineg(32768), 21);
+  CHECK(-16, utoipos(287496), -14);
+  CHECK(-19, utoineg(884736), 1);
+  CHECK(-27, utoineg(12288000), 253);
+  CHECK(-7,  utoipos(16581375), -114);
+  CHECK(-43, utoineg(884736000), 21);
+  t = u2tonegi(0x00000022UL, 0x45ae8000UL); /* -27878400*5280 */
+  CHECK(-67, t, 217);
+  t = u2tonegi(0x03a4b862UL, 0xc4b40000UL); /* -640320^3 */
+  CHECK(-163, t, 185801);
+#undef CHECK
+  avma = av; return NULL;
+DONE:
+  return gerepileuptoint(av, icopy(a));
+}
+
+static GEN
+Fp_ellj_nodiv(GEN a4, GEN a6, GEN p)
+{
+  GEN a43 = Fp_mulu(Fp_powu(a4, 3, p), 4, p);
+  return mkvec2(Fp_mulu(a43, 1728, p), Fp_add(a43, Fp_mulu(Fp_sqr(a6, p), 27, p), p));
+}
+
+static GEN /* Only compute a mod p, so assume p>=17 */
+Fp_ellcard_CM(GEN a4, GEN a6, GEN p)
+{
+  pari_sp  av = avma;
+  GEN j = Fp_ellj_nodiv(a4, a6, p);
+  GEN a = CM_ellap(a4, a6, gel(j,1), gel(j,2), p);
+  return a ? gerepileupto(av, subii(addis(p,1),a)): NULL;
+}
+
 GEN
 Fp_ellcard(GEN a4, GEN a6, GEN p)
 {
@@ -875,6 +1009,7 @@ Fp_ellcard(GEN a4, GEN a6, GEN p)
   ulong pp = p[2];
   if (lp < 7)
     return utoi(Fl_ellcard_naive(itou(a4), itou(a6), pp));
+  { GEN a = Fp_ellcard_CM(a4,a6,p); if (a) return a; }
   if (lp < 30)
     return utoi(Fl_ellcard_Shanks(itou(a4), itou(a6), pp));
   if (lp >= 62) { GEN a = Fp_ellcard_SEA(a4, a6, p, 0); if (a) return a; }

@@ -2729,7 +2729,6 @@ ellrootno(GEN e, GEN p)
 /**                                                                **/
 /********************************************************************/
 
-/* compute a_2 */
 static long
 cardmod2(GEN e)
 { /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
@@ -2745,174 +2744,16 @@ cardmod2(GEN e)
   else if (a2 ^ a4 ^ a6) N += 2; /* x = 1, y arbitrary */
   return N;
 }
-/* a_p using Jacobi sums */
+
 static long
-ap_jacobi(GEN e, ulong p)
+cardmod3(GEN e)
 {
-  if (p == 2) return 3 - cardmod2(e);
-  else
-  {
-    ulong i;
-    ulong e6 = Rg_to_Fl(ell_get_b2(e), p);
-    ulong e72= Rg_to_Fl(ell_get_b4(e), p) << 1;
-    ulong e8 = Rg_to_Fl(ell_get_b6(e), p);
-    long s = krouu(e8, p) + krouu((e8 + e72 + e6 + 4) % p, p); /* i = 0,1 */
-    if (p < 757UL)
-      for (i=2; i<p; i++)
-        s += krouu((e8 + i*(e72 + i*(e6 + (i<<2)))) % p, p);
-    else
-      for (i=2; i<p; i++)
-        s += krouu(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
-    return -s;
-  }
-}
-
-/** ellap from CM (original code contributed by Mark Watkins) **/
-
-static ulong
-Mod16(GEN x) {
-  long s = signe(x);
-  ulong m;
-  if (!s) return 0;
-  m = mod16(x); if (!m) return m;
-  if (s < 0) m = 16 - m;
-  return m;
-}
-#define Mod2(x) (Mod16(x) & 1)
-#define Mod4(x) (Mod16(x) & 3)
-#define Mod8(x) (Mod16(x) & 7)
-
-static GEN
-ap_j0(GEN E,GEN p)
-{
-  GEN a, b, e, d;
-  if (umodiu(p,3) != 1) return gen_0;
-  (void)cornacchia2(utoipos(27),p, &a,&b);
-  if (umodiu(a, 3) == 1) a = negi(a);
-  d = Rg_to_Fp(gmulgs(ell_get_c6(E), 8), p);
-  e = diviuexact(shifti(p,-1), 3); /* (p-1) / 6 */
-  return centermod(mulii(a, Fp_pow(d, e, p)), p);
-}
-static GEN
-ap_j1728(GEN E,GEN p)
-{
-  GEN a, b, d, e;
-  if (mod4(p) != 1) return gen_0;
-  (void)cornacchia2(utoipos(4),p, &a,&b);
-  if (Mod4(a)==0) a = b;
-  if (Mod2(a)==1) a = shifti(a,1);
-  if (Mod8(a)==6) a = negi(a);
-  d = Rg_to_Fp(gmulgs(ell_get_c4(E), -27), p);
-  e = shifti(p,-2); /* (p-1) / 4 */
-  return centermod(mulii(a, Fp_pow(d, e, p)), p);
-}
-static GEN
-ap_j8000(GEN p)
-{
-  GEN a, b;
-  long r = mod8(p);
-  if (r != 1 && r != 3) return gen_0;
-  (void)cornacchia2(utoipos(8),p, &a,&b);
-  switch(Mod16(a)) {
-    case 2: case 6:   if (Mod4(b)) a = negi(a);
-      break;
-    case 10: case 14: if (!Mod4(b)) a = negi(a);
-      break;
-  }
-  return a;
-}
-static GEN
-ap_j287496(GEN p)
-{
-  GEN a, b;
-  if (mod4(p) != 1) return gen_0;
-  (void)cornacchia2(utoipos(4),p, &a,&b);
-  if (Mod4(a)==0) a = b;
-  if (Mod2(a)==1) a = shifti(a,1);
-  if (Mod8(a)==6) a = negi(a);
-  if (krosi(2,p) < 0) a = negi(a);
-  return a;
-}
-static GEN
-ap_cm(int CM, GEN p)
-{
-  GEN a, b;
-  if (krosi(CM,p) < 0) return gen_0;
-  (void)cornacchia2(utoipos(-CM),p, &a, &b);
-  if ((CM&3) == 0) CM >>= 2;
-  if ((krois(a, -CM) > 0) ^ (CM == -7)) a = negi(a);
-  return a;
-}
-static GEN
-ec_ap_cm(GEN J,GEN C6B,GEN C6E,int CM,GEN jd,GEN jn,GEN p)
-{
-  GEN a;
-  if (!equalii(modii(mulii(jd,J),p), jn)) return NULL;
-  if      (CM == -8)  a = ap_j8000(p);
-  else if (CM == -16) a = ap_j287496(p);
-  else                a = ap_cm(CM,p);
-  if (kronecker(mulii(C6E,C6B), p) < 0) a = negi(a);
-  return a;
-}
-
-static GEN
-ap_bad_red(GEN e, GEN p)
-{
-  pari_sp av = avma;
-  GEN c6;
-  long s;
-  if (equaliu(p, 2)) return stoi(3 - cardmod2(e));
-  c6 = Rg_to_Fp(ell_get_c6(e), p);
-  s = kronecker(c6, p);
-  if (mod4(p) == 3) s = -s;
-  avma = av; return stoi(s);
-}
-static GEN
-u2tonegi(ulong a, ulong b) { GEN z = uu32toi(a,b); setsigne(z, -1); return z; }
-
-static GEN
-CM_ellap(GEN E, GEN p)
-{
-  pari_sp av = avma;
-  GEN C4E, C6E, j, jn, jd, a, t, u;
-
-#define CHECK(CM,J,C6B) a = ec_ap_cm(J,C6B,C6E,CM,jd,jn,p); if (a) goto DONE;
-  C4E = Rg_to_Fp(ell_get_c4(E), p);
-  if (!signe(C4E)) { a = ap_j0(E,p); goto DONE;}
-  C6E = Rg_to_Fp(ell_get_c6(E), p);
-  if (!signe(C6E)) { a = ap_j1728(E,p); goto DONE;}
-  j = ell_get_j(E);
-  jn = Rg_to_Fp(numer(j), p);
-  jd = Rg_to_Fp(denom(j), p); /* j = jn/jd */
-  CHECK(-7,  utoineg(3375),      utoipos(1323));
-  CHECK(-8,  utoipos(8000),      utoineg(1792));
-  CHECK(-12, utoipos(54000),     utoineg(19008));
-  CHECK(-11, utoineg(32768),     utoineg(6776));
-  CHECK(-16, utoipos(287496),    utoipos(12096));
-  CHECK(-19, utoineg(884736),    utoineg(77976));
-  CHECK(-27, utoineg(12288000),  utoineg(54648));
-  CHECK(-7,  utoipos(16581375),  utoipos(75411));
-  CHECK(-43, utoineg(884736000), utoineg(8387064));
-  t = u2tonegi(0x00000022UL, 0x45ae8000UL); /* -27878400*5280 */
-  CHECK(-67, t, utoineg(210408408));
-  t = u2tonegi(0x03a4b862UL, 0xc4b40000UL); /* -640320^3 */
-  u = u2tonegi(0x000000f8UL, 0x4414c858UL); /* -705220967*1512 */
-  CHECK(-163, t, u);
-#undef CHECK
-  avma = av; return NULL;
-DONE:
-  return gerepileuptoint(av, icopy(a));
-}
-
-static GEN
-easy_ap(GEN E, GEN p)
-{
-  pari_sp av = avma;
-  GEN D = Rg_to_Fp(ell_get_disc(E), p);
-  avma = av;
-  if (!signe(D)) return ap_bad_red(E,p);
-  if (cmpiu(p, 99) < 0) return stoi(ap_jacobi(E, itou(p)));
-  return CM_ellap(E, p);
+  ulong b2 = Rg_to_Fl(ell_get_b2(e), 3);
+  ulong b4 = Rg_to_Fl(ell_get_b4(e), 3);
+  ulong b6 = Rg_to_Fl(ell_get_b6(e), 3);
+  ulong Po = 1+2*b4, Pe = b2+b6;
+  /* kro(x,3)+1 = (x+1)%3, N = 4 + sum(kro) = 1+ sum(1+kro) */
+  return 1+(b6+1)%3+(Po+Pe+1)%3+(2*Po+Pe+1)%3;
 }
 
 /* assume e is at least a 'small ell' */
@@ -2940,14 +2781,16 @@ get_p(GEN e, GEN p, const char *name)
 static long
 ellap_small_goodred(GEN E, ulong p)
 {
-  pari_sp av;
-  GEN a, a4, a6, pp;
-  if (p < 99) return ap_jacobi(E, p);
-  av = avma; a = CM_ellap(E, utoipos(p));
-  avma = av; if (a) return itos(a);
+  pari_sp av = avma;
+  GEN a4, a6, pp;
+  long c;
+  if (p == 2) return 3 - cardmod2(E);
+  if (p == 3) return 4 - cardmod3(E);
   pp=utoi(p);
   a4 = ell_to_a4a6(E,pp,&a6);
-  return p+1-itos(Fp_ellcard(a4, a6, pp));
+  c = itos(Fp_ellcard(a4, a6, pp));
+  avma = av;
+  return p+1-c;
 }
 
 static void
@@ -4144,12 +3987,26 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   return ellmiller(E, P, Q, m);
 }
 
+static GEN /*assume p odd, p |disc(e) */
+ellcard_oddbad_red(GEN e, GEN p)
+{
+  pari_sp av = avma;
+  GEN c6;
+  long s;
+  c6 = Rg_to_Fp(ell_get_c6(e), p);
+  s = kronecker(c6, p);
+  if (mod4(p) == 3) s = -s;
+  avma = av; return addis(p,1-s);
+}
 /* Cardinal including the ramified point */
 static GEN
 ellcard_ram(GEN E, GEN p)
 {
-  GEN a, a4, a6;
-  a = easy_ap(E, p); if (a) return subii(addis(p,1),a);
+  GEN a4, a6;
+  GEN D = Rg_to_Fp(ell_get_disc(E), p);
+  if (equaliu(p,2)) return utoi(cardmod2(E));
+  if (equaliu(p,3)) return utoi(cardmod3(E));
+  if (!signe(D)) return ellcard_oddbad_red(E,p);
   a4 = ell_to_a4a6(E,p,&a6);
   return Fp_ellcard(a4, a6, p);
 }
