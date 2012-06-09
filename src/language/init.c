@@ -497,6 +497,7 @@ allocatemem(ulong newsize)
   s = top - bot;
   pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
   global_err_data = NULL;
+  iferr_env = NULL;
   cb_pari_err_recover(-1);
 }
 
@@ -1247,6 +1248,7 @@ pari_err(int numerr, ...)
   va_start(ap,numerr);
 
   global_err_data = numerr ? pari_err2GEN(numerr,ap):va_arg(ap,GEN);
+  if (!numerr) numerr = err_get_num(global_err_data);
   if (*iferr_env)
     longjmp(*iferr_env, numerr);
   err_init();
