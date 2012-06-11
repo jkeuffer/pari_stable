@@ -21,7 +21,7 @@ small characteristic. */
 
 /***********************************************************************/
 /**                                                                   **/
-/**                              FlxqE                                  **/
+/**                              FlxqE                                **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -76,10 +76,17 @@ FlxqE_dbl_slope(GEN P, GEN a4, GEN T, ulong p, GEN *slope)
   GEN x, y, Q;
   if (ell_is_inf(P) || !lgpol(gel(P,2))) return ellinf();
   x = gel(P,1); y = gel(P,2);
-  *slope = Flxq_div(Flx_add(Flx_Fl_mul(Flxq_sqr(x, T, p), 3, p), a4, p),
-                  Flx_Fl_mul(y, 2, p), T, p);
+  if (p==3UL)
+    *slope = typ(a4)==t_VEC ? Flxq_div(Flxq_mul(x, gel(a4, 1), T, p), y, T, p)
+                            : Flxq_div(a4, Flx_neg(y, p), T, p);
+  else
+  {
+    GEN sx = Flx_add(Flx_Fl_mul(Flxq_sqr(x, T, p), 3, p), a4, p);
+    *slope = Flxq_div(sx, Flx_Fl_mul(y, 2, p), T, p);
+  }
   Q = cgetg(3,t_VEC);
   gel(Q, 1) = Flx_sub(Flxq_sqr(*slope, T, p), Flx_Fl_mul(x, 2, p), p);
+  if (typ(a4)==t_VEC) gel(Q, 1) = Flx_sub(gel(Q, 1), gel(a4, 1), p);
   gel(Q, 2) = Flx_sub(Flxq_mul(*slope, Flx_sub(x, gel(Q, 1), p), T, p), y, p);
   return Q;
 }
@@ -110,6 +117,7 @@ FlxqE_add_slope(GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *slope)
   *slope = Flxq_div(Flx_sub(Py, Qy, p), Flx_sub(Px, Qx, p), T, p);
   R = cgetg(3,t_VEC);
   gel(R, 1) = Flx_sub(Flx_sub(Flxq_sqr(*slope, T, p), Px, p), Qx, p);
+  if (typ(a4)==t_VEC) gel(R, 1) = Flx_sub(gel(R, 1),gel(a4, 1), p);
   gel(R, 2) = Flx_sub(Flxq_mul(*slope, Flx_sub(Px, gel(R, 1), p), T, p), Py, p);
   return R;
 }
@@ -186,12 +194,34 @@ FlxqE_mul(GEN P, GEN n, GEN a4, GEN T, ulong p)
   return _FlxqE_mul(&E, P, n);
 }
 
+/* 3*x^2+2*a2*x = -a2*x, and a2!=0 */
+
+/* Finds a random non-singular point on E */
+static GEN
+random_F3xqE(GEN a2, GEN a6, GEN T)
+{
+  pari_sp ltop = avma;
+  GEN x, y, rhs;
+  const ulong p=3;
+  do
+  {
+    avma= ltop;
+    x   = random_Flx(degpol(T),T[1],p);
+    rhs = Flx_add(Flxq_mul(Flxq_sqr(x, T, p), Flx_add(x, a2, p), T, p), a6, p);
+  } while ((!lgpol(rhs) && !lgpol(x)) || !Flxq_issquare(rhs, T, p));
+  y = Flxq_sqrt(rhs, T, p);
+  if (!y) pari_err_PRIME("random_F3xqE", T);
+  return gerepilecopy(ltop, mkvec2(x, y));
+}
+
 /* Finds a random non-singular point on E */
 GEN
 random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp ltop = avma;
   GEN x, x2, y, rhs;
+  if (typ(a4)==t_VEC)
+    return random_F3xqE(gel(a4,1), a6, T);
   do
   {
     avma= ltop;
@@ -554,6 +584,25 @@ Flx_renormalize_ip(GEN x, long lx)
 }
 
 static ulong
+F3xq_ellcard_naive(GEN a2, GEN a6, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  long i, d = degpol(T), lx = d+2;
+  long q = upowuu(p, d), a;
+  GEN x = const_vecsmall(lx,0); x[1] = T[1];
+  for(a=1, i=0; i<q; i++)
+  {
+    GEN rhs;
+    Flx_renormalize_ip(x, lx);
+    rhs = Flx_add(Flxq_mul(Flxq_sqr(x, T, p), Flx_add(x, a2, p), T, p), a6, p);
+    if (!lgpol(rhs)) a++; else if (Flxq_issquare(rhs,T,p)) a+=2;
+    Flx_next(x,p);
+  }
+  avma = av;
+  return a;
+}
+
+static ulong
 Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
@@ -635,7 +684,9 @@ Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
   pari_sp av = avma;
   long n = degpol(T);
   GEN r, q = powuu(p,  n);
-  if (degpol(a4)<=0 && degpol(a6)<=0)
+  if (typ(a4)==t_VEC)
+    r = utoi(F3xq_ellcard_naive(gel(a4,1), a6, T, p));
+  else if (degpol(a4)<=0 && degpol(a6)<=0)
     r = Fp_ffellcard(utoi(Flx_eval(a4,0,p)),utoi(Flx_eval(a6,0,p)),q,n,utoi(p));
   else if (cmpis(q,100)<0)
     r = utoi(Flxq_ellcard_naive(a4, a6, T, p));
