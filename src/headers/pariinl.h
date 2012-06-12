@@ -122,15 +122,13 @@ mkvec5(GEN x, GEN y, GEN z, GEN t, GEN u) {
   GEN v=cgetg(6,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z;
   gel(v,4) = t; gel(v,5) = u; return v; }
 INLINE GEN
-mkvecs(long x) { GEN v = cgetg(2, t_VEC); gel(v,1) = stoi(x); return v; }
+mkvecs(long x) { retmkvec(stoi(x)); }
 INLINE GEN
-mkvec2s(long x, long y) {
-  GEN v = cgetg(3,t_VEC); gel(v,1) = stoi(x); gel(v,2) = stoi(y); return v; }
+mkvec2s(long x, long y) { retmkvec2(stoi(x),stoi(y)); }
 INLINE GEN
-mkvec3s(long x, long y, long z) {
-  GEN v=cgetg(4,t_VEC);
-  gel(v,1)=stoi(x); gel(v,2)=stoi(y); gel(v,3)=stoi(z); return v;
-}
+mkvec3s(long x, long y, long z) { retmkvec3(stoi(x),stoi(y),stoi(z)); }
+INLINE GEN
+mkvec4s(long x, long y, long z, long t) { retmkvec4(stoi(x),stoi(y),stoi(z),stoi(t)); }
 INLINE GEN
 mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = gcopy(x); return v; }
 INLINE GEN

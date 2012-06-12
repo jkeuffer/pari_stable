@@ -530,7 +530,7 @@ F2xq_ellcard(GEN a, GEN a6, GEN T)
     struct _F2xqE e;
     long m = (n+1)>>1;
     GEN q1 = addis(q, 1);
-    GEN v = n==4 ? mkvec4(utoi(13),utoi(17),utoi(21),utoi(25))
+    GEN v = n==4 ? mkvec4s(13,17,21,25)
                  : odd(n) ? mkvec3(subii(q1,int2u(m)),q1,addii(q1,int2u(m))):
                             mkvec5(subii(q1,int2u(m+1)),subii(q1,int2u(m)),q1,
                                    addii(q1,int2u(m)),addii(q1,int2u(m+1)));
