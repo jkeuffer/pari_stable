@@ -28,6 +28,7 @@ test(nextprime(2^65),2);
 
 a=ffgen(ffinit(101,3),'a);
 E=ellffinit([1,3],a); E.j
+E.disc
 P=random(E);Q=random(E);
 R=elladd(E,P,Q);
 elladd(E,ellsub(E,R,P),ellneg(E,Q))
