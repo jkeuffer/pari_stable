@@ -222,7 +222,34 @@ initsmall(GEN x, GEN y)
   gel(y,12) = D;
   if (gequal0(D)) { gel(y, 13) = gen_0; return 0; }
 
-  j = gdiv(gmul(gsqr(c4),c4), D);
+  if (typ(D) == t_POL && typ(c4) == t_POL && varn(D) == varn(c4))
+  { /* c4^3 / D, simplifying incrementally */
+    GEN g = RgX_gcd(D, c4);
+    if (degpol(g) == 0)
+      j = gred_rfrac_simple(gmul(gsqr(c4),c4), D);
+    else
+    {
+      GEN d, c = RgX_div(c4, g);
+      D = RgX_div(D, g);
+      g = RgX_gcd(D,c4);
+      if (degpol(g) == 0)
+        j = gred_rfrac_simple(gmul(gsqr(c4),c), D);
+      else
+      {
+        D = RgX_div(D, g);
+        d = RgX_div(c4, g);
+        g = RgX_gcd(D,c4);
+        if (degpol(g))
+        {
+          D = RgX_div(D, g);
+          c4 = RgX_div(c4, g);
+        }
+        j = gred_rfrac_simple(gmul(gmul(c4, d),c), D);
+      }
+    }
+  }
+  else
+    j = gdiv(gmul(gsqr(c4),c4), D);
   gel(y,13) = j; return 1;
 }
 
