@@ -2619,7 +2619,7 @@ FqX_split_all(GEN z, GEN T, GEN p)
 
 /* not memory-clean, as FpX_factorff_i, returning only linear factors */
 static GEN
-FpX_rootsff_i(GEN P, GEN p, GEN T)
+FpX_rootsff_i(GEN P, GEN T, GEN p)
 {
   GEN V, F = gel(FpX_factor(P,p), 1);
   long i, lfact = 1, nmax = lgpol(P), n = lg(F), dT = degpol(T);
@@ -2640,10 +2640,10 @@ FpX_rootsff_i(GEN P, GEN p, GEN T)
   return V;
 }
 GEN
-FpX_rootsff(GEN P, GEN p, GEN T)
+FpX_rootsff(GEN P, GEN T, GEN p)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, FpX_rootsff_i(P, p, T));
+  return gerepilecopy(av, FpX_rootsff_i(P, T, p));
 }
 
 static GEN
@@ -2711,7 +2711,7 @@ FqX_roots_i(GEN f, GEN T, GEN p)
   GEN R;
   f = FqX_normalize(f, T, p);
   if (!signe(f)) pari_err_ROOTS0("FqX_roots");
-  if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), p, T);
+  if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), T, p);
   if (degpol(f)==2)
     return gen_sort(FqX_quad_roots(f,T,p), (void*) &cmp_RgX, &cmp_nodata);
   switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
@@ -2766,7 +2766,7 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
 
 /* not memory-clean */
 static GEN
-FpX_factorff_i(GEN P, GEN p, GEN T)
+FpX_factorff_i(GEN P, GEN T, GEN p)
 {
   GEN V, E, F = FpX_factor(P,p);
   long i, lfact = 1, nmax = lgpol(P), n = lg(gel(F,1));
@@ -2787,10 +2787,10 @@ FpX_factorff_i(GEN P, GEN p, GEN T)
   setlg(E,lfact); return sort_factor_pol(mkvec2(V,E), cmp_RgX);
 }
 GEN
-FpX_factorff(GEN P, GEN p, GEN T)
+FpX_factorff(GEN P, GEN T, GEN p)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, FpX_factorff_i(P, p, T));
+  return gerepilecopy(av, FpX_factorff_i(P, T, p));
 }
 
 /* assumes varncmp (varn(T), varn(f)) > 0 */
@@ -2807,7 +2807,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   }
   T = FpX_normalize(T, p);
   f = FqX_normalize(f, T, p);
-  if (isabsolutepol(f)) return FpX_factorff_i(simplify_shallow(f), p, T);
+  if (isabsolutepol(f)) return FpX_factorff_i(simplify_shallow(f), T, p);
 
   pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */

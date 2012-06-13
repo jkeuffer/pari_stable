@@ -31,6 +31,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     value of pd [ remove assumption that it pointed into a prime table ]
     and always set pd to a pointer into the private prime table.
   - powell, addell, subell renamed to ellpow, elladd, ellsub.
+  - last tow arguments of FpX_factorff and FpX_rootsff have been swapped.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
