@@ -312,7 +312,7 @@ FpE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN p, GEN *pt_R)
   } else {
     GEN slope, tmp1, tmp2;
     *pt_R = FpE_add_slope(P, R, a4, p, &slope);
-    tmp1  = Fp_mul(Fp_add(gel(Q, 1), Fp_neg(gel(R, 1), p), p), slope, p);
+    tmp1  = Fp_mul(Fp_sub(gel(Q, 1), gel(R, 1), p), slope, p);
     tmp2  = Fp_add(tmp1, gel(R, 2), p);
     return Fp_sub(gel(Q, 2), tmp2, p);
   }
@@ -1343,7 +1343,7 @@ FpXQE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
   } else {
     GEN slope, tmp1, tmp2;
     *pt_R = FpXQE_add_slope(P, R, a4, T, p, &slope);
-    tmp1  = FpXQ_mul(FpX_add(gel(Q, 1), FpX_neg(gel(R, 1), p), p), slope, T, p);
+    tmp1  = FpXQ_mul(FpX_sub(gel(Q, 1), gel(R, 1), p), slope, T, p);
     tmp2  = FpX_add(tmp1, gel(R, 2), p);
     return FpX_sub(gel(Q, 2), tmp2, p);
   }

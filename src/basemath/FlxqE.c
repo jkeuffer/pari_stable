@@ -305,7 +305,7 @@ FlxqE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
   } else {
     GEN slope, tmp1, tmp2;
     *pt_R = FlxqE_add_slope(P, R, a4, T, p, &slope);
-    tmp1  = Flxq_mul(Flx_add(gel(Q, 1), Flx_neg(gel(R, 1), p), p), slope, T, p);
+    tmp1  = Flxq_mul(Flx_sub(gel(Q, 1), gel(R, 1), p), slope, T, p);
     tmp2  = Flx_add(tmp1, gel(R, 2), p);
     return Flx_sub(gel(Q, 2), tmp2, p);
   }
