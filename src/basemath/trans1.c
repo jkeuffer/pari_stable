@@ -1136,7 +1136,7 @@ Qp_sqrt(GEN x)
   GEN z,y,mod, p = gel(x,2);
 
   if (gequal0(x)) return zeropadic(p, (e+1) >> 1);
-  if (e & 1) pari_err(e_MISC,"odd exponent in p-adic sqrt");
+  if (e & 1) pari_err(e_MISC,"odd valuation in p-adic sqrt");
 
   y = cgetg(5,t_PADIC);
   pp = precp(x);
