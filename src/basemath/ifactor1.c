@@ -3463,9 +3463,9 @@ END:
 }
 
 INLINE void
-chk_arith(GEN n) {
-  if (typ(n) != t_INT) pari_err_TYPE("arithmetic function",n);
-  if (!signe(n)) pari_err(e_MISC, "zero argument in an arithmetic function");
+chk_arith(GEN n, const char *f) {
+  if (typ(n) != t_INT) pari_err_TYPE(f,n);
+  if (!signe(n)) pari_err_DOMAIN(f, "argument", "=", gen_0, gen_0);
 }
 
 long
@@ -3477,7 +3477,7 @@ moebiusu(ulong n)
 
   switch(n)
   {
-    case 0: chk_arith(gen_0);/*error*/
+    case 0: chk_arith(gen_0,"moebius");/*error*/
     case 1: return  1;
     case 2: return -1;
   }
@@ -3542,7 +3542,7 @@ moebius(GEN n)
   ulong p, lim;
   long i, l, s, v;
 
-  chk_arith(n);
+  chk_arith(n,"moebius");
   if (lgefint(n) == 3) return moebiusu(n[2]);
   p = mod4(n); if (!p) return 0;
   if (p == 2) { s = -1; n = shifti(n, -1); } else { s = 1; n = icopy(n); }
@@ -3743,7 +3743,7 @@ omega(GEN n)
   long i, l, nb, v;
   ulong p, lim;
 
-  chk_arith(n); if (is_pm1(n)) return 0;
+  chk_arith(n,"omega"); if (is_pm1(n)) return 0;
   v = vali(n); nb = v ? 1 : 0;
   n = shifti(n, -v);
   if (is_pm1(n)) return nb;
@@ -3786,7 +3786,7 @@ bigomega(GEN n)
   ulong p, lim;
   long i, l, nb, v;
 
-  chk_arith(n); if (is_pm1(n)) return 0;
+  chk_arith(n,"bigomega"); if (is_pm1(n)) return 0;
   nb = v = vali(n); n = shifti(n, -v);
   if (is_pm1(n)) { avma = av; return nb; }
   setabssign(n);
@@ -3857,7 +3857,7 @@ eulerphi(GEN n)
   ulong p, lim;
   long i, l, v;
 
-  chk_arith(n);
+  chk_arith(n,"eulerphi");
   if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
   v = vali(n); n = shifti(n,-v); setabssign(n);
   m = v > 1 ? int2n(v-1) : gen_1;
@@ -3908,7 +3908,7 @@ numbdiv(GEN n)
   long i, l, v;
   ulong p, lim;
 
-  chk_arith(n); if (is_pm1(n)) return gen_1;
+  chk_arith(n,"numbdiv"); if (is_pm1(n)) return gen_1;
   v = vali(n); n = shifti(n,-v); setabssign(n);
   m = utoipos(v+1);
   if (is_pm1(n)) return gerepileuptoint(av,m);
@@ -3955,7 +3955,7 @@ sumdiv(GEN n)
   ulong p, lim;
   long i, l, v;
 
-  chk_arith(n); if (is_pm1(n)) return gen_1;
+  chk_arith(n,"sumdiv"); if (is_pm1(n)) return gen_1;
   v = vali(n); n = shifti(n,-v); setabssign(n);
   m = v ? addsi(-1, int2n(v+1)) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
@@ -4010,7 +4010,7 @@ sumdivk(GEN n, long k)
 
   if (!k) return numbdiv(n);
   if (k == 1) return sumdiv(n);
-  chk_arith(n); if (is_pm1(n)) return gen_1;
+  chk_arith(n,"sumdivk"); if (is_pm1(n)) return gen_1;
   k1 = k; n1 = n;
   if (k < 0)  k = -k;
   if (k == 1) { m = sumdiv(n); goto fin; }

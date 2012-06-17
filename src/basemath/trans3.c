@@ -1820,7 +1820,7 @@ zetap(GEN s)
 GEN
 gzeta(GEN x, long prec)
 {
-  if (gequal1(x)) pari_err(e_MISC, "argument equal to one in zeta");
+  if (gequal1(x)) pari_err_DOMAIN("zeta", "argument", "=", gen_1, x);
   switch(typ(x))
   {
     case t_INT:
