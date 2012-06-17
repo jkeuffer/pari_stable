@@ -603,7 +603,7 @@ static char *
 absrtostr_width_frac(GEN x, int width_frac)
 {
   long beta, ls, point, lx, sx = signe(x);
-  char *s, *buf, *buf0;
+  char *s, *buf;
   GEN z;
 
   if (!sx) return real0tostr_width_frac(width_frac);
@@ -624,22 +624,25 @@ absrtostr_width_frac(GEN x, int width_frac)
   if (!signe(z)) return real0tostr_width_frac(width_frac);
 
   s = itostr_sign(z, 1, &ls); /* ls > 0, number of digits in s */
-  /* '.', trailing \0 */
-  buf0 = buf = stack_malloc( ls + 1+1 );
   point = ls - beta; /* position of . in s; <= ls, may be < 0 */
   if (point > 0) /* write integer_part.fractional_part */
   {
+    /* '.', trailing \0 */
+    buf = stack_malloc( ls + 1+1 );
     if (ls == point)
       strcpy(buf, s); /* no '.' */
     else
       wr_dec(buf, s, point);
   } else { /* point <= 0, fractional part must be written */
-    *buf++ = '0';
-    *buf++ = '.';
-    buf = zeros(buf, -point);
-    strcpy(buf, s);
+    char *t;
+    /* '0', '.', zeroes, trailing \0 */
+    buf = t = stack_malloc( 1 + 1 - point + ls + 1 );
+    *t++ = '0';
+    *t++ = '.';
+    t = zeros(t, -point);
+    strcpy(t, s);
   }
-  return buf0;
+  return buf;
 }
 
 /* Return t_REAL |x| in floating point format.

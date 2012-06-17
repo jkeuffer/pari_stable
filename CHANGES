@@ -100,6 +100,7 @@ BA 77- FpX_gcd(0,x) -> div by 0
    80- t_REAL with huge exponents print incorrectly [#1322]
    81- a1;a2;a3;a4;a6;ellinit([a1,a2,a3,a4,a6],1) was very slow
    82- FpX_factorff and FpX_rootsff were not using standard argument order.
+PB 83- printf("%.6f", 5E-5) -> SEGV
 
   Changed
     1- mathnf: swapped flag 3 and 5.
