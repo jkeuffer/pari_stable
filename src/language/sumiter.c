@@ -1446,7 +1446,7 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 {
   long sig, iter, itmax;
   pari_sp av = avma;
-  GEN c,d,e,tol,tol1,min1,min2,fa,fb,fc,p,q,r,s,xm;
+  GEN c, d, e, tol, fa, fb, fc;
 
   a = gtofp(a,prec);
   b = gtofp(b,prec); sig = cmprr(b,a);
@@ -1455,13 +1455,15 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
 
   fa = eval(E, a);
   fb = eval(E, b);
-  if (gsigne(fa)*gsigne(fb) > 0) pari_err(e_MISC,"roots must be bracketed in solve");
+  if (gsigne(fa)*gsigne(fb) > 0)
+    pari_err(e_MISC,"roots must be bracketed in solve");
   itmax = prec2nbits(prec) * 2 + 1;
   tol = real2n(5-prec2nbits(prec), LOWDEFAULTPREC);
   fc = fb;
   e = d = NULL; /* gcc -Wall */
   for (iter=1; iter<=itmax; iter++)
   {
+    GEN xm, tol1;
     if (gsigne(fb)*gsigne(fc) > 0)
     {
       c = a; fc = fa; e = d = subrr(b,a);
@@ -1470,20 +1472,22 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     {
       a = b; b = c; c = a; fa = fb; fb = fc; fc = fa;
     }
-    tol1 = mulrr(tol, gmax(tol,absr(b)));
+    tol1 = absr_cmp(tol, b) > 0? sqrr(tol): mulrr(tol, absr(b));
     xm = shiftr(subrr(c,b),-1);
-    if (cmprr(absr(xm),tol1) <= 0 || gequal0(fb)) break; /* SUCCESS */
+    if (absr_cmp(xm,tol1) <= 0 || gequal0(fb)) break; /* SUCCESS */
 
-    if (cmprr(absr(e),tol1) >= 0 && gcmp(gabs(fa,0),gabs(fb,0)) > 0)
+    if (absr_cmp(e,tol1) >= 0 && gcmp(gabs(fa,0),gabs(fb,0)) > 0)
     { /* attempt interpolation */
-      s = gdiv(fb,fa);
+      GEN min1, min2, p, q, s = gdiv(fb,fa);
       if (cmprr(a,c)==0)
       {
-        p = gmul2n(gmul(xm,s),1); q = gsubsg(1,s);
+        p = gmul2n(gmul(xm,s),1);
+        q = gsubsg(1,s);
       }
       else
       {
-        q = gdiv(fa,fc); r = gdiv(fb,fc);
+        GEN r = gdiv(fb,fc);
+        q = gdiv(fa,fc);
         p = gmul2n(gmul(gsub(q,r),gmul(xm,q)),1);
         p = gmul(s, gsub(p, gmul(gsub(b,a),gsubgs(r,1))));
         q = gmul(gmul(gsubgs(q,1),gsubgs(r,1)),gsubgs(s,1));
