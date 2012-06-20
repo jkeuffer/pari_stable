@@ -2079,8 +2079,8 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
   return 1;
 }
 
-/* is x a p-th power, p >= 11 prime ? Similar to is_357_power(), but instead 
- * of the mask, we keep the current test exponent around. Cut off when 
+/* is x a p-th power, p >= 11 prime ? Similar to is_357_power(), but instead
+ * of the mask, we keep the current test exponent around. Cut off when
  * log_2 x^(1/k) < cutoffbits since we would have found it by trial division.
  * Everything needed here (primitive roots etc.) is computed from scratch on
  * the fly; compared to the size of numbers under consideration, these
