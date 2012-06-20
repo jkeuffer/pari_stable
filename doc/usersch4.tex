@@ -1459,9 +1459,13 @@ subsequent words \kbd{z[2]},\dots \kbd{z[lg(z)-1]} are \kbd{GEN}s containing
 additional data, depending on the error type.
 
 \subsec{Type \typ{CLOSURE} (closure)}\kbdsidx{t_CLOSURE}\sidx{closure}
-This type holds GP functions and closures, in compiled form. It is useless in
-library mode and subject to change each time the GP language evolves. Hence we
-do not describe it here and refer to the Developer's Guide.
+This type holds GP functions and closures, in compiled form. The internal detail
+of this type is subject to change each time the GP language evolves. Hence we
+do not describe it here and refer to the Developer's Guide.  However
+functions to create or to evaluate \typ{CLOSURE}s are documented in
+\secref{se:closure}.
+
+\fun{long}{closure_arity}{GEN C} returns the arity of the \typ{CLOSURE}.
 
 \subsec{Type \typ{LIST} (list)}\kbdsidx{t_LIST}\sidx{list}
 this type was introduced for specific \kbd{gp} use and is rather inefficient
