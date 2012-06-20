@@ -1,11 +1,30 @@
 Function: vecmin
 Section: operators
-C-Name: vecmin
-Prototype: G
-Help: vecmin(x): minimum of the elements of the vector/matrix x
-Doc: if $x$ is a vector or a matrix, returns the minimum
- of the elements of $x$, otherwise returns a copy of $x$. Error if $x$ is
- empty.
+C-Name: vecmin0
+Prototype: GD0,L,
+Help: vecmin(x,{flag=0}): smallest entry in the vector/matrix x.
+ Binary digits of flag (if present) mean: 1: give the index of the smallest
+ entry (indirect min).
+Doc: if $x$ is a vector or a matrix, returns the smallest entry of $x$,
+ otherwise returns a copy of $x$. Error if $x$ is empty.
+
+ \noindent The binary digits of \fl\ mean:
+
+ \item 1: index of the smallest entry (indirect minimum). If $x$ is
+ a matrix, return the coordinates $[i,j]$ such that $x[i,j]$ is the
+ smallest entry. This flag is ignored if $x$ is not a vector or matrix.
+ \bprog
+ ? vecmin([10, 20, -30, 40])
+ %1 = -30
+ ? vecmin([10, 20, -30, 40], 1)
+ %2 = 3
+ ? vecmin([10, 20; -30, 40], 1)
+ %3 = Vecsmall([2, 1])
+ @eprog
+
 Description:
-  (vecsmall):small vecsmall_min($1)
-  (gen):gen        vecmin($1)
+  (vecsmall, ?0):small vecsmall_min($1)
+  (vecsmall, 1):small  vecsmall_indexmin($1)
+  (vec, 1):small       vecindexmin($1)
+  (gen, ?0):gen        vecmin($1)
+  (gen, 1):gen         vecmin0($1, 1)

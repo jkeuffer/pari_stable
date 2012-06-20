@@ -499,12 +499,30 @@ vecsmall_pack(GEN V, long base, long mod)
 }
 
 INLINE long
+vecsmall_indexmax(GEN x)
+{
+  long i, i0 = 1, t = x[1], lx = lg(x);
+  for (i=2; i<lx; i++)
+    if (x[i] > t) t = x[i0=i];
+  return i0;
+}
+
+INLINE long
 vecsmall_max(GEN x)
 {
   long i, t = x[1], lx = lg(x);
   for (i=2; i<lx; i++)
     if (x[i] > t) t = x[i];
   return t;
+}
+
+INLINE long
+vecsmall_indexmin(GEN x)
+{
+  long i, i0 = 1, t = x[1], lx =lg(x);
+  for (i=2; i<lx; i++)
+    if (x[i] < t) t = x[i0=i];
+  return i0;
 }
 
 INLINE long

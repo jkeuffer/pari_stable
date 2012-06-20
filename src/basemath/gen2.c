@@ -1888,69 +1888,115 @@ gmin(GEN x, GEN y) { return gcopy(gcmp(x,y)<0? x: y); }
 GEN
 gmings(GEN x, long s) { return (gcmpsg(s,x)>0)? gcopy(x): stoi(s); }
 
-GEN
-vecmax(GEN x)
+long
+vecindexmax(GEN x)
 {
-  long lx = lg(x), i, j;
+  long lx = lg(x), i0, i;
   GEN s;
 
-  if (lx==1) pari_err(e_MISC, "empty vector in vecmax");
+  if (lx==1) pari_err(e_MISC, "empty vector in vecindexmax");
   switch(typ(x))
   {
     case t_VEC: case t_COL:
-      s = gel(x,1);
+      s = gel(x,i0=1);
       for (i=2; i<lx; i++)
-        if (gcmp(gel(x,i),s) > 0) s = gel(x,i);
-      return gcopy(s);
+        if (gcmp(gel(x,i),s) > 0) s = gel(x,i0=i);
+      return i0;
+    case t_VECSMALL:
+      return vecsmall_indexmax(x);
+    default: pari_err_TYPE("vecindexmax",x);
+  }
+  /* NOT REACHED */
+  return 0;
+}
+long
+vecindexmin(GEN x)
+{
+  long lx = lg(x), i0, i;
+  GEN s;
+
+  if (lx==1) pari_err(e_MISC, "empty vector in vecindexmin");
+  switch(typ(x))
+  {
+    case t_VEC: case t_COL:
+      s = gel(x,i0=1);
+      for (i=2; i<lx; i++)
+        if (gcmp(gel(x,i),s) < 0) s = gel(x,i0=i);
+      return i0;
+    case t_VECSMALL:
+      return vecsmall_indexmin(x);
+    default: pari_err_TYPE("vecindexmin",x);
+  }
+  /* NOT REACHED */
+  return 0;
+}
+
+
+GEN
+vecmax0(GEN x, int flag)
+{
+  long i0, j0, i, j;
+  GEN s;
+  switch(typ(x))
+  {
+    case t_VEC: case t_COL:
+      i = vecindexmax(x);
+      return (flag & 1) ? stoi(i) : gcopy(gel(x, i));
     case t_MAT: {
-      long lx2 = lg(x[1]);
-      if (lx2==1) pari_err(e_MISC, "empty vector in vecmax");
-      s = gcoeff(x,1,1); i = 2;
+      long lx2, lx = lg(x);
+      if (lx==1 || (lx2 = lg(x[1])) == 1)
+        pari_err(e_MISC, "empty vector in vecmax");
+      s = gcoeff(x,i0=1,j0=1); i = 2;
       for (j=1; j<lx; j++,i=1)
       {
         GEN c = gel(x,j);
         for (; i<lx2; i++)
-          if (gcmp(gel(c,i),s) > 0) s = gel(c,i);
+          if (gcmp(gel(c,i),s) > 0) { s = gel(c,i); j0=j; i0=i; }
       }
-      return gcopy(s);
+      return (flag & 1) ? mkvecsmall2(i0,j0) : gcopy(s);
     }
     case t_VECSMALL:
-      return stoi(vecsmall_max(x));
-    default: return gcopy(x);
+      i = vecsmall_indexmax(x);
+      return (flag & 1) ? stoi(i) : stoi(x[i]);
+    default:
+      return gcopy(x);
   }
 }
-
 GEN
-vecmin(GEN x)
+vecmin0(GEN x, int flag)
 {
-  long lx = lg(x), i, j;
+  long i0, j0, i, j;
   GEN s;
-
-  if (lx==1) pari_err(e_MISC, "empty vector in vecmin");
   switch(typ(x))
   {
     case t_VEC: case t_COL:
-      s = gel(x,1);
-      for (i=2; i<lx; i++)
-        if (gcmp(gel(x,i),s) < 0) s = gel(x,i);
-      return gcopy(s);
+      i = vecindexmin(x);
+      return (flag & 1) ? stoi(i) : gcopy(gel(x, i));
     case t_MAT: {
-      long lx2 = lg(x[1]);
-      if (lx2==1) pari_err(e_MISC, "empty vector in vecmin");
-      s = gcoeff(x,1,1); i = 2;
+      long lx2, lx = lg(x);
+      if (lx==1 || (lx2 = lg(x[1])) == 1)
+        pari_err(e_MISC, "empty vector in vecmin");
+      s = gcoeff(x,i0=1,j0=1); i = 2;
       for (j=1; j<lx; j++,i=1)
       {
         GEN c = gel(x,j);
         for (; i<lx2; i++)
-          if (gcmp(gel(c,i),s) < 0) s = gel(c,i);
+          if (gcmp(gel(c,i),s) < 0) { s = gel(c,i); j0=j; i0=i; }
       }
-      return gcopy(s);
+      return (flag & 1) ? mkvecsmall2(i0,j0) : gcopy(s);
     }
     case t_VECSMALL:
-      return stoi(vecsmall_min(x));
-    default: return gcopy(x);
+      i = vecsmall_indexmin(x);
+      return (flag & 1) ? stoi(i) : stoi(x[i]);
+    default:
+      return gcopy(x);
   }
 }
+
+GEN
+vecmax(GEN x) { return vecmax0(x, 0); }
+GEN
+vecmin(GEN x) { return vecmin0(x, 0); }
 
 /*******************************************************************/
 /*                                                                 */
