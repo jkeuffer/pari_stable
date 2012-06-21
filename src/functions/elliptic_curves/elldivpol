@@ -2,7 +2,7 @@ Function: elldivpol
 Section: elliptic_curves
 C-Name: elldivpol
 Prototype: GLDn
-Help: elldivpol(E,n,{v=x}): n-division polynomial f_n for the curve E in the
+Help: elldivpol(E,n,{v='x}): n-division polynomial f_n for the curve E in the
  variable v.
 Doc: $n$-division polynomial $f_n$ for the curve $E$ in the
  variable $v$. In standard notation, for any affine point $P = (X,Y)$ on the

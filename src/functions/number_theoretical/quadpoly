@@ -2,7 +2,7 @@ Function: quadpoly
 Section: number_theoretical
 C-Name: quadpoly0
 Prototype: GDn
-Help: quadpoly(D,{v=x}): quadratic polynomial corresponding to the
+Help: quadpoly(D,{v='x}): quadratic polynomial corresponding to the
  discriminant D, in variable v.
 Doc: creates the ``canonical'' quadratic
  polynomial (in the variable $v$) corresponding to the discriminant $D$,

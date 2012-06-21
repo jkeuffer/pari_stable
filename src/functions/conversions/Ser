@@ -2,7 +2,7 @@ Function: Ser
 Section: conversions
 C-Name: gtoser
 Prototype: GDnDP
-Help: Ser(s,{v=x},{d=seriesprecision}): convert s into a power series with
+Help: Ser(s,{v='x},{d=seriesprecision}): convert s into a power series with
  variable v and precision d, starting with the constant coefficient.
 Doc: transforms the object $s$ into a power series with main variable $v$
  ($x$ by default) and precision (number of significant terms) equal to
