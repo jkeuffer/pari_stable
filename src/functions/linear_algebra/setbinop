@@ -14,5 +14,5 @@ Doc: the set whose elements are the f(x,y), where x,y run through X,Y.
  ? setbinop((x,y)->x-y, X,Y) \\ set X - Y
  %3 = [-3, -2, -1, 0, 1]
  ? setbinop((x,y)->x+y, X)   \\ set 2X = X + X
- %2 = [3, 4, 5, 6, 7]
+ %2 = [2, 3, 4, 5, 6]
  @eprog
