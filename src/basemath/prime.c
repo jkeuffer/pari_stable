@@ -532,12 +532,12 @@ long
 isanypower_nosmalldiv(GEN N, GEN *px)
 {
   GEN x = N, y;
-  ulong mask = 7, ex0 = 11;
+  ulong mask = 7;
   long ex, k = 1;
   forprime_t T;
   while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
   while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
-  u_forprime_init(&T, 11, ULONG_MAX);
+  (void)u_forprime_init(&T, 11, ULONG_MAX);
   /* stop when x^(1/k) < 2^14 */
   while ( (ex = is_pth_power(x, &y, &T, 15)) ) { k *= ex; x = y; }
   *px = x; return k;
