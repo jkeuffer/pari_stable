@@ -875,12 +875,13 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
   pari_sp av;
   ulong ct = 1, q;
   long pk, k, fl = -1;
-  byteptr d = diffptr+2;
   Cache *C, *Cp;
+  forprime_t T;
 
-  for (q = 3; *d; )
-  {
-    if (q%p != 1 || umodiu(et,q) == 0) goto repeat;
+  (void)u_forprime_arith_init(&T, 3, ULONG_MAX, 1,p);
+  while( (q = u_forprime_next(&T)) )
+  { /* q = 1 (mod p) */
+    if (umodiu(et,q) == 0) continue;
 
     if (umodiu(R->N,q) == 0) return -1;
     k = u_lval(q-1, p);
@@ -901,8 +902,6 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
     if (fl == 1) return ct;
     avma = av;
     ct++;
-   repeat:
-    NEXT_PRIME_VIADIFF(q,d);
   }
   pari_err_BUG("aprcl test fails! this is highly improbable");
   return 0;
