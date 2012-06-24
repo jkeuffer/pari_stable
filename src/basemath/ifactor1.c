@@ -2013,44 +2013,36 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
  * corresponding diffptr to go on looping over primes.
  * If pt != NULL, it receives the n-th root */
 ulong
-is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
+is_kth_power(GEN x, ulong n, GEN *pt)
 {
-  int init = 0;
+  forprime_t T;
   long j;
   ulong q, residue;
   GEN y;
-  byteptr d0;
   pari_sp av = avma;
 
-  if (d)
-  {
-    q = n; d0 = d;
-  }
-  else
-  {
-    q = 0; d0 = diffptr;
-    maxprime_check(n);
-    while (q < n) NEXT_PRIME_VIADIFF(q,d0);
-  }
-  /* q smallest prime >= n */
+  (void)u_forprime_arith_init(&T, odd(n)? 2*n+1: n+1, ULONG_MAX, 1,n);
+  /* we'll start at q, smallest prime >= n */
 
   /* Modular checks, use small primes q congruent 1 mod n */
   /* A non n-th power nevertheless passes the test with proba n^(-#checks),
-   * we want this < 1e-6 ~ exp(-13.8).
-   * n = 17886697 is smallest such that the smallest suitable q is > 2^32 */
-  j = (long)(13.8 / log((double)n));
-  if (j < 1 && n < 17886697) j = 1;
+   * We'd like this < 1e-6 but let j = floor(log(1e-6) / log(n)) which
+   * ensures much less. */
+  if (n >= 17886697) /* smallest such that smallest suitable q is > 2^32 */
+    j = 0;
+  else if (n > 1000)
+    j = 1;
+  else if (n > 100)
+    j = 2;
+  else if (n > 31)
+    j = 3;
+  else if (n > 15)
+    j = 4;
+  else
+    j = 5;
   for (; j > 0; j--)
   {
-    do
-    {
-      if (*d0) NEXT_PRIME_VIADIFF(q,d0);
-      else {
-        if (init) q += n; else { init = 1; q += n+1 - q%n; }
-        while (!uisprime(q)) q += n;
-        break;
-      }
-    } while (q % n != 1);
+    if (!(q = u_forprime_next(&T))) break;
     /* q a prime = 1 mod n */
     if (DEBUGLEVEL>4) err_printf("\tchecking modulo %ld\n", q);
     residue = umodiu(x, q);
@@ -2084,35 +2076,22 @@ is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
  * log_2 x^(1/k) < cutoffbits since we would have found it by trial division.
  * Everything needed here (primitive roots etc.) is computed from scratch on
  * the fly; compared to the size of numbers under consideration, these
- * word-sized computations take negligible time. */
+ * word-sized computations take negligible time.
+ * Any cutoffbits > 0 is safe, but direct root extraction attempts are faster
+ * when trial division has been used to discover very small bases. We become
+ * competitive at cutoffbits ~ 4 */
 int
-is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
+is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
 {
   long size = expi(x) /* not +1 */;
-  ulong p = 11;
+  ulong p;
   pari_sp av = avma;
-  byteptr d = diffptr+5;
-
-  /* cutting off at 1 is safe, but direct root extraction attempts are
-   * faster when trial division has been used to discover very small
-   * bases.  We become competitive at about cutoffbits = 4 */
-  if (!cutoffbits) cutoffbits = 1;
-  /* prepare for iterating curexp over primes */
-  if (*curexp < 11) *curexp = 11;
-  while (p < *curexp) {
-    if (!*d) { p = unextprime(*curexp); break; }
-    NEXT_PRIME_VIADIFF(p,d);
-  }
-  *curexp = p;
 
   if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
-  /* check size of x vs. curexp */
-  while (size/p >= cutoffbits) {
+  while ((p = u_forprime_next(T)) && size/p >= cutoffbits) {
     if (DEBUGLEVEL>4) err_printf("OddPwrs: testing for exponent %ld\n", p);
-    /* if found, caller should call us again without changing *curexp */
-    if (is_kth_power(x, p, pt, d)) return p;
-    NEXT_PRIME_VIADIFF(p,d);
-    *curexp = p;
+    /* if found, caller should call us again without incrementing T->p */
+    if (is_kth_power(x, p, pt)) return p;
   }
   avma = av; return 0; /* give up */
 }
@@ -2756,32 +2735,34 @@ ifac_crack(GEN *partial, GEN *where)
     err_printf("IFAC: cracking composite\n\t%Ps\n", **where);
     if (DEBUGLEVEL>3) err_printf("IFAC: checking for pure square\n");
   }
-  /* MPQS cannot factor prime powers. Look for pure poowers even if MPQS is
+  /* MPQS cannot factor prime powers. Look for pure powers even if MPQS is
    * blocked by hint: fast and useful in bounded factorization */
   {
-    ulong exp0 = 0, exp1 = 1, mask = 7;
+    forprime_t T;
+    ulong exp = 1, mask = 7;
     long good = 0;
     pari_sp av = avma;
-    /* crack squares. Fast due to the initial square residue test */
+    (void)u_forprime_init(&T, 11, ULONG_MAX);
+    /* crack squares */
     while (Z_issquareall(VALUE(*where), &factor))
     {
       good = 1; /* remember we succeeded once */
       update_pow(*where, factor, 2, &av);
-      if (moebius_mode) return 0;        /* no need to carry on */
+      if (moebius_mode) return 0; /* no need to carry on */
     }
     /* At debug levels > 4, is_357_power() prints something more informative */
     if (DEBUGLEVEL == 4) err_printf("IFAC: checking for odd power\n");
-    while ( (exp1 = is_357_power(VALUE(*where), &factor, &mask)) )
+    while ( (exp = is_357_power(VALUE(*where), &factor, &mask)) )
     {
       good = 1; /* remember we succeeded once */
-      update_pow(*where, factor, exp1, &av);
+      update_pow(*where, factor, exp, &av);
       if (moebius_mode) return 0; /* no need to carry on */
     }
     /* cutoff at 14 bits as trial division must have found everything below */
-    while ( (exp1 = is_pth_power(VALUE(*where), &factor, &exp0, 15)) )
+    while ( (exp = is_pth_power(VALUE(*where), &factor, &T, 15)) )
     {
       good = 1; /* remember we succeeded once */
-      update_pow(*where, factor, exp1, &av);
+      update_pow(*where, factor, exp, &av);
       if (moebius_mode) return 0; /* no need to carry on */
     }
 

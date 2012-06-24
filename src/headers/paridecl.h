@@ -2105,7 +2105,7 @@ GEN     core(GEN n);
 GEN     gnextprime(GEN n);
 GEN     gprecprime(GEN n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);
-int     is_pth_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
+int     is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits);
 long    ispowerful(GEN n);
 long    moebiusu(ulong n);
 GEN     nextprime(GEN n);
@@ -2784,6 +2784,8 @@ GEN     sumpos2(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 GEN     suminf(void *E, GEN (*eval)(void *, GEN), GEN a, long prec);
 ulong   u_forprime_next(forprime_t *T);
 int     u_forprime_init(forprime_t *T, ulong a, ulong b);
+void    u_forprime_restrict(forprime_t *T, ulong c);
+int     u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q);
 GEN     zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec);
 
 /* thue.c */

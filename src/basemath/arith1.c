@@ -943,7 +943,7 @@ Z_ispowerall(GEN x, ulong k, GEN *pt)
     if (k == 3) { mask = 1; return !!is_357_power(x, pt, &mask); }
     if (k == 5) { mask = 2; return !!is_357_power(x, pt, &mask); }
     if (k == 7) { mask = 4; return !!is_357_power(x, pt, &mask); }
-    return is_kth_power(x, k, pt, NULL);
+    return is_kth_power(x, k, pt);
   }
   if (!odd(k)) return 0;
   if (Z_ispowerall(absi(x), k, pt))
@@ -1111,7 +1111,7 @@ gisanypower(GEN x, GEN *pty)
       p = P[i];
       e = E[i];
       for (j = 0; j < e; j++)
-        if (!is_kth_power(b, p, &b, NULL)) break;
+        if (!is_kth_power(b, p, &b)) break;
       if (j < e) k /= upowuu(p, e - j);
     }
     if (k == 1) { avma = av; return 0; }
@@ -1129,9 +1129,9 @@ static long
 Z_isanypower_aux(GEN x, GEN *pty)
 {
   long ex, v, i, j, l, k;
-  GEN logx, y, fa, P, E, Pe, Ee;
+  GEN y, fa, P, E, Pe, Ee;
   byteptr d = diffptr;
-  ulong mask, p = 0, ex0 = 11, e = 0, e2;
+  ulong mask, p = 0, e = 0, e2;
 
   if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
 
@@ -1195,7 +1195,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
       p = Pe[i];
       for (j = 0; j < Ee[i]; j++)
       {
-        if (!is_kth_power(x, p, &y, NULL)) break;
+        if (!is_kth_power(x, p, &y)) break;
         k *= p; x = y;
       }
     }
@@ -1203,29 +1203,36 @@ Z_isanypower_aux(GEN x, GEN *pty)
   else
   { /* any prime divisor of x is > 102 */
     const double LOG2_103 = 6.6865; /* lower bound for log_2(103) */
+    forprime_t T;
 
     while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
     mask = 7;
     while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
-    /* cut off at 4 bits which seems to be about optimum;  for primes
-     * >> 10^3 the modular checks are no longer competitively fast */
-    while ( (ex = is_pth_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
-    if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
-    do {
-      if (!*d) { p = unextprime(ex0); break; }
-      NEXT_PRIME_VIADIFF(p,d);
-    } while (p < ex0);
-
-    /* upper bound for log(x) / log(103) */
-    e2 = (long)((expi(x) + 1) / LOG2_103);
-    logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
-    while (p < e2)
+    e2 = (long)((expi(x) + 1) / LOG2_103); /* >= log_103 (x) */
+    if (u_forprime_init(&T, 11, e2))
     {
-      if (pow_check(p, &x, &logx, &k)) {
+      GEN logx = NULL;
+      /* cut off at 4 bits which seems to be about optimum;  for primes
+       * >> 10^3 the modular checks are no longer competitively fast */
+      while ( (ex = is_pth_power(x, &y, &T, 4)) )
+      {
+        k *= ex; x = y;
         e2 = (long)((expi(x) + 1) / LOG2_103);
-        continue; /* if success, retry same p */
+        u_forprime_restrict(&T, e2);
       }
-      if (*d) NEXT_PRIME_VIADIFF(p, d); else p = unextprime(p+1);
+      if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
+      p = u_forprime_next(&T);
+      if (p)
+        logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
+      while (p && p < e2)
+      {
+        if (pow_check(p, &x, &logx, &k)) {
+          e2 = (long)((expi(x) + 1) / LOG2_103);
+          u_forprime_restrict(&T, e2);
+          continue; /* if success, retry same p */
+        }
+        p = u_forprime_next(&T);
+      }
     }
   }
 END:

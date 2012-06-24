@@ -233,11 +233,21 @@ u_forprime_set_prime_table(forprime_t *T, ulong a)
   }
 }
 
+/* run through primes in arithmetic progression = c (mod q).
+ * Assume (c,q)=1, 0 <= c < q */
 int
-u_forprime_init(forprime_t *T, ulong a, ulong b)
+u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
 {
-  ulong maxp = maxprime();
+  ulong maxp;
   if (a > b || b < 2) return 0; /* empty */
+  maxp = maxprime();
+  if (q != 1 && c != 2 && odd(q)) {
+    /* only allow *odd* primes. If c = 2, then p = 2 must be included :-( */
+    if (!odd(c)) c += q;
+    q <<= 1;
+  }
+  T->q = q;
+  T->c = c;
   T->strategy = 0; /* unknown */
   T->sieve = NULL; /* unused for now */
   T->b = b;
@@ -251,7 +261,7 @@ u_forprime_init(forprime_t *T, ulong a, ulong b)
   else
     u_forprime_set_prime_table(T, a);
 
-  if (b - maxp < maxp / expu(b)) /* not worth sieving */
+  if (q != 1 || T->b - maxp < maxp / expu(b)) /* not worth sieving */
   { if (!T->strategy) T->strategy = 3; }
   else
   {
@@ -275,6 +285,15 @@ u_forprime_init(forprime_t *T, ulong a, ulong b)
   }
   return 1;
 }
+
+/* will run through primes in [a,b] */
+int
+u_forprime_init(forprime_t *T, ulong a, ulong b)
+{ return u_forprime_arith_init(T, a,b, 0,1); }
+/* now only run through primes <= c; assume c <= b above */
+void
+u_forprime_restrict(forprime_t *T, ulong c) { T->b = c; }
+
 /* b = NULL: loop forever */
 int
 forprime_init(forprime_t *T, GEN a, GEN b)
@@ -349,12 +368,30 @@ u_forprime_next(forprime_t *T)
 {
   if (T->strategy == 1)
   {
-    if (!*(T->d)) T->strategy = T->sieve? 2: 3;
-    else
+    for(;;)
     {
-      NEXT_PRIME_VIADIFF(T->p, T->d);
-      if (T->p > T->b) return 0;
-      return T->p;
+      if (!*(T->d))
+      {
+        T->strategy = T->sieve? 2: 3;
+        if (T->q != 1)
+        { /* make p + q the smallest integer = c (mod q) and > original p */
+          ulong r = T->p % T->q;
+          pari_sp av = avma;
+          GEN d = adduu(T->p - r, T->c);
+          if (T->c > r) d = subiu(d, T->q);
+          avma = av;
+          if (lgefint(d) > 3) return 0; /* overflow */
+          T->p = d[2];
+          /* T->p possibly not a prime ! */
+        }
+        break;
+      }
+      else
+      {
+        NEXT_PRIME_VIADIFF(T->p, T->d);
+        if (T->p > T->b) return 0;
+        if (T->q == 1 || T->p % T->q == T->c) return T->p;
+      }
     }
   }
   if (T->strategy == 2)
@@ -424,7 +461,15 @@ NEXT_CHUNK:
   }
   if (T->strategy == 3)
   {
-    T->p = unextprime(T->p + 1);
+    if (T->q == 1)
+      T->p = unextprime(T->p + 1);
+    else
+    {
+      do {
+        T->p += T->q;
+        if (T->p < T->q) return 0; /* overflow */
+      } while (!uisprime(T->p));
+    }
     if (!T->p) /* overflow ulong, switch to GEN */
       T->strategy = 4;
     else

@@ -171,7 +171,7 @@ GEN merge_factor_i(GEN f, GEN g);
 /* integer factorization / discrete log */
 GEN   coprime_part(GEN x, GEN f);
 ulong ucoprime_part(ulong x, ulong f);
-ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
+ulong is_kth_power(GEN x, ulong p, GEN *pt);
 GEN   mpqs(GEN N);
 ulong gcduodd(ulong x, ulong y);
 long  Z_lvalrem_stop(GEN n, ulong p, int *stop);

@@ -2646,19 +2646,22 @@ at face value and assume $x$ is not an $i$-th power without performing any
 test. If the return value $k$ is non-zero, set \kbd{*ptn} to $n$ such that $x
 = n^k$.
 
-\fun{int}{is_pth_power}{GEN x, GEN *ptn, ulong *pminp, ulong cutoff}
-$x > 0$ is an integer and we look for the smallest prime
-$p \geq \max(11,\kbd{*pminp})$ such that $x = n^p$. (The $11$ is due to the
-fact that \tet{is_357_power} and \kbd{issquare} are faster than
-the generic version for $p < 11$.) Fail and return $0$ when the existence
-of $p$ would imply $2^{\kbd{cutoff}} > x^{1/p}$, meaning that a possible $n$
-is so small that it should have been found by trial division; for maximal
-speed, you should start by a round of trial division, but the cut-off may
-also be set to $1$ for a rigorous result without any trial division.
+\fun{int}{is_pth_power}{GEN x, GEN *ptn, forprime_t *T, ulong cutoff}
+let $x > 0$ be an integer, $\kbd{cutoff} > 0$ and $T$ be an iterator over
+primes $\geq 11$, we look for the smallest prime $p$ such that $x = n^p$
+(advancing $T$ as we go along). The $11$ is due to the fact that
+\tet{is_357_power} and \kbd{issquare} are faster than the generic version for
+$p < 11$.
 
-Otherwise returns the smallest suitable prime $p$ and set \kbd{*ptn} to $n$.
-\kbd{*pminp} is updated to $p$, so that we may immediately recall the
-function with the same parameters after setting $x = \kbd{*ptn}$.
+Fail and return $0$ when the existence of $p$ would imply $2^{\kbd{cutoff}} >
+x^{1/p}$, meaning that a possible $n$ is so small that it should have been
+found by trial division; for maximal speed, you should start by a round of
+trial division, but the cut-off may also be set to $1$ for a rigorous result
+without any trial division.
+
+Otherwise returns the smallest suitable prime $p$ and set \kbd{*ptn} to $n$;
+we may immediately recall the function with the same parameters after setting
+$x = \kbd{*ptn}$.
 
 \subsec{Factorization}
 
@@ -2792,6 +2795,25 @@ unfortunately, there is currently no way for the factoring machinery to
 become aware of it. (It is highly implausible that hard to find factors
 would be exhibited in this way, though.) This should be slower than
 \tet{BPSW_psp} for $k\geq 4$ and we would expect it to be less reliable.
+
+\subsec{Iterators over primes}
+\fun{int}{u_forprime_init}{forprime_t *T, ulong a, ulong b}
+
+\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b}
+
+\fun{ulong}{u_forprime_next}{forprime_t *T}
+
+\fun{GEN}{forprime_next}{forprime_t *T}
+
+\fun{void}{u_forprime_restrict}{forprime_t *T, ulong c} let $T$ an iterator
+initialized via \kbd{u\_forprime\_init(\&T, a, b)}, possibly followed by a
+number of calls to \tet{u_forprime_next}, and $a \leq c \leq b$. Restrict the
+range of primes considered to $[a,c]$.
+
+\fun{int}{u_forprime_arith_init}{forprime_t *T, ulong a, ulong b, ulong c,
+ulong q} initialize an iterator over primes in $[a,b]$, congruent to $c$
+modulo $q$. Assume $0 \leq c < q$ and $(c,q) = 1$. Subsequent calls to
+\tet{u_forprime_next} will only return primes congruent to $c$ modulo $q$.
 
 \subsec{Pseudo-random integers}
 These routine return pseudo-random integers uniformly distributed in some
