@@ -1202,7 +1202,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
     default: return Flx_factor_2(f, p, d);
   }
   /* to hold factors and exponents */
-  t = flag ? cgetg(d+1,t_VECSMALL): cgetg(d+1,t_VEC);
+  t = cgetg(d+1, flag? t_VECSMALL: t_VEC);
   E = cgetg(d+1, t_VECSMALL);
   vf=f[1]; e = nbfact = 1;
   for(;;)
