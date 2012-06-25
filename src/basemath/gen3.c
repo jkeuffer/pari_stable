@@ -1714,7 +1714,9 @@ diffop(GEN x, GEN v, GEN dv)
       {
         GEN m = gel(x,1), pol=gel(x,2);
         GEN u = gneg(gdiv(diffop(m,v,dv),RgX_deriv(m)));
-        y = gadd(diffop(pol,v,dv), gmul(u,RgX_deriv(pol)));
+        y = diffop(pol,v,dv);
+        if (typ(pol)==t_POL && varn(pol)==varn(m))
+          y = gadd(y, gmul(u,RgX_deriv(pol)));
         y = gmodulo(y, gel(x,1));
       }
       return gerepileupto(av, y);
