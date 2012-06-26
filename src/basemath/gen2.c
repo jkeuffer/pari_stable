@@ -1945,7 +1945,10 @@ vecmax0(GEN x, int flag)
     case t_MAT: {
       long lx2, lx = lg(x);
       if (lx==1 || (lx2 = lg(x[1])) == 1)
+      {
         pari_err(e_MISC, "empty vector in vecmax");
+        return NULL;/*not reached*/
+      }
       s = gcoeff(x,i0=1,j0=1); i = 2;
       for (j=1; j<lx; j++,i=1)
       {
@@ -1975,7 +1978,10 @@ vecmin0(GEN x, int flag)
     case t_MAT: {
       long lx2, lx = lg(x);
       if (lx==1 || (lx2 = lg(x[1])) == 1)
+      {
         pari_err(e_MISC, "empty vector in vecmin");
+        return NULL;/*not reached*/
+      }
       s = gcoeff(x,i0=1,j0=1); i = 2;
       for (j=1; j<lx; j++,i=1)
       {
