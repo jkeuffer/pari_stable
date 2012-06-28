@@ -297,7 +297,8 @@ BA 89- Add blackbox finite field for generic linear algebra
 BA 90- PARI functions FlxqM_image, FlxqM_ker, FqM_deplin
 BA 91- GP function ellneg
 BA 92- PARI functions Fp_ellcard, FpXQ_ellcard, Flxq_ellcard
-LGr93- vecmax / vecmin: add flag to return index of largest/smallest entry
+LGr93- vecmax / vecmin: add optional pointer argument (to hold index of a
+       largest/smallest entry)
 
   Removed
     1- dropped DOS support

@@ -1933,7 +1933,7 @@ vecindexmin(GEN x)
 
 
 GEN
-vecmax0(GEN x, int flag)
+vecmax0(GEN x, GEN *pi)
 {
   long i0, j0, i, j;
   GEN s;
@@ -1941,7 +1941,8 @@ vecmax0(GEN x, int flag)
   {
     case t_VEC: case t_COL:
       i = vecindexmax(x);
-      return (flag & 1) ? stoi(i) : gcopy(gel(x, i));
+      if (pi) *pi = utoipos(i);
+      return gcopy(gel(x, i));
     case t_MAT: {
       long lx2, lx = lg(x);
       if (lx==1 || (lx2 = lg(x[1])) == 1)
@@ -1956,17 +1957,19 @@ vecmax0(GEN x, int flag)
         for (; i<lx2; i++)
           if (gcmp(gel(c,i),s) > 0) { s = gel(c,i); j0=j; i0=i; }
       }
-      return (flag & 1) ? mkvecsmall2(i0,j0) : gcopy(s);
+      if (pi) *pi = mkvec2(utoipos(i0), utoipos(j0));
+      return gcopy(s);
     }
     case t_VECSMALL:
-      i = vecsmall_indexmax(x);
-      return (flag & 1) ? stoi(i) : stoi(x[i]);
+      i = vecsmall_indexmin(x);
+      if (pi) *pi = utoipos(i);
+      return stoi(x[i]);
     default:
       return gcopy(x);
   }
 }
 GEN
-vecmin0(GEN x, int flag)
+vecmin0(GEN x, GEN *pi)
 {
   long i0, j0, i, j;
   GEN s;
@@ -1974,7 +1977,8 @@ vecmin0(GEN x, int flag)
   {
     case t_VEC: case t_COL:
       i = vecindexmin(x);
-      return (flag & 1) ? stoi(i) : gcopy(gel(x, i));
+      if (pi) *pi = utoipos(i);
+      return gcopy(gel(x, i));
     case t_MAT: {
       long lx2, lx = lg(x);
       if (lx==1 || (lx2 = lg(x[1])) == 1)
@@ -1989,20 +1993,22 @@ vecmin0(GEN x, int flag)
         for (; i<lx2; i++)
           if (gcmp(gel(c,i),s) < 0) { s = gel(c,i); j0=j; i0=i; }
       }
-      return (flag & 1) ? mkvecsmall2(i0,j0) : gcopy(s);
+      if (pi) *pi = mkvec2(utoipos(i0), utoipos(j0));
+      return gcopy(s);
     }
     case t_VECSMALL:
       i = vecsmall_indexmin(x);
-      return (flag & 1) ? stoi(i) : stoi(x[i]);
+      if (pi) *pi = utoipos(i);
+      return stoi(x[i]);
     default:
       return gcopy(x);
   }
 }
 
 GEN
-vecmax(GEN x) { return vecmax0(x, 0); }
+vecmax(GEN x) { return vecmax0(x, NULL); }
 GEN
-vecmin(GEN x) { return vecmin0(x, 0); }
+vecmin(GEN x) { return vecmin0(x, NULL); }
 
 /*******************************************************************/
 /*                                                                 */
