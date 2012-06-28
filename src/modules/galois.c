@@ -2363,6 +2363,7 @@ polgaloisnamesbig(long n, long k)
   return gerepilecopy(av, gel(V,k));
 }
 
+/* pol a monic ZX */
 GEN
 galoisbig(GEN pol, long prec)
 {
