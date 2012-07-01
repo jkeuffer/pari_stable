@@ -408,8 +408,9 @@ without any separator; entries of type \typ{STR} are printed without enclosing
 quotes. \fl is one of \tet{f_RAW}, \tet{f_PRETTYMAT} or \tet{f_TEX}, using the
 current default output context.
 
-\fun{void}{out_print0}{PariOUT *out, GEN g, long flag} as \tet{print0},
-using output context \kbd{out}.
+\fun{void}{out_print0}{PariOUT *out, GEN sep, GEN g, long flag} as
+\tet{print0}, using output context \kbd{out} and separator \kbd{sep} between
+successive entries (no separator if \kbd{NULL}).
 
 \fun{void}{print}{GEN g} equivalent to \kbd{print0(g, f\_RAW)}, followed
 by a \kbd{\bs n} then an \kbd{fflush}.

@@ -299,6 +299,7 @@ BA 91- GP function ellneg
 BA 92- PARI functions Fp_ellcard, FpXQ_ellcard, Flxq_ellcard
 LGr93- vecmax / vecmin: add optional pointer argument (to hold index of a
        largest/smallest entry)
+   94- printsep() function
 
   Removed
     1- dropped DOS support
