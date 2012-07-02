@@ -75,45 +75,50 @@ operating system, thus you can build PARI/GP for several different machines
 from the same source tree (the builds are independent and can be done
 simultaneously).
 
-\kbd{./Configure --tune}
+Decide whether you agree with what \kbd{Configure} printed on your screen, in
+particular the architecture, compiler and optimization flags. Look for
+messages prepended by \kbd{\#\#\#}, which report genuine problems.
+Look especially for the \kbd{gmp}, \kbd{readline} and \kbd{X11} libraries,
+and the \kbd{perl} and \kbd{gunzip} (or \kbd{zcat}) binaries.
+If anything should have been found and was not, consider that \kbd{Configure}
+failed and follow the instructions in section~3.
 
-\noindent fine tunes the library for the host used for compilation. This
-adjusts thresholds by running a large number of comparative tests
-and creates a file \kbd{tune.h} in the build directory, that will be
-used from now on, overriding the ones in \kbd{src/kernel/none/} and
-\kbd{src/kernel/gmp/}. It will take a while: about 30 minutes on a 2GHz
-machine. Expect a small performance boost, perhaps a 10\% speed increase
+\subsec{Advanced configuration:}
+\kbd{Configure} accepts many other flags, and you may use any number of them
+to build quite a complicated configuration command. See \kbd{Configure
+--help} for a complete list. In particular, there are sets of flags related
+to GNU MP (\kbd{--with-gmp*}) and GNU readline library
+(\kbd{--with-readline*}).
+
+Here, we focus on the non-obvious ones:
+
+\kbd{--tune}: fine tunes the library for the host used for compilation. This
+adjusts thresholds by running a large number of comparative tests and creates
+a file \kbd{tune.h} in the build directory, that will be used from now on,
+overriding the ones in \kbd{src/kernel/none/} and \kbd{src/kernel/gmp/}. It
+will take a while: about 30 minutes. Expect a small
+performance boost, perhaps a 10\% speed increase
 compared to default settings.
 
 If you are using GMP, tune it first, then PARI. Make sure you tune PARI on
-the machine that will actually run your computations, and do not use a
-heavily loaded machine for tunings.
+the machine that will actually run your computations. Do not use a heavily
+loaded machine for tunings.
 
-\kbd{./Configure --time=<fun>}
+\kbd{--graphic=}\var{lib}: enables a particular graphic library.
+The default is \kbd{X11} on most platforms, but PARI can use
+\kbd{Qt}, \kbd{fltk}, or \kbd{win32} (GDI).
 
-\noindent choose a timing function. The default timing function will usually
-work fine, however you can use a different one that better fit your need. Not
-all timing functions are available on all platforms. PARI can use
-\kbd{getrusage}, \kbd{clock\_gettime}, \kbd{times} or \kbd{ftime} as timing
-functions. The three first functions give timings in terms of CPU usage of the
-current task; this gives a good approximation of the complexity of the
-algorithm. The last one, \kbd{ftime}, gives timings in terms of absolute time
-which might be important in case of parallelism. Moreover the
-\kbd{clock\_gettime} function is more precise, but much slower (at the time of
-this writing), than \kbd{getrusage} or \kbd{times}.
+\kbd{--time=}\var{function}: chooses a timing function. The default usually
+works fine, however you can use a different one that better fits your needs.
+PARI can use \kbd{getrusage}, \kbd{clock\_gettime}, \kbd{times} or
+\kbd{ftime} as timing functions. (Not all timing functions are available on
+all platforms.) The three first functions give timings in terms of CPU usage
+of the current task, approximating the complexity of the algorithm. The last
+one, \kbd{ftime}, gives timings in terms of absolute (wall-clock) time which
+can be important in case of parallelism. Moreover, the \kbd{clock\_gettime}
+function is more precise, but much slower (at the time of this writing), than
+\kbd{getrusage} or \kbd{times}.
 
-\misctitle{Technical note} \kbd{Configure} accepts many other flags
-besides \kbd{--prefix}. See \kbd{Configure --help} for a complete list. In
-particular, there are sets of flags related to GNU MP (\kbd{--with-gmp*}) and
-GNU readline library (\kbd{--with-readline*}).
-
-Decide whether you agree with what \kbd{Configure} printed on your screen, in
-particular the architecture, compiler and optimization flags. Look for
-messages prepended by \kbd{\#\#\#}, which report genuine problems. If
-anything should have been found and was not, consider that \kbd{Configure}
-failed and follow the instructions in the next section. Look especially for
-the \kbd{gmp}, \kbd{readline} and \kbd{X11} libraries, and the \kbd{perl} and
-\kbd{gunzip} (or \kbd{zcat}) binaries.
 
 \subsec{Compilation:} To compile the \kbd{gp} binary and build the
 documentation, type
