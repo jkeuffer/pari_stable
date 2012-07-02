@@ -1961,7 +1961,7 @@ vecmax0(GEN x, GEN *pi)
       return gcopy(s);
     }
     case t_VECSMALL:
-      i = vecsmall_indexmin(x);
+      i = vecsmall_indexmax(x);
       if (pi) *pi = utoipos(i);
       return stoi(x[i]);
     default:
