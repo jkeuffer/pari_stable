@@ -4276,21 +4276,21 @@ readbin(const char *name, FILE *f, int *vector)
 /**                             GP I/O                            **/
 /**                                                               **/
 /*******************************************************************/
-/* print a vector of GENs */
+/* print a vector of GENs, in output context 'out', using 'sep' as a
+ * separator between sucessive entries [ NULL = no separator ]*/
 void
-out_print0(PariOUT *out, GEN sep, GEN g, long flag)
+out_print0(PariOUT *out, const char *sep, GEN g, long flag)
 {
   pari_sp av0 = avma;
   OUT_FUN f = get_fun(flag);
   long i, l = lg(g);
-  char *sepstr = sep? GENtostr_fun_unquoted(sep, GP_DATA->fmt, f): NULL;
   for (i = 1; i < l; i++)
   {
     pari_sp av = avma;
     GEN x = gel(g,i);
     char *s = GENtostr_fun_unquoted(x, GP_DATA->fmt, f);
     out_puts(out, s); avma = av;
-    if (sepstr && i+1 < l) out_puts(out, sepstr);
+    if (sep && i+1 < l) out_puts(out, sep);
   }
   avma = av0;
 }
@@ -4329,7 +4329,7 @@ void
 print0(GEN g, long flag) { out_print0(pariOut, NULL, g, flag); }
 
 void
-printsep(GEN s, GEN g, long flag) { out_print0(pariOut, s, g, flag); }
+printsep(const char *s, GEN g, long flag) { out_print0(pariOut, s, g, flag); }
 
 /* dummy needed to pass a (empty!) va_list to sm_dopr */
 static char *
