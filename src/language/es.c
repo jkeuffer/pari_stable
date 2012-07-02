@@ -389,18 +389,20 @@ _fputs(const char *s, FILE *f ) {
 static void
 _putc_log(char c) { if (pari_logfile) (void)putc(c, pari_logfile); }
 static void
-_puts_log(const char *s) {
+_puts_log(const char *s)
+{
   FILE *f = pari_logfile;
-  const char *t;
+  char *p;
   if (!f) return;
-  if (logstyle == logstyle_color) { (void)fputs(s, f); return; }
-  for (t = s; *t; t++)
-  {
-    if (*t != esc) { (void)fputc(*t, f); continue; }
-    /* skip ANSI color escape sequence */
-    while (*++t != 'm')
-      if (!*t) return;
-  }
+  if (logstyle != logstyle_color)
+    while ( (p = strchr(s, esc)) )
+    { /* skip ANSI color escape sequence */
+      fwrite(s, 1, p-s-1, f);
+      s = strchr(p, 'm');
+      if (!s) return;
+      s++;
+    }
+  fputs(s, f);
 }
 static void
 _flush_log(void) { (void)fflush(pari_logfile); }
