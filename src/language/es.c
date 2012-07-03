@@ -392,7 +392,7 @@ static void
 _puts_log(const char *s)
 {
   FILE *f = pari_logfile;
-  char *p;
+  const char *p;
   if (!f) return;
   if (logstyle != logstyle_color)
     while ( (p = strchr(s, esc)) )
