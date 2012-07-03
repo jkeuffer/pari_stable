@@ -1938,6 +1938,90 @@ static ulong powersmod[106] = {
   032403440ul,  /* 105 */
 };
 
+static int
+check_res(ulong x, ulong N, int shift, ulong *mask)
+{
+  long r = x%N; if ((ulong)r> (N>>1)) r = N - r;
+  *mask &= (powersmod[r] >> shift);
+  if (DEBUGLEVEL >= 5)
+    err_printf("\t   %3ld:  %3ld   (3rd %ld, 5th %ld, 7th %ld)\n",
+               N, r, *mask&1, (*mask>>1)&1, (*mask>>2)&1);
+  return *mask;
+}
+
+/* is x mod 211*209*61*203*117*31*43*71 a 3rd, 5th or 7th power ? */
+int
+uis_357_powermod(ulong x, ulong *mask)
+{
+  if (             !check_res(x, 211UL, 0, mask)) return 0;
+  if (*mask & 3 && !check_res(x, 209UL, 3, mask)) return 0;
+  if (*mask & 3 && !check_res(x,  61UL, 6, mask)) return 0;
+  if (*mask & 5 && !check_res(x, 203UL, 9, mask)) return 0;
+  if (*mask & 1 && !check_res(x, 117UL,12, mask)) return 0;
+  if (*mask & 3 && !check_res(x,  31UL,15, mask)) return 0;
+  if (*mask & 5 && !check_res(x,  43UL,18, mask)) return 0;
+  if (*mask & 6 && !check_res(x,  71UL,21, mask)) return 0;
+  return 1;
+}
+/* asume x > 0 and pt != NULL */
+int
+uis_357_power(ulong x, ulong *pt, ulong *mask)
+{
+  double logx;
+  if (!odd(x))
+  {
+    long v = vals(x);
+    if (v % 7) *mask &= ~4;
+    if (v % 5) *mask &= ~2;
+    if (v % 3) *mask &= ~1;
+    if (!*mask) return 0;
+  }
+  if (!uis_357_powermod(x, mask)) return 0;
+  logx = log((double)x);
+  while (*mask)
+  {
+    long e, b, MAX;
+    ulong y, ye;
+    if (*mask & 1)      { b = 1; e = 3; MAX = 2642245; }
+    else if (*mask & 2) { b = 2; e = 5; MAX = 7131; }
+    else                { b = 4; e = 7; MAX = 565; }
+    y = (ulong)(exp(logx / e) + 0.5);
+    ye = upowuu(y,e);
+    if (ye == x) { *pt = y; return e; }
+#ifdef LONG_IS_64BIT
+    if (ye > x) y--; else y++;
+    ye = upowuu(y,e);
+    if (ye == x) { *pt = y; return e; }
+#endif
+    *mask &= ~b; /* turn the bit off */
+  }
+  return 0;
+}
+
+#ifndef LONG_IS_64BIT
+/* as above, split in two functions */
+/* is x mod 211*209*61*203 a 3rd, 5th or 7th power ? */
+static int
+uis_357_powermod_32bit_1(ulong x, ulong *mask)
+{
+  if (             !check_res(x, 211UL, 0, mask)) return 0;
+  if (*mask & 3 && !check_res(x, 209UL, 3, mask)) return 0;
+  if (*mask & 3 && !check_res(x,  61UL, 6, mask)) return 0;
+  if (*mask & 5 && !check_res(x, 203UL, 9, mask)) return 0;
+  return 1;
+}
+/* is x mod 117*31*43*71 a 3rd, 5th or 7th power ? */
+static int
+uis_357_powermod_32bit_2(ulong x, ulong *mask)
+{
+  if (*mask & 1 && !check_res(x, 117UL,12, mask)) return 0;
+  if (*mask & 3 && !check_res(x,  31UL,15, mask)) return 0;
+  if (*mask & 5 && !check_res(x,  43UL,18, mask)) return 0;
+  if (*mask & 6 && !check_res(x,  71UL,21, mask)) return 0;
+  return 1;
+}
+#endif
+
 /* Returns 3, 5, or 7 if x is a cube (but not a 5th or 7th power),  a 5th
  * power (but not a 7th),  or a 7th power, and in this case creates the
  * base on the stack and assigns its address to *pt.  Otherwise returns 0.
@@ -1948,42 +2032,40 @@ static ulong powersmod[106] = {
 int
 is_357_power(GEN x, GEN *pt, ulong *mask)
 {
-  long lx = lgefint(x), resbyte;
-  ulong residue;
+  long lx = lgefint(x);
+  ulong r;
   pari_sp av;
   GEN y;
 
-  *mask &= 7;                /* paranoia */
-  if (!*mask) return 0;        /* useful when running in a loop */
-
+  if (!*mask) return 0; /* useful when running in a loop */
+  if (lgefint(x) == 3) {
+    ulong t;
+    long e = uis_357_power(x[2], &t, mask);
+    if (e)
+    {
+      if (pt) *pt = utoi(t);
+      return e;
+    }
+    return 0;
+  }
   if (DEBUGLEVEL >= 5)
   {
-    err_printf("OddPwrs: is %Ps\n\t...a", x);
+    err_printf("OddPwrs: is %lu\n\t...a", x);
     if (*mask&1) err_printf(" 3rd%s", (*mask==7?",":(*mask!=1?" or":"")));
     if (*mask&2) err_printf(" 5th%s", (*mask==7?", or":(*mask&4?" or":"")));
     if (*mask&4) err_printf(" 7th");
     err_printf(" power?\n\tmodulo: resid. (remaining possibilities)\n");
   }
-  residue = (lx == 3)? (ulong)x[2]: umodiu(x, 211*209*61*203);
 
-#define check_res(N, shift) {\
-  resbyte = residue%N; if ((ulong)resbyte > (N>>1)) resbyte = N - resbyte;\
-  *mask &= (powersmod[resbyte] >> shift); \
-  if (DEBUGLEVEL >= 5)\
-    err_printf("\t   %3ld:  %3ld   (3rd %ld, 5th %ld, 7th %ld)\n",\
-               N, resbyte, *mask&1, (*mask>>1)&1, (*mask>>2)&1);\
-  if (!*mask) return 0;\
-}
-  check_res(211, 0);
-  if (*mask & 3) check_res(209UL, 3);
-  if (*mask & 3) check_res( 61UL, 6);
-  if (*mask & 5) check_res(203UL, 9);
-  residue = (lx == 3)? (ulong)x[2]: umodiu(x, 117*31*43*71);
-  if (*mask & 1) check_res(117UL,12);
-  if (*mask & 3) check_res( 31UL,15);
-  if (*mask & 5) check_res( 43UL,18);
-  if (*mask & 6) check_res( 71UL,21);
-
+#ifdef LONG_IS_64BIT
+  r = (lx == 3)? (ulong)x[2]: umodiu(x, 6046846918939827UL);
+  if (!uis_357_powermod(r, mask)) return 0;
+#else
+  r = (lx == 3)? (ulong)x[2]: umodiu(x, 211*209*61*203);
+  if (!uis_357_powermod_32bit_1(r, mask)) return 0;
+  r = (lx == 3)? (ulong)x[2]: umodiu(x, 117*31*43*71);
+  if (!uis_357_powermod_32bit_2(r, mask)) return 0;
+#endif
   av = avma;
   while (*mask)
   {

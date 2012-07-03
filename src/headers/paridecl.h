@@ -2111,6 +2111,7 @@ long    ispowerful(GEN n);
 long    moebiusu(ulong n);
 GEN     nextprime(GEN n);
 GEN     precprime(GEN n);
+int     uis_357_power(ulong x, ulong *pt, ulong *mask);
 ulong   unextprime(ulong n);
 ulong   uprecprime(ulong n);
 
