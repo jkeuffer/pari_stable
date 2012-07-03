@@ -2028,18 +2028,18 @@ is_kth_power(GEN x, ulong n, GEN *pt)
   /* A non n-th power nevertheless passes the test with proba n^(-#checks),
    * We'd like this < 1e-6 but let j = floor(log(1e-6) / log(n)) which
    * ensures much less. */
-  if (n >= 17886697) /* smallest such that smallest suitable q is > 2^32 */
-    j = 0;
-  else if (n > 1000)
-    j = 1;
-  else if (n > 100)
-    j = 2;
-  else if (n > 31)
-    j = 3;
-  else if (n > 15)
-    j = 4;
-  else
+  if (n < 16)
     j = 5;
+  else if (n < 32)
+    j = 4;
+  else if (n < 101)
+    j = 3;
+  else if (n < 1001)
+    j = 2;
+  else if (n < 17886697) /* smallest such that smallest suitable q is > 2^32 */
+    j = 1;
+  else
+    j = 0;
   for (; j > 0; j--)
   {
     if (!(q = u_forprime_next(&T))) break;
