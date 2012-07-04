@@ -319,8 +319,8 @@ u_LucasMod(ulong n, ulong P, ulong N)
   return v;
 }
 
-static int
-u_IsLucasPsP(ulong n)
+int
+uislucaspsp(ulong n)
 {
   long i, v;
   ulong b, z, m2, m = n + 1;
@@ -480,7 +480,7 @@ uisprime(ulong n)
     case 983401: return 0;
     default: return 1;
   }
-  return u_IsLucasPsP(n);
+  return uislucaspsp(n);
 }
 
 /* assume no prime divisor <= 661 */
@@ -490,7 +490,7 @@ uisprime_nosmalldiv(ulong n)
   Fl_MR_Jaeschke_t S;
   Fl_init_MR_Jaeschke(&S, n);
   if (Fl_bad_for_base(&S, 2)) return 0;
-  return u_IsLucasPsP(n);
+  return uislucaspsp(n);
 }
 
 long

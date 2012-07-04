@@ -1124,6 +1124,48 @@ gisanypower(GEN x, GEN *pty)
   return 0; /* not reached */
 }
 
+static long
+Z_isanypower_nosmalldiv(GEN *px)
+{ /* any prime divisor of x is > 102 */
+  const double LOG2_103 = 6.6865; /* lower bound for log_2(103) */
+  forprime_t T;
+  ulong mask = 7;
+  long k, ex, e2;
+  GEN y, x = *px;
+
+  k = 1;
+  while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
+  while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
+  e2 = (long)((expi(x) + 1) / LOG2_103); /* >= log_103 (x) */
+  if (u_forprime_init(&T, 11, e2))
+  {
+    GEN logx = NULL;
+    ulong p;
+    /* cut off at 4 bits which seems to be about optimum;  for primes
+     * >> 10^3 the modular checks are no longer competitively fast */
+    while ( (ex = is_pth_power(x, &y, &T, 4)) )
+    {
+      k *= ex; x = y;
+      e2 = (long)((expi(x) + 1) / LOG2_103);
+      u_forprime_restrict(&T, e2);
+    }
+    if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
+    p = u_forprime_next(&T);
+    if (p)
+      logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
+    while (p && p < e2)
+    {
+      if (pow_check(p, &x, &logx, &k)) {
+        e2 = (long)((expi(x) + 1) / LOG2_103);
+        u_forprime_restrict(&T, e2);
+        continue; /* if success, retry same p */
+      }
+      p = u_forprime_next(&T);
+    }
+  }
+  *px = x; return k;
+}
+
 /* disregard the sign of x, caller will take care of x < 0 */
 static long
 Z_isanypower_aux(GEN x, GEN *pty)
@@ -1131,7 +1173,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
   long ex, v, i, j, l, k;
   GEN y, fa, P, E, Pe, Ee;
   byteptr d = diffptr;
-  ulong mask, p = 0, e = 0, e2;
+  ulong mask, p = 0, e = 0;
 
   if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
 
@@ -1201,40 +1243,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
     }
   }
   else
-  { /* any prime divisor of x is > 102 */
-    const double LOG2_103 = 6.6865; /* lower bound for log_2(103) */
-    forprime_t T;
-
-    while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
-    mask = 7;
-    while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
-    e2 = (long)((expi(x) + 1) / LOG2_103); /* >= log_103 (x) */
-    if (u_forprime_init(&T, 11, e2))
-    {
-      GEN logx = NULL;
-      /* cut off at 4 bits which seems to be about optimum;  for primes
-       * >> 10^3 the modular checks are no longer competitively fast */
-      while ( (ex = is_pth_power(x, &y, &T, 4)) )
-      {
-        k *= ex; x = y;
-        e2 = (long)((expi(x) + 1) / LOG2_103);
-        u_forprime_restrict(&T, e2);
-      }
-      if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
-      p = u_forprime_next(&T);
-      if (p)
-        logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
-      while (p && p < e2)
-      {
-        if (pow_check(p, &x, &logx, &k)) {
-          e2 = (long)((expi(x) + 1) / LOG2_103);
-          u_forprime_restrict(&T, e2);
-          continue; /* if success, retry same p */
-        }
-        p = u_forprime_next(&T);
-      }
-    }
-  }
+    k = Z_isanypower_nosmalldiv(&x);
 END:
   if (pty && k != 1)
   {
@@ -1248,6 +1257,7 @@ END:
   }
   return k == 1? 0: k;
 }
+
 long
 Z_isanypower(GEN x, GEN *pty)
 {
@@ -1273,6 +1283,169 @@ Z_isanypower(GEN x, GEN *pty)
   }
   if (pty) *pty = gerepilecopy(av, *pty); else avma = av;
   return k;
+}
+
+/* Faster than */
+/*   !cmpii(n, int2n(vali(n))) */
+/*   !cmpis(shifti(n, -vali(n)), 1) */
+/*   expi(n) == vali(n) */
+/*   hamming(n) == 1 */
+/* even for single-word values, and much faster for multiword values. */
+/* If all you have is a word, you can just use n & !(n & (n-1)). */
+long
+ispow2(GEN n)
+{
+  GEN xp;
+  long i, lx;
+  ulong u;
+  if (typ(n) != t_INT) pari_err_TYPE("ispow2", n);
+  if (signe(n) != 1) return 0;
+
+  xp = int_LSW(n);
+  lx = lgefint(n);
+  u = *xp;
+
+  for (i = 3; i < lx; ++i)
+  {
+    if (u != 0) return 0;
+    xp = int_nextW(xp);
+    u = *xp;
+  }
+  return !(u & (u-1)); /* faster than hamming_word(u) == 1 */
+}
+
+long
+isprimepower(GEN n, GEN *pt)
+{
+  pari_sp av = avma;
+  long v;
+  ulong p;
+  byteptr d;
+
+  if (typ(n) != t_INT) pari_err_TYPE("isprimepower", n);
+  if (signe(n) != 1) return 0;
+  if (!mod2(n)) {
+    v = vali(n);
+    if (expi(n) == v) {
+      if (pt) *pt = gen_2;
+      return v;
+    }
+    return 0;
+  }
+
+  /* Deal with small odd values */
+  if (lgefint(n) == 3)
+  {
+    v = uisprimepower(n[2], &p);
+    if (v)
+    {
+      if (pt) *pt = utoipos(p);
+      return v;
+    }
+    return 0;
+  }
+
+  p = 2;
+  d = diffptr+1;
+  for (;;)
+  {
+    NEXT_PRIME_VIADIFF(p, d);
+    if (p >= 103) break;
+    v = Z_lvalrem(n, p, &n);
+    if (v)
+    {
+      avma = av;
+      if (!is_pm1(n)) return 0;
+      if (pt) *pt = utoipos(p);
+      return v;
+    }
+  }
+  /* p | n => p >= 103 */
+
+  v = Z_isanypower_nosmalldiv(&n);  /* Expensive test! */
+  if (!isprime(n)) { avma = av; return 0; }
+  if (pt) *pt = gerepilecopy(av, n); else avma = av;
+  return v;
+}
+
+long
+uisprimepower(ulong n, ulong *pp)
+{
+  /* We must have CUTOFF^11 >= ULONG_MAX and CUTOFF^3 < ULONG_MAX.
+   * Tests suggest that 200-300 is the best range for 64-bit platforms. */
+  const ulong CUTOFF = 199UL;
+  const ulong CUTOFF3 = CUTOFF*CUTOFF*CUTOFF;
+#ifdef LONG_IS_64BIT
+  /* primes preceeding the appropriate root of ULONG_MAX. */
+  const ulong ROOT9 = 137;
+  const ulong ROOT8 = 251;
+  const ulong ROOT7 = 563;
+  const ulong ROOT5 = 7129;
+  const ulong ROOT4 = 65521;
+#else
+  const ulong ROOT9 = 11;
+  const ulong ROOT8 = 13;
+  const ulong ROOT7 = 23;
+  const ulong ROOT5 = 83;
+  const ulong ROOT4 = 251;
+#endif
+  ulong p, mask;
+  byteptr d;
+  long v;
+  int e;
+  if (n < 2) return 0;
+  if (!odd(n)) {
+    v = vals(n);
+    if (n == 1 << v) { *pp = 2; return v; }
+    return 0;
+  }
+  if (n < 8) { *pp = n; return 1; } /* 3,5,7 */
+
+  p = 2;
+  d = diffptr + 1;
+  for (;;)
+  {
+    NEXT_PRIME_VIADIFF(p, d);
+    if (p >= CUTOFF) break;
+    v = u_lvalrem(n, p, &n);
+    if (v)
+    {
+      if (n == 1) { *pp = p; return v; }
+      return 0;
+    }
+  }
+  /* p | n => p >= CUTOFF */
+
+  if (n < CUTOFF3)
+  {
+    if (n < CUTOFF*CUTOFF || uisprime(n)) { *pp = n; return 1; }
+    if (uissquareall(n, &n)) { *pp = n; return 2; }
+    return 0;
+  }
+
+  /* Check for squares, fourth powers, and eighth powers as appropriate. */
+  v = 1;
+  if (CUTOFF <= ROOT8 && uissquareall(n, &n)) v <<= 1;
+  if (CUTOFF <= ROOT4 && uissquareall(n, &n)) v <<= 1;
+  if (uissquareall(n, &n)) v <<= 1;
+
+  if (CUTOFF > ROOT5) mask = 1;
+  else
+  {
+    const ulong CUTOFF5 = CUTOFF3*CUTOFF*CUTOFF;
+    if (n < CUTOFF5) mask = 1; else mask = 3;
+    if (CUTOFF <= ROOT7)
+    {
+      const ulong CUTOFF7 = CUTOFF5*CUTOFF*CUTOFF;
+      if (n >= CUTOFF7) mask = 7;
+    }
+  }
+
+  if (CUTOFF <= ROOT9 && (e = uis_357_power(n, &n, &mask))) { v *= e; mask=1; }
+  if ((e = uis_357_power(n, &n, &mask))) v *= e;
+
+  if (uisprime(n)) { *pp = n; return v; }
+  return 0;
 }
 
 /*********************************************************************/

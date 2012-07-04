@@ -25,3 +25,28 @@ do(-1/64)
 
 for (i=1, #v, if (!ispowerful(v[i]), print(i)))
 ispowerful(5^3*(10^1000+1)^2)
+
+v = [1, 2^10, 2^15, 2^32, 2^64, 2^128];
+
+/*
+correct = vector(#v);
+{
+for (k = 1, #v,
+  my(u = v[k], s,t);
+  for(i=u, u+10^4,
+    if ((a = ispower(i,,&p)) && isprime(p), s += a; t += p);
+    if (isprime(i), s ++; t += i);
+  );
+  correct[k] = [s,t];
+)
+}
+*/
+{
+for (k = 1, #v,
+  my(u = v[k], s,t);
+  s = sum(i=u, u+10^4, isprimepower(i));
+  t = 0;for (i = u, u+10^4, if (isprimepower(i,&p), t += p));
+  print([s,t]);
+\\  if ([s,t] != correct[k], error(k))
+)
+}
