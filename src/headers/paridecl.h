@@ -2115,6 +2115,7 @@ long    moebiusu(ulong n);
 GEN     nextprime(GEN n);
 GEN     precprime(GEN n);
 int     uis_357_power(ulong x, ulong *pt, ulong *mask);
+int     uis_357_powermod(ulong x, ulong *mask);
 ulong   unextprime(ulong n);
 ulong   uprecprime(ulong n);
 
