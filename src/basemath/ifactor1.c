@@ -1980,11 +1980,11 @@ uis_357_power(ulong x, ulong *pt, ulong *mask)
   logx = log((double)x);
   while (*mask)
   {
-    long e, b, MAX;
+    long e, b;
     ulong y, ye;
-    if (*mask & 1)      { b = 1; e = 3; MAX = 2642245; }
-    else if (*mask & 2) { b = 2; e = 5; MAX = 7131; }
-    else                { b = 4; e = 7; MAX = 565; }
+    if (*mask & 1)      { b = 1; e = 3; }
+    else if (*mask & 2) { b = 2; e = 5; }
+    else                { b = 4; e = 7; }
     y = (ulong)(exp(logx / e) + 0.5);
     ye = upowuu(y,e);
     if (ye == x) { *pt = y; return e; }
@@ -2153,7 +2153,7 @@ is_kth_power(GEN x, ulong n, GEN *pt)
   return 1;
 }
 
-/* is x a p-th power, p >= 11 prime ? Similar to is_357_power(), but instead
+/* is x a p^i-th power, p >= 11 prime ? Similar to is_357_power(), but instead
  * of the mask, we keep the current test exponent around. Cut off when
  * log_2 x^(1/k) < cutoffbits since we would have found it by trial division.
  * Everything needed here (primitive roots etc.) is computed from scratch on
@@ -2166,14 +2166,17 @@ int
 is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
 {
   long size = expi(x) /* not +1 */;
-  ulong p;
+  ulong p = u_forprime_next(T);
   pari_sp av = avma;
 
   if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
-  while ((p = u_forprime_next(T)) && size/p >= cutoffbits) {
+  while (p && size/p >= cutoffbits) {
+    long v = 1;
     if (DEBUGLEVEL>4) err_printf("OddPwrs: testing for exponent %ld\n", p);
     /* if found, caller should call us again without incrementing T->p */
-    if (is_kth_power(x, p, pt)) return p;
+    while (is_kth_power(x, p, &x)) v *= p;
+    if (v > 1) { if (pt) *pt = x; return v; }
+    p = u_forprime_next(T);
   }
   avma = av; return 0; /* give up */
 }

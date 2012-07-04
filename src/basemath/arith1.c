@@ -888,14 +888,14 @@ ispolygonal(GEN x, GEN S, GEN *N)
 /**                                                                 **/
 /*********************************************************************/
 static int
-pow_check(ulong p, GEN *x, GEN *logx, long *k)
+pow_check(ulong p, GEN *x, GEN *logx, double *dlogx, long *k)
 {
   GEN u, y;
   long e;
   setprec(*logx, DEFAULTPREC + (lg(*x)-2) / p);
   u = divru(*logx, p); y = grndtoi(mpexp(u), &e);
   if (e >= -10 || !equalii(powiu(y, p), *x)) return 0;
-  *k *= p; *x = y; *logx = u; return 1;
+  *k *= p; *x = y; *logx = u; *dlogx /= p; return 1;
 }
 
 static long
@@ -1128,6 +1128,7 @@ static long
 Z_isanypower_nosmalldiv(GEN *px)
 { /* any prime divisor of x is > 102 */
   const double LOG2_103 = 6.6865; /* lower bound for log_2(103) */
+  const double LOG103 = 4.6347; /* lower bound for log(103) */
   forprime_t T;
   ulong mask = 7, e2;
   long k, ex;
@@ -1156,12 +1157,12 @@ Z_isanypower_nosmalldiv(GEN *px)
     {
       logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
       dlogx = rtodbl(logx);
-      e2 = (ulong)(dlogx / LOG2_103 + 1e-2);
+      e2 = (ulong)(dlogx / LOG103); /* >= log_103(x) */
     }
     while (p && p < e2)
     {
-      if (pow_check(p, &x, &logx, &k)) {
-        e2 = (ulong)(dlogx / LOG2_103 + 1e-2);
+      if (pow_check(p, &x, &logx, &dlogx, &k)) {
+        e2 = (ulong)(dlogx / LOG103); /* >= log_103(x) */
         u_forprime_restrict(&T, e2);
         continue; /* if success, retry same p */
       }
@@ -1328,17 +1329,8 @@ isprimepower(GEN n, GEN *pt)
   byteptr d;
 
   if (typ(n) != t_INT) pari_err_TYPE("isprimepower", n);
-  if (signe(n) != 1) return 0;
-  if (!mod2(n)) {
-    v = vali(n);
-    if (expi(n) == v) {
-      if (pt) *pt = gen_2;
-      return v;
-    }
-    return 0;
-  }
+  if (signe(n) <= 0) return 0;
 
-  /* Deal with small odd values */
   if (lgefint(n) == 3)
   {
     v = uisprimepower(n[2], &p);
@@ -1349,9 +1341,8 @@ isprimepower(GEN n, GEN *pt)
     }
     return 0;
   }
-
-  p = 2;
-  d = diffptr+1;
+  p = 0;
+  d = diffptr;
   for (;;)
   {
     NEXT_PRIME_VIADIFF(p, d);
@@ -1366,8 +1357,7 @@ isprimepower(GEN n, GEN *pt)
     }
   }
   /* p | n => p >= 103 */
-
-  v = Z_isanypower_nosmalldiv(&n);  /* Expensive test! */
+  v = Z_isanypower_nosmalldiv(&n); /* expensive */
   if (!isprime(n)) { avma = av; return 0; }
   if (pt) *pt = gerepilecopy(av, n); else avma = av;
   return v;
