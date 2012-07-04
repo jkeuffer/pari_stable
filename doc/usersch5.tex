@@ -2659,9 +2659,10 @@ found by trial division; for maximal speed, you should start by a round of
 trial division, but the cut-off may also be set to $1$ for a rigorous result
 without any trial division.
 
-Otherwise returns the smallest suitable prime $p$ and set \kbd{*ptn} to $n$;
-we may immediately recall the function with the same parameters after setting
-$x = \kbd{*ptn}$.
+Otherwise returns the smallest suitable prime power $p^i$ and set \kbd{*ptn}
+to the $p^i$-th root of $x$ (which is now not a $p$-th power). We may
+immediately recall the function with the same parameters after setting $x =
+\kbd{*ptn}$: it will start at the next prime.
 
 \subsec{Factorization}
 

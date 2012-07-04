@@ -2166,17 +2166,18 @@ int
 is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
 {
   long size = expi(x) /* not +1 */;
-  ulong p = u_forprime_next(T);
+  ulong p;
   pari_sp av = avma;
 
   if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
-  while (p && size/p >= cutoffbits) {
+  while ((p = u_forprime_next(T)) && size/p >= cutoffbits) {
     long v = 1;
     if (DEBUGLEVEL>4) err_printf("OddPwrs: testing for exponent %ld\n", p);
-    /* if found, caller should call us again without incrementing T->p */
-    while (is_kth_power(x, p, &x)) v *= p;
-    if (v > 1) { if (pt) *pt = x; return v; }
-    p = u_forprime_next(T);
+    while (is_kth_power(x, p, pt)) {
+      v *= p; x = *pt;
+      size = expi(x); if (size/p < cutoffbits) break;
+    }
+    if (v > 1) return v;
   }
   avma = av; return 0; /* give up */
 }
