@@ -952,10 +952,8 @@ prime_table_next_p(ulong a, byteptr *pd, ulong *pp, ulong *pn)
   prime_table_closest_p(a, &d, &p, &n);
   if (p < a)
   {
-    do {
-      if (!*d) pari_err_MAXPRIME(a);
-      n++; NEXT_PRIME_VIADIFF(p,d);
-    } while (p < a);
+    if (a > maxprime()) pari_err_MAXPRIME(a);
+    do { n++; NEXT_PRIME_VIADIFF(p,d); } while (p < a);
   }
   else if (p != a)
   {
