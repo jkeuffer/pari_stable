@@ -1129,34 +1129,39 @@ Z_isanypower_nosmalldiv(GEN *px)
 { /* any prime divisor of x is > 102 */
   const double LOG2_103 = 6.6865; /* lower bound for log_2(103) */
   forprime_t T;
-  ulong mask = 7;
-  long k, ex, e2;
+  ulong mask = 7, e2;
+  long k, ex;
   GEN y, x = *px;
 
   k = 1;
   while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
   while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
-  e2 = (long)((expi(x) + 1) / LOG2_103); /* >= log_103 (x) */
+  e2 = (ulong)((expi(x) + 1) / LOG2_103); /* >= log_103 (x) */
   if (u_forprime_init(&T, 11, e2))
   {
     GEN logx = NULL;
     ulong p;
+    double dlogx = 0;
     /* cut off at 4 bits which seems to be about optimum;  for primes
      * >> 10^3 the modular checks are no longer competitively fast */
     while ( (ex = is_pth_power(x, &y, &T, 4)) )
     {
       k *= ex; x = y;
-      e2 = (long)((expi(x) + 1) / LOG2_103);
+      e2 = (ulong)((expi(x) + 1) / LOG2_103);
       u_forprime_restrict(&T, e2);
     }
     if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
     p = u_forprime_next(&T);
     if (p)
+    {
       logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
+      dlogx = rtodbl(logx);
+      e2 = (ulong)(dlogx / LOG2_103 + 1e-2);
+    }
     while (p && p < e2)
     {
       if (pow_check(p, &x, &logx, &k)) {
-        e2 = (long)((expi(x) + 1) / LOG2_103);
+        e2 = (ulong)(dlogx / LOG2_103 + 1e-2);
         u_forprime_restrict(&T, e2);
         continue; /* if success, retry same p */
       }
@@ -1396,7 +1401,7 @@ uisprimepower(ulong n, ulong *pp)
   if (n < 2) return 0;
   if (!odd(n)) {
     v = vals(n);
-    if (n == 1 << v) { *pp = 2; return v; }
+    if (n == 1UL << v) { *pp = 2; return v; }
     return 0;
   }
   if (n < 8) { *pp = n; return 1; } /* 3,5,7 */
