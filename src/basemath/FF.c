@@ -891,7 +891,7 @@ FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m)
       gel(E,i) = mkFF_i(fg,Rg_to_FpXQ(gel(E,i),T,p));
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellgroup");
+    pari_err_IMPL("FF_ellinit in characteristic 2");
   default:
     e = Flxq_ell_to_a4a6(E,T,pp);
     N = Flxq_ellcard(gel(e,1),gel(e,2),T,pp);
@@ -920,7 +920,7 @@ FF_ellgens(GEN E)
     F = FpXQ_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellgen");
+    pari_err_IMPL("FF_ellgen in characteristic 2");
   default:
     F = Flxq_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T, pp);
   }
@@ -943,7 +943,7 @@ FF_ellmul(GEN E, GEN P, GEN n)
     Q = FpXQE_changepoint(Qp, gel(e,3), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellgen");
+    pari_err_IMPL("FF_ellmul in characteristic 2");
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P, T, pp), gel(e,3), T, pp);
     Qp = FlxqE_mul(Pp, n, gel(e,1), T, pp);
@@ -967,7 +967,7 @@ FF_ellorder(GEN E, GEN P, GEN o)
     r = FpXQE_order(Pp, o, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellgen over F2^k");
+    pari_err_IMPL("FF_ellorder in characteristic 2");
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
     r = FlxqE_order(Pp, o, gel(e,1), T, pp);
@@ -991,7 +991,7 @@ FF_elllog(GEN E, GEN P, GEN Q, GEN o)
     r = FpXQE_log(Pp, Qp, o, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellgen over F2^k");
+    pari_err_IMPL("FF_elllog in characteristic 2");
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
     Qp = FlxqE_changepointinv(RgE_to_FlxqE(Q,T,pp), gel(e,3), T, pp);
@@ -1016,7 +1016,7 @@ FF_ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
     r = FpXQE_weilpairing(Pp, Qp, m, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellgen over F2^k");
+    pari_err_IMPL("FF_ellweilpairing in characteristic 2");
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
     Qp = FlxqE_changepointinv(RgE_to_FlxqE(Q,T,pp), gel(e,3), T, pp);
