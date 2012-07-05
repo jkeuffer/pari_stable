@@ -902,6 +902,26 @@ Flxq_ell_to_a4a6(GEN E, GEN T, ulong p)
                    Flx_Fl_mul(a1,3%p,p),Flx_Fl_mul(a3,108%p,p)));
 }
 
+static GEN
+F2xq_ell_to_a4a6(GEN E, GEN T)
+{
+  GEN a1 = Rg_to_F2xq(ell_get_a1(E),T);
+  GEN a2 = Rg_to_F2xq(ell_get_a2(E),T);
+  GEN a3 = Rg_to_F2xq(ell_get_a3(E),T);
+  GEN a4 = Rg_to_F2xq(ell_get_a4(E),T);
+  GEN a6 = Rg_to_F2xq(ell_get_a6(E),T);
+  GEN a1i = F2xq_inv(a1,T);
+  GEN a1i2 = F2xq_sqr(a1i,T);
+  GEN a1i3 = F2xq_mul(a1i,a1i2,T);
+  GEN a1i6 = F2xq_sqr(a1i3,T);
+  GEN d = F2xq_mul(a3,a1i,T);
+  GEN e = F2xq_mul(F2x_add(a4,F2xq_sqr(d,T)),a1i,T);
+  GEN da2 = F2x_add(a2,d);
+  GEN d2 = F2xq_mul(da2,a1i2,T);
+  GEN d6 = F2xq_mul(F2x_add(F2x_add(F2xq_mul(F2x_add(F2xq_mul(da2,d,T),a4),d,T),a6),F2xq_sqr(e,T)),a1i6,T);
+  retmkvec3(d2, d6, mkvec4(a1,d,zero_F2x(T[1]),e));
+}
+
 GEN
 FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m)
 {
@@ -919,7 +939,12 @@ FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m)
       gel(E,i) = mkFF_i(fg,Rg_to_FpXQ(gel(E,i),T,p));
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellinit in characteristic 2");
+    e = F2xq_ell_to_a4a6(E,T);
+    N = F2xq_ellcard(gel(e,1),gel(e,2),T);
+    G = F2xq_ellgroup(gel(e,1),gel(e,2),N,T,pt_m);
+    for(i=1;i<=13;i++)
+      gel(E,i) = mkFF_i(fg,Rg_to_F2xq(gel(E,i),T));
+    break;
   default:
     e = Flxq_ell_to_a4a6(E,T,pp);
     N = Flxq_ellcard(gel(e,1),gel(e,2),T,pp);
@@ -948,7 +973,8 @@ FF_ellgens(GEN E)
     F = FpXQ_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellgen in characteristic 2");
+    F = F2xq_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T);
+    break;
   default:
     F = Flxq_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T, pp);
   }
@@ -971,7 +997,10 @@ FF_ellmul(GEN E, GEN P, GEN n)
     Q = FpXQE_changepoint(Qp, gel(e,3), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellmul in characteristic 2");
+    Pp = F2xqE_changepointinv(RgE_to_F2xqE(P, T), gel(e,3), T);
+    Qp = F2xqE_mul(Pp, n, gel(e,1), T);
+    Q = F2xqE_changepoint(Qp, gel(e,3), T);
+    break;
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P, T, pp), gel(e,3), T, pp);
     Qp = FlxqE_mul(Pp, n, gel(e,1), T, pp);
@@ -995,7 +1024,9 @@ FF_ellorder(GEN E, GEN P, GEN o)
     r = FpXQE_order(Pp, o, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellorder in characteristic 2");
+    Pp = F2xqE_changepointinv(RgE_to_F2xqE(P,T), gel(e,3), T);
+    r = F2xqE_order(Pp, o, gel(e,1), T);
+    break;
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
     r = FlxqE_order(Pp, o, gel(e,1), T, pp);
@@ -1019,7 +1050,9 @@ FF_elllog(GEN E, GEN P, GEN Q, GEN o)
     r = FpXQE_log(Pp, Qp, o, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_elllog in characteristic 2");
+    Pp = F2xqE_changepointinv(RgE_to_F2xqE(P,T), gel(e,3), T);
+    Qp = F2xqE_changepointinv(RgE_to_F2xqE(Q,T), gel(e,3), T);
+    r = F2xqE_log(Pp, Qp, o, gel(e,1), T);
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
     Qp = FlxqE_changepointinv(RgE_to_FlxqE(Q,T,pp), gel(e,3), T, pp);
@@ -1044,7 +1077,10 @@ FF_ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
     r = FpXQE_weilpairing(Pp, Qp, m, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
-    pari_err_IMPL("FF_ellweilpairing in characteristic 2");
+    Pp = F2xqE_changepointinv(RgE_to_F2xqE(P,T), gel(e,3), T);
+    Qp = F2xqE_changepointinv(RgE_to_F2xqE(Q,T), gel(e,3), T);
+    r = F2xqE_weilpairing(Pp, Qp, m, gel(e,1), T);
+    break;
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
     Qp = FlxqE_changepointinv(RgE_to_FlxqE(Q,T,pp), gel(e,3), T, pp);

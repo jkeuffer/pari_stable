@@ -97,6 +97,26 @@ GEN     ZXX_to_F2xX(GEN B, long v);
 GEN     gener_F2xq(GEN T, GEN *po);
 GEN     random_F2x(long d, long vs);
 
+/* F2xqE.c */
+
+GEN     F2xq_ellcard(GEN a2, GEN a6, GEN T);
+GEN     F2xq_ellgens(GEN a2, GEN a6, GEN ch, GEN D, GEN m, GEN T);
+GEN     F2xq_ellgroup(GEN a2, GEN a6, GEN N, GEN T, GEN *pt_m);
+GEN     F2xqE_add(GEN P, GEN Q, GEN a2, GEN T);
+GEN     F2xqE_changepoint(GEN x, GEN ch, GEN T);
+GEN     F2xqE_changepointinv(GEN x, GEN ch, GEN T);
+GEN     F2xqE_dbl(GEN P, GEN a2, GEN T);
+GEN     F2xqE_log(GEN a, GEN b, GEN o, GEN a2, GEN T);
+GEN     F2xqE_mul(GEN P, GEN n, GEN a2, GEN T);
+GEN     F2xqE_neg(GEN P, GEN T);
+GEN     F2xqE_order(GEN z, GEN o, GEN a2, GEN T);
+GEN     F2xqE_sub(GEN P, GEN Q, GEN a2, GEN T);
+GEN     F2xqE_tatepairing(GEN t, GEN s, GEN m, GEN a2, GEN T);
+GEN     F2xqE_weilpairing(GEN t, GEN s, GEN m, GEN a2, GEN T);
+const struct bb_group * get_F2xqE_group(void **E, GEN a2, GEN a6, GEN T);
+GEN     RgE_to_F2xqE(GEN x, GEN T);
+GEN     random_F2xqE(GEN a2, GEN a6, GEN T);
+
 /* Flx.c */
 
 GEN     Fl_to_Flx(ulong x, long sv);

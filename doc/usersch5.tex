@@ -5214,6 +5214,62 @@ Weil pairing of the points of $m$-torsion $P$ and $Q$.
 \fun{GEN}{RgE_to_FpE}{GEN P, GEN p} returns the \kbd{FpE} obtained by applying
 \kbd{Rg\_to\_Fp} coefficientwise.
 
+\subsec{Elliptic curves over $\F_{2^n}$, not supersingular}
+Let $T$ be an irreducible \kbd{F2x} and $E$ the
+elliptic curve given by the equation $E:y^2+x*y=x^3+a_2\*x^2+a_6$ with $a_2$ and $a_6$
+being \kbd{F2x} in $\F_2[X]/(T)$.  A \kbd{F2xqE} is a point of $E(\F_2[X]/(T))$.
+
+\fun{GEN}{F2xq_ellcard}{GEN a2, GEN a6, GEN T}
+Return the order of the group $E(\F_p[X]/(T))$.
+
+\fun{GEN}{F2xq_ellgroup}{GEN a2, GEN a6, GEN N, GEN T, GEN *pt_m}
+Return the group structure $D$ of the group $E(\F_2[X]/(T))$,
+which is assumed to be of order $N$ and set $*pt_m=m$.
+
+\fun{GEN}{F2xq_ellgens}{GEN a2, GEN a6, GEN ch, GEN D, GEN m, GEN T}
+Returns generators of the group $E(\F_2[X]/(T))$ with the base change \kbd{ch}
+(see \kbd{FlxqE\_changepoint}), where $D$ and $m$ are as returned by
+\kbd{Flxq\_ellgroup}.
+
+\subsec{\kbd{F2xqE}}
+
+\fun{GEN}{F2xqE_changepoint}{GEN P, GEN m, GEN a2, GEN T} returns the image
+$Q$ of the point $P$ on the curve $E:y^2+x*y=x^3+a_2\*x^2+a_6$ by the coordinate
+change $m$ (which is a \kbd{FlxqV}).
+
+\fun{GEN}{F2xqE_changepointinv}{GEN P, GEN m, GEN a2, GEN T} returns the image
+$Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
+coordinate change $m$ (which is a \kbd{FlxqV}).
+
+\fun{GEN}{F2xqE_add}{GEN P, GEN Q, GEN a2, GEN T}
+
+\fun{GEN}{F2xqE_sub}{GEN P, GEN Q, GEN a2, GEN T}
+
+\fun{GEN}{F2xqE_dbl}{GEN P, GEN a2, GEN T}
+
+\fun{GEN}{F2xqE_neg}{GEN P, GEN T}
+
+\fun{GEN}{F2xqE_mul}{GEN P, GEN n, GEN a2, GEN T}
+
+\fun{GEN}{random_F2xqE}{GEN a2, GEN a6, GEN T}
+
+\fun{GEN}{F2xqE_order}{GEN P, GEN o, GEN a2, GEN T} returns the order of $P$ in
+the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
+factorization.
+
+\fun{GEN}{F2xqE_log}{GEN P, GEN G, GEN o, GEN a2, GEN T} Let \kbd{G} be a
+point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not exists,
+the result is currently undefined.
+
+\fun{GEN}{F2xqE_tatepairing}{GEN P, GEN Q, GEN m, GEN a2, GEN T} returns the
+Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
+
+\fun{GEN}{F2xqE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a2, GEN T} returns the
+Weil pairing of the points of $m$-torsion $P$ and $Q$.
+
+\fun{GEN}{RgE_to_F2xqE}{GEN P, GEN T} returns the \kbd{F2xqE} obtained by applying
+\kbd{Rg\_to\_F2xq} coefficientwise.
+
 \subsec{Elliptic curves over $\F_q$, small characteristic $p>3$ }
 Let $p$ be a prime \kbd{ulong}, $T$ an irreducible \kbd{Flx} mod $p$, and $E$ the
 elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
@@ -5273,7 +5329,7 @@ Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
 \subsec{Elliptic curves over $\F_q$, large characteristic }
 
-Let $p$ a prime number, $T$ an irreducible polynomial mod $p$, and $E$ the
+Let $p$ be a prime number, $T$ an irreducible polynomial mod $p$, and $E$ the
 elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
 in $\F_p[X]/(T)$.  A \kbd{FpXQE} is a point of $E(\F_p[X]/(T))$.
 
