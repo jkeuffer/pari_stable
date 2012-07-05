@@ -1106,19 +1106,24 @@ heegner_indexmultD(GEN faN, GEN a, GEN D, long prec)
   return gerepileupto(av, mulri(mulrr(a, b), c));
 }
 
+/* E integral model, P != oo in E(Q) */
 static long
 is_tors(GEN E, GEN torsion, GEN P)
 {
   long a, i;
-  GEN Q, R;
+  GEN Q, R, dx, dy;
   if (lg(gel(torsion,2))==1) return 0;
-  a = itou(gmael(torsion,2,1));
+  dx = Q_denom(gel(P,1));
+  dy = Q_denom(gel(P,2)); /* Nagell Lutz "integrality" condition */
+  if (cmpiu(dx, 4) > 0 || cmpiu(dy, 8) > 0) return 0;
+
+  a = itou(gmael(torsion,2,1)); /* torsion exponent */
   Q = gmael(torsion,3,1);
   if (!odd(a))
   {
-    if (a==2) return gequal(P,Q);
     P = elladd(E,P,P);
     if (ell_is_inf(P)) return 1;
+    if (a==2) return 0;
     Q = elladd(E,Q,Q);
     a >>=1;
   }
