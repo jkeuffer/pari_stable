@@ -5854,6 +5854,9 @@ by the integer \kbd{y}.
 
 \fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}.
 
+\fun{GEN}{ZX_shifti}{GEN x, long n} shifts all coefficients of \kbd{x} by $n$ bits,
+which can be negative.
+
 \fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 
 \fun{GEN}{ZX_mulspec}{GEN a, GEN b, long na, long nb}. Internal routine:

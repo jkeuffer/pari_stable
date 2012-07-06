@@ -610,6 +610,7 @@ GEN     ZX_neg(GEN x);
 GEN     ZX_rem(GEN x, GEN y);
 GEN     ZX_renormalize(GEN x, long lx);
 GEN     ZX_rescale(GEN P, GEN h);
+GEN     ZX_shifti(GEN x, long n);
 GEN     ZX_sqr(GEN x);
 GEN     ZX_sqrspec(GEN a, long na);
 GEN     ZX_sub(GEN x, GEN y);
