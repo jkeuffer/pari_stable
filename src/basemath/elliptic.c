@@ -900,7 +900,7 @@ ellordinate_i(GEN e, GEN x, long prec)
   }
   if (td == t_FFELT && equaliu(FF_p_i(D),2))
   {
-    GEN F = FFX_roots(mkpoln(3, gen_1, b, gneg(a)), D);
+    GEN F = FFX_roots(mkpoln(3, gen_1, b, a), D);
     if (lg(F) == 1) { avma = av; return cgetg(1,t_VEC); }
     return gerepileupto(av, F);
   }
