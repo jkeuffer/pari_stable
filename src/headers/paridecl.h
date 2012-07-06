@@ -69,6 +69,7 @@ GEN     F2x_to_Flx(GEN x);
 GEN     F2x_to_ZX(GEN x);
 GEN     F2xC_to_ZXC(GEN x);
 GEN     F2xV_to_F2m(GEN v, long n);
+GEN     F2xq_Artin_Schreier(GEN a, GEN T);
 GEN     F2xq_conjvec(GEN x, GEN T);
 GEN     F2xq_div(GEN x,GEN y,GEN T);
 GEN     F2xq_inv(GEN x, GEN T);

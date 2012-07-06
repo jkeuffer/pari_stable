@@ -801,6 +801,28 @@ F2xq_log(GEN a, GEN g, GEN ord, GEN T)
 }
 
 GEN
+F2xq_Artin_Schreier(GEN a, GEN T)
+{
+  pari_sp ltop=avma;
+  long j,N = F2x_degree(T);
+  GEN Q, XP;
+  pari_timer ti;
+  timer_start(&ti);
+  XP = F2xq_sqr(polx_F2x(T[1]),T);
+  Q  = F2xq_matrix_pow(XP,N,N,T);
+  for (j=1; j<=N; j++)
+    F2m_flip(Q,j,j);
+  if(DEBUGLEVEL>=9) timer_printf(&ti,"Berlekamp matrix");
+  F2v_add_inplace(gel(Q,1),a);
+  Q = F2m_ker_sp(Q,0);
+  if(DEBUGLEVEL>=9) timer_printf(&ti,"kernel");
+  if (lg(Q)!=2) return NULL;
+  Q = gel(Q,1);
+  Q[1] = T[1];
+  return gerepileuptoleaf(ltop, Q);
+}
+
+GEN
 F2xq_sqrt(GEN a, GEN T)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
