@@ -588,3 +588,24 @@ ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e)
     w = Fq_sub(gmul2n(w,1), Fq_mul(Fq_sqr(w,T,q), Fq_mul(n, Fq_pow(a,n_1,T, q), T,q), T,q), T,q);
   }
 }
+
+/* Same as ZpXQX_liftroot for the polynomial b*X-1 */
+GEN
+ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
+{
+  pari_sp av = avma;
+  GEN q = p;
+  ulong mask;
+
+  a = FpX_red(a, q);
+  if (e == 1) return a;
+  mask = quadratic_prec_mask(e);
+  for(;;)
+  {
+    q = sqri(q);
+    if (mask & 1) q = diviiexact(q, p);
+    mask >>= 1;
+    a = FpXQ_mul(a, Fp_FpX_sub(gen_2, FpXQ_mul(a, FpX_red(b, q) , T, q), q), T,q);
+    if (mask == 1) return gerepileupto(av, a);
+  }
+}
