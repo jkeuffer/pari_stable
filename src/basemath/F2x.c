@@ -140,6 +140,58 @@ F2x_to_F2v(GEN x, long N)
 }
 
 GEN
+RgX_to_F2x(GEN x)
+{
+  long l=nbits2lg(lgpol(x));
+  GEN z=cgetg(l,t_VECSMALL);
+  long i,j,k;
+  z[1]=((ulong)x[1])&VARNBITS;
+  for(i=2, k=1,j=BITS_IN_LONG;i<lg(x);i++,j++)
+  {
+    if (j==BITS_IN_LONG)
+    {
+      j=0; k++; z[k]=0;
+    }
+    if (Rg_to_Fl(gel(x,i),2))
+      z[k]|=1UL<<j;
+  }
+  return F2x_renormalize(z,l);
+}
+
+/* If x is a POLMOD, assume modulus is a multiple of T. */
+GEN
+Rg_to_F2xq(GEN x, GEN T)
+{
+  long ta, tx = typ(x), v = T[1];
+  GEN a, b;
+  if (is_const_t(tx))
+  {
+    if (tx == t_FFELT) return FF_to_F2xq(x);
+    return Rg_to_Fl(x, 2)? pol1_F2x(v): pol0_F2x(v);
+  }
+  switch(tx)
+  {
+    case t_POLMOD:
+      b = gel(x,1);
+      a = gel(x,2); ta = typ(a);
+      if (is_const_t(ta)) return Rg_to_Fl(a, 2)? pol1_F2x(v): pol0_F2x(v);
+      b = RgX_to_F2x(b); if (b[1] != v) break;
+      a = RgX_to_F2x(a); if (zv_equal(b,T)) return a;
+      return F2x_rem(a, T);
+    case t_POL:
+      x = RgX_to_F2x(x);
+      if (x[1] != v) break;
+      return F2x_rem(x, T);
+    case t_RFRAC:
+      a = Rg_to_F2xq(gel(x,1), T);
+      b = Rg_to_F2xq(gel(x,2), T);
+      return F2xq_div(a,b, T);
+  }
+  pari_err_TYPE("Rg_to_F2xq",x);
+  return NULL; /* not reached */
+}
+
+GEN
 F2x_add(GEN x, GEN y)
 {
   long i,lz;

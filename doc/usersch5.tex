@@ -4976,8 +4976,17 @@ accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
 \fun{ulong}{padic_to_Fl}{GEN x, ulong p} special case of \tet{Rg_to_Fl},
 for a $x$ a \typ{PADIC}.
 
+\fun{GEN}{RgX_to_F2x}{GEN x}, \kbd{x} a \typ{POL}, returns the
+\kbd{F2x} obtained by applying \kbd{Rg\_to\_Fl} coefficientwise.
+
 \fun{GEN}{RgX_to_Flx}{GEN x, ulong p}, \kbd{x} a \typ{POL}, returns the
 \kbd{Flx} obtained by applying \kbd{Rg\_to\_Fl} coefficientwise.
+
+\fun{GEN}{Rg_to_F2xq}{GEN z, GEN T}, \kbd{z} a \kbd{GEN} which can be
+mapped to $\F_2[X]/(T)$: anything \kbd{Rg\_to\_Fl} can be applied to,
+a \typ{POL} to which \kbd{RgX\_to\_F2x} can be applied to, a \typ{POLMOD}
+whose modulus is divisible by $T$ (once mapped to a \kbd{F2x}), a suitable
+\typ{RFRAC}. Returns \kbd{z} as an \kbd{F2xq}, normalized.
 
 \fun{GEN}{Rg_to_Flxq}{GEN z, GEN T, ulong p}, \kbd{z} a \kbd{GEN} which can be
 mapped to $\F_p[X]/(T)$: anything \kbd{Rg\_to\_Fl} can be applied to,
@@ -7798,10 +7807,17 @@ display $g$.
 
 \fun{GEN}{FF_to_FpXQ_i}{GEN a} shallow version of \kbd{FF\_to\_FpXQ}.
 
+\fun{GEN}{FF_to_F2xq}{GEN a} converts the \typ{FFELT} \kbd{a} to a \kbd{F2x}
+$P$ such that $a=P(g)$ where $g$ is the generator of the finite field returned
+by \kbd{ffgen}, in the variable used to display $g$. This only work if the
+characteristic is $2$.
+
+\fun{GEN}{FF_to_F2xq_i}{GEN a} shallow version of \kbd{FF\_to\_F2xq}.
+
 \fun{GEN}{FF_to_Flxq}{GEN a} converts the \typ{FFELT} \kbd{a} to a \kbd{Flx}
-$P$ such that $a=P(g)$ where $g$ is the
-generator of the finite field returned by \kbd{ffgen}, in the variable used to
-display $g$. This only work if the characteristic is small enough.
+$P$ such that $a=P(g)$ where $g$ is the generator of the finite field returned
+by \kbd{ffgen}, in the variable used to display $g$. This only work if the
+characteristic is small enough.
 
 \fun{GEN}{FF_to_Flxq_i}{GEN a} shallow version of \kbd{FF\_to\_Flxq}.
 
