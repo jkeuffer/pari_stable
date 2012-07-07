@@ -1749,7 +1749,6 @@ GEN     FF_charpoly(GEN x);
 GEN     FF_conjvec(GEN x);
 GEN     FF_div(GEN a, GEN b);
 GEN     FF_ellgens(GEN E);
-GEN     FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m);
 GEN     FF_elllog(GEN E, GEN P, GEN Q, GEN o);
 GEN     FF_ellmul(GEN E, GEN P, GEN n);
 GEN     FF_ellorder(GEN E, GEN P, GEN o);
