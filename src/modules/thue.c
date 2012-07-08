@@ -58,23 +58,9 @@ myround(GEN x, long dir)
   return gmul(x, gadd(gen_1, eps));
 }
 
-/* Returns the index of the largest element in a vector */
+/* v a t_VEC/t_VEC */
 static GEN
-_Vecmax(GEN Vec, long *ind)
-{
-  long k, tno = 1, l = lg(Vec);
-  GEN tmax = gel(Vec,1);
-  for (k = 2; k < l; k++)
-    if (gcmp(gel(Vec,k),tmax) > 0) { tmax = gel(Vec,k); tno = k; }
-  if (ind) *ind = tno;
-  return tmax;
-}
-
-static GEN
-Vecmax(GEN v) { return _Vecmax(v, NULL); }
-
-static long
-Vecmaxind(GEN v) { long i; (void)_Vecmax(v, &i); return i; }
+vecmax_shallow(GEN v) { return gel(v, vecindexmax(v)); }
 
 static GEN
 tnf_get_roots(GEN poly, long prec, long S, long T)
@@ -243,7 +229,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     gpmin = gprec_w(gpmin, DEFAULTPREC);
 
     /* Compute x0. See paper, Prop. 2.2.1 */
-    x0 = gmul(gpmin, Vecmax(gabs(imag_i(ro), prec)));
+    x0 = gmul(gpmin, vecmax_shallow(gabs(imag_i(ro), prec)));
     x0 = sqrtnr(gdiv(int2n(n-1), x0), n);
   }
   if (DEBUGLEVEL>1)
@@ -892,7 +878,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
   x1 = gmax(x0, sqrtnr(shiftr(tmp,1),n));
 
   Vect = gmul(gabs(A,DEFAULTPREC), const_col(r, gen_1));
-  c14 = mulrr(c4, Vecmax(Vect));
+  c14 = mulrr(c4, vecmax_shallow(Vect));
   x2 = gmax(x1, sqrtnr(mulur(10,c14), n));
   if (DEBUGLEVEL>1) {
     err_printf("x1 -> %Ps\n",x1);
@@ -915,7 +901,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
     if (iroot <= r) gel(Vect,iroot) = stoi(1-n);
     Delta = RgM_RgC_mul(A,Vect);
 
-    c5 = Vecmax(gabs(Delta,Prec));
+    c5 = vecmax_shallow(gabs(Delta,Prec));
     c5  = myround(gprec_w(c5,DEFAULTPREC), 1);
     c7  = mulur(r,c5);
     BS.c10 = divur(n,c7);
@@ -955,7 +941,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
       }
       Lambda = RgM_RgC_mul(A,Vect2);
 
-      c6 = addrr(dbltor(0.1), Vecmax(gabs(Lambda,DEFAULTPREC)));
+      c6 = addrr(dbltor(0.1), vecmax_shallow(gabs(Lambda,DEFAULTPREC)));
       c6 = myround(c6, 1);
       c8 = addrr(dbltor(1.23), mulur(r,c6));
       c11= mulrr(shiftr(c3,1) , mpexp(divrr(mulur(n,c8),c7)));
@@ -972,7 +958,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
       BS.NE = NE;
       BS.Hmu = gel(Hmu,ine);
 
-      i1 = Vecmaxind(gabs(Delta,prec));
+      i1 = vecindexmax(gabs(Delta,prec));
       if (is_pm1(BS.Ind))
       {
         if (! (B0 = get_B0(i1, Delta, Lambda, eps5, prec, &BS)) ) goto PRECPB;
