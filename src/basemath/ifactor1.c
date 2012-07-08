@@ -2130,7 +2130,7 @@ is_kth_power(GEN x, ulong n, GEN *pt)
     residue = umodiu(x, q);
     if (residue == 0)
     {
-      if (Z_lvalrem(x, q, &y) % n) { avma = av; return 0; }
+      if (Z_lval(x,q) % n) { avma = av; return 0; }
       continue;
     }
     /* n-th power mod q ? */
