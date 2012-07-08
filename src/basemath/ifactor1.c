@@ -2161,7 +2161,7 @@ is_kth_power(GEN x, ulong n, GEN *pt)
  * word-sized computations take negligible time.
  * Any cutoffbits > 0 is safe, but direct root extraction attempts are faster
  * when trial division has been used to discover very small bases. We become
- * competitive at cutoffbits ~ 4 */
+ * competitive at cutoffbits ~ 10 */
 int
 is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
 {
@@ -2175,7 +2175,7 @@ is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
     if (DEBUGLEVEL>4) err_printf("OddPwrs: testing for exponent %ld\n", p);
     while (is_kth_power(x, p, pt)) {
       v *= p; x = *pt;
-      size = expi(x); if (size/p < cutoffbits) break;
+      size = expi(x);
     }
     if (v > 1) return v;
   }

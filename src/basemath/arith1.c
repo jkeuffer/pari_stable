@@ -890,10 +890,8 @@ ispolygonal(GEN x, GEN S, GEN *N)
 static int
 pow_check(ulong p, GEN *x, GEN *logx, double *dlogx, long *k)
 {
-  GEN u, y;
   long e;
-  setprec(*logx, DEFAULTPREC + (lg(*x)-2) / p);
-  u = divru(*logx, p); y = grndtoi(mpexp(u), &e);
+  GEN u = divru(*logx, p), y = grndtoi(mpexp(u), &e);
   if (e >= -10 || !equalii(powiu(y, p), *x)) return 0;
   *k *= p; *x = y; *logx = u; *dlogx /= p; return 1;
 }
@@ -1143,23 +1141,24 @@ Z_isanypower_nosmalldiv(GEN *px)
     GEN logx = NULL;
     ulong p;
     double dlogx = 0;
-    /* cut off at 4 bits which seems to be about optimum;  for primes
-     * >> 10^3 the modular checks are no longer competitively fast */
-    while ( (ex = is_pth_power(x, &y, &T, 4)) )
+    /* cut off at x^(1/p) ~ 2^30 bits which seems to be about optimum;
+     * for large p the modular checks are no longer competitively fast */
+    while ( (ex = is_pth_power(x, &y, &T, 30)) )
     {
       k *= ex; x = y;
       e2 = (ulong)((expi(x) + 1) / LOG2_103);
       u_forprime_restrict(&T, e2);
     }
     if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
+    /* x^(1/p) < 2^31 */
     p = u_forprime_next(&T);
     if (p)
     {
-      logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
+      logx = logr_abs( itor(x, DEFAULTPREC) );
       dlogx = rtodbl(logx);
       e2 = (ulong)(dlogx / LOG103); /* >= log_103(x) */
     }
-    while (p && p < e2)
+    while (p && p <= e2)
     {
       if (pow_check(p, &x, &logx, &dlogx, &k)) {
         e2 = (ulong)(dlogx / LOG103); /* >= log_103(x) */
