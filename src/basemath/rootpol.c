@@ -388,18 +388,17 @@ RgX_even_odd(GEN p, GEN *pe, GEN *po)
 static double
 log2ir(GEN x)
 {
-  double l;
-
   if (!signe(x)) return -pariINFINITY;
   if (typ(x) == t_INT)
   {
     GEN m = int_MSW(x);
-    l = (double)(ulong)*m;
-    if (lgefint(x)==3) return log2(l);
+    long lx = lgefint(x);
+    double l = (double)(ulong)*m;
+    if (lx==3) return log2(l);
 #ifndef LONG_IS_64BIT /* overkill ? The first word should be enough... */
     l += ((double)(ulong)*int_precW(m)) / 4294967296.; /* 2^32 */
 #endif
-    return log2(l) + (double)(BITS_IN_LONG*(lgefint(x)-3));
+    return log2(l) + (double)(BITS_IN_LONG*(lx-3));
   }
   /* else t_REAL */
   return dbllog2r(x);
