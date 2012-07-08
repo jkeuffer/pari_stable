@@ -1,7 +1,7 @@
 Function: ellffinit
 Section: elliptic_curves
 C-Name: ellffinit
-Prototype: GG
+Prototype: GGD0,L,
 Help: ellffinit(x,g): x being a vector suitable for ellinit, and g a finite
  field element, return an ellff structure suitable for computation in the group
  E(K) where K is the definition field of g. The element g can also be a prime

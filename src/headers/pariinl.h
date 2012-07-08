@@ -2135,7 +2135,7 @@ ellinf(void) { return mkvec(gen_0); }
 INLINE GEN ellff_get_field(GEN x) { return gel(x, 14); }
 INLINE GEN ellff_get_a4a6(GEN x)  { return gel(x, 15); }
 INLINE GEN ellff_get_card(GEN x)  { return gel(x, 16); }
-INLINE GEN ellff_get_d1(GEN x)    { return gmael(x, 17, 1); }
+INLINE GEN ellff_get_d1(GEN x)    { GEN D = gel(x, 17); return typ(D)==t_VEC ? gel(D,1): D; }
 INLINE GEN ellff_get_o(GEN x)     { return gel(x, 17); }
 INLINE GEN ellff_get_m(GEN x)     { return gel(x, 18); }
 

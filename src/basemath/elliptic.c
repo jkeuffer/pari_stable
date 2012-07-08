@@ -4189,7 +4189,7 @@ ellgenerators(GEN E)
 }
 
 GEN
-ellffinit(GEN x, GEN fg)
+ellffinit(GEN x, GEN fg, long flag)
 {
   pari_sp av = avma;
   GEN E = cgetg(19,t_VEC);
@@ -4214,7 +4214,7 @@ ellffinit(GEN x, GEN fg)
   gel(E,14) = fg;
   gel(E,15) = e;
   gel(E,16) = N;
-  gel(E,17) = mkvec2(d1, Z_factor(d1));
+  gel(E,17) = flag ? d1: mkvec2(d1, Z_factor(d1));
   gel(E,18) = m;
   return gerepilecopy(av,E);
 }

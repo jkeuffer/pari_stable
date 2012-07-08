@@ -1553,7 +1553,7 @@ GEN     elleta(GEN om, long prec);
 GEN     ellffcyc(GEN x);
 GEN     ellfffactcyc(GEN E);
 GEN     ellffgen(GEN E);
-GEN     ellffinit(GEN x, GEN p);
+GEN     ellffinit(GEN x, GEN fg, long flag);
 GEN     ellfflog(GEN E, GEN P, GEN Q, GEN o);
 GEN     ellffmul(GEN E, GEN P, GEN n);
 GEN     ellfforder(GEN E, GEN P, GEN o);
