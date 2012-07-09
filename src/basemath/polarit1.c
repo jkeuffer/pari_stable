@@ -302,8 +302,8 @@ FpX_otherroot(GEN x, GEN r, GEN p)
 static GEN
 FpX_roots_i(GEN f, GEN p)
 {
-  long n, j, da, db;
-  GEN y, pol, pol0, a, b, q = shifti(p,-1);
+  long n, np, j, k, da, db;
+  GEN y, yp, pol, pol0, a, b, q = shifti(p,-1);
 
   n = ZX_valrem(f, &f)? 1: 0;
   y = cgetg(lg(f), t_COL);
@@ -313,6 +313,7 @@ FpX_roots_i(GEN f, GEN p)
     if (lg(f) <= 3) { setlg(y, 2); return y; }
     n = 1;
   }
+  n++;
   da = degpol(f);
   if (da == 1) { gel(y,j++) = subii(p, gel(f,2)); setlg(y,j); return y; }
   if (da == 2) {
@@ -333,33 +334,42 @@ FpX_roots_i(GEN f, GEN p)
   b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
   b = FpX_gcd(f,b, p);
   da = degpol(a);
-  db = degpol(b); n += da + db; setlg(y, n+1);
-  if (db) gel(y,j)    = FpX_normalize(b,p);
-  if (da) gel(y,j+db) = FpX_normalize(a,p);
+  db = degpol(b); setlg(y, n+da+db);
+  yp = cgetg(n+da+db, t_VEC);
+  np = 1;
+  if (db) gel(yp,np++) = FpX_normalize(b,p);
+  if (da) gel(yp,np++) = FpX_normalize(a,p);
   pol0 = icopy(gen_1); /* constant term, will vary in place */
   pol = deg1pol_shallow(gen_1, pol0, varn(f));
-  while (j <= n)
-  { /* cf FpX_split_Berlekamp */
-    a = gel(y,j); da = degpol(a);
-    if (da==1)
-      gel(y,j++) = subii(p, gel(a,2));
-    else if (da==2)
+  for (pol0[2]=1; ; pol0[2]++)
+  {
+    for (k = j = 1; j < np; j++)
     {
-      GEN r = FpX_quad_root(a, p, 0);
-      gel(y, j++) = r;
-      gel(y, j++) = FpX_otherroot(a,r, p);
+      a = gel(yp,j); da = degpol(a);
+      if (da==1)
+        gel(y,n++) = subii(p, gel(a,2));
+      else if (da==2)
+      {
+        GEN r = FpX_quad_root(a, p, 0);
+        gel(y, n++) = r;
+        gel(y, n++) = FpX_otherroot(a,r, p);
+      }
+      else gel(yp, k++) = a;
     }
-    else for (pol0[2]=1; ; pol0[2]++)
-    {
+    if (k == 1) break;
+    np = k;
+    if (pol0[2] == 100 && !BPSW_psp(p)) pari_err_PRIME("polrootsmod",p);
+    for (j = np; --j > 0; )
+    { /* cf FpX_split_Berlekamp */
+      a = gel(yp, j);
       b = ZX_Z_add(FpXQ_pow(pol,q, a,p), gen_m1); /* pol^(p-1)/2 - 1 */
       b = FpX_gcd(a,b, p); db = degpol(b);
-      if (db && db < da)
+      if (db && db < degpol(a))
       {
         b = FpX_normalize(b, p);
-        gel(y,j+db) = FpX_div(a,b, p);
-        gel(y,j)    = b; break;
+        gel(yp,np++) = FpX_div(a,b, p);
+        gel(yp,j)    = b; break;
       }
-      if (pol0[2] == 100 && !BPSW_psp(p)) pari_err_PRIME("polrootsmod",p);
     }
   }
   return sort(y);
