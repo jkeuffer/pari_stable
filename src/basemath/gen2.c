@@ -1103,6 +1103,14 @@ gvaluation(GEN x, GEN p)
       if (tp == t_POL) return 0;
       return Z_pval(x,p);
 
+    case t_REAL:
+      if (tp == t_POL) return 0;
+      break;
+
+    case t_FFELT:
+      if (tp == t_POL) return FF_equal0(x)? LONG_MAX: 0;
+      break;
+
     case t_INTMOD: {
       GEN a = gel(x,1), b = gel(x,2);
       long val;
