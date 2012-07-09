@@ -102,7 +102,7 @@ BA 77- FpX_gcd(0,x) -> div by 0
 BA 82- FpX_factorff and FpX_rootsff were not using standard argument order
 PB 83- printf("%.6f", 5E-5) -> SEGV
 BA 84- diffop(Mod(y,x^2-y),[y],[1]) -> wrong result
-   85- valuation(1., x) => error [#1336]
+BA 85- calling a GP function with a lot of ommited arguments could cause a crash
 
   Changed
     1- mathnf: swapped flag 3 and 5.

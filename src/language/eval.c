@@ -1173,10 +1173,14 @@ closure_eval(GEN C)
         GEN z;
         if (typ(fun)!=t_CLOSURE) pari_err(e_NOTFUNC, fun);
         arity = closure_arity(fun);
-        if (n>arity)
-          pari_err(e_MISC,"too many parameters in user-defined function call");
-        for (j=n+1;j<=arity;j++)
-          gel(st,sp++)=0;
+        if (n!=arity)
+        {
+          if (n>arity)
+            pari_err(e_MISC,"too many parameters in user-defined function call");
+          st_alloc(arity-n);
+          for (j=n+1;j<=arity;j++)
+            gel(st,sp++)=0;
+        }
 #ifdef STACK_CHECK
         if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
           pari_err(e_MISC, "deep recursion");
