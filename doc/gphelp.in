@@ -860,6 +860,7 @@ sub basic_subst {
   if ($seek) { $seek=0 if (s/\}/$tr{endit}/) }
   s/\\(backslash|bs)\{(\w)\}/\\$2/g;
   s/\\(backslash|bs)(?![a-zA-Z]) */\\/g;
+  s/ *\\setminus */ \\ /g;
 
   s/\@com(.*)$/$tr{startcode}$1$tr{endcode}/g;
 
