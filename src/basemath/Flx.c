@@ -1409,18 +1409,19 @@ static GEN
 Flx_gcd_basecase(GEN a, GEN b, ulong p)
 {
   pari_sp av = avma, lim = stack_lim(av,2);
+  ulong iter = 0;
   if (lg(b) > lg(a)) swap(a, b);
   while (lgpol(b))
   {
     GEN c = Flx_rem(a,b,p);
-    a = b; b = c;
+    iter++; a = b; b = c;
     if (low_stack(lim,stack_lim(av,2)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"Flx_gcd (d = %ld)",degpol(c));
       gerepileall(av,2, &a,&b);
     }
   }
-  return a;
+  return iter < 2 ? Flx_copy(a) : a;
 }
 
 GEN
@@ -1444,7 +1445,7 @@ Flx_gcd(GEN x, GEN y, ulong p)
       gerepileall(av,2,&x,&y);
     }
   }
-  return gerepileupto(av, Flx_gcd_basecase(x,y,p));
+  return gerepileuptoleaf(av, Flx_gcd_basecase(x,y,p));
 }
 
 int
