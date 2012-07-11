@@ -157,31 +157,37 @@ root_mod_2(GEN f)
   return y;
 }
 
-#define i_mod4(x) (signe(x)? mod4((GEN)(x)): 0)
+/* assume deg f > 0 and f reduced mod 4 [ need non-negative coeffs ] */
 static GEN
 root_mod_4(GEN f)
 {
-  long i, no, ne;
+  long no, ne, i, l = lg(f);
   GEN y, t;
-  int z0, z1, z2, z3;
+  int z0, z1, z2, z3; /* zi = 1 iff f(i) = 0 mod 4 */
 
-  t = constant_term(f);
-  z0 = !signe(t);
-  z2 = ((i_mod4(t) + 2*i_mod4(f[3])) & 3) == 0;
+  t = gel(f,2);
+  ne = signe(t)? *int_LSW(t): 0;
+  t = gel(f,3);
+  no = signe(t)? *int_LSW(t): 0;
 
-  for (ne=0,i=2; i<lg(f); i+=2)
+  z0 = (ne & 3) == 0; /* f(0) mod 4 = 0 ? */
+  z2 = ((ne + (no<<1)) & 3) == 0; /* f(2) mod 4 = 0 ? */
+
+  /* write f(x) = fe(x^2) + x fo(x^2) */
+  for (i=4; i<l; i+=2)
   {
     t = gel(f,i);
-    if (signe(t)) ne += *int_LSW(t);
+    if (signe(t)) ne += *int_LSW(t); /* compute mod 2^BIL */
   }
-  for (no=0,i=3; i<lg(f); i+=2)
+  for (i=5; i<l; i+=2)
   {
     t = gel(f,i);
-    if (signe(t)) ne += *int_LSW(t);
+    if (signe(t)) no += *int_LSW(t); /* compute mod 2^BIL */
   }
-  no &= 3; ne &= 3;
+  ne &= 3; /* = fe(1) mod 4 */
+  no &= 3; /* = fo(1) mod 4 */
   z3 = (no == ne);
-  z1 = (no == ((4-ne)&3));
+  z1 = ((ne+no) & 3) == 0;
   y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1;
   if (z0) gel(y,i++) = gen_0;
   if (z1) gel(y,i++) = gen_1;
@@ -189,9 +195,8 @@ root_mod_4(GEN f)
   if (z3) gel(y,i) = utoipos(3);
   return y;
 }
-#undef i_mod4
 
-/* p even, accept p = 4 for p-adic stuff */
+/* p even, accept p = 4 for p-adic stuff. Assume deg(f) > 0 */
 INLINE GEN
 root_mod_even(GEN f, ulong p)
 {

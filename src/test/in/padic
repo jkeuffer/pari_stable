@@ -18,3 +18,12 @@ test(nextprime(2^64),3)
 polrootspadic(x^3-x+8, 2, 6)
 f = subst(x^3-x+8, x, x + Mod(y,y^2+y+1));
 padicappr(f, Mod(1+O(2^10)-y, y^2+y+1))
+
+t=x^4-6*x^3+11*x^2-6*x+1;
+polrootsmod(t,4)
+polrootsmod(t*x,4)
+polrootsmod(t*(x-1),4)
+polrootsmod(t*(x+2),4)
+polrootsmod(t*(x+1),4)
+polrootsmod(t*(x^2-1),4)
+polrootsmod(t*(x^2-1)*(x-2),4)
