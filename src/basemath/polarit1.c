@@ -22,6 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+static GEN Flx_roots_i(GEN f, ulong p);
+
 /*******************************************************************/
 /*                                                                 */
 /*                  POLYNOMIAL EUCLIDEAN DIVISION                  */
@@ -433,7 +435,21 @@ GEN
 FpX_roots(GEN f, GEN p) {
   pari_sp av = avma;
   long q = mod2BIL(p);
-  GEN F = FpX_factmod_init(f,p);
+  GEN F;
+  if (lg(p) == 3)
+  {
+    ulong up;
+    if (signe(p) < 0) pari_err_PRIME("FpX_roots", p);
+    up = itou(p);
+    f = ZX_to_Flx(f, up);
+    switch (lgpol(f))
+    {
+      case 0: pari_err_ROOTS0("FpX_roots");
+      case 1: avma = av; return cgetg(1, t_COL);
+    }
+    return gerepileupto(av, Flc_to_ZC(Flx_roots_i(Flx_normalize(f, up), up)));
+  }
+  F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
     case -1: pari_err_ROOTS0("FpX_roots");
@@ -468,6 +484,20 @@ rootmod(GEN f, GEN p)
   pari_sp av = avma;
   GEN y;
 
+  if (lg(p) == 3)
+  {
+    ulong up;
+    if (signe(p) < 0) pari_err_PRIME("rootmod", p);
+    up = itou(p);
+    f = ZX_to_Flx(f,up);
+    switch (lgpol(f))
+    {
+      case 0: pari_err_ROOTS0("rootmod");
+      case 1: avma = av; return cgetg(1, t_COL);
+    }
+    y = Flx_roots_i(Flx_normalize(f,up),up);
+    return gerepileupto(av, gmodulo(Flc_to_ZC(y), p));
+  }
   f = factmod_init(f, p);
   switch (degpol(f))
   {
@@ -1045,6 +1075,150 @@ static ulong
 Flx_otherroot(GEN x, ulong r, ulong p)
 {
   return Fl_neg(Fl_add(x[3], r, p), p);
+}
+
+static GEN
+Flx_root_mod_2(GEN f)
+{
+  int z1, z0 = !(f[2] & 1);
+  long i,n;
+  GEN y;
+
+  for (i=2, n=1; i < lg(f); i++)
+    if (f[i] & 1) n++;
+  z1 = n & 1;
+  y = cgetg(z0+z1+1, t_VECSMALL); i = 1;
+  if (z0) y[i++] = 0;
+  if (z1) y[i  ] = 1;
+  return y;
+}
+
+/* assume deg f > 0 and f reduced mod 4 [ need non-negative coeffs ] */
+static GEN
+Flx_root_mod_4(GEN f)
+{
+  long no, ne, i, l = lg(f);
+  GEN y;
+  int z0, z1, z2, z3; /* zi = 1 iff f(i) = 0 mod 4 */
+
+  ne = f[2];
+  no = f[3];
+
+  z0 = (ne & 3) == 0; /* f(0) mod 4 = 0 ? */
+  z2 = ((ne + (no<<1)) & 3) == 0; /* f(2) mod 4 = 0 ? */
+
+  /* write f(x) = fe(x^2) + x fo(x^2) */
+  for (i=4; i<l; i+=2) ne += f[i]; /* compute mod 2^BIL */
+  for (i=5; i<l; i+=2) no += f[i]; /* compute mod 2^BIL */
+  ne &= 3; /* = fe(1) mod 4 */
+  no &= 3; /* = fo(1) mod 4 */
+  z3 = (no == ne);
+  z1 = ((ne+no) & 3) == 0;
+  y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1;
+  if (z0) y[i++] = 0;
+  if (z1) y[i++] = 1;
+  if (z2) y[i++] = 2;
+  if (z3) y[i  ] = 3;
+  return y;
+}
+
+/* by splitting, assume p prime, deg(f) > 0, and f monic */
+static GEN
+Flx_roots_i(GEN f, ulong p)
+{
+  long n, np, j, k, da, db;
+  GEN y, yp, pol, a, b;
+  ulong q = p >> 1;
+
+  if (!(p&1))
+  {
+    switch(p)
+    {
+      case 2: return Flx_root_mod_2(f);
+      case 4: return Flx_root_mod_4(f);
+      default: pari_err_PRIME("rootmod",utoipos(p));
+    }
+  }
+  y = cgetg(1+degpol(f), t_VECSMALL);
+  j = 1;
+  if (Flx_valrem(f, &f)) {
+    y[j++] = 0;
+    if (lg(f) <= 3) { setlg(y, 2); return y; }
+    n = 1;
+  }
+  else
+    n = 0;
+  n++;
+  da = degpol(f);
+  if (da == 1) { y[j++] = p - f[2]; setlg(y,j); return y; }
+  if (da == 2) {
+    ulong s, r = Flx_quad_root(f, p, 1);
+    if (r != p) {
+      y[j++] = r;
+      s = Flx_otherroot(f,r, p);
+      if (r != s) y[j++] = s;
+    }
+    setlg(y, j); vecsmall_sort(y); return y;
+  }
+
+  /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
+  b = Flxq_powu(polx_Flx(varn(f)),q, f,p);
+  if (lg(b) < 3) pari_err_PRIME("rootmod",utoipos(p));
+  b = Flx_Fl_add(b, p-1, p); /* b = x^((p-1)/2) - 1 mod f */
+  a = Flx_gcd(f,b, p);
+  b = Flx_Fl_add(b,  2 , p); /* b = x^((p-1)/2) + 1 mod f */
+  b = Flx_gcd(f,b, p);
+  da = degpol(a);
+  db = degpol(b); setlg(y, n+da+db);
+  yp = cgetg(n+da+db, t_VEC);
+  np = 1;
+  if (db) gel(yp,np++) = Flx_normalize(b,p);
+  if (da) gel(yp,np++) = Flx_normalize(a,p);
+  pol = polx_Flx(varn(f));
+  for (pol[2]=1; ; pol[2]++)
+  {
+    for (k = j = 1; j < np; j++)
+    {
+      a = gel(yp,j); da = degpol(a);
+      if (da==1)
+        y[n++] = p - a[2];
+      else if (da==2)
+      {
+        ulong r = Flx_quad_root(a, p, 0);
+        y[n++] = r;
+        y[n++] = Flx_otherroot(a,r, p);
+      }
+      else gel(yp, k++) = a;
+    }
+    if (k == 1) break;
+    np = k;
+    if (pol[2] == 100 && !uisprime(p)) pari_err_PRIME("polrootsmod",utoipos(p));
+    for (j = 1; j < np; j++)
+    { /* cf FpX_split_Berlekamp */
+      a = gel(yp, j);
+      b = Flx_Fl_add(Flxq_powu(pol,q, a,p), p-1, p); /* pol^(p-1)/2 */
+      b = Flx_gcd(a,b, p); db = degpol(b);
+      if (db && db < degpol(a))
+      {
+        b = Flx_normalize(b, p);
+        gel(yp,np++) = Flx_div(a,b, p);
+        gel(yp,j)    = b; break;
+      }
+    }
+  }
+  vecsmall_sort(y); return y;
+}
+
+GEN
+Flx_roots(GEN f, ulong p)
+{
+  pari_sp av = avma;
+  switch (lgpol(f))
+  {
+    case 0: pari_err_ROOTS0("Flx_roots");
+    case 1: avma = av; return cgetg(1, t_VECSMALL);
+  }
+  return gerepileupto(av, Flx_roots_i(Flx_normalize(f, p), p));
 }
 
 /* assume x reduced mod p, monic. */

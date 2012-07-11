@@ -3781,7 +3781,7 @@ Assumes that \kbd{p} is prime.
 
 \fun{GEN}{FpX_roots}{GEN f, GEN p} returns the roots in \kbd{\Z/p\Z} of
 the \kbd{FpX}~\kbd{f} (without multiplicity, as a vector of \kbd{Fp}s).
-Assumes that \kbd{p} is prime.
+Assumes that \kbd{p} is prime or $4$.
 
 \fun{GEN}{random_FpX}{long d, long v, GEN p} returns a random \kbd{FpX}
 in variable \kbd{v}, of degree less than~\kbd{d}.
@@ -4298,6 +4298,10 @@ by an exhaustive search. Efficient for small $p$ and small degrees !
 \fun{GEN}{polx_Flx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
 
 \fun{GEN}{Flx_normalize}{GEN z, ulong p}, as \kbd{FpX\_normalize}.
+
+\fun{GEN}{Flx_roots}{GEN f, ulong p} returns the vector of roots
+of $f$ (without multiplicity, as a \typ{VECSMALL}). Assumes that $p$ is prime
+or $4$.
 
 \fun{GEN}{random_Flx}{long d, long sv, ulong p} returns a random \kbd{Flx}
 in variable \kbd{v}, of degree less than~\kbd{d}.
