@@ -6,3 +6,4 @@ test(n)=
   if(M^-1*M!=matid(n),error("F2m"));
 }
 test(200)
+test(2)
