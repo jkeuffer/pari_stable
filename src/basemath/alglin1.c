@@ -2927,6 +2927,22 @@ det0(GEN a,long flag)
 }
 
 static GEN
+det2x2 (GEN A)
+  /* A a 2x2 matrix
+     returns the determinant of A computed by the simple formula
+  */
+{
+  pari_sp av = avma;
+  GEN a = gcoeff (A, 1, 1),
+      b = gcoeff (A, 1, 2),
+      c = gcoeff (A, 2, 1),
+      d = gcoeff (A, 2, 2);
+
+  return gerepileupto (av, gsub (gmul (a, d), gmul (b, c)));
+}
+
+
+static GEN
 det_simple_gauss(GEN a, GEN data, pivot_fun pivot)
 {
   pari_sp av = avma, lim = stack_lim(av,1);
@@ -2978,6 +2994,8 @@ det2(GEN a)
   if (typ(a)!=t_MAT) pari_err_TYPE("det2",a);
   if (!nbco) return gen_1;
   if (nbco != lg(a[1])-1) pari_err_DIM("det2");
+  if (nbco == 2)
+    return det2x2 (a);
   pivot = get_pivot_fun(a, &data);
   return det_simple_gauss(a, data, pivot);
 }
@@ -3115,11 +3133,7 @@ det_develop(GEN M, long max, double bound)
   {
     case 0: return gen_1;
     case 1: return gcopy(gcoeff(M,1,1));
-    case 2: {
-      GEN a = gcoeff(M,1,1), b = gcoeff(M,1,2);
-      GEN c = gcoeff(M,2,1), d = gcoeff(M,2,2);
-      return gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
-    }
+    case 2: return det2x2 (M);
   }
   if (max > ((n+2)>>1)) max = (n+2)>>1;
   for (j = 1; j <= n; j++)
@@ -3277,6 +3291,8 @@ det(GEN a)
     av = avma;
     return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
   }
+  if (n == 2)
+    return det2x2 (a);
   pivot = get_pivot_fun(a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
   B = (double)n; B = B*B; B = B*B;
