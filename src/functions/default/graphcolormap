@@ -14,9 +14,9 @@ Doc: a vector of colors, to be
  code. For valid character strings, see the standard \kbd{rgb.txt} file in X11
  distributions, where we restrict to lowercase letters and remove all
  whitespace from color names. An RGB code is a vector with 3 integer entries
- between 0 and 255. For instance \kbd{[250, 235, 215]} and \kbd{"antique
- white"} represent the same color. RGB codes are a little cryptic but often
- easier to generate.
+ between 0 and 255. For instance \kbd{[250, 235, 215]} and
+ \kbd{"antiquewhite"} represent the same color. RGB codes are cryptic but
+ often easier to generate.
 
  The default value is [\kbd{"white"}, \kbd{"black"}, \kbd{"blue"},
  \kbd{"violetred"}, \kbd{"red"}, \kbd{"green"}, \kbd{"grey"},
