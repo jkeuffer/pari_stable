@@ -1786,17 +1786,17 @@ QpX_to_ZX(GEN f, GEN p)
   return ZpX_to_ZX(f, p);
 }
 
-/* x in Z return x + O(pr), pr = p^r. Return gen_0 instead of zeropadic */
+/* x in Z return x + O(pr), pr = p^r */
 static GEN
 Z_to_Zp(GEN x, GEN p, GEN pr, long r)
 {
   GEN y;
   long v, sx = signe(x);
 
-  if (!sx) return gen_0;
+  if (!sx) return zeropadic_shallow(p,r);
   v = Z_pvalrem(x,p,&x);
   if (v) {
-    r -= v; if (r <= 0) return gen_0;
+    r -= v; if (r <= 0) return zeropadic_shallow(p,r);
     pr = powiu(p,r);
   }
   y = cgetg(5,t_PADIC);
@@ -1904,7 +1904,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
 }
 
 /* a t_PADIC, return vector of p-adic roots of f equal to a (mod p)
- * We assume 1) f(a) = 0 mod p (mod 4 if p=2).
+ * We assume 1) f(a) = 0 mod p,
  *           2) leading coeff prime to p. */
 GEN
 Zp_appr(GEN f, GEN a)

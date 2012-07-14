@@ -3618,6 +3618,7 @@ INLINE GEN    zerocol(long n);
 INLINE GEN    zeromat(long m, long n);
 INLINE GEN    zeromatcopy(long m, long n);
 INLINE GEN    zeropadic(GEN p, long e);
+INLINE GEN    zeropadic_shallow(GEN p, long e);
 INLINE GEN    zeropol(long v);
 INLINE GEN    zeroser(long v, long e);
 INLINE GEN    zerovec(long n);

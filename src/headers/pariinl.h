@@ -207,6 +207,16 @@ zeropadic(GEN p, long e)
   y[1] = evalvalp(e) | evalprecp(0);
   return y;
 }
+INLINE GEN
+zeropadic_shallow(GEN p, long e)
+{
+  GEN y = cgetg(5,t_PADIC);
+  gel(y,4) = gen_0;
+  gel(y,3) = gen_1;
+  gel(y,2) = p;
+  y[1] = evalvalp(e) | evalprecp(0);
+  return y;
+}
 /* O(pol_x(v)^e) */
 INLINE GEN
 zeroser(long v, long e)
