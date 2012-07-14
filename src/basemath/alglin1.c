@@ -1374,15 +1374,17 @@ is_modular_solve(GEN a, GEN b, GEN *u)
   }
   *u = a; return 1;
 }
-/* Gaussan Elimination. Compute a^(-1)*b
- * b is a matrix or column vector, NULL meaning: take the identity matrix
+/* Gaussan Elimination. If a is square, return a^(-1)*b;
+ * if a has more rows than columns and b is NULL, return c such that c a = Id.
+ * a is a (not necessarily square) matrix
+ * b is a matrix or column vector, NULL meaning: take the identity matrix,
+ *   effectively returning the inverse of a
  * If a and b are empty, the result is the empty matrix.
  *
- * li: nb lines of a and b
- * aco: nb columns of a
- * bco: nb columns of b (if matrix)
- *
- * li > aco is allowed if b = NULL, in which case return c such that c a = Id */
+ * li: number of rows of a and b
+ * aco: number of columns of a
+ * bco: number of columns of b (if matrix)
+ */
 GEN
 RgM_solve(GEN a, GEN b)
 {
@@ -1395,7 +1397,7 @@ RgM_solve(GEN a, GEN b)
   if (is_modular_solve(a,b,&u)) return gerepileupto(av, u);
   avma = av;
 
-  if (lg (a) == 3) {
+  if (lg (a) == 3 && lg (a [1]) == 3) {
     /* 2x2 matrix, start by inverting a */
     GEN detinv = ginv (det (a));
     GEN ainv = cgetg (3, t_MAT);
