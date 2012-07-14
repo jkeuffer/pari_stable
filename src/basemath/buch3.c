@@ -1141,9 +1141,9 @@ bnfcertify0(GEN bnf, long flag)
   pari_sp av = avma;
   long i, N;
   GEN nf, cyc, B;
-  byteptr delta = diffptr + 1;
   ulong bound, p;
   struct check_pr S;
+  forprime_t T;
 
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf);
@@ -1167,11 +1167,8 @@ bnfcertify0(GEN bnf, long flag)
   }
   bound = itou_or_0(B);
   if (!bound) pari_err(e_MISC,"sorry, too many primes to check");
-  maxprime_check(bound);
-  for (p = 2; p <= bound; ) {
-    check_prime(p,bnf, &S);
-    NEXT_PRIME_VIADIFF(p, delta);
-  }
+  u_forprime_init(&T, 2, bound);
+  while ( (p = u_forprime_next(&T)) ) check_prime(p,bnf, &S);
   if (lg(cyc) > 1)
   {
     GEN f = Z_factor(gel(cyc,1)), P = gel(f,1);
