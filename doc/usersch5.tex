@@ -5708,8 +5708,11 @@ non-empty invertible upper triangular matrix, hence a little faster.
 value of $\text{det}(a)$. The bound is a \typ{INT}.
 
 \fun{GEN}{RgM_solve}{GEN a, GEN b} returns $a^{-1}b$ where $a$ is a square
-\typ{MAT} and $b$ is a \typ{COL} or \typ{MAT}.
-Returns \kbd{NULL} if $a^{-1}$ cannot be computed, see \tet{RgM_inv}.
+\typ{MAT} and $b$ is a \typ{COL} or \typ{MAT}. Returns \kbd{NULL} if $a^{-1}$
+cannot be computed, see \tet{RgM_inv}.
+
+If $b = \kbd{NULL}$, the matrix $a$ need no longer be square, and we strive
+to return a left inverse for $a$ (\kbd{NULL} if it does not exist).
 
 \fun{GEN}{RgM_solve_realimag}{GEN M, GEN b} $M$ being a \typ{MAT}
 with $r_1+r_2$ rows and $r_1+2r_2$ columns, $y$ a \typ{COL} or \typ{MAT}
