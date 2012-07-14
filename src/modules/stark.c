@@ -1338,20 +1338,20 @@ deg2(LISTray *R, long p) { vecsmalltrunc_append(R->L2, p); }
 
 /* pi(x) <= ?? */
 static long
-PiBound(long x)
+PiBound(ulong x)
 {
   double lx = log((double)x);
   return 1 + (long) (x/lx * (1 + 3/(2*lx)));
 }
 
 static void
-InitPrimesQuad(GEN bnr, long N0, LISTray *R)
+InitPrimesQuad(GEN bnr, ulong N0, LISTray *R)
 {
   pari_sp av = avma;
   GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
   long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
   GEN prime, Lpr, nf = bnf_get_nf(bnf), dk = nf_get_disc(nf);
-  byteptr d = diffptr + 1;
+  forprime_t T;
 
   l = 1 + PiBound(N0);
   R->L0 = vecsmalltrunc_init(l);
@@ -1359,7 +1359,10 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   R->L1 = vecsmalltrunc_init(l); R->L1ray = vectrunc_init(l);
   R->L11= vecsmalltrunc_init(l); R->L11ray= vectrunc_init(l);
   prime = utoipos(2);
-  for (p = 2; p <= N0; prime[2] = p) {
+  u_forprime_init(&T, 2, N0);
+  while ( (p = u_forprime_next(&T)) )
+  {
+    prime[2] = p;
     switch (krois(dk, p))
     {
     case -1: /* inert */
@@ -1383,7 +1386,6 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
       }
       break;
     }
-    NEXT_PRIME_VIADIFF(p,d);
   }
   /* precompute isprincipalray(x), x in Z */
   R->rayZ = cgetg(condZ, t_VEC);
@@ -1394,21 +1396,23 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
 }
 
 static void
-InitPrimes(GEN bnr, long N0, LISTray *R)
+InitPrimes(GEN bnr, ulong N0, LISTray *R)
 {
   GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
   long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
   GEN tmpray, tabpr, prime, pr, nf = bnf_get_nf(bnf);
-  byteptr d = diffptr + 1;
+  forprime_t T;
 
   R->condZ = condZ; l = PiBound(N0) * N;
   tmpray = cgetg(N+1, t_VEC);
   R->L1 = vecsmalltrunc_init(l);
   R->L1ray = vectrunc_init(l);
+  u_forprime_init(&T, 2, N0);
   prime = utoipos(2);
-  for (p = 2; p <= N0; prime[2] = p)
+  while ( (p = u_forprime_next(&T)) )
   {
     pari_sp av = avma;
+    prime[2] = p;
     if (DEBUGLEVEL>1 && (p & 2047) == 1) err_printf("%ld ", p);
     tabpr = idealprimedec(nf, prime);
     for (j = 1; j < lg(tabpr); j++)
@@ -1431,7 +1435,6 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
       vectrunc_append(R->L1ray, ZC_copy(gel(tmpray,k)));
       gunclone(gel(tmpray,k));
     }
-    NEXT_PRIME_VIADIFF(p,d);
   }
 }
 
@@ -1952,23 +1955,10 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
 static void
 QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 {
-  const long cl  = lg(dataCR) - 1;
-  pari_sp av, av1, av2;
+  pari_sp av = avma, av1, av2;
   long ncond, n, j, k, n0;
-  GEN N0, C, T, S, cf, cfh, an, degs;
+  GEN N0, C, T = *pT, S = *pS, cf, cfh, an, degs;
   LISTray LIST;
-  pari_timer ti;
-  if (DEBUGLEVEL) timer_start(&ti);
-
-  /* allocate memory for answer */
-  *pS = S = cgetg(cl+1, t_VEC);
-  *pT = T = cgetg(cl+1, t_VEC);
-  for (j = 1; j <= cl; j++)
-  {
-    gel(S,j) = cgetc(prec);
-    gel(T,j) = cgetc(prec);
-  }
-  av = avma;
 
   /* initializations */
   degs = GetDeg(dataCR);
@@ -1983,7 +1973,6 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     N0[j] = (long)prec2nbits_mul(prec, 0.35 * gtodouble(c));
     if (n0 < N0[j]) n0 = N0[j];
   }
-  maxprime_check(n0);
   if (DEBUGLEVEL>1) err_printf("N0 = %ld\n", n0);
   InitPrimesQuad(bnr, n0, &LIST);
 
@@ -2130,8 +2119,6 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   GEN N0, C, T, S, an, degs, limx;
   LISTray LIST;
   ST_t cScT;
-  pari_timer ti;
-  if (DEBUGLEVEL) timer_start(&ti);
 
   nf  = checknf(bnr);
   /* allocate memory for answer */
@@ -2141,6 +2128,11 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   {
     gel(S,j) = cgetc(prec);
     gel(T,j) = cgetc(prec);
+  }
+  if (nf_get_degree(nf) == 2)
+  {
+    QuadGetST(bnr, pS,pT,dataCR,vChar,prec);
+    return;
   }
   av = avma;
 
@@ -2160,7 +2152,6 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     N0[j] = zeta_get_N0(c, limx);
     if (n0 < N0[j]) n0  = N0[j];
   }
-  maxprime_check(n0);
   i0 = zeta_get_i0(r1, r2, prec2nbits(prec), limx);
   InitPrimes(bnr, n0, &LIST);
 
@@ -2323,10 +2314,7 @@ LABDOUB:
   Lp = cgetg(cl + 1, t_VEC);
   if (!flag)
   {
-    if (nf_get_degree(nf) == 2)
-      QuadGetST(bnr, &S,&T,dataCR,vChar,newprec);
-    else
-      GetST(bnr, &S, &T, dataCR, vChar, newprec);
+    GetST(bnr, &S, &T, dataCR, vChar, newprec);
     if (DEBUGLEVEL) timer_printf(&ti, "S&T");
     for (i = 1; i <= cl; i++)
       Lp[i] = GetValue(gel(dataCR,i), gel(W,i), gel(S,i), gel(T,i),
