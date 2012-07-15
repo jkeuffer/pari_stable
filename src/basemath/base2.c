@@ -3018,7 +3018,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
         if (!RgX_equal_var(gel(c,1), T))
           pari_err_MODULUS("rnf function", gel(c,1),T);
         c = gel(c,2);
-        check_pol(&c);
+        if (typ(c) == t_POL) check_pol(&c);
         if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
         break;
       default: pari_err_TYPE("rnf function",c);
