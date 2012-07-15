@@ -669,7 +669,7 @@ GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
     GRHprime_t *pr = S->primes+i;
     GEN dec = pr->dec, fs = gel(dec, 1);
     double logCslogp = logC/pr->logp;
-    long j = lg(fs), lim = logCslogp;
+    long j = lg(fs), lim = (long)logCslogp;
     NEXT_PRIME_VIADIFF(p, delta);
     if (fs[1] == N && N <= lim) count--; /* Inert prime */
     while (--j)
@@ -679,7 +679,7 @@ GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, GEN invhr, long LIMC)
       if (f > lim) continue;
       logNP = f * pr->logp;
       q = 1/sqrt(upowuu(p, f));
-      A = logNP * q; B = logNP * A; M = logCslogp/f;
+      A = logNP * q; B = logNP * A; M = (long)(logCslogp/f);
       if (M > 1)
       {
         double inv1_q = 1 / (1-q);

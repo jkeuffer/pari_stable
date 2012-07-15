@@ -477,13 +477,13 @@ ex10(long e) {
   pari_sp av;
   GEN z;
   if (e >= 0) {
-    if (e < 1e15) return e*LOG10_2;
+    if (e < 1e15) return (long)(e*LOG10_2);
     av = avma; z = mulur(e, log10_2());
     z = floorr(z); e = itos(z);
   }
   else /* e < 0 */
   {
-    if (e > -1e15) return -(-e*LOG10_2)-1;
+    if (e > -1e15) return (long)(-(-e*LOG10_2)-1);
     av = avma; z = mulsr(e, log10_2());
     z = floorr(z); e = itos(z) - 1;
   }

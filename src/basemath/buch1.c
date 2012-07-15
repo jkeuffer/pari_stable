@@ -377,7 +377,7 @@ quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC, long minSFB)
       logNP = pr->logp;
       q = 1/sqrt((double)p);
     }
-    A = logNP * q; B = logNP * A; M = logC/logNP;
+    A = logNP * q; B = logNP * A; M = (long)(logC/logNP);
     if (M > 1)
     {
       double inv1_q = 1 / (1-q);

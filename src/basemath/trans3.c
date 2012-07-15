@@ -405,7 +405,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       L = HALF_E * gtodouble(gabs(z,prec));
       precnew = prec;
       if (L >= HALF_E) {
-        long rab = nbits2extraprec((long) L/(HALF_E*LOG2));
+        long rab = nbits2extraprec((long) (L/(HALF_E*LOG2)));
         if (fl) rab *= 2;
          precnew += 1 + rab;
       }

@@ -1419,7 +1419,7 @@ InitPrimes(GEN bnr, ulong N0, LISTray *R)
     {
       pr  = gel(tabpr,j);
       np = itos_or_0( pr_norm(pr) );
-      if (!np || np > N0) break;
+      if (!np || np > (long)N0) break;
       if (condZ % p == 0 && idealval(nf, cond, pr))
       {
         gel(tmpray,j) = NULL; continue;

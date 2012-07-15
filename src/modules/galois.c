@@ -2410,7 +2410,7 @@ galoisbig(GEN pol, long prec)
     }
     BR.coef = z;
     BR.p = pol;
-    BR.pr = prec + nbits2extraprec((long)(cauchy_bound(pol)) / LOG2);
+    BR.pr = prec + nbits2extraprec((long)(cauchy_bound(pol) / LOG2));
     BR.prmax = BR.pr + BIGDEFAULTPREC-2;
     BR.N = N;
     BR.r = vectrunc_init(N+1);
