@@ -239,7 +239,13 @@ int
 u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
 {
   ulong maxp;
-  if (a > b || b < 2) return 0; /* empty */
+  if (a > b || b < 2)
+  {
+    T->strategy = 1; /* paranoia */
+    T->p = 0; /* empty */
+    T->b = 0; /* empty */
+    return 0;
+  }
   maxp = maxprime();
   if (q != 1 && c != 2 && odd(q)) {
     /* only allow *odd* primes. If c = 2, then p = 2 must be included :-( */
@@ -305,7 +311,13 @@ forprime_init(forprime_t *T, GEN a, GEN b)
   {
     b = gfloor(b);
     if (typ(b) != t_INT) pari_err_TYPE("forprime_init",b);
-    if (signe(b) < 0 || cmpii(a,b) > 0) return 0;
+    if (signe(b) < 0 || cmpii(a,b) > 0)
+    {
+      T->strategy = 4; /* paranoia */
+      T->bb = gen_0;
+      T->pp = gen_0;
+      return 0;
+    }
     lb = lgefint(b);
   }
   else
