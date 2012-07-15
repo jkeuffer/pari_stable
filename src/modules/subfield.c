@@ -538,20 +538,21 @@ init_primedata(primedata *S)
 static void
 choose_prime(primedata *S, GEN pol, GEN dpol)
 {
-  byteptr di = diffptr + 1;
-  long i, j, k, r, lcm, oldlcm, pp, N = degpol(pol), minp = N*N / 4;
+  long i, j, k, r, lcm, oldlcm, N = degpol(pol);
+  ulong pp;
   GEN Z, p, ff, oldff, n, oldn;
   pari_sp av;
+  forprime_t T;
 
-  p = utoipos(2);
-  while (p[2] <= minp) NEXT_PRIME_VIADIFF(p[2], di);
+  u_forprime_init(&T, (N*N) >> 2, ULONG_MAX);
+  p = icopy(gen_1);
   oldlcm = 0;
   oldff = oldn = NULL; pp = 0; /* gcc -Wall */
   av = avma;
   for(k = 1; k < 11 || !oldlcm; k++,avma = av)
   {
-    do NEXT_PRIME_VIADIFF(p[2], di); while (!smodis(dpol, p[2]));
     if (k > 5 * N) pari_err_OVERFLOW("choose_prime [too many block systems]");
+    do p[2] = u_forprime_next(&T); while (!umodiu(dpol, p[2]));
     ff = gel(FpX_factor(pol, p), 1);
     r = lg(ff)-1;
     if (r == N || r >= BIL) continue;
