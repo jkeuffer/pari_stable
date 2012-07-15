@@ -1287,6 +1287,13 @@ Flx_factcantor(GEN f, ulong p, long flag)
   if (flag == 2) { avma = av; return z; }
   return gerepilecopy(av, z);
 }
+GEN
+Flx_degfact(GEN f, ulong p)
+{
+  pari_sp av = avma;
+  GEN z = Flx_factcantor_i(Flx_normalize(f,p),p,1);
+  return gerepilecopy(av, z);
+}
 
 int
 Flx_is_irred(GEN f, ulong p) { return !!Flx_factcantor_i(f,p,2); }
@@ -1453,8 +1460,7 @@ GEN
 FpX_degfact(GEN f, GEN p) {
   pari_sp av = avma;
   GEN z = FpX_factcantor_i(FpX_factmod_init(f,p),p,1);
-  settyp(z[1], t_VECSMALL);
-  settyp(z, t_MAT); return gerepilecopy(av, z);
+  return gerepilecopy(av, z);
 }
 GEN
 factcantor(GEN f, GEN p) { return factcantor0(f,p,0); }
