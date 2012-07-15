@@ -1,6 +1,12 @@
 [-1, -1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, 1, 1, -1, -1]
 [-1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1, -1, 1, -1, -1]
 -1
+  ***   at top-level: nfhilbert(nf,Mod(0,3
+  ***                 ^--------------------
+  *** nfhilbert: domain error in nfhilbert: a = 0
+  ***   at top-level: nfhilbert(nf,3,0.,pr
+  ***                 ^--------------------
+  *** nfhilbert: domain error in nfhilbert: b = 0
 1
 1
 -1
@@ -106,4 +112,4 @@ p = 5:
 10: error("different primes in hilbert: 5 != 2.")
 11: 1
 -1
-Total time spent: 1012
+Total time spent: 976

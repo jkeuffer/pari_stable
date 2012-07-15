@@ -458,7 +458,8 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   nf = checknf(nf);
   if (p) {
     checkprid(p);
-    if (gequal0(a) || gequal0(b)) pari_err (e_MISC,"0 argument in nfhilbertp");
+    if (gequal0(a)) pari_err_DOMAIN("nfhilbert", "a", "=", gen_0, a);
+    if (gequal0(b)) pari_err_DOMAIN("nfhilbert", "b", "=", gen_0, b);
     return nfhilbertp(nf,a,b,p);
   }
   return nfhilbert(nf,a,b);

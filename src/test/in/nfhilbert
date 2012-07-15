@@ -11,6 +11,9 @@ vector(#P, i, nfhilbert(nf, a, (1+P[i]*y)*b, pr))
 nf=nfinit(y^2+1); pr=idealprimedec(nf,2)[1];
 nfhilbert(nf, [1,1]~, 3, pr)
 
+nfhilbert(nf, Mod(0,3), 3, pr)
+nfhilbert(nf, 3, 0., pr)
+
 nfhilbert(nf,[1,-2]~,[1,-2]~, pr)
 
 nf=nfinit(y^2+3);
