@@ -29,6 +29,18 @@ nfsnf(K, [M, N, N])
 rnfisabelian(y,x)
 rnfisabelian(y^2+23,x^3+x^2-1)
 
+pol = y^3+y^2-2*y-1;
+bnf = bnfinit(pol);
+T=rnfisnorminit(bnf, x^3-y);
+do(T,u,flag)=lift(lift(rnfisnorm(T,u,flag)));
+do(T,y)
+do(T,2,100)
+do(T,2,-2*3*5*7)
+
+T=rnfisnorminit(y^2+23, x^2-y);
+do(T,y)
+do(T,2,100)
+
 \\#1157
 rnfisnorminit(y,x^2-Mod(2+y,y));
 

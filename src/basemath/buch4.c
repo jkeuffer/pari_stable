@@ -711,13 +711,13 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
   if (!gequal1(leading_term(relpol))) pari_err_IMPL("non monic relative equation");
   drel = degpol(relpol);
-  if (varncmp(varn(relpol), vbas) >= 0)
-    pari_err(e_MISC,"main variable must be of higher priority in rnfisnorminit");
   if (drel <= 2) galois = 1;
 
+  relpol = rnf_fix_pol(T, relpol, 1);
   rnfeq = NULL; /* no reltoabs needed */
   if (nf_get_degree(nf) == 1) { /* over Q */
-    polabs = simplify_shallow(lift(relpol)); k = gen_0;
+    polabs = relpol;
+    k = gen_0;
   } else if (galois == 2) { /* needs reltoabs */
     rnfeq = rnfequation2(bnf, relpol);
     polabs = gel(rnfeq,1);
@@ -728,7 +728,8 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     polabs = rnfequationall(bnf, relpol, &sk, NULL);
     k = stoi(sk);
   }
-  if (!bnfabs || !gequal0(k)) bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
+  if (!bnfabs || !gequal0(k))
+    bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
   if (!nfabs) nfabs = bnf_get_nf(bnfabs);
 
   if (galois == 2)
@@ -744,12 +745,12 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   {
     GEN g = gel(gen,i);
     if (ugcd(umodiu(gel(cyc,i), drel), drel) == 1) break;
-    fa_pr_append(nf,bnfabs,gcoeff(g,1,1),&prod,&S1,&S2);
+    Zfa_pr_append(nf,bnfabs,gcoeff(g,1,1),&prod,&S1,&S2);
   }
   if (!galois)
   {
     GEN Ndiscrel = diviiexact(nf_get_disc(nfabs), powiu(nf_get_disc(nf), drel));
-    fa_pr_append(nf,bnfabs,absi(Ndiscrel), &prod,&S1,&S2);
+    Zfa_pr_append(nf,bnfabs,absi(Ndiscrel), &prod,&S1,&S2);
   }
 
   gel(y,1) = bnf;
@@ -778,8 +779,11 @@ rnfisnorm(GEN T, GEN x, long flag)
   long L, i, drel, itu;
 
   if (typ(T) != t_VEC || lg(T) != 9)
-    pari_err(e_MISC,"please apply rnfisnorminit first");
-  bnf = gel(T,1); rel = gel(T,2); relpol = gel(T,3); theta = gel(T,4);
+    pari_err_TYPE("rnfisnorm [please apply rnfisnorminit()]", T);
+  bnf = gel(T,1);
+  rel = gel(T,2);
+  relpol = gel(T,3);
+  theta = gel(T,4);
   drel = degpol(relpol);
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
@@ -798,18 +802,14 @@ rnfisnorm(GEN T, GEN x, long flag)
     pari_warn(warner,"useless flag in rnfisnorm: the extension is Galois");
   if (flag > 0)
   {
-    byteptr d = diffptr;
-    long p = 0;
-    maxprime_check((ulong)flag);
-    for(;;)
-    {
-      NEXT_PRIME_VIADIFF(p, d);
-      if (p > flag) break;
+    forprime_t T;
+    ulong p;
+    u_forprime_init(&T, 2, flag);
+    while ( (p = u_forprime_next(&T)) )
       pr_append(nf,rel, utoipos(p),&prod,&S1,&S2);
-    }
   }
   else if (flag < 0)
-    fa_pr_append(nf,rel,stoi(-flag),&prod,&S1,&S2);
+    Zfa_pr_append(nf,rel, utoipos(-flag),&prod,&S1,&S2);
   /* overkill: prime ideals dividing x would be enough */
   fa_pr_append(nf,rel,idealnorm(nf,x), &prod,&S1,&S2);
 
