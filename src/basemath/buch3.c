@@ -1167,8 +1167,8 @@ bnfcertify0(GEN bnf, long flag)
   }
   bound = itou_or_0(B);
   if (!bound) pari_err(e_MISC,"sorry, too many primes to check");
-  u_forprime_init(&T, 2, bound);
-  while ( (p = u_forprime_next(&T)) ) check_prime(p,bnf, &S);
+  if (u_forprime_init(&T, 2, bound))
+    while ( (p = u_forprime_next(&T)) ) check_prime(p,bnf, &S);
   if (lg(cyc) > 1)
   {
     GEN f = Z_factor(gel(cyc,1)), P = gel(f,1);
