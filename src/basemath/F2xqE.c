@@ -27,10 +27,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /* Theses functions deal with point over elliptic curves over F_2^n defined
  * by an equation of the form:
  ** y^2+x*y=x^3+a_2*x^2+a_6 if the curve is ordinary.
+ ** y^2+a_3*y=x^3+a_4*x+a_6 if the curve is supersingular.
  * Most of the time a6 is omitted since it can be recovered from any point
  * on the curve.
+ * For supersingular curves, the parameter a2 is replaced by [a3,a4].
  */
-
 
 GEN
 RgE_to_F2xqE(GEN x, GEN T)
@@ -72,28 +73,41 @@ F2xqE_changepointinv(GEN x, GEN ch, GEN T)
 }
 
 static GEN
-F2xqE_dbl_slope(GEN P, GEN a2, GEN T, GEN *slope)
+F2xqE_dbl_slope(GEN P, GEN a, GEN T, GEN *slope)
 {
   GEN x, y, Q;
-  if (ell_is_inf(P) || !lgpol(gel(P,1))) return ellinf();
+  if (ell_is_inf(P)) return ellinf();
   x = gel(P,1); y = gel(P,2);
-  *slope = F2x_add(x, F2xq_div(y, x, T));
-  Q = cgetg(3,t_VEC);
-  gel(Q, 1) = F2x_add(F2xq_sqr(*slope, T), F2x_add(*slope, a2)),
-  gel(Q, 2) = F2x_add(F2xq_mul(*slope, F2x_add(x, gel(Q, 1)), T), F2x_add(y, gel(Q, 1)));
+  if (typ(a)==t_VECSMALL)
+  {
+    GEN a2 = a;
+    if (!lgpol(gel(P,1))) return ellinf();
+    *slope = F2x_add(x, F2xq_div(y, x, T));
+    Q = cgetg(3,t_VEC);
+    gel(Q, 1) = F2x_add(F2xq_sqr(*slope, T), F2x_add(*slope, a2));
+    gel(Q, 2) = F2x_add(F2xq_mul(*slope, F2x_add(x, gel(Q, 1)), T), F2x_add(y, gel(Q, 1)));
+  }
+  else
+  {
+    GEN a3 = gel(a,1), a4 = gel(a,2);
+    *slope = F2xq_div(F2x_add(a4, F2xq_sqr(x, T)), a3, T);
+    Q = cgetg(3,t_VEC);
+    gel(Q, 1) = F2xq_sqr(*slope, T);
+    gel(Q, 2) = F2x_add(F2xq_mul(*slope, F2x_add(x, gel(Q, 1)), T), F2x_add(y, a3));
+  }
   return Q;
 }
 
 GEN
-F2xqE_dbl(GEN P, GEN a2, GEN T)
+F2xqE_dbl(GEN P, GEN a, GEN T)
 {
   pari_sp av = avma;
   GEN slope;
-  return gerepileupto(av, F2xqE_dbl_slope(P, a2, T,&slope));
+  return gerepileupto(av, F2xqE_dbl_slope(P, a, T,&slope));
 }
 
 static GEN
-F2xqE_add_slope(GEN P, GEN Q, GEN a2, GEN T, GEN *slope)
+F2xqE_add_slope(GEN P, GEN Q, GEN a, GEN T, GEN *slope)
 {
   GEN Px, Py, Qx, Qy, R;
   if (ell_is_inf(P)) return Q;
@@ -103,37 +117,51 @@ F2xqE_add_slope(GEN P, GEN Q, GEN a2, GEN T, GEN *slope)
   if (zv_equal(Px, Qx))
   {
     if (zv_equal(Py, Qy))
-      return F2xqE_dbl_slope(P, a2, T, slope);
+      return F2xqE_dbl_slope(P, a, T, slope);
     else
       return ellinf();
   }
   *slope = F2xq_div(F2x_add(Py, Qy), F2x_add(Px, Qx), T);
   R = cgetg(3,t_VEC);
-  gel(R, 1) = F2x_add(F2x_add(F2x_add(F2x_add(F2xq_sqr(*slope, T), *slope), Px), Qx), a2);
-  gel(R, 2) = F2x_add(F2xq_mul(*slope, F2x_add(Px, gel(R, 1)), T), F2x_add(Py, gel(R, 1)));
+  if (typ(a)==t_VECSMALL)
+  {
+    GEN a2 = a;
+    gel(R, 1) = F2x_add(F2x_add(F2x_add(F2x_add(F2xq_sqr(*slope, T), *slope), Px), Qx), a2);
+    gel(R, 2) = F2x_add(F2xq_mul(*slope, F2x_add(Px, gel(R, 1)), T), F2x_add(Py, gel(R, 1)));
+  }
+  else
+  {
+    GEN a3 = gel(a,1);
+    gel(R, 1) = F2x_add(F2x_add(F2xq_sqr(*slope, T), Px), Qx);
+    gel(R, 2) = F2x_add(F2xq_mul(*slope, F2x_add(Px, gel(R, 1)), T), F2x_add(Py, a3));
+  }
   return R;
 }
 
 GEN
-F2xqE_add(GEN P, GEN Q, GEN a2, GEN T)
+F2xqE_add(GEN P, GEN Q, GEN a, GEN T)
 {
   pari_sp av = avma;
   GEN slope;
-  return gerepileupto(av, F2xqE_add_slope(P,Q,a2, T,&slope));
+  return gerepileupto(av, F2xqE_add_slope(P, Q, a, T, &slope));
 }
 
 static GEN
-F2xqE_neg_i(GEN P, GEN a2, GEN T)
+F2xqE_neg_i(GEN P, GEN a, GEN T)
 {
+  GEN LHS;
   if (ell_is_inf(P)) return P;
-  return mkvec2(gel(P,1), F2x_add(gel(P,1), gel(P,2)));
+  LHS = typ(a)==t_VECSMALL ? gel(P,1): gel(a,1);
+  return mkvec2(gel(P,1), F2x_add(LHS, gel(P,2)));
 }
 
 GEN
-F2xqE_neg(GEN P, GEN a2, GEN T)
+F2xqE_neg(GEN P, GEN a, GEN T)
 {
+  GEN LHS;
   if (ell_is_inf(P)) return ellinf();
-  return mkvec2(gcopy(gel(P,1)), F2x_add(gel(P,1), gel(P,2)));
+  LHS = typ(a)==t_VECSMALL ? gel(P,1): gel(a,1);
+  return mkvec2(gcopy(gel(P,1)), F2x_add(LHS, gel(P,2)));
 }
 
 GEN
@@ -186,21 +214,31 @@ F2xqE_mul(GEN P, GEN n, GEN a2, GEN T)
 
 /* Finds a random non-singular point on E */
 GEN
-random_F2xqE(GEN a2, GEN a6, GEN T)
+random_F2xqE(GEN a, GEN a6, GEN T)
 {
   pari_sp ltop = avma;
-  GEN x, x2, y, rhs;
+  GEN x, y, rhs, u, u2;
   do
   {
     avma= ltop;
     x   = random_F2x(F2x_degree(T),T[1]);
-    if (!lgpol(x))
-      { avma=ltop; retmkvec2(pol0_Flx(T[1]), F2xq_sqrt(a6,T)); }
-    x2  = F2xq_sqr(x, T);
-    rhs = F2x_add(F2xq_mul(x2,F2x_add(x,a2),T),a6);
-    rhs = F2xq_div(rhs,x2,T);
-  } while (F2xq_trace(rhs, T));
-  y = F2xq_mul(F2xq_Artin_Schreier(rhs, T), x, T);
+    if (typ(a) == t_VECSMALL)
+    {
+      GEN a2 = a;
+      if (!lgpol(x))
+        { avma=ltop; retmkvec2(pol0_Flx(T[1]), F2xq_sqrt(a6,T)); }
+      u = x; u2  = F2xq_sqr(x, T);
+      rhs = F2x_add(F2xq_mul(u2,F2x_add(x,a2),T),a6);
+    }
+    else
+    {
+      GEN a3 = gel(a,1), a4 = gel(a,2);
+      u = a3; u2 = F2xq_sqr(a3,T);
+      rhs = F2x_add(F2xq_mul(x,F2x_add(F2xq_sqr(x,T),a4),T),a6);
+    }
+    rhs = F2xq_div(rhs,u2,T);
+  } while (F2xq_trace(rhs,T));
+  y = F2xq_mul(F2xq_Artin_Schreier(rhs, T), u, T);
   return gerepilecopy(ltop, mkvec2(x, y));
 }
 
@@ -453,12 +491,48 @@ F2xq_elltrace_AGM(GEN a6, GEN Tb)
 }
 
 GEN
-F2xq_ellcard(GEN a2, GEN a6, GEN T)
+F2xq_ellcard(GEN a, GEN a6, GEN T)
 {
   pari_sp av = avma;
-  GEN q = int2u(F2x_degree(T));
-  GEN t = F2xq_elltrace_AGM(a6, T);
-  GEN c = addii(q, F2xq_trace(a2,T) ? addui(1,t): subui(1,t));
+  long n = F2x_degree(T);
+  GEN q = int2u(n), c;
+  if (typ(a)==t_VECSMALL)
+  {
+    GEN t = F2xq_elltrace_AGM(a6, T);
+    c = addii(q, F2xq_trace(a,T) ? addui(1,t): subui(1,t));
+  } else if (n==1)
+  {
+    long a4i = lgpol(gel(a,2)), a6i = lgpol(a6);
+    return utoi(a4i? (a6i? 1: 5): 3);
+  }
+  else if (n==2)
+  {
+    GEN a3 = gel(a,1), a4 = gel(a,2), x = polx_F2x(T[1]), x1 = pol1_F2x(T[1]);
+    GEN a613 = F2xq_mul(F2x_add(x1, a6),a3,T), a43= F2xq_mul(a4,a3,T);
+    long f0= F2xq_trace(F2xq_mul(a6,a3,T),T);
+    long f1= F2xq_trace(F2x_add(a43,a613),T);
+    long f2= F2xq_trace(F2x_add(F2xq_mul(a43,x,T),a613),T);
+    long f3= F2xq_trace(F2x_add(F2xq_mul(a43,F2x_add(x,x1),T),a613),T);
+    c = utoi(9-2*(f0+f1+f2+f3));
+  }
+  else
+  {
+    struct _F2xqE e;
+    long m = (n+1)>>1;
+    GEN q1 = addis(q, 1);
+    GEN v = n==4 ? mkvec4(utoi(13),utoi(17),utoi(21),utoi(25))
+                 : odd(n) ? mkvec3(subii(q1,int2u(m)),q1,addii(q1,int2u(m))):
+                            mkvec5(subii(q1,int2u(m+1)),subii(q1,int2u(m)),q1,
+                                   addii(q1,int2u(m)),addii(q1,int2u(m+1)));
+    e.a2=a; e.a6=a6; e.T=T;
+    c = gen_select_order(v,(void*)&e, &F2xqE_group);
+    if (n==4 && equaliu(c, 21)) /* Ambiguous case */
+    {
+      GEN d = F2xq_pow(polx_F2x(T[1]),utoi(3),T), a3 = gel(a,1);
+      e.a6 = F2x_add(a6,F2xq_mul(d,F2xq_sqr(a3,T),T)); /* twist */
+      c = subui(34, gen_select_order(mkvec2s(13,25),(void*)&e, &F2xqE_group));
+    }
+  }
   return gerepileuptoint(av, c);
 }
 
@@ -487,6 +561,8 @@ F2xq_ellgens(GEN a2, GEN a6, GEN ch, GEN D, GEN m, GEN T)
   e.a2=a2; e.a6=a6; e.T=T;
   switch(lg(D)-1)
   {
+  case 0:
+    return cgetg(1,t_VEC);
   case 1:
     P = gen_gener(gel(D,1), (void*)&e, &F2xqE_group);
     P = mkvec(F2xqE_changepoint(P, ch, T));

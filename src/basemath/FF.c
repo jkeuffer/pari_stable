@@ -905,23 +905,33 @@ Flxq_ell_to_a4a6(GEN E, GEN T, ulong p)
 static GEN
 F2xq_ell_to_a4a6(GEN E, GEN T)
 {
+  long v = T[1];
   GEN a1 = Rg_to_F2xq(ell_get_a1(E),T);
   GEN a2 = Rg_to_F2xq(ell_get_a2(E),T);
   GEN a3 = Rg_to_F2xq(ell_get_a3(E),T);
   GEN a4 = Rg_to_F2xq(ell_get_a4(E),T);
   GEN a6 = Rg_to_F2xq(ell_get_a6(E),T);
-  GEN a1i = F2xq_inv(a1,T);
-  GEN a1i2 = F2xq_sqr(a1i,T);
-  GEN a1i3 = F2xq_mul(a1i,a1i2,T);
-  GEN a1i6 = F2xq_sqr(a1i3,T);
-  GEN d  = F2xq_mul(a3,a1i,T);
-  GEN dd = F2xq_mul(d,a1i2,T);
-  GEN e  = F2xq_mul(F2x_add(a4,F2xq_sqr(d,T)),a1i,T);
-  GEN ee = F2xq_mul(e,a1i3,T);
-  GEN da2 = F2x_add(a2,d);
-  GEN d2 = F2xq_mul(da2,a1i2,T);
-  GEN d6 = F2xq_mul(F2x_add(F2x_add(F2xq_mul(F2x_add(F2xq_mul(da2,d,T),a4),d,T),a6),F2xq_sqr(e,T)),a1i6,T);
-  retmkvec3(d2, d6, mkvec4(a1i,dd,pol0_F2x(v),ee));
+  if (lgpol(a1))
+  {
+    GEN a1i = F2xq_inv(a1,T);
+    GEN a1i2 = F2xq_sqr(a1i,T);
+    GEN a1i3 = F2xq_mul(a1i,a1i2,T);
+    GEN a1i6 = F2xq_sqr(a1i3,T);
+    GEN d  = F2xq_mul(a3,a1i,T);
+    GEN dd = F2xq_mul(d,a1i2,T);
+    GEN e  = F2xq_mul(F2x_add(a4,F2xq_sqr(d,T)),a1i,T);
+    GEN ee = F2xq_mul(e,a1i3,T);
+    GEN da2 = F2x_add(a2,d);
+    GEN d2 = F2xq_mul(da2,a1i2,T);
+    GEN d6 = F2xq_mul(F2x_add(F2x_add(F2xq_mul(F2x_add(F2xq_mul(da2,d,T),a4),d,T),a6),F2xq_sqr(e,T)),a1i6,T);
+    retmkvec3(d2, d6, mkvec4(a1i,dd,pol0_F2x(v),ee));
+  }
+  else
+  {
+    GEN d4 = F2x_add(F2xq_sqr(a2,T),a4);
+    GEN d6 = F2x_add(F2xq_mul(a2,a4,T),a6);
+    retmkvec3(mkvec2(a3,d4), d6, mkvec4(pol1_F2x(v),a2,pol0_F2x(T[1]),pol0_F2x(T[1])));
+  }
 }
 
 GEN

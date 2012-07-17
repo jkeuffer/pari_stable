@@ -1,7 +1,7 @@
-test(p,n=0,v='a)=
+test(p,n=0,v='a,w=1)=
 {
   my(a=if(n,ffgen(ffinit(p,n),v),p));
-  my(E=ellffinit([1,1,0,0,a+3],a));
+  my(E=ellffinit([w,1,1-w,0,a+3],a));
   my(G=ellgenerators(E)[1]);
   my(P=random(E));
   [d1]=ellgroup(E);
@@ -17,6 +17,7 @@ test(p,n=0,v='a)=
 test(2,4);
 test(2,78);
 test(2,100);
+test(2,101,,0);
 test(5,3);
 test(7,3);
 test(11,2);

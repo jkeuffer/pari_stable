@@ -5220,10 +5220,17 @@ Weil pairing of the points of $m$-torsion $P$ and $Q$.
 \fun{GEN}{RgE_to_FpE}{GEN P, GEN p} returns the \kbd{FpE} obtained by applying
 \kbd{Rg\_to\_Fp} coefficientwise.
 
-\subsec{Elliptic curves over $\F_{2^n}$, not supersingular}
+\subsec{Elliptic curves over $\F_{2^n}$}
 Let $T$ be an irreducible \kbd{F2x} and $E$ the
-elliptic curve given by the equation $E:y^2+x*y=x^3+a_2\*x^2+a_6$ with $a_2$ and $a_6$
-being \kbd{F2x} in $\F_2[X]/(T)$.  A \kbd{F2xqE} is a point of $E(\F_2[X]/(T))$.
+elliptic curve given by either the equation
+$E:y^2+x*y=x^3+a_2\*x^2+a_6$ with $a_2$ and $a_6$ being \kbd{F2x} in $\F_2[X]/(T)$
+(ordinary case)
+or
+$E:y^2+a_3*y=x^3+a_4\*x+a_6$ with $a_3$, $a_4$ and $a_6$ being \kbd{F2x} in $\F_2[X]/(T)$
+(supersingular case).
+
+A \kbd{F2xqE} is a point of $E(\F_2[X]/(T))$.  In the supersingular case, the
+parameter $a_2$ is actually the \typ{VEC} $[a_3,a_4]$.
 
 \fun{GEN}{F2xq_ellcard}{GEN a2, GEN a6, GEN T}
 Return the order of the group $E(\F_p[X]/(T))$.
