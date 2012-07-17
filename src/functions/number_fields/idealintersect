@@ -21,7 +21,7 @@ Doc: intersection of the two ideals
  dimensions with integer coefficients:
  \bprog
  ZM_intersect(A,B) =
- { my(Ker = matkerint(concat(A,B));
-   mathnf( A * vecextract(Ker, Str("..", #A), "..") )
+ { my(Ker = matkerint(concat(A,B)));
+   mathnf( A * Ker[1..#A,] )
  }
  @eprog
