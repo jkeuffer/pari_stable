@@ -122,14 +122,14 @@ F2xqE_add(GEN P, GEN Q, GEN a2, GEN T)
 }
 
 static GEN
-F2xqE_neg_i(GEN P, GEN T)
+F2xqE_neg_i(GEN P, GEN a2, GEN T)
 {
   if (ell_is_inf(P)) return P;
   return mkvec2(gel(P,1), F2x_add(gel(P,1), gel(P,2)));
 }
 
 GEN
-F2xqE_neg(GEN P, GEN T)
+F2xqE_neg(GEN P, GEN a2, GEN T)
 {
   if (ell_is_inf(P)) return ellinf();
   return mkvec2(gcopy(gel(P,1)), F2x_add(gel(P,1), gel(P,2)));
@@ -140,7 +140,7 @@ F2xqE_sub(GEN P, GEN Q, GEN a2, GEN T)
 {
   pari_sp av = avma;
   GEN slope;
-  return gerepileupto(av, F2xqE_add_slope(P, F2xqE_neg_i(Q, T), a2, T, &slope));
+  return gerepileupto(av, F2xqE_add_slope(P, F2xqE_neg_i(Q, a2, T), a2, T, &slope));
 }
 
 struct _F2xqE
@@ -170,7 +170,7 @@ _F2xqE_mul(void *E, GEN P, GEN n)
   struct _F2xqE *e=(struct _F2xqE *) E;
   long s = signe(n);
   if (!s || ell_is_inf(P)) return ellinf();
-  if (s<0) P = F2xqE_neg(P, e->T);
+  if (s<0) P = F2xqE_neg(P, e->a2, e->T);
   if (is_pm1(n)) return s>0? gcopy(P): P;
   return gerepileupto(av, gen_pow(P, n, e, &_F2xqE_dbl, &_F2xqE_add));
 }

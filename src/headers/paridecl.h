@@ -108,7 +108,7 @@ GEN     F2xqE_changepointinv(GEN x, GEN ch, GEN T);
 GEN     F2xqE_dbl(GEN P, GEN a2, GEN T);
 GEN     F2xqE_log(GEN a, GEN b, GEN o, GEN a2, GEN T);
 GEN     F2xqE_mul(GEN P, GEN n, GEN a2, GEN T);
-GEN     F2xqE_neg(GEN P, GEN T);
+GEN     F2xqE_neg(GEN P, GEN a2, GEN T);
 GEN     F2xqE_order(GEN z, GEN o, GEN a2, GEN T);
 GEN     F2xqE_sub(GEN P, GEN Q, GEN a2, GEN T);
 GEN     F2xqE_tatepairing(GEN t, GEN s, GEN m, GEN a2, GEN T);
