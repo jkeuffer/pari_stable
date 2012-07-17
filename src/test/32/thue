@@ -13,4 +13,6 @@
   ***                 ^-------------
   *** thueinit: constant polynomial in thueinit.
 [[2, 2], [-2, -2], [4, 1], [-4, -1]]
-Total time spent: 1536
+[[0, 3], [3, -276], [3, 0]]
+[[0, 3], [3, 0], [19, 2], [27, 3]]
+Total time spent: 1040

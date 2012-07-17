@@ -446,17 +446,18 @@ CheckSol(GEN *pS, GEN z1, GEN z2, GEN P, GEN rhs, GEN ro)
 static GEN
 GuessQi(GEN b, GEN c, GEN *eps)
 {
-  GEN Q, Lat, C = int2n(33);
+  const long shift = 33;
+  GEN Q, Lat, C = int2n(shift);
 
   Lat = matid(3);
-  gcoeff(Lat,3,1) = C;
-  gcoeff(Lat,3,2) = ground(gmul(C,b));
-  gcoeff(Lat,3,3) = ground(gmul(C,c));
+  gcoeff(Lat,3,1) = ground(gmul2n(b, shift));
+  gcoeff(Lat,3,2) = ground(gmul2n(c, shift));
+  gcoeff(Lat,3,3) = C;
 
   Q = gel(lllint(Lat),1);
-  if (gequal0(gel(Q,3))) return NULL; /* FAIL */
+  if (gequal0(gel(Q,2))) return NULL; /* FAIL */
 
-  *eps = gadd(gadd(gel(Q,1), gmul(gel(Q,2),b)), gmul(gel(Q,3),c));
+  *eps = gadd(gadd(gel(Q,3), gmul(gel(Q,1),b)), gmul(gel(Q,2),c));
   *eps = mpabs(*eps); return Q;
 }
 
@@ -741,7 +742,7 @@ static GEN
 get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 {
   GEN B0 = Baker(BS);
-  long i2 = (i1 == 1)? 2: 1;
+  long step = 0, i2 = (i1 == 1)? 2: 1;
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
     init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
@@ -759,22 +760,23 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
         if (res) break;
         if (DEBUGLEVEL>1) err_printf("CF failed. Increasing kappa\n");
       }
-      if (cf == 10)
+      if (!step && cf == 10)
       { /* Semirational or totally rational case */
         GEN Q, ep, q, l0, denbound;
 
         if (! (Q = GuessQi(BS->delta, BS->lambda, &ep)) ) break;
 
-        denbound = gadd(B0, absi(gel(Q,2)));
+        denbound = gadd(B0, absi(gel(Q,1)));
         q = denom( bestappr(BS->delta, denbound) );
         l0 = subrr(errnum(BS->delta, q), ep);
         if (signe(l0) <= 0) break;
 
-        B0 = divrr(mplog(divrr(mulir(gel(Q,3), BS->c15), l0)),  BS->c13);
+        B0 = divrr(mplog(divrr(mulir(gel(Q,2), BS->c15), l0)),  BS->c13);
         if (DEBUGLEVEL>1) err_printf("Semirat. reduction: B0 -> %Ps\n",B0);
       }
       /* if no progress, stop */
       if (gcmp(oldB0, gadd(B0,dbltor(0.1))) <= 0) return gmin(oldB0, B0);
+      else step++;
     }
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
@@ -787,7 +789,7 @@ static GEN
 get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 {
   GEN B0 = Baker(BS), Bx = NULL;
-  long i2 = (i1 == 1)? 2: 1;
+  long step = 0, i2 = (i1 == 1)? 2: 1;
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
     init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
@@ -806,17 +808,17 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       }
 
       /* FIXME: TO BE COMPLETED */
-      if (cf == 10)
+      if (!step && cf == 10)
       { /* Semirational or totally rational case */
         GEN Q, ep, q, l0, denbound;
 
         if (! (Q = GuessQi(BS->delta, BS->lambda, &ep)) ) break;
 
         /* Beware Q[2]] = gen_0 */
-        denbound = gadd(mulri(B0, absi(gel(Q,2))),
-                        mulii(BS->Ind, absi(gel(Q,3))));
+        denbound = gadd(mulri(B0, absi(gel(Q,1))),
+                        mulii(BS->Ind, absi(gel(Q,2))));
         q = denom( bestappr(BS->delta, denbound) );
-        l0 = divri(subrr(errnum(BS->delta, q), ep), absi(gel(Q,3)));
+        l0 = divri(subrr(errnum(BS->delta, q), ep), absi(gel(Q,2)));
         if (signe(l0) <= 0) break;
 
         get_B0Bx(BS, l0, &B0, &Bx);
@@ -824,7 +826,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
           err_printf("Semirat. reduction: B0 -> %Ps x <= %Ps\n",B0, Bx);
       }
       /* if no progress, stop */
-      if (oldBx && gcmp(oldBx, Bx) <= 0) return oldBx;
+      if (oldBx && gcmp(oldBx, Bx) <= 0) return oldBx; else step++;
     }
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
@@ -998,7 +1000,7 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
       }
     }
   }
-  return MiddleSols(pS, x3, ro, P, rhs, s, c1);
+  return gmax(x0, MiddleSols(pS, x3, ro, P, rhs, s, c1));
 
 PRECPB:
   ne = gerepilecopy(av, ne);
