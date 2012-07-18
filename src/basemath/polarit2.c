@@ -2631,7 +2631,9 @@ inexact(GEN x, int *simple, int *rational)
 
     case t_INTMOD:
     case t_FFELT:
-      *rational = 0; *simple = 1; return 0;
+      *rational = 0;
+      if (!*simple) *simple = 1;
+      return 0;
 
     case t_COMPLEX:
       *rational = 0;
@@ -2646,14 +2648,17 @@ inexact(GEN x, int *simple, int *rational)
       *rational = 0;
       return isinexactall(gel(x,1), simple, rational);
     case t_POL:
-      *rational = *simple = 0;
+      *rational = 0;
+      *simple = -1;
       return isinexactall(x, &junk, rational);
     case t_RFRAC:
-      *rational = *simple = 0;
+      *rational = 0;
+      *simple = -1;
       return inexact(gel(x,1), &junk, rational)
           || inexact(gel(x,2), &junk, rational);
   }
-  *rational = *simple = 0; return 0;
+  *rational = 0;
+  *simple = -1; return 0;
 }
 
 /* x monomial, y t_POL in the same variable */
@@ -2692,7 +2697,7 @@ RgX_gcd(GEN x, GEN y)
   if (rational) return QX_gcd(x,y); /* Q[X] */
 
   av = avma;
-  if (simple) x = RgX_gcd_simple(x,y);
+  if (simple > 0) x = RgX_gcd_simple(x,y);
   else
   {
     dx = lg(x); dy = lg(y);
