@@ -517,6 +517,42 @@ gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp)
   return gerepilecopy(av, mkvec2(o, mkmat2(P,F)));
 }
 
+/* E has order o[1], ..., or o[#o], draw random points until all solutions
+ * but one are eliminated */
+GEN
+gen_select_order(GEN o, void *E, const struct bb_group *grp)
+{
+  pari_sp ltop = avma, btop;
+  GEN lastgood, so, vo;
+  long lo = lg(o), nbo=lo-1;
+  if (nbo == 1) return icopy(gel(o,1));
+  so = ZV_indexsort(o); /* minimize max( o[i+1] - o[i] ) */
+  vo = const_vecsmall(lo, 0);
+  lastgood = gel(o, so[nbo]);
+  btop = avma;
+  for(;;)
+  {
+    GEN lasto = gen_0;
+    GEN P = grp->rand(E), t = mkvec(gen_0);
+    long i;
+    for (i = 1; i < lo; i++)
+    {
+      GEN newo = gel(o, so[i]);
+      if (vo[i]) continue;
+      t = grp->mul(E,t, grp->pow(E, P, subii(newo,lasto)));/*P^o[i]*/
+      lasto = newo;
+      if (!grp->equal1(t))
+      {
+        if (--nbo == 1) { avma=ltop; return icopy(lastgood); }
+        vo[i] = 1;
+      }
+      else
+        lastgood = lasto;
+    }
+    avma = btop;
+  }
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                          n-th ROOT                              */

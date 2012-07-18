@@ -1059,42 +1059,6 @@ possible_traces(GEN compile, GEN mask, GEN *P, int larger)
   *P = Pfinal; return V;
 }
 
-/* E has order o[1], ..., or o[#o], draw random points until all solutions
- * but one are eliminated */
-static GEN
-choose_card(GEN o, void *E, const struct bb_group *grp)
-{
-  pari_sp ltop = avma, btop;
-  GEN lastgood, so, vo;
-  long lo = lg(o), nbo=lo-1;
-  if (nbo == 1) return icopy(gel(o,1));
-  so = ZV_indexsort(o); /* minimize max( o[i+1] - o[i] ) */
-  vo = const_vecsmall(lo, 0);
-  lastgood = gel(o, so[nbo]);
-  btop = avma;
-  for(;;)
-  {
-    GEN lasto = gen_0;
-    GEN P = grp->rand(E), t = mkvec(gen_0);
-    long i;
-    for (i = 1; i < lo; i++)
-    {
-      GEN newo = gel(o, so[i]);
-      if (vo[i]) continue;
-      t = grp->mul(E,t, grp->pow(E, P, subii(newo,lasto)));/*P^o[i]*/
-      lasto = newo;
-      if (lg(t) != 2)
-      {
-        if (--nbo == 1) { avma=ltop; return icopy(lastgood); }
-        vo[i] = 1;
-      }
-      else
-        lastgood = lasto;
-    }
-    avma = btop;
-  }
-}
-
 static GEN
 cost(long mask, GEN cost_vec)
 {
@@ -1265,7 +1229,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN q, void *E, const struct bb
       GEN t = Z_chinese_post(u, stoi(r2[i]), C, U, NULL);
       gel(card, i) = subii(pp1, Fp_center(t, C, Cs2));
     }
-    return choose_card(card, E, grp);
+    return gen_select_order(card, E, grp);
   }
   if (DEBUGLEVEL>=2) timer_start(&ti);
   av1 = avma;
@@ -1350,7 +1314,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN q, void *E, const struct bb
           GEN card = subii(Be, mulii(Mu, GMb));
           card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));
           if (DEBUGLEVEL>=2) timer_printf(&ti,"match_and_sort");
-          return choose_card(card, E, grp);
+          return gen_select_order(card, E, grp);
         }
       }
     }

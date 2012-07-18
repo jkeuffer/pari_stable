@@ -1296,6 +1296,8 @@ GEN gen_ellgroup(GEN N, GEN F, GEN *pt_m, void *E, const struct bb_group *grp,
                  GEN pairorder(void *E, GEN P, GEN Q, GEN m, GEN F));
 GEN gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp);
 GEN gen_order(GEN x, GEN o, void *E, const struct bb_group *grp);
+GEN gen_select_order(GEN o, void *E, const struct bb_group *grp);
+
 GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp);
 GEN gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
                                    GEN (*mul)(void*,GEN,GEN));
