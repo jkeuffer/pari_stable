@@ -193,18 +193,14 @@ random_F2xqE(GEN a2, GEN a6, GEN T)
   do
   {
     avma= ltop;
-    do {
     x   = random_F2x(F2x_degree(T),T[1]);
-    }
-    while (!lgpol(x));
+    if (!lgpol(x))
+      { avma=ltop; retmkvec2(pol0_Flx(T[1]), F2xq_sqrt(a6,T)); }
     x2  = F2xq_sqr(x, T);
     rhs = F2x_add(F2xq_mul(x2,F2x_add(x,a2),T),a6);
     rhs = F2xq_div(rhs,x2,T);
   } while (F2xq_trace(rhs, T));
   y = F2xq_mul(F2xq_Artin_Schreier(rhs, T), x, T);
-  if (!gequal(F2x_add(F2xq_sqr(y,T),F2xq_mul(x,y,T)),
-              F2x_add(F2xq_mul(F2xq_sqr(x,T),F2x_add(x,a2),T),a6)))
-    pari_err_BUG("random_F2xqE");
   return gerepilecopy(ltop, mkvec2(x, y));
 }
 
