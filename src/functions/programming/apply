@@ -43,7 +43,7 @@ Doc: Apply the \typ{CLOSURE} \kbd{f} to the entries of \kbd{A}. If \kbd{A}
  are available as shortcuts for
  \bprog
  apply(g, select(f, Vec(v)))
- select(Vec(v), f)
+ select(f, Vec(v))
  apply(g, Vec(v))
  @eprog\noindent respectively:
  \bprog
