@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #endif
 
 BEGINEXTERN
-#include <X11/Xlib.h>
+#include <X11/XKBlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
 #ifndef XK_c
@@ -249,15 +249,13 @@ EXIT:
       case KeyRelease:
         /* Mod4 == Super on "std" Linux */
         keystate = event.xkey.state & (ShiftMask|ControlMask|Mod1Mask|Mod4Mask);
-        switch (XKeycodeToKeysym(display, event.xkey.keycode, 0))
+        switch (XkbKeycodeToKeysym(display, event.xkey.keycode, 0,0))
         {
         case XK_q:
-          if (!keystate || keystate == ControlMask)
-            goto EXIT;
+          if (!keystate || keystate == ControlMask) goto EXIT;
           break;
         case XK_c:
-          if (keystate == ControlMask)
-            goto EXIT;
+          if (keystate == ControlMask) goto EXIT;
           break;
         }
         break;
