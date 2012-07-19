@@ -24,8 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                                                                   **/
 /***********************************************************************/
 
-/* Theses functions deal with point over elliptic curves over Fq defined
- * by an equation of the form y^2=x^3+a4*x+a6.
+/* Theses functions deal with point over elliptic curves over F_2^n defined
+ * by an equation of the form:
+ ** y^2+x*y=x^3+a_2*x^2+a_6 if the curve is ordinary.
  * Most of the time a6 is omitted since it can be recovered from any point
  * on the curve.
  */
@@ -476,7 +477,7 @@ GEN
 F2xq_ellgroup(GEN a2, GEN a6, GEN N, GEN T, GEN *pt_m)
 {
   struct _F2xqE e;
-  GEN q = int2u(degpol(T));
+  GEN q = int2u(F2x_degree(T));
   e.a2=a2; e.a6=a6; e.T=T;
   return gen_ellgroup(N, subis(q,1), pt_m, (void*)&e, &F2xqE_group, _F2xqE_pairorder);
 }
