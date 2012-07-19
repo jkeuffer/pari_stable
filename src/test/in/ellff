@@ -14,6 +14,7 @@ test(p,n=0,v='a)=
     if(elllog(E,P,G)!=1023%d1,error([p,n,4]));
   );
 }
+test(2,4);
 test(2,78);
 test(2,100);
 test(5,3);

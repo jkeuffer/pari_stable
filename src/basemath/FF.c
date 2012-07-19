@@ -1053,6 +1053,7 @@ FF_elllog(GEN E, GEN P, GEN Q, GEN o)
     Pp = F2xqE_changepointinv(RgE_to_F2xqE(P,T), gel(e,3), T);
     Qp = F2xqE_changepointinv(RgE_to_F2xqE(Q,T), gel(e,3), T);
     r = F2xqE_log(Pp, Qp, o, gel(e,1), T);
+    break;
   default:
     Pp = FlxqE_changepointinv(RgE_to_FlxqE(P,T,pp), gel(e,3), T, pp);
     Qp = FlxqE_changepointinv(RgE_to_FlxqE(Q,T,pp), gel(e,3), T, pp);
