@@ -484,6 +484,7 @@ rootmod(GEN f, GEN p)
   pari_sp av = avma;
   GEN y;
 
+  f = factmod_init(f, p);
   if (lg(p) == 3)
   {
     ulong up;
@@ -495,10 +496,9 @@ rootmod(GEN f, GEN p)
       case 0: pari_err_ROOTS0("rootmod");
       case 1: avma = av; return cgetg(1, t_COL);
     }
-    y = Flx_roots_i(Flx_normalize(f,up),up);
-    return gerepileupto(av, gmodulo(Flc_to_ZC(y), p));
+    y = Flc_to_ZC( Flx_roots_i(f,up) );
+    return gerepileupto(av, FpC_to_mod(y, p));
   }
-  f = factmod_init(f, p);
   switch (degpol(f))
   {
     case  0: avma = av; return cgetg(1,t_COL);
