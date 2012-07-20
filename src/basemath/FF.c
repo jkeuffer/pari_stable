@@ -930,7 +930,8 @@ F2xq_ell_to_a4a6(GEN E, GEN T)
   {
     GEN d4 = F2x_add(F2xq_sqr(a2,T),a4);
     GEN d6 = F2x_add(F2xq_mul(a2,a4,T),a6);
-    retmkvec3(mkvec2(a3,d4), d6, mkvec4(pol1_F2x(v),a2,pol0_F2x(T[1]),pol0_F2x(T[1])));
+    GEN a3i = F2xq_inv(a3,T);
+    retmkvec3(mkvec3(a3,d4,a3i), d6, mkvec4(pol1_F2x(v),a2,pol0_F2x(T[1]),pol0_F2x(T[1])));
   }
 }
 

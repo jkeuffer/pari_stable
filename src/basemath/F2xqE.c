@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  ** y^2+a_3*y=x^3+a_4*x+a_6 if the curve is supersingular.
  * Most of the time a6 is omitted since it can be recovered from any point
  * on the curve.
- * For supersingular curves, the parameter a2 is replaced by [a3,a4].
+ * For supersingular curves, the parameter a2 is replaced by [a3,a4,a3^-1].
  */
 
 GEN
@@ -89,8 +89,8 @@ F2xqE_dbl_slope(GEN P, GEN a, GEN T, GEN *slope)
   }
   else
   {
-    GEN a3 = gel(a,1), a4 = gel(a,2);
-    *slope = F2xq_div(F2x_add(a4, F2xq_sqr(x, T)), a3, T);
+    GEN a3 = gel(a,1), a4 = gel(a,2), a3i = gel(a,3);
+    *slope = F2xq_mul(F2x_add(a4, F2xq_sqr(x, T)), a3i, T);
     Q = cgetg(3,t_VEC);
     gel(Q, 1) = F2xq_sqr(*slope, T);
     gel(Q, 2) = F2x_add(F2xq_mul(*slope, F2x_add(x, gel(Q, 1)), T), F2x_add(y, a3));
@@ -217,26 +217,27 @@ GEN
 random_F2xqE(GEN a, GEN a6, GEN T)
 {
   pari_sp ltop = avma;
-  GEN x, y, rhs, u, u2;
+  GEN x, y, rhs, u;
   do
   {
     avma= ltop;
     x   = random_F2x(F2x_degree(T),T[1]);
     if (typ(a) == t_VECSMALL)
     {
-      GEN a2 = a;
+      GEN a2 = a, x2;
       if (!lgpol(x))
         { avma=ltop; retmkvec2(pol0_Flx(T[1]), F2xq_sqrt(a6,T)); }
-      u = x; u2  = F2xq_sqr(x, T);
-      rhs = F2x_add(F2xq_mul(u2,F2x_add(x,a2),T),a6);
+      u = x; x2  = F2xq_sqr(x, T);
+      rhs = F2x_add(F2xq_mul(x2,F2x_add(x,a2),T),a6);
+      rhs = F2xq_div(rhs,x2,T);
     }
     else
     {
-      GEN a3 = gel(a,1), a4 = gel(a,2);
-      u = a3; u2 = F2xq_sqr(a3,T);
+      GEN a3 = gel(a,1), a4 = gel(a,2), a3i = gel(a,3), u2i;
+      u = a3; u2i = F2xq_sqr(a3i,T);
       rhs = F2x_add(F2xq_mul(x,F2x_add(F2xq_sqr(x,T),a4),T),a6);
+      rhs = F2xq_mul(rhs,u2i,T);
     }
-    rhs = F2xq_div(rhs,u2,T);
   } while (F2xq_trace(rhs,T));
   y = F2xq_mul(F2xq_Artin_Schreier(rhs, T), u, T);
   return gerepilecopy(ltop, mkvec2(x, y));
