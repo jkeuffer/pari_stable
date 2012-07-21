@@ -1013,8 +1013,13 @@ gequal(GEN x, GEN y)
             && gequal(gel(x,3),gel(y,3));
 
       case t_RFRAC:
-        av=avma; i=gequal(gmul(gel(x,1),gel(y,2)),gmul(gel(x,2),gel(y,1)));
-        avma=av; return i;
+      {
+        GEN a = gel(x,1), b = gel(x,2), c = gel(y,1), d = gel(y,2);
+        if (gequal(b,d)) return gequal(a,c); /* simple case */
+        av = avma;
+        i = gequal(simplify_shallow(gmul(a,d)), simplify_shallow(gmul(b,c)));
+        avma = av; return i;
+      }
 
       case t_STR:
         return !strcmp(GSTR(x),GSTR(y));
