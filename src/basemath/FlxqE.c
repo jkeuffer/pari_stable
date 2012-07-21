@@ -525,7 +525,7 @@ Flx_next(GEN t, ulong p)
 {
   long i;
   for(i=2;;i++)
-    if ((ulong)t[i]==p)
+    if ((ulong)t[i]==p-1)
       t[i]=0;
     else
     {
@@ -534,24 +534,33 @@ Flx_next(GEN t, ulong p)
     }
 }
 
+static void
+Flx_renormalize_ip(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>=2; i--)
+    if (x[i]) break;
+  setlg(x, i+1);
+}
+
 static ulong
 Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
-  long i, d = degpol(T), lx = d+1;
+  long i, d = degpol(T), lx = d+2;
   long q = upowuu(p, d), a;
-  GEN x = const_vecsmall(lx,0);
-  for(a=0, i=0; i<q; i++)
+  GEN x = const_vecsmall(lx,0); x[1] = T[1];
+  for(a=1, i=0; i<q; i++)
   {
     GEN x2, rhs;
-    x = Flx_renormalize(x,lx);
+    Flx_renormalize_ip(x, lx);
     x2  = Flxq_sqr(x, T, p);
     rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
-    if (!lgpol(rhs)) a++; else if (Flxq_issquare(x,T,p)) a+=2;
+    if (!lgpol(rhs)) a++; else if (Flxq_issquare(rhs,T,p)) a+=2;
     Flx_next(x,p);
   }
   avma = av;
-  return p+1-a;
+  return a;
 }
 
 static GEN
