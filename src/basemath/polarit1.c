@@ -22,8 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-static GEN Flx_roots_i(GEN f, ulong p);
-
 /*******************************************************************/
 /*                                                                 */
 /*                  POLYNOMIAL EUCLIDEAN DIVISION                  */
@@ -122,93 +120,53 @@ grem(GEN x, GEN y)
 /*           ROOTS MODULO a prime p (no multiplicities)            */
 /*                                                                 */
 /*******************************************************************/
-static ulong
-init_p(GEN pp)
-{
-  ulong p;
-  if ((ulong)expi(pp) > BITS_IN_LONG - 3) p = 0;
-  else
-  {
-    p = itou(pp);
-    if (p < 2 || signe(pp) < 0) pari_err_PRIME("factmod",pp);
-  }
-  return p;
-}
-
-static GEN
-factmod_init(GEN F, GEN p)
+/* Check types and replace F by a monic normalized FpX having the same roots
+ * Don't bother to make constant polynomials monic */
+static void
+factmod_init(GEN *F, GEN p)
 {
   if (typ(p)!=t_INT) pari_err_TYPE("factmod",p);
-  if (typ(F)!=t_POL) pari_err_TYPE("factmod",F);
-  return FpX_normalize(RgX_to_FpX(F, p), p);
+  if (signe(p) < 0) pari_err_PRIME("factmod",p);
+  if (typ(*F)!=t_POL) pari_err_TYPE("factmod",*F);
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    if (pp < 2) pari_err_PRIME("factmod", p);
+    *F = RgX_to_Flx(*F, pp);
+    if (lg(*F) > 3) *F = Flx_normalize(*F, pp);
+  }
+  else
+  {
+    *F = RgX_to_FpX(*F, p);
+    if (lg(*F) > 3) *F = FpX_normalize(*F, p);
+  }
+}
+/* as above, assume p prime and *F a ZX */
+static void
+ZX_factmod_init(GEN *F, GEN p)
+{
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    *F = ZX_to_Flx(*F, pp);
+    if (lg(*F) > 3) *F = Flx_normalize(*F, pp);
+  }
+  else
+  {
+    *F = FpX_red(*F, p);
+    if (lg(*F) > 3) *F = FpX_normalize(*F, p);
+  }
 }
 
 static GEN
-root_mod_2(GEN f)
+oneroot_mod_2(GEN f)
 {
-  int z1, z0 = !signe(constant_term(f));
   long i,n;
-  GEN y;
-
+  if (!signe(constant_term(f))) return gen_0;
   for (i=2, n=1; i < lg(f); i++)
     if (signe(f[i])) n++;
-  z1 = n & 1;
-  y = cgetg(z0+z1+1, t_COL); i = 1;
-  if (z0) gel(y,i++) = gen_0;
-  if (z1) gel(y,i) = gen_1;
-  return y;
-}
-
-/* assume deg f > 0 and f reduced mod 4 [ need non-negative coeffs ] */
-static GEN
-root_mod_4(GEN f)
-{
-  long no, ne, i, l = lg(f);
-  GEN y, t;
-  int z0, z1, z2, z3; /* zi = 1 iff f(i) = 0 mod 4 */
-
-  t = gel(f,2);
-  ne = signe(t)? *int_LSW(t): 0;
-  t = gel(f,3);
-  no = signe(t)? *int_LSW(t): 0;
-
-  z0 = (ne & 3) == 0; /* f(0) mod 4 = 0 ? */
-  z2 = ((ne + (no<<1)) & 3) == 0; /* f(2) mod 4 = 0 ? */
-
-  /* write f(x) = fe(x^2) + x fo(x^2) */
-  for (i=4; i<l; i+=2)
-  {
-    t = gel(f,i);
-    if (signe(t)) ne += *int_LSW(t); /* compute mod 2^BIL */
-  }
-  for (i=5; i<l; i+=2)
-  {
-    t = gel(f,i);
-    if (signe(t)) no += *int_LSW(t); /* compute mod 2^BIL */
-  }
-  ne &= 3; /* = fe(1) mod 4 */
-  no &= 3; /* = fo(1) mod 4 */
-  z3 = (no == ne);
-  z1 = ((ne+no) & 3) == 0;
-  y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1;
-  if (z0) gel(y,i++) = gen_0;
-  if (z1) gel(y,i++) = gen_1;
-  if (z2) gel(y,i++) = gen_2;
-  if (z3) gel(y,i) = utoipos(3);
-  return y;
-}
-
-/* p even, accept p = 4 for p-adic stuff. Assume deg(f) > 0 */
-INLINE GEN
-root_mod_even(GEN f, ulong p)
-{
-  switch(p)
-  {
-    case 2: return root_mod_2(f);
-    case 4: return root_mod_4(f);
-  }
-  pari_err_PRIME("rootmod",utoi(p));
-  return NULL; /* not reached */
+  if (n & 1) return gen_1;
+  return NULL;
 }
 
 /* by checking f(0..p-1) */
@@ -235,40 +193,88 @@ Flx_roots_naive(GEN f, ulong p)
   }
   avma = av; fixlg(y, n+1); return y;
 }
-
-GEN
-rootmod2(GEN f, GEN pp)
+static GEN
+Flx_root_mod_2(GEN f)
 {
-  pari_sp av = avma;
-  ulong p;
+  int z1, z0 = !(f[2] & 1);
+  long i,n;
   GEN y;
 
-  f = factmod_init(f, pp);
-  switch (degpol(f))
-  {
-    case  0: avma = av; return cgetg(1,t_COL);
-    case -1: pari_err_ROOTS0("rootmod2");
-  }
-  p = init_p(pp); if (!p) pari_err_OVERFLOW("rootmod2 [prime too big]");
-  if (p & 1)
-    y = Flc_to_ZC(Flx_roots_naive(ZX_to_Flx(f,p), p));
-  else
-    y = root_mod_even(f,p);
-  return gerepileupto(av, FpC_to_mod(y, pp));
+  for (i=2, n=1; i < lg(f); i++)
+    if (f[i] & 1) n++;
+  z1 = n & 1;
+  y = cgetg(z0+z1+1, t_VECSMALL); i = 1;
+  if (z0) y[i++] = 0;
+  if (z1) y[i  ] = 1;
+  return y;
 }
 
-/* assume x reduced mod p, monic. */
+static GEN FpX_roots_i(GEN f, GEN p);
+static GEN Flx_roots_i(GEN f, ulong p);
+static GEN FpX_Berlekamp_i(GEN f, GEN pp, long flag);
+
+/* Generic driver to computes the roots of f modulo pp, using 'Roots' when
+ * pp is a small prime.
+ * if (gpwrap), check types thoroughly and return t_INTMODs, otherwise
+ * assume that f is an FpX, pp a prime and return t_INTs */
+static GEN
+rootmod_aux(GEN f, GEN pp, GEN (*Roots)(GEN,ulong), int gpwrap)
+{
+  pari_sp av = avma;
+  GEN y;
+  if (gpwrap)
+    factmod_init(&f, pp);
+  else
+    ZX_factmod_init(&f, pp);
+  switch(lg(f))
+  {
+    case 2: pari_err_ROOTS0("rootmod");
+    case 3: avma = av; return cgetg(1,t_COL);
+  }
+  if (typ(f) == t_VECSMALL)
+  {
+    ulong p = pp[2];
+    if (p == 2)
+      y = Flx_root_mod_2(f);
+    else
+    {
+      if (!odd(p)) pari_err_PRIME("rootmod",utoi(p));
+      y = Roots(f, p);
+    }
+    y = Flc_to_ZC(y);
+  }
+  else
+    y = FpX_roots_i(f, pp);
+  if (gpwrap) y = FpC_to_mod(y, pp);
+  return gerepileupto(av, y);
+}
+/* assume that f is a ZX an pp a prime */
+GEN
+FpX_roots(GEN f, GEN pp)
+{ return rootmod_aux(f, pp, Flx_roots_i, 0); }
+/* no assumptions on f and pp */
+GEN
+rootmod2(GEN f, GEN pp) { return rootmod_aux(f, pp, &Flx_roots_naive, 1); }
+GEN
+rootmod(GEN f, GEN pp) { return rootmod_aux(f, pp, &Flx_roots_i, 1); }
+GEN
+rootmod0(GEN f, GEN p, long flag)
+{
+  switch(flag)
+  {
+    case 0: return rootmod(f,p);
+    case 1: return rootmod2(f,p);
+    default: pari_err_FLAG("polrootsmod");
+  }
+  return NULL; /* not reached */
+}
+
+/* assume x reduced mod p > 2, monic. */
 static int
 FpX_quad_factortype(GEN x, GEN p)
 {
   GEN b = gel(x,3), c = gel(x,2);
-  GEN D;
-
-  if (equaliu(p, 2)) {
-    if (!signe(b)) return 0;
-    return signe(c)? -1: 1;
-  }
-  D = subii(sqri(b), shifti(c,2));
+  GEN D = subii(sqri(b), shifti(c,2));
   return kronecker(D,p);
 }
 /* assume x reduced mod p, monic. Return one root, or NULL if irreducible */
@@ -376,6 +382,7 @@ FpX_roots_i(GEN f, GEN p)
   }
   return sort(y);
 }
+/* assume p odd prime */
 static GEN
 FpX_oneroot_i(GEN f, GEN p)
 {
@@ -429,99 +436,25 @@ FpX_oneroot_i(GEN f, GEN p)
   }
 }
 
-static GEN
-FpX_factmod_init(GEN f, GEN p) { return FpX_normalize(FpX_red(f,p), p); }
-GEN
-FpX_roots(GEN f, GEN p) {
-  pari_sp av = avma;
-  long q = mod2BIL(p);
-  GEN F;
-  if (lg(p) == 3)
-  {
-    ulong up;
-    if (signe(p) < 0) pari_err_PRIME("FpX_roots", p);
-    up = itou(p);
-    f = ZX_to_Flx(f, up);
-    switch (lgpol(f))
-    {
-      case 0: pari_err_ROOTS0("FpX_roots");
-      case 1: avma = av; return cgetg(1, t_COL);
-    }
-    return gerepileupto(av, Flc_to_ZC(Flx_roots_i(Flx_normalize(f, up), up)));
-  }
-  F = FpX_factmod_init(f,p);
-  switch(degpol(F))
-  {
-    case -1: pari_err_ROOTS0("FpX_roots");
-    case 0: avma = av; return cgetg(1, t_COL);
-  }
-  return gerepileupto(av, odd(q)? FpX_roots_i(F, p): root_mod_even(F,q));
-}
+/* assume that p is prime */
 GEN
 FpX_oneroot(GEN f, GEN p) {
   pari_sp av = avma;
-  long q = mod2BIL(p);
-  GEN F = FpX_factmod_init(f,p);
-  switch(degpol(F))
+  f = FpX_red(f, p);
+  switch(lg(f))
   {
-    case -1: pari_err_ROOTS0("FpX_oneroot");
-    case 0: avma = av; return NULL;
+    case 2: pari_err_ROOTS0("FpX_oneroot");
+    case 3: avma = av; return NULL;
   }
-  if (!odd(q))
+  if (!mpodd(p))
   {
-    F = root_mod_even(F,q); avma = av;
-    return (lg(F) == 1)? NULL: gel(F,1);
+    f = oneroot_mod_2(f);
+    avma = av; return f;
   }
-  F = FpX_oneroot_i(F, p);
-  if (!F) { avma = av; return NULL; }
-  return gerepileuptoint(av, F);
-}
-
-GEN
-rootmod(GEN f, GEN p)
-{
-  ulong q;
-  pari_sp av = avma;
-  GEN y;
-
-  f = factmod_init(f, p);
-  if (lg(p) == 3)
-  {
-    ulong up;
-    if (signe(p) < 0) pari_err_PRIME("rootmod", p);
-    up = itou(p);
-    f = ZX_to_Flx(f,up);
-    switch (lgpol(f))
-    {
-      case 0: pari_err_ROOTS0("rootmod");
-      case 1: avma = av; return cgetg(1, t_COL);
-    }
-    y = Flc_to_ZC( Flx_roots_i(f,up) );
-    return gerepileupto(av, FpC_to_mod(y, p));
-  }
-  switch (degpol(f))
-  {
-    case  0: avma = av; return cgetg(1,t_COL);
-    case -1: pari_err_ROOTS0("rootmod");
-  }
-  q = init_p(p); if (!q) q = mod2BIL(p);
-  if (q & 1)
-    y = FpX_roots_i(f, p);
-  else
-    y = root_mod_even(f,q);
-  return gerepileupto(av, FpC_to_mod(y, p));
-}
-
-GEN
-rootmod0(GEN f, GEN p, long flag)
-{
-  switch(flag)
-  {
-    case 0: return rootmod(f,p);
-    case 1: return rootmod2(f,p);
-    default: pari_err_FLAG("polrootsmod");
-  }
-  return NULL; /* not reached */
+  f = FpX_normalize(f, p);
+  f = FpX_oneroot_i(f, p);
+  if (!f) { avma = av; return NULL; }
+  return gerepileuptoint(av, f);
 }
 
 /*******************************************************************/
@@ -950,6 +883,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
 static int
 cmpGsGs(GEN a, GEN b) { return (long)a - (long)b; }
 
+/* p > 2 */
 static GEN
 FpX_is_irred_2(GEN f, GEN p, long d)
 {
@@ -961,6 +895,7 @@ FpX_is_irred_2(GEN f, GEN p, long d)
   }
   return FpX_quad_factortype(f, p) == -1? gen_1: NULL;
 }
+/* p > 2 */
 static GEN
 FpX_degfact_2(GEN f, GEN p, long d)
 {
@@ -1014,18 +949,23 @@ FpX_factor_2(GEN f, GEN p, long d)
   S = deg1pol_shallow(gen_1, s, v);
   return mkvec2(mkcol2(R,S), mkvecsmall2(1,1));
 }
+static GEN
+FpX_factor_deg2(GEN f, GEN p, long d, long flag)
+{
+  switch(flag) {
+    case 2: return FpX_is_irred_2(f, p, d);
+    case 1: return FpX_degfact_2(f, p, d);
+    default: return FpX_factor_2(f, p, d);
+  }
+}
 
 static int
 F2x_quad_factortype(GEN x)
-{
-  return x[2] == 7 ? -1: x[2] == 6 ? 1 :0;
-}
+{ return x[2] == 7 ? -1: x[2] == 6 ? 1 :0; }
 
 static GEN
 F2x_is_irred_2(GEN f, long d)
-{
-  return d == 1 || (d==2 && F2x_quad_factortype(f) == -1)? gen_1: NULL;
-}
+{ return d == 1 || (d==2 && F2x_quad_factortype(f) == -1)? gen_1: NULL; }
 
 static GEN
 F2x_degfact_2(GEN f, long d)
@@ -1053,17 +993,22 @@ F2x_factor_2(GEN f, long d)
   default: return mkvec2(mkcol2(mkvecsmall2(v,2),mkvecsmall2(v,3)), mkvecsmall2(1,1));
   }
 }
+static GEN
+F2x_factor_deg2(GEN f, long d, long flag)
+{
+  switch(flag) {
+    case 2: return F2x_is_irred_2(f, d);
+    case 1: return F2x_degfact_2(f, d);
+    default: return F2x_factor_2(f, d);
+  }
+}
 
+/* p > 2 */
 static ulong
 Flx_quad_root(GEN x, ulong p, int unknown)
 {
-  ulong s, u, D, b = x[3], c = x[2];
-
-  if (p==2) {
-    if (!b) return c;
-    return c? p: 1;
-  }
-  D = Fl_sub(Fl_sqr(b,p), Fl_mul(c,4,p), p);
+  ulong s, u, b = x[3], c = x[2];
+  ulong D = Fl_sub(Fl_sqr(b,p), Fl_mul(c,4,p), p);
   if (unknown && kross(D,p) == -1) return p;
   s = Fl_sqrt(D,p);
   if (s==~0UL) return p;
@@ -1077,52 +1022,7 @@ Flx_otherroot(GEN x, ulong r, ulong p)
   return Fl_neg(Fl_add(x[3], r, p), p);
 }
 
-static GEN
-Flx_root_mod_2(GEN f)
-{
-  int z1, z0 = !(f[2] & 1);
-  long i,n;
-  GEN y;
-
-  for (i=2, n=1; i < lg(f); i++)
-    if (f[i] & 1) n++;
-  z1 = n & 1;
-  y = cgetg(z0+z1+1, t_VECSMALL); i = 1;
-  if (z0) y[i++] = 0;
-  if (z1) y[i  ] = 1;
-  return y;
-}
-
-/* assume deg f > 0 and f reduced mod 4 [ need non-negative coeffs ] */
-static GEN
-Flx_root_mod_4(GEN f)
-{
-  long no, ne, i, l = lg(f);
-  GEN y;
-  int z0, z1, z2, z3; /* zi = 1 iff f(i) = 0 mod 4 */
-
-  ne = f[2];
-  no = f[3];
-
-  z0 = (ne & 3) == 0; /* f(0) mod 4 = 0 ? */
-  z2 = ((ne + (no<<1)) & 3) == 0; /* f(2) mod 4 = 0 ? */
-
-  /* write f(x) = fe(x^2) + x fo(x^2) */
-  for (i=4; i<l; i+=2) ne += f[i]; /* compute mod 2^BIL */
-  for (i=5; i<l; i+=2) no += f[i]; /* compute mod 2^BIL */
-  ne &= 3; /* = fe(1) mod 4 */
-  no &= 3; /* = fo(1) mod 4 */
-  z3 = (no == ne);
-  z1 = ((ne+no) & 3) == 0;
-  y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1;
-  if (z0) y[i++] = 0;
-  if (z1) y[i++] = 1;
-  if (z2) y[i++] = 2;
-  if (z3) y[i  ] = 3;
-  return y;
-}
-
-/* by splitting, assume p prime, deg(f) > 0, and f monic */
+/* by splitting, assume p > 2 prime, deg(f) > 0, and f monic */
 static GEN
 Flx_roots_i(GEN f, ulong p)
 {
@@ -1130,15 +1030,6 @@ Flx_roots_i(GEN f, ulong p)
   GEN y, yp, pol, a, b;
   ulong q = p >> 1;
 
-  if (!(p&1))
-  {
-    switch(p)
-    {
-      case 2: return Flx_root_mod_2(f);
-      case 4: return Flx_root_mod_4(f);
-      default: pari_err_PRIME("rootmod",utoipos(p));
-    }
-  }
   y = cgetg(1+degpol(f), t_VECSMALL);
   j = 1;
   if (Flx_valrem(f, &f)) {
@@ -1213,12 +1104,13 @@ GEN
 Flx_roots(GEN f, ulong p)
 {
   pari_sp av = avma;
-  switch (lgpol(f))
+  switch(lg(f))
   {
-    case 0: pari_err_ROOTS0("Flx_roots");
-    case 1: avma = av; return cgetg(1, t_VECSMALL);
+    case 2: pari_err_ROOTS0("Flx_roots");
+    case 3: avma = av; return cgetg(1, t_VECSMALL);
   }
-  return gerepileupto(av, Flx_roots_i(Flx_normalize(f, p), p));
+  if (p == 2) return Flx_root_mod_2(f);
+  return gerepileuptoleaf(av, Flx_roots_i(Flx_normalize(f, p), p));
 }
 
 /* assume x reduced mod p, monic. */
@@ -1247,6 +1139,7 @@ Flx_degfact_2(GEN f, ulong p, long d)
     default: return mkvec2(mkvecsmall(1), mkvecsmall(2));
   }
 }
+/* p > 2 */
 static GEN
 Flx_factor_2(GEN f, ulong p, long d)
 {
@@ -1267,6 +1160,15 @@ Flx_factor_2(GEN f, ulong p, long d)
   S = mkvecsmall3(v,s,1);
   return mkvec2(mkcol2(R,S), mkvecsmall2(1,1));
 }
+static GEN
+Flx_factor_deg2(GEN f, ulong p, long d, long flag)
+{
+  switch(flag) {
+    case 2: return Flx_is_irred_2(f, p, d);
+    case 1: return Flx_degfact_2(f, p, d);
+    default: return Flx_factor_2(f, p, d);
+  }
+}
 
 static int
 cmp_small(GEN x, GEN y) {
@@ -1277,54 +1179,52 @@ cmp_small(GEN x, GEN y) {
 static GEN
 F2x_factcantor_i(GEN f, long flag)
 {
-  long j, e, vf, nbfact, d = F2x_degree(f);
+  long j, e, nbfact, d = F2x_degree(f);
   ulong k;
-  GEN E, f2, g, g1, u, v, pd, y, t;
+  GEN X, E, f2, g, g1, u, v, pd, y, t;
 
-  if (d <= 2) switch(flag) {
-    case 2: return F2x_is_irred_2(f, d);
-    case 1: return F2x_degfact_2(f, d);
-    default: return F2x_factor_2(f, d);
-  }
+  if (d <= 2) return F2x_factor_deg2(f, d, flag);
   /* to hold factors and exponents */
   t = flag ? cgetg(d+1,t_VECSMALL): cgetg(d+1,t_VEC);
   E = cgetg(d+1, t_VECSMALL);
-  vf=f[1]; e = nbfact = 1;
+  X = polx_F2x(f[1]);
+  e = nbfact = 1;
   for(;;)
   {
     f2 = F2x_gcd(f,F2x_deriv(f));
-    if (flag > 1 && F2x_degree(f2) > 0) return NULL;
+    if (flag == 2 && F2x_degree(f2) > 0) return NULL;
     g1 = F2x_div(f,f2);
     k = 0;
     while (F2x_degree(g1)>0)
     {
-      long du,dg;
+      long du, dg, dg1;
       GEN S;
       k++; if (k%2==0) { k++; f2 = F2x_div(f2,g1); }
       u = g1; g1 = F2x_gcd(f2,g1);
-      if (F2x_degree(g1)>0)
-      {
-        u = F2x_div( u,g1);
-        f2= F2x_div(f2,g1);
-      }
       du = F2x_degree(u);
-      if (du <= 0) continue;
-
+      dg1 = F2x_degree(g1);
+      if (dg1>0)
+      {
+        f2= F2x_div(f2,g1);
+        if (du == dg1) continue;
+        u = F2x_div( u,g1);
+        du -= dg1;
+      }
       /* here u is square-free (product of irred. of multiplicity e * k) */
-      pd=gen_1; v=polx_F2x(vf);
+      pd=gen_1; v = X;
       S = du==1 ?  cgetg(1, t_VEC): F2xq_powers(F2xq_sqr(v, u), du-1, u);
       for (d=1; d <= du>>1; d++)
       {
         if (!flag) pd = shifti(pd, 1);
         v = F2x_F2xqV_eval(v, S, u);
-        g = F2x_gcd(F2x_add(v, polx_F2x(vf)), u);
+        g = F2x_gcd(F2x_add(v, X), u);
         dg = F2x_degree(g);
         if (dg <= 0) continue;
         /* g is a product of irred. pols, all of which have degree d */
         j = nbfact+dg/d;
         if (flag)
         {
-          if (flag > 1) return NULL;
+          if (flag == 2) return NULL;
           for ( ; nbfact<j; nbfact++) { t[nbfact]=d; E[nbfact]=e*k; }
         }
         else
@@ -1347,7 +1247,7 @@ F2x_factcantor_i(GEN f, long flag)
     if (F2x_degree(f2)==0) break;
     e <<=1; f = F2x_sqrt(f2);
   }
-  if (flag > 1) return gen_1; /* irreducible */
+  if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
   return flag ? sort_factor(y, (void*)cmpGsGs, cmp_nodata)
@@ -1365,39 +1265,51 @@ F2x_factcantor(GEN f, long flag)
 int
 F2x_is_irred(GEN f) { return !!F2x_factcantor_i(f,2); }
 
+static void
+F2xv_to_Flxv_inplace(GEN v)
+{
+  long i;
+  for(i=1;i<lg(v);i++) gel(v,i)= F2x_to_Flx(gel(v,i));
+}
+static void
+Flxv_to_ZXV_inplace(GEN v)
+{
+  long i;
+  for(i=1;i<lg(v);i++) gel(v,i)= Flx_to_ZX(gel(v,i));
+}
+static void
+F2xv_to_ZXV_inplace(GEN v)
+{
+  long i;
+  for(i=1;i<lg(v);i++) gel(v,i)= F2x_to_ZX(gel(v,i));
+}
+
 /* factor f mod pp.
  * flag = 1: return the degrees, not the factors
  * flag = 2: return NULL if f is not irreducible */
 static GEN
 Flx_factcantor_i(GEN f, ulong p, long flag)
 {
-  long j, e, vf, nbfact, d = degpol(f);
+  long j, e, nbfact, d = degpol(f);
   ulong k;
-  GEN E, f2, g, g1, u, v, pd, q, y, t;
-  if (p==2) /*We need to handle 2 specially */
-  {
+  GEN X, E, f2, g, g1, u, v, pd, q, y, t;
+  if (p==2) { /*We need to handle 2 specially */
     GEN F = F2x_factcantor_i(Flx_to_F2x(f),flag);
-    if (flag==0 && F)
-    {
-      long i;
-      for(i=1;i<lg(F[1]);i++)
-        gmael(F,1,i)= F2x_to_Flx(gmael(F,1,i));
-    }
+    if (flag==0) F2xv_to_Flxv_inplace(gel(F,1));
     return F;
-  } /* Now we assume p odd */
-  if (d <= 2) switch(flag) {
-    case 2: return Flx_is_irred_2(f, p, d);
-    case 1: return Flx_degfact_2(f, p, d);
-    default: return Flx_factor_2(f, p, d);
   }
+  /* Now we assume p odd */
+  if (d <= 2) return Flx_factor_deg2(f, p, d, flag);
+
   /* to hold factors and exponents */
   t = cgetg(d+1, flag? t_VECSMALL: t_VEC);
   E = cgetg(d+1, t_VECSMALL);
-  vf=f[1]; e = nbfact = 1;
+  X = polx_Flx(f[1]);
+  e = nbfact = 1;
   for(;;)
   {
     f2 = Flx_gcd(f,Flx_deriv(f,p), p);
-    if (flag > 1 && degpol(f2) > 0) return NULL;
+    if (flag == 2 && degpol(f2) > 0) return NULL;
     g1 = Flx_div(f,f2,p);
     k = 0;
     while (degpol(g1)>0)
@@ -1415,20 +1327,20 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
       if (du <= 0) continue;
 
       /* here u is square-free (product of irred. of multiplicity e * k) */
-      pd=gen_1; v=polx_Flx(vf);
+      pd=gen_1; v=X;
       S = du==1 ?  cgetg(1, t_VEC): Flxq_powers(Flxq_powu(v, p, u, p), du-1, u, p);
       for (d=1; d <= du>>1; d++)
       {
         if (!flag) pd = muliu(pd,p);
         v = Flx_FlxqV_eval(v, S, u, p);
-        g = Flx_gcd(Flx_sub(v, polx_Flx(vf), p), u, p);
+        g = Flx_gcd(Flx_sub(v, X, p), u, p);
         dg = degpol(g);
         if (dg <= 0) continue;
         /* g is a product of irred. pols, all of which have degree d */
         j = nbfact+dg/d;
         if (flag)
         {
-          if (flag > 1) return NULL;
+          if (flag == 2) return NULL;
           for ( ; nbfact<j; nbfact++) { t[nbfact]=d; E[nbfact]=e*k; }
         }
         else
@@ -1457,7 +1369,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
     if (degpol(f2)==0) break;
     e *= p; f = Flx_deflate(f2, p);
   }
-  if (flag > 1) return gen_1; /* irreducible */
+  if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
   return flag ? sort_factor(y, (void*)cmpGsGs, cmp_nodata)
@@ -1478,65 +1390,48 @@ Flx_degfact(GEN f, ulong p)
   GEN z = Flx_factcantor_i(Flx_normalize(f,p),p,1);
   return gerepilecopy(av, z);
 }
-
 int
 Flx_is_irred(GEN f, ulong p) { return !!Flx_factcantor_i(f,p,2); }
 
-/* factor f mod pp.
+/* factor f (FpX or Flx) mod pp.
  * flag = 1: return the degrees, not the factors
  * flag = 2: return NULL if f is not irreducible.
  * Not gerepile-safe */
 static GEN
 FpX_factcantor_i(GEN f, GEN pp, long flag)
 {
-  long j, vf, nbfact, d = degpol(f);
+  long j, nbfact, d = degpol(f);
   ulong k;
-  GEN E,y,f2,g,g1,u,v,pd,q;
+  GEN X, E,y,f2,g,g1,v,pd,q;
   GEN t;
-  if (lgefint(pp)==3)
-  {
+  if (typ(f) == t_VECSMALL)
+  { /* lgefint(pp) = 3 */
     GEN F;
     ulong p = pp[2];
-    if (p==2)
-    {
-      F = F2x_factcantor_i(ZX_to_F2x(f),flag);
-      if (flag==0 && F)
-      {
-        long i;
-        for(i=1;i<lg(F[1]);i++)
-          gmael(F,1,i)= F2x_to_ZX(gmael(F,1,i));
-      }
-    } else
-    {
-      F = Flx_factcantor_i(ZX_to_Flx(f,p),p,flag);
-      if (flag==0 && F)
-      {
-        long i;
-        for(i=1;i<lg(F[1]);i++)
-          gmael(F,1,i)= Flx_to_ZX(gmael(F,1,i));
-      }
+    if (p==2) {
+      F = F2x_factcantor_i(Flx_to_F2x(f),flag);
+      if (flag==0) F2xv_to_ZXV_inplace(gel(F,1));
+    } else {
+      F = Flx_factcantor_i(f,p,flag);
+      if (flag==0) Flxv_to_ZXV_inplace(gel(F,1));
     }
     return F;
-  } /*Now, we can assume that p is large and odd*/
-
-  if (d <= 2) switch(flag) {
-    case 2: return FpX_is_irred_2(f, pp, d);
-    case 1: return FpX_degfact_2(f, pp, d);
-    default: return FpX_factor_2(f, pp, d);
   }
+  /*Now, we can assume that p is large and odd*/
+  if (d <= 2) return FpX_factor_deg2(f,pp,d,flag);
 
   /* to hold factors and exponents */
-  t = flag ? cgetg(d+1,t_VECSMALL): cgetg(d+1,t_VEC);
+  t = cgetg(d+1, flag? t_VECSMALL: t_VEC);
   E = cgetg(d+1, t_VECSMALL);
-  vf=varn(f); nbfact = 1;
+  X = pol_x(varn(f)); nbfact = 1;
   f2 = FpX_gcd(f,ZX_deriv(f), pp);
-  if (flag > 1 && degpol(f2) > 0) return NULL;
-  g1 = FpX_div(f,f2,pp);
+  if (flag == 2 && degpol(f2)) return NULL;
+  g1 = degpol(f2)? FpX_div(f,f2,pp): f; /* squarefree */
   k = 0;
   while (degpol(g1)>0)
   {
     long du,dg;
-    GEN S;
+    GEN u, S;
     k++;
     u = g1; g1 = FpX_gcd(f2,g1, pp);
     if (degpol(g1)>0)
@@ -1548,13 +1443,13 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
     if (du <= 0) continue;
 
     /* here u is square-free (product of irred. of multiplicity e * k) */
-    pd=gen_1; v=pol_x(vf);
+    pd=gen_1; v=X;
     S = du==1 ?  cgetg(1, t_VEC): FpXQ_powers(FpXQ_pow(v, pp, u, pp), du-1, u, pp);
     for (d=1; d <= du>>1; d++)
     {
       if (!flag) pd = mulii(pd,pp);
       v = FpX_FpXQV_eval(v, S, u, pp);
-      g = FpX_gcd(ZX_sub(v, pol_x(vf)), u, pp);
+      g = FpX_gcd(ZX_sub(v, X), u, pp);
       dg = degpol(g);
       if (dg <= 0) continue;
 
@@ -1562,7 +1457,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       j = nbfact+dg/d;
       if (flag)
       {
-        if (flag > 1) return NULL;
+        if (flag == 2) return NULL;
         for ( ; nbfact<j; nbfact++) { t[nbfact]=d; E[nbfact]=k; }
       }
       else
@@ -1588,7 +1483,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       E[nbfact++]=k;
     }
   }
-  if (flag > 1) return gen_1; /* irreducible */
+  if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
   return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
@@ -1598,24 +1493,27 @@ GEN
 FpX_factcantor(GEN f, GEN pp, long flag)
 {
   pari_sp av = avma;
-  GEN z = FpX_factcantor_i(FpX_factmod_init(f,pp),pp,flag);
+  GEN z;
+  ZX_factmod_init(&f,pp);
+  z = FpX_factcantor_i(f,pp,flag);
   if (flag == 2) { avma = av; return z; }
   return gerepilecopy(av, z);
 }
 
-GEN
-factcantor0(GEN f, GEN p, long flag)
+static GEN
+factmod_aux(GEN f, GEN p, GEN (*Factor)(GEN,GEN,long), long flag)
 {
   pari_sp av = avma;
   long j, nbfact;
   GEN z, y, t, E, u, v;
-  f = factmod_init(f, p);
-  switch (degpol(f))
+
+  factmod_init(&f, p);
+  switch(lg(f))
   {
-    case  0: avma = av; return trivial_fact();
-    case -1: return gerepileupto(av, zero_fact_intmod(f, p));
+    case 2: avma = av; return trivial_fact();
+    case 3: return gerepileupto(av, zero_fact_intmod(f, p));
   }
-  z = FpX_factcantor_i(f,p,flag); t = gel(z,1); E = gel(z,2);
+  z = Factor(f,p,flag); t = gel(z,1); E = gel(z,2);
   y = cgetg(3, t_MAT); nbfact = lg(t);
   u = cgetg(nbfact,t_COL); gel(y,1) = u;
   v = cgetg(nbfact,t_COL); gel(y,2) = v;
@@ -1633,17 +1531,26 @@ factcantor0(GEN f, GEN p, long flag)
     }
   return gerepileupto(av, y);
 }
+GEN
+factcantor0(GEN f, GEN p, long flag)
+{ return factmod_aux(f, p, &FpX_factcantor_i, flag); }
+GEN
+factmod(GEN f, GEN p)
+{ return factmod_aux(f, p, &FpX_Berlekamp_i, 0); }
 
 /* Use this function when you think f is reducible, and that there are lots of
  * factors. If you believe f has few factors, use FpX_nbfact(f,p)==1 instead */
 int
 FpX_is_irred(GEN f, GEN p) {
-  return !!FpX_factcantor_i(FpX_factmod_init(f,p),p,2);
+  ZX_factmod_init(&f,p);
+  return !!FpX_factcantor_i(f,p,2);
 }
 GEN
 FpX_degfact(GEN f, GEN p) {
   pari_sp av = avma;
-  GEN z = FpX_factcantor_i(FpX_factmod_init(f,p),p,1);
+  GEN z;
+  ZX_factmod_init(&f,p);
+  z = FpX_factcantor_i(f,p,1);
   return gerepilecopy(av, z);
 }
 GEN
@@ -1680,59 +1587,208 @@ FqX_rand(long d1, long v, GEN T, GEN p)
 }
 
 #define set_irred(i) { if ((i)>ir) swap(t[i],t[ir]); ir++;}
+/* assume x1 != 0 */
+static GEN
+deg1_Flx(ulong x1, ulong x0, ulong sv)
+{
+  return mkvecsmall3(sv, x0, x1);
+}
+
+long
+F2x_split_Berlekamp(GEN *t)
+{
+  GEN u = *t, a, b, vker;
+  long lpol, d, i, ir, L, la, sv = u[1], du = F2x_degree(u);
+
+  if (du == 1) return 1;
+  if (du == 2)
+  {
+    if (F2x_quad_factortype(u) == 1) /* 0 is a root: shouldn't occur */
+    {
+      t[0] = mkvecsmall2(sv, 2);
+      t[1] = mkvecsmall2(sv, 3);
+      return 2;
+    }
+    return 1;
+  }
+
+  lpol = nbits2lg(lgpol(u));
+  vker = F2x_Berlekamp_ker(u);
+  d = lg(vker)-1;
+  ir = 0;
+  /* t[i] irreducible for i < ir, still to be treated for i < L */
+  for (L=1; L<d; )
+  {
+    GEN pol;
+    if (d == 2)
+      pol = F2v_to_F2x(gel(vker,2), sv);
+    else
+    {
+      GEN v = const_vecsmall(lpol,0);
+      v[1] = du;
+      v[2] = random_Fl(2); /*Assume vker[1]=1*/
+      for (i=2; i<=d; i++)
+        if (random_Fl(2)) F2v_add_inplace(v, gel(vker,i));
+      pol = F2v_to_F2x(v, sv);
+    }
+    for (i=ir; i<L && L<d; i++)
+    {
+      a = t[i]; la = F2x_degree(a);
+      if (la == 1) { set_irred(i); }
+      else if (la == 2)
+      {
+        if (F2x_quad_factortype(a) == 1) /* 0 is a root: shouldn't occur */
+        {
+          t[i] = mkvecsmall2(sv, 2);
+          t[L] = mkvecsmall2(sv, 3); L++;
+        }
+        set_irred(i);
+      }
+      else
+      {
+        pari_sp av = avma;
+        long lb;
+        b = F2x_rem(pol, a);
+        if (F2x_degree(b) <= 0) { avma=av; continue; }
+        b = F2x_gcd(a,b); lb = F2x_degree(b);
+        if (lb && lb < la)
+        {
+          t[L] = F2x_div(a,b);
+          t[i]= b; L++;
+        }
+        else avma = av;
+      }
+    }
+  }
+  return d;
+}
+
+/* p != 2 */
+long
+Flx_split_Berlekamp(GEN *t, ulong p)
+{
+  GEN u = *t, a,b,vker;
+  long d, i, ir, L, la, lb, sv = u[1];
+  long l = lg(u);
+  ulong po2;
+
+  if (p == 2)
+  {
+    *t = Flx_to_F2x(*t);
+    d = F2x_split_Berlekamp(t);
+    for (i = 1; i <= d; i++) t[i] = F2x_to_Flx(t[i]);
+    return d;
+  }
+  la = degpol(u);
+  if (la == 1) return 1;
+  if (la == 2)
+  {
+    ulong r = Flx_quad_root(u,p,1);
+    if (r != p)
+    {
+      t[0] = deg1_Flx(1, p - r, sv); r = Flx_otherroot(u,r,p);
+      t[1] = deg1_Flx(1, p - r, sv);
+      return 2;
+    }
+    return 1;
+  }
+
+  vker = Flx_Berlekamp_ker(u,p);
+  vker = Flm_to_FlxV(vker, sv);
+  d = lg(vker)-1;
+  po2 = p >> 1; /* (p-1) / 2 */
+  ir = 0;
+  /* t[i] irreducible for i < ir, still to be treated for i < L */
+  for (L=1; L<d; )
+  {
+    GEN pol = const_vecsmall(l-2,0);
+    pol[1] = sv;
+    pol[2] = random_Fl(p); /*Assume vker[1]=1*/
+    for (i=2; i<=d; i++)
+      Flx_addmul_inplace(pol, gel(vker,i), random_Fl(p), p);
+    (void)Flx_renormalize(pol,l-1);
+
+    for (i=ir; i<L && L<d; i++)
+    {
+      a = t[i]; la = degpol(a);
+      if (la == 1) { set_irred(i); }
+      else if (la == 2)
+      {
+        ulong r = Flx_quad_root(a,p,1);
+        if (r != p)
+        {
+          t[i] = deg1_Flx(1, p - r, sv); r = Flx_otherroot(a,r,p);
+          t[L] = deg1_Flx(1, p - r, sv); L++;
+        }
+        set_irred(i);
+      }
+      else
+      {
+        pari_sp av = avma;
+        b = Flx_rem(pol, a, p);
+        if (degpol(b) <= 0) { avma=av; continue; }
+        b = Flx_Fl_add(Flxq_powu(b,po2, a,p), p-1, p);
+        b = Flx_gcd(a,b, p); lb = degpol(b);
+        if (lb && lb < la)
+        {
+          b = Flx_normalize(b, p);
+          t[L] = Flx_div(a,b,p);
+          t[i]= b; L++;
+        }
+        else avma = av;
+      }
+    }
+  }
+  return d;
+}
 
 long
 FpX_split_Berlekamp(GEN *t, GEN p)
 {
   GEN u = *t, a,b,po2,vker;
-  long d, i, ir, L, la, lb, vu = varn(u), sv = evalvarn(vu);
-  long l = lg(u);
-  ulong ps = itou_or_0(p);
-  if (ps==2)
-    vker = F2x_Berlekamp_ker(ZX_to_F2x(u));
-  else if (ps)
+  long d, i, ir, L, la, lb, vu = varn(u);
+  if (lgefint(p) == 3)
   {
-    vker = Flx_Berlekamp_ker(ZX_to_Flx(u,ps),ps);
-    vker = Flm_to_FlxV(vker, sv);
+    ulong up = p[2];
+    if (up == 2)
+    {
+      *t = ZX_to_F2x(*t);
+      d = F2x_split_Berlekamp(t);
+      for (i = 0; i < d; i++) t[i] = F2x_to_ZX(t[i]);
+    }
+    else
+    {
+      *t = ZX_to_Flx(*t, up);
+      d = Flx_split_Berlekamp(t, up);
+      for (i = 0; i < d; i++) t[i] = Flx_to_ZX(t[i]);
+    }
+    return d;
   }
-  else
+  la = degpol(u);
+  if (la == 1) return 1;
+  if (la == 2)
   {
-    vker = FpX_Berlekamp_ker(u,p);
-    vker = RgM_to_RgXV(vker,vu);
+    GEN r = FpX_quad_root(u,p,1);
+    if (r)
+    {
+      t[0] = deg1pol_shallow(gen_1, subii(p,r), vu); r = FpX_otherroot(u,r,p);
+      t[1] = deg1pol_shallow(gen_1, subii(p,r), vu);
+      return 2;
+    }
+    return 1;
   }
+  vker = FpX_Berlekamp_ker(u,p);
+  vker = RgM_to_RgXV(vker,vu);
   d = lg(vker)-1;
   po2 = shifti(p, -1); /* (p-1) / 2 */
   ir = 0;
-  /* t[i] irreducible for i <= ir, still to be treated for i < L */
+  /* t[i] irreducible for i < ir, still to be treated for i < L */
   for (L=1; L<d; )
   {
-    GEN polt;
-    if (ps==2)
-    {
-      long lb = nbits2lg(l-2);
-      GEN pol = const_vecsmall(lb-1,0);
-      pol[1] = sv;
-      pol[2] = random_Fl(2); /*Assume vker[1]=1*/
-      for (i=2; i<=d; i++)
-        if (random_Fl(2))
-          F2v_add_inplace(pol, gel(vker,i));
-      (void)F2x_renormalize(pol,lb);
-      polt = F2x_to_ZX(pol);
-    } else if (ps) {
-      GEN pol = const_vecsmall(l-2,0);
-      pol[1] = sv;
-      pol[2] = random_Fl(ps); /*Assume vker[1]=1*/
-      for (i=2; i<=d; i++)
-        Flx_addmul_inplace(pol, gel(vker,i), random_Fl(ps), ps);
-      (void)Flx_renormalize(pol,l-1);
-
-      polt = Flx_to_ZX(pol);
-    } else {
-      GEN pol = scalar_ZX_shallow(randomi(p), vu);
-      for (i=2; i<=d; i++)
-        pol = ZX_add(pol, ZX_Z_mul(gel(vker,i), randomi(p)));
-      polt = FpX_red(pol,p);
-    }
+    GEN pol = scalar_ZX_shallow(randomi(p), vu);
+    for (i=2; i<=d; i++)
+      pol = ZX_add(pol, ZX_Z_mul(gel(vker,i), randomi(p)));
+    pol = FpX_red(pol,p);
     for (i=ir; i<L && L<d; i++)
     {
       a = t[i]; la = degpol(a);
@@ -1750,7 +1806,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
       else
       {
         pari_sp av = avma;
-        b = FpX_rem(polt, a, p);
+        b = FpX_rem(pol, a, p);
         if (degpol(b) <= 0) { avma=av; continue; }
         b = ZX_Z_add(FpXQ_pow(b,po2, a,p), gen_m1);
         b = FpX_gcd(a,b, p); lb = degpol(b);
@@ -1826,90 +1882,226 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
 }
 
 static GEN
-FpX_factor_i(GEN f, GEN pp)
+F2x_Berlekamp_i(GEN f, long flag)
 {
-  long e, N, nbfact, val, d = degpol(f);
-  ulong p, k, j;
-  GEN E, f2, g1, u, t;
+  long e, nbfact, val, d = F2x_degree(f);
+  ulong k, j;
+  GEN y, E, f2, g1, t;
 
-  if (d <= 2) return FpX_factor_2(f, pp, d);
-  p = init_p(pp);
+  if (d <= 2) return F2x_factor_deg2(f, d, flag);
 
   /* to hold factors and exponents */
-  t = cgetg(d+1,t_COL); E = cgetg(d+1,t_VECSMALL);
-  val = ZX_valrem(f, &f);
+  t = cgetg(d+1, flag? t_VECSMALL: t_VEC);
+  E = cgetg(d+1,t_VECSMALL);
+  val = F2x_valrem(f, &f);
   e = nbfact = 1;
-  if (val) { gel(t,1) = pol_x(varn(f)); E[1] = val; nbfact++; }
+  if (val) {
+    if (flag == 2 && val > 1) return NULL;
+    if (flag == 1)
+      t[1] = 1;
+    else
+      gel(t,1) = polx_F2x(f[1]);
+    E[1] = val; nbfact++;
+  }
 
   for(;;)
   {
-    f2 = FpX_gcd(f,ZX_deriv(f), pp);
-    g1 = lg(f2)==3? f: FpX_div(f,f2,pp); /* is squarefree */
+    f2 = F2x_gcd(f,F2x_deriv(f));
+    if (flag == 2 && F2x_degree(f2)) return NULL;
+    g1 = F2x_degree(f2)? F2x_div(f,f2): f; /* squarefree */
     k = 0;
-    while (degpol(g1)>0)
+    while (F2x_degree(g1)>0)
     {
-      k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
-      u = g1;
-      if (!degpol(f2)) g1 = pol_1(0); /* only its degree (= 0) matters */
+      GEN u;
+      k++; if (k%2 == 0) { k++; f2 = F2x_div(f2,g1); }
+      u = g1; /* deg(u) > 0 */
+      if (!F2x_degree(f2)) g1 = pol1_F2x(0); /* only its degree (= 0) matters */
       else
       {
-        g1 = FpX_gcd(f2,g1, pp);
-        if (degpol(g1))
+        long dg1;
+        g1 = F2x_gcd(f2,g1);
+        dg1 = F2x_degree(g1);
+        if (dg1)
         {
-          u = FpX_div( u,g1,pp);
-          f2= FpX_div(f2,g1,pp);
+          f2= F2x_div(f2,g1);
+          if (F2x_degree(u) == dg1) continue;
+          u = F2x_div( u,g1);
         }
       }
       /* u is square-free (product of irred. of multiplicity e * k) */
-      N = degpol(u);
-      if (N > 0)
+      gel(t,nbfact) = u;
+      d = F2x_split_Berlekamp(&gel(t,nbfact));
+      if (flag == 2 && d != 1) return NULL;
+      if (flag == 1)
+        for (j=0; j<(ulong)d; j++) t[nbfact+j] = F2x_degree(gel(t,nbfact+j));
+      for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
+      nbfact += d;
+    }
+    j = F2x_degree(f2); if (!j) break;
+    e *= 2; f = F2x_deflate(f2, 2);
+  }
+  if (flag == 2) return gen_1; /* irreducible */
+  setlg(t, nbfact);
+  setlg(E, nbfact); y = mkvec2(t,E);
+  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+              : sort_factor_pol(y, cmp_small);
+}
+
+static GEN
+Flx_Berlekamp_i(GEN f, ulong p, long flag)
+{
+  long e, nbfact, val, d = degpol(f);
+  ulong k, j;
+  GEN y, E, f2, g1, t;
+
+  if (p == 2)
+  {
+    GEN F = F2x_factor_deg2(Flx_to_F2x(f),d,flag);
+    if (flag==0) F2xv_to_Flxv_inplace(gel(F,1));
+    return F;
+  }
+  if (d <= 2) return Flx_factor_deg2(f,p,d,flag);
+
+  /* to hold factors and exponents */
+  t = cgetg(d+1, flag? t_VECSMALL: t_VEC);
+  E = cgetg(d+1,t_VECSMALL);
+  val = Flx_valrem(f, &f);
+  e = nbfact = 1;
+  if (val) {
+    if (flag == 2 && val > 1) return NULL;
+    if (flag == 1)
+      t[1] = 1;
+    else
+      gel(t,1) = polx_Flx(f[1]);
+    E[1] = val; nbfact++;
+  }
+
+  for(;;)
+  {
+    f2 = Flx_gcd(f,Flx_deriv(f,p), p);
+    if (flag == 2 && degpol(f2)) return NULL;
+    g1 = degpol(f2)? Flx_div(f,f2,p): f; /* squarefree */
+    k = 0;
+    while (degpol(g1)>0)
+    {
+      GEN u;
+      k++; if (k%p == 0) { k++; f2 = Flx_div(f2,g1,p); }
+      u = g1; /* deg(u) > 0 */
+      if (!degpol(f2)) g1 = pol1_Flx(0); /* only its degree (= 0) matters */
+      else
       {
-        gel(t,nbfact) = FpX_normalize(u,pp);
-        d = (N==1)? 1: FpX_split_Berlekamp(&gel(t,nbfact), pp);
-        for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
-        nbfact += d;
+        g1 = Flx_gcd(f2,g1, p);
+        if (degpol(g1))
+        {
+          f2= Flx_div(f2,g1,p);
+          if (lg(u) == lg(g1)) continue;
+          u = Flx_div( u,g1,p);
+        }
       }
+      /* u is square-free (product of irred. of multiplicity e * k) */
+      u = Flx_normalize(u,p);
+      gel(t,nbfact) = u;
+      d = Flx_split_Berlekamp(&gel(t,nbfact), p);
+      if (flag == 2 && d != 1) return NULL;
+      if (flag == 1)
+        for (j=0; j<(ulong)d; j++) t[nbfact+j] = degpol(gel(t,nbfact+j));
+      for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
+      nbfact += d;
     }
     if (!p) break;
     j = degpol(f2); if (!j) break;
     if (j % p) pari_err_PRIME("factmod",utoi(p));
-    e *= p; f = RgX_deflate(f2, p);
+    e *= p; f = Flx_deflate(f2, p);
   }
+  if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor_pol(mkvec2(t,E), cmpii);
+  setlg(E, nbfact); y = mkvec2(t,E);
+  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+              : sort_factor_pol(y, cmp_small);
+}
+
+/* f an FpX or an Flx */
+static GEN
+FpX_Berlekamp_i(GEN f, GEN pp, long flag)
+{
+  long e, nbfact, val, d = degpol(f);
+  ulong k, j;
+  GEN y, E, f2, g1, t;
+
+  if (typ(f) == t_VECSMALL)
+  {/* lgefint(pp) == 3 */
+    ulong p = pp[2];
+    GEN F;
+    if (p == 2) {
+      F = F2x_Berlekamp_i(Flx_to_F2x(f), flag);
+      if (flag==0) F2xv_to_ZXV_inplace(gel(F,1));
+    } else {
+      F = Flx_Berlekamp_i(f, p, flag);
+      if (flag==0) Flxv_to_ZXV_inplace(gel(F,1));
+    }
+    return F;
+  }
+  /* p is large (and odd) */
+  if (d <= 2) return FpX_factor_deg2(f,pp,d,flag);
+
+  /* to hold factors and exponents */
+  t = cgetg(d+1, flag? t_VECSMALL: t_VEC);
+  E = cgetg(d+1,t_VECSMALL);
+  val = ZX_valrem(f, &f);
+  e = nbfact = 1;
+  if (val) {
+    if (flag == 2 && val > 1) return NULL;
+    if (flag == 1)
+      t[1] = 1;
+    else
+      gel(t,1) = pol_x(varn(f));
+    E[1] = val; nbfact++;
+  }
+
+  f2 = FpX_gcd(f,ZX_deriv(f), pp);
+  if (flag == 2 && degpol(f2)) return NULL;
+  g1 = degpol(f2)? FpX_div(f,f2,pp): f; /* squarefree */
+  k = 0;
+  while (degpol(g1)>0)
+  {
+    GEN u;
+    k++;
+    u = g1; /* deg(u) > 0 */
+    if (!degpol(f2)) g1 = pol_1(0); /* only its degree (= 0) matters */
+    else
+    {
+      g1 = FpX_gcd(f2,g1, pp);
+      if (degpol(g1))
+      {
+        f2= FpX_div(f2,g1,pp);
+        if (lg(u) == lg(g1)) continue;
+        u = FpX_div( u,g1,pp);
+      }
+    }
+    /* u is square-free (product of irred. of multiplicity e * k) */
+    u = FpX_normalize(u,pp);
+    gel(t,nbfact) = u;
+    d = FpX_split_Berlekamp(&gel(t,nbfact), pp);
+    if (flag == 2 && d != 1) return NULL;
+    if (flag == 1)
+      for (j=0; j<(ulong)d; j++) t[nbfact+j] = degpol(gel(t,nbfact+j));
+    for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
+    nbfact += d;
+  }
+  if (flag == 2) return gen_1; /* irreducible */
+  setlg(t, nbfact);
+  setlg(E, nbfact); y = mkvec2(t,E);
+  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+              : sort_factor_pol(y, cmpii);
 }
 GEN
 FpX_factor(GEN f, GEN p)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, FpX_factor_i(FpX_factmod_init(f, p), p));
+  ZX_factmod_init(&f, p);
+  return gerepilecopy(av, FpX_Berlekamp_i(f, p, 0));
 }
 
-GEN
-factmod(GEN f, GEN p)
-{
-  pari_sp av = avma;
-  long nbfact;
-  long j;
-  GEN y, u, v, z, t, E;
-
-  f = factmod_init(f, p);
-  switch (degpol(f))
-  {
-    case  0: avma = av; return trivial_fact();
-    case -1: return gerepileupto(av, zero_fact_intmod(f, p));
-  }
-  z = FpX_factor_i(f, p); t = gel(z,1); E = gel(z,2);
-  y = cgetg(3,t_MAT); nbfact = lg(t);
-  u = cgetg(nbfact,t_COL); gel(y,1) = u;
-  v = cgetg(nbfact,t_COL); gel(y,2) = v;
-  for (j=1; j<nbfact; j++)
-  {
-    gel(u,j) = FpX_to_mod(gel(t,j), p);
-    gel(v,j) = utoi((ulong)E[j]);
-  }
-  return gerepileupto(av, y);
-}
 GEN
 factormod0(GEN f, GEN p, long flag)
 {

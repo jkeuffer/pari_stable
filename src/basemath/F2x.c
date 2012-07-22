@@ -544,6 +544,51 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   *pr = x; return z;
 }
 
+long
+F2x_valrem(GEN x, GEN *Z)
+{
+  long v, v2, i, l=lg(x);
+  GEN y;
+  if (l==2) { *Z = leafcopy(x); return LONG_MAX; }
+  for (i=2; i<l && x[i]==0; i++) /*empty*/;
+  v = i-2;
+  v2 = (i < l)? vals(x[i]): 0;
+  if (v+v2 == 0) { *Z = x; return 0; }
+  l -= i-2;
+  y = cgetg(l, t_VECSMALL); y[1] = x[1];
+  if (v2 == 0)
+    for (i=2; i<l; i++) y[i] = x[i+v];
+  else if (l == 3)
+    y[2] = x[2+v] >> v2;
+  else
+  {
+    const ulong sh = BITS_IN_LONG - v2;
+    ulong r = x[2+v];
+    for (i=3; i<l; i++)
+    {
+      y[i-1] = (x[i+v] << sh) | (r >> v2);
+      r = x[i+v];
+    }
+    y[l-1] = r >> v2;
+    (void)F2x_renormalize(y,l);
+  }
+  *Z = y; return (v << TWOPOTBITS_IN_LONG) + v2;
+}
+
+GEN
+F2x_deflate(GEN x, long d)
+{
+  GEN y;
+  long i,id, dy, dx = F2x_degree(x);
+  if (d <= 1) return Flx_copy(x);
+  if (dx < 0) return leafcopy(x);
+  dy = dx/d;
+  y = const_vecsmall(nbits2lg(dy)-1, 0); y[1] = x[1];
+  for (i=id=0; i<=dy; i++,id+=d)
+    if (F2x_coeff(x,id)) F2x_set(y, i);
+  return y;
+}
+
 GEN
 F2x_deriv(GEN z)
 {

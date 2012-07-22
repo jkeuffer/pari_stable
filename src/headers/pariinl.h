@@ -1724,6 +1724,11 @@ INLINE GEN
 FpXQX_renormalize(GEN x, long lx) { return ZX_renormalize(x,lx); }
 INLINE GEN
 F2x_renormalize(GEN x, long lx)   { return Flx_renormalize(x,lx); }
+INLINE GEN
+F2v_to_F2x(GEN x, long sv) {
+  GEN y = leafcopy(x);
+  y[1] = sv; F2x_renormalize(y, lg(y)); return y;
+}
 
 INLINE GEN
 ZX_ZXY_resultant(GEN a, GEN b) { return ZX_ZXY_rnfequation(a,b,NULL); }

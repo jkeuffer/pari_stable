@@ -9,13 +9,10 @@ Description:
  (pol, int, 1):vec            rootmod2($1, $2)
  (pol, int, #small):vec       $"Bad flag in polrootsmod"
  (pol, int, small):vec        rootmod0($1, $2, $3)
-Doc: row vector of roots modulo $p$ of the polynomial \var{pol}. The
- particular non-prime value $p=4$ is accepted, mainly for $2$-adic
- computations. Multiple roots are \emph{not} repeated.
+Doc: row vector of roots modulo $p$ of the polynomial \var{pol}.
+ Multiple roots are \emph{not} repeated.
  \bprog
  ? polrootsmod(x^2-1,2)
  %1 = [Mod(1, 2)]~
- ? polrootsmod(x^2-1,4)
- %2 = [Mod(1, 4), Mod(3, 4)]~
  @eprog\noindent
  If $p$ is very small, you may set $\fl=1$, which uses a naive search.
