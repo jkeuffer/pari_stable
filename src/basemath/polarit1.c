@@ -306,123 +306,163 @@ FpX_otherroot(GEN x, GEN r, GEN p)
   return s;
 }
 
+/* 'todo' contains the list of factors to be split.
+ * 'done' the list of finished factors, no longer touched */
+struct split_t { GEN todo, done; } split_t;
+static void
+split_init(struct split_t *S, long max)
+{
+  S->done = vectrunc_init(max);
+  S->todo = vectrunc_init(max);
+}
+#if 0
+/* move todo[i] to done */
+static void
+split_convert(struct split_t *S, long i)
+{
+  long n = lg(S->todo)-1;
+  vectrunc_append(S->done, gel(S->todo,i));
+  if (n) gel(S->todo,i) = gel(S->todo, n);
+  setlg(S->todo, n);
+}
+#endif
+/* append t to todo */
+static void
+split_add(struct split_t *S, GEN t) { vectrunc_append(S->todo, t); }
+/* delete todo[i], add t to done */
+static void
+split_moveto_done(struct split_t *S, long i, GEN t)
+{
+  long n = lg(S->todo)-1;
+  vectrunc_append(S->done, t);
+  if (n) gel(S->todo,i) = gel(S->todo, n);
+  setlg(S->todo, n);
+
+}
+/* append t to done */
+static void
+split_add_done(struct split_t *S, GEN t)
+{ vectrunc_append(S->done, t); }
+/* split todo[i] into a and b */
+static void
+split_todo(struct split_t *S, long i, GEN a, GEN b)
+{
+  gel(S->todo, i) = a;
+  split_add(S, b);
+}
+/* split todo[i] into a and b, moved to done */
+static void
+split_done(struct split_t *S, long i, GEN a, GEN b)
+{
+  split_moveto_done(S, i, a);
+  split_add_done(S, b);
+}
+
 /* by splitting, assume p > 2 prime, deg(f) > 0, and f monic */
 static GEN
 FpX_roots_i(GEN f, GEN p)
 {
-  long n, np, j, k, da, db;
-  GEN y, yp, pol, pol0, a, b, q = shifti(p,-1);
+  GEN pol, pol0, a, q;
+  struct split_t S;
 
-  n = ZX_valrem(f, &f)? 1: 0;
-  y = cgetg(lg(f), t_COL);
-  j = 1;
-  if (n) {
-    gel(y, j++) = gen_0;
-    if (lg(f) <= 3) { setlg(y, 2); return y; }
-    n = 1;
-  }
-  n++;
-  da = degpol(f);
-  if (da == 1) { gel(y,j++) = subii(p, gel(f,2)); setlg(y,j); return y; }
-  if (da == 2) {
-    GEN s, r = FpX_quad_root(f, p, 1);
-    if (r) {
-      gel(y, j++) = r;
-      s = FpX_otherroot(f,r, p);
-      if (!equalii(r, s)) gel(y, j++) = s;
+  split_init(&S, lg(f)-1);
+  settyp(S.done, t_COL);
+  if (ZX_valrem(f, &f)) split_add_done(&S, gen_0);
+  switch(degpol(f))
+  {
+    case 0: return S.done;
+    case 1: split_add_done(&S, subii(p, gel(f,2))); return S.done;
+    case 2: {
+      GEN s, r = FpX_quad_root(f, p, 1);
+      if (r) {
+        split_add_done(&S, r);
+        s = FpX_otherroot(f,r, p);
+        /* f not known to be square free yet */
+        if (!equalii(r, s)) split_add_done(&S, s);
+      }
+      return sort(S.done);
     }
-    setlg(y, j); return sort(y);
   }
 
-  /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
-  b = FpXQ_pow(pol_x(varn(f)),q, f,p);
-  if (lg(b) < 3) pari_err_PRIME("rootmod",p);
-  b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
-  a = FpX_gcd(f,b, p);
-  b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
-  b = FpX_gcd(f,b, p);
-  da = degpol(a);
-  db = degpol(b); setlg(y, n+da+db);
-  yp = cgetg(n+da+db, t_VEC);
-  np = 1;
-  if (db) gel(yp,np++) = FpX_normalize(b,p);
-  if (da) gel(yp,np++) = FpX_normalize(a,p);
+  a = FpXQ_pow(pol_x(varn(f)), subiu(p,1), f,p);
+  if (lg(a) < 3) pari_err_PRIME("rootmod",p);
+  a = FpX_Fp_sub_shallow(a, gen_1, p); /* a = x^(p-1) - 1 mod f */
+  a = FpX_gcd(f,a, p);
+  if (!degpol(a)) return S.done;
+  split_add(&S, FpX_normalize(a,p));
+
+  q = shifti(p,-1);
   pol0 = icopy(gen_1); /* constant term, will vary in place */
   pol = deg1pol_shallow(gen_1, pol0, varn(f));
-  for (pol0[2]=1; ; pol0[2]++)
+  for (pol0[2] = 1;; pol0[2]++)
   {
-    for (k = j = 1; j < np; j++)
-    {
-      a = gel(yp,j); da = degpol(a);
-      if (da==1)
-        gel(y,n++) = subii(p, gel(a,2));
-      else if (da==2)
-      {
-        GEN r = FpX_quad_root(a, p, 0);
-        gel(y, n++) = r;
-        gel(y, n++) = FpX_otherroot(a,r, p);
-      }
-      else gel(yp, k++) = a;
-    }
-    if (k == 1) break;
-    np = k;
+    long j;
     if (pol0[2] == 100 && !BPSW_psp(p)) pari_err_PRIME("polrootsmod",p);
-    for (j = np; --j > 0; )
-    { /* cf FpX_split_Berlekamp */
-      a = gel(yp, j);
-      b = ZX_Z_add(FpXQ_pow(pol,q, a,p), gen_m1); /* pol^(p-1)/2 - 1 */
-      b = FpX_gcd(a,b, p); db = degpol(b);
-      if (db && db < degpol(a))
-      {
-        b = FpX_normalize(b, p);
-        gel(yp,np++) = FpX_div(a,b, p);
-        gel(yp,j)    = b; break;
+    for (j = 1; j < lg(S.todo); j++)
+    {
+      GEN c = gel(S.todo,j);
+      switch(degpol(c))
+      { /* convert linear and quadratics to roots, try to split the rest */
+        case 1:
+          split_moveto_done(&S, j, subii(p, gel(c,2)));
+          break;
+        case 2: {
+          GEN r = FpX_quad_root(c, p, 0), s = FpX_otherroot(c,r, p);
+          split_done(&S, j, r, s);
+          break;
+        }
+        default: {
+          /* b = pol^(p-1)/2 - 1 */
+          GEN b = FpX_Fp_sub_shallow(FpXQ_pow(pol,q, c,p), gen_1, p);
+          long db;
+          b = FpX_gcd(c,b, p); db = degpol(b);
+          if (db && db < degpol(c))
+          {
+            b = FpX_normalize(b, p);
+            c = FpX_div(c,b, p);
+            split_todo(&S, j, b, c);
+          }
+        }
       }
     }
+    if (lg(S.todo) == 1) return sort(S.done);
   }
-  return sort(y);
 }
-/* assume p odd prime */
+/* assume p > 2 prime */
 static GEN
 FpX_oneroot_i(GEN f, GEN p)
 {
-  long da, db;
-  GEN pol, pol0, a, b, q = shifti(p,-1);
+  GEN pol, pol0, a, q;
 
   if (ZX_val(f)) return gen_0;
-  da = degpol(f);
-  if (da == 1) return subii(p, gel(f,2));
-  if (da == 2) return FpX_quad_root(f, p, 1);
-
-  /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
-  b = FpXQ_pow(pol_x(varn(f)),q, f,p);
-  if (lg(b) < 3) pari_err_PRIME("rootmod",p);
-  b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
-  a = FpX_gcd(f,b, p);
-  b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
-  b = FpX_gcd(f,b, p);
-  da = degpol(a);
-  db = degpol(b);
-  if (!da)
+  switch(degpol(f))
   {
-    if (!db) return NULL;
-    a = b;
+    case 1: return subii(p, gel(f,2));
+    case 2: return FpX_quad_root(f, p, 1);
   }
-  else
-    if (db && db < da) a = b;
+
+  a = FpXQ_pow(pol_x(varn(f)), subiu(p,1), f,p);
+  if (lg(a) < 3) pari_err_PRIME("rootmod",p);
+  a = FpX_Fp_sub_shallow(a, gen_1, p); /* a = x^(p-1) - 1 mod f */
+  a = FpX_gcd(f,a, p);
+  if (!degpol(a)) return NULL;
   a = FpX_normalize(a,p);
+
+  q = shifti(p,-1);
   pol0 = icopy(gen_1); /* constant term, will vary in place */
   pol = deg1pol_shallow(gen_1, pol0, varn(f));
   for(;;)
-  { /* cf FpX_split_Berlekamp */
-    da = degpol(a);
-    if (da==1)
-      return subii(p, gel(a,2));
-    if (da==2)
-      return FpX_quad_root(a, p, 0);
+  {
+    long da;
+    switch(da = degpol(a))
+    {
+      case 1: return subii(p, gel(a,2));
+      case 2: return FpX_quad_root(a, p, 0);
+    }
     for (pol0[2]=1; ; pol0[2]++)
     {
-      b = ZX_Z_add(FpXQ_pow(pol,q, a,p), gen_m1); /* pol^(p-1)/2 - 1 */
+      GEN b = FpX_Fp_sub_shallow(FpXQ_pow(pol,q, a,p), gen_1, p);
+      long db;
       b = FpX_gcd(a,b, p); db = degpol(b);
       if (db && db < da)
       {
@@ -430,8 +470,7 @@ FpX_oneroot_i(GEN f, GEN p)
         a = (db <= (da >> 1))? b: FpX_div(a,b, p);
         break;
       }
-      if (pol0[2] == 100 && !BPSW_psp(p))
-        pari_err_PRIME("polrootsmod",p);
+      if (pol0[2] == 100 && !BPSW_psp(p)) pari_err_PRIME("FpX_oneroot",p);
     }
   }
 }
@@ -869,7 +908,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
     w = FpX_rem(itoFpX(m,p,v),*t, p);
     w = try_pow(w,*t,p,q,r);
     if (!w) continue;
-    w = ZX_Z_add(w, gen_m1);
+    w = FpX_Fp_sub_shallow(w, gen_1, p);
     w = FpX_gcd(*t,w, p); l=degpol(w);
     if (l && l!=dv) break;
   }
@@ -1808,7 +1847,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
         pari_sp av = avma;
         b = FpX_rem(pol, a, p);
         if (degpol(b) <= 0) { avma=av; continue; }
-        b = ZX_Z_add(FpXQ_pow(b,po2, a,p), gen_m1);
+        b = FpX_Fp_sub_shallow(FpXQ_pow(b,po2, a,p), gen_1, p);
         b = FpX_gcd(a,b, p); lb = degpol(b);
         if (lb && lb < la)
         {
