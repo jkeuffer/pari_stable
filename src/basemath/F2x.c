@@ -582,8 +582,8 @@ F2x_deflate(GEN x, long d)
   long i,id, dy, dx = F2x_degree(x);
   if (d <= 1) return Flx_copy(x);
   if (dx < 0) return leafcopy(x);
-  dy = dx/d;
-  y = const_vecsmall(nbits2lg(dy)-1, 0); y[1] = x[1];
+  dy = dx/d; /* dy+1 coefficients + 1 extra word for variable */
+  y = const_vecsmall(nbits2lg(dy+1)-1, 0); y[1] = x[1];
   for (i=id=0; i<=dy; i++,id+=d)
     if (F2x_coeff(x,id)) F2x_set(y, i);
   return y;
