@@ -275,7 +275,7 @@ FlxqE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
   } else {
     GEN slope, tmp1, tmp2;
     *pt_R = FlxqE_dbl_slope(R, a4, T, p, &slope);
-    tmp1 = Flx_add(gel(Q, 1), Flx_neg(gel(R, 1), p), p);
+    tmp1 = Flx_sub(gel(Q, 1), gel(R, 1), p);
     tmp2 = Flx_add(Flxq_mul(tmp1, slope, T, p), gel(R,2), p);
     return Flx_sub(gel(Q, 2), tmp2, p);
   }

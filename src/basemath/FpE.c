@@ -283,7 +283,7 @@ FpE_tangent_update(GEN R, GEN Q, GEN a4, GEN p, GEN *pt_R)
   } else {
     GEN slope, tmp1, tmp2;
     *pt_R = FpE_dbl_slope(R, a4, p, &slope);
-    tmp1 = Fp_add(gel(Q, 1), Fp_neg(gel(R, 1), p), p);
+    tmp1 = Fp_sub(gel(Q, 1), gel(R, 1), p);
     tmp2 = Fp_add(Fp_mul(tmp1, slope, p), gel(R,2), p);
     return Fp_sub(gel(Q, 2), tmp2, p);
   }
@@ -1313,7 +1313,7 @@ FpXQE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
   } else {
     GEN slope, tmp1, tmp2;
     *pt_R = FpXQE_dbl_slope(R, a4, T, p, &slope);
-    tmp1 = FpX_add(gel(Q, 1), FpX_neg(gel(R, 1), p), p);
+    tmp1 = FpX_sub(gel(Q, 1), gel(R, 1), p);
     tmp2 = FpX_add(FpXQ_mul(tmp1, slope, T, p), gel(R,2), p);
     return FpX_sub(gel(Q, 2), tmp2, p);
   }
