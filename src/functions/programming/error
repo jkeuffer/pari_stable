@@ -19,6 +19,6 @@ Doc: outputs its argument list (each of
  them interpreted as a string), then interrupts the running \kbd{gp} program,
  returning to the input prompt. For instance
  \bprog
- error("n = ", n, " is not squarefree !")
+ error("n = ", n, " is not squarefree!")
  @eprog\noindent
   % \syn{NO}

@@ -28,7 +28,7 @@ Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  %5 = 0
  ? ellap(E, 11)   \\ ... but it also works
  %6 = 0
- ? ellgroup(E, 13) \\ ouch, inconsistent input !
+ ? ellgroup(E, 13) \\ ouch, inconsistent input!
     ***   at top-level: ellap(E,13)
     ***                 ^-----------
     *** ellap: inconsistent moduli in Rg_to_Fp:

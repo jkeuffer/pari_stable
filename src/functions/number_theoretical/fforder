@@ -11,7 +11,7 @@ Doc: multiplicative order of the finite field element $x$.  If $o$ is
  of the multiplicative group of the underlying finite field.
  \bprog
  ? t = ffgen(ffinit(nextprime(10^8), 5));
- ? g = ffprimroot(t, &o);  \\@com o will be useful !
+ ? g = ffprimroot(t, &o);  \\@com o will be useful!
  ? fforder(g^1000000, o)
  time = 0 ms.
  %5 = 5000001750000245000017150000600250008403

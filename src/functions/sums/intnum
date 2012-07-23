@@ -270,7 +270,7 @@ Doc: numerical integration
  tab = intnuminit(-1,1, M);
  intnum(x=-1,1, intnum(y=-sqrt(1-x^2),sqrt(1-x^2), x^2+y^2,tab), tab) - Pi/2
  }
- ? m = intnumstep() \\@com what value of $m$ did it take ?
+ ? m = intnumstep() \\@com what value of $m$ did it take?
  %1 = 7
  ? test(m - 1)
  time = 1,790 ms.

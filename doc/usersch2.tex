@@ -1232,10 +1232,10 @@ computations are then done formally on the coefficients as if the
 polynomial was univariate.
 
 This is not symmetrical. So if I enter \kbd{x + y} in a clean session,
-what happens ? This is understood as
+what happens? This is understood as
 $$ x^1 + (y^1 + 0*y^0)*x^0 \in (\Z[y])[x] $$
 but how do we know that $x$ is ``more important'' than $y$ ? Why not $y^1 +
-x*y^0$, which is the same mathematical entity after all ?
+x*y^0$, which is the same mathematical entity after all?
 
 The answer is that variables are ordered implicitly by the interpreter:
 when a new identifier (e.g~$x$, or $y$ as above) is input, the corresponding
@@ -1297,7 +1297,7 @@ or \tet{content}:
 ? content(2 / x)
 %5 = 2
 @eprog
-\noindent Can you see why ? Hint: $x/y = (1/y) * x$ is in $\Q(y)[x]$ and
+\noindent Can you see why? Hint: $x/y = (1/y) * x$ is in $\Q(y)[x]$ and
 denominator is taken with respect to $\Q(y)(x)$; $y/x = (y*x^0) / x$ is in
 $\Q(y)(x)$ so $y$ is invertible in the coefficient ring. On the other hand,
 $2/x$ involves a single variable and the coefficient ring is simply $\Z$.
@@ -1342,7 +1342,7 @@ Here is a more involved example:
 @eprog\noindent
 The discrepancy between \kbd{\%2} and \kbd{\%3} is surprising. Why does
 \kbd{\%2} contain a spurious constant term, which cannot be
-deduced from the input ? Well, we ignored the rule that forbids to
+deduced from the input? Well, we ignored the rule that forbids to
 substitute an expression involving high-priority variables
 to a low-priority variable. The result \kbd{\%4} is correct according to
 our rules since the implicit constant in $O(x)$ may depend on $z$. It is
@@ -1875,8 +1875,8 @@ lexically scope it to the place where it is useful:
   my ( add = init(5) );
 @eprog
 
-How about multiple functions then ? We can use the last idea and return a
-vector of functions, but if we insist on global variables ?
+How about multiple functions then? We can use the last idea and return a
+vector of functions, but if we insist on global variables?
 The first idea
 \bprog
 init(x) = add(y) = x+y; mul(y) = x*y;
@@ -2272,7 +2272,7 @@ To get out of a break loop, you can use \tet{next}, \tet{break}, \tet{return},
 or type \kbd{C-d} (\kbd{EOF}), any of which will let \kbd{gp} perform its
 usual cleanup, and send you back to the \kbd{gp} prompt. Note that \kbd{C-d}
 is slightly dangerous, since typing it \emph{twice} will not only send you
-back to the \kbd{gp} prompt, but to your shell prompt ! (Since \kbd{C-d} at
+back to the \kbd{gp} prompt, but to your shell prompt! (Since \kbd{C-d} at
 the \kbd{gp} prompt exits the gp session.)
 
 If the break loop was started by a user interrupt (and not by an error),
@@ -2398,10 +2398,10 @@ final example, to check in a safe way whether \tet{install} works correctly
 in your \kbd{gp}:
 \bprog
 broken_install() =
-{ \\ can we install ?
+{ \\ can we install?
   iferr(install(addii,GG),
         ERR, return ("OS"));
-  \\ can we use the installed function ?
+  \\ can we use the installed function?
   iferr(if (addii(1,1) != 2, return("BROKEN")),
         ERR, return("USE"));
   return (0);
@@ -2930,7 +2930,7 @@ $if Pari-GP
   "\C-h": backward-delete-char
   "\e\C-h": backward-kill-word
   "\C-xd": dump-functions
-  (: "\C-v()\C-b"       #@com can be annoying when copy-pasting !
+  (: "\C-v()\C-b"       #@com can be annoying when copy-pasting!
   [: "\C-v[]\C-b"
 $endif
 @eprog

@@ -32,7 +32,7 @@ Doc: computes the structure of the group $E(\F_p) \sim \Z/d_1\Z \times
  %5 = [12]
  ? ellgroup(E, 11)   \\ ... but it also works
  %6 = [12]
- ? ellgroup(E, 13) \\ ouch, inconsistent input !
+ ? ellgroup(E, 13) \\ ouch, inconsistent input!
     ***   at top-level: ellgroup(E,13)
     ***                 ^--------------
     *** ellgroup: inconsistent moduli in Rg_to_Fp:
