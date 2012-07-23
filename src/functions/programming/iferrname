@@ -61,7 +61,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
 
   \item \kbd{"e\_OP"}. Impossible operation between two objects than cannot
   be typecast to a sensible common domain for deeper reasons than a type
-  mismatch, usually for arithmetic reasons. As in \kbd{O(2) + O(3)} : it is
+  mismatch, usually for arithmetic reasons. As in \kbd{O(2) + O(3)}: it is
   valid to add two \typ{PADIC}s, provided the underlying prime is the same; so
   the addition is not forbidden a priori for type reasons, it only becomes so
   when inspecting the objects and trying to perform the operation.
@@ -134,7 +134,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \item \kbd{"e\_COPRIME"}. Function $s$ expected coprime arguments,
   and did receive $x,y$, which were not.
   \var{E} has three component, 1 (\typ{STR}): the function name $s$,
-  2 : the argument $x$, 3 : the argument $y$.
+  2: the argument $x$, 3: the argument $y$.
 
   \item \kbd{"e\_INTMOD"}. Tried to invert a non-invertible \typ{INTMOD}
   \kbd{Mod($a$,$b$)}. Provided $a$ is not $0$ mod $b$, this allows to factor
@@ -169,7 +169,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \item \kbd{"e\_PRIME"}. Function $s$ expected a prime number,
   and did receive $p$, which was not. (As in \kbd{idealprimedec(nf, 4)}.)
   \var{E} has two component, 1 (\typ{STR}): the function name $s$,
-  2 : the argument $p$.
+  2: the argument $p$.
 
   \item \kbd{"e\_ROOTS0"}. An argument of function $s$ is a zero polynomial,
   and we need to consider its roots. (As in \kbd{polroots(0)}.) \var{E} has

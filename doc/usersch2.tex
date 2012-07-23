@@ -759,7 +759,7 @@ of the right dimension to \kbd{M[i,]}.
 of the right dimension to \kbd{M[,j]}.
 
 \noindent \emph{But} \kbd{M[i]} is meaningless and triggers an error. The
-``range'' notation $i..j$ is available as for vectors :
+``range'' notation $i..j$ is available as for vectors:
 
 \item \kbd{M[i..j, k..l]}, $i\leq j$, $k\leq l$, returns the submatrix built
 from the rows $i$ to $j$ and columns $k$ to $l$ of $M$; you can \emph{not}
@@ -883,7 +883,7 @@ error is printed immediately, the computation is aborted, and GP enters the
 
 @eprog\noindent Here the computation is aborted as soon as we try to evaluate
 $1/0$, and $1 + 1$ is never executed. Exceptions can be trapped
-using \tet{iferr} or \tet{iferrname}, however : we can evaluate some
+using \tet{iferr} or \tet{iferrname}, however: we can evaluate some
 expression and either recover an ordinary result (no error occurred), or an
 exception (an error did occur).
 \bprog
@@ -891,7 +891,7 @@ exception (an error did occur).
   error("impossible inverse modulo: Mod(6, 12).")
   %1 = 2
 @eprog\noindent One can ignore the exception, print it as above, or extract
-non trivial information from the error context :
+non trivial information from the error context:
 \bprog
   ? i = Mod(6,12); iferr(1/i, E, print(component(E,1)));
   Mod(6, 12)
@@ -1061,7 +1061,7 @@ returning 1 for \kbd{true} and 0 for \kbd{false}. For instance,
 but a different distance component are tested as equal.
 
 \kbd{===}: test whether two objects are identical component-wise. This is
-stricter than \kbd{==} : for instance, the integer 0, a 0 polynomial or a
+stricter than \kbd{==}: for instance, the integer 0, a 0 polynomial or a
 vector with 0 entries, are all tested equal by \kbd{==}, but they are not
 identical.
 
@@ -1095,7 +1095,7 @@ before the left hand side.
 It is crucial that the left hand-side be an \var{lvalue} there, it avoids
 ambiguities in expressions like \kbd{1 + x = 1}. The latter evaluates as
 \kbd{1 + (x = 1)}, not as \kbd{(1 + x) = 1}, even though the priority of
-\kbd{=} is lower than the priority of \kbd{+} : \kbd{1 + x} is not an lvalue.
+\kbd{=} is lower than the priority of \kbd{+}: \kbd{1 + x} is not an lvalue.
 
 If the expression cannot be parsed in a way where the left hand side is an
 lvalue, raise an error.
@@ -1982,7 +1982,7 @@ by any number of keyword characters: \kbd{\_} or alphanumeric characters
 ([\kbd{A-Za-z0-9}]). The built-in member function names are reserved and
 cannot be used (see the list with \kbd{?.}). Finally, names starting with
 \kbd{e} or \kbd{E} followed by a digit are forbidden, due to a clash with
-the floating point exponent notation : we understand \kbd{1.e2} as
+the floating point exponent notation: we understand \kbd{1.e2} as
 $100.000\dots$, not as extracting member \kbd{e2} of object \kbd{1}.
 
 \section{Strings and Keywords}\sidx{string}\sidx{keyword}

@@ -42,7 +42,7 @@ Doc: discrete logarithm of $x$ in $(\Z/N\Z)^*$ in base $g$.
  The latter two algorithms require $O(\sqrt{q})$ operations in the group on
  average, hence will not be able to treat cases where $q > 10^{30}$, say.
  In addition, Pollard rho is not able to handle the case where there are no
- solutions : it will enter an infinite loop.
+ solutions: it will enter an infinite loop.
  \bprog
  ? g = znprimroot(101)
  %1 = Mod(2,101)

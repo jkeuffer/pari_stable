@@ -16,7 +16,7 @@ Doc: returns the current version number as a \typ{VEC} with three integer
  care about the 3 first numeric components. In any case, the \kbd{lex} function
  offers a clever way to check against a particular version number, since it will
  compare each successive vector entry, numerically or as strings, and will not
- mind if the vectors it compares have different lengths :
+ mind if the vectors it compares have different lengths:
  \bprog
     if (lex(version(), [2,3,5]) >= 0,
       \\ code to be executed if we are running 2.3.5 or more recent.

@@ -38,7 +38,7 @@ Doc: sum of the two ideals $x$ and $y$ in the number field $\var{nf}$. The
    [0 1]
 
  @eprog\noindent In the last two examples, we get wrong results since the
- matrices $c$ and $d$ do not correspond to an ideal : the $\Z$-span of their
+ matrices $c$ and $d$ do not correspond to an ideal: the $\Z$-span of their
  columns (as usual interpreted as coordinates with respect to the integer basis
  \kbd{K.zk}) is not an $O_K$-module. To add arbitrary $\Z$-modules generated
  by the columns of matrices $A$ and $B$, use \kbd{mathnf(concat(A,B))}.

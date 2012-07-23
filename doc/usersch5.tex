@@ -111,16 +111,16 @@ An \kbd{entree} is the generic object associated to an identifier (a name)
 in GP's interpreter, be it a built-in or user function, or a variable. For
 a function, it has at least the following fields:
 
-  \kbd{char *name} : the name under which the interpreter knows us.
+  \kbd{char *name}: the name under which the interpreter knows us.
 
-  \kbd{void *value} :  a pointer to the C function to call.
+  \kbd{void *value}:  a pointer to the C function to call.
 
-  \kbd{long menu} : an integer from 1 to 11 (to which group of function
+  \kbd{long menu}: an integer from 1 to 11 (to which group of function
                     help do we belong).
 
-  \kbd{char *code} : the prototype code.
+  \kbd{char *code}: the prototype code.
 
-  \kbd{char *help} : the help text for the function.
+  \kbd{char *help}: the help text for the function.
 
 A routine in GP is described to the analyzer by an \kbd{entree}
 structure. Built-in PARI routines are grouped in \emph{modules}, which
@@ -566,7 +566,7 @@ a \typ{POLMOD}.
 \typ{POLMOD}.
 
 \fun{int}{is_noncalc_t}{long t} true if generic operations (\kbd{gadd},
-\kbd{gmul}) do not make sense for $t$ : corresponds to types
+\kbd{gmul}) do not make sense for $t$: corresponds to types
 \typ{LIST}, \typ{STR}, \typ{VECSMALL}, \typ{CLOSURE}
 
 \subsec{Accessors and components}\label{se:accessors}
@@ -871,7 +871,7 @@ non-recursive type (\kbd{is\_recursive\_t(typ(q))} is non-zero). Contrary to
 \kbd{gerepileuptoint} and \kbd{gerepileupto}, \kbd{gerepileuptoleaf} leaves
 length and effective length of a \typ{INT} unchanged.
 
-\subsec{Garbage collection : advanced use}
+\subsec{Garbage collection: advanced use}
 
 \fun{void}{stackdummy}{pari_sp av, pari_sp ltop} inhibits the memory area
 between \kbd{av} \emph{included} and \kbd{ltop} \emph{excluded} with respect to
@@ -3013,7 +3013,7 @@ are both vector types, expand $x$ first, then $n$.
 \fun{GEN}{map_proto_lGL}{long (*f)(GEN,long), GEN x, long y}
 
 In the last function, $f$ implements an associative binary operator, which we
-extend naturally to an $n$-ary operator $f_n$ for any $n$ : by convention,
+extend naturally to an $n$-ary operator $f_n$ for any $n$: by convention,
 $f_0() = 1$, $f_1(x) = x$, and
 $$ f_n(x_1,\dots,x_n) = f( f_{n-1}(x_1,\dots,x_{n-1}), x_n)),$$
 for $n \geq 2$.
@@ -6152,7 +6152,7 @@ error if it detects consistency problems in modular objects: incompatible rings
 for $T\neq U$). Minor discrepancies are supported if they make general sense
 (e.g. $\F_p$ and $\F_{p^k}$, but not $\F_p$ and $\Q_p$); \typ{FFELT} and
 \typ{POLMOD} of \typ{INTMOD}s are considered inconsistent, even if they define
-the same field : if you need to use simultaneously these different finite
+the same field: if you need to use simultaneously these different finite
 field implementations, multiply the polynomial by a \typ{FFELT} equal to $1$
 first.
 
@@ -6187,13 +6187,13 @@ and a secondary type \kbd{t2}, describing $R$. If \kbd{t} is the
 
 \kbd{t1} is one of
 
-\typ{POLMOD} : at least one \typ{POLMOD} component,
+\typ{POLMOD}: at least one \typ{POLMOD} component,
 set \kbd{*ppol} to the modulus,
 
-\typ{QUAD} : no \typ{POLMOD}, at least one \typ{QUAD} component,
+\typ{QUAD}: no \typ{POLMOD}, at least one \typ{QUAD} component,
 set \kbd{*ppol} to the modulus (\kbd{$-$.pol}) of the \typ{QUAD},
 
-\typ{COMPLEX} : no \typ{POLMOD} or \typ{QUAD}, at least one \typ{COMPLEX}
+\typ{COMPLEX}: no \typ{POLMOD} or \typ{QUAD}, at least one \typ{COMPLEX}
 component, set \kbd{*ppol} to $y^2 + 1$.
 
 and the underlying base ring $R$ is given by \kbd{t2}, which
@@ -8723,7 +8723,7 @@ call}.
 
 \subsubsec{e\_OP} Impossible operation between two objects than cannot be
 typecast to a sensible common domain for deeper reasons than a type mismatch,
-usually for arithmetic reasons. As in \kbd{O(2) + O(3)} : it is valid to add
+usually for arithmetic reasons. As in \kbd{O(2) + O(3)}: it is valid to add
 two \typ{PADIC}s, provided the underlying prime is the same; so the addition
 is not forbidden a priori for type reasons, it only becomes so when
 inspecting the objects and trying to perform the operation.
@@ -8874,7 +8874,7 @@ and did not receive one. (As in \kbd{nfinit(x\pow2-1)}.)
   pari_err(e_IRREDPOL, const char *s, GEN x)
   pari_err_IRREDPOL(const char *s, GEN x)
 @eprog\noindent prints the error message: \kbd{not an irreducible polynomial
-in $s$ : $x$}.
+in $s$: $x$}.
 
 \subsubsec{e\_MISC} Generic uncategorized error.
 \bprog
@@ -8903,7 +8903,7 @@ which was not. (As in \kbd{idealprimedec(nf, 4)}.)
 \bprog
   pari_err(e_PRIME, const char *s, GEN x)
   pari_err_PRIME(const char *s, GEN x)
-@eprog\noindent prints the error message: \kbd{not a prime in $s$ : $x$}.
+@eprog\noindent prints the error message: \kbd{not a prime in $s$: $x$}.
 
 \subsubsec{e\_ROOTS0} An argument of function $s$ is a zero polynomial, and
 we need to consider its roots. (As in \kbd{polroots(0)}.)
@@ -8918,7 +8918,7 @@ we need to consider its roots. (As in \kbd{polroots(0)}.)
   pari_err(e_SQRTN, GEN x)
   pari_err_SQRTN(GEN x)
 @eprog\noindent prints the error message: \kbd{not an n-th power residue in
-sqrtn : $x$}.
+sqrtn: $x$}.
 
 \section{Hashtables}
 A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys
@@ -9526,7 +9526,7 @@ at the default value (and possibly print or return it, depending on
 \kbd{flag}); otherwise the value of the default to $v$, possibly after some
 translation work. The flag is one of
 
-\item \tet{d_INITRC} called while reading the \kbd{gprc} : print and return
+\item \tet{d_INITRC} called while reading the \kbd{gprc}: print and return
 \kbd{gnil}, possibly defer until \kbd{gp} actually starts.
 
 \item \tet{d_RETURN} return the current value, as a \typ{INT} if possible, as
@@ -9592,7 +9592,7 @@ a \typ{STR} otherwise.
 routines are implemented in terms of the following generic ones. In all
 routines below
 
-\item \kbd{v} and \kbd{flag} are the arguments passed to \kbd{default} :
+\item \kbd{v} and \kbd{flag} are the arguments passed to \kbd{default}:
 \kbd{v} is a new value (or the empty string: no change), and \kbd{flag} is one
 of \tet{d_INITRC}, \tet{d_RETURN}, etc.
 
