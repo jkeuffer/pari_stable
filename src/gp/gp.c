@@ -481,6 +481,7 @@ slash_commands(void)
 \\s      : print stack information\n\
 \\t      : print the list of PARI types\n\
 \\u      : print the list of user-defined functions\n\
+\\um     : print the list of user-defined member functions\n\
 \\v      : print current version of GP\n\
 \\w {nf} : write to a file\n\
 \\x {n}  : print complete inner structure of result\n\
