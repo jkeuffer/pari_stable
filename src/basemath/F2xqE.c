@@ -329,8 +329,13 @@ F2xqE_chord_update(GEN R, GEN P, GEN Q, GEN a2, GEN T, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
-    *pt_R = ellinf();
-    return pol1_F2x(T[1]);
+    *pt_R = gcopy(Q);
+    return F2xqE_vert(P, Q, T);
+  }
+  else if (ell_is_inf(P))
+  {
+    *pt_R = F2xqE_add(R, Q, a2, T);
+    return F2xqE_vert(R, Q, T);
   }
   else if (zv_equal(gel(P, 1), gel(R, 1)))
   {

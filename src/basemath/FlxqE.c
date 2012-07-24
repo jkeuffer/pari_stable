@@ -290,8 +290,13 @@ FlxqE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
-    *pt_R = ellinf();
-    return pol1_Flx(T[1]);
+    *pt_R = gcopy(Q);
+    return FlxqE_vert(P, Q, T, p);
+  }
+  else if (ell_is_inf(P))
+  {
+    *pt_R = FlxqE_add(R, Q, a4, T, p);
+    return FlxqE_vert(R, Q, T, p);
   }
   else if (zv_equal(gel(P, 1), gel(R, 1)))
   {

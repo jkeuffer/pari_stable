@@ -298,8 +298,13 @@ FpE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN p, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
-    *pt_R = ellinf();
-    return gen_1;
+    *pt_R = gcopy(Q);
+    return FpE_vert(P, Q, p);
+  }
+  else if (ell_is_inf(P))
+  {
+    *pt_R = FpE_add(R, Q, a4, p);
+    return FpE_vert(R, Q, p);
   }
   else if (equalii(gel(P, 1), gel(R, 1)))
   {
@@ -1328,8 +1333,13 @@ FpXQE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
-    *pt_R = ellinf();
-    return pol_1(varn(T));
+    *pt_R = gcopy(Q);
+    return FpXQE_vert(P, Q, T, p);
+  }
+  else if (ell_is_inf(P))
+  {
+    *pt_R = FpXQE_add(R, Q, a4, T, p);
+    return FpXQE_vert(R, Q, T, p);
   }
   else if (ZX_equal(gel(P, 1), gel(R, 1)))
   {
