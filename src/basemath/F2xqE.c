@@ -402,14 +402,14 @@ F2xqE_Miller(GEN Q, GEN P, GEN m, GEN a2, GEN T)
 {
   pari_sp ltop = avma;
   struct _F2xqE_miller d;
-  GEN v, result, num, denom, g1;
+  GEN v, num, denom, g1;
 
   d.a2 = a2; d.T = T; d.P = P;
   g1 = pol1_F2x(T[1]);
   v = gen_pow(mkvec3(g1,g1,Q), m, (void*)&d, F2xqE_Miller_dbl, F2xqE_Miller_add);
   num = gel(v,1); denom = gel(v,2);
-  result = lgpol(denom) ? F2xq_div(num, denom, T): g1;
-  return gerepileupto(ltop, lgpol(result) ? result: g1);
+  if (!lgpol(num) || !lgpol(denom)) { avma = ltop; return NULL; }
+  return gerepileupto(ltop, F2xq_div(num, denom, T));
 }
 
 GEN
@@ -420,7 +420,9 @@ F2xqE_weilpairing(GEN P, GEN Q, GEN m, GEN a2, GEN T)
   if (ell_is_inf(P) || ell_is_inf(Q) || zv_equal(P,Q))
     return pol1_F2x(T[1]);
   num    = F2xqE_Miller(P, Q, m, a2, T);
+  if (!num) return pol1_F2x(T[1]);
   denom  = F2xqE_Miller(Q, P, m, a2, T);
+  if (!denom) { avma=ltop; return pol1_F2x(T[1]); }
   result = F2xq_div(num, denom, T);
   return gerepileupto(ltop, result);
 }
@@ -428,9 +430,11 @@ F2xqE_weilpairing(GEN P, GEN Q, GEN m, GEN a2, GEN T)
 GEN
 F2xqE_tatepairing(GEN P, GEN Q, GEN m, GEN a2, GEN T)
 {
+  GEN num;
   if (ell_is_inf(P) || ell_is_inf(Q))
     return pol1_F2x(T[1]);
-  return F2xqE_Miller(P, Q, m, a2, T);
+  num = F2xqE_Miller(P, Q, m, a2, T);
+  return num? num: pol1_F2x(T[1]);
 }
 
 /* Assume b == 1 mod 8 is known to precision e+1,

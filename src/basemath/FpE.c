@@ -370,13 +370,13 @@ FpE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN p)
 {
   pari_sp ltop = avma;
   struct _FpE_miller d;
-  GEN v, result, num, denom;
+  GEN v, num, denom;
 
   d.a4 = a4; d.p = p; d.P = P;
   v = gen_pow(mkvec3(gen_1,gen_1,Q), m, (void*)&d, FpE_Miller_dbl, FpE_Miller_add);
   num = gel(v,1); denom = gel(v,2);
-  result = signe(denom) ? Fp_div(num, denom, p): gen_1;
-  return gerepileupto(ltop, signe(result) ? result: gen_1);
+  if (!signe(num) || !signe(denom)) { avma = ltop; return NULL; }
+  return gerepileupto(ltop, Fp_div(num, denom, p));
 }
 
 GEN
@@ -387,7 +387,9 @@ FpE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
   if (ell_is_inf(P) || ell_is_inf(Q) || ZV_equal(P,Q))
     return gen_1;
   num    = FpE_Miller(P, Q, m, a4, p);
+  if (!num) return gen_1;
   denom  = FpE_Miller(Q, P, m, a4, p);
+  if (!denom) { avma = ltop; return gen_1; }
   result = Fp_div(num, denom, p);
   if (mpodd(m))
     result  = Fp_neg(result, p);
@@ -397,9 +399,11 @@ FpE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
 GEN
 FpE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
 {
+  GEN num;
   if (ell_is_inf(P) || ell_is_inf(Q))
     return gen_1;
-  return FpE_Miller(P, Q, m, a4, p);
+  num = FpE_Miller(P, Q, m, a4, p);
+  return num? num: gen_1;
 }
 
 /***********************************************************************/
@@ -1409,14 +1413,14 @@ FpXQE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   struct _FpXQE_miller d;
-  GEN v, result, num, denom, g1;
+  GEN v, num, denom, g1;
 
   d.a4 = a4; d.T = T; d.p = p; d.P = P;
   g1 = pol_1(varn(T));
   v = gen_pow(mkvec3(g1,g1,Q), m, (void*)&d, FpXQE_Miller_dbl, FpXQE_Miller_add);
   num = gel(v,1); denom = gel(v,2);
-  result = signe(denom) ? FpXQ_div(num, denom, T, p): g1;
-  return gerepileupto(ltop, signe(result) ? result: g1);
+  if (!signe(num) || !signe(denom)) { avma = ltop; return NULL; }
+  return gerepileupto(ltop, FpXQ_div(num, denom, T, p));
 }
 
 GEN
@@ -1427,7 +1431,9 @@ FpXQE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
   if (ell_is_inf(P) || ell_is_inf(Q) || ZX_equal(P,Q))
     return pol_1(varn(T));
   num    = FpXQE_Miller(P, Q, m, a4, T, p);
+  if (!num) return pol_1(varn(T));
   denom  = FpXQE_Miller(Q, P, m, a4, T, p);
+  if (!denom) { avma = ltop; return pol_1(varn(T)); }
   result = FpXQ_div(num, denom, T, p);
   if (mpodd(m))
     result  = FpX_neg(result, p);
@@ -1437,9 +1443,11 @@ FpXQE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 GEN
 FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 {
+  GEN num;
   if (ell_is_inf(P) || ell_is_inf(Q))
     return pol_1(varn(T));
-  return FpXQE_Miller(P, Q, m, a4, T, p);
+  num = FpXQE_Miller(P, Q, m, a4, T, p);
+  return num? num: pol_1(varn(T));
 }
 
 GEN
