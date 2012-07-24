@@ -344,18 +344,12 @@ The extra operator \kbd{===} tests whether two objects are identical and is
 much stricter than \kbd{==} : objects of different type or length are never
 identical.
 
-
 For the purpose of comparison, \typ{STR} objects are strictly larger than any
 other non-string type; two \typ{STR} objects are compared using the standard
 lexicographic order.
 
-GP accepts the following synonyms for some of the above functions:
-\kbd{|} and \kbd{\&} are accepted as\sidx{bitwise and}\sidx{bitwise or}
-synonyms of \kbd{||} and \kbd{\&\&} respectively. Also, \kbd{<>} is accepted
-as a synonym for \kbd{!=}. On the other hand, \kbd{=} is definitely
-\emph{not} a synonym for \kbd{==}: it is the assignment statement. (We do not
-use the customary C operators for bitwise \kbd{and} or bitwise \kbd{or}; use
-\tet{bitand} or \tet{bitor}.)
+GP accepts \kbd{<>} as a synonym for \kbd{!=}. On the other hand, \kbd{=} is
+definitely \emph{not} a synonym for \kbd{==}: it is the assignment statement.
 
 The standard boolean operators \kbd{||} (\idx{inclusive or}), \kbd{\&\&}
 (\idx{and})\sidx{or} and \kbd{!} (\idx{not}) are also available.
