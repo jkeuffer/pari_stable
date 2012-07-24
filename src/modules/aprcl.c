@@ -71,8 +71,8 @@ red_cyclop(GEN T, long p)
   if (d <= -2) return T;
 
   /* reduce mod (x^p - 1) */
-  y = leafcopy(T); z = (GEN*)(y+2);
-  for (i = 0; i<=d; i++) z[i] = addii(z[i], z[i+p]);
+  y = ZX_mod_Xn_1(T, p);
+  z = (GEN*)(y+2);
 
   /* reduce mod x^(p-1) + ... + 1 */
   d = p-1;

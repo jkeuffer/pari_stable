@@ -169,16 +169,84 @@ oneroot_mod_2(GEN f)
   return NULL;
 }
 
+/* return 1,...,p-1 [not_0 = 1] or 0,...,p [not_0 = 0] */
+static GEN
+all_roots_mod_p(ulong p, int not_0)
+{
+  GEN r;
+  long i;
+  if (not_0) {
+    r = cgetg(p, t_VECSMALL);
+    for (i = 1; i < p; i++) r[i] = i;
+  } else {
+    r = cgetg(p+1, t_VECSMALL);
+    for (i = 0; i < p; i++) r[i+1] = i;
+  }
+  return r;
+}
+
+/* X^n - 1 */
+static GEN
+Flx_Xnm1(long sv, long n, ulong p)
+{
+  GEN t = cgetg(n+3, t_VECSMALL);
+  long i;
+  t[1] = sv;
+  t[2] = p - 1;
+  for (i = 3; i <= n+1; i++) t[i] = 0;
+  t[i] = 1; return t;
+}
+/* X^n + 1 */
+static GEN
+Flx_Xn1(long sv, long n, ulong p)
+{
+  GEN t = cgetg(n+3, t_VECSMALL);
+  long i;
+  t[1] = sv;
+  t[2] = 1;
+  for (i = 3; i <= n+1; i++) t[i] = 0;
+  t[i] = 1; return t;
+}
+
+static ulong
+Fl_nonsquare(ulong p)
+{
+  long k = 2;
+  for (;; k++)
+  {
+    long i = krouu(k, p);
+    if (!i) pari_err_PRIME("Fl_nonsquare",utoipos(p));
+    if (i < 0) return k;
+  }
+}
+
+/* f monic Flx, f(0) != 0. Return a monic squarefree g with the same
+ * roots as f */
+static GEN
+Flx_cut_out_roots(GEN f, ulong p)
+{
+  GEN g = Flx_mod_Xnm1(f, p-1, p); /* f mod x^(p-1) - 1 */
+  if (g != f && degpol(g) >= 0) {
+    (void)Flx_valrem(g, &g); /* reduction may introduce 0 root */
+    g = Flx_gcd(g, Flx_Xnm1(g[1], p-1, p), p);
+    g = Flx_normalize(g, p);
+  }
+  return g;
+}
+
 /* by checking f(0..p-1) */
 GEN
 Flx_roots_naive(GEN f, ulong p)
 {
-  long d = degpol(f), n = 0;
+  long d, n = 0;
   ulong s = 1UL, r;
-  GEN q, y = cgetg(d + 1, t_VECSMALL);
+  GEN q, y = cgetg(degpol(f) + 1, t_VECSMALL);
   pari_sp av2, av = avma;
 
-  if (Flx_valrem(f, &f)) { y[++n] = 0; d = degpol(f); }
+  if (Flx_valrem(f, &f)) y[++n] = 0;
+  f = Flx_cut_out_roots(f, p);
+  d = degpol(f);
+  if (d < 0) return all_roots_mod_p(p, n == 0);
   av2 = avma;
   while (d > 1) /* d = current degree of f */
   {
@@ -396,20 +464,21 @@ FpX_roots_i(GEN f, GEN p)
   pol = deg1pol_shallow(gen_1, pol0, varn(f));
   for (pol0[2] = 1;; pol0[2]++)
   {
-    long j;
+    long j, l = lg(S.todo);
+    if (l == 1) return sort(S.done);
     if (pol0[2] == 100 && !BPSW_psp(p)) pari_err_PRIME("polrootsmod",p);
-    for (j = 1; j < lg(S.todo); j++)
+    for (j = 1; j < l; j++)
     {
       GEN c = gel(S.todo,j);
       switch(degpol(c))
       { /* convert linear and quadratics to roots, try to split the rest */
         case 1:
           split_moveto_done(&S, j, subii(p, gel(c,2)));
-          break;
+          j--; l--; break;
         case 2: {
           GEN r = FpX_quad_root(c, p, 0), s = FpX_otherroot(c,r, p);
           split_done(&S, j, r, s);
-          break;
+          j--; l--; break;
         }
         default: {
           /* b = pol^(p-1)/2 - 1 */
@@ -425,7 +494,6 @@ FpX_roots_i(GEN f, GEN p)
         }
       }
     }
-    if (lg(S.todo) == 1) return sort(S.done);
   }
 }
 /* assume p > 2 prime */
@@ -1061,82 +1129,116 @@ Flx_otherroot(GEN x, ulong r, ulong p)
   return Fl_neg(Fl_add(x[3], r, p), p);
 }
 
+static void
+split_squares(struct split_t *S, GEN g, ulong p)
+{
+  ulong q = p >> 1;
+  GEN a = Flx_mod_Xnm1(g, q, p); /* mod x^(p-1)/2 - 1 */
+  if (degpol(a) < 0)
+  {
+    long i;
+    split_add_done(S, (GEN)1);
+    for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_sqr(i,p));
+  } else {
+    (void)Flx_valrem(a, &a);
+    if (degpol(a))
+    {
+      a = Flx_gcd(a, Flx_Xnm1(g[1], q, p), p);
+      if (degpol(a)) split_add(S, Flx_normalize(a, p));
+    }
+  }
+}
+static void
+split_nonsquares(struct split_t *S, GEN g, ulong p)
+{
+  ulong q = p >> 1;
+  GEN a = Flx_mod_Xn1(g, q, p); /* mod x^(p-1)/2 + 1 */
+  if (degpol(a) < 0)
+  {
+    ulong z = Fl_nonsquare(p);
+    long i;
+    split_add_done(S, (GEN)z);
+    for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_mul(z, Fl_sqr(i,p), p));
+  } else {
+    (void)Flx_valrem(a, &a);
+    if (degpol(a))
+    {
+      a = Flx_gcd(a, Flx_Xn1(g[1], q, p), p);
+      if (degpol(a)) split_add(S, Flx_normalize(a, p));
+    }
+  }
+}
+/* p > 2. f monic Flx, f(0) != 0. Add to split_t structs coprime factors
+ * of g = \prod_{f(a) = 0} (X - a). Return 0 when f(x) = 0 for all x in Fp* */
+static int
+split_Flx_cut_out_roots(struct split_t *S, GEN f, ulong p)
+{
+  GEN a, g = Flx_mod_Xnm1(f, p-1, p); /* f mod x^(p-1) - 1 */
+  long d = degpol(g);
+  if (d < 0) return 0;
+  if (g != f) { (void)Flx_valrem(g, &g); d = degpol(g); } /*kill powers of x*/
+  if (!d) return 1;
+  if (p <= 1.4 * (ulong)d) {
+    /* small p; split further using x^((p-1)/2) +/- 1.
+     * 30% degree drop makes the extra gcd worth it. */
+    split_squares(S, g, p);
+    split_nonsquares(S, g, p);
+  } else { /* large p; use x^(p-1) - 1 directly */
+    a = Flxq_powu(polx_Flx(f[1]), p-1, g,p);
+    if (lg(a) < 3) pari_err_PRIME("rootmod",utoipos(p));
+    a = Flx_Fl_add(a, p-1, p); /* a = x^(p-1) - 1 mod g */
+    g = Flx_gcd(g,a, p);
+    if (degpol(g)) split_add(S, Flx_normalize(g,p));
+  }
+  return 1;
+}
+
 /* by splitting, assume p > 2 prime, deg(f) > 0, and f monic */
 static GEN
 Flx_roots_i(GEN f, ulong p)
 {
-  long n, np, j, k, da, db;
-  GEN y, yp, pol, a, b;
+  GEN pol, g;
   ulong q = p >> 1;
+  struct split_t S;
 
-  y = cgetg(1+degpol(f), t_VECSMALL);
-  j = 1;
-  if (Flx_valrem(f, &f)) {
-    y[j++] = 0;
-    if (lg(f) <= 3) { setlg(y, 2); return y; }
-    n = 1;
-  }
-  else
-    n = 0;
-  n++;
-  da = degpol(f);
-  if (da == 1) { y[j++] = p - f[2]; setlg(y,j); return y; }
-  if (da == 2) {
-    ulong s, r = Flx_quad_root(f, p, 1);
-    if (r != p) {
-      y[j++] = r;
-      s = Flx_otherroot(f,r, p);
-      if (r != s) y[j++] = s;
-    }
-    setlg(y, j); vecsmall_sort(y); return y;
-  }
-
-  /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
-  b = Flxq_powu(polx_Flx(varn(f)),q, f,p);
-  if (lg(b) < 3) pari_err_PRIME("rootmod",utoipos(p));
-  b = Flx_Fl_add(b, p-1, p); /* b = x^((p-1)/2) - 1 mod f */
-  a = Flx_gcd(f,b, p);
-  b = Flx_Fl_add(b,  2 , p); /* b = x^((p-1)/2) + 1 mod f */
-  b = Flx_gcd(f,b, p);
-  da = degpol(a);
-  db = degpol(b); setlg(y, n+da+db);
-  yp = cgetg(n+da+db, t_VEC);
-  np = 1;
-  if (db) gel(yp,np++) = Flx_normalize(b,p);
-  if (da) gel(yp,np++) = Flx_normalize(a,p);
+  split_init(&S, lg(f)-1);
+  settyp(S.done, t_VECSMALL);
+  if (Flx_valrem(f, &g)) split_add_done(&S, (GEN)0);
+  if (! split_Flx_cut_out_roots(&S, g, p))
+    return all_roots_mod_p(p, lg(S.done) == 1);
   pol = polx_Flx(varn(f));
   for (pol[2]=1; ; pol[2]++)
   {
-    for (k = j = 1; j < np; j++)
-    {
-      a = gel(yp,j); da = degpol(a);
-      if (da==1)
-        y[n++] = p - a[2];
-      else if (da==2)
-      {
-        ulong r = Flx_quad_root(a, p, 0);
-        y[n++] = r;
-        y[n++] = Flx_otherroot(a,r, p);
-      }
-      else gel(yp, k++) = a;
-    }
-    if (k == 1) break;
-    np = k;
+    long j, l = lg(S.todo);
+    if (l == 1) { vecsmall_sort(S.done); return S.done; }
     if (pol[2] == 100 && !uisprime(p)) pari_err_PRIME("polrootsmod",utoipos(p));
-    for (j = 1; j < np; j++)
-    { /* cf FpX_split_Berlekamp */
-      a = gel(yp, j);
-      b = Flx_Fl_add(Flxq_powu(pol,q, a,p), p-1, p); /* pol^(p-1)/2 */
-      b = Flx_gcd(a,b, p); db = degpol(b);
-      if (db && db < degpol(a))
+    for (j = 1; j < l; j++)
+    {
+      GEN c = gel(S.todo,j);
+      switch(degpol(c))
       {
-        b = Flx_normalize(b, p);
-        gel(yp,np++) = Flx_div(a,b, p);
-        gel(yp,j)    = b; break;
+        case 1:
+          split_moveto_done(&S, j, (GEN)(p - c[2]));
+          j--; l--; break;
+        case 2: {
+          ulong r = Flx_quad_root(c, p, 0), s = Flx_otherroot(c,r, p);
+          split_done(&S, j, (GEN)r, (GEN)s);
+          j--; l--; break;
+        }
+        default: {
+          GEN b = Flx_Fl_add(Flxq_powu(pol,q, c,p), p-1, p); /* pol^(p-1)/2 */
+          long db;
+          b = Flx_gcd(c,b, p); db = degpol(b);
+          if (db && db < degpol(c))
+          {
+            b = Flx_normalize(b, p);
+            c = Flx_div(c,b, p);
+            split_todo(&S, j, b, c);
+          }
+        }
       }
     }
   }
-  vecsmall_sort(y); return y;
 }
 
 GEN

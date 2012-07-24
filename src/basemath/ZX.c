@@ -622,3 +622,20 @@ ZX_eval1(GEN x)
   }
   return gerepileuptoint(av,s);
 }
+
+/* reduce T mod X^n - 1. Shallow function */
+GEN
+ZX_mod_Xn_1(GEN T, ulong n)
+{
+  long i, j, L = lg(T), l = n+2;
+  GEN S;
+  if (L <= l) return T;
+  S = cgetg(l, t_POL);
+  S[1] = T[1];
+  for (i = 2; i < l; i++) gel(S,i) = gel(T,i);
+  for (j = 2; i < L; i++) {
+    gel(S,j) = addii(gel(S,j), gel(T,i));
+    if (++j == l) j = 2;
+  }
+  return normalizepol_lg(S, l);
+}

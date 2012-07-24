@@ -1225,6 +1225,39 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   return q;
 }
 
+/* reduce T mod (X^n - 1, p). Shallow function */
+GEN
+Flx_mod_Xnm1(GEN T, ulong n, ulong p)
+{
+  long i, j, L = lg(T), l = n+2;
+  GEN S;
+  if (L <= l || n & ~LGBITS) return T;
+  S = cgetg(l, t_VECSMALL);
+  S[1] = T[1];
+  for (i = 2; i < l; i++) S[i] = T[i];
+  for (j = 2; i < L; i++) {
+    S[j] = Fl_add(S[j], T[i], p);
+    if (++j == l) j = 2;
+  }
+  return Flx_renormalize(S, l);
+}
+/* reduce T mod (X^n + 1, p). Shallow function */
+GEN
+Flx_mod_Xn1(GEN T, ulong n, ulong p)
+{
+  long i, j, L = lg(T), l = n+2;
+  GEN S;
+  if (L <= l || n & ~LGBITS) return T;
+  S = cgetg(l, t_VECSMALL);
+  S[1] = T[1];
+  for (i = 2; i < l; i++) S[i] = T[i];
+  for (j = 2; i < L; i++) {
+    S[j] = Fl_sub(S[j], T[i], p);
+    if (++j == l) j = 2;
+  }
+  return Flx_renormalize(S, l);
+}
+
 long
 Flx_val(GEN x)
 {
