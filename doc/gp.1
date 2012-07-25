@@ -177,7 +177,8 @@ colors).
 main executable
 .TP
 .I $HOME/.gprc
-(or $GPRC if set) read at beginning of execution by each
+(or $GPRC if set) user preference file, read at beginning of execution by
+each
 .B gp
 shell. A default gprc
 .I gprc.dft
@@ -186,9 +187,7 @@ is provided with the distribution. If this file cannot be found,
 is checked instead.
 .TP
 .I pari.log
-default logfile (can be changed in
-.I .gprc
-or interactively using
+default logfile (can be changed in the gprc file or interactively using
 .B default()
 )
 .TP
@@ -211,8 +210,10 @@ GP programs
 .SH ENVIRONMENT
 .TP
 .I $GPRC
-place to look for the user's gprc file (before $HOME/.gprc, ./gprc, and
-/etc/gprc in this order).
+place to look for the user's preference file (gprc); if the file does not exist,
+we then check in $HOME/.gprc, /etc/gprc, and finally for a file named 'gprc'
+in PARI's 
+.B datadir.
 
 .TP
 .I $GP_DATA_DIR
@@ -225,7 +226,8 @@ function, in degrees 8 to 11; or the modular polynomials in
 .I seadata/
 used by the
 .B ellap
-function for large base fields.
+function for large base fields. This environment variable
+overrides PARI's 'datadir', defined at Configure time.
 
 .TP
 .I $GPHELP

@@ -2851,6 +2851,8 @@ following places (in this order, only the first one found will be loaded):
 \+&\kbd{setenv GPRC /my/dir/anyname} &in \kbd{csh} syntax
 (in your \kbd{.login} or \kbd{.cshrc} file).\cr
 
+\+&\kbd{env GPRC=/my/dir/anyname gp} &on the command line launching \kbd{gp}.\cr
+
 \noindent If so, the file named by \kbd{\$GPRC} is the \kbd{gprc}.
 
 \noindent$\bullet$ If \kbd{GPRC} is not set, and if the environment variable
@@ -2859,11 +2861,6 @@ following places (in this order, only the first one found will be loaded):
 \kbd{\$HOME/.gprc} on a Unix system
 
 \kbd{\$HOME\bs gprc.txt} on a DOS, OS/2, or Windows system.
-
-\noindent$\bullet$ If \kbd{HOME} also leaves us clueless, we try
-
-\strut\kbd{\til/.gprc} on a Unix system (where as usual \kbd{\til} stands for
-your home directory), or
 
 \noindent$\bullet$ If no gprc was found among the user files mentioned above
 we look for \kbd{/etc/gprc} for a system-wide gprc file (you will need root
