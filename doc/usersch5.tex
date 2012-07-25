@@ -4562,6 +4562,8 @@ words by increasing degree.
 
 \fun{GEN}{ZX_to_F2x}{GEN x}
 
+\fun{GEN}{F2v_to_F2x}{GEN x, long sv}
+
 \fun{GEN}{ZXX_to_F2xX}{GEN x, long v}
 
 \fun{GEN}{F2x_to_Flx}{GEN x}
@@ -4601,6 +4603,10 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 \fun{GEN}{F2x_renormalize}{GEN x, long lx}
 
 \fun{GEN}{F2x_deriv}{GEN x}
+
+\fun{GEN}{F2x_deflate}{GEN x, long d}
+
+\fun{long}{F2x_valrem}{GEN x, GEN *Z}
 
 \fun{GEN}{F2x_extgcd}{GEN a, GEN b, GEN *ptu, GEN *ptv}
 
