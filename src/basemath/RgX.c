@@ -141,7 +141,7 @@ QX_ZXQV_eval(GEN P, GEN V, GEN dV)
   P = Q_remove_denom(P, &dP);
   z = gel(P,2); if (n == 0) return icopy(z);
   if (dV) z = mulii(dV, z); /* V[1] = dV */
-  z = ZX_Z_add(ZX_Z_mul(gel(V,2),gel(P,3)), z);
+  z = ZX_Z_add_shallow(ZX_Z_mul(gel(V,2),gel(P,3)), z);
   for (i=2; i<=n; i++) z = ZX_add(ZX_Z_mul(gel(V,i+1),gel(P,2+i)), z);
   dz = mul_denom(dP, dV);
   return dz? RgX_Rg_div(z, dz): z;

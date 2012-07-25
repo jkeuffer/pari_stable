@@ -189,6 +189,18 @@ ZX_Z_add(GEN y, GEN x)
   if (lz==3) z = ZX_renormalize(z,lz);
   return z;
 }
+GEN
+ZX_Z_add_shallow(GEN y, GEN x)
+{
+  long lz, i;
+  GEN z = cgetg_copy(y, &lz);
+  if (lz == 2) { avma = (pari_sp)(z + 2); return scalar_ZX_shallow(x,varn(y)); }
+  z[1] = y[1];
+  gel(z,2) = addii(gel(y,2),x);
+  for(i=3; i<lz; i++) gel(z,i) = gel(y,i);
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
 
 GEN
 ZX_Z_sub(GEN y, GEN x)

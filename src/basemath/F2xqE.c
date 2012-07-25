@@ -468,7 +468,7 @@ F2xq_elltrace_AGM(GEN a6, GEN Tb)
   if (DEBUGLEVEL) timer_start(&ti);
   av = avma; lim = stack_lim(av, 1);
   a = pol_1(v);
-  b = ZX_Z_add(ZX_shifti(F2x_to_ZX(a6),3),gen_1);
+  b = ZX_Z_add_shallow(ZX_shifti(F2x_to_ZX(a6),3),gen_1);
   for (n=5; n<=M+3; n++)
   {
     GEN aa = ZX_shifti(ZX_add(a, b),-1);

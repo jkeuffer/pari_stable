@@ -404,10 +404,10 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     if (wpow) a = FpX_FpXQV_eval(g,wpow, T,q);
     else      a = FpX_FpXQ_eval(g,w0, T,q); /* first time */
     /* now, a = 0 (p) */
-    a = gmul(gneg(h0), ZX_Z_divexact(a, p));
-    w1 = gadd(w0, gmul(p, FpXQ_red(a, T,p)));
+    a = FpXQ_mul(ZX_neg(h0), ZX_Z_divexact(a, p), T,p);
+    w1 = ZX_add(w0, ZX_Z_mul(a, p));
 
-    w1_Q = centermod(gmul(w1, remii(den,q)), q);
+    w1_Q = centermod(ZX_Z_mul(w1, remii(den,q)), q);
     if (ZX_equal(w1_Q, w0_Q))
     {
       GEN G = is_pm1(den)? g: RgX_rescale(g,den);
@@ -425,10 +425,10 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     wpow = FpXQ_powers(w1, rt, T, q2);
     /* h0 := h0 * (2 - h0 g'(w1)) mod (T,q)
      *     = h0 + h0 * (1 - h0 g'(w1)) */
-    a = gmul(gneg(h0), FpX_FpXQV_eval(gp, FpXV_red(wpow,q),T,q));
-    a = ZX_Z_add(FpX_rem(a, T,q), gen_1); /* 1 - h0 g'(w1) = 0 (p) */
-    a = gmul(h0, ZX_Z_divexact(a, p));
-    h0 = gadd(h0, gmul(p, FpXQ_red(a, T,p)));
+    a = FpXQ_mul(ZX_neg(h0), FpX_FpXQV_eval(gp, FpXV_red(wpow,q),T,q), T,q);
+    a = ZX_Z_add_shallow(a, gen_1); /* 1 - h0 g'(w1) = 0 (p) */
+    a = FpXQ_mul(h0, ZX_Z_divexact(a, p), T,p);
+    h0 = ZX_add(h0, ZX_Z_mul(a, p));
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
   TR = gel(DATA,5);

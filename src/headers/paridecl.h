@@ -621,6 +621,7 @@ GEN     Z_ZX_sub(GEN x, GEN y);
 GEN     ZXV_Z_mul(GEN y, GEN x);
 long    ZXY_max_lg(GEN x);
 GEN     ZX_Z_add(GEN y,GEN x);
+GEN     ZX_Z_add_shallow(GEN y, GEN x);
 GEN     ZX_Z_divexact(GEN y,GEN x);
 GEN     ZX_Z_mul(GEN y,GEN x);
 GEN     ZX_Z_sub(GEN y, GEN x);
