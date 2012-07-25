@@ -5,6 +5,9 @@ Prototype: GD&
 Help: vecmin(x,{&v}): smallest entry in the vector/matrix x. If v is
  present, set it to the index of a smallest
  entry (indirect min).
+Description:
+  (gen):gen            vecmin($1)
+  (gen, &gen):gen      vecmin0($1, &$2)
 Doc: if $x$ is a vector or a matrix, returns the smallest entry of $x$,
  otherwise returns a copy of $x$. Error if $x$ is empty.
 
@@ -22,6 +25,4 @@ Doc: if $x$ is a vector or a matrix, returns the smallest entry of $x$,
  %3 = [2, 1]
  @eprog
 
-Description:
-  (gen):gen            vecmin($1)
-  (gen, &gen):gen      vecmin0($1, &$2)
+Variant: Also available is \fun{GEN}{vecmin}{GEN x}.

@@ -5605,7 +5605,7 @@ and $0$ otherwise.
 \fun{int}{zv_equal}{GEN x, GEN y} returns $1$ if the two \kbd{zv} are equal
 and $0$ otherwise.
 
-\fun{long}{ZV_search}{GEN L, long y} look for $y$ in the sorted
+\fun{long}{zv_search}{GEN L, long y} look for $y$ in the sorted
 \kbd{zv} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
 
 \fun{GEN}{zv_copy}{GEN x} as \kbd{Flv\_copy}.
@@ -5923,6 +5923,8 @@ are equal and $0$ otherwise.
 
 \fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the
 \kbd{ZX}~\kbd{x}.
+
+\fun{GEN}{ZX_Z_add_shallow}{GEN x,GEN y} shallow version of \tet{ZX_Z_add}.
 
 \fun{GEN}{ZX_Z_sub}{GEN x,GEN y} subtracts the integer \kbd{y} to the
 \kbd{ZX}~\kbd{x}.
@@ -7026,6 +7028,9 @@ is given by the vector $x$. Shallow function.
 \fun{GEN}{deg1pol_shallow}{GEN a, GEN b,long v} returns the degree 1
 \typ{POL} $a + b \kbd{pol\_x}(v)$
 
+\fun{GEN}{zeropadic_shallow}{GEN p, long n} returns a (shallow) $0$
+\typ{PADIC} equal to $O(\kbd{p}^\kbd{n})$.
+
 \subsec{From roots to polynomials}
 
 \fun{GEN}{deg1_from_roots}{GEN L, long v} given a vector $L$ of scalars,
@@ -7290,6 +7295,14 @@ instead of \kbd{gcmp} as the underlying comparison routine.
 
 \fun{GEN}{indexvecsort}{GEN x, GEN k}, as \kbd{vecsort}, but only
 returns the permutation that would sort the vector \kbd{x}.
+
+\fun{long}{vecindexmin}{GEN x} returns the index for a maximal element of $x$
+(\typ{VEC}, \typ{COL} or \typ{VECSMALL}).
+
+\fun{long}{vecindexmax}{GEN x} returns the index for a maximal element of $x$
+(\typ{VEC}, \typ{COL} or \typ{VECSMALL}).
+
+\fun{long}{vecindexmax}{GEN x}
 
 \subsec{Generic sort and search} The following routines allow to use an
 arbitrary comparison function \kbd{int (*cmp)(void* data, GEN x, GEN y)},
