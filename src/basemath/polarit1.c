@@ -174,7 +174,7 @@ static GEN
 all_roots_mod_p(ulong p, int not_0)
 {
   GEN r;
-  long i;
+  ulong i;
   if (not_0) {
     r = cgetg(p, t_VECSMALL);
     for (i = 1; i < p; i++) r[i] = i;
@@ -1136,7 +1136,7 @@ split_squares(struct split_t *S, GEN g, ulong p)
   GEN a = Flx_mod_Xnm1(g, q, p); /* mod x^(p-1)/2 - 1 */
   if (degpol(a) < 0)
   {
-    long i;
+    ulong i;
     split_add_done(S, (GEN)1);
     for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_sqr(i,p));
   } else {
@@ -1155,8 +1155,7 @@ split_nonsquares(struct split_t *S, GEN g, ulong p)
   GEN a = Flx_mod_Xn1(g, q, p); /* mod x^(p-1)/2 + 1 */
   if (degpol(a) < 0)
   {
-    ulong z = Fl_nonsquare(p);
-    long i;
+    ulong i, z = Fl_nonsquare(p);
     split_add_done(S, (GEN)z);
     for (i = 2; i <= q; i++) split_add_done(S, (GEN)Fl_mul(z, Fl_sqr(i,p), p));
   } else {

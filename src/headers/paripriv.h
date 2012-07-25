@@ -194,6 +194,8 @@ GEN  RgX_recipspec_shallow(GEN x, long l, long n);
 /* b) Modular */
 GEN  bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 GEN  Kronecker_to_FpXQX(GEN z, GEN pol, GEN p);
+long F2x_split_Berlekamp(GEN *t);
+long Flx_split_Berlekamp(GEN *t, ulong p);
 GEN  FpX_quad_root(GEN x, GEN p, int unknown);
 long FpX_split_Berlekamp(GEN *t, GEN pp);
 GEN  FqX_split_all(GEN z, GEN T, GEN p);
