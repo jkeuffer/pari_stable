@@ -2096,7 +2096,7 @@ Flx_Berlekamp_i(GEN f, ulong p, long flag)
 
   if (p == 2)
   {
-    GEN F = F2x_factor_deg2(Flx_to_F2x(f),d,flag);
+    GEN F = F2x_Berlekamp_i(Flx_to_F2x(f),flag);
     if (flag==0) F2xv_to_Flxv_inplace(gel(F,1));
     return F;
   }
@@ -2240,6 +2240,18 @@ FpX_factor(GEN f, GEN p)
   pari_sp av = avma;
   ZX_factmod_init(&f, p);
   return gerepilecopy(av, FpX_Berlekamp_i(f, p, 0));
+}
+GEN
+Flx_factor(GEN f, ulong p)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, Flx_Berlekamp_i(f, p, 0));
+}
+GEN
+F2x_factor(GEN f)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, F2x_Berlekamp_i(f, 0));
 }
 
 GEN

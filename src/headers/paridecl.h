@@ -2493,9 +2493,11 @@ long    vecvecsmall_search(GEN x, GEN y, long flag);
 
 /* polarit1.c */
 
+GEN     F2x_factor(GEN f);
 int     F2x_is_irred(GEN f);
 int     Flx_is_irred(GEN f, ulong p);
 GEN     Flx_degfact(GEN f, ulong p);
+GEN     Flx_factor(GEN f, ulong p);
 long    Flx_nbfact(GEN z, ulong p);
 GEN     Flx_nbfact_by_degree(GEN z, long *nb, ulong p);
 long    Flx_nbroots(GEN f, ulong p);

@@ -4283,9 +4283,15 @@ $\deg a \geq {\deg x \over 2} > \deg b$.
 
 \fun{GEN}{Flx_pow}{GEN x, long n, ulong p}
 
+\fun{GEN}{Flx_roots}{GEN f, ulong p} returns the vector of roots
+of $f$ (without multiplicity, as a \typ{VECSMALL}). Assumes that $p$ is
+prime.
+
 \fun{GEN}{Flx_roots_naive}{GEN f, ulong p} returns the vector of roots
 of $f$ as a \typ{VECSMALL} (multiple roots are not repeated), found
-by an exhaustive search. Efficient for small $p$ and small degrees !
+by an exhaustive search. Efficient for very small $p$ !
+
+\fun{GEN}{Flx_factor}{GEN f, ulong p}
 
 \subsubsec{Miscellaneous operations}
 
@@ -4298,10 +4304,6 @@ by an exhaustive search. Efficient for small $p$ and small degrees !
 \fun{GEN}{polx_Flx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
 
 \fun{GEN}{Flx_normalize}{GEN z, ulong p}, as \kbd{FpX\_normalize}.
-
-\fun{GEN}{Flx_roots}{GEN f, ulong p} returns the vector of roots
-of $f$ (without multiplicity, as a \typ{VECSMALL}). Assumes that $p$ is prime
-or $4$.
 
 \fun{GEN}{random_Flx}{long d, long sv, ulong p} returns a random \kbd{Flx}
 in variable \kbd{v}, of degree less than~\kbd{d}.

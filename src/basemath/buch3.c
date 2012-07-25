@@ -1402,7 +1402,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   long i, j, reldeg, nfac, k;
   pari_sp av = avma;
   GEN bnf, index, discnf, nf, group, detgroup, fa, greldeg;
-  GEN famo, fac, col, cnd;
+  GEN fac, col, cnd;
   byteptr d = diffptr;
   ulong p;
 
@@ -1447,12 +1447,13 @@ rnfnormgroup(GEN bnr, GEN polrel)
       if (pr_get_f(pr) > 1) break;
       /* if pr (probably) ramified, we have to use all (non-ram) P | pr */
       if (idealval(nf,cnd,pr)) { oldf = 0; continue; }
-      modpr = zk_to_Fq_init(nf, &pr, &T, &pp); /* T = NULL */
+      modpr = zk_to_Fq_init(nf, &pr, &T, &pp); /* T = NULL, pp ignored */
       polr = nfX_to_FqX(polrel, nf, modpr); /* in Fp[X] */
-      if (!FpX_is_squarefree(polr, pp)) { oldf = 0; continue; }
+      polr = ZX_to_Flx(polr, p);
+      if (!Flx_is_squarefree(polr, p)) { oldf = 0; continue; }
 
-      famo = FpX_factor(polr, pp);
-      fac = gel(famo,1); f = degpol(gel(fac,1));
+      fac = gel(Flx_factor(polr, p), 1);
+      f = degpol(gel(fac,1));
       nfac = lg(fac)-1;
       /* check decomposition of pr has Galois type */
       for (j=2; j<=nfac; j++)
@@ -1488,22 +1489,21 @@ GEN
 nf_deg1_prime(GEN nf)
 {
   GEN bad = mulii(nf_get_disc(nf), nf_get_index(nf));
-  GEN T = nf_get_pol(nf), p, z;
+  GEN T = nf_get_pol(nf), z;
   long degnf = degpol(T);
   byteptr pt;
-  ulong pp = init_primepointer(degnf, &pt);
+  ulong c, p = init_primepointer(degnf, &pt);
   for(;;)
   {
     pari_sp av = avma;
-    NEXT_PRIME_VIADIFF_CHECK(pp, pt);
-    if (umodiu(bad, pp) == 0) continue;
-    p = utoipos(pp);
-    z = FpX_roots(FpX_red(T, p), p);
-    if (lg(z) > 1) break;
+    NEXT_PRIME_VIADIFF_CHECK(p, pt);
+    if (umodiu(bad, p) == 0) continue;
+    z = Flx_roots(ZX_to_Flx(T, p), p);
+    if (lg(z) > 1) { c = Fl_neg(z[1], p); break; }
     avma = av;
   }
-  z = deg1pol_shallow(gen_1, negi(gel(z,1)), varn(T));
-  return primedec_apply_kummer(nf, z, 1, p);
+  z = deg1pol_shallow(gen_1, utoi(c), varn(T));
+  return primedec_apply_kummer(nf, z, 1, utoipos(p));
 }
 
 long

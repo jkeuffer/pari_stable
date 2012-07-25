@@ -1578,7 +1578,7 @@ Flx_ffintersect(GEN P, GEN Q, long n, ulong l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     else
     {
       GEN L, An, Bn, z, U;
-      U = ZX_to_Flx(gmael(FpX_factor(polcyclo(pg,MAXVARN),utoi(l)),1,1),l);
+      U = gmael(Flx_factor(ZX_to_Flx(polcyclo(pg,MAXVARN),l),l),1,1);
       A = Flx_intersect_ker(P, MA, U, l);
       B = Flx_intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) timer_start(&T);
