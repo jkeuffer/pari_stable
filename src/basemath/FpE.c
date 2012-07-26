@@ -290,7 +290,7 @@ FpE_tangent_update(GEN R, GEN Q, GEN a4, GEN p, GEN *pt_R)
 }
 
 /* Computes the equation of the line through R and P, and returns its
-   evaluation at the point Q. Also adds Q to the point R.
+   evaluation at the point Q. Also adds P to the point R.
  */
 
 static GEN
@@ -298,12 +298,12 @@ FpE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN p, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
-    *pt_R = gcopy(Q);
+    *pt_R = gcopy(P);
     return FpE_vert(P, Q, p);
   }
   else if (ell_is_inf(P))
   {
-    *pt_R = FpE_add(R, Q, a4, p);
+    *pt_R = gcopy(R);
     return FpE_vert(R, Q, p);
   }
   else if (equalii(gel(P, 1), gel(R, 1)))
@@ -1329,7 +1329,7 @@ FpXQE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
 }
 
 /* Computes the equation of the line through R and P, and returns its
-   evaluation at the point Q. Also adds Q to the point R.
+   evaluation at the point Q. Also adds P to the point R.
  */
 
 static GEN
@@ -1337,12 +1337,12 @@ FpXQE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
-    *pt_R = gcopy(Q);
+    *pt_R = gcopy(P);
     return FpXQE_vert(P, Q, T, p);
   }
   else if (ell_is_inf(P))
   {
-    *pt_R = FpXQE_add(R, Q, a4, T, p);
+    *pt_R = gcopy(R);
     return FpXQE_vert(R, Q, T, p);
   }
   else if (ZX_equal(gel(P, 1), gel(R, 1)))

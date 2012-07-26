@@ -321,7 +321,7 @@ F2xqE_tangent_update(GEN R, GEN Q, GEN a2, GEN T, GEN *pt_R)
 }
 
 /* Computes the equation of the line through R and P, and returns its
-   evaluation at the point Q. Also adds Q to the point R.
+   evaluation at the point Q. Also adds P to the point R.
  */
 
 static GEN
@@ -329,12 +329,12 @@ F2xqE_chord_update(GEN R, GEN P, GEN Q, GEN a2, GEN T, GEN *pt_R)
 {
   if (ell_is_inf(R))
   {
-    *pt_R = gcopy(Q);
+    *pt_R = gcopy(P);
     return F2xqE_vert(P, Q, T);
   }
   else if (ell_is_inf(P))
   {
-    *pt_R = F2xqE_add(R, Q, a2, T);
+    *pt_R = gcopy(R);
     return F2xqE_vert(R, Q, T);
   }
   else if (zv_equal(gel(P, 1), gel(R, 1)))
