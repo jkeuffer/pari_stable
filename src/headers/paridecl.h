@@ -3142,7 +3142,7 @@ INLINE GEN    rtor(GEN x, long prec);
 INLINE long   sdivsi(long x, GEN y);
 INLINE long   sdivsi_rem(long x, GEN y, long *rem);
 INLINE long   sdivss_rem(long x, long y, long *rem);
-INLINE long   udivuu_rem(ulong x, ulong y, ulong *r);
+INLINE ulong  udivuu_rem(ulong x, ulong y, ulong *r);
 INLINE void   setabssign(GEN x);
 INLINE void   shift_left(GEN z2, GEN z1, long min, long M, ulong f,  ulong sh);
 INLINE void   shift_right(GEN z2, GEN z1, long min, long M, ulong f, ulong sh);
