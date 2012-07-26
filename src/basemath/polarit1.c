@@ -1405,19 +1405,19 @@ F2x_factcantor(GEN f, long flag)
 int
 F2x_is_irred(GEN f) { return !!F2x_factcantor_i(f,2); }
 
-static void
+void
 F2xv_to_Flxv_inplace(GEN v)
 {
   long i;
   for(i=1;i<lg(v);i++) gel(v,i)= F2x_to_Flx(gel(v,i));
 }
-static void
+void
 Flxv_to_ZXV_inplace(GEN v)
 {
   long i;
   for(i=1;i<lg(v);i++) gel(v,i)= Flx_to_ZX(gel(v,i));
 }
-static void
+void
 F2xv_to_ZXV_inplace(GEN v)
 {
   long i;

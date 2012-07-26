@@ -2495,6 +2495,8 @@ long    vecvecsmall_search(GEN x, GEN y, long flag);
 
 GEN     F2x_factor(GEN f);
 int     F2x_is_irred(GEN f);
+void    F2xv_to_Flxv_inplace(GEN v);
+void    F2xv_to_ZXV_inplace(GEN v);
 int     Flx_is_irred(GEN f, ulong p);
 GEN     Flx_degfact(GEN f, ulong p);
 GEN     Flx_factor(GEN f, ulong p);
@@ -2503,6 +2505,7 @@ GEN     Flx_nbfact_by_degree(GEN z, long *nb, ulong p);
 long    Flx_nbroots(GEN f, ulong p);
 GEN     Flx_roots(GEN f, ulong p);
 long    FlxqX_nbroots(GEN f, GEN T, ulong p);
+void    Flxv_to_ZXV_inplace(GEN v);
 GEN     FpX_degfact(GEN f, GEN p);
 int     FpX_is_irred(GEN f, GEN p);
 int     FpX_is_totally_split(GEN f, GEN p);

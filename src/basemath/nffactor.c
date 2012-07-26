@@ -1549,10 +1549,10 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
 
 /* returns a factor of T in Fp of degree <= maxf, NULL if none exist */
 static GEN
-get_good_factor(GEN T, GEN p, long maxf)
+get_good_factor(GEN T, ulong p, long maxf)
 {
   pari_sp av = avma;
-  GEN r, list = gel(FpX_factor(T,p), 1);
+  GEN r, list = gel(Flx_factor(ZX_to_Flx(T,p),p), 1);
   if (maxf == 1)
   { /* deg.1 factors are best */
     r = gel(list,1);
@@ -1622,11 +1622,11 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     NEXT_PRIME_VIADIFF_CHECK(pp, pt);
     if (! umodiu(bad,pp)) continue;
     if (*lt) { ltp = umodiu(*lt, pp); if (!ltp) continue; }
-    ap = utoipos(pp);
-    r = get_good_factor(nfpol, ap, maxf);
+    r = get_good_factor(nfpol, pp, maxf);
     if (!r) continue;
 
-    apr = primedec_apply_kummer(nf,r,1,ap);
+    ap = utoipos(pp);
+    apr = primedec_apply_kummer(nf, Flx_to_ZX(r), 1, ap);
     amodpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
 
     /* second step : evaluate factorisation mod apr */
@@ -1909,11 +1909,11 @@ nf_pick_prime_for_units(GEN nf, prklift_t *P)
   {
     NEXT_PRIME_VIADIFF_CHECK(pp, pt);
     if (! umodiu(bad,pp)) continue;
-    ap = utoipos(pp);
-    r = get_good_factor(nfpol, ap, maxf);
+    r = get_good_factor(nfpol, pp, maxf);
     if (r) break;
   }
-  apr = primedec_apply_kummer(nf,r,1,ap);
+  ap = utoipos(pp);
+  apr = primedec_apply_kummer(nf, Flx_to_ZX(r), 1, ap);
   amodpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
   P->pr = apr;
   P->q = pr_norm(apr);

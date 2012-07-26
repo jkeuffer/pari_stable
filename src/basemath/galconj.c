@@ -1878,11 +1878,12 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     GEN Ti, Tp = ZX_to_Flx(T, gf->p);
     long nb, d;
     if (!Flx_is_squarefree(Tp, gf->p)) goto nextp;
-    Ti = gel(FpX_factor(Flx_to_ZX(Tp), utoipos(gf->p)), 1);
+    Ti = gel(Flx_factor(Tp, gf->p), 1);
     nb = lg(Ti)-1; d = degpol(gel(Ti,1));
     if (nb > 1 && degpol(gel(Ti,nb)) != d) { avma = ltop; return NULL; }
     if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) goto nextp;
     if (DEBUGLEVEL >= 1) err_printf("GaloisConj: Trying p=%ld\n", gf->p);
+    Flxv_to_ZXV_inplace(Ti);
     gf->fp = d;
     gf->Tmod = Ti; lbot = avma;
     frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);
