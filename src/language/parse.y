@@ -15,7 +15,6 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define YYSIZE_T size_t
-#define YYERROR_VERBOSE 1
 #define YYSTYPE union token_value
 #define YYLTYPE struct node_loc
 #define YYLLOC_DEFAULT(Current, Rhs, N)     \
@@ -25,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define NOARG(x) newnode(Fnoarg,-1,-1,&(x))
 
 %}
+%error-verbose
 %name-prefix="pari_"
 %pure-parser
 %parse-param {char **lex}
