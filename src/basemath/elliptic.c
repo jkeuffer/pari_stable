@@ -3961,13 +3961,13 @@ ellmiller(GEN E, GEN Q, GEN P, GEN m)
 {
   pari_sp ltop = avma;
   struct _ell_miller d;
-  GEN v, result, num, denom;
+  GEN v, num, denom;
 
   d.E = E; d.P = P;
   v = gen_pow(mkvec3(gen_1,gen_1,Q), m, (void*)&d, ellmiller_dbl, ellmiller_add);
   num = gel(v,1); denom = gel(v,2);
-  result = !gequal0(denom) ? gdiv(num, denom): gen_1;
-  return gerepileupto(ltop, gequal0(result)? gen_1: result);
+  if (gequal0(num) || gequal0(denom)) { avma=ltop; return NULL; }
+  return gerepileupto(ltop, gdiv(num, denom));
 }
 
 GEN
@@ -3988,7 +3988,9 @@ ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
     return gerepileupto(ltop, Fp_to_mod(z, p));
   }
   num    = ellmiller(E, P, Q, m);
+  if (!num) return gpowgs(ell_get_disc(E), 0);
   denom  = ellmiller(E, Q, P, m);
+  if (!denom) {avma = ltop; return gpowgs(ell_get_disc(E), 0); }
   result = gdiv(num, denom);
   if (mpodd(m))
     result  = gneg(result);
@@ -3998,7 +4000,7 @@ ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
 GEN
 elltatepairing(GEN E, GEN P, GEN Q, GEN m)
 {
-  GEN p=NULL;
+  GEN num, p=NULL;
   checksmallell(E); checkellpt(P); checkellpt(Q);
   if (typ(m)!=t_INT) pari_err_TYPE("elltatepairing",m);
   if (ell_is_inf(P) || ell_is_inf(Q))
@@ -4011,7 +4013,8 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
                             FpE_changepointinv(RgV_to_FpV(Q,p),gel(S,3),p),m,gel(S,1),p);
     return gerepileupto(ltop, Fp_to_mod(z, p));
   }
-  return ellmiller(E, P, Q, m);
+  num = ellmiller(E, P, Q, m);
+  return num ? num : gpowgs(ell_get_disc(E), 0);
 }
 
 static GEN /*assume p odd, p |disc(e) */
