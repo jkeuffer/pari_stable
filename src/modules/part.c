@@ -77,11 +77,11 @@ static GEN
 L(GEN n, ulong q, long bitprec)
 {
   long pr = nbits2prec(bitprec / q + q);
-  ulong h, nmodq = umodiu(n, q), hn;
+  ulong h, nmodq = umodiu(n, q), qov2 = q>>1, hn;
   GEN r, res = stor(0, pr), q12 = muluu(q,12), q24 = shifti(q12,1);
   GEN pi_q = divri(mppi(pr), q12);
   pari_sp av = avma;
-  for (h = 1, hn = 0; h < q; h++, avma = av)
+  for (h = 1, hn = 0; h <= qov2; h++, avma = av) /* symmetry h <-> q-h */
   {
     GEN t;
     hn += nmodq; if (hn >= q) hn -= q;
@@ -91,7 +91,7 @@ L(GEN n, ulong q, long bitprec)
     t = isintzero(r)? addrs(res, 1): addrr(res, mpcos(mulri(pi_q,r)));
     affrr(t, res);
   }
-  return res;
+  return shiftr(res,1);
 }
 
 /* Return a low precision estimate of log p(n). */
