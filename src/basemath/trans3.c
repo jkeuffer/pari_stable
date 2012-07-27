@@ -2421,18 +2421,53 @@ GEN
 sumdedekind_coprime(GEN h, GEN k)
 {
   pari_sp av = avma;
-  GEN s2, s1 = gen_0, p = gen_1, pp = gen_0, s = gen_1;
+  GEN s2, s1, p, pp;
+  long s;
+  if (lgefint(k) == 3 && (ulong)k[2] <= (2*(ulong)LONG_MAX) / 3)
+  {
+    ulong kk = k[2];
+    GEN v = u_sumdedekind_coprime(umodiu(h, kk), kk);
+    long s1 = v[1], s2 = v[2];
+    return gerepileupto(av, gdiv(addis(mulis(k,s1), s2), muluu(12, kk)));
+  }
+  s = 1;
+  s1 = gen_0; p = gen_1; pp = gen_0;
   s2 = h = modii(h, k);
   while (signe(h)) {
     GEN r, nexth, a = dvmdii(k, h, &nexth);
-    if (is_pm1(h)) s2 = addii(s2, mulii(p, s));
-    s1 = addii(s1, mulii(a, s));
-    togglesign_safe(&s);
+    if (is_pm1(h)) s2 = s == 1? addii(s2, p): subii(s2, p);
+    s1 = s == 1? addii(s1, a): subii(s1, a);
+    s = -s;
     k = h; h = nexth;
     r = addii(mulii(a,p), pp); pp = p; p = r;
   }
-  if (signe(s) < 0) s1 = subis(s1, 3);
+  /* at this point p = original k */
+  if (s == -1) s1 = subis(s1, 3);
   return gerepileupto(av, gdiv(addii(mulii(p,s1), s2), muliu(p,12)));
+}
+/* as above, for ulong arguments.
+ * k integer > 0, 0 <= h < k, (h,k) = 1. Returns [s1,s2] such that
+ * s(h,k) = (s2 + k s1) / (12k). Requires max(h + k/2, k) < LONG_MAX
+ * to avoid overflow, in particular k <= LONG_MAX * 2/3 is fine */
+GEN
+u_sumdedekind_coprime(long h, long k)
+{
+  long s = 1, s1 = 0, s2 = h, p = 1, pp = 0;
+  while (h) {
+    long r, nexth = k % h, a = k / h; /* a >= 1, a >= 2 if h = 1 */
+    if (h == 1) s2 += p * s; /* occurs exactly once, last step */
+    s1 += a * s;
+    s = -s;
+    k = h; h = nexth;
+    r = a*p + pp; pp = p; p = r; /* p >= pp >= 0 */
+  }
+  /* in the above computation, p increases from 1 to original k,
+   * -k/2 <= s2 <= h + k/2, and |s1| <= k */
+  if (s < 0) s1 -= 3; /* |s1| <= k+3 ? */
+  /* But in fact, |s2 + p s1| <= k^2 + 1/2 - 3k; if (s < 0), we have
+   * |s2| <= k/2 and it follows that |s1| < k here as well */
+  /* p = k; s(h,k) = (s2 + p s1)/12p. */
+  return mkvecsmall2(s1, s2);
 }
 GEN
 sumdedekind(GEN h, GEN k)

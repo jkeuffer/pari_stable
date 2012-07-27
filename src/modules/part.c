@@ -17,10 +17,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  *
  * This program is basically the implementation of the script
  *
- * Psi(n, q) = local(a, b, c); a=sqrt(2/3)*Pi/q; b=n-1/24; c=sqrt(b);
+ * Psi(n, q) = my(a=sqrt(2/3)*Pi/q, b=n-1/24, c=sqrt(b));
  *             (sqrt(q)/(2*sqrt(2)*b*Pi))*(a*cosh(a*c)-(sinh(a*c)/c))
- * L(n, q) = if(q==1,1,sum(h=1,q-1,if(gcd(h,q)>1,0,cos((g(h,q)-2*h*n)*Pi/q))))
- * g(h, q) = if(q<3,0,sum(k=1,q-1,k*(frac(h*k/q)-1/2)))
+ * L(n,q)=if(q==1,1,sum(h=1,q-1,if(gcd(h,q)==1, cos((g(h,q)-24*h*n)*Pi/(12*q))))
+ * g(h, q) = if(q>=3, 12*sum(k=1,q-1,k*(frac(h*k/q)-1/2)))
+ *         \\ sumdedekind(h,q)*12*q
  * part(n) = round(sum(q=1,5 + 0.24*sqrt(n),L(n,q)*Psi(n,q)))
  *
  * only faster. It is a translation of the C/mpfr version at
@@ -42,7 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  *   c = sqrt(2/3)*Pi*sqrt(b)
  *   d = 1 / ((2*b)^(3/2) * Pi);
  *
- * Psi(N, q) = local(a = c/q); sqrt(q) * (a*cosh(a) - sinh(a)) */
+ * Psi(N, q) = my(a = c/q); sqrt(q) * (a*cosh(a) - sinh(a)) */
 static GEN
 psi(GEN c, ulong q, long prec)
 {
@@ -52,69 +53,42 @@ psi(GEN c, ulong q, long prec)
   return mulrr(sqrtr(stor(q,prec)), subrr(mulrr(a,cha), sha));
 }
 
-/* g(h, q) = if (q<3, 0, sum(k=1,q-1,k*(frac(h*k/q)-1/2))) */
-/* assume h < q and (h,q) = 1. Not memory clean. */
+/* g(h, q) = if(q>=3, 12*sum(k=1,q-1,k*(frac(h*k/q)-1/2)))
+ *   \\ this is an integer = sumdedekind(h,q)*12*q
+ * assume h < q and (h,q) = 1. Not memory clean. */
 static GEN
-g(ulong q, ulong h)
+g(ulong h, ulong q)
 {
-  ulong k, kh;
-  GEN i2;
+  long s1, s2;
+  GEN v;
 
   if (q < 3)  return gen_0;
-  if (h == 1) return gdivgs(muluu(q-1,q-2), 12);
-  if (h == 2) return q == 3? mkfrac(gen_m1, utoipos(6))
-                           : gdivgs(muluu((q-1)>>1,(q-5)>>1), 6);
-  k = q % h;
-  if (k <= 2)
-  {
-    GEN h2 = sqru(h);
-    return k == 1? gdivgs(mului((q-1)/h, subsi(q-1, h2)), 12)
-                 : gdivgs(mului((q-2)/h, subsi((q<<1)-1, h2)), 24); /* k=2 */
-
-  }
-  /* TODO: expr for h-1 mod h  +  gcd-style computation */
-
-  kh = h;
-  if (ULONG_MAX/h > q)
-  {
-    long l3 = 0;
-    for (k = 1; k < q; k++)
-    {
-      l3 += k * ((kh << 1) - q);
-      kh += h; if (kh >= q) kh -= q;
-    }
-    i2 = stoi(l3);
-  }
-  else
-  {
-    pari_sp av = avma;
-    i2 = gen_0;
-    for (k = 1; k < q; k++)
-    {
-      i2 = addii(i2, mulss(k, (kh << 1) - q));
-      if ((k & 31) == 0) i2 = gerepileuptoint(av, i2);
-      kh += h; if (kh >= q) kh -= q;
-    }
-  }
-  return gdivgs(i2, q<<1);
+  if (h == 1) return muluu(q-1,q-2);
+  if (h == 2) return q == 3? gen_m2: muluu(q-1,(q-5)>>1);
+  v = u_sumdedekind_coprime(h, q);
+  s1 = v[1];
+  s2 = v[2];
+  return addis(mulss(q,s1), s2);
 }
 
-/* L(n, q) = if(q==1,1,sum(h=1,q-1,if(gcd(h,q)>1,0,cos((g(h,q)-2*h*n)*Pi/q)))
+/* L(n,q)=if(q==1,1,sum(h=1,q-1,if(gcd(h,q)==1, cos((g(h,q)-24*h*n)*Pi/(12*q))))
  * Never called with q < 3, so ignore this case */
 static GEN
 L(GEN n, ulong q, long bitprec)
 {
   long pr = nbits2prec(bitprec / q + q);
   ulong h, nmodq = umodiu(n, q), hn;
-  GEN r, res = stor(0, pr), pi_q = divru(mppi(pr), q);
+  GEN r, res = stor(0, pr), q12 = muluu(q,12), q24 = shifti(q12,1);
+  GEN pi_q = divri(mppi(pr), q12);
   pari_sp av = avma;
   for (h = 1, hn = 0; h < q; h++, avma = av)
   {
     GEN t;
     hn += nmodq; if (hn >= q) hn -= q;
     if (ugcd(q, h) > 1) continue;
-    r = gsubgs(g(q,h), hn << 1);
-    t = isintzero(r)? addrs(res, 1): addrr(res, mpcos(gmul(pi_q,r)));
+    r = subii(g(h,q), muluu(hn, 24));
+    r = centermodii(r, q24, q12);
+    t = isintzero(r)? addrs(res, 1): addrr(res, mpcos(mulri(pi_q,r)));
     affrr(t, res);
   }
   return res;
@@ -166,7 +140,8 @@ numbpart(GEN n)
   prec = nbits2prec(bitprec);
   pinit(n, &C, &D, prec);
   sum = cgetr (prec); affsr(0, sum);
-  /* Because N < 10^16 and q < sqrt(N), q fits into a long */
+  /* Because N < 10^16 and q < sqrt(N), q fits into a long
+   * In fact q < 2 LONG_MAX / 3 */
   av = avma; togglesign(est);
   for (q = (ulong)(sqrt(gtodouble(n))*0.24 + 5); q >= 3; q--, avma=av)
   {
