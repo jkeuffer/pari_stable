@@ -926,13 +926,14 @@ F2xq_ell_to_a4a6(GEN E, GEN T)
     GEN d6 = F2xq_mul(F2x_add(F2x_add(F2xq_mul(F2x_add(F2xq_mul(da2,d,T),a4),d,T),a6),F2xq_sqr(e,T)),a1i6,T);
     retmkvec3(d2, d6, mkvec4(a1i,dd,pol0_F2x(v),ee));
   }
-  else
+  else if (lgpol(a3))
   {
     GEN d4 = F2x_add(F2xq_sqr(a2,T),a4);
     GEN d6 = F2x_add(F2xq_mul(a2,a4,T),a6);
     GEN a3i = F2xq_inv(a3,T);
     retmkvec3(mkvec3(a3,d4,a3i), d6, mkvec4(pol1_F2x(v),a2,pol0_F2x(T[1]),pol0_F2x(T[1])));
   }
+  else pari_err_IMPL("singular curves over field of char 2.");
 }
 
 GEN
