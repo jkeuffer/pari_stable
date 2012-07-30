@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
+use strict;
 use PARI::822;
 
+my (%funcs, %Fun_by_sec);
 PARI::822::read(\%funcs, "pari.desc");
 
 open (FILE, "../../doc/usersFUNCS.tex") || die;
@@ -43,9 +45,9 @@ while (<FILE>)
         $doc .= library_syntax($fun, $args);
       }
       s/_def_//;
-      my($secname) = $_;
-      my($l) = ($fun->{Section} =~ 'default')? "def,$_": $_;
-      my($idx) = ($secname =~ s/_/\\_/g)? $l: $secname;
+      my ($secname) = $_;
+      my ($l) = ($fun->{Section} =~ 'default')? "def,$_": $_;
+      my ($idx) = ($secname =~ s/_/\\_/g)? $l: $secname;
       print "\n\\subsec{$secname$v}\\kbdsidx{$idx}\\label{se:$l}\n$doc\n";
     }
   }
@@ -61,8 +63,9 @@ sub library_syntax { my ($fun, $args) = @_;
   $args =~ s/=[^,\)]*//g; # delete default values
   my (@ARGS) = split(/[,^] */, $args); # ^ for O(p^e)
   my ($type) = "GEN";
-  $args = ''; @vars=();
-  for ($i = 0; $i <= $#proto; )
+  my (@vars)=();
+  $args = '';
+  for (my $i = 0; $i <= $#proto; )
   {
     my ($c) = $proto[$i++];
     if ($c eq 'l') { $type = "long"; next; }
@@ -101,8 +104,9 @@ sub library_syntax { my ($fun, $args) = @_;
   }
   $args =~ s/^, //;
 
+  my ($post);
   my ($l)=scalar @vars;
-  if ($l==0) { $post=""; }
+  if    ($l==0) { $post=''; }
   elsif ($l==1)
   {
     $post = ", where $vars[0] is a variable number";
