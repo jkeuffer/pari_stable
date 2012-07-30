@@ -1,4 +1,5 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
+use warnings FATAL => 'all';
 use strict;
 use PARI::822;
 

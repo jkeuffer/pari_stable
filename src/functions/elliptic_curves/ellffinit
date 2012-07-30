@@ -2,19 +2,21 @@ Function: ellffinit
 Section: elliptic_curves
 C-Name: ellffinit
 Prototype: GGD0,L,
-Help: ellffinit(x,g): x being a vector suitable for ellinit, and g a finite
+Help: ellffinit(x,g,{flag=0}): x being a vector suitable for ellinit, and g a
+ finite
  field element, return an ellff structure suitable for computation in the group
  E(K) where K is the definition field of g. The element g can also be a prime
- number, in which case K=Fp. This structure can be used in place where a small
- ell is allowed.  This structure contains the group structure and the
- factorization of the exponent.
+ number, in which case K=Fp. This structure can be used wherever a small
+ ell is allowed; it contains the group structure. If flag=0 (defaut) the
+ group order is fully factored; otherwise not.
 Doc:
  $x$ being a vector suitable for \tet{ellinit}, and $g$ a finite field element,
  return an \tet{ellff} structure suitable for computation in the group $E(K)$ where
  $K$ is the definition field of $g$. the element $g$ can also be a prime number,
- in which case $K=\F_p$. This structure can be used in functions that expect a small
- \kbd{ell}.  This structure contains the group structure and the factorization
- of the exponent.
+ in which case $K=\F_p$. This structure can be used in functions that expect a
+ small \kbd{ell}. It contains the group structure as a product of cyclic
+ groups. By default ($\fl = 0$), the group order is fully factored, which can
+ be slow.
  \bprog
  ? a=ffgen(ffinit(101,3),'a);
  ? E=ellffinit([1,a^3],a);
