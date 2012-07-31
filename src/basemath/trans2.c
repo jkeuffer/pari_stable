@@ -888,10 +888,10 @@ bernvec_old(long nb)
 GEN
 bernvec(long nb)
 {
-  GEN y = cgetg(nb+2, t_VEC), z = y + 1;
-  long i;
+  long i, l = nb+2;
+  GEN y = cgetg(l, t_VEC);
   if (nb < 20) return bernvec_old(nb);
-  for (i = nb; i; i--) gel(z,i) = bernfrac(i << 1);
+  for (i = 1; i < l; i++) gel(y,i) = bernfrac((i-1) << 1);
   return y;
 }
 
