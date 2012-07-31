@@ -2043,10 +2043,13 @@ get_cS_cT(ST_t *T, long n)
   nsurc = invr(csurn);
   lncsurn = logr_abs(csurn);
 
-  gel(Z,2) = lncsurn; /* r >= 2 */
-  for (i = 3; i <= r; i++)
-    gel(Z,i) = divru(mulrr(gel(Z,i-1), lncsurn), i-1);
-  /* Z[i] = ln^(i-1)(c1/n) / (i-1)! */
+  if (r > 1)
+  {
+    gel(Z,2) = lncsurn; /* r >= 2 */
+    for (i = 3; i <= r; i++)
+      gel(Z,i) = divru(mulrr(gel(Z,i-1), lncsurn), i-1);
+    /* Z[i] = ln^(i-1)(c1/n) / (i-1)! */
+  }
 
   /* i = i0 */
     A = gel(aij,i0); t = gel(A,1);
