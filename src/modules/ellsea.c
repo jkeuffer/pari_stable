@@ -1375,8 +1375,8 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
   GEN prod_atkin = gen_1, max_traces = gen_0;
   double bound_gr = 1.;
   const double growth_factor = 1.26;
-  long ell = 2;
-  byteptr primepointer = diffptr + 1;
+  long ell;
+  forprime_t TT;
   const struct bb_group *grp;
   void *E;
 
@@ -1409,15 +1409,15 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
 
   /* compile_atkin is a vector containing informations about Atkin primes,
    * informations about Elkies primes lie in Mod(TR, TR_mod). */
+  u_forprime_init(&TT, 3, 1000); /* way beyond what seadata provides */
   bound = sqrti(shifti(q, 4));
   bound_bsgs = get_bound_bsgs(expi(q));
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
-  while (1)
+  while ( (ell = u_forprime_next(&TT)) )
   {
     long ellkt, kt = 1, nbtrace;
     GEN trace_mod;
-    NEXT_PRIME_VIADIFF(ell, primepointer);
     trace_mod = find_trace(a4, a6, ell, q, T, p, &kt, smallfact);
     if (trace_mod==gen_0) pari_err(e_MISC,"not enough modular polynomials");
     if (!trace_mod) continue;
