@@ -933,7 +933,8 @@ F2xq_ell_to_a4a6(GEN E, GEN T)
     GEN a3i = F2xq_inv(a3,T);
     retmkvec3(mkvec3(a3,d4,a3i), d6, mkvec4(pol1_F2x(v),a2,pol0_F2x(T[1]),pol0_F2x(T[1])));
   }
-  else pari_err_IMPL("singular curves over field of char 2.");
+  pari_err_IMPL("singular curves over field of char 2.");
+  return NULL; /*NOT REACHED*/
 }
 
 GEN
