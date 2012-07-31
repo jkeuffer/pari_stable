@@ -235,7 +235,7 @@ constpi(long prec)
   if (gpi && realprec(gpi) >= prec) return gpi;
 
   av = avma;
-  tmp = gclone(pi_ramanujan(prec));
+  tmp = gclone(pi_ramanujan(prec+EXTRAPRECWORD));
   swap_clone(&gpi,tmp);
   avma = av; return gpi;
 }
@@ -2132,23 +2132,60 @@ agm(GEN x, GEN y, long prec)
 /**                             LOG(X)                             **/
 /**                                                                **/
 /********************************************************************/
+/* atanh(u/v) using binary splitting */
+static GEN
+atanhQ_split(ulong u, ulong v, long prec)
+{ /* satisfies (2n+1) (v/u)^2n > 2^bitprec */
+  long i, nmax = bit_accuracy(prec);
+  GEN u2 = sqru(u), v2 = sqru(v);
+  double d = ((double)v) / u;
+  struct abpq_res R;
+  struct abpq A;
+  nmax = bit_accuracy(prec) / (2*log2(d));
+  abpq_init(&A, nmax);
+  A.a[0] = A.b[0] = gen_1;
+  A.p[0] = utoipos(u);
+  A.q[0] = utoipos(v);
+  for (i = 1; i <= nmax; i++)
+  {
+    A.a[i] = gen_1;
+    A.b[i] = utoipos((i<<1)+1);
+    A.p[i] = u2;
+    A.q[i] = v2;
+  }
+  abpq_sum(&R, 0, nmax, &A);
+  return rdivii(R.T, mulii(R.B,R.Q),prec);
+}
+/* log(2) = 10*atanh(1/17)+4*atanh(13/499) */
+static GEN
+log2_split(long prec)
+{ /* satisfies (n+1) 2^n > 2^bitprec */
+  GEN u = atanhQ_split(1, 17, prec);
+  GEN v = atanhQ_split(13, 499, prec);
+  shiftr_inplace(v, 2);
+  return addrr(mulur(10, u), v);
+}
+#if 0 /* slower ! */
+static GEN
+log2_agm(long prec)
+{
+  long n = prec2nbits(prec) >> 1;
+  GEN y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, prec) ));
+  return divru(y, n);
+}
+#endif
 /* cf logagmr_abs(). Compute Pi/2agm(1, 4/2^n) ~ log(2^n) = n log(2) */
 GEN
 constlog2(long prec)
 {
   pari_sp av;
-  long l, n;
-  GEN y, tmplog2;
-
+  GEN y, tmp;
   if (glog2 && realprec(glog2) >= prec) return glog2;
 
-  tmplog2 = cgetr_block(prec);
+  tmp = cgetr_block(prec);
   av = avma;
-  l = prec+EXTRAPRECWORD;
-  n = prec2nbits(l) >> 1;
-  y = divrr(Pi2n(-1, prec), agm1r_abs( real2n(2 - n, l) ));
-  affrr(divru(y,n), tmplog2);
-  swap_clone(&glog2,tmplog2);
+  affrr(log2_split(prec+EXTRAPRECWORD), tmp);
+  swap_clone(&glog2,tmp);
   avma = av; return glog2;
 }
 

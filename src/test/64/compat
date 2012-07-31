@@ -22,7 +22,7 @@
 ? \precision=57
    realprecision = 57 significant digits
 ? pi
-3.14159265358979323846264338327950288419716939937510582097
+3.14159265358979323846264338327950288419716939937510582098
 ? \precision=38
    realprecision = 38 significant digits
 ? o(x^12)
@@ -2647,6 +2647,6 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getstack()
 200
 ? getheap()
-[602, 99534]
+[602, 99437]
 ? print("Total time spent: ",gettime);
-Total time spent: 144
+Total time spent: 152
