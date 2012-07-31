@@ -2179,7 +2179,7 @@ GEN
 constlog2(long prec)
 {
   pari_sp av;
-  GEN y, tmp;
+  GEN tmp;
   if (glog2 && realprec(glog2) >= prec) return glog2;
 
   tmp = cgetr_block(prec);
