@@ -142,70 +142,54 @@ swap_clone(GEN *old, GEN c)
   *old = c;
   if (tmp) gunclone(tmp);
 }
-#if 0
-/* Ramanujan's formula:
- *                         ----
+
+/*                         ----
  *  53360 (640320)^(1/2)   \    (6n)! (545140134 n + 13591409)
  *  -------------------- = /    ------------------------------
  *        Pi               ----   (n!)^3 (3n)! (-640320)^(3n)
  *                         n>=0
- */
-GEN
-piold(long prec)
+ *
+ * Ramanujan's formula + binary splitting */
+static GEN
+pi_ramanujan(long prec)
 {
-  const long k1 = 545140134, k2 = 13591409, k3 = 640320;
-  const double alpha2 = 47.11041314; /* 3log(k3/12) / log(2) */
-  GEN p1,p2,p3,tmppi;
-  long l, n, n1;
-  pari_sp av = avma, av2;
-  double alpha;
+  const ulong B = 545140134, A = 13591409, C = 640320;
+  const double alpha2 = 47.11041314; /* 3log(C/12) / log(2) */
+  long n, nmax;
+  struct abpq_res R;
+  struct abpq S;
+  GEN D, u;
 
-  tmppi = cgetr(prec);
-  incrprec(prec);
-  n = (long)(1 + prec2nbits(prec)/alpha2);
-  n1 = 6*n - 1;
-  p2 = addsi(k2, mulss(n,k1));
-  p1 = itor(p2, prec);
-
-  /* initialize mantissa length */
-  if (prec>=4) l=4; else l=prec;
-  setlg(p1,l); alpha = (double)l;
-
-  av2 = avma;
-  while (n)
-  {
-    if (n < CBRTVERYBIGINT) /* p3 = n1(n1-2)(n1-4) / n^3 */
-      p3 = divru(mulur(n1-4,mulur(n1*(n1-2),p1)),n*n*n);
-    else
-    {
-      if (n1 < SQRTVERYBIGINT)
-        p3 = divru(divru(mulur(n1-4,mulur(n1*(n1-2),p1)),n*n),n);
-      else
-        p3 = divru(divru(divru(mulur(n1-4,mulur(n1,mulur(n1-2,p1))),n),n),n);
-    }
-    p3 = divru(divru(p3,100100025), 327843840);
-    subisz(p2,k1,p2);
-    subirz(p2,p3,p1);
-    alpha += alpha2; l = (long)(1+alpha); /* new mantissa length */
-    if (l > prec) l = prec;
-    setlg(p1,l); avma = av2;
-    n--; n1-=6;
-  }
-  p1 = divur(53360,p1);
-  return gerepileuptoleaf(av, mulrr(p1,sqrtr_abs(stor(k3,prec))));
-}
+  nmax = (long)(1 + prec2nbits(prec)/alpha2);
+#ifdef LONG_IS_64BIT
+  D = utoipos(10939058860032000); /* C^3/24 */
+#else
+  D = uutoi(2546948,495419392);
 #endif
+  abpq_init(&S, nmax);
+  S.a[0] = utoipos(A);
+  S.b[0] = S.p[0] = S.q[0] = gen_1;
+  for (n = 1; n <= nmax; n++)
+  {
+    S.a[n] = addiu(muluu(B, n), A);
+    S.b[n] = gen_1;
+    S.p[n] = mulis(muluu(6*n-5, 2*n-1), 1-6*n);
+    S.q[n] = mulii(sqru(n), muliu(D,n));
+  }
+  abpq_sum(&R, 0, nmax, &S);
+  u = rdivii(R.Q, R.T, prec); /* = 12 Pi / C^{3/2} */
+  return mulrr( mulru(u, C/12), sqrtr_abs(utor(C,prec)) );
+}
+
+#if 0 /* Much slower than binary splitting at least up to prec = 10^8 */
 /* Gauss - Brent-Salamin AGM iteration */
-GEN
-constpi(long prec)
+static GEN
+pi_brent_salamin(long prec)
 {
-  GEN A, B, C, tmppi;
+  GEN A, B, C;
+  pari_sp av2;
   long i, G;
-  pari_sp av, av2;
 
-  if (gpi && realprec(gpi) >= prec) return gpi;
-
-  av = avma; tmppi = cgetr_block(prec);
   G = - prec2nbits(prec);
   incrprec(prec);
 
@@ -226,9 +210,34 @@ constpi(long prec)
     affrr(subrr(C, y), C); avma = av2;
   }
   shiftr_inplace(C, 2);
-  affrr(divrr(sqrr(addrr(A,B)), C), tmppi);
-  swap_clone(&gpi, tmppi);
+  return divrr(sqrr(addrr(A,B)), C);
+}
+GEN
+constpi(long prec)
+{
+  pari_sp av;
+  GEN tmp;
+  if (gpi && realprec(gpi) >= prec) return gpi;
+
+  tmp = cgetr_block(prec);
+  av = avma;
+  affrr(pi_brent_salamin(prec), tmp);
+  swap_clone(&gpi, tmp);
   avma = av;  return gpi;
+}
+#endif
+
+GEN
+constpi(long prec)
+{
+  pari_sp av;
+  GEN tmp;
+  if (gpi && realprec(gpi) >= prec) return gpi;
+
+  av = avma;
+  tmp = gclone(pi_ramanujan(prec));
+  swap_clone(&gpi,tmp);
+  avma = av; return gpi;
 }
 
 GEN

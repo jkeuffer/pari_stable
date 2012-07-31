@@ -202,6 +202,7 @@ BA 70- GP function ellpow is renamed to ellmul
 BA 71- rename powell->ellmul, addell->elladd, subell->ellsub
    72- is_pth_power interface [ pass a forprime_t iterator ]
    73- polrootsmod(, 4) is no longer accepted
+   74- revert to Ramanujan's formula to compute Pi [ + binary splitting ]
 
   Added
     1- mathnf for matrices over K[X] [#41]
