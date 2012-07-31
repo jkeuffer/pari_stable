@@ -105,7 +105,7 @@ x + 1
 ? \p57
    realprecision = 57 significant digits
 ? Pi
-3.14159265358979323846264338327950288419716939937510582097
+3.14159265358979323846264338327950288419716939937510582098
 ? \p38
    realprecision = 38 significant digits
 ? O(x^12)
@@ -121,6 +121,6 @@ O(x^12)
   ***                                 ^---
   *** _^_: impossible inverse modulo: Mod(131, 49649).
 ? getheap
-[59, 808]
+[59, 809]
 ? print("Total time spent: ",gettime);
-Total time spent: 4
+Total time spent: 0
