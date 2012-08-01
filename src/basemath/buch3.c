@@ -1403,7 +1403,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   pari_sp av = avma;
   GEN bnf, index, discnf, nf, group, detgroup, fa, greldeg;
   GEN fac, col, cnd;
-  byteptr d = diffptr;
+  forprime_t S;
   ulong p;
 
   checkbnr(bnr); bnf = bnr_get_bnf(bnr);
@@ -1427,14 +1427,14 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
   discnf = nf_get_disc(nf);
   index  = nf_get_index(nf);
-  for (p=0 ;;)
+  u_forprime_init(&S, 2, ULONG_MAX);
+  while ( (p = u_forprime_next(&S)) )
   {
     long oldf = -1, lfa;
     /* If all pr are unramified and have the same residue degree, p =prod pr
      * and including last pr^f or p^f is the same, but the last isprincipal
      * is much easier! oldf is used to track this */
 
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!umodiu(index, p)) continue; /* can't be treated efficiently */
 
     fa = idealprimedec(nf, utoipos(p)); lfa = lg(fa)-1;
@@ -1465,7 +1465,8 @@ rnfnormgroup(GEN bnr, GEN polrel)
       if (oldf && i == lfa && !umodiu(discnf, p)) pr = utoipos(p);
 
       /* pr^f = N P, P | pr, hence is in norm group */
-      col = gmulsg(f, bnrisprincipal(bnr,pr,0));
+      col = bnrisprincipal(bnr,pr,0);
+      if (f > 1) col = ZC_z_mul(col, f);
       group = ZM_hnf(shallowconcat(group, col));
       detgroup = ZM_det_triangular(group);
       k = cmpiu(detgroup,reldeg);
@@ -1473,6 +1474,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
+  return NULL;
 }
 
 static GEN
@@ -1488,22 +1490,26 @@ liftpol(GEN pol, GEN q)
 GEN
 nf_deg1_prime(GEN nf)
 {
-  GEN bad = mulii(nf_get_disc(nf), nf_get_index(nf));
-  GEN T = nf_get_pol(nf), z;
+  GEN z, T = nf_get_pol(nf), D = nf_get_disc(nf), f = nf_get_index(nf);
   long degnf = degpol(T);
-  byteptr pt;
-  ulong c, p = init_primepointer(degnf, &pt);
-  for(;;)
+  forprime_t S;
+  ulong p;
+  u_forprime_init(&S, degnf, ULONG_MAX);
+  while ( (p = u_forprime_next(&S)) )
   {
-    pari_sp av = avma;
-    NEXT_PRIME_VIADIFF_CHECK(p, pt);
-    if (umodiu(bad, p) == 0) continue;
+    pari_sp av;
+    if (!umodiu(D, p) || !umodiu(f, p)) continue;
+    av = avma;
     z = Flx_roots(ZX_to_Flx(T, p), p);
-    if (lg(z) > 1) { c = Fl_neg(z[1], p); break; }
     avma = av;
+    if (lg(z) > 1)
+    {
+      ulong c = Fl_neg(z[1], p);
+      z = deg1pol_shallow(gen_1, utoi(c), varn(T));
+      return primedec_apply_kummer(nf, z, 1, utoipos(p));
+    }
   }
-  z = deg1pol_shallow(gen_1, utoi(c), varn(T));
-  return primedec_apply_kummer(nf, z, 1, utoipos(p));
+  return NULL;
 }
 
 long
