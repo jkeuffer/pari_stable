@@ -909,7 +909,8 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN q, GEN T, GEN p, long *ptr_kt, ulong s
     }
   }
   kt = k;
-  if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN)) return gen_0;
+  if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN))
+    pari_err(e_MISC,"not enough modular polynomials");
   if (DEBUGLEVEL)
   { err_printf("Process prime %5ld. ", ell); timer_start(&ti); }
   meqnj = FqXY_evalx(MEQN.eq, Fq_ellj(a4, a6, T, p), T, p);
@@ -1369,28 +1370,25 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
 {
   const long MAX_ATKIN = 21;
   pari_sp ltop = avma, btop, st_lim;
-  long i, nb_atkin;
-  GEN res, cat, TR, TR_mod;
-  GEN compile_atkin, bound, bound_bsgs, champ;
+  long ell, i, nb_atkin;
+  GEN TR, TR_mod, compile_atkin, bound, bound_bsgs, champ;
   GEN prod_atkin = gen_1, max_traces = gen_0;
   double bound_gr = 1.;
   const double growth_factor = 1.26;
-  long ell;
   forprime_t TT;
-  const struct bb_group *grp;
   void *E;
 
   if (!modular_eqn && !get_seadata(0)) return NULL;
   if (T && varn(T)==0) /* 0 is used by the modular polynomial */
   {
-    T = ZX_copy(T); setvarn(T,1);
-    a4 = ZX_copy(a4); setvarn(a4,1);
-    a6 = ZX_copy(a6); setvarn(a6,1);
+    T  = shallowcopy(T);  setvarn(T,1);
+    a4 = shallowcopy(a4); setvarn(a4,1);
+    a6 = shallowcopy(a6); setvarn(a6,1);
   }
   /*First compute the trace modulo 2 */
   switch(FqX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), T, p))
   {
-  case 3: /* bonus time: 4 | #E(Fq) = q+1 - a_p */
+  case 3: /* bonus time: 4 | #E(Fq) = q+1 - t */
     i = mod4(q)+1; if (i > 2) i -= 4;
     TR_mod = utoipos(4);
     TR = stoi(i); break;
@@ -1419,17 +1417,16 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
     long ellkt, kt = 1, nbtrace;
     GEN trace_mod;
     trace_mod = find_trace(a4, a6, ell, q, T, p, &kt, smallfact);
-    if (trace_mod==gen_0) pari_err(e_MISC,"not enough modular polynomials");
     if (!trace_mod) continue;
 
     nbtrace = lg(trace_mod) - 1;
     ellkt = (long)upowuu(ell, kt);
     if (nbtrace == 1)
     {
-      long ap_mod_ellkt = trace_mod[1];
+      long t_mod_ellkt = trace_mod[1];
       if (smallfact && ell > smallfact)
-      { /* does ell divide q + 1 - ap ? */
-        long card_mod_ell = (smodis(q, ell) + 1 - ap_mod_ellkt) % ell ;
+      { /* does ell divide q + 1 - t ? */
+        long card_mod_ell = (umodiu(q,ell) + 1 - t_mod_ellkt) % ell ;
         if (!card_mod_ell)
         {
           if (DEBUGLEVEL)
@@ -1437,7 +1434,7 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
           avma = ltop; return gen_0;
         }
       }
-      (void)Z_incremental_CRT(&TR, ap_mod_ellkt, &TR_mod, ellkt);
+      (void)Z_incremental_CRT(&TR, t_mod_ellkt, &TR_mod, ellkt);
     }
     else
     {
@@ -1452,7 +1449,7 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
       bound_gr *= growth_factor;
       if (signe(max_traces))
       {
-        max_traces = divis(mulis(max_traces,2*nbtrace), ellkt);
+        max_traces = divis(muliu(max_traces,2*nbtrace), ellkt);
         if (DEBUGLEVEL>=3)
           err_printf("At least %Ps remaining possibilities.\n",max_traces);
       }
@@ -1461,20 +1458,24 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
         GEN bound_atkin = truedivii(bound, TR_mod);
         champ = champion(compile_atkin, nb_atkin, bound_atkin);
         max_traces = gel(champ,2);
-        if (cmpir(max_traces, bound_tr) < 0) break;
         if (DEBUGLEVEL>=2)
           err_printf("%Ps remaining possibilities.\n", max_traces);
+        if (cmpir(max_traces, bound_tr) < 0)
+        {
+          GEN res, cat = shallowextract(compile_atkin, gel(champ,1));
+          const struct bb_group *grp;
+          if (DEBUGLEVEL)
+            err_printf("Match and sort for %Ps possibilities.\n", max_traces);
+          grp = get_FqE_group(&E,a4,a6,T,p);
+          res = match_and_sort(cat, TR_mod, TR, q, E, grp);
+          return gerepileuptoint(ltop, res);
+        }
       }
     }
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop,5, &TR,&TR_mod, &compile_atkin, &max_traces, &prod_atkin);
   }
-  cat = shallowextract(compile_atkin, gel(champ, 1));
-  if (DEBUGLEVEL)
-    err_printf("Match and sort for %Ps possibilities.\n",gel(champ, 2));
-  grp = get_FqE_group(&E,a4,a6,T,p);
-  res = match_and_sort(cat, TR_mod, TR, q, E, grp);
-  return gerepileuptoint(ltop, res);
+  return NULL;/*not reached*/
 }
 
 GEN
