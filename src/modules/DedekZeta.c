@@ -22,31 +22,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 static GEN
 dirzetak0(GEN nf, ulong N)
 {
-  GEN vect, c, c2, pol = nf_get_pol(nf), index = nf_get_index(nf);
-  pari_sp av = avma;
+  GEN vect, c, c2, T = nf_get_pol(nf), index = nf_get_index(nf);
+  pari_sp av = avma, av2;
   const ulong SQRTN = (ulong)(sqrt(N) + 1e-3);
   ulong i, p, lx;
-  byteptr d = diffptr;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
+  forprime_t S;
 
   (void)evallg(N+1);
   c  = cgetalloc(t_VECSMALL, N+1);
   c2 = cgetalloc(t_VECSMALL, N+1);
   c2[1] = c[1] = 1; for (i=2; i<=N; i++) c[i] = 0;
-
-  maxprime_check(N);
-  for (p = 0; p <= N; avma = av)
+  u_forprime_init(&S, 2, N);
+  av2 = avma;
+  while ( (p = u_forprime_next(&S)) )
   {
-    NEXT_PRIME_VIADIFF(p, d);
+    avma = av2;
     court[2] = p;
     if (umodiu(index, p)) /* court does not divide index */
     {
-      vect = gel(FpX_degfact(pol,court),1);
+      vect = gel(Flx_degfact(ZX_to_Flx(T,p), p),1);
       lx = lg(vect);
     }
     else
     {
-      GEN P = idealprimedec(nf,court); lx = lg(P); vect = cgetg(lx,t_VECSMALL);
+      GEN P = idealprimedec(nf,court);
+      lx = lg(P); vect = cgetg(lx,t_VECSMALL);
       for (i=1; i<lx; i++) vect[i] = pr_get_f(gel(P,i));
     }
     if (p <= SQRTN)
@@ -77,6 +78,7 @@ dirzetak0(GEN nf, ulong N)
         for (k = N/p, k2 = k*p; k > 0; k--, k2 -= p) c[k2] += c[k];
       }
   }
+  avma = av;
   pari_free(c2); return c;
 }
 

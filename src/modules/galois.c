@@ -207,9 +207,8 @@ static long
 galmodp(long EVEN, GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 {
   long i,k,l,n,nbremain;
-  byteptr d = diffptr;
   GEN p1, dtyp;
-  ulong p = 0;
+  forprime_t T;
 
   switch(degpol(pol))
   {
@@ -219,14 +218,15 @@ galmodp(long EVEN, GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
     default: nbremain = EVEN?  5:  3; break; /* case 11 */
   }
 
+  u_forprime_init(&T, 2, ULONG_MAX);
   dtyp = new_chunk(NMAX+1);
   k = gr[0]; for (i=1; i<k; i++) gr[i]=1;
   for (k=1; k<15; k++)
   {
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    ulong p = u_forprime_next(&T);
     if (!umodiu(dpol,p)) continue; /* p divides dpol */
 
-    p1 = gel(FpX_degfact(pol,utoipos(p)),1);
+    p1 = gel(Flx_degfact(ZX_to_Flx(pol,p),p),1);
     l = lg(p1);
     dtyp[0] = evaltyp(t_VECSMALL)|evallg(l);
     for (i=1; i<l; i++) dtyp[i] = p1[l-i]; /* decreasing order */

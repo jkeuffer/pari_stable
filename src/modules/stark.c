@@ -2873,26 +2873,27 @@ struct gpq_data {
 static void
 init_pq(GEN D, struct gpq_data *T)
 {
-  const long Np = 6547;
+  const long Np = 6547; /* N.B. primepi(50000) = 5133 */
+  const ulong maxq = 50000;
   GEN listp = cgetg(Np + 1, t_VECSMALL); /* primes p */
   GEN listP = cgetg(Np + 1, t_VEC); /* primeform(p) if of order 2, else NULL */
   GEN gcd24 = cgetg(Np + 1, t_VECSMALL); /* gcd(p-1, 24) */
-  long i, l = 1;
+  forprime_t S;
+  long l = 1;
   double best = 0.;
-  ulong q = 0, maxq = maxprime();
-  byteptr d = diffptr;
+  ulong q;
 
-  if (maxq > 50000) maxq = 50000;
+  u_forprime_init(&S, 2, ULONG_MAX);
   T->D = D;
   T->p = T->q = 0;
   for(;;)
   {
     GEN Q;
-    long gcdq, mod;
+    long i, gcdq, mod;
     int order2, store;
     double t;
 
-    NEXT_PRIME_VIADIFF_CHECK(q, d);
+    q = u_forprime_next(&S);
     if (best > 0 && q >= maxq)
     {
       if (DEBUGLEVEL)
