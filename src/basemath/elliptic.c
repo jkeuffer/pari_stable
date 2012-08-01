@@ -3531,6 +3531,7 @@ _orderell(GEN E, GEN P)
 {
   pari_sp av = avma;
   GEN tmp, p, a4, dx, dy, d4, d6, D, Pp, Q;
+  forprime_t T;
   ulong pp;
   long k;
   if (ell_is_inf(P)) return 1;
@@ -3546,7 +3547,8 @@ _orderell(GEN E, GEN P)
   /* choose not too small prime p dividing neither a coefficient of the
      short Weierstrass form nor of P and leading to good reduction      */
 
-  for (pp = 100003;;pp = unextprime(pp + 1))
+  u_forprime_init(&T, 100003, ULONG_MAX);
+  while ( (pp = u_forprime_next(&T)) )
     if (Rg_to_Fl(d4, pp) && Rg_to_Fl(d6, pp) && Rg_to_Fl(D, pp)
      && Rg_to_Fl(dx, pp) && Rg_to_Fl(dy, pp)) break;
 
