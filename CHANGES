@@ -105,6 +105,7 @@ BA 84- diffop(Mod(y,x^2-y),[y],[1]) -> wrong result
 BA 85- calling a GP function with a lot of ommited arguments could cause a crash
 GH 86- missing solutions in thue(), e.g. thue(thueinit(x^3+92*x+1),3^3)
    87- t_RFRAC == t_RFRAC could return a wrong result
+   88- obscure bug in polroots() (sage #13314)
 
   Changed
     1- mathnf: swapped flag 3 and 5.
