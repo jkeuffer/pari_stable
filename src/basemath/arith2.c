@@ -963,3 +963,64 @@ sumdigits(GEN n)
     return gerepileuptoint(av, S);
   }
 }
+
+static void
+digits_dac(GEN x, GEN B, long l, GEN* z)
+{
+  GEN q,r;
+  long m;
+  if (l==1) { *z=x; return; }
+  m=l>>1;
+  q=dvmdii(x,powiu(B,m),&r);
+  digits_dac(q,B,l-m,z);
+  digits_dac(r,B,m,z+l-m);
+}
+
+static void
+digits_dacsmall(GEN x, ulong B, long l, ulong* z)
+{
+  pari_sp av = avma;
+  GEN q,r;
+  long m;
+  if (l==1) { *z=itou(x); return; }
+  m=l>>1;
+  q=dvmdii(x,powuu(B,m),&r);
+  digits_dacsmall(q,B,l-m,z);
+  digits_dacsmall(r,B,m,z+l-m);
+  avma = av;
+}
+
+/* convert integer --> base 10^9 [not memory clean] */
+GEN
+digits(GEN x, GEN B)
+{
+  pari_sp av=avma;
+  long lz;
+  GEN z;
+  if (typ(x)!=t_INT) pari_err_TYPE("digits",x);
+  if (!B)
+    B = utoi(10);
+  else {
+    if (typ(B)!=t_INT) pari_err_TYPE("digits",B);
+    if (!signe(B)) pari_err(e_INV,"digits");
+    B = absi(B);
+  }
+  if (absi_cmp(x,B)<0) {avma = av; retmkvec(absi(x)); }
+  if (equaliu(B,2))    {avma = av; return binaire(x); }
+  x = absi(x); lz = logint(x,B,NULL);
+  if (lgefint(B)>3)
+  {
+    z = zerovec(lz);
+    digits_dac(x,B,lz,(GEN*)(z+1));
+    digits_dac(x,B,lz,(GEN*)(z+1));
+    return gerepilecopy(av,z);
+  }
+  else
+  {
+    ulong b = B[2];
+    z = const_vecsmall(lz,0);
+    digits_dacsmall(x,b,lz,(ulong*)(z+1));
+    digits_dacsmall(x,b,lz,(ulong*)(z+1));
+    return gerepileupto(av,vecsmall_to_vec(z));
+  }
+}

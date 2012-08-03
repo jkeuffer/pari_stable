@@ -314,6 +314,7 @@ LGr93- vecmax / vecmin: add optional pointer argument (to hold index of a
    95- isprimepower() function
    96- PARI functions F2v_to_F2x, F2x_valrem, F2x_deflate
    97- PARI function RgV_polint
+BA 98- GP function digits
 
   Removed
     1- dropped DOS support

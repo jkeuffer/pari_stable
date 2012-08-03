@@ -984,6 +984,7 @@ GEN     core2partial(GEN n, long l);
 GEN     coredisc(GEN n);
 GEN     coredisc0(GEN n,long flag);
 GEN     coredisc2(GEN n);
+GEN     digits(GEN N, GEN B);
 GEN     divisors(GEN n);
 GEN     divisorsu(ulong n);
 GEN     eulerphi(GEN n);

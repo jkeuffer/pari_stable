@@ -1,0 +1,6 @@
+digits(5^100)
+check(a,b)=my(v=digits(a,b));if(subst(Pol(v),'x,b)!=a || vecmax(v)>=b,error([a,b]));
+check(5^100,2)
+check(5^100,3)
+check(3^100,2^64-1)
+check(3^100,2^128+1)
