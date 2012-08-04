@@ -372,7 +372,7 @@ factor_quad(GEN x, GEN res, long *ptcnt)
 long
 logint(GEN B, GEN y, GEN *ptq)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   long e,i,fl;
   GEN q,pow2, r = y;
 
@@ -387,17 +387,19 @@ logint(GEN B, GEN y, GEN *ptq)
     }
   }
   /* binary splitting: compute bits of e one by one */
-  /* compute pow2[i] = y^(2^i) [i < very crude upper bound for log_2(n)] */
-  pow2 = new_chunk(expi(B)+1);
+  /* compute pow2[i] = y^(2^i) [i < crude upper bound for log_2 log_y(B)] */
+  pow2 = new_chunk((long)log2(expi(B))+2);
   gel(pow2,0) = y;
   for (i=0,q=r;; )
-  {
-    fl = cmpii(r,B); if (fl >= 0) break;
+  { /* r = y^2^i */
+    fl = cmpii(r,B);
+    if (!fl) { e = 1L<<i; e++; r = mulii(r,y); goto END; }
+    if (fl > 0) break;
     q = r; r = sqri(q);
     i++; gel(pow2,i) = r;
   }
-  if (i == 0) { e = 1; goto END; } /* y <= B */
 
+  av2 = avma;
   for (i--, e=1L<<i;;)
   { /* y^e = q < B <= r = q * y^(2^i) */
     if (!fl) break; /* B = r */
@@ -405,11 +407,11 @@ logint(GEN B, GEN y, GEN *ptq)
     if (--i < 0) { if (fl > 0) e++; break; }
     r = mulii(q, gel(pow2,i));
     fl = cmpii(r, B);
-    if (fl <= 0) { e += (1L<<i); q = r; }
+    if (fl <= 0) { e += (1L<<i); q = r = gerepileuptoint(av2, r); }
   }
   if (fl <= 0) { e++; r = mulii(r,y); }
 END:
-  if (ptq) *ptq = gerepileuptoint(av, icopy(r)); else avma = av;
+  if (ptq) *ptq = gerepileuptoint(av, r); else avma = av;
   return e;
 }
 
