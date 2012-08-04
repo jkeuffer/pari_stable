@@ -91,6 +91,26 @@ install0(char *name, char *code, char *gpname, char *lib)
 #else
 #  ifdef _WIN32
 #  include <windows.h>
+/* like LoadLibrary, but using default(sopath) */
+static HMODULE
+gp_LoadLibrary(char *name)
+{
+  HMODULE handle;
+  char *s = path_expand(name);
+
+  /* if sopath empty or path is absolute, use LoadLibrary */
+  if (!GP_DATA || *(GP_DATA->sopath->PATH)==0 || path_is_absolute(s))
+    return try_LoadLibrary(s);
+  else
+  {
+    forpath_t T;
+    char *t;
+    forpath_init(&T, GP_DATA->sopath, s);
+    while ( (t = forpath_next(&T)) )
+      if ( (handle = try_LoadLibrary(t)) ) return handle;
+  }
+  return NULL;
+}
 void
 install0(char *name, char *code, char *gpname, char *lib)
 {
@@ -108,10 +128,9 @@ install0(char *name, char *code, char *gpname, char *lib)
 #ifdef DL_DFLT_NAME
   if (! *lib) lib = DL_DFLT_NAME;
 #endif
-  if (! *gpname) gpname=name;
-  if (lib) lib = path_expand(lib);
+  if (! *gpname) gpname = name;
 
-  handle = LoadLibrary(lib);
+  handle = gp_LoadLibrary(lib);
   if (!handle)
   {
     if (lib) pari_err(e_MISC,"couldn't open dynamic library '%s'",lib);
@@ -123,7 +142,6 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",name,lib);
     pari_err(e_MISC,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
-  if (lib) pari_free(lib);
   install((void*)f,gpname,code);
 }
 #  else
