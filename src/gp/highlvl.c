@@ -26,6 +26,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #ifdef HAS_DLOPEN
 #include <dlfcn.h>
 
+/* see try_name() */
+static void *
+try_dlopen(char *s, int flag)
+{
+  void *h = dlopen(s, flag);
+  free((void*)s); return h;
+}
+
+/* like dlopen, but using default(sopath) */
+static void *
+gp_dlopen(char *name, int flag)
+{
+  void *handle;
+  char *s;
+
+  if (!name) return dlopen(NULL, flag);
+  s = path_expand(name);
+
+  /* if sopath empty or path is absolute, use dlopen */
+  if (!GP_DATA || *(GP_DATA->sopath->PATH)==0 || path_is_absolute(s))
+    return try_dlopen(s, flag);
+  else
+  {
+    forpath_t T;
+    char *t;
+    forpath_init(&T, GP_DATA->sopath, s);
+    while ( (t = forpath_next(&T)) )
+    {
+      if ( (handle = try_dlopen(t,flag)) ) return handle;
+      (void)dlerror(); /* clear error message */
+    }
+  }
+  return NULL;
+}
+
 void
 install0(char *name, char *code, char *gpname, char *lib)
 {
@@ -33,12 +68,11 @@ install0(char *name, char *code, char *gpname, char *lib)
 
   if (! *lib) lib = DL_DFLT_NAME;
   if (! *gpname) gpname = name;
-  if (lib) lib = path_expand(lib);
 
 #ifndef RTLD_GLOBAL /* OSF1 has dlopen but not RTLD_GLOBAL*/
 #  define RTLD_GLOBAL 0
 #endif
-  handle = dlopen(lib, RTLD_LAZY|RTLD_GLOBAL);
+  handle = gp_dlopen(lib, RTLD_LAZY|RTLD_GLOBAL);
 
   if (!handle)
   {
@@ -52,7 +86,6 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",name,lib);
     pari_err(e_MISC,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
-  if (lib) pari_free(lib);
   (void)install(f, gpname, code);
 }
 #else

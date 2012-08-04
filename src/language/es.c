@@ -3873,6 +3873,25 @@ try_open(char *s)
   return NULL;
 }
 
+void
+forpath_init(forpath_t *T, gp_path *path, const char *s)
+{
+  T->s = s;
+  T->ls = strlen(s);
+  T->dir = path->dirs;
+}
+char *
+forpath_next(forpath_t *T)
+{
+  char *t, *dir = T->dir[0];
+
+  if (!*dir) return NULL; /* done */
+  /* room for dir + '/' + s + '\0' */
+  t = (char*)pari_malloc(strlen(dir) + T->ls + 2);
+  sprintf(t,"%s/%s", dir, T->s);
+  T->dir++; return t;
+}
+
 /* If a file called "name" exists (possibly after appending ".gp")
  * record it in the file_stack (as a pipe if compressed).
  * name is malloc'ed, we free it before returning
@@ -3914,8 +3933,8 @@ switchin_last(void)
 }
 
 /* return 1 if s starts by '/' or './' or '../' */
-static int
-is_absolute(char *s)
+int
+path_is_absolute(char *s)
 {
 #ifdef _WIN32
   if( (*s >= 'A' && *s <= 'Z') ||
@@ -3941,17 +3960,14 @@ switchin(const char *name)
   if (!*name) return switchin_last();
   s = path_expand(name);
   /* if s is an absolute path, don't use dir_list */
-  if (is_absolute(s)) { if ((f = try_name(s))) return f; }
+  if (path_is_absolute(s)) { if ((f = try_name(s))) return f; }
   else
   {
-    size_t lens = strlen(s);
-    char **tmp = GP_DATA->path->dirs;
-    for ( ; *tmp; tmp++)
-    { /* make room for '/' and '\0', try_name frees it */
-      char *t = (char*)pari_malloc(2 + lens + strlen(*tmp));
-      sprintf(t,"%s/%s",*tmp,s);
+    char *t;
+    forpath_t T;
+    forpath_init(&T, GP_DATA->path, s);
+    while ( (t = forpath_next(&T)) )
       if ((f = try_name(t))) return f;
-    }
   }
   pari_err_FILE("input file",name);
   return NULL; /*not reached*/

@@ -616,10 +616,9 @@ sd_datadir(const char *v, long flag)
   return gnil;
 }
 
-GEN
-sd_path(const char *v, long flag)
+static GEN
+sd_PATH(const char *v, long flag, const char* s, gp_path *p)
 {
-  gp_path *p = GP_DATA->path;
   if (v)
   {
     pari_free((void*)p->PATH);
@@ -629,9 +628,15 @@ sd_path(const char *v, long flag)
   }
   if (flag == d_RETURN) return strtoGENstr(p->PATH);
   if (flag == d_ACKNOWLEDGE)
-    pari_printf("   path = \"%s\"\n",p->PATH);
+    pari_printf("   %s = \"%s\"\n", s, p->PATH);
   return gnil;
 }
+GEN
+sd_path(const char *v, long flag)
+{ return sd_PATH(v, flag, "path", GP_DATA->path); }
+GEN
+sd_sopath(char *v, int flag)
+{ return sd_PATH(v, flag, "sopath", GP_DATA->sopath); }
 
 static const char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 GEN
@@ -729,12 +734,11 @@ default0(const char *a, const char *b) { return setdefault(a,b, b? d_SILENT: d_R
 /*                     INITIALIZE GP_DATA                           */
 /*                                                                  */
 /********************************************************************/
-/* initialize D->path */
+/* initialize path */
 static void
-init_path(gp_data *D)
+init_path(gp_path *path, const char *v)
 {
-  gp_path *path = D->path;
-  path->PATH = pari_strdup(pari_default_path());
+  path->PATH = pari_strdup(v);
   path->dirs = NULL;
 }
 
@@ -765,7 +769,7 @@ default_gp_data(void)
   static gp_data __GPDATA, *D = &__GPDATA;
   static gp_hist __HIST;
   static gp_pp   __PP;
-  static gp_path __PATH;
+  static gp_path __PATH, __SOPATH;
   static pari_timer __T;
 
   D->flags       = 0;
@@ -787,9 +791,11 @@ default_gp_data(void)
   D->hist = &__HIST;
   D->pp   = &__PP;
   D->path = &__PATH;
+  D->sopath=&__SOPATH;
   init_fmt(D);
   init_hist(D, 5000, 0);
-  init_path(D);
+  init_path(D->path, pari_default_path());
+  init_path(D->sopath, "");
   init_pp(D);
   return D;
 }

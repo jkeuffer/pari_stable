@@ -337,7 +337,7 @@ void debug_context(void);
 typedef struct {
   gp_hist *hist;
   gp_pp *pp;
-  gp_path *path;
+  gp_path *path, *sopath;
   pariout_t *fmt;
   ulong lim_lines, flags, linewrap;
   int echo, breakloop, recover, use_readline; /* GP-specific */
@@ -348,6 +348,14 @@ typedef struct {
 extern gp_data *GP_DATA;
   /* GP_DATA->flags */
 enum { gpd_QUIET=1, gpd_TEST=2, gpd_EMACS=256, gpd_TEXMACS=512};
+
+typedef struct {
+  const char *s;
+  size_t ls;
+  char **dir;
+} forpath_t;
+void forpath_init(forpath_t *T, gp_path *path, const char *s);
+char *forpath_next(forpath_t *T);
 
 /* GP output && output format */
 void gpwritebin(const char *s, GEN x);
@@ -401,6 +409,7 @@ GEN  gp_history(gp_hist *H, long p, char *old, char *entry);
 void delete_dirs(gp_path *p);
 void gp_expand_path(gp_path *p);
 const char *pari_default_path(void);
+int path_is_absolute(char *s);
 
 typedef struct input_method {
 /* mandatory */
