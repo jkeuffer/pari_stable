@@ -3803,13 +3803,18 @@ gp_expand_path(gp_path *p)
   delete_dirs(p);
   v = pari_strdup(v);
   for (s=v; *s; s++)
-    if (*s == PATH_SEPARATOR) { *s = 0; n++; }
+    if (*s == PATH_SEPARATOR) {
+      *s = 0;
+      if (s == v || s[-1] != 0) n++; /* ignore empty path components */
+    }
   dirs = (char**) pari_malloc((n + 2)*sizeof(char *));
 
   for (s=v, i=0; i<=n; i++)
   {
-    char *end = s + strlen(s), *f = end;
-    while (f > s && *--f == '/') *f = 0;
+    char *end, *f;
+    while (!*s) s++; /* skip empty path components */
+    f = end = s + strlen(s);
+    while (f > s && *--f == '/') *f = 0; /* skip trailing '/' */
     dirs[i] = path_expand(s);
     s = end + 1; /* next path component */
   }
