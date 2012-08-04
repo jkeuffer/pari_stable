@@ -1003,6 +1003,35 @@ polrecip(GEN x)
 /**                  POLYNOMIAL INTERPOLATION                      **/
 /**                                                                **/
 /********************************************************************/
+/* allow X = NULL for [1,...,n] */
+GEN
+RgV_polint(GEN X, GEN Y, long v)
+{
+  pari_sp av0 = avma, av, lim;
+  GEN Q, P = NULL;
+  long i, l = lg(Y);
+  if (!X)
+  {
+    X = cgetg(l, t_VEC);
+    for (i=1; i<l; i++) gel(X,i) = utoipos(i);
+  }
+  Q = roots_to_pol(X, v); av = avma; lim = stack_lim(av,2);
+  for (i=1; i<l; i++)
+  {
+    GEN inv, T, dP;
+    if (gequal0(gel(Y,i))) continue;
+    T = RgX_div_by_X_x(Q, gel(X,i), NULL);
+    inv = ginv(poleval(T,gel(X,i)));
+    dP = RgX_Rg_mul(T, gmul(gel(Y,i),inv));
+    P = P? RgX_add(P, dP): dP;
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpV_polint");
+      P = gerepileupto(av, P);
+    }
+  }
+  return gerepileupto(av0, P);
+}
 /* X,Y are "spec" GEN vectors with n > 1 components ( at X[0], ... X[n-1] ) */
 GEN
 polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
@@ -1010,7 +1039,6 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
   long i, m, ns = 0;
   pari_sp av = avma;
   GEN y, c, d, dy = NULL; /* gcc -Wall */
-  int no_dy = 1;
 
   if (!X)
   {
@@ -1018,20 +1046,33 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
     for (i=1; i<=n; i++) gel(X,i) = utoipos(i);
     X++;
   }
-  switch(typ(x)) /* FIXME: should only be done if x,X,Y contain t_REALs */
+  switch(typ(x)) {
     case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
     {
       GEN D = NULL;
-      no_dy = 0;
       for (i=0; i<n; i++)
       {
-        GEN t = gabs(gsub(x,gel(X,i)), DEFAULTPREC);
-        if (!D || gcmp(t,D) < 0) { ns = i; D = t; }
+        GEN t = gsub(x,gel(X,i));
+        switch(typ(t))
+        {
+          case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
+            t = gabs(t, DEFAULTPREC);
+            if (!D || gcmp(t,D) < 0) { ns = i; D = t; }
+            break;
+          default:
+            goto NODY;
+
+        }
       }
+      break;
       /* X[ns] is closest to x */
     }
+NODY:
+    default:
+      if (ptdy) { *ptdy = gen_0; ptdy = NULL; }
+  }
   c = new_chunk(n);
-  d = new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = Y[i];
+  d = new_chunk(n); for (i=0; i<n; i++) gel(c,i) = gel(d,i) = gel(Y,i);
   y = gel(d,ns--);
   /* divided differences */
   for (m=1; m<n; m++)
@@ -1048,7 +1089,6 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
     y = gadd(y,dy);
   }
   if (!ptdy) return gerepileupto(av, y);
-  if (no_dy) { *ptdy = gen_0; return gerepileupto(av, y); }
   *ptdy = dy;
   gerepileall(av, 2, &y, ptdy);
   return y;
@@ -1080,7 +1120,8 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
       pari_err(e_MISC,"polynomials in 'x in polinterpolate's data");
     return scalarpol(Y, 0);
   }
-  if (!x) x = pol_x(0);
+  if (!x) return RgV_polint(X, Y, 0);
+  if (gcmpX(x)) return RgV_polint(X, Y, varn(x));
   return polint_i(X? X+1: NULL,Y+1,x,lx-1,ptdy);
 }
 

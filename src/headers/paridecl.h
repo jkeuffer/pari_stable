@@ -1331,6 +1331,7 @@ GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 /* bibli2.c */
 
 GEN     QXQ_reverse(GEN a, GEN T);
+GEN     RgV_polint(GEN X, GEN Y, long v);
 GEN     RgXQ_reverse(GEN a, GEN T);
 GEN     ZV_indexsort(GEN L);
 long    ZV_search(GEN x, GEN y);

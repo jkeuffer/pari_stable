@@ -5723,6 +5723,11 @@ when $m > n$.
 
 \fun{GEN}{RgV_dotsquare}{GEN x} returns the scalar product of $x$ with itself.
 
+\fun{GEN}{RgV_polint}{GEN X, GEN Y, long v} $X$ and $Y$ being two vectors of
+the same length, returns the polynomial $T$ in variable $v$ such that
+$T(X[i]) = Y[i]$ for all $i$. The special case $X = \kbd{NULL}$
+corresponds to $X = [1,2,\dots,n]$, where $n$ is the length of $Y$.
+
 \fun{GEN}{RgM_inv}{GEN a} returns a left inverse of $a$ (which needs not be
 square), or \kbd{NULL} if this turns out to be impossible. The latter
 happens when the matrix does not have maximal rank (or when rounding errors

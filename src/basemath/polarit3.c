@@ -2256,7 +2256,7 @@ FpV_polint(GEN xa, GEN ya, GEN p, long v)
     if (low_stack(lim, stack_lim(av,2)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"FpV_polint");
-      if (!P) avma = av; else P = gerepileupto(av, P);
+      P = gerepileupto(av, P);
     }
   }
   return P? P: pol_0(v);

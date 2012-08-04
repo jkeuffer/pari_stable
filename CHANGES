@@ -106,6 +106,7 @@ BA 85- calling a GP function with a lot of ommited arguments could cause a crash
 GH 86- missing solutions in thue(), e.g. thue(thueinit(x^3+92*x+1),3^3)
    87- t_RFRAC == t_RFRAC could return a wrong result
    88- obscure bug in polroots() (sage #13314)
+   89- polinterpolate([1,2] * Mod(1,7), [2,3], 0) -> incorrect type in gabs
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -204,6 +205,7 @@ BA 71- rename powell->ellmul, addell->elladd, subell->ellsub
    72- is_pth_power interface [ pass a forprime_t iterator ]
    73- polrootsmod(, 4) is no longer accepted
    74- revert to Ramanujan's formula to compute Pi [ + binary splitting ]
+   75- polinterpolate(,, 'x) use divide & conquer algorithm
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -308,6 +310,7 @@ LGr93- vecmax / vecmin: add optional pointer argument (to hold index of a
    94- printsep() function
    95- isprimepower() function
    96- PARI functions F2v_to_F2x, F2x_valrem, F2x_deflate
+   97- PARI function RgV_polint
 
   Removed
     1- dropped DOS support
