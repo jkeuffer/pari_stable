@@ -488,24 +488,6 @@ init_traces(GEN ff, GEN T, GEN p)
   return y;
 }
 
-/* return C in Z[X]/(p,T), C[ D[1] ] = 1, C[ D[i] ] = 0 otherwise. H is the
- * list of degree 1 polynomials X - D[i]  (come directly from factorization) */
-static GEN
-interpol(GEN H, GEN T, GEN p)
-{
-  long i, m = lg(H);
-  GEN X = pol_x(0),d,p1,p2,a;
-
-  p1=pol_1(0); p2=gen_1; a = gneg(constant_term(gel(H,1))); /* = D[1] */
-  for (i=2; i<m; i++)
-  {
-    d = constant_term(gel(H,i)); /* -D[i] */
-    p1 = FpXQX_mul(p1,gadd(X,d), T,p);
-    p2 = Fq_mul(p2, gadd(a,d), T,p);
-  }
-  return FqX_Fq_mul(p1,Fq_inv(p2, T,p), T,p);
-}
-
 static void
 init_primedata(primedata *S)
 {
@@ -526,10 +508,13 @@ init_primedata(primedata *S)
   S->fk = cgetg(N+1, t_VEC);
   for (l=1,j=1; j<lff; j++)
   { /* compute roots and fix ordering (Frobenius cycles) */
-    GEN F = FpX_factorff_irred(gel(S->ff,j), T, p);
-    gel(S->interp,j) = interpol(F,T,p);
+    GEN F = gel(S->ff, j), deg1 = FpX_factorff_irred(F, T,p);
+    GEN H = gel(deg1,1), a = Fq_neg(constant_term(H), T,p);
+    GEN Q = FqX_div(F, H, T,p);
+    GEN q = Fq_inv(FqX_eval(Q, a, T,p), T,p);
+    gel(S->interp,j) = FqX_Fq_mul(Q, q, T,p); /* = 1 at a, 0 at other roots */
     S->firstroot[j] = l;
-    for (i=1; i<lg(F); i++,l++) S->fk[l] = F[i];
+    for (i=1; i<lg(deg1); i++,l++) gel(S->fk, l) = gel(deg1, i);
   }
   S->Trk     = init_traces(S->ff, T,p);
   S->bezoutC = get_bezout(S->pol, S->ff, p);
