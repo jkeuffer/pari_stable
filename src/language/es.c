@@ -4347,7 +4347,7 @@ dopr_arg_vector(GEN arg_vector, const char* fmt, ...)
 void
 printf0(const char *fmt, GEN args)
 { char *s = dopr_arg_vector(args, fmt);
-  pari_puts(s); free(s); }
+  pari_puts(s); free(s); pari_flush(); }
 /* GP only */
 GEN
 Strprintf(const char *fmt, GEN args)
