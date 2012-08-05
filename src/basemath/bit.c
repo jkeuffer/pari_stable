@@ -35,7 +35,7 @@ binaire(GEN x)
   {
     case t_INT:
     if (!signe(x))
-      return mkvec(gen_0);
+      return cgetg(1,t_VEC);
     else
     {
       GEN xp=int_MSW(x);

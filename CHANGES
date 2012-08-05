@@ -209,6 +209,7 @@ BA 71- rename powell->ellmul, addell->elladd, subell->ellsub
    73- polrootsmod(, 4) is no longer accepted
    74- revert to Ramanujan's formula to compute Pi [ + binary splitting ]
    75- polinterpolate(,, 'x) use divide & conquer algorithm
+BA 76- binary(0) now return []
 
   Added
     1- mathnf for matrices over K[X] [#41]
