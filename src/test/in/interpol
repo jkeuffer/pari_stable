@@ -1,4 +1,4 @@
-\p38
+default(realprecision, 38);
 polinterpolate([2,3,4])
 polinterpolate([2,3,4] * Mod(1,7))
 polinterpolate([2,3,4] * Mod(1,7),, 0)
