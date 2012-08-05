@@ -2135,12 +2135,13 @@ agm(GEN x, GEN y, long prec)
 /* atanh(u/v) using binary splitting */
 static GEN
 atanhQ_split(ulong u, ulong v, long prec)
-{ /* satisfies (2n+1) (v/u)^2n > 2^bitprec */
-  long i, nmax = bit_accuracy(prec);
+{
+  long i, nmax;
   GEN u2 = sqru(u), v2 = sqru(v);
   double d = ((double)v) / u;
   struct abpq_res R;
   struct abpq A;
+  /* satisfies (2n+1) (v/u)^2n > 2^bitprec */
   nmax = bit_accuracy(prec) / (2*log2(d));
   abpq_init(&A, nmax);
   A.a[0] = A.b[0] = gen_1;
@@ -2159,13 +2160,14 @@ atanhQ_split(ulong u, ulong v, long prec)
 /* log(2) = 10*atanh(1/17)+4*atanh(13/499) */
 static GEN
 log2_split(long prec)
-{ /* satisfies (n+1) 2^n > 2^bitprec */
+{
   GEN u = atanhQ_split(1, 17, prec);
   GEN v = atanhQ_split(13, 499, prec);
   shiftr_inplace(v, 2);
   return addrr(mulur(10, u), v);
 }
 #if 0 /* slower ! */
+/* cf logagmr_abs(). Compute Pi/2agm(1, 4/2^n) ~ log(2^n) = n log(2) */
 static GEN
 log2_agm(long prec)
 {
@@ -2174,7 +2176,6 @@ log2_agm(long prec)
   return divru(y, n);
 }
 #endif
-/* cf logagmr_abs(). Compute Pi/2agm(1, 4/2^n) ~ log(2^n) = n log(2) */
 GEN
 constlog2(long prec)
 {
