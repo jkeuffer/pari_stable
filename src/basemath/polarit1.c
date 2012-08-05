@@ -1738,7 +1738,7 @@ long
 F2x_split_Berlekamp(GEN *t)
 {
   GEN u = *t, a, b, vker;
-  long lpol, d, i, ir, L, la, sv = u[1], du = F2x_degree(u);
+  long lb, d, i, ir, L, la, sv = u[1], du = F2x_degree(u);
 
   if (du == 1) return 1;
   if (du == 2)
@@ -1752,8 +1752,8 @@ F2x_split_Berlekamp(GEN *t)
     return 1;
   }
 
-  lpol = nbits2lg(lgpol(u));
   vker = F2x_Berlekamp_ker(u);
+  lb = lg(gel(vker,1));
   d = lg(vker)-1;
   ir = 0;
   /* t[i] irreducible for i < ir, still to be treated for i < L */
@@ -1764,7 +1764,7 @@ F2x_split_Berlekamp(GEN *t)
       pol = F2v_to_F2x(gel(vker,2), sv);
     else
     {
-      GEN v = const_vecsmall(lpol,0);
+      GEN v = const_vecsmall(lb,0);
       v[1] = du;
       v[2] = random_Fl(2); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
