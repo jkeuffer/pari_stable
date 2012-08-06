@@ -210,6 +210,7 @@ BA 71- rename powell->ellmul, addell->elladd, subell->ellsub
    74- revert to Ramanujan's formula to compute Pi [ + binary splitting ]
    75- polinterpolate(,, 'x) use divide & conquer algorithm
 BA 76- binary(0) now return []
+   77- polisirreducible() now avoids factoring in most cases
 
   Added
     1- mathnf for matrices over K[X] [#41]

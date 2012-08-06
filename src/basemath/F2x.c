@@ -774,11 +774,19 @@ F2xq_matrix_pow(GEN y, long n, long m, GEN P)
 static GEN
 F2xq_eval_powers(GEN P, GEN V, long a, long n)
 {
+  pari_sp av = avma, lim = stack_lim(av,2);
   long i;
   GEN z = F2x_coeff(P,a) ? pol1_F2x(P[1]): pol0_F2x(P[1]);
   for (i=1; i<=n; i++)
-   if (F2x_coeff(P,a+i))
-     z = F2x_add(z, gel(V,i+1));
+    if (F2x_coeff(P,a+i))
+    {
+      z = F2x_add(z, gel(V,i+1));
+      if (low_stack(lim,stack_lim(av,2)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"F2xq_eval_powers (i = %ld)",i);
+        z = gerepileuptoleaf(av, z);
+      }
+    }
   return z;
 }
 
@@ -793,7 +801,7 @@ F2x_F2xqV_eval(GEN P, GEN V, GEN T)
   if (d < l)
   {
     z = F2xq_eval_powers(P,V,0,d);
-    return gerepileupto(av, z);
+    return gerepileuptoleaf(av, z);
   }
   if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in F2x_F2xqV_eval");
   d -= l;
@@ -804,7 +812,7 @@ F2x_F2xqV_eval(GEN P, GEN V, GEN T)
     d -= l-1;
     u = F2xq_eval_powers(P,V,d+1,l-2);
     z = F2x_add(u, F2xq_mul(z,gel(V,l),T));
-    z = gerepileupto(btop, z);
+    z = gerepileuptoleaf(btop, z);
   }
   u = F2xq_eval_powers(P,V,0,d);
   z = F2x_add(u, F2xq_mul(z,gel(V,d+2),T));
@@ -813,7 +821,7 @@ F2x_F2xqV_eval(GEN P, GEN V, GEN T)
     long cnt = 1 + (degpol(P) - l) / (l-1);
     err_printf("F2x_F2xqV_eval: %ld F2xq_mul [%ld]\n", cnt, l-1);
   }
-  return gerepileupto(av, z);
+  return gerepileuptoleaf(av, z);
 }
 
 GEN

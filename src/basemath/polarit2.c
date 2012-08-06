@@ -947,13 +947,37 @@ factorback2(GEN L, GEN e) { return gen_factorback(L, e, &mul, &powi, NULL); }
 GEN
 factorback(GEN fa) { return factorback2(fa, NULL); }
 
+static int
+RgX_is_irred_i(GEN x)
+{
+  GEN y, p, pol;
+  long l = lg(x), pa;
+
+  if (!signe(x) || l <= 3) return 0;
+  switch(RgX_type(x,&p,&pol,&pa))
+  {
+    case t_INTMOD: return FpX_is_irred(RgX_to_FpX(x,p), p);
+    case t_COMPLEX: return l == 4;
+    case t_REAL:
+      if (l == 4) return 1;
+      if (l > 5) return 0;
+      return gsigne(RgX_disc(x)) > 0;
+  }
+  y = factor(x);
+  return (lg(gcoeff(y,1,1))==l);
+}
+static int
+RgX_is_irred(GEN x)
+{
+  pari_sp av = avma;
+  int r = RgX_is_irred_i(x);
+  avma = av; return r;
+}
 GEN
 gisirreducible(GEN x)
 {
   long l, i;
-  pari_sp av = avma;
   GEN y;
-
   switch(typ(x))
   {
     case t_INT: case t_REAL: case t_FRAC: return gen_0;
@@ -961,12 +985,10 @@ gisirreducible(GEN x)
       y = cgetg_copy(x, &l);
       for (i=1; i<l; i++) gel(y,i) = gisirreducible(gel(x,i));
       return y;
-    case t_POL: break;
+    case t_POL: return RgX_is_irred(x)? gen_1: gen_0;
     default: pari_err_TYPE("gisirreducible",x);
+             return NULL;
   }
-  l = lg(x); if (l<=3) return gen_0;
-  y = factor(x); avma = av;
-  return (lg(gcoeff(y,1,1))==l)?gen_1:gen_0;
 }
 
 /*******************************************************************/

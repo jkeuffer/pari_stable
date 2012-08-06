@@ -911,7 +911,7 @@ Flx_try_pow(GEN w0, GEN pol, ulong p, GEN q, long r)
  *  t[0],t[1]...t[k-1] the k factors, normalized */
 
 static void
-F2x_split(ulong m, GEN *t, long d, GEN S)
+F2x_split(ulong m, GEN *t, long d)
 {
   long l, v, dv;
   pari_sp av0, av;
@@ -922,15 +922,14 @@ F2x_split(ulong m, GEN *t, long d, GEN S)
   for(av=avma;;avma=av)
   {
     GEN w0 = w = F2xq_pow(polx_F2x(v), utoi(m-1), *t); m += 2;
-    for (l=1; l<d; l++)
-      w = F2x_add(w0, F2x_F2xqV_eval(w, S, *t));
+    for (l=1; l<d; l++) w = F2x_add(w0, F2xq_sqr(w, *t));
     w = F2x_gcd(*t,w);
     l = F2x_degree(w); if (l && l!=dv) break;
   }
   w = gerepileupto(av0, w);
   l /= d; t[l]=F2x_div(*t,w); *t=w;
-  F2x_split(m,t+l,d,S);
-  F2x_split(m,t,  d,S);
+  F2x_split(m,t+l,d);
+  F2x_split(m,t,  d);
 }
 
 static void
@@ -1321,7 +1320,7 @@ F2x_factcantor_i(GEN f, long flag)
 {
   long j, e, nbfact, d = F2x_degree(f);
   ulong k;
-  GEN X, E, f2, g, g1, u, v, pd, y, t;
+  GEN X, E, f2, g, g1, u, v, y, t;
 
   if (d <= 2) return F2x_factor_deg2(f, d, flag);
   /* to hold factors and exponents */
@@ -1337,8 +1336,8 @@ F2x_factcantor_i(GEN f, long flag)
     k = 0;
     while (F2x_degree(g1)>0)
     {
+      pari_sp av;
       long du, dg, dg1;
-      GEN S;
       k++; if (k%2==0) { k++; f2 = F2x_div(f2,g1); }
       u = g1; g1 = F2x_gcd(f2,g1);
       du = F2x_degree(u);
@@ -1351,15 +1350,14 @@ F2x_factcantor_i(GEN f, long flag)
         du -= dg1;
       }
       /* here u is square-free (product of irred. of multiplicity e * k) */
-      pd=gen_1; v = X;
-      S = du==1 ?  cgetg(1, t_VEC): F2xq_powers(F2xq_sqr(v, u), du-1, u);
+      v = X;
+      av = avma;
       for (d=1; d <= du>>1; d++)
       {
-        if (!flag) pd = shifti(pd, 1);
-        v = F2x_F2xqV_eval(v, S, u);
+        v = F2xq_sqr(v, u);
         g = F2x_gcd(F2x_add(v, X), u);
         dg = F2x_degree(g);
-        if (dg <= 0) continue;
+        if (dg <= 0) {avma = (pari_sp)v; v = gerepileuptoleaf(av,v); continue;}
         /* g is a product of irred. pols, all of which have degree d */
         j = nbfact+dg/d;
         if (flag)
@@ -1370,12 +1368,13 @@ F2x_factcantor_i(GEN f, long flag)
         else
         {
           gel(t,nbfact) = g;
-          F2x_split(2,&gel(t,nbfact),d,S);
+          F2x_split(2,&gel(t,nbfact),d);
           for (; nbfact<j; nbfact++) E[nbfact]=e*k;
         }
         du -= dg;
         u = F2x_div(u,g);
         v = F2x_rem(v,u);
+        av = avma;
       }
       if (du)
       {
@@ -1432,7 +1431,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
 {
   long j, e, nbfact, d = degpol(f);
   ulong k;
-  GEN X, E, f2, g, g1, u, v, pd, q, y, t;
+  GEN X, E, f2, g, g1, u, v, q, y, t;
   if (p==2) { /*We need to handle 2 specially */
     GEN F = F2x_factcantor_i(Flx_to_F2x(f),flag);
     if (flag==0) F2xv_to_Flxv_inplace(gel(F,1));
@@ -1454,8 +1453,8 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
     k = 0;
     while (degpol(g1)>0)
     {
+      pari_sp av;
       long du,dg;
-      GEN S;
       k++; if (k%p==0) { k++; f2 = Flx_div(f2,g1,p); }
       u = g1; g1 = Flx_gcd(f2,g1, p);
       if (degpol(g1)>0)
@@ -1467,15 +1466,14 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
       if (du <= 0) continue;
 
       /* here u is square-free (product of irred. of multiplicity e * k) */
-      pd=gen_1; v=X;
-      S = du==1 ?  cgetg(1, t_VEC): Flxq_powers(Flxq_powu(v, p, u, p), du-1, u, p);
+      v=X;
+      av = avma;
       for (d=1; d <= du>>1; d++)
       {
-        if (!flag) pd = muliu(pd,p);
-        v = Flx_FlxqV_eval(v, S, u, p);
+        v = Flxq_powu(v, p, u, p);
         g = Flx_gcd(Flx_sub(v, X, p), u, p);
         dg = degpol(g);
-        if (dg <= 0) continue;
+        if (dg <= 0) {avma = (pari_sp)v; v = gerepileuptoleaf(av,v); continue;}
         /* g is a product of irred. pols, all of which have degree d */
         j = nbfact+dg/d;
         if (flag)
@@ -1485,6 +1483,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
         }
         else
         {
+          GEN pd = powuu(p, d);
           long r;
           g = Flx_normalize(g, p);
           gel(t,nbfact) = g; q = subis(pd,1);
@@ -1498,6 +1497,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
         du -= dg;
         u = Flx_div(u,g,p);
         v = Flx_rem(v,u,p);
+        av = avma;
       }
       if (du)
       {
@@ -1542,7 +1542,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
 {
   long j, nbfact, d = degpol(f);
   ulong k;
-  GEN X, E,y,f2,g,g1,v,pd,q;
+  GEN X, E,y,f2,g,g1,v,q;
   GEN t;
   if (typ(f) == t_VECSMALL)
   { /* lgefint(pp) = 3 */
@@ -1583,11 +1583,10 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
     if (du <= 0) continue;
 
     /* here u is square-free (product of irred. of multiplicity e * k) */
-    pd=gen_1; v=X;
+    v=X;
     S = du==1 ?  cgetg(1, t_VEC): FpXQ_powers(FpXQ_pow(v, pp, u, pp), du-1, u, pp);
     for (d=1; d <= du>>1; d++)
     {
-      if (!flag) pd = mulii(pd,pp);
       v = FpX_FpXQV_eval(v, S, u, pp);
       g = FpX_gcd(ZX_sub(v, X), u, pp);
       dg = degpol(g);
@@ -1602,6 +1601,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       }
       else
       {
+        GEN pd = powiu(pp,d);
         long r;
         g = FpX_normalize(g, pp);
         gel(t,nbfact) = g; q = subis(pd,1);
