@@ -1153,11 +1153,11 @@ gvaluation(GEN x, GEN p)
       avma = av; return val;
     }
     case t_POL: {
-      long i, val;
       if (tp == t_POL) {
         long vp = varn(p), vx = varn(x);
         if (vp == vx)
         {
+          long val;
           if (RgX_is_monomial(p)) return RgX_val(x) / degpol(p);
           av = avma; limit=stack_lim(av,1);
           for (val=0; ; val++)
@@ -1178,10 +1178,10 @@ gvaluation(GEN x, GEN p)
 
     case t_SER: {
       if (tp == t_POL) {
-        long vx = varn(x), vp = varn(p), val;
+        long vp = varn(p), vx = varn(x);
         if (vp == vx)
         {
-          val = RgX_val(p);
+          long val = RgX_val(p);
           if (!val) pari_err(e_MISC, "forbidden divisor %Ps in gvaluation", p);
           return (long)(valp(x) / val);
         }
