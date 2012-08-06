@@ -1002,9 +1002,9 @@ digits(GEN x, GEN B)
     B = utoi(10);
   else {
     if (typ(B)!=t_INT) pari_err_TYPE("digits",B);
-    if (cmpiu(B,2)<0) pari_err_DOMAIN("digits","B","<",gen_2,B);
+    if (cmpis(B,2)<0) pari_err_DOMAIN("digits","B","<",gen_2,B);
   }
-  if (equaliu(B,2))    {avma = av; return binaire(x); }
+  if (equalis(B,2))    {avma = av; return binaire(x); }
   if (!signe(x))       {avma = av; return cgetg(1,t_VEC); }
   if (absi_cmp(x,B)<0) {avma = av; retmkvec(absi(x)); }
   x = absi(x); lz = logint(x,B,NULL);
