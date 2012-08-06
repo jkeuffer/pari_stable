@@ -194,7 +194,7 @@ hashstr_dbg(hashtable *h)
 /********************************************************************/
 
 INLINE ulong
-compound(ulong h, ulong a) { return (h << 5) + (h>>2) + a; }
+glue(ulong h, ulong a) { return (h << 5) + (h>>2) + a; }
 ulong
 hash_GEN(GEN x)
 {
@@ -205,13 +205,13 @@ hash_GEN(GEN x)
     case t_INT:
       lx = lgefint(x);
       h &= TYPBITS;
-      for (i = 1; i < lx; i++) h = compound(h, (ulong)x[i]);
+      for (i = 1; i < lx; i++) h = glue(h, (ulong)x[i]);
       return h;
     case t_REAL:
     case t_STR:
     case t_VECSMALL:
       lx = lg(x);
-      for (i = 1; i < lx; i++) h = compound(h, (ulong)x[i]);
+      for (i = 1; i < lx; i++) h = glue(h, (ulong)x[i]);
       return h;
     /* one more special case */
     case t_LIST:
@@ -219,9 +219,9 @@ hash_GEN(GEN x)
       if (!x) return h;
       /* fall through */
     default:
-      if (lontyp[tx] == 2) { h = compound(h, x[1]); i = 2; } else i = 1;
+      if (lontyp[tx] == 2) { h = glue(h, x[1]); i = 2; } else i = 1;
       lx = lg(x);
-      for (; i < lx; i++) h = compound(h, hash_GEN(gel(x,i)));
+      for (; i < lx; i++) h = glue(h, hash_GEN(gel(x,i)));
       return h;
   }
 }
