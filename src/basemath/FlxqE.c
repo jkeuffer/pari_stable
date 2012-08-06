@@ -79,7 +79,7 @@ FlxqE_dbl_slope(GEN P, GEN a4, GEN T, ulong p, GEN *slope)
   *slope = Flxq_div(Flx_add(Flx_Fl_mul(Flxq_sqr(x, T, p), 3, p), a4, p),
                   Flx_Fl_mul(y, 2, p), T, p);
   Q = cgetg(3,t_VEC);
-  gel(Q, 1) = Flx_sub(Flxq_sqr(*slope, T, p), Flx_Fl_mul(x, 2, p), p),
+  gel(Q, 1) = Flx_sub(Flxq_sqr(*slope, T, p), Flx_Fl_mul(x, 2, p), p);
   gel(Q, 2) = Flx_sub(Flxq_mul(*slope, Flx_sub(x, gel(Q, 1), p), T, p), y, p);
   return Q;
 }

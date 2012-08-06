@@ -85,7 +85,7 @@ FpE_dbl_slope(GEN P, GEN a4, GEN p, GEN *slope)
   *slope = Fp_div(Fp_add(Fp_mulu(Fp_sqr(x,p), 3, p), a4, p),
                   Fp_mulu(y, 2, p), p);
   Q = cgetg(3,t_VEC);
-  gel(Q, 1) = Fp_sub(Fp_sqr(*slope, p), Fp_mulu(x, 2, p), p),
+  gel(Q, 1) = Fp_sub(Fp_sqr(*slope, p), Fp_mulu(x, 2, p), p);
   gel(Q, 2) = Fp_sub(Fp_mul(*slope, Fp_sub(x, gel(Q, 1), p), p), y, p);
   return Q;
 }
@@ -1124,7 +1124,7 @@ FpXQE_dbl_slope(GEN P, GEN a4, GEN T, GEN p, GEN *slope)
   *slope = FpXQ_div(FpX_add(FpX_mulu(FpXQ_sqr(x, T, p), 3, p), a4, p),
                             FpX_mulu(y, 2, p), T, p);
   Q = cgetg(3,t_VEC);
-  gel(Q, 1) = FpX_sub(FpXQ_sqr(*slope, T, p), FpX_mulu(x, 2, p), p),
+  gel(Q, 1) = FpX_sub(FpXQ_sqr(*slope, T, p), FpX_mulu(x, 2, p), p);
   gel(Q, 2) = FpX_sub(FpXQ_mul(*slope, FpX_sub(x, gel(Q, 1), p), T, p), y, p);
   return Q;
 }
