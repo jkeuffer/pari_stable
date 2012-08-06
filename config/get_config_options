@@ -160,6 +160,15 @@ Optional libraries:
   --with-qt[=DIR]        use the Qt graphical library [prefix for Qt dir.]
   --with-fltk[=DIR]      use the FLTK graphical library [prefix for FLTK dir.]
 
+Environment variables affecting the build:
+  CC                     C compiler
+  CFLAGS                 additional flags to the C compiler
+  LD                     linker
+  LDFLAGS                additional linker flags
+  DLLDFLAGS              additional linker flags for linking the shared lib
+  C_INCLUDE_PATH         directories to search for include files (separate by :)
+  LIBRARY_PATH           directories to search for libraries (separate by :)
+
 EOT
 exit 1
 ;;
