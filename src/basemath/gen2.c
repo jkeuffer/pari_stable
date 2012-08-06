@@ -1059,10 +1059,10 @@ gequalsg(long s, GEN x)
 /*******************************************************************/
 
 static long
-minval(GEN x, GEN p, long first)
+minval(GEN x, GEN p)
 {
   long i,k, val = LONG_MAX, lx = lg(x);
-  for (i=first; i<lx; i++)
+  for (i=lontyp[typ(x)]; i<lx; i++)
   {
     k = gvaluation(gel(x,i),p);
     if (k < val) val = k;
@@ -1173,8 +1173,7 @@ gvaluation(GEN x, GEN p)
         }
         if (varncmp(vx, vp) > 0) return 0;
       }
-      i=2; while (isrationalzero(gel(x,i))) i++;
-      return minval(x,p,i);
+      return minval(x,p);
     }
 
     case t_SER: {
@@ -1188,14 +1187,14 @@ gvaluation(GEN x, GEN p)
         }
         if (varncmp(vx, vp) > 0) return 0;
       }
-      return minval(x,p,2);
+      return minval(x,p);
     }
 
     case t_RFRAC:
       return gvaluation(gel(x,1),p) - gvaluation(gel(x,2),p);
 
     case t_COMPLEX: case t_QUAD: case t_VEC: case t_COL: case t_MAT:
-      return minval(x,p,1);
+      return minval(x,p);
   }
   pari_err(e_MISC,"forbidden or conflicting type in gval");
   return 0; /* not reached */
