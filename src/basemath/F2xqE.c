@@ -454,10 +454,45 @@ Z2XQ_sqrt1(GEN b, GEN T, long e)
     n <<=1; if (mask & 1) n--;
     /* aa = (1-b*a^2)/2, a = a + a * aa */
     q2 = int2u(n+2);
-    aa = ZX_shifti(Z_ZX_sub(gen_1,FpXQ_mul(b,FpXQ_sqr(a,T,q2),T,q2)),-1);
+    aa = ZX_shifti(Z_ZX_sub(gen_1,FpXQ_mul(FpX_red(b,q2),FpXQ_sqr(a,T,q2),T,q2)),-1);
     a = ZX_add(a, FpXQ_mul(a,aa,T,int2u(n+1)));
   }
   return gerepileupto(av, FpXQ_mul(a,b,T,int2u(e)));
+}
+
+/* Assume a = 1 [4] */
+
+static GEN
+Z2XQ_log(GEN a, GEN T, long e)
+{
+  pari_sp av = avma, av2, lim;
+  long i, e2 = (e>>1)+1;
+  GEN pe = int2n(e+expu(e2));
+  GEN b = Fp_FpX_sub(gen_1, a, pe);
+  GEN s = b, bi = b;
+  av2 = avma; lim = stack_lim(av2, 1);
+  for(i=2; i<=e2; i++)
+  {
+    long v = vals(i);
+    bi = FpXQ_mul(b,bi,T,pe);
+    s  = FpX_add(s, FpX_Fp_mul(ZX_shifti(bi,-v),Fp_inv(utoi(i>>v),pe),pe), pe);
+    if (low_stack(lim, stack_lim(av2,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"Z2XQ_log(%ld)",i);
+      gerepileall(av2, 2, &bi, &s);
+    }
+  }
+  return gerepileupto(av, FpX_neg(s, pe));
+}
+
+/* Assume a = 1 [4] */
+static GEN
+Z2XQ_norm(GEN a, GEN T, long e)
+{
+  GEN pe = int2n(e), s;
+  if (degpol(a)==0) return Fp_powu(gel(a,2),degpol(T),pe);
+  s = FpXQ_trace(Z2XQ_log(a, T, e), T, pe);
+  return modii(gel(Qp_exp(cvtop(s, gen_2, e-2)),4),pe);
 }
 
 /* Assume a2==0, so 4|E(F_p): if t^4 = a6 then (t,t^2) is of order 4
@@ -489,12 +524,12 @@ F2xq_elltrace_AGM(GEN a6, GEN Tb)
       gerepileall(av, 2, &a, &b);
     }
   }
+  if (DEBUGLEVEL) timer_printf(&ti,"F2xq_elltrace_AGM(lift)");
   pe = int2u(M+2);
   c = ZX_shifti(ZX_add(a,b),-1);
   c = FpXQ_mul(a,ZpXQ_invlift(c, pol_1(v), T, gen_2, M+2), T, pe);
-  if (DEBUGLEVEL) timer_printf(&ti,"F2xq_elltrace_AGM(lift)");
-  c = modii(ZX_resultant(c,T), pe);
-  if (DEBUGLEVEL) timer_printf(&ti,"F2xq_elltrace_AGM(ZX_resultant)");
+  c = Z2XQ_norm(c,T,M+2);
+  if (DEBUGLEVEL) timer_printf(&ti,"F2xq_elltrace_AGM(norm)");
   if (expi(sqri(c))>=N+2) c = subii(c,pe);
   if (umodiu(c,4)==3) c = negi(c);
   return c;
