@@ -405,7 +405,7 @@ dbllog2i(GEN x)
   if (lx == 3) return log2(l);
   l += ((double)(ulong)*int_precW(m)) * W;
   /* at least m = min(53,BIL) bits are correct in the mantissa, thus log2
-   * is correct with error < log(1 + 2^-m) ~ 2^-m. Adding the correct 
+   * is correct with error < log(1 + 2^-m) ~ 2^-m. Adding the correct
    * exponent BIL(lx-3) causes 1ulp further round-off error */
   return log2(l) + (double)(BITS_IN_LONG*(lx-3));
 }
