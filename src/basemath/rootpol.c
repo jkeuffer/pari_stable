@@ -385,44 +385,56 @@ RgX_even_odd(GEN p, GEN *pe, GEN *po)
 /**                                                                **/
 /********************************************************************/
 
+/* Quick approximation to log2(|x); first define y s.t. |y-x| < 2^-32 then
+ * return y rounded to 2 ulp. In particular, if result < 2^21, absolute error
+ * is bounded by 2^-31. If result > 2^21, it is correct to 2 ulp */
 static double
-log2ir(GEN x)
+dbllog2i(GEN x)
 {
-  if (!signe(x)) return -pariINFINITY;
-  if (typ(x) == t_INT)
-  {
-    GEN m = int_MSW(x);
-    long lx = lgefint(x);
-    double l = (double)(ulong)*m;
-    if (lx==3) return log2(l);
-#ifndef LONG_IS_64BIT /* overkill ? The first word should be enough... */
-    l += ((double)(ulong)*int_precW(m)) / 4294967296.; /* 2^32 */
+#ifdef LONG_IS_64BIT
+  const double W = 1/(4294967296. * 4294967296.); /* 2^-64 */
+#else
+  const double W = 1/4294967296.; /*2^-32*/
 #endif
-    return log2(l) + (double)(BITS_IN_LONG*(lx-3));
-  }
-  /* else t_REAL */
-  return dbllog2r(x);
+  GEN m;
+  long lx = lgefint(x);
+  double l;
+  if (lx == 2) return -pariINFINITY;
+  m = int_MSW(x);
+  l = (double)(ulong)*m;
+  if (lx == 3) return log2(l);
+  l += ((double)(ulong)*int_precW(m)) * W;
+  /* at least m = min(53,BIL) bits are correct in the mantissa, thus log2
+   * is correct with error < log(1 + 2^-m) ~ 2^-m. Adding the correct 
+   * exponent BIL(lx-3) causes 1ulp further round-off error */
+  return log2(l) + (double)(BITS_IN_LONG*(lx-3));
 }
+
 /* return log(|x|) */
 static double
 dbllogr(GEN x) {
   if (!signe(x)) return -pariINFINITY;
   return LOG2*dbllog2r(x);
 }
-static GEN /* beware overflow */
-dblexp(double x) { return fabs(x) < 100.? dbltor(exp(x)): mpexp(dbltor(x)); }
-
+static double
+dbllogmp(GEN x) { return typ(x) == t_INT? dbllog2i(x): dbllog2r(x); }
 double
 dbllog2(GEN z)
 {
   double x, y;
-
-  if (typ(z) != t_COMPLEX) return log2ir(z);
-  x = log2ir(gel(z,1));
-  y = log2ir(gel(z,2));
-  if (fabs(x-y) > 10) return maxdd(x,y);
-  return x + 0.5*log2(1 + exp2(2*(y-x)));
+  switch(typ(z))
+  {
+    case t_INT: return dbllog2i(z);
+    case t_REAL: return dbllog2r(z);
+    default: /*t_COMPLEX*/
+      x = dbllogmp(gel(z,1));
+      y = dbllogmp(gel(z,2));
+      if (fabs(x-y) > 10) return maxdd(x,y);
+      return x + 0.5*log2(1 + exp2(2*(y-x)));
+  }
 }
+static GEN /* beware overflow */
+dblexp(double x) { return fabs(x) < 100.? dbltor(exp(x)): mpexp(dbltor(x)); }
 
 /* find s such that  A_h <= 2^s <= 2 A_i  for one h and all i < n = deg(p),
  * with  A_i := (binom(n,i) lc(p) / p_i) ^ 1/(n-i), and  p = sum p_i X^i */
