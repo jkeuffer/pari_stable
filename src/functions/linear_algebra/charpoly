@@ -6,7 +6,7 @@ Help: charpoly(A,{v='x},{flag=3}): det(v*Id-A)=characteristic polynomial of
  the matrix or polmod A. flag is optional and ignored unless A is a matrix;
  it may be set to 0 (Le Verrier), 1
  (Lagrange interpolation) or 2 (use Hessenberg form), 3 (Berkowitz, default).
- All algorithms except flag = 3 (Berkowitz) assume that n! is invertible,
+ Algorithms 0 (Le Verrier) and 1 (Lagrange) assume that n! is invertible,
  where n is the dimension of the matrix.
 Doc:
  \idx{characteristic polynomial}
