@@ -604,6 +604,7 @@ long    zv_content(GEN x);
 int     zv_equal(GEN V, GEN W);
 GEN     zv_neg(GEN x);
 long    zv_prod(GEN v);
+GEN     zv_prod_Z(GEN v);
 long    zv_sum(GEN v);
 int     zvV_equal(GEN V, GEN W);
 int     ZM_ishnf(GEN x);

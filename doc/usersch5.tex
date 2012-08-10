@@ -5610,6 +5610,9 @@ occurs in the fringe case where an entry is equal to $2^{\B-1}$.
 \fun{long}{zv_prod}{GEN x} returns the product of all the components
 of~\kbd{x} (assumes no overflow occurs).
 
+\fun{GEN}{zv_prod_Z}{GEN x} returns the product of all the components
+of~\kbd{x}; consider all $x[i]$ as \kbd{ulong}s.
+
 \fun{long}{zv_sum}{GEN x} returns the sum of all the components
 of~\kbd{x} (assumes no overflow occurs).
 

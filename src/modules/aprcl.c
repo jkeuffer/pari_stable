@@ -310,114 +310,162 @@ powpolmod(Cache *C, Red *R, long p, long k, GEN jac)
   return _powpolmod(C, jac, R, _sqr);
 }
 
-/* globfa contains the odd prime divisors of e(t) */
+/* Return e(t) = \prod_{p-1 | t} p^{1+v_p(t)}}
+ * globfa contains the odd prime divisors of e(t) */
 static GEN
-e(ulong t, GEN *globfa)
+compute_e(ulong t, GEN *globfa)
 {
-  GEN fa, P, E, s, Primes;
-  ulong nbd, m, k, d;
-  long lfa, i, j;
+  GEN L, P, D = divisorsu(t);
+  long l = lg(D);
+  ulong k;
 
-  fa = factoru(t);
-  P = gel(fa,1);
-  E = gel(fa,2); lfa = lg(P);
-  nbd = 1;
-  for (i=1; i<lfa; i++) { E[i]++; nbd *= E[i]; }
-  Primes = vecsmalltrunc_init(nbd + 1);
-  s = gen_2; /* nbd = number of divisors */
-  for (k=0; k<nbd; k++)
+  P = vecsmalltrunc_init(l);
+  L = vecsmalltrunc_init(l);
+  for (k=l-1; k>1; k--) /* k != 1: avoid d = 1 */
   {
-    m = k; d = 1;
-    for (j=1; m; j++)
-    {
-      d *= upowuu(P[j], m % E[j]);
-      m /= E[j];
-    }
-    /* d runs through the divisors of t */
+    ulong d = D[k];
     if (uisprime(++d))
-    {
-      if (d > 5000000) return gen_0;
-      if (d != 2) vecsmalltrunc_append(Primes, d);
-      s = muliu(s, upowuu(d, 1 + u_lval(t,d)));
+    { /* we want q = 1 (mod p) prime, not too large */
+      if (d > 50000000) return gen_0;
+      vecsmalltrunc_append(P, d);
+      vecsmalltrunc_append(L, upowuu(d, 1 + u_lval(t,d)));
     }
   }
-  if (globfa) { vecsmall_sort(Primes); *globfa = Primes; }
-  return s;
+  if (globfa) *globfa = P;
+  return shifti(zv_prod_Z(L), 2 + u_lval(t,2));
 }
 
+/* Table obtained by the following script:
+
+install(compute_e, "LD&"); \\ remove 'static' first
+
+table(first = 6, step = 6, MAXT = 8648640)=
+{
+  emax = 0;
+  L = List();
+  forstep(t = first, MAXT, step,
+    e = compute_e(t);
+    if (e > 1.9*emax,
+      listput(L, [t, e]); emax = e;
+      printf("  if (C < %5.5g) return %8d;\n", 2*log(e)/log(2), t)
+    );
+  );
+}
+
+Previous values can be recovered using the following table:
+
+T=[6,12,24,48,36,60,120,180,240,504,360,420,720,840,1440,1260,1680,2520,3360,5040,13860,10080,16380,21840,18480,27720,32760,36960,55440,65520,98280,110880,131040,166320,196560,262080,277200,360360,480480,332640,554400,720720,665280,831600,1113840,1441440,1663200,2227680,2162160,2827440,3326400,3603600,6126120,4324320,6683040,7207200,11138400,8648640];
+f(t) = 2*log(compute_e(t))/log(2);
+for (i=1,#T, t=T[i]; printf("  if (C < %5.5g) return %8d;\n", f(t),t));
+
+*/
+
+/* assume C < 3515 */
 static ulong
-compt(GEN N)
+compute_t_small(double C)
+{
+  if (C < 17.955) return        6;
+  if (C < 31.999) return       12;
+  if (C < 33.999) return       24;
+  if (C < 54.084) return       36;
+  if (C < 65.332) return       60;
+  if (C < 68.464) return       72;
+  if (C < 70.790) return      108;
+  if (C < 78.047) return      120;
+  if (C < 102.42) return      180;
+  if (C < 127.51) return      360;
+  if (C < 136.69) return      420;
+  if (C < 153.45) return      540;
+  if (C < 165.68) return      840;
+  if (C < 169.19) return     1008;
+  if (C < 178.54) return     1080;
+  if (C < 192.70) return     1200;
+  if (C < 206.36) return     1260;
+  if (C < 211.97) return     1620;
+  if (C < 222.11) return     1680;
+  if (C < 225.13) return     2016;
+  if (C < 244.21) return     2160;
+  if (C < 270.32) return     2520;
+  if (C < 279.53) return     3360;
+  if (C < 293.65) return     3780;
+  if (C < 346.71) return     5040;
+  if (C < 348.74) return     6480;
+  if (C < 383.38) return     7560;
+  if (C < 396.72) return     8400;
+  if (C < 426.09) return    10080;
+  if (C < 458.39) return    12600;
+  if (C < 527.21) return    15120;
+  if (C < 595.44) return    25200;
+  if (C < 636.35) return    30240;
+  if (C < 672.59) return    42840;
+  if (C < 684.97) return    45360;
+  if (C < 708.85) return    55440;
+  if (C < 771.38) return    60480;
+  if (C < 775.94) return    75600;
+  if (C < 859.70) return    85680;
+  if (C < 893.25) return   100800;
+  if (C < 912.36) return   110880;
+  if (C < 966.23) return   128520;
+  if (C < 1009.2) return   131040;
+  if (C < 1042.1) return   166320;
+  if (C < 1125.0) return   196560;
+  if (C < 1251.1) return   257040;
+  if (C < 1375.1) return   332640;
+  if (C < 1431.1) return   393120;
+  if (C < 1483.5) return   514080;
+  if (C < 1546.5) return   655200;
+  if (C < 1585.9) return   665280;
+  if (C < 1661.4) return   786240;
+  if (C < 1667.7) return   831600;
+  if (C < 1677.1) return   917280;
+  if (C < 1728.2) return   982800;
+  if (C < 1747.6) return  1081080;
+  if (C < 1773.8) return  1179360;
+  if (C < 1810.8) return  1285200;
+  if (C < 1924.7) return  1310400;
+  if (C < 2001.3) return  1441440;
+  if (C < 2096.5) return  1663200;
+  if (C < 2166.0) return  1965600;
+  if (C < 2321.9) return  2162160;
+  if (C < 2368.5) return  2751840;
+  if (C < 2377.4) return  2827440;
+  if (C < 2515.0) return  3326400;
+  if (C < 2588.7) return  3341520;
+  if (C < 2636.8) return  3603600;
+  if (C < 2667.5) return  3931200;
+  if (C < 3028.9) return  4324320;
+  if (C < 3045.8) return  5654880;
+  if (C < 3080.8) return  6652800;
+  if (C < 3121.9) return  6683040;
+  if (C < 3283.4) return  7207200;
+  return  8648640;
+}
+
+/* return t such that e(t) > sqrt(N) */
+static ulong
+compute_t(GEN N, GEN *e, GEN *globfa)
 {
   pari_sp av0 = avma;
-  double Cd = 100 * rtodbl(logr_abs(itor(N,DEFAULTPREC))) / log(10.);
-  ulong t, C = (ulong)ceil(Cd);
+  /* 2^e b <= N < 2^e (b+1), where b >= 2^52. Approximating log_2 N by
+   * log2(gtodouble(N)) ~ e+log2(b), the error is less than log(1+1/b) < 1e-15*/
+  double C = dbllog2(N) + 1e-6; /* > log_2 N */
+  ulong t;
   GEN B;
   avma = av0;
-  /* C < [200*log_10 e(t)] ==> return t. For e(t) < 10^529, N < 10^1058 */
-  if (C <    540) return        6;
-  if (C <    963) return       12;
-  if (C <   1023) return       24;
-  if (C <   1330) return       48;
-  if (C <   1628) return       36;
-  if (C <   1967) return       60;
-  if (C <   2349) return      120;
-  if (C <   3083) return      180;
-  if (C <   3132) return      240;
-  if (C <   3270) return      504;
-  if (C <   3838) return      360;
-  if (C <   4115) return      420;
-  if (C <   4621) return      720;
-  if (C <   4987) return      840;
-  if (C <   5079) return     1440;
-  if (C <   6212) return     1260;
-  if (C <   6686) return     1680;
-  if (C <   8137) return     2520;
-  if (C <   8415) return     3360;
-  if (C <  10437) return     5040;
-  if (C <  11643) return    13860;
-  if (C <  12826) return    10080;
-  if (C <  13369) return    16380;
-  if (C <  13540) return    21840;
-  if (C <  15060) return    18480;
-  if (C <  15934) return    27720;
-  if (C <  17695) return    32760;
-  if (C <  18816) return    36960;
-  if (C <  21338) return    55440;
-  if (C <  23179) return    65520;
-  if (C <  23484) return    98280;
-  if (C <  27465) return   110880;
-  if (C <  30380) return   131040;
-  if (C <  31369) return   166320;
-  if (C <  33866) return   196560;
-  if (C <  34530) return   262080;
-  if (C <  36195) return   277200;
-  if (C <  37095) return   360360;
-  if (C <  38179) return   480480;
-  if (C <  41396) return   332640;
-  if (C <  43301) return   554400;
-  if (C <  47483) return   720720;
-  if (C <  47742) return   665280;
-  if (C <  50202) return   831600;
-  if (C <  52502) return  1113840;
-  if (C <  60245) return  1441440;
-  if (C <  63112) return  1663200;
-  if (C <  65395) return  2227680;
-  if (C <  69895) return  2162160;
-  if (C <  71567) return  2827440;
-  if (C <  75708) return  3326400;
-  if (C <  79377) return  3603600;
-  if (C <  82703) return  6126120;
-  if (C <  91180) return  4324320;
-  if (C <  93978) return  6683040;
-  if (C <  98840) return  7207200;
-  if (C <  99282) return 11138400;
-  if (C < 105811) return  8648640;
-
+  /* Return "smallest" t such that f(t) >= C, which implies e(t) > sqrt(N) */
+  /* For N < 2^3515 ~ 10^1058 */
+  if (C < 3515.0)
+  {
+    t = compute_t_small(C);
+    *e = compute_e(t, globfa);
+    return t;
+  }
   B = sqrti(N);
   for (t = 8648640+840;; t+=840)
   {
     pari_sp av = avma;
-    if (cmpii(e(t, NULL), B) > 0) break;
+    *e = compute_e(t, globfa);
+    if (cmpii(*e, B) > 0) break;
     avma = av;
   }
   avma = av0; return t;
@@ -505,37 +553,6 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
   *j3q = ZX_mul(jpq, u_red_cyclo2n_ip(vpk,k));
   *j3q = red_cyclo2n_ip(*j3q, k);
   return jpq;
-}
-
-static void
-calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
-{
-  GEN J, tabg, faq, tabfaq, tabj, P, PE;
-  long lfaq, j;
-  ulong i, q, l;
-  pari_sp av;
-
-  l = lg(globfa);
-  *ptabfaq = tabfaq= cgetg(l,t_VEC);
-  *ptabj   = tabj  = cgetg(l,t_VEC);
-  for (i=1; i<l; i++)
-  {
-    q = globfa[i]; /* odd prime */
-    faq = factoru_pow(q-1); gel(tabfaq,i) = faq;
-    P = gel(faq,1); lfaq = lg(P);
-    PE= gel(faq,3);
-    av = avma;
-    tabg = compute_g(q);
-
-    J = cgetg(lfaq,t_VEC);
-    gel(J,1) = cgetg(1,t_STR); /* dummy */
-    for (j=2; j<lfaq; j++) /* skip p = P[1] = 2 */
-    {
-      long pe = PE[j];
-      gel(J,j) = get_jac(pC[pe], q, pe, tabg);
-    }
-    gel(tabj,i) = gerepilecopy(av, J);
-  }
 }
 
 /* N = 1 mod p^k, return an elt of order p^k in (Z/N)^* */
@@ -868,12 +885,15 @@ step4d(Cache *C, Red *R, ulong q)
   return -1;
 }
 
+static GEN
+_res(long a, long b) { return b? mkvec2s(a, b): mkvecs(a); }
+
 /* return 1 [OK so far] or <= 0 [not a prime] */
-static long
+static GEN
 step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
 {
   pari_sp av;
-  ulong ct = 1, q;
+  ulong q;
   long pk, k, fl = -1;
   Cache *C, *Cp;
   forprime_t T;
@@ -883,7 +903,7 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
   { /* q = 1 (mod p) */
     if (umodiu(et,q) == 0) continue;
 
-    if (umodiu(R->N,q) == 0) return -1;
+    if (umodiu(R->N,q) == 0) return _res(1,p);
     k = u_lval(q-1, p);
     pk = upowuu(p,k);
     if (pk < lg(pC) && pC[pk]) { C = pC[pk]; Cp = pC[p]; }
@@ -892,19 +912,19 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
       Cp = NULL;
     }
 
-    if (!filltabs(C, Cp, R, p, pk, ltab)) return 0;
-    av = avma; R->C = C->cyc;
+    av = avma;
+    if (!filltabs(C, Cp, R, p, pk, ltab)) return _res(1,0);
+    R->C = C->cyc;
     if (p >= 3)      fl = step4a(C,R, q,p,k, NULL);
     else if (k >= 3) fl = step4b(C,R, q,k);
     else if (k == 2) fl = step4c(C,R, q);
     else             fl = step4d(C,R, q);
-    if (fl == -1) return (long)(-q);
-    if (fl == 1) return ct;
+    if (fl == -1) return _res(q,p);
+    if (fl == 1) return NULL; /*OK*/
     avma = av;
-    ct++;
   }
-  pari_err_BUG("aprcl test fails! this is highly improbable");
-  return 0;
+  pari_err_BUG("aprcl test fails! This is highly improbable");
+  return NULL;
 }
 
 static GEN
@@ -926,15 +946,11 @@ step6(GEN N, ulong t, GEN et)
 }
 
 static GEN
-_res(long a, long b) { return b? mkvec2s(a, b): mkvecs(a); }
-
-static GEN
 aprcl(GEN N)
 {
-  GEN et, fat, flaglp, tabfaq, tabj, res, globfa;
-  long i, j, l, ltab, lfat, fl, ctglob = 0;
-  ulong p, q, t;
-  pari_sp av;
+  GEN et, fat, flaglp, res, globfa;
+  long i, j, l, ltab, lfat;
+  ulong t;
   Red R;
   Cache **pC;
 
@@ -946,62 +962,63 @@ aprcl(GEN N)
       default: return _res(0,0);
     }
   if (Z_issquare(N)) return _res(0,0);
-  t = compt(N);
+  t = compute_t(N, &et, &globfa);
   if (DEBUGLEVEL) err_printf("Starting APRCL: Choosing t = %ld\n",t);
-  et = e(t, &globfa);
   if (cmpii(sqri(et),N) < 0) pari_err_BUG("aprcl: e(t) too small");
-  if (!gequal1(gcdii(N,mului(t,et)))) return _res(1,0);
+  if (!equali1(gcdii(N,mului(t,et)))) return _res(1,0);
 
   R.N = N;
   R.N2= shifti(N, -1);
   pC = calcglobs(&R, t, &ltab, &fat);
   if (!pC) return _res(1,0);
-  lfat = lg(fat); p = fat[lfat-1]; /* largest p | t */
-  flaglp = cgetg(p+1, t_VECSMALL);
-  flaglp[2] = 0;
+  lfat = lg(fat);
+  flaglp = cgetg(lfat, t_VECSMALL);
+  flaglp[1] = 0;
   for (i=2; i<lfat; i++)
   {
-    p = fat[i]; q = p*p;
-    flaglp[p] = (Fl_powu(umodiu(N,q),p-1,q) != 1);
+    ulong p = fat[i];
+    GEN q = sqru(p);
+    flaglp[i] = equaliu(Fp_powu(N, p-1, q), 1);
   }
-  calcjac(pC, globfa, &tabfaq, &tabj);
+  vecsmall_sort(globfa);
 
-  av = avma; l = lg(globfa);
-  if (DEBUGLEVEL>2)
+  l = lg(globfa);
+  if (DEBUGLEVEL>2) err_printf("Step4: %ld q-values\n", l-1);
+  for (i=l-1; i>0; i--) /* decreasing order: slowest first */
   {
-    err_printf("Jacobi sums and tables computed\n");
-    err_printf("Step4: q-values (# = %ld): ", l-1);
-  }
-  for (i=l-1; i>0; i--)
-  {
-    GEN faq = gel(tabfaq,i), P = gel(faq,1), E = gel(faq,2), PE = gel(faq,3);
-    long lfaq = lg(P);
-    q = globfa[i]; if (DEBUGLEVEL>2) err_printf("%ld ",q);
-    for (j=1; j<lfaq; j++, avma = av)
+    ulong q = globfa[i];
+    GEN P, E, PE, faq = factoru_pow(q-1);
+    long lfaq;
+    pari_sp av1 = avma, av2;
+    GEN tabg = compute_g(q);
+    av2 = avma;
+    P = gel(faq,1), E = gel(faq,2), PE = gel(faq,3);
+    lfaq = lg(P);
+    if (DEBUGLEVEL>2)
+      err_printf("Jacobi sums computed for q = %ld...",q);
+    for (j=1; j<lfaq; j++, avma = av2)
     {
-      Cache *C;
-      long pe, e;
-      p = P[j];
-      e = E[j];
-      pe= PE[j]; C = pC[pe];
+      long p = P[j], e = E[j], pe = PE[j], fl;
+      Cache *C = pC[pe];
       R.C = C->cyc;
-      if (p >= 3)      fl = step4a(C,&R, q,p,e, gmael(tabj,i,j));
+      if (p >= 3)      fl = step4a(C,&R, q,p,e, get_jac(pC[pe], q, pe, tabg));
       else if (e >= 3) fl = step4b(C,&R, q,e);
       else if (e == 2) fl = step4c(C,&R, q);
       else             fl = step4d(C,&R, q);
       if (fl == -1) return _res(q,p);
-      if (fl == 1) flaglp[p] = 1;
+      if (fl == 1) flaglp[ zv_search(fat, p) ] = 0;
     }
+    if (DEBUGLEVEL>2) err_printf("OK\n");
+    avma = av1;
   }
-  if (DEBUGLEVEL>2) err_printf("\nStep5: testing conditions lp\n");
-  for (i=1; i<lfat; i++)
+  if (DEBUGLEVEL>2) err_printf("Step5: testing conditions lp\n");
+  for (i=2; i<lfat; i++) /*skip fat[1] = 2*/
   {
-    p = fat[i]; if (flaglp[p]) continue;
-
-    fl = step5(pC, &R, p, et, ltab);
-    if (!fl) return _res(1,0);
-    if (fl < 0) return _res(fl,p);
-    if (fl > ctglob) ctglob = fl; /* DEBUG */
+    pari_sp av = avma;
+    long p = fat[i];
+    GEN r;
+    if (flaglp[i] && (r = step5(pC, &R, p, et, ltab))) return r;
+    avma = av;
   }
   if (DEBUGLEVEL>2) err_printf("Step6: testing potential divisors\n");
   res = step6(N, t, et);
@@ -1015,7 +1032,6 @@ aprcl(GEN N)
         sc += pC[i]->ctsgt;
       }
     err_printf("Number of Fermat powerings = %lu\n",sc);
-    err_printf("Maximal number of nondeterministic steps = %lu\n",ctglob);
   }
   return res;
 }

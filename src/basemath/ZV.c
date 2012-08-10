@@ -826,6 +826,23 @@ zv_prod(GEN v)
   n = v[1]; for (i = 2; i < l; i++) n *= v[i];
   return n;
 }
+/* product of ulongs */
+GEN
+zv_prod_Z(GEN v)
+{
+  pari_sp av = avma;
+  long k, n = lg(v)-1, m;
+  GEN x;
+  if (n == 0) return gen_1;
+  if (n == 1) return utoi(v[1]);
+  if (n == 2) return muluu(v[1], v[2]);
+  m = n >> 1;
+  x = cgetg(m + (odd(n)? 2: 1), t_VEC);
+  for (k = 1; k <= m; k++) gel(x,k) = muluu(v[k<<1], v[(k<<1)-1]);
+  if (odd(n)) gel(x,k) = utoipos(v[n]);
+  return gerepileuptoint(av, divide_conquer_prod(x, mulii));
+}
+
 GEN
 ZV_prod(GEN v)
 {
