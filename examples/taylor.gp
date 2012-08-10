@@ -4,11 +4,11 @@
 \\ (low = close to a cold blue, high = close to a hot red).
 \\ To generate simple colormaps.
 rgb(mag) =
-{ my(x = mag/255.);
-  blue = min(max(4*(0.75-x),     0), 1);
-  red  = min(max(4*(x-0.25),     0), 1);
-  green= min(max(4*abs(x-0.5)-1, 0), 1);
-  return (floor([red, green, blue]*255));
+{ my(x = mag/255., B, G, R);
+  B = min(max(4*(0.75-x),     0), 1);
+  R = min(max(4*(x-0.25),     0), 1);
+  G = min(max(4*abs(x-0.5)-1, 0), 1);
+  return (floor([R, G, B]*255));
 }
 default(graphcolormap, concat(["white","black","blue"], vector(25,i,rgb(10*i))));
 default(graphcolors, vector(25,i,i+2));

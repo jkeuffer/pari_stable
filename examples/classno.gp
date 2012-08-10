@@ -18,16 +18,17 @@
 \\ Adjust constant cc for accuracy, default at least 9 decimal places.
 
 cl(d, cc = 5) =
-{ my(q0,sd,t,c, s = 0, q = 1);
+{ my(q0,sd,c, s = 0, q = 1);
 
   if (!isfundamental(-d), error("Discriminant not fundamental"));
   sd = sqrt(d);
   q0 = exp(-2*Pi/sd); c = -4*Pi/sd;
   for (n=1, ceil(sd*cc),
+    my(t);
     q *= q0; t = 1/(1-q);
     s += kronecker(-d,n) * q * t * (1 + c*t*n)
   );
-  if (d==3, s *= 3);
-  if (d==4, s *= 2);
+  if (d==3, s *= 3,
+      d==4, s *= 2);
   -2*s;
 }

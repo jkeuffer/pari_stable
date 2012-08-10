@@ -1,6 +1,6 @@
 \\ return one non-trivial divisor of n > 1 using Shanks's SQUFOF
 squfof(n) =
-{
+{ my (p, D, d, a, b, b1, f, g, l, bb, gs);
   if (isprime(n) || issquare(n, &n), return(n));
 
   p = factor(n,0)[1,1];
@@ -20,7 +20,7 @@ squfof(n) =
     f = qfbred(f, 3, D, d);
     a = component(f, 1);
     if (!(i%2) && issquare(a, &as),
-      j = 1;
+      my(j = 1);
       while (j<=lq,
         if (as == q[j], break);
         j++
