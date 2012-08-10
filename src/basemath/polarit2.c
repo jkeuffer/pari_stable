@@ -892,36 +892,33 @@ gen_factorback(GEN L, GEN e, GEN (*_mul)(void*,GEN,GEN),
                GEN (*_pow)(void*,GEN,GEN), void *data)
 {
   pari_sp av = avma;
-  long k, l, lx, t = typ(L);
+  long k, l, lx;
   GEN p,x;
 
   if (e) /* supplied vector of exponents */
     p = L;
   else
   {
-    if (t == t_MAT) { /* genuine factorization */
-      l = lg(L);
-      if (l == 1) return gen_1;
-      if (l != 3) pari_err(e_MISC,"not a factorisation in factorback");
-    } else {
-      if (!is_vec_t(t)) pari_err(e_MISC,"not a factorisation in factorback");
-      /* product of the L[i] */
-      return gerepileupto(av, divide_conquer_assoc(L, data, _mul));
+    switch(typ(L)) {
+      case t_VEC:
+      case t_COL: /* product of the L[i] */
+        return gerepileupto(av, divide_conquer_assoc(L, data, _mul));
+      case t_MAT: /* genuine factorization */
+        l = lg(L);
+        if (l == 1) return gen_1;
+        if (l == 3) break;
+        /*fall through*/
+      default:
+        pari_err_TYPE("factorback [not a factorization]", L);
     }
     p = gel(L,1);
     e = gel(L,2);
   }
   /* p = elts, e = expo */
   lx = lg(p);
-  t = t_INT; /* dummy */
   /* check whether e is an integral vector of correct length */
-  if (is_vec_t(typ(e)) && lx == lg(e))
-  {
-    for (k=1; k<lx; k++)
-      if (typ(e[k]) != t_INT) break;
-    if (k == lx) t = t_MAT;
-  }
-  if (t != t_MAT) pari_err(e_MISC,"not a factorisation in factorback");
+  if (!is_vec_t(typ(e)) || lx != lg(e) || !RgV_is_ZV(e))
+    pari_err_TYPE("factorback [not an exponent vector]", e);
   if (lx == 1) return gen_1;
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
