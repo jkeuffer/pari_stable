@@ -2507,6 +2507,7 @@ GEN     Flx_factor(GEN f, ulong p);
 long    Flx_nbfact(GEN z, ulong p);
 GEN     Flx_nbfact_by_degree(GEN z, long *nb, ulong p);
 long    Flx_nbroots(GEN f, ulong p);
+ulong   Flx_oneroot(GEN f, ulong p);
 GEN     Flx_roots(GEN f, ulong p);
 long    FlxqX_nbroots(GEN f, GEN T, ulong p);
 void    Flxv_to_ZXV_inplace(GEN v);

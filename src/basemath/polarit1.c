@@ -158,17 +158,6 @@ ZX_factmod_init(GEN *F, GEN p)
   }
 }
 
-static GEN
-oneroot_mod_2(GEN f)
-{
-  long i,n;
-  if (!signe(constant_term(f))) return gen_0;
-  for (i=2, n=1; i < lg(f); i++)
-    if (signe(f[i])) n++;
-  if (n & 1) return gen_1;
-  return NULL;
-}
-
 /* return 1,...,p-1 [not_0 = 1] or 0,...,p [not_0 = 0] */
 static GEN
 all_roots_mod_p(ulong p, int not_0)
@@ -268,13 +257,21 @@ Flx_root_mod_2(GEN f)
   long i,n;
   GEN y;
 
-  for (i=2, n=1; i < lg(f); i++)
-    if (f[i] & 1) n++;
+  for (i=2, n=1; i < lg(f); i++) n += f[i];
   z1 = n & 1;
   y = cgetg(z0+z1+1, t_VECSMALL); i = 1;
   if (z0) y[i++] = 0;
   if (z1) y[i  ] = 1;
   return y;
+}
+static ulong
+Flx_oneroot_mod_2(GEN f)
+{
+  long i,n;
+  if (!(f[2] & 1)) return 0;
+  for (i=2, n=1; i < lg(f); i++) n += f[i];
+  if (n & 1) return 1;
+  return 2;
 }
 
 static GEN FpX_roots_i(GEN f, GEN p);
@@ -373,6 +370,23 @@ FpX_otherroot(GEN x, GEN r, GEN p)
   s = subii(p, s); if (signe(s) < 0) s = addii(s,p);
   return s;
 }
+
+/* p > 2 */
+static ulong
+Flx_quad_root(GEN x, ulong p, int unknown)
+{
+  ulong s, u, b = x[3], c = x[2];
+  ulong D = Fl_sub(Fl_sqr(b,p), Fl_mul(c,4,p), p);
+  if (unknown && kross(D,p) == -1) return p;
+  s = Fl_sqrt(D,p);
+  if (s==~0UL) return p;
+  u = (p>>1)+1;
+  return Fl_mul(u, Fl_sub(s,b, p), p);
+}
+static ulong
+Flx_otherroot(GEN x, ulong r, ulong p)
+{ return Fl_neg(Fl_add(x[3], r, p), p); }
+
 
 /* 'todo' contains the list of factors to be split.
  * 'done' the list of finished factors, no longer touched */
@@ -497,10 +511,62 @@ FpX_roots_i(GEN f, GEN p)
   }
 }
 /* assume p > 2 prime */
+static ulong
+Flx_oneroot_i(GEN f, ulong p)
+{
+  GEN pol, a;
+  ulong q;
+  long da;
+
+  if (Flx_val(f)) return 0;
+  switch(degpol(f))
+  {
+    case 1: return Fl_neg(f[2], p);
+    case 2: return Flx_quad_root(f, p, 1);
+  }
+
+  a = Flxq_powu(polx_Flx(f[1]), p - 1, f,p);
+  if (lg(a) < 3) pari_err_PRIME("rootmod",utoipos(p));
+  a = Flx_Fl_add(a, p-1, p); /* a = x^(p-1) - 1 mod f */
+  a = Flx_gcd(f,a, p);
+  da = degpol(a);
+  if (!da) return p;
+  a = Flx_normalize(a,p);
+
+  q = p >> 1;
+  pol = polx_Flx(f[1]);
+  for(pol[2] = 1;; pol[2]++)
+  {
+    if (pol[2] == 1000 && !uisprime(p)) pari_err_PRIME("Flx_oneroot",utoipos(p));
+    switch(da)
+    {
+      case 1: return Fl_neg(a[2], p);
+      case 2: return Flx_quad_root(a, p, 0);
+      default: {
+        GEN b = Flx_Fl_add(Flxq_powu(pol,q, a,p), p-1, p);
+        long db;
+        b = Flx_gcd(a,b, p); db = degpol(b);
+        if (db && db < da)
+        {
+          b = Flx_normalize(b, p);
+          if (db <= (da >> 1)) {
+            a = b;
+            da = db;
+          } else {
+            a = Flx_div(a,b, p);
+            da -= db;
+          }
+        }
+      }
+    }
+  }
+}
+/* assume p > 2 prime */
 static GEN
 FpX_oneroot_i(GEN f, GEN p)
 {
   GEN pol, pol0, a, q;
+  long da;
 
   if (ZX_val(f)) return gen_0;
   switch(degpol(f))
@@ -513,53 +579,76 @@ FpX_oneroot_i(GEN f, GEN p)
   if (lg(a) < 3) pari_err_PRIME("rootmod",p);
   a = FpX_Fp_sub_shallow(a, gen_1, p); /* a = x^(p-1) - 1 mod f */
   a = FpX_gcd(f,a, p);
-  if (!degpol(a)) return NULL;
+  da = degpol(a);
+  if (!da) return NULL;
   a = FpX_normalize(a,p);
 
   q = shifti(p,-1);
   pol0 = icopy(gen_1); /* constant term, will vary in place */
   pol = deg1pol_shallow(gen_1, pol0, varn(f));
-  for(;;)
+  for (pol0[2]=1; ; pol0[2]++)
   {
-    long da;
-    switch(da = degpol(a))
+    if (pol0[2] == 1000 && !BPSW_psp(p)) pari_err_PRIME("FpX_oneroot",p);
+    switch(da)
     {
       case 1: return subii(p, gel(a,2));
       case 2: return FpX_quad_root(a, p, 0);
-    }
-    for (pol0[2]=1; ; pol0[2]++)
-    {
-      GEN b = FpX_Fp_sub_shallow(FpXQ_pow(pol,q, a,p), gen_1, p);
-      long db;
-      b = FpX_gcd(a,b, p); db = degpol(b);
-      if (db && db < da)
-      {
-        b = FpX_normalize(b, p);
-        a = (db <= (da >> 1))? b: FpX_div(a,b, p);
-        break;
+      default: {
+        GEN b = FpX_Fp_sub_shallow(FpXQ_pow(pol,q, a,p), gen_1, p);
+        long db;
+        b = FpX_gcd(a,b, p); db = degpol(b);
+        if (db && db < da)
+        {
+          b = FpX_normalize(b, p);
+          if (db <= (da >> 1)) {
+            a = b;
+            da = db;
+          } else {
+            a = FpX_div(a,b, p);
+            da -= db;
+          }
+        }
       }
-      if (pol0[2] == 100 && !BPSW_psp(p)) pari_err_PRIME("FpX_oneroot",p);
     }
   }
 }
 
-/* assume that p is prime */
-GEN
-FpX_oneroot(GEN f, GEN p) {
+ulong
+Flx_oneroot(GEN f, ulong p)
+{
   pari_sp av = avma;
-  f = FpX_red(f, p);
+  ulong r;
   switch(lg(f))
   {
-    case 2: pari_err_ROOTS0("FpX_oneroot");
+    case 2: return 0;
+    case 3: avma = av; return p;
+  }
+  if (p == 2) return Flx_oneroot_mod_2(f);
+  r = Flx_oneroot_i(Flx_normalize(f, p), p);
+  avma = av; return r;
+}
+
+/* assume that p is prime */
+GEN
+FpX_oneroot(GEN f, GEN pp) {
+  pari_sp av = avma;
+  ZX_factmod_init(&f, pp);
+  switch(lg(f))
+  {
+    case 2: avma = av; return gen_0;
     case 3: avma = av; return NULL;
   }
-  if (!mpodd(p))
+  if (typ(f) == t_VECSMALL)
   {
-    f = oneroot_mod_2(f);
-    avma = av; return f;
+    ulong r, p = pp[2];
+    if (p == 2)
+      r = Flx_oneroot_mod_2(f);
+    else
+      r = Flx_oneroot_i(f, p);
+    avma = av;
+    return (r == p)? NULL: utoi(r);
   }
-  f = FpX_normalize(f, p);
-  f = FpX_oneroot_i(f, p);
+  f = FpX_oneroot_i(f, pp);
   if (!f) { avma = av; return NULL; }
   return gerepileuptoint(av, f);
 }
@@ -1109,25 +1198,6 @@ F2x_factor_deg2(GEN f, long d, long flag)
   }
 }
 
-/* p > 2 */
-static ulong
-Flx_quad_root(GEN x, ulong p, int unknown)
-{
-  ulong s, u, b = x[3], c = x[2];
-  ulong D = Fl_sub(Fl_sqr(b,p), Fl_mul(c,4,p), p);
-  if (unknown && kross(D,p) == -1) return p;
-  s = Fl_sqrt(D,p);
-  if (s==~0UL) return p;
-  u = (p>>1)+1;
-  return Fl_mul(u, Fl_sub(s,b, p), p);
-}
-
-static ulong
-Flx_otherroot(GEN x, ulong r, ulong p)
-{
-  return Fl_neg(Fl_add(x[3], r, p), p);
-}
-
 static void
 split_squares(struct split_t *S, GEN g, ulong p)
 {
@@ -1204,7 +1274,7 @@ Flx_roots_i(GEN f, ulong p)
   if (Flx_valrem(f, &g)) split_add_done(&S, (GEN)0);
   if (! split_Flx_cut_out_roots(&S, g, p))
     return all_roots_mod_p(p, lg(S.done) == 1);
-  pol = polx_Flx(varn(f));
+  pol = polx_Flx(f[1]);
   for (pol[2]=1; ; pol[2]++)
   {
     long j, l = lg(S.todo);

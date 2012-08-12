@@ -4287,6 +4287,10 @@ $\deg a \geq {\deg x \over 2} > \deg b$.
 of $f$ (without multiplicity, as a \typ{VECSMALL}). Assumes that $p$ is
 prime.
 
+\fun{ulong}{Flx_oneroot}{GEN f, ulong p} returns one root $0 \leq r < p$ of
+the \kbd{Flx}~\kbd{f} in \kbd{\Z/p\Z}. Return $p$ if no root exists. Assumes
+that \kbd{p} is prime.
+
 \fun{GEN}{Flx_roots_naive}{GEN f, ulong p} returns the vector of roots
 of $f$ as a \typ{VECSMALL} (multiple roots are not repeated), found
 by an exhaustive search. Efficient for very small $p$ !

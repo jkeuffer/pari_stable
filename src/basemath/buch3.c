@@ -1493,21 +1493,22 @@ nf_deg1_prime(GEN nf)
   GEN z, T = nf_get_pol(nf), D = nf_get_disc(nf), f = nf_get_index(nf);
   long degnf = degpol(T);
   forprime_t S;
+  pari_sp av;
   ulong p;
   u_forprime_init(&S, degnf, ULONG_MAX);
+  av = avma;
   while ( (p = u_forprime_next(&S)) )
   {
-    pari_sp av;
+    ulong r;
     if (!umodiu(D, p) || !umodiu(f, p)) continue;
-    av = avma;
-    z = Flx_roots(ZX_to_Flx(T, p), p);
-    avma = av;
-    if (lg(z) > 1)
+    r = Flx_oneroot(ZX_to_Flx(T,p), p);
+    if (r != p)
     {
-      ulong c = Fl_neg(z[1], p);
-      z = deg1pol_shallow(gen_1, utoi(c), varn(T));
+      z = utoi(Fl_neg(r, p));
+      z = deg1pol_shallow(gen_1, z, varn(T));
       return primedec_apply_kummer(nf, z, 1, utoipos(p));
     }
+    avma = av;
   }
   return NULL;
 }
