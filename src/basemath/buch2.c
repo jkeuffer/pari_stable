@@ -2862,6 +2862,15 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR, pari_timer *T)
 
   /* tentative regulator */
   R = gmul(*ptkR, gdiv(ZM_det_triangular(H), powiu(den, r)));
+  /* R > 0.2 uniformly */
+  if (gexpo(R) < -3) {
+    if (DEBUGLEVEL)
+    {
+      err_printf("\n#### Tentative regulator: %.28Pg\n", R);
+      timer_printf(T, "computing check");
+    }
+    avma = av; return fupb_PRECI;
+  }
   c = gmul(R,z); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
