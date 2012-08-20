@@ -14,7 +14,6 @@ test(p,n=0,v='a,w=1)=
     if(elllog(E,P,G)!=1023%d1,error([p,n,4]));
   );
 }
-test(2,4);
 test(2,78);
 test(2,100);
 test(2,101,,0);
@@ -36,3 +35,21 @@ E.disc
 P=random(E);Q=random(E);
 R=elladd(E,P,Q);
 elladd(E,ellsub(E,R,P),ellneg(E,Q))
+
+check(a,p)=
+{
+  my(n,g,N,P);
+  n=poldegree(p);
+  my(b=ffgen(p*Mod(1,2))); b = subst(a,'t,b)*b^0;
+  E=ellffinit([1,0,0,0,b],b,1);
+  N=ellcard(E);
+  for(i=1,4,
+    P=random(E);
+    if(ellpow(E,P,N)!=[0],error([a,p])));
+  ellgenerators(E);
+}
+{
+  for(a=1,8,
+    pol=ffinit(2,a); g = ffprimroot(ffgen(pol,'t));
+    for(i=0,2^a-2, check((g^i).pol,g.mod)));
+}
