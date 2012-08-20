@@ -247,8 +247,7 @@ RgX_deflate(GEN x0, long d)
 {
   GEN z, y, x;
   long i,id, dy, dx = degpol(x0);
-  if (d <= 1) return x0;
-  if (dx < 0) return pol_0(varn(x0));
+  if (d == 1 || dx <= 0) return leafcopy(x0);
   dy = dx/d;
   y = cgetg(dy+3, t_POL); y[1] = x0[1];
   z = y + 2;
@@ -263,6 +262,7 @@ RgX_inflate(GEN x0, long d)
 {
   long i, id, dy, dx = degpol(x0);
   GEN x = x0 + 2, z, y;
+  if (dx <= 0) return leafcopy(x0);
   dy = dx*d;
   y = cgetg(dy+3, t_POL); y[1] = x0[1];
   z = y + 2;
