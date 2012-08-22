@@ -4670,6 +4670,9 @@ assuming it exists.
 
 \fun{GEN}{F2x_F2xqV_eval}{GEN f, GEN x, GEN T}, see \kbd{FpX\_FpXQV\_eval}.
 
+\fun{GEN}{F2xq_autpow}{GEN a, long n, GEN T} computes $\sigma^n(X)$ assuming
+$a=\sigma(X)$ where $\sigma$ is an automorphism of the algebra $\F_2[X]/T(X)$.
+
 \subsec{Functions returning objects with \typ{INTMOD} coefficients}
 
 Those functions are mostly needed for interface reasons: \typ{INTMOD}s should

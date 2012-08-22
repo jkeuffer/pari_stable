@@ -620,7 +620,7 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
   if (n==2) return F2x_degree(a6) ? gen_1 : stoi(-3);
   if (n==3) return F2x_degree(a6) ? (F2xq_trace(a6,T2) ?  stoi(-3): gen_1) : stoi(5);
   timer_start(&ti);
-  sqx = mkvec2(F2xq_sqrt(polx_F2x(T2[1]), T2), T2);
+  sqx = mkvec2(F2xq_autpow(mkvecsmall2(T2[1], 4),n-1,T2), T2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Sqrtx");
   T = F2x_canonlift(T2, N-2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Teich");

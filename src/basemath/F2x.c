@@ -858,6 +858,18 @@ F2x_F2xq_eval(GEN Q, GEN x, GEN T)
   return gerepileupto(av, z);
 }
 
+static GEN
+F2xq_autpow_sqr(void * T, GEN x) { return F2x_F2xq_eval(x, x, (GEN) T); }
+
+static GEN
+F2xq_autpow_mul(void * T, GEN x, GEN y) { return F2x_F2xq_eval(x, y, (GEN) T); }
+
+GEN
+F2xq_autpow(GEN x, long n, GEN T)
+{
+  return gen_powu(x,n,(void*)T,F2xq_autpow_sqr,F2xq_autpow_mul);
+}
+
 ulong
 F2xq_trace(GEN x, GEN T)
 {
