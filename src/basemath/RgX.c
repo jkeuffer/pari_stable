@@ -1799,3 +1799,50 @@ RgXQ_norm(GEN x, GEN T)
   if (gequal1(L) || dx < 0) return y;
   return gerepileupto(av, gdiv(y, gpowgs(L, dx)));
 }
+
+/* write p(X) = e(X^2) + Xo(X^2), shallow function */
+void
+RgX_even_odd(GEN p, GEN *pe, GEN *po)
+{
+  long n = degpol(p), v = varn(p), n0, n1, i;
+  GEN p0, p1;
+
+  if (n <= 0) { *pe = gcopy(p); *po = zeropol(v); return; }
+
+  n0 = (n>>1)+1; n1 = n+1 - n0; /* n1 <= n0 <= n1+1 */
+  p0 = cgetg(n0+2, t_POL); p0[1] = evalvarn(v)|evalsigne(1);
+  p1 = cgetg(n1+2, t_POL); p1[1] = evalvarn(v)|evalsigne(1);
+  for (i=0; i<n1; i++)
+  {
+    p0[2+i] = p[2+(i<<1)];
+    p1[2+i] = p[3+(i<<1)];
+  }
+  if (n1 != n0)
+    p0[2+i] = p[2+(i<<1)];
+  *pe = normalizepol(p0);
+  *po = normalizepol(p1);
+}
+
+/* write p(X) = a_0(X^k) + Xa_1(X^k) + ... + X^(k-1)a_{k-1}(X^k), shallow function */
+GEN
+RgX_splitting(GEN p, long k)
+{
+  long n = degpol(p), v = varn(p), m, i, j, l;
+  GEN r;
+
+  m = n/k;
+  r = cgetg(k+1,t_VEC);
+  for(i=1; i<=k; i++)
+  {
+    gel(r,i) = cgetg(m+3, t_POL);
+    mael(r,i,1) = evalvarn(v)|evalsigne(1);
+  }
+  for (j=1, i=0, l=2; i<=n; i++)
+  {
+    gmael(r,j,l) = gel(p,2+i);
+    if (j==k) { j=1; l++; } else j++;
+  }
+  for(i=1; i<=k; i++)
+    gel(r,i) = normalizepol_lg(gel(r,i),i<j?l+1:l);
+  return r;
+}

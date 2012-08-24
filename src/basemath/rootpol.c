@@ -356,29 +356,6 @@ polgraeffe(GEN p)
   return gerepileupto(av, RgX_sub(s0, RgX_shift_shallow(s1,1)));
 }
 
-/* write p(X) = e(X^2) + Xo(X^2), shallow function */
-void
-RgX_even_odd(GEN p, GEN *pe, GEN *po)
-{
-  long n = degpol(p), v = varn(p), n0, n1, i;
-  GEN p0, p1;
-
-  if (n <= 0) { *pe = gcopy(p); *po = zeropol(v); return; }
-
-  n0 = (n>>1)+1; n1 = n+1 - n0; /* n1 <= n0 <= n1+1 */
-  p0 = cgetg(n0+2, t_POL); p0[1] = evalvarn(v)|evalsigne(1);
-  p1 = cgetg(n1+2, t_POL); p1[1] = evalvarn(v)|evalsigne(1);
-  for (i=0; i<n1; i++)
-  {
-    p0[2+i] = p[2+(i<<1)];
-    p1[2+i] = p[3+(i<<1)];
-  }
-  if (n1 != n0)
-    p0[2+i] = p[2+(i<<1)];
-  *pe = normalizepol(p0);
-  *po = normalizepol(p1);
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                       MODULUS OF ROOTS                         **/

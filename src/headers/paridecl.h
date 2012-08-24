@@ -525,6 +525,7 @@ GEN     RgX_divrem(GEN x,GEN y,GEN *r);
 GEN     RgX_divs(GEN y, long x);
 long    RgX_equal(GEN x, GEN y);
 long    RgX_equal_var(GEN x, GEN y);
+void    RgX_even_odd(GEN p, GEN *pe, GEN *po);
 GEN     RgX_get_0(GEN x);
 GEN     RgX_get_1(GEN x);
 GEN     RgX_inflate(GEN x0, long d);
@@ -543,6 +544,7 @@ GEN     RgX_renormalize(GEN x);
 GEN     RgX_rescale(GEN P, GEN h);
 GEN     RgX_shift(GEN a, long n);
 GEN     RgX_shift_shallow(GEN x, long n);
+GEN     RgX_splitting(GEN p, long k);
 GEN     RgX_sqr(GEN x);
 GEN     RgX_sqrspec(GEN a, long na);
 GEN     RgX_sub(GEN x, GEN y);
@@ -2782,7 +2784,6 @@ void    setrand(GEN seed);
 
 /* rootpol.c */
 
-void    RgX_even_odd(GEN p, GEN *pe, GEN *po);
 GEN     ZX_graeffe(GEN p);
 GEN     cleanroots(GEN x,long l);
 int     isrealappr(GEN x, long l);
