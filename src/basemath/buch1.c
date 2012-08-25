@@ -301,10 +301,9 @@ clearhash(long **hash)
 }
 
 static void
-check_prime_quad(GRHcheck_t *S, long np, GEN D, GEN invhr)
+check_prime_quad(GRHcheck_t *S, long np, GEN D)
 {
   long p, i;
-  GEN invhrtmp = invhr;
   byteptr delta;
   pari_sp av = avma;
 
@@ -329,11 +328,35 @@ check_prime_quad(GRHcheck_t *S, long np, GEN D, GEN invhr)
     pr->logp = log(p);
     s = krois(D,p);
     pr->dec = (GEN)s;
-    if (s) invhrtmp = mulur(p - s, divru(invhrtmp, p));
   }
   S->nprimes = np;
-  affrr(invhrtmp, invhr);
   avma = av;
+}
+
+static GEN
+compute_invresquad(GRHcheck_t *S)
+{
+  pari_sp av = avma;
+  GEN invres = dbltor(1.);
+  GRHprime_t *pr = S->primes;
+  byteptr delta = diffptr;
+  long i = S->nprimes, p = 0, LIMC = uprime(i+1) - 1;
+  double limp = log(LIMC) / 2;
+  for (i = S->nprimes; i > 0; pr++, i--)
+  {
+    long s = (long)pr->dec;
+    NEXT_PRIME_VIADIFF(p, delta);
+    if (s)
+    {
+      if (s>0 || pr->logp <= limp)
+        /* Both p and P contribute */
+        invres = mulur(p - s, divru(invres, p));
+      else if (s<0)
+        /* Only p contributes */
+        invres = mulur(p, divru(invres, p - 1));
+    }
+  }
+  return gerepileuptoleaf(av, invres);
 }
 
 /* p | conductor of order of disc D ? */
@@ -352,15 +375,28 @@ is_bad(GEN D, ulong p)
   avma = av; return r;
 }
 
-static int
-quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC, long minSFB)
+static long
+nthidealquad(GEN D, long n)
 {
-  long i, np = uprimepi(LIMC), count;
+  byteptr delta = diffptr;
+  long p = 0;
+  while (n > 0)
+  {
+    NEXT_PRIME_VIADIFF(p, delta);
+    if (!is_bad(D, (ulong)p) && krois(D, p) >= 0) n--;
+  }
+  return p;
+}
+
+static int
+quadGRHchk(GEN D, GRHcheck_t *S, long LIMC, long minSFB)
+{
+  long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
   byteptr delta;
   ulong p;
-  check_prime_quad(S, np, D, invhr);
-  p = 0; count = 0; delta = diffptr;
+  check_prime_quad(S, np, D);
+  p = 0; delta = diffptr;
   for (i = 0; i <= np; i++)
   {
     GRHprime_t *pr = S->primes+i;
@@ -385,14 +421,13 @@ quadGRHchk(GEN D, GRHcheck_t *S, GEN invhr, long LIMC, long minSFB)
       B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
     }
     if ((long)pr->dec>0) { SA += 2*A;SB += 2*B; } else { SA += A; SB += B; }
-    if ((long)pr->dec>=0 && umodiu(D,(ulong)p) && !is_bad(D,(ulong)p)) count++;
   }
-  return count > minSFB && GRHok(S, logC, SA, SB);
+  return GRHok(S, logC, SA, SB);
 }
 
 /* create B->FB, B->numFB; set B->badprim. Return L(kro_D, 1) */
 static void
-FBquad(struct buch_quad *B, long C2, long C1, GEN invhr, GRHcheck_t *S)
+FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
 {
   GEN D = B->QFR->D;
   long i, p;
@@ -400,7 +435,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GEN invhr, GRHcheck_t *S)
   byteptr d = diffptr;
   GRHprime_t *pr;
 
-  check_prime_quad(S, uprimepi((ulong)C2), D, invhr);
+  check_prime_quad(S, uprimepi((ulong)C2), D);
   pr = S->primes;
   B->numFB = cgetg(C2+1, t_VECSMALL);
   B->FB    = cgetg(C2+1, t_VECSMALL);
@@ -638,12 +673,14 @@ imag_relations(struct buch_quad *B, long need, long *pc, ulong LIMC, GEN mat)
         for (i=1; i<lgsub; i++) col[B->subFB[i]] += -fpd[i]-ex[i];
         add_fact(B, col, form2); col[fpd[-2]]--;
       }
+      if (DEBUGLEVEL) err_printf(" %ldP",s);
     }
     else
     {
       col = gel(mat,++s);
       for (i=1; i<lgsub; i++) col[B->subFB[i]] = -ex[i];
       add_fact(B, col, form);
+      if (DEBUGLEVEL) err_printf(" %ld",s);
     }
     col[current]--;
     if (++current > B->KC) current = 1;
@@ -932,7 +969,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   long i, s, current, triv, sfb_trials, nrelsup, nreldep, need, nsubFB, minSFB;
   ulong low, high, LIMC0, LIMC, LIMC2, LIMCMAX, cp;
   GEN W, cyc, res, gen, dep, mat, C, extraC, B, R, invhr, h = NULL; /*-Wall*/
-  double drc, lim, LOGD, LOGD2;
+  double drc, sdrc, lim, LOGD, LOGD2;
   GRHcheck_t GRHcheck;
   struct qfr_data QFR;
   struct buch_quad BQ;
@@ -964,10 +1001,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   LOGD = log(drc);
   LOGD2 = LOGD * LOGD;
 
-  lim = sqrt(drc);
-  /* invhr = 2^r1 (2pi)^r2 / sqrt(D) w ~ L(chi,1) / hR */
-  if (BQ.PRECREG) invhr = dbltor(2. / lim);
-  else         invhr = dbltor(PI / lim);
+  sdrc = lim = sqrt(drc);
   if (!BQ.PRECREG) lim /= sqrt(3.);
   cp = (ulong)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 20) cp = 20;
@@ -980,13 +1014,11 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   BQ.powsubFB = BQ.subFB = NULL;
   minSFB = (expi(D) > 15)? 3: 2;
   init_GRHcheck(&GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
-  LIMC0 = maxss((long)(cbach2*LOGD2), 20);
+  high = low = LIMC0 = maxss((long)(cbach2*LOGD2), 1);
   LIMCMAX = (long)(6.*LOGD2);
-  low = LIMC0;
-  /* XXX 100 and 1000 below to ensure a good enough approximation of residue */
-  high = expi(D) < 16 ? 100 : 1000;
-  if (high < low) high = low;
-  while (!quadGRHchk(D, &GRHcheck, invhr, high, minSFB))
+  /* XXX 25 and 200 below to ensure a good enough approximation of residue */
+  check_prime_quad(&GRHcheck, expi(D) < 16 ? 25 : 200, D);
+  while (!quadGRHchk(D, &GRHcheck, high, minSFB))
   {
     low = high;
     high *= 2;
@@ -994,17 +1026,19 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   while (high - low > 1)
   {
     long test = (low+high)/2;
-    if (quadGRHchk(D, &GRHcheck, invhr, test, minSFB))
+    if (quadGRHchk(D, &GRHcheck, test, minSFB))
       high = test;
     else
       low = test;
   }
-  if (high == LIMC0+1 && quadGRHchk(D, &GRHcheck, invhr, LIMC0, minSFB))
+  if (high == LIMC0+1 && quadGRHchk(D, &GRHcheck, LIMC0, minSFB))
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
-  LIMC0 = maxss((long)(cbach*LOGD2), 20);
+  if (LIMC2 > LIMCMAX) LIMC2 = LIMCMAX;
+  LIMC0 = (long)(cbach*LOGD2);
   LIMC = cbach ? LIMC0 : LIMC2;
+  LIMC = maxss(LIMC, nthidealquad(D, 2));
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START:
@@ -1021,14 +1055,16 @@ START:
     if (LIMC2 < LIMC) LIMC2 = LIMC;
     if (BQ.PRECREG) qfr_data_init(QFR.D, BQ.PRECREG, &QFR);
 
-    FBquad(&BQ, LIMC2, LIMC, invhr, &GRHcheck);
+    FBquad(&BQ, LIMC2, LIMC, &GRHcheck);
     if (DEBUGLEVEL) timer_printf(&T, "factor base");
     BQ.subFB = subFBquad(&BQ, QFR.D, lim + 0.5, minSFB);
     if (DEBUGLEVEL) timer_printf(&T, "subFBquad = %Ps",
                                  vecpermute(BQ.FB, BQ.subFB));
     nsubFB = lg(BQ.subFB) - 1;
   }
-  while (!nsubFB);
+  while (nsubFB < (expi(D) > 15 ? 3 : 2));
+  /* invhr = 2^r1 (2pi)^r2 / sqrt(D) w ~ L(chi,1) / hR */
+  invhr = gmul(dbltor((BQ.PRECREG?2.:PI)/sdrc), compute_invresquad(&GRHcheck));
   BQ.powsubFB = powsubFBquad(&BQ,CBUCH+1);
   if (DEBUGLEVEL) timer_printf(&T, "powsubFBquad");
   BQ.limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
