@@ -2,5 +2,18 @@ Function: mateigen
 Section: linear_algebra
 C-Name: eigen
 Prototype: Gp
-Help: mateigen(x): eigenvectors of the matrix x given as columns of a matrix.
-Doc: gives the eigenvectors of $x$ as columns of a matrix.
+Help: mateigen(x): complex eigenvectors of the matrix x given as columns of a
+ matrix.
+Doc: returns the (complex) eigenvectors of $x$ as columns of a matrix.
+ This function first computes the characteristic polynomial of $x$, then
+ approximates its complex roots $(\lambda_i)$, then tries to compute the
+ eigenspaces as kernels of the $x - \lambda_i$. This algorithm is
+ ill-conditioned and is likely to miss kernel vectors if some roots of the
+ characteristic polynomial are close, in particular if it has multiple roots.
+ For symmetric matrices, use \tet{qfjacobi} instead; for Hermitian matrices,
+ compute
+ \bprog
+  A = real(x);
+  B = imag(x);
+  y = matconcat([A, -B; B, A]);
+ @eprog\noindent and apply \kbd{qfjacobi} to $y$.
