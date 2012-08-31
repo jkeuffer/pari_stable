@@ -814,6 +814,7 @@ incgamspec(GEN s, GEN x, GEN g, long prec)
   return gerepileupto(ltop, gadd(S, gdiv(gadd(gadd(S1, S2), S3), P)));
 }
 
+#if 0
 static long
 precision2(GEN x, GEN y)
 {
@@ -822,6 +823,7 @@ precision2(GEN x, GEN y)
   if (!py) return px;
   return minss(px, py);
 }
+#endif
 
 /* return |x| */
 static double
@@ -848,7 +850,7 @@ incgam0(GEN s, GEN x, GEN g, long prec)
 
   if (gequal0(x)) return g? gcopy(g): ggamma(s,prec);
   av = avma;
-  l = precision2(x, s);
+  l = precision(s);
   if (!l) l = prec;
   E = prec2nbits(l) + 1;
   if (typ(x) != t_REAL) x = gtofp(x, l);
