@@ -3298,7 +3298,12 @@ FqX_roots_i(GEN f, GEN T, GEN p)
   GEN R;
   f = FqX_normalize(f, T, p);
   if (!signe(f)) pari_err_ROOTS0("FqX_roots");
-  if (isabsolutepol(f)) return FpX_rootsff_i(simplify_shallow(f), T, p);
+  if (isabsolutepol(f))
+  {
+    f = simplify_shallow(f);
+    if (typ(f) == t_INT) return cgetg(1, t_COL);
+    return FpX_rootsff_i(f, T, p);
+  }
   if (degpol(f)==2)
     return gen_sort(FqX_quad_roots(f,T,p), (void*) &cmp_RgX, &cmp_nodata);
   switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
