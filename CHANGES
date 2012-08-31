@@ -110,6 +110,7 @@ GH 86- missing solutions in thue(), e.g. thue(thueinit(x^3+92*x+1),3^3)
 BA 90- printf() did not flush output
    91- logint() used too much memory and could return a wrong result:
        logint(3^64, 3) --> 33
+   92- eint1(x < 0) normalization. Now eint1(x) = incgam(0, x) [#418]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -211,6 +212,8 @@ BA 71- rename powell->ellmul, addell->elladd, subell->ellsub
    75- polinterpolate(,, 'x) use divide & conquer algorithm
 BA 76- binary(0) now return []
    77- polisirreducible() now avoids factoring in most cases
+HC 78- reimplement incgam()
+   79- allow eint1(t_COMPLEX)
 
   Added
     1- mathnf for matrices over K[X] [#41]

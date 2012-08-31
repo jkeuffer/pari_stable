@@ -2,11 +2,12 @@ Function: eint1
 Section: transcendental
 C-Name: veceint1
 Prototype: GDGp
-Help: eint1(x,{n}): exponential integral E1(x). If n is present, computes
- the vector of the first n values of the exponential integral E1(n.x) (x > 0).
-Doc: exponential integral $\int_x^\infty \dfrac{e^{-t}}{t}\,dt$ ($x\in\R$)
+Help: eint1(x,{n}): exponential integral E1(x). If n is present and x > 0,
+ computes the vector of the first n values of the exponential integral E1(n.x)
+Doc: exponential integral $\int_x^\infty \dfrac{e^{-t}}{t}\,dt =
+ \kbd{incgam(0, x)$, which is defined for any complex $x \neq 0$.
 
- If $n$ is present, outputs the $n$-dimensional vector
- $[\kbd{eint1}(x),\dots,\kbd{eint1}(nx)]$ ($x \geq 0$). This is faster than
- repeatedly calling \kbd{eint1($i$ * x)}.
+ If $n$ is present, we must have $x > 0$; the function returns the
+ $n$-dimensional vector $[\kbd{eint1}(x),\dots,\kbd{eint1}(nx)]$. This is
+ faster than repeatedly calling \kbd{eint1($i$ * x)}.
 Variant: Also available is \fun{GEN}{eint1}{GEN x, long prec}.
