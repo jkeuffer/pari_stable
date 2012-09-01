@@ -3776,6 +3776,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
     if (lg(nf)==3) { /* P non-monic and nfinit CHANGEd it ? */
       pari_warn(warner,"non-monic polynomial. Change of variables discarded");
       nf = gel(nf,1);
+      P = nf_get_pol(nf);
     }
   }
   N = degpol(P);
