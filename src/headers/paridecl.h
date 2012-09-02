@@ -637,6 +637,7 @@ GEN     ZX_mul(GEN x, GEN y);
 GEN     ZX_mulspec(GEN a, GEN b, long na, long nb);
 GEN     ZX_neg(GEN x);
 GEN     ZX_rem(GEN x, GEN y);
+GEN     ZX_remi2n(GEN y, long n);
 GEN     ZX_renormalize(GEN x, long lx);
 GEN     ZX_rescale(GEN P, GEN h);
 GEN     ZX_shifti(GEN x, long n);

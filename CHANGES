@@ -323,6 +323,7 @@ LGr93- vecmax / vecmin: add optional pointer argument (to hold index of a
 BA 98- GP function digits
    99- GP default 'sopath' [ rewritten from initial patch by GTo ]
 LGr100- allow polylog(n, t_SER) around a != 0
+BA 101- PARI functions ZX_shifti, ZX_remi2n
 
   Removed
     1- dropped DOS support

@@ -5960,16 +5960,19 @@ integer \kbd{x}.
 
 \fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the \kbd{ZX} \kbd{x} by the integer \kbd{y}.
 
+\fun{GEN}{ZX_shifti}{GEN x, long n} shifts all coefficients of \kbd{x} by $n$ bits,
+which can be negative.
+
 \fun{GEN}{ZX_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all divisions
 are exact.
+
+\fun{GEN}{ZX_remi2n}{GEN x, long n} reduces all coefficients of \kbd{x} to $n$ bits,
+using \tet{remi2n}.
 
 \fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x}
 by the integer \kbd{y}.
 
 \fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}.
-
-\fun{GEN}{ZX_shifti}{GEN x, long n} shifts all coefficients of \kbd{x} by $n$ bits,
-which can be negative.
 
 \fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 

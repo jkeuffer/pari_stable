@@ -267,6 +267,16 @@ ZX_shifti(GEN y, long n)
 }
 
 GEN
+ZX_remi2n(GEN y, long n)
+{
+  GEN z;
+  long i, l;
+  l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l; i++) gel(z,i) = remi2n(gel(y,i),n);
+  return ZX_renormalize(z,l);
+}
+
+GEN
 ZXV_Z_mul(GEN y, GEN x)
 {
   long i, l;
