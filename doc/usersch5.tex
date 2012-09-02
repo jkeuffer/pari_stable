@@ -6855,6 +6855,10 @@ See also next section for analogs of the following functions:
 \fun{GEN}{mkfraccopy}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
 $y > 1$ and $(x,y) = 1$.
 
+\fun{GEN}{mkrfraccopy}{GEN x, GEN y} creates the \typ{RFRAC} $x/y$.
+Assumes that $y$ is a \typ{POL}, $x$ a compatible type whose variable has
+lower or same priority, with $(x,y) = 1$.
+
 \fun{GEN}{mkcolcopy}{GEN x} creates a 1-dimensional \typ{COL} containing
 \kbd{x}.
 

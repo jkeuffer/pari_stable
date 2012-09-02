@@ -79,6 +79,9 @@ INLINE GEN
 mkrfrac(GEN x, GEN y) { GEN v = cgetg(3, t_RFRAC);
   gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
+mkrfraccopy(GEN x, GEN y) { GEN v = cgetg(3, t_RFRAC);
+  gel(v,1) = gcopy(x); gel(v,2) = gcopy(y); return v; }
+INLINE GEN
 mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
   gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN

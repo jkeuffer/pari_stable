@@ -13,3 +13,6 @@ bestapprPade(1/(1+x+O(x^10)), 5)
 bestapprPade(1/(1+x^6+O(x^13)), 5)
 bestapprPade(1/(1+x^6+O(x^13)))
 bestapprPade(Mod(x^3+x^2+x+1, x^5-2))
+bestapprPade(x^2+x^3+x^4+O(x^5))
+bestapprPade(x^-4+x^-3+x^-2+O(x^-1))
+

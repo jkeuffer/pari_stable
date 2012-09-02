@@ -3607,7 +3607,24 @@ bestappr_ser(GEN x, long B)
   x = normalizepol(ser2pol_i(x, lx));
   N = monomial(gen_1, lx-2, varn(x));
   t = mod_to_rfrac(x, N, B); if (!t) return NULL;
-  if (v) t = RgX_mulXn(t, v);
+  if (v)
+  {
+    GEN a, b;
+    long vx;
+    if (typ(t) == t_POL) return RgX_mulXn(t, v);
+    /* t_RFRAC */
+    vx = varn(x);
+    a = gel(t,1);
+    b = gel(t,2);
+    v -= RgX_valrem(b, &b);
+    if (typ(a) == t_POL && varn(a) == vx) v += RgX_valrem(a, &a);
+    if (v < 0) b = RgX_shift(b, -v);
+    else if (v > 0) {
+      if (typ(a) != t_POL || varn(a) != vx) a = scalarpol_shallow(a, vx);
+      a = RgX_shift(a, v);
+    }
+    t = mkrfraccopy(a, b);
+  }
   return t;
 }
 static GEN bestappr_RgX(GEN x, long B);
