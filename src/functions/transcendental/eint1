@@ -5,7 +5,8 @@ Prototype: GDGp
 Help: eint1(x,{n}): exponential integral E1(x). If n is present and x > 0,
  computes the vector of the first n values of the exponential integral E1(n.x)
 Doc: exponential integral $\int_x^\infty \dfrac{e^{-t}}{t}\,dt =
- \kbd{incgam(0, x)$, which is defined for any complex $x \neq 0$.
+ \kbd{incgam}(0, x)$, where the latter expression extends the function
+ definition from real $x > 0$ to all complex $x \neq 0$.
 
  If $n$ is present, we must have $x > 0$; the function returns the
  $n$-dimensional vector $[\kbd{eint1}(x),\dots,\kbd{eint1}(nx)]$. This is
