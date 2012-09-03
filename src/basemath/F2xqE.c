@@ -497,11 +497,11 @@ Z2XQ_frob(GEN x, GEN B, GEN T, GEN q)
 }
 
 static GEN
-Z2XQ_fastsqrtmod2(GEN c, GEN sqx)
+F2xq_fastsqrt(GEN c, GEN sqx, GEN T)
 {
   GEN c0, c1;
-  RgX_even_odd(c, &c0, &c1);
-  return F2x_to_ZX(F2x_add(ZX_to_F2x(c0), F2xq_mul(ZX_to_F2x(c1), gel(sqx, 1), gel(sqx, 2))));
+  F2x_even_odd(c, &c0, &c1);
+  return F2x_add(c0, F2xq_mul(c1, sqx, T));
 }
 
 /* Solve a*S(x)+b*x+c=0 mod 2^N where 2|b, a=1 [2] */
@@ -512,7 +512,7 @@ solve_frobeqn(GEN a, GEN b, GEN c, long N, GEN B, GEN T, GEN sqx)
   pari_sp ltop = avma;
   GEN q, x2, y2, c2, D2, lin;
   long N2, M;
-  if (N == 1) return Z2XQ_fastsqrtmod2(c, sqx);
+  if (N == 1) return F2x_to_ZX(F2xq_fastsqrt(ZX_to_F2x(c), gel(sqx,1), gel(sqx,2)));
   N2 = (N + 1)>>1; M = N - N2;
   q = int2n(N);
   a = ZX_remi2n(a, N); b = ZX_remi2n(b, N); c = ZX_remi2n(c, N);

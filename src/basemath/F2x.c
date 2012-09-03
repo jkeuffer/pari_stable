@@ -589,6 +589,28 @@ F2x_deflate(GEN x, long d)
   return y;
 }
 
+/* write p(X) = e(X^2) + Xo(X^2), shallow function */
+void
+F2x_even_odd(GEN p, GEN *pe, GEN *po)
+{
+  long n = F2x_degree(p), n0, n1, i;
+  GEN p0, p1;
+
+  if (n <= 0) { *pe = leafcopy(p); *po = pol0_F2x(p[1]); return; }
+
+  n0 = (n>>1)+1; n1 = n+1 - n0; /* n1 <= n0 <= n1+1 */
+  p0 = const_vecsmall(nbits2lg(n0+1)-1, 0); p0[1] = p[1];
+  p1 = const_vecsmall(nbits2lg(n1+1)-1, 0); p1[1] = p[1];
+  for (i=0; i<n1; i++)
+  {
+    if (F2x_coeff(p,i<<1)) F2x_set(p0,i);
+    if (F2x_coeff(p,1+(i<<1))) F2x_set(p1,i);
+  }
+  if (n1 != n0 && F2x_coeff(p,i<<1)) F2x_set(p0,i);
+  *pe = F2x_renormalize(p0,lg(p0));
+  *po = F2x_renormalize(p1,lg(p1));
+}
+
 GEN
 F2x_deriv(GEN z)
 {
