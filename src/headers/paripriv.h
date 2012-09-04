@@ -265,7 +265,7 @@ int  gp_init_functions(void);
 GEN  pari_compile_str(char *lex, int strict);
 
 void pari_sigint(const char *s);
-pariFILE *pari_last_tmp_file();
+pariFILE *pari_last_tmp_file(void);
 void* get_stack(double fraction, long min);
 void  init_graph(void);
 void  free_graph(void);
