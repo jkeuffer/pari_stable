@@ -507,9 +507,10 @@ GRHok(GRHcheck_t *S, double L, double SA, double SB)
 }
 
 static void
-check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D)
+check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P)
 {
   byteptr delta = diffptr;
+  GEN index;
   long i, p;
   if (S->nprimes >= np) return;
   if (S->nprimes)
@@ -524,40 +525,43 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P, GEN D)
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
+  index = nf_get_index(nf);
   for (i = S->nprimes, delta = diffptr + i; i <= np; i++)
   {
     pari_sp av = avma;
-    long j, k, l, n;
+    long j, k, f, n, l;
     GRHprime_t *pr = S->primes + i;
-    GEN dec;
+    GEN dec, fs, ns;
     NEXT_PRIME_VIADIFF_CHECK(p, delta);
     pr->logp = log(p);
-    if (umodiu(D, p))
-      dec = FpX_degfact(P, utoipos(p));
+    if (umodiu(index, p))
+    { /* p does not divide index */
+      dec = Flx_degfact(ZX_to_Flx(P,p), p);
+      fs = gel(dec,1);
+      ns = gel(dec,2);
+      l = lg(fs);
+    }
     else
     {
       GEN dec0 = idealprimedec(nf, utoipos(p));
-      n = lg(dec0);
+      l = lg(dec0);
       dec = cgetg(3, t_MAT);
-      gel(dec, 1) = cgetg(n, t_VECSMALL);
-      for (j = 1; j < n; j++) coeff(dec, j, 1) = itou(gmael(dec0, j, 4));
-      gel(dec, 2) = const_vecsmall(n-1, 1);
+      gel(dec, 1) = fs = cgetg(l, t_VECSMALL);
+      for (j = 1; j < l; j++) fs[j] = pr_get_f(gel(dec0,j));
+      gel(dec, 2) = ns = cgetg(l, t_VECSMALL);
     }
-    n = lg(gel(dec, 1));
-    l = coeff(dec, 1, 1);
-    for (j = 2, k = 1; j < n; j++)
-      if (coeff(dec, j, 1) == l)
-        coeff(dec, k, 2) += coeff(dec, j, 2);
+    f = fs[1]; n = 1;
+    for (j = 2, k = 1; j < l; j++)
+      if (fs[j] == f)
+        n++;
       else
       {
-        l = coeff(dec, j, 1);
-        k++;
-        coeff(dec, k, 1) = l;
-        coeff(dec, k, 2) = coeff(dec, j, 2);
+        ns[k] = n; fs[k] = f; k++;
+        f = fs[j]; n = 1;
       }
-    k++;
-    setlg(gel(dec,1), k);
-    setlg(gel(dec,2), k);
+    ns[k] = n; fs[k] = f; k++;
+    setlg(fs, k);
+    setlg(ns, k);
     pr->dec = gerepilecopy(av, dec);
   }
   S->nprimes = np;
@@ -608,7 +612,7 @@ compute_invres(GRHcheck_t *S)
 }
 
 static long
-nthideal(GRHcheck_t *S, GEN nf, GEN D, long n)
+nthideal(GRHcheck_t *S, GEN nf, long n)
 {
   pari_sp av = avma;
   byteptr delta = diffptr + 1;
@@ -618,7 +622,7 @@ nthideal(GRHcheck_t *S, GEN nf, GEN D, long n)
   {
     GRHprime_t *pr;
     GEN ns, fs;
-    check_prime_dec(S, i+1, nf, P, D);
+    check_prime_dec(S, i+1, nf, P);
     pr = S->primes + i;
     fs = gel(pr->dec, 1);
     if (fs[1] == N) goto INERT;
@@ -653,7 +657,7 @@ INERT:
  * Return prod_{p<=n2} (1-1/p) / prod_{Norm(P)<=n2} (1-1/Norm(P)),
  * close to residue of zeta_K at 1 = 2^r1 (2pi)^r2 h R / (w D) */
 static void
-FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GRHcheck_t *S)
+FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
 {
   byteptr delta = diffptr;
   long i, p, ip;
@@ -662,7 +666,7 @@ FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GRHcheck_t *S)
   double L = log((double)C2);
 
   maxprime_check((ulong)C2);
-  check_prime_dec(S, uprimepi((ulong)C2), nf, nf_get_pol(nf), D);
+  check_prime_dec(S, uprimepi((ulong)C2), nf, nf_get_pol(nf));
   pr = S->primes;
   F->sfb_chg = 0;
   F->FB  = cgetg(C2+1, t_VECSMALL);
@@ -721,13 +725,13 @@ FBgen(FB_t *F, GEN nf, GEN D, long N, long C2, long C1, GRHcheck_t *S)
 }
 
 static int
-GRHchk(GEN nf, GEN D, GEN P, long N, GRHcheck_t *S, long LIMC)
+GRHchk(GEN nf, GEN P, long N, GRHcheck_t *S, long LIMC)
 {
   long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
   byteptr delta;
   ulong p;
-  check_prime_dec(S, np, nf, P, D);
+  check_prime_dec(S, np, nf, P);
   p = 0; delta = diffptr;
   for (i = 0; i <= np; i++)
   {
@@ -3754,7 +3758,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   long nreldep, sfb_trials, need, old_need, precdouble = 0, precadd = 0;
   long done_small, small_fail, fail_limit, squash_index;
   double lim, drc, LOGD, LOGD2;
-  GEN computed = NULL, zu, nf, D, Dp, A, W, R, h, PERM, fu = NULL /*-Wall*/;
+  GEN computed = NULL, zu, nf, D, A, W, R, h, PERM, fu = NULL /*-Wall*/;
   GEN small_multiplier;
   GEN res, L, invhr, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   GEN auts, cyclic;
@@ -3808,10 +3812,9 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   init_GRHcheck(&GRHcheck, N, R1, LOGD);
   high = low = LIMC0 = maxss((long)(cbach2*LOGD2), 1);
   LIMCMAX = (long)(12.*LOGD2);
-  Dp = gmul(D, nf_get_index(nf));
   /* XXX 25 and 200 below to ensure a good enough approximation of residue */
-  check_prime_dec(&GRHcheck, expi(D) < 16 ? 25 : 200, nf, P, Dp);
-  while (!GRHchk(nf, Dp, P, N, &GRHcheck, high))
+  check_prime_dec(&GRHcheck, expi(D) < 16 ? 25 : 200, nf, P);
+  while (!GRHchk(nf, P, N, &GRHcheck, high))
   {
     low = high;
     high *= 2;
@@ -3819,22 +3822,22 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   while (high - low > 1)
   {
     long test = (low+high)/2;
-    if (GRHchk(nf, Dp, P, N, &GRHcheck, test))
+    if (GRHchk(nf, P, N, &GRHcheck, test))
       high = test;
     else
       low = test;
   }
-  if (high == LIMC0+1 && GRHchk(nf, Dp, P, N, &GRHcheck, LIMC0))
+  if (high == LIMC0+1 && GRHchk(nf, P, N, &GRHcheck, LIMC0))
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
   if (LIMC2 > LIMCMAX) LIMC2 = LIMCMAX;
   if (DEBUGLEVEL) err_printf("LIMC2 = %ld\n", LIMC2);
-  if (LIMC2 < nthideal(&GRHcheck, nf, Dp, 1)) class1 = 1;
+  if (LIMC2 < nthideal(&GRHcheck, nf, 1)) class1 = 1;
   if (DEBUGLEVEL && class1) err_printf("Class 1\n", LIMC2);
   LIMC0 = (long)(cbach*LOGD2);
   av = avma; LIMC = cbach ? LIMC0 : LIMC2;
-  LIMC = maxss(LIMC, nthideal(&GRHcheck, nf, Dp, N));
+  LIMC = maxss(LIMC, nthideal(&GRHcheck, nf, N));
   if (DEBUGLEVEL) timer_printf(&T, "computing Bach constant");
 
 START:
@@ -3858,7 +3861,7 @@ START:
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (DEBUGLEVEL) { err_printf("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
-  FBgen(&F, nf, Dp, N, LIMC2, LIMC, &GRHcheck);
+  FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
   if (!F.KC) goto START;
   av = avma;
   subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,MINSFB);
