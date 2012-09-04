@@ -4658,6 +4658,9 @@ assuming it exists.
 
 \fun{GEN}{F2xq_sqrt}{GEN a, GEN T}
 
+\fun{GEN}{F2xq_sqrt_fast}{GEN a, GEN s, GEN T} assuming that $s^2=x\pmod{T(x)}$,
+computes $b=a(s)\pmod{T}$ so that $b^2=a$.
+
 \fun{GEN}{F2xq_sqrtn}{GEN a, GEN n, GEN T, GEN *zeta}
 
 \fun{GEN}{gener_F2xq}{GEN T, GEN *po}

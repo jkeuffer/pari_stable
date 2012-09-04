@@ -962,20 +962,26 @@ F2xq_Artin_Schreier(GEN a, GEN T)
 }
 
 GEN
+F2xq_sqrt_fast(GEN c, GEN sqx, GEN T)
+{
+  GEN c0, c1;
+  F2x_even_odd(c, &c0, &c1);
+  return F2x_add(c0, F2xq_mul(c1, sqx, T));
+}
+
+static int
+F2x_is_x(GEN a) { return lg(a)==3 && a[2]==2; }
+
+GEN
 F2xq_sqrt(GEN a, GEN T)
 {
-  pari_sp av = avma, lim = stack_lim(av,2);
-  long i,N = F2x_degree(T);
-  for(i=1;i<N;i++)
-  {
-    a = F2xq_sqr(a,T);
-    if (low_stack(lim,stack_lim(av,2)))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"F2xq_sqrt (i = %ld)",i);
-      a = gerepileuptoleaf(av, a);
-    }
-  }
-  return gerepileuptoleaf(av, a);
+  pari_sp av = avma;
+  long n = F2x_degree(T);
+  GEN sqx;
+  if (n==1) return leafcopy(a);
+  if (n==2) return F2xq_sqr(a,T);
+  sqx = F2xq_autpow(mkvecsmall2(T[1], 4),n-1,T);
+  return gerepileuptoleaf(av, F2x_is_x(a)? sqx: F2xq_sqrt_fast(a,sqx,T));
 }
 
 GEN

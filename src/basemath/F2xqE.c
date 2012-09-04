@@ -496,14 +496,6 @@ Z2XQ_frob(GEN x, GEN B, GEN T, GEN q)
   return FpX_rem_Barrett(RgX_inflate(x, 2), B, T, q);
 }
 
-static GEN
-F2xq_fastsqrt(GEN c, GEN sqx, GEN T)
-{
-  GEN c0, c1;
-  F2x_even_odd(c, &c0, &c1);
-  return F2x_add(c0, F2xq_mul(c1, sqx, T));
-}
-
 /* Solve a*S(x)+b*x+c=0 mod 2^N where 2|b, a=1 [2] */
 
 static GEN
@@ -512,7 +504,7 @@ solve_frob_eqn(GEN a, GEN b, GEN c, long N, GEN B, GEN T, GEN sqx)
   pari_sp ltop = avma;
   GEN q, x2, y2, c2, D2, lin;
   long N2, M;
-  if (N == 1) return F2x_to_ZX(F2xq_fastsqrt(ZX_to_F2x(c), gel(sqx,1), gel(sqx,2)));
+  if (N == 1) return F2x_to_ZX(F2xq_sqrt_fast(ZX_to_F2x(c), gel(sqx,1), gel(sqx,2)));
   N2 = (N + 1)>>1; M = N - N2;
   q = int2n(N);
   a = ZX_remi2n(a, N); b = ZX_remi2n(b, N); c = ZX_remi2n(c, N);
@@ -620,7 +612,7 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
   if (n==2) return F2x_degree(a6) ? gen_1 : stoi(-3);
   if (n==3) return F2x_degree(a6) ? (F2xq_trace(a6,T2) ?  stoi(-3): gen_1) : stoi(5);
   timer_start(&ti);
-  sqx = mkvec2(F2xq_autpow(mkvecsmall2(T2[1], 4),n-1,T2), T2);
+  sqx = mkvec2(F2xq_sqrt(polx_F2x(T2[1]),T2), T2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Sqrtx");
   T = F2x_canonlift(T2, N-2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Teich");
