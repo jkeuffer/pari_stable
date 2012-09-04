@@ -3954,7 +3954,7 @@ START:
         if (!F.sfb_chg) rnd_rel(&cache, &F, nf, fact);
         F.L_jid = F.perm;
       }
-      timer_start(&T);
+      if (DEBUGLEVEL) timer_start(&T);
       if (precpb)
       {
         GEN nf0 = nf;
