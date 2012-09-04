@@ -191,6 +191,7 @@ Flx_Xn1(long sv, long n, ulong p)
 {
   GEN t = cgetg(n+3, t_VECSMALL);
   long i;
+  (void) p;
   t[1] = sv;
   t[2] = 1;
   for (i = 3; i <= n+1; i++) t[i] = 0;

@@ -326,7 +326,7 @@ forprime_init(forprime_t *T, GEN a, GEN b)
   T->pp = cgeti(lb);
   /* a, b are positive integers, a <= b */
   if (lgefint(a) == 3) /* lb == 3 implies b != NULL */
-    return u_forprime_init(T, a[2], lb == 3? b[2]: ULONG_MAX);
+    return u_forprime_init(T, a[2], lb == 3? (ulong)b[2]: ULONG_MAX);
   T->strategy = 4;
   affii(subiu(a,1), T->pp);
   return 1;

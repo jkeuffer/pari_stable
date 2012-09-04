@@ -2209,7 +2209,7 @@ Flx_addifsmooth3(pari_sp *av, struct Flxq_log_rel *r, GEN h, long u, long v, lon
    = R + (a*b-c^2)*C+a*b*c
  */
 static void
-Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, GEN T, ulong p)
+Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, ulong p)
 {
   long l = lg(C)-2, la, lb;
   GEN a = const_vecsmall(l+2,0); /*We allocate one extra word to catch overflow*/
@@ -2411,7 +2411,7 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
   {
     GEN C = Flx_shift(pol1_Flx(T[1]), (n+2)/3);
     GEN R = Flxq_powu(C,3,T,p);
-    Flxq_log_cubic(&rel, C, R, T, p);
+    Flxq_log_cubic(&rel, C, R, p);
   }
   setlg(M,1+rel.nbrel);
   setlg(V,1+rel.nbrel);
@@ -2663,7 +2663,7 @@ _Flxq_equal0(GEN x) { return lgpol(x)==0; }
 static GEN
 _Flxq_s(void *E, long x)
 { struct _Flxq *s = (struct _Flxq *)E;
-  ulong u = x<0 ? s->p+x: x;
+  ulong u = x<0 ? s->p+x: (ulong)x;
   return Fl_to_Flx(u, s->T[1]);
 }
 
