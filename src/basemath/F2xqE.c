@@ -147,7 +147,7 @@ F2xqE_add(GEN P, GEN Q, GEN a, GEN T)
 }
 
 static GEN
-F2xqE_neg_i(GEN P, GEN a, GEN T)
+F2xqE_neg_i(GEN P, GEN a)
 {
   GEN LHS;
   if (ell_is_inf(P)) return P;
@@ -159,6 +159,7 @@ GEN
 F2xqE_neg(GEN P, GEN a, GEN T)
 {
   GEN LHS;
+  (void) T;
   if (ell_is_inf(P)) return ellinf();
   LHS = typ(a)==t_VECSMALL ? gel(P,1): gel(a,1);
   return mkvec2(gcopy(gel(P,1)), F2x_add(LHS, gel(P,2)));
@@ -169,7 +170,7 @@ F2xqE_sub(GEN P, GEN Q, GEN a2, GEN T)
 {
   pari_sp av = avma;
   GEN slope;
-  return gerepileupto(av, F2xqE_add_slope(P, F2xqE_neg_i(Q, a2, T), a2, T, &slope));
+  return gerepileupto(av, F2xqE_add_slope(P, F2xqE_neg_i(Q, a2), a2, T, &slope));
 }
 
 struct _F2xqE

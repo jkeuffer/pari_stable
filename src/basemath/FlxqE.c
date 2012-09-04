@@ -123,7 +123,7 @@ FlxqE_add(GEN P, GEN Q, GEN a4, GEN T, ulong p)
 }
 
 static GEN
-FlxqE_neg_i(GEN P, GEN T, ulong p)
+FlxqE_neg_i(GEN P, ulong p)
 {
   if (ell_is_inf(P)) return P;
   return mkvec2(gel(P,1), Flx_neg(gel(P,2), p));
@@ -132,6 +132,7 @@ FlxqE_neg_i(GEN P, GEN T, ulong p)
 GEN
 FlxqE_neg(GEN P, GEN T, ulong p)
 {
+  (void) T;
   if (ell_is_inf(P)) return ellinf();
   return mkvec2(gcopy(gel(P,1)), Flx_neg(gel(P,2), p));
 }
@@ -141,7 +142,7 @@ FlxqE_sub(GEN P, GEN Q, GEN a4, GEN T, ulong p)
 {
   pari_sp av = avma;
   GEN slope;
-  return gerepileupto(av, FlxqE_add_slope(P, FlxqE_neg_i(Q, T, p), a4, T, p, &slope));
+  return gerepileupto(av, FlxqE_add_slope(P, FlxqE_neg_i(Q, p), a4, T, p, &slope));
 }
 
 struct _FlxqE
