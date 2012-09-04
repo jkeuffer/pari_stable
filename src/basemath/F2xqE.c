@@ -506,8 +506,8 @@ F2xq_fastsqrt(GEN c, GEN sqx, GEN T)
 
 /* Solve a*S(x)+b*x+c=0 mod 2^N where 2|b, a=1 [2] */
 
-GEN
-solve_frobeqn(GEN a, GEN b, GEN c, long N, GEN B, GEN T, GEN sqx)
+static GEN
+solve_frob_eqn(GEN a, GEN b, GEN c, long N, GEN B, GEN T, GEN sqx)
 {
   pari_sp ltop = avma;
   GEN q, x2, y2, c2, D2, lin;
@@ -517,18 +517,18 @@ solve_frobeqn(GEN a, GEN b, GEN c, long N, GEN B, GEN T, GEN sqx)
   q = int2n(N);
   a = ZX_remi2n(a, N); b = ZX_remi2n(b, N); c = ZX_remi2n(c, N);
   B = ZX_remi2n(B, N); T = ZX_remi2n(T, N);
-  x2 = solve_frobeqn(a, b, c, N2, B, T, sqx);
+  x2 = solve_frob_eqn(a, b, c, N2, B, T, sqx);
   y2 = Z2XQ_frob(x2, B, T, q);
   lin = ZX_add(ZX_add(ZX_mul(a, y2), ZX_mul(b, x2)), c);
   c2 = ZX_shifti(FpX_rem_Barrett(ZX_remi2n(lin, N), B, T, q), -N2);
-  D2 = solve_frobeqn(a, b, c2, M, B, T, sqx);
+  D2 = solve_frob_eqn(a, b, c2, M, B, T, sqx);
   return gerepileupto(ltop, FpX_add(x2, ZX_shifti(D2, N2), q));
 }
 
 /*
   Let P(X,Y)=(X+2*Y+8*X*Y)^2+Y+4*X*Y
-  Solve   P(x,S(x))=0 [mod 2^n]
-  assuming  x = x0    [mod 2]
+  Solve   P(x,S(x))=0 [mod 2^n,T]
+  assuming  x = x0    [mod 2,T]
 
   we set s = X+2*Y+8*X*Y, P = s^2+Y+4*X*Y
   Dx = dP/dx = (16*s+4)*x+(4*s+1)
@@ -563,7 +563,7 @@ solve_AGM_eqn(GEN x0, long n, GEN B, GEN T, GEN sqx)
     Dx = FpX_rem_Barrett(ZX_remi2n(Dx, M), BM, TM, qM);
     Dy = ZX_add(ZX_Z_add(ZX_mul(ZX_Z_add(ZX_shifti(x2, 4), utoi(4)), s), gen_1), ZX_shifti(x2, 2));
     Dy = FpX_rem_Barrett(ZX_remi2n(Dy, M), BM, TM, qM);
-    D2 = solve_frobeqn(Dy, Dx, V, M, BM, TM, sqx);
+    D2 = solve_frob_eqn(Dy, Dx, V, M, BM, TM, sqx);
     x2 = FpX_add(x2, ZX_shifti(D2, N2), q);
     if (low_stack(st_lim, stack_lim(ltop, 1)))
     {
