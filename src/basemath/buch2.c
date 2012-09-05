@@ -651,19 +651,19 @@ INERT:
 
 
 /* Compute FB, LV, iLP + KC*. Reset perm
- * n2: bound for norm of tested prime ideals (includes be_honest())
- * n : bound for p, such that P|p (NP <= n2) used to build relations
+ * C2: bound for norm of tested prime ideals (includes be_honest())
+ * C1: bound for p, such that P|p (NP <= C2) used to build relations
 
- * Return prod_{p<=n2} (1-1/p) / prod_{Norm(P)<=n2} (1-1/Norm(P)),
+ * Return prod_{p<=C2} (1-1/p) / prod_{Norm(P)<=C2} (1-1/Norm(P)),
  * close to residue of zeta_K at 1 = 2^r1 (2pi)^r2 h R / (w D) */
 static void
-FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
+FBgen(FB_t *F, GEN nf, long N, long C1, long C2, GRHcheck_t *S)
 {
   byteptr delta = diffptr;
   long i, p, ip;
   GRHprime_t *pr;
   GEN prim;
-  double L = log((double)C2);
+  const double L = log((double)C2 + 0.5);
 
   maxprime_check((ulong)C2);
   check_prime_dec(S, uprimepi((ulong)C2), nf, nf_get_pol(nf));
@@ -690,6 +690,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
 
     f = gel(pr->dec, 1); nb = gel(pr->dec, 2);
     if (f[1] == N) continue; /* p inert */
+    /* compute l such that p^f <= C2  <=> f <= l */
     l = (long)(L/pr->logp);
     for (k=0, m=1; m < lg(f) && f[m]<=l; m++) k += nb[m];
 
@@ -3861,7 +3862,7 @@ START:
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (DEBUGLEVEL) { err_printf("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
-  FBgen(&F, nf, N, LIMC2, LIMC, &GRHcheck);
+  FBgen(&F, nf, N, LIMC, LIMC2, &GRHcheck);
   if (!F.KC) goto START;
   av = avma;
   subFBgen(&F,nf,auts,cyclic,mindd(lim,LIMC2) + 0.5,MINSFB);
