@@ -37,7 +37,7 @@ Doc: Apply the \typ{CLOSURE} \kbd{f} to the entries of \kbd{A}. If \kbd{A}
  the alternative set-notations
  \bprog
  [g(x) | x <- v, f(x)]
- [x <- v, f(x)]
+ [x | x <- v, f(x)]
  [g(x) | x <- v]
  @eprog\noindent
  are available as shortcuts for

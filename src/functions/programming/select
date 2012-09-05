@@ -29,7 +29,7 @@ Doc: We first describe the default behaviour, when $\fl$ is 0 or omitted.
  the alternative set-notations
  \bprog
  [g(x) | x <- v, f(x)]
- [x <- v, f(x)]
+ [x | x <- v, f(x)]
  [g(x) | x <- v]
  @eprog\noindent
  are available as shortcuts for
@@ -39,7 +39,7 @@ Doc: We first describe the default behaviour, when $\fl$ is 0 or omitted.
  apply(g, Vec(v))
  @eprog\noindent respectively:
  \bprog
- ? [ x <- vector(50,i,i^2+1), isprime(x) ]
+ ? [ x | x <- vector(50,i,i^2+1), isprime(x) ]
  %1 = [2, 5, 17, 37, 101, 197, 257, 401, 577, 677, 1297, 1601]
  @eprog
 

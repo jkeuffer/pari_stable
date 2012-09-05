@@ -200,7 +200,6 @@ in: lvalue '<' '-' expr {$$=newnode(Flistarg,$4,$1,&@$);}
 
 compr: '[' expr '|' in ']' {$$=newopcall(OPcompr,$4,$2,&@$);}
      | '[' expr '|' in ',' expr ']' {$$=newopcall3(OPcompr, $4,$2,$6,&@$);}
-     | '[' in ',' expr ']' {$$=newopcall3(OPcompr,$2,NOARG(@$),$4,&@$);}
 ;
 
 arg: seq        {$$=$1;}

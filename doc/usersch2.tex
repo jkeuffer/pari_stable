@@ -706,7 +706,7 @@ the indexing):
  the alternative set-notations
  \bprog
  [g(x) | x <- v, f(x)]
- [x <- v, f(x)]
+ [x | x <- v, f(x)]
  [g(x) | x <- v]
  @eprog\noindent
  are available as shortcuts for
@@ -716,7 +716,7 @@ the indexing):
  apply(g, Vec(v))
  @eprog\noindent respectively, and may serve as \typ{VEC} constructors:
  \bprog
- ? [ p <- primes(10), isprime(p+2) ]
+ ? [ p | p <- primes(10), isprime(p+2) ]
  %2 = [3, 5, 11, 17, 29]
  @eprog\noindent returns the primes $p$ (among the first 10 primes) such
  that $(p, p+2)$ is a twin pair;
