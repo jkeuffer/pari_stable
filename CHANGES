@@ -100,18 +100,18 @@ BA 77- FpX_gcd(0,x) -> div by 0
    80- t_REAL with huge exponents print incorrectly [#1322]
    81- a1;a2;a3;a4;a6;ellinit([a1,a2,a3,a4,a6],1) was very slow
 BA 82- FpX_factorff and FpX_rootsff were not using standard argument order
-PB 83- printf("%.6f", 5E-5) -> SEGV
+PB 83- printf("%.6f", 5E-5) -> SEGV [#1328]
 BA 84- diffop(Mod(y,x^2-y),[y],[1]) -> wrong result
 BA 85- calling a GP function with a lot of omitted arguments could cause a crash
 GH 86- missing solutions in thue(), e.g. thue(thueinit(x^3+92*x+1),3^3)
-   87- t_RFRAC == t_RFRAC could return a wrong result
+   87- t_RFRAC == t_RFRAC could return a wrong result [#1339]
    88- obscure bug in polroots() (sage #13314)
    89- polinterpolate([1,2] * Mod(1,7), [2,3], 0) -> incorrect type in gabs
 BA 90- printf() did not flush output
    91- logint() used too much memory and could return a wrong result:
        logint(3^64, 3) --> 33
    92- eint1(x < 0) normalization. Now eint1(x) = incgam(0, x) [#418]
-   93- polrootsff(2*x+1,2,y) -> SEGV
+   93- polrootsff(2*x+1,2,y) -> SEGV [#1350]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
