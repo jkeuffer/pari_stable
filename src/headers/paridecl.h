@@ -1747,6 +1747,7 @@ void    writetex(const char *s, GEN g);
 
 /* eval.c */
 
+enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN };
 void    bincopy_relink(GEN C, GEN vi);
 GEN     break0(long n);
 GEN     closure_callgen1(GEN C, GEN x);

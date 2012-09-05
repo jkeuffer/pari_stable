@@ -1566,6 +1566,14 @@ prune_history(gp_hist *H, long loc)
 static int
 is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
+static void
+reset_ctrlc()
+{
+#if defined(_WIN32) || defined(__CYGWIN32__)
+  win32ctrlc = 0;
+#endif
+}
+
 enum { gp_ISMAIN = 1, gp_RECOVER = 2 };
 
 static GEN
@@ -1616,9 +1624,7 @@ gp_main_loop(long flag)
     avma = av;
     if (ismain)
     {
-#if defined(_WIN32) || defined(__CYGWIN32__)
-      win32ctrlc = 0;
-#endif
+      reset_ctrlc();
       timer_start(GP_DATA->T);
       pari_set_last_newline(1);
     }
@@ -1681,7 +1687,7 @@ break_loop(int numerr)
   Buffer *b;
   int sigint = numerr<0, go_on = sigint;
   struct gp_context rec;
-  const char *prompt;
+  const char *prompt, *msg;
   char promptbuf[MAX_PROMPT_LEN + 24];
   long nenv, oldframe_level = frame_level;
   pari_sp av;
@@ -1697,9 +1703,10 @@ break_loop(int numerr)
   pari_infile = newfile(stdin, "stdin", mf_IN)->file;
   term_color(c_ERR); pari_putc('\n');
   if (sigint)
-    print_errcontext(pariOut, "Break loop: type <Return> to continue; 'break' to go back to GP", NULL, NULL);
+    msg = "Break loop: <Return> to continue; 'break' to go back to GP prompt";
   else
-    print_errcontext(pariOut, "Break loop: type 'break' to go back to GP", NULL, NULL);
+    msg = "Break loop: type 'break' to go back to GP prompt";
+  print_errcontext(pariOut, msg, NULL, NULL);
   term_color(c_NONE);
   prompt = break_loop_prompt(promptbuf, s_env.n-1);
   av = avma;
@@ -1717,36 +1724,34 @@ break_loop(int numerr)
       pari_infile = newfile(stdin, "stdin", mf_IN)->file;
     }
     term_color(c_NONE);
-    if (gp_read_line(&F, prompt))
+    if (!gp_read_line(&F, prompt))
+      br_status = br_BREAK; /* EOF */
+    else
     {
-      /* Empty input --> continue computation if break loop initiated
-       * by ^C (will continue) */
+      /* Empty input ? Continue if entry on sigint (exit debugger frame) */
       if (! *(b->buf) && sigint) break;
-#if defined(_WIN32) || defined(__CYGWIN32__)
-      win32ctrlc = 0;
-#endif
+      reset_ctrlc();
       if (check_meta(b->buf, 0)) continue;
       x = closure_evalbrk(pari_compile_str(b->buf,0), &br_status);
-      if (br_status) goto GP_EOF;
+    }
+    switch (br_status)
+    {
+      case br_NEXT: case br_MULTINEXT:
+        popinfile(); /* exit frame. Don't exit debugger if s_env.n > 2 */
+        go_on = 0; goto BR_EXIT;
+      case br_BREAK: case br_RETURN:
+        killallfiles(); /* completely exit the debugger */
+        go_on = 0; goto BR_EXIT;
+    }
 
-      if (x == gnil || is_silent(b->buf)) continue;
-
+    if (x != gnil && !is_silent(b->buf))
+    {
       term_color(c_OUTPUT);
       gen_output(x, GP_DATA->fmt);
-      pari_putc('\n'); continue;
-    }
-
-    /* EOF or break/next/return */
-GP_EOF:
-    if (pari_infile != stdin)
-    { /* were reading a file from the break loop, and are done : close it */
-      if (popinfile()) { go_on = 0; break; /* should not happen */ }
-    }
-    else
-    { /* user typed <C-D> in break loop : exit the debuger */
-      go_on = 0; break;
+      pari_putc('\n');
     }
   }
+BR_EXIT:
   s_env.n=nenv;
   frame_level = oldframe_level;
   gp_context_restore(&rec);
