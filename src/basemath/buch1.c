@@ -389,7 +389,7 @@ nthidealquad(GEN D, long n)
 }
 
 static int
-quadGRHchk(GEN D, GRHcheck_t *S, long LIMC, long minSFB)
+quadGRHchk(GEN D, GRHcheck_t *S, long LIMC)
 {
   long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
@@ -1018,7 +1018,7 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   LIMCMAX = (long)(6.*LOGD2);
   /* XXX 25 and 200 below to ensure a good enough approximation of residue */
   check_prime_quad(&GRHcheck, expi(D) < 16 ? 25 : 200, D);
-  while (!quadGRHchk(D, &GRHcheck, high, minSFB))
+  while (!quadGRHchk(D, &GRHcheck, high))
   {
     low = high;
     high *= 2;
@@ -1026,12 +1026,12 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   while (high - low > 1)
   {
     long test = (low+high)/2;
-    if (quadGRHchk(D, &GRHcheck, test, minSFB))
+    if (quadGRHchk(D, &GRHcheck, test))
       high = test;
     else
       low = test;
   }
-  if (high == LIMC0+1 && quadGRHchk(D, &GRHcheck, LIMC0, minSFB))
+  if (high == LIMC0+1 && quadGRHchk(D, &GRHcheck, LIMC0))
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
