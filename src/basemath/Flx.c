@@ -2947,6 +2947,26 @@ FlxY_Flx_mul(GEN P, GEN U, ulong p)
 }
 
 GEN
+FlxY_evalx(GEN Q, ulong x, ulong p)
+{
+  GEN z;
+  long i, lb = lg(Q);
+  z = cgetg(lb,t_VECSMALL); z[1]=mael(Q,2,1);
+  for (i=2; i<lb; i++) z[i] = Flx_eval(gel(Q,i), x, p);
+  return Flx_renormalize(z, lb);
+}
+
+GEN FlxY_Flxq_evalx(GEN P, GEN x, GEN T, ulong p)
+{
+  long i, lP = lg(P);
+  GEN res = cgetg(lP,t_POL);
+  res[1] = P[1];
+  for(i=2; i<lP; i++)
+    gel(res,i) = Flx_Flxq_eval(gel(P,i), x, T, p);
+  return FlxX_renormalize(res, lP);
+}
+
+GEN
 FlxY_Flx_div(GEN x, GEN y, ulong p)
 {
   long i, l;
@@ -3582,6 +3602,36 @@ FlxqX_FlxqXQ_eval(GEN Q, GEN x, GEN S, GEN T, ulong p)
   return gerepileupto(av, z);
 }
 
+static GEN
+FlxqXQ_autpow_sqr(void * T, GEN x)
+{
+  FlxqXQ_muldata *D = (FlxqXQ_muldata *)T;
+  GEN phi = gel(x,1), S = gel(x,2);
+  GEN phi2 = Flx_Flxq_eval(phi,phi,D->T,D->p);
+  GEN Sphi = FlxY_Flxq_evalx(S,phi,D->T,D->p);
+  GEN S2 = FlxqX_FlxqXQ_eval(Sphi, S, D->S,D->T,D->p);
+  return mkvec2(phi2, S2);
+}
+
+static GEN
+FlxqXQ_autpow_mul(void * T, GEN x, GEN y)
+{
+  FlxqXQ_muldata *D = (FlxqXQ_muldata *)T;
+  GEN phi1 = gel(x,1), S1 = gel(x,2);
+  GEN phi2 = gel(y,1), S2 = gel(y,2);
+  GEN phi3 = Flx_Flxq_eval(phi1,phi2,D->T,D->p);
+  GEN Sphi = FlxY_Flxq_evalx(S1,phi2,D->T,D->p);
+  GEN S3 = FlxqX_FlxqXQ_eval(Sphi, S2, D->S,D->T,D->p);
+  return mkvec2(phi3, S3);
+}
+
+GEN
+FlxqXQV_autpow(GEN aut, long n, GEN S, GEN T, ulong p)
+{
+  FlxqXQ_muldata D;
+  D.S=S; D.T=T; D.p=p;
+  return gen_powu(aut,n,&D,FlxqXQ_autpow_sqr,FlxqXQ_autpow_mul);
+}
 
 /*******************************************************************/
 /*                                                                 */

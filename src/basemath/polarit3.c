@@ -2314,17 +2314,6 @@ FlxY_evalx_drop(GEN Q, ulong x, ulong p)
   z[i] = leadz; return z;
 }
 
-/* as above, but don't care about degree drop */
-GEN
-FlxY_evalx(GEN Q, ulong x, ulong p)
-{
-  GEN z;
-  long i, lb = lg(Q);
-  z = cgetg(lb,t_VECSMALL); z[1]=mael(Q,2,1);
-  for (i=2; i<lb; i++) z[i] = Flx_eval(gel(Q,i), x, p);
-  return Flx_renormalize(z, lb);
-}
-
 /* Q an FpXY (t_POL with FpX coeffs), evaluate at X = x */
 GEN
 FpXY_evalx(GEN Q, GEN x, GEN p)

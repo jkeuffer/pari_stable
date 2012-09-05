@@ -4480,6 +4480,8 @@ by $y$ using \kbd{Flx_div}.
 
 \fun{GEN}{FlxY_evalx}{GEN x, GEN y, ulong p}
 
+\fun{GEN}{FlxY_Flxq_evalx}{GEN x, GEN y, ulong p}
+
 \fun{GEN}{FlxX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
@@ -4554,6 +4556,10 @@ occur).
 \fun{GEN}{FlxqXQ_powers}{GEN x, long n, GEN S, GEN T, ulong p}
 
 \fun{GEN}{FlxqXQ_matrix_pow}{GEN x, long n, long m, GEN S, GEN T, ulong p}
+
+\fun{GEN}{FlxqXQV_autpow}{GEN a, long n, long m, GEN S, GEN T, ulong p}
+$\sigma$ being the automorphism defined by $\sigma(x)=a[1]\mod{T}$,
+$\sigma(X)=a[2]\mod{S,T}$, returns $[\sigma^n(x),\sigma^n(X)]$.
 
 \subsec{\kbd{F2x}} An \kbd{F2x}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial over $\F_2[X]$. Specifically
