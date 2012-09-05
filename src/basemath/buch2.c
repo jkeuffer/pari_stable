@@ -726,7 +726,7 @@ FBgen(FB_t *F, GEN nf, long N, long C1, long C2, GRHcheck_t *S)
 }
 
 static int
-GRHchk(GEN nf, GEN P, long N, GRHcheck_t *S, long LIMC)
+GRHchk(GEN nf, GEN P, GRHcheck_t *S, long LIMC)
 {
   long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
@@ -3815,7 +3815,7 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   LIMCMAX = (long)(12.*LOGD2);
   /* XXX 25 and 200 below to ensure a good enough approximation of residue */
   check_prime_dec(&GRHcheck, expi(D) < 16 ? 25 : 200, nf, P);
-  while (!GRHchk(nf, P, N, &GRHcheck, high))
+  while (!GRHchk(nf, P, &GRHcheck, high))
   {
     low = high;
     high *= 2;
@@ -3823,12 +3823,12 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   while (high - low > 1)
   {
     long test = (low+high)/2;
-    if (GRHchk(nf, P, N, &GRHcheck, test))
+    if (GRHchk(nf, P, &GRHcheck, test))
       high = test;
     else
       low = test;
   }
-  if (high == LIMC0+1 && GRHchk(nf, P, N, &GRHcheck, LIMC0))
+  if (high == LIMC0+1 && GRHchk(nf, P, &GRHcheck, LIMC0))
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
