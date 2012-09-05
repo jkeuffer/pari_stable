@@ -4473,7 +4473,10 @@ its factorization.
 
 \fun{GEN}{FlxX_sub}{GEN P, GEN Q, ulong p}
 
-\fun{GEN}{FlxY_Flx_div}{GEN x, GEN y, ulong p}
+\fun{GEN}{FlxY_Flx_mul}{GEN x, GEN y, ulong p}
+
+\fun{GEN}{FlxY_Flx_div}{GEN x, GEN y, ulong p} divides the coefficients of $x$
+by $y$ using \kbd{Flx_div}.
 
 \fun{GEN}{FlxY_evalx}{GEN x, GEN y, ulong p}
 
@@ -4529,6 +4532,12 @@ routine may still be used (but will fail if non-invertible leading terms
 occur).
 
 \fun{long}{FlxqX_nbroots}{GEN f, GEN T, GEN p}, as \kbd{FpX\_nbroots}.
+
+\fun{GEN}{FlxqX_FlxqXQ_eval}{GEN Q, GEN x, GEN S, GEN T, ulong p} as
+\kbd{FpX\_FpXQ\_eval}.
+
+\fun{GEN}{FlxqX_FlxqXQV_eval}{GEN P, GEN V, GEN S, GEN T, ulong p} as
+\kbd{FpX\_FpXQV\_eval}.
 
 \subsec{\kbd{FlxqXQ}} See \kbd{FpXQXQ} operations.
 

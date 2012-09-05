@@ -2936,6 +2936,17 @@ FlxX_sub(GEN x, GEN y, ulong p)
 }
 
 GEN
+FlxY_Flx_mul(GEN P, GEN U, ulong p)
+{
+  long i, lP = lg(P);
+  GEN res = cgetg(lP,t_POL);
+  res[1] = P[1];
+  for(i=2; i<lP; i++)
+    gel(res,i) = Flx_mul(U,gel(P,i), p);
+  return FlxX_renormalize(res, lP);
+}
+
+GEN
 FlxY_Flx_div(GEN x, GEN y, ulong p)
 {
   long i, l;
@@ -3504,6 +3515,73 @@ FlxqXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, ulong p)
 {
   return RgXV_to_RgM(FlxqXQ_powers(y,m-1,S,T,p),n);
 }
+
+/*Close to FlxqXV_FlxqC_mul*/
+static GEN
+FlxqXQ_eval_powers(GEN P, GEN V, long a, long n, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  GEN z = scalarpol_shallow(gel(P,2+a), varn(P)); /* V[1] = 1 */
+  long i;
+  for (i=1; i<=n; i++)
+  {
+    z = FlxX_add(z, FlxY_Flx_mul(gel(V,i+1),gel(P,2+a+i),p),p);
+    if ((i & 7) == 0) z = gerepileupto(av, z);
+  }
+  return FlxqX_red(z, T, p);
+}
+
+/* Brent & Kung
+ * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
+ *
+ * V as output by FlxqXQ_powers(x,l,T,p). For optimal performance, l is as given
+ * by brent_kung_optpow */
+GEN
+FlxqX_FlxqXQV_eval(GEN P, GEN V, GEN S, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  long l = lg(V)-1, d = degpol(P);
+  GEN z, u;
+
+  if (d < 0) return pol_0(varn(S));
+  if (d < l)
+  {
+    z = FlxqXQ_eval_powers(P,V,0,d,T,p);
+    return gerepileupto(av, z);
+  }
+  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in FlxqX_FlxqXQV_eval");
+  d -= l;
+  z = FlxqXQ_eval_powers(P,V,d+1,l-1,T,p);
+  while (d >= l-1)
+  {
+    d -= l-1;
+    u = FlxqXQ_eval_powers(P,V,d+1,l-2,T,p);
+    z = FlxX_add(u, FlxqXQ_mul(z,gel(V,l),S,T,p), p);
+    z = gerepileupto(av, z);
+  }
+  u = FlxqXQ_eval_powers(P,V,0,d,T,p);
+  z = FlxX_add(u, FlxqXQ_mul(z,gel(V,d+2),S,T,p), p);
+  if (DEBUGLEVEL>=8)
+  {
+    long cnt = 1 + (degpol(P) - l) / (l-1);
+    err_printf("FlxqX_FlxqXQV_eval: %ld FlxqXQ_mul [%ld]\n", cnt, l-1);
+  }
+  return gerepileupto(av, z);
+}
+
+/* Q in Z[X] and x in Flxq[X]/(T). Return a lift of Q(x) */
+GEN
+FlxqX_FlxqXQ_eval(GEN Q, GEN x, GEN S, GEN T, ulong p)
+{
+  pari_sp av = avma;
+  GEN z;
+  long d = degpol(Q), rtd;
+  if (d < 0) return pol_0(varn(Q));
+  rtd = (long) sqrt((double)d);
+  z = FlxqX_FlxqXQV_eval(Q, FlxqXQ_powers(x,rtd,S,T,p), S,T,p);
+  return gerepileupto(av, z);
+}
+
 
 /*******************************************************************/
 /*                                                                 */
