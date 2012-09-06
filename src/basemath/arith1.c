@@ -3827,6 +3827,10 @@ quadregulator(GEN x, long prec)
 /**                            CLASS NUMBER                             **/
 /**                                                                     **/
 /*************************************************************************/
+static int qfb_is_1(GEN f) { return equali1(gel(f,1)); }
+static GEN qfb_pow(void *E, GEN f, GEN n) { (void)E; return powgi(f,n); }
+static const struct bb_group qfb_group={ NULL,qfb_pow,NULL,NULL,
+                                         NULL,qfb_is_1,NULL};
 
 GEN
 qfbclassno0(GEN x,long flag)
@@ -3842,37 +3846,17 @@ qfbclassno0(GEN x,long flag)
 
 /* f^h = 1, return order(f) */
 static GEN
-find_order(GEN f, GEN h)
-{
-  GEN fh, p,e;
-  long i,j,lim;
-
-  p = Z_factor(h);
-  e =gel(p,2);
-  p =gel(p,1);
-  for (i=1; i<lg(p); i++)
-  {
-    lim = itos(gel(e,i));
-    for (j=1; j<=lim; j++)
-    {
-      GEN q = diviiexact(h,gel(p,i));
-      fh = powgi(f, q);
-      if (!equali1(gel(fh,1))) break;
-      h = q;
-    }
-  }
-  return h;
-}
+find_order(GEN f, GEN h) { return gen_order(f, h, NULL, &qfb_group); }
 
 static GEN
-end_classno(GEN h, GEN hin, GEN forms, long lform)
+end_classno(GEN h, GEN hin, GEN forms)
 {
-  long i,com;
-  GEN a,b,p1,q,fh,fg, f = gel(forms,0);
+  GEN a, b, p1, q, fh, fg, f = gel(forms,1);
+  long i, com, l = lg(forms);
 
   h = find_order(f,h); /* H = <f> */
   q = diviiround(hin, h); /* approximate order of G/H */
-  for (i=1; i < lform; i++)
+  for (i=2; i < l; i++)
   {
     pari_sp av = avma;
     fg = powgi(gel(forms,i), h);
@@ -3888,11 +3872,11 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
     if (gequal0(q))
     { /* f^(ih) != 1 for all 0 < i <= oldq. Happen if the original upper bound
          for h was wrong */
-      long c;
+      ulong c;
       p1 = fh;
       for (c=1; ; c++, p1 = gmul(p1,fh))
-        if (gequal1(gel(p1,1))) break;
-      q = mulsi(-com, find_order(fh, utoipos((ulong)c)));
+        if (qfb_is_1(p1)) break;
+      q = mulsi(-com, find_order(fh, utoipos(c)));
     }
     q = gerepileuptoint(av, q);
   }
@@ -3975,10 +3959,10 @@ two_rank(GEN x)
 }
 
 static GEN
-sqr_primeform(GEN x, long f) { return redimag(qfisqr(primeform_u(x, f))); }
+sqr_primeform(GEN x, ulong p) { return redimag(qfisqr(primeform_u(x, p))); }
 
-#define MAXFORM 11
-#define _low(to, x) { GEN __x = (GEN)(x); to = signe(__x)?mod2BIL(__x):0; }
+static ulong
+_low(GEN x) { return signe(x)? mod2BIL(x): 0; }
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.
@@ -3987,11 +3971,12 @@ sqr_primeform(GEN x, long f) { return redimag(qfisqr(primeform_u(x, f))); }
 GEN
 classno(GEN x)
 {
+  const long MAXFORM = 12;
   pari_sp av = avma, av2, lim;
-  long r2,c,lforms,k,l,i,j,com,s, forms[MAXFORM];
-  GEN count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
-  GEN Hf, D;
-  byteptr p = diffptr;
+  long r2, p, nforms, k, i, j, com, s;
+  GEN forms, count, index, tabla, tablb, hash, p1, p2;
+  GEN hin, h, f, fh, fg, ftest, Hf, D;
+  forprime_t S;
 
   if (signe(x) >= 0) return classno2(x);
 
@@ -4005,27 +3990,27 @@ classno(GEN x)
   p1 = mulrr(divrr(p2,mppi(DEFAULTPREC)), dbltor(1.005)); /*overshoot by 0.5%*/
   s = itos_or_0( truncr(shiftr(sqrtr(p2), 1)) );
   if (!s) pari_err_OVERFLOW("classno [discriminant too large]");
-  if (s < 10) s = 200;
-  else if (s < 20) s = 1000;
+  if      (s < 10)   s = 200;
+  else if (s < 20)   s = 1000;
   else if (s < 5000) s = 5000;
+  forms = vectrunc_init(MAXFORM+1);
 
-  c = lforms = 0; maxprime_check(s);
-  while (c <= s)
+  u_forprime_init(&S, 2, s);
+  nforms = 0;
+  while ( (p = u_forprime_next(&S)) )
   {
-    long d;
-    NEXT_PRIME_VIADIFF(c,p);
-
-    k = krois(D,c); if (!k) continue;
+    long d, k = krois(D,p);
+    pari_sp av3;
+    if (!k) continue;
     if (k > 0)
     {
-      if (lforms < MAXFORM) forms[lforms++] = c;
-      d = c - 1;
+      if (++nforms < MAXFORM) vectrunc_append(forms, sqr_primeform(D,p));
+      d = p - 1;
     }
     else
-      d = c + 1;
-    av2 = avma;
-    affrr(divru(mulur(c,p1),d), p1);
-    avma = av2;
+      d = p + 1;
+    av3 = avma; affrr(divru(mulur(p,p1),d), p1);
+    avma = av3;
   }
   r2 = two_rank(D);
   h = hin = roundr(shiftr(p1, -r2));
@@ -4037,12 +4022,12 @@ classno(GEN x)
   tabla = new_chunk(10000);
   tablb = new_chunk(10000);
   hash  = new_chunk(10000);
-  f = sqr_primeform(D, forms[0]);
+  f = gel(forms,1);
   p1 = fh = powgi(f, h);
   for (i=0; i<s; i++, p1 = qficomp(p1,f))
   {
-    _low(tabla[i], p1[1]);
-    _low(tablb[i], p1[2]); count[tabla[i]&255]++;
+    tabla[i] = _low(gel(p1,1));
+    tablb[i] = _low(gel(p1,2)); count[tabla[i]&255]++;
   }
   /* follow the idea of counting sort to avoid maintaining linked lists in
    * hashtable */
@@ -4056,26 +4041,22 @@ classno(GEN x)
   ftest = gpowgs(p1,0);
   for (com=0; ; com++)
   {
-    long j1, j2;
+    long j1, k, l;
     GEN a, b;
-    a = gel(ftest,1); _low(k, a);
-    b = gel(ftest,2); _low(l, b); j = k&255;
+    a = gel(ftest,1); k = _low(a);
+    b = gel(ftest,2); l = _low(b); j = k&255;
     for (j1=index[j]; j1 < index[j+1]; j1++)
     {
-      j2 = hash[j1];
+      long j2 = hash[j1];
       if (tabla[j2] == k && tablb[j2] == l)
       {
         p1 = gmul(gpowgs(f,j2),fh);
         if (equalii(gel(p1,1), a) && absi_equal(gel(p1,2), b))
         { /* p1 = ftest or ftest^(-1), we are done */
-          if (signe(p1[2]) == signe(b)) com = -com;
+          if (signe(gel(p1,2)) == signe(b)) com = -com;
           h = addii(addis(h,j2), mulss(s,com));
-          gel(forms,0) = f;
-          for (i=1; i<lforms; i++)
-            gel(forms,i) = sqr_primeform(D, forms[i]);
-          h = end_classno(h,hin,forms,lforms);
-          h = mulii(h,Hf);
-          return gerepileuptoint(av, shifti(h, r2));
+          h = end_classno(h, hin, forms);
+          return gerepileuptoint(av, shifti(mulii(h,Hf), r2));
         }
       }
     }
