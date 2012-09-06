@@ -2831,7 +2831,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
           str_puts(S, ",j,k,0)");
         return;
       }
-      print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
+      print = (typ(gel(g,1)) == t_VECSMALL)? prints: bruti;
       if (l==2)
       {
         str_puts(S, new_fun_set? "Mat(": "mat(");
@@ -2873,7 +2873,7 @@ matbruti(GEN g, pariout_t *T, outString *S)
 
   r=lg(g); if (r==1 || lg(g[1])==1) { str_puts(S, "[;]"); return; }
   l = lg(g[1]); str_putc(S, '\n');
-  print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
+  print = (typ(gel(g,1)) == t_VECSMALL)? prints: bruti;
   av = avma;
   w = term_width();
   if (2*r < w)
@@ -3092,7 +3092,7 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       str_puts(S, "\\pmatrix{\n "); r = lg(g);
       if (r>1)
       {
-        OUT_FUN print = (typ(g[1]) == t_VECSMALL)? prints: texi;
+        OUT_FUN print = (typ(gel(g,1)) == t_VECSMALL)? prints: texi;
 
         l = lg(g[1]);
         for (i=1; i<l; i++)

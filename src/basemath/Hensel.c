@@ -247,7 +247,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
   if (e0 == 1) return a;
 
   if (DEBUGLEVEL > 3) timer_start(&Ti);
-  if (typ(a[1]) == t_INT)
+  if (typ(gel(a,1)) == t_INT)
   { /* a = TreeLift structure */
     e = itos(gel(a,1));
     link = gel(a,2);

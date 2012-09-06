@@ -98,7 +98,7 @@ typedef unsigned long pari_ulong;
 #define evallgeflist(x) (x)
 #define _evallg(x)    (x)
 
-#define typ(x)        ((long)((((ulong*)(x))[0]) >> TYPSHIFT))
+#define typ(x)        ((long)(((ulong)((x)[0])) >> TYPSHIFT))
 #define settyp(x,s)   (((ulong*)(x))[0]=\
                         (((ulong*)(x))[0]&(~TYPBITS)) | evaltyp(s))
 

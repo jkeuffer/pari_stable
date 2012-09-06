@@ -589,7 +589,7 @@ factor(GEN x)
         case t_REAL: y=cgetg(3,t_MAT); lx=lg(x)-2; v=varn(x);
           av=avma; p1=cleanroots(x,pa); tetpil=avma;
           for(r1=1; r1<lx; r1++)
-            if (typ(p1[r1]) == t_COMPLEX) break;
+            if (typ(gel(p1,r1)) == t_COMPLEX) break;
           lx=(r1+lx)>>1; p2=cgetg(lx,t_COL);
           for(i=1; i<r1; i++)
             gel(p2,i) = deg1pol_shallow(gen_1, negr(gel(p1,i)), v);
@@ -1207,9 +1207,9 @@ ggcd(GEN x, GEN y)
           if (typ(p1)==t_INT) { avma=av; return gcopy(y); }
           tetpil=avma; return gerepile(av,tetpil, gdiv(y,gel(p1,2)));
         }
-        if (typ(p1[2])==t_INT && typ(p1[3])==t_INT) {avma=av; return gcopy(y);}
+        if (typ(gel(p1,2))==t_INT && typ(gel(p1,3))==t_INT) {avma=av; return gcopy(y);}
         p1 = ginv(p1); avma=av;
-        if (typ(p1[2])==t_INT && typ(p1[3])==t_INT) return gcopy(x);
+        if (typ(gel(p1,2))==t_INT && typ(gel(p1,3))==t_INT) return gcopy(x);
         return triv_cont_gcd(y,x);
 
       default: return gen_1; /* t_REAL */
@@ -1577,7 +1577,7 @@ content(GEN x)
       return NULL; /* not reached */
   }
   for (i=lontyp[tx]; i<lx; i++)
-    if (typ(x[i]) != t_INT) break;
+    if (typ(gel(x,i)) != t_INT) break;
   lx--; c = gel(x,lx);
   t = typ(c); if (is_matvec_t(t)) c = content(c);
   if (i > lx)

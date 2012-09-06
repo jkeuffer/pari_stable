@@ -383,7 +383,7 @@ FpXQX_red(GEN z, GEN T, GEN p)
   long i, l = lg(z);
   GEN res = cgetg(l,t_POL); res[1] = z[1];
   for(i=2;i<l;i++)
-    if (typ(z[i]) == t_INT)
+    if (typ(gel(z,i)) == t_INT)
       gel(res,i) = modii(gel(z,i),p);
     else
       gel(res,i) = FpXQ_red(gel(z,i),T,p);
@@ -1248,8 +1248,8 @@ FqV_to_FlxV(GEN v, GEN T, GEN pp)
   ulong p = pp[2];
   GEN y = cgetg(N, t_VEC);
   for (j=1; j<N; j++)
-    gel(y,j) = (typ(v[j])==t_INT?  Z_to_Flx(gel(v,j), p, vT)
-                                  : ZX_to_Flx(gel(v,j), p));
+    gel(y,j) = (typ(gel(v,j))==t_INT?  Z_to_Flx(gel(v,j), p, vT)
+                                    : ZX_to_Flx(gel(v,j), p));
   return y;
 }
 
@@ -1261,8 +1261,8 @@ FqC_to_FlxC(GEN v, GEN T, GEN pp)
   ulong p = pp[2];
   GEN y = cgetg(N, t_COL);
   for (j=1; j<N; j++)
-    gel(y,j) = (typ(v[j])==t_INT?  Z_to_Flx(gel(v,j), p, vT)
-                                  : ZX_to_Flx(gel(v,j), p));
+    gel(y,j) = (typ(gel(v,j))==t_INT?  Z_to_Flx(gel(v,j), p, vT)
+                                    : ZX_to_Flx(gel(v,j), p));
   return y;
 }
 

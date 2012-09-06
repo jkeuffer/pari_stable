@@ -84,9 +84,9 @@ vconcat(GEN A, GEN B)
   if (!A) return B;
   if (!B) return A;
   la = lg(A); if (la==1) return A;
-  T = typ(A[1]); /* t_COL or t_VECSMALL */
-  ha = lg(A[1]); M = cgetg(la,t_MAT);
-  hb = lg(B[1]); hc = ha+hb-1;
+  T = typ(gel(A,1)); /* t_COL or t_VECSMALL */
+  ha = lg(gel(A,1)); M = cgetg(la,t_MAT);
+  hb = lg(gel(B,1)); hc = ha+hb-1;
   for (j=1; j<la; j++)
   {
     c = cgetg(hc, T); gel(M, j) = c;

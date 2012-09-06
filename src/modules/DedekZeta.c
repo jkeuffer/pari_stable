@@ -570,7 +570,7 @@ gzetakall(GEN znf, GEN s, long flag, long prec)
   pari_sp av = avma;
   GEN z;
 
-  if (typ(znf)!=t_VEC || lg(znf)!=10 || typ(znf[1]) != t_VECSMALL)
+  if (typ(znf)!=t_VEC || lg(znf)!=10 || typ(gel(znf,1)) != t_VECSMALL)
     pari_err_TYPE("zetakall", znf);
   if (isint(s, &s))
   {

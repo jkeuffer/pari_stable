@@ -310,7 +310,7 @@ polsimplify(GEN x)
 {
   long i,lx = lg(x);
   for (i=2; i<lx; i++)
-    if (typ(x[i]) == t_POL) gel(x,i) = constant_term(gel(x,i));
+    if (typ(gel(x,i)) == t_POL) gel(x,i) = constant_term(gel(x,i));
   return x;
 }
 
@@ -576,7 +576,7 @@ bound_for_coeff(long m, GEN rr, GEN *maxroot)
   GEN p1,b1,b2,B,M, C = matpascal(m-1);
 
   for (r1=1; r1 < lrr; r1++)
-    if (typ(rr[r1]) != t_REAL) break;
+    if (typ(gel(rr,r1)) != t_REAL) break;
   r1--;
 
   rr = gabs(rr,0); *maxroot = vecmax(rr);

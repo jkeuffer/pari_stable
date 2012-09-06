@@ -31,15 +31,15 @@ checktnf(GEN tnf)
 {
   long l = lg(tnf);
   if (typ(tnf)!=t_VEC || (l!=8 && l!=3)) return 0;
-  if (typ(tnf[1]) != t_VEC) return 0;
+  if (typ(gel(tnf,1)) != t_VEC) return 0;
   if (l != 8) return 1; /* S=0 */
 
   (void)checkbnf(gel(tnf,2));
-  return (typ(tnf[3]) == t_COL
-       && typ(tnf[4]) == t_COL
-       && typ(tnf[5]) == t_MAT
-       && typ(tnf[6]) == t_MAT
-       && typ(tnf[7]) == t_VEC);
+  return (typ(gel(tnf,3)) == t_COL
+       && typ(gel(tnf,4)) == t_COL
+       && typ(gel(tnf,5)) == t_MAT
+       && typ(gel(tnf,6)) == t_MAT
+       && typ(gel(tnf,7)) == t_VEC);
 }
 
 static GEN

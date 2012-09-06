@@ -122,7 +122,7 @@ checkclgp(GEN v)
 void
 checkprid(GEN id)
 {
-  if (typ(id) != t_VEC || lg(id) != 6 || typ(id[2]) != t_COL)
+  if (typ(id) != t_VEC || lg(id) != 6 || typ(gel(id,2)) != t_COL)
     pari_err_TYPE("checkprid",id);
 }
 GEN
@@ -132,7 +132,7 @@ get_prid(GEN x)
   if (typ(x) != t_VEC) return NULL;
   lx = lg(x);
   if (lx == 3) { x = gel(x,1); lx = lg(x); }
-  if (lx != 6 || typ(x[3]) != t_INT) return NULL;
+  if (lx != 6 || typ(gel(x,3)) != t_INT) return NULL;
   return x;
 }
 
@@ -150,9 +150,9 @@ void
 check_ZKmodule(GEN x, const char *s)
 {
   if (typ(x) != t_VEC || lg(x) < 3) pari_err_TYPE(s,x);
-  if (typ(x[1]) != t_MAT) pari_err_TYPE(s,gel(x,1));
-  if (typ(x[2]) != t_VEC) pari_err_TYPE(s,gel(x,2));
-  if (lg(x[2]) != lg(x[1])) pari_err_DIM(s);
+  if (typ(gel(x,1)) != t_MAT) pari_err_TYPE(s,gel(x,1));
+  if (typ(gel(x,2)) != t_VEC) pari_err_TYPE(s,gel(x,2));
+  if (lg(gel(x,2)) != lg(gel(x,1))) pari_err_DIM(s);
 }
 
 GEN
@@ -167,7 +167,7 @@ get_bnf(GEN x, long *t)
       {
         case 5 : *t = typ_QUA; return NULL;
         case 6 :
-          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+          if (typ(gel(x,1)) != t_VEC || typ(gel(x,3)) != t_MAT) break;
           *t = typ_BID; return NULL;
         case 10: *t = typ_NF; return NULL;
         case 11: *t = typ_BNF; return x;
@@ -198,7 +198,7 @@ get_nf(GEN x, long *t)
       switch(lg(x))
       {
         case 3:
-          if (typ(x[2]) != t_POLMOD) break;
+          if (typ(gel(x,2)) != t_POLMOD) break;
           return get_nf(gel(x,1),t);
         case 10: *t = typ_NF; return x;
         case 11: *t = typ_BNF;
@@ -209,7 +209,7 @@ get_nf(GEN x, long *t)
           x = bnf_get_nf(x);  if (typ(x)!=t_VEC || lg(x)!=10) break;
           return x;
         case 6 :
-          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+          if (typ(gel(x,1)) != t_VEC || typ(gel(x,3)) != t_MAT) break;
           *t = typ_BID; return NULL;
         case 9 :
           x = gel(x,2);
@@ -243,7 +243,7 @@ nftyp(GEN x)
           x = bnf_get_nf(x);  if (typ(x)!=t_VEC || lg(x)!=10) break;
           return typ_BNR;
         case 6 :
-          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+          if (typ(gel(x,1)) != t_VEC || typ(gel(x,3)) != t_MAT) break;
           return typ_BID;
         case 9 :
           x = gel(x,2);

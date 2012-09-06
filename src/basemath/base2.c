@@ -1786,7 +1786,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
   S->D = NULL; /* -Wall */
   S->w = NULL; /* -Wall */
   S->T = NULL; /* -Wall */
-  if (typ(nf[5]) == t_VEC) /* beware dummy nf from padicff */
+  if (typ(gel(nf,5)) == t_VEC) /* beware dummy nf from padicff */
   {
     GEN M = nf_get_M(nf);
     long ex = gexpo(M) + gexpo(mului(8 * N, p));
@@ -2983,7 +2983,7 @@ check_pol(GEN *px)
   long i, lx = lg(x);
   for (i=2; i<lx; i++)
   {
-    long tx = typ(x[i]);
+    long tx = typ(gel(x,i));
     if (!is_rational_t(tx)) pari_err_TYPE("rnf function [coeff]", gel(x,i));
   }
   if (lx == 2) *px = gen_0;
@@ -3126,9 +3126,9 @@ static int
 is_pseudo_matrix(GEN O)
 {
   return (typ(O) ==t_VEC && lg(O) >= 3
-          && typ(O[1]) == t_MAT
-          && typ(O[2]) == t_VEC
-          && lg(O[1]) == lg(O[2]));
+          && typ(gel(O,1)) == t_MAT
+          && typ(gel(O,2)) == t_VEC
+          && lg(gel(O,1)) == lg(gel(O,2)));
 }
 
 /* given bnf and a pseudo-basis of an order in HNF [A,I], tries to simplify

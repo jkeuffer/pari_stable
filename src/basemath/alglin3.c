@@ -569,10 +569,10 @@ gtomat(GEN x)
     case t_VEC: {
       lx=lg(x); y=cgetg(lx,t_MAT);
       if (lx == 1) break;
-      if (typ(x[1]) == t_COL) {
-        long h = lg(x[1]);
+      if (typ(gel(x,1)) == t_COL) {
+        long h = lg(gel(x,1));
         for (i=2; i<lx; i++) {
-          if (typ(x[i]) != t_COL || lg(x[i]) != h) break;
+          if (typ(gel(x,i)) != t_COL || lg(gel(x,i)) != h) break;
         }
         if (i == lx) { /* matrix with h-1 rows */
           y = cgetg(lx, t_MAT);
@@ -586,10 +586,10 @@ gtomat(GEN x)
     case t_COL:
       lx = lg(x);
       if (lx == 1) return cgetg(1, t_MAT);
-      if (typ(x[1]) == t_VEC) {
-        long j, h = lg(x[1]);
+      if (typ(gel(x,1)) == t_VEC) {
+        long j, h = lg(gel(x,1));
         for (i=2; i<lx; i++) {
-          if (typ(x[i]) != t_VEC || lg(x[i]) != h) break;
+          if (typ(gel(x,i)) != t_VEC || lg(gel(x,i)) != h) break;
         }
         if (i == lx) { /* matrix with h cols */
           y = cgetg(h, t_MAT);

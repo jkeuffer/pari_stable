@@ -2785,7 +2785,7 @@ ZXX_to_FlxX(GEN B, ulong p, long v)
   GEN b=cgetg(lb,t_POL);
   b[1]=evalsigne(1)|(((ulong)B[1])&VARNBITS);
   for (i=2; i<lb; i++)
-    switch (typ(B[i]))
+    switch (typ(gel(B,i)))
     {
     case t_INT:
       gel(b,i) = Z_to_Flx(gel(B,i), p, v);

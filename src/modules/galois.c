@@ -384,7 +384,7 @@ Monomial(GEN r, PERM bb, long nbv)
   }
   if (nbv > 2)
     gen_sort_inplace(R, (void*)&cmp_re, cmp_nodata, NULL);
-  else if (nbv == 2 && typ(R[2]) != t_COMPLEX)
+  else if (nbv == 2 && typ(gel(R,2)) != t_COMPLEX)
     swap(gel(R,1), gel(R,2));
   t = NULL;
   for (i=1; i<=nbv; i++)

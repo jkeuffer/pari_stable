@@ -2432,8 +2432,8 @@ chk_perm(GEN perm, long n)
 static int
 is_group(GEN g)
 {
-  return typ(g)==t_VEC && lg(g)==3 && typ(g[1])==t_VEC
-      && typ(g[2])==t_VECSMALL;
+  return typ(g)==t_VEC && lg(g)==3 && typ(gel(g,1))==t_VEC
+      && typ(gel(g,2))==t_VECSMALL;
 }
 
 GEN

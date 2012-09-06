@@ -327,7 +327,7 @@ commands(long n)
       switch (EpVALENCE(ep))
       {
         case EpVAR:
-          if (typ(ep->value) == t_CLOSURE) break;
+          if (typ((GEN)ep->value) == t_CLOSURE) break;
           /* fall through */
         case EpNEW: continue;
       }
@@ -719,7 +719,7 @@ aide0(const char *s0, int flag)
   switch(EpVALENCE(ep))
   {
     case EpVAR:
-      if (typ(ep->value)==t_CLOSURE && typ(closure_get_text((GEN)ep->value))==t_VEC)
+      if (typ((GEN)ep->value)==t_CLOSURE && typ(closure_get_text((GEN)ep->value))==t_VEC)
       {
         GEN str = closure_get_text((GEN)ep->value);
         if (!ep->help || long_help)

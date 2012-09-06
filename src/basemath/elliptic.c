@@ -568,7 +568,7 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   if (lx < 20) pari_err_TYPE("coordch [not an elliptic curve]",e);
   R = ell_get_roots(e);
   if (typ(R) != t_COL) set_dummy(y);
-  else if (typ(e[1])==t_PADIC)
+  else if (typ(gel(e,1))==t_PADIC)
   {
     gel(y,14) = mkvec( gmul(v2, gsub(gel(R,1),r)) );
     gel(y,15) = gmul(gel(e,15), gsqr(u));
@@ -684,7 +684,7 @@ ellchangepoint(GEN x, GEN ch)
   s = gel(ch,3);
   t = gel(ch,4);
   v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2);
-  tx = typ(x[1]);
+  tx = typ(gel(x,1));
   if (is_matvec_t(tx))
   {
     y = cgetg(lx,tx);
@@ -727,7 +727,7 @@ ellchangepointinv(GEN x, GEN ch)
   r = gel(ch,2);
   s = gel(ch,3);
   t = gel(ch,4);
-  tx = typ(x[1]);
+  tx = typ(gel(x,1));
   u2 = gsqr(u); u3 = gmul(u,u2);
   if (is_matvec_t(tx))
   {
@@ -788,7 +788,7 @@ ellisoncurve(GEN e, GEN x)
   checkell5(e);
   if (!is_vec_t(tx)) pari_err_TYPE("ellisoncurve [point]", x);
   lx = lg(x); if (lx==1) return cgetg(1,tx);
-  tx = typ(x[1]);
+  tx = typ(gel(x,1));
   if (is_vec_t(tx))
   {
     GEN z = cgetg(lx,tx);
@@ -3178,7 +3178,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   if (flag > 2 || flag < 0) pari_err_FLAG("ellheight");
   checksmallell_real(e); if (!is_matvec_t(tx)) pari_err_TYPE("ellheight",a);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
-  tx = typ(a[1]);
+  tx = typ(gel(a,1));
   if (is_matvec_t(tx))
   {
     z = cgetg(lx,tx);
@@ -3279,7 +3279,7 @@ bilhells(GEN e, GEN z1, GEN z2, GEN h2, long prec)
 
   if (lz1==1) return cgetg(1,typ(z1));
 
-  tx = typ(z1[1]);
+  tx = typ(gel(z1,1));
   if (!is_matvec_t(tx))
   {
     p1 = ghell(e, elladd(e,z1,z2),prec);
@@ -3303,8 +3303,8 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
   if (lg(z1)==1) return cgetg(1,tz1);
   if (lg(z2)==1) return cgetg(1,tz2);
 
-  tz1 = typ(z1[1]);
-  tz2 = typ(z2[1]);
+  tz1 = typ(gel(z1,1));
+  tz2 = typ(gel(z2,1));
   if (is_matvec_t(tz2))
   {
     if (is_matvec_t(tz1)) pari_err_TYPE("bilhell",z1);
@@ -3758,9 +3758,9 @@ torspnt(GEN E, GEN w, long n, long prec)
   GEN p = cgetg(3,t_VEC), q = pointell(E, w, prec);
   long e;
   gel(p,1) = gmul2n(myround(gmul2n(gel(q,1),2), &e),-2);
-  if (e > -5 || typ(p[1]) == t_COMPLEX) return NULL;
+  if (e > -5 || typ(gel(p,1)) == t_COMPLEX) return NULL;
   gel(p,2) = gmul2n(myround(gmul2n(gel(q,2),3), &e),-3);
-  if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
+  if (e > -5 || typ(gel(p,2)) == t_COMPLEX) return NULL;
   return (oncurve(E,p)
       && ell_is_inf(ellmul_Z(E,p,utoipos(n)))
       && _orderell(E,p) == n)? p: NULL;

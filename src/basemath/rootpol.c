@@ -986,7 +986,7 @@ isreal(GEN p)
 {
   long i;
   for (i = lg(p)-1; i > 1; i--)
-    if (typ(p[i]) == t_COMPLEX) return 0;
+    if (typ(gel(p,i)) == t_COMPLEX) return 0;
   return 1;
 }
 

@@ -693,7 +693,7 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, long vx)
   b = is_RgX(b,vx)? RgX_renormalize(b): scalarpol(b, vx);
   d = RgX_extgcd(a,b, pu,pv);
   if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
-  else if (typ(d[2]) == t_REAL && lg(d[2]) <= 3)
+  else if (typ(gel(d,2)) == t_REAL && lg(gel(d,2)) <= 3)
 #if 1
   { /* possible accuracy problem */
     GEN D = RgX_gcd_simple(a,b);

@@ -1119,7 +1119,7 @@ print_all_user_fun(int member)
     for (ep = functions_hash[i]; ep; ep = ep->next)
     {
       int is_member;
-      if (EpVALENCE(ep) != EpVAR || typ(ep->value)!=t_CLOSURE) continue;
+      if (EpVALENCE(ep) != EpVAR || typ((GEN)ep->value)!=t_CLOSURE) continue;
       f = ep->name;
       is_member = (f[0] == '_' && f[1] == '.');
       if (member != is_member) continue;

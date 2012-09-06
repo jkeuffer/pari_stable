@@ -533,7 +533,7 @@ get_snf(GEN x, long *N)
     case t_MAT:
       if (!RgM_isdiagonal(x)) return NULL;
       cyc = RgM_diagonal_shallow(x); break;
-    case t_VEC: if (lg(x) == 4 && typ(x[2]) == t_VEC) x = gel(x,2);
+    case t_VEC: if (lg(x) == 4 && typ(gel(x,2)) == t_VEC) x = gel(x,2);
     case t_COL: cyc = leafcopy(x); break;
     default: return NULL;
   }

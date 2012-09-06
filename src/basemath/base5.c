@@ -337,7 +337,7 @@ rnfidealhermite(GEN rnf, GEN x)
       gel(z,2) = gmul(x, gel(bas,2)); return z;
 
     case t_VEC:
-      if (lg(x) == 3 && typ(x[1]) == t_MAT) return nfhnf(nf, x);
+      if (lg(x) == 3 && typ(gel(x,1)) == t_MAT) return nfhnf(nf, x);
       return rnfidealabstorel(rnf, x);
 
     case t_POLMOD: case t_POL: case t_COL:

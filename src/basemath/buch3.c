@@ -423,7 +423,7 @@ Buchray(GEN bnf, GEN module, long flag)
   for (j=1; j<=ngen; j++)
   {
     p1 = gel(cycgen,j);
-    if (typ(El[j]) != t_INT) /* <==> != 1 */
+    if (typ(gel(El,j)) != t_INT) /* <==> != 1 */
     {
       GEN F = to_famat_shallow(gel(El,j), gel(cyc,j));
       p1 = famat_mul(F, p1);
@@ -2383,7 +2383,7 @@ GEN
 subgrouplist0(GEN bnr, GEN indexbound, long all)
 {
   if (typ(bnr)!=t_VEC) pari_err_TYPE("subgrouplist",bnr);
-  if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
+  if (lg(bnr)!=1 && typ(gel(bnr,1))!=t_INT)
   {
     checkbnr(bnr);
     if (!all) return subgroupcond(bnr,indexbound);

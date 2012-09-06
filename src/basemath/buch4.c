@@ -841,7 +841,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   setlg(Y, L);
   aux = factorback2(sunitrel, gfloor(Y));
   x = gdiv(mkpolmod(x,nfpol), RgXQ_norm(lift_intern(aux), relpol));
-  if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(gel(x,2))))
+  if (typ(x) == t_POLMOD && (typ(gel(x,2)) != t_POL || !degpol(gel(x,2))))
   {
     x = gel(x,2); /* rational number */
     if (typ(x) == t_POL) x = gel(x,2);

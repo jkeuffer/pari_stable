@@ -376,7 +376,7 @@ isinexactreal(GEN x)
   switch(typ(x))
   {
     case t_REAL: return 1;
-    case t_COMPLEX: return (typ(x[1])==t_REAL || typ(x[2])==t_REAL);
+    case t_COMPLEX: return (typ(gel(x,1))==t_REAL || typ(gel(x,2))==t_REAL);
 
     case t_INT: case t_INTMOD: case t_FRAC:
     case t_FFELT: case t_PADIC: case t_QUAD:
@@ -1946,8 +1946,8 @@ integ(GEN x, long v)
       if (typ(y)==t_RFRAC && lg(y[1]) == lg(y[2]))
       {
         GEN p2;
-        tx=typ(y[1]); p1=is_scalar_t(tx)? gel(y,1): leading_term(gel(y,1));
-        tx=typ(y[2]); p2=is_scalar_t(tx)? gel(y,2): leading_term(gel(y,2));
+        tx=typ(gel(y,1)); p1=is_scalar_t(tx)? gel(y,1): leading_term(gel(y,1));
+        tx=typ(gel(y,2)); p2=is_scalar_t(tx)? gel(y,2): leading_term(gel(y,2));
         y = gsub(y, gdiv(p1,p2));
       }
       return gerepileupto(av,y);
