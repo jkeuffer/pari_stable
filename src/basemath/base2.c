@@ -248,22 +248,22 @@ mtran_long(GEN v, GEN w, long q, long m, long k0)
 static void
 rowred_long(GEN a, long rmod)
 {
-  long q,j,k,pro, c = lg(a), r = lg(a[1]);
+  long j,k, c = lg(a), r = lg(a[1]);
 
   for (j=1; j<r; j++)
   {
     for (k=j+1; k<c; k++)
       while (coeff(a,j,k))
       {
-        q = coeff(a,j,j) / coeff(a,j,k);
-        pro=(long)mtran_long(gel(a,j),gel(a,k),q,rmod, j);
-        a[j]=a[k]; a[k]=pro;
+        long q = coeff(a,j,j) / coeff(a,j,k);
+        GEN pro = mtran_long(gel(a,j),gel(a,k),q,rmod, j);
+        gel(a, j) = gel(a, k); gel(a, k)=pro;
       }
     if (coeff(a,j,j) < 0)
       for (k=j; k<r; k++) coeff(a,k,j)=-coeff(a,k,j);
     for (k=1; k<j; k++)
     {
-      q = coeff(a,j,k) / coeff(a,j,j);
+      long q = coeff(a,j,k) / coeff(a,j,j);
       gel(a,k) = mtran_long(gel(a,k),gel(a,j),q,rmod, k);
     }
   }
@@ -275,24 +275,24 @@ rowred_long(GEN a, long rmod)
 static void
 rowred(GEN a, GEN rmod)
 {
-  long j,k,pro, c = lg(a), r = lg(a[1]);
+  long j,k, c = lg(a), r = lg(a[1]);
   pari_sp av=avma, lim=stack_lim(av,1);
-  GEN q, rmodo2 = shifti(rmod,-1);
+  GEN rmodo2 = shifti(rmod,-1);
 
   for (j=1; j<r; j++)
   {
     for (k=j+1; k<c; k++)
       while (signe(gcoeff(a,j,k)))
       {
-        q=diviiround(gcoeff(a,j,j),gcoeff(a,j,k));
-        pro=(long)mtran(gel(a,j),gel(a,k),q,rmod,rmodo2, j);
-        a[j]=a[k]; a[k]=pro;
+        GEN q=diviiround(gcoeff(a,j,j),gcoeff(a,j,k));
+        GEN pro=mtran(gel(a,j),gel(a,k),q,rmod,rmodo2, j);
+        gel(a, j) = gel(a, k); gel(a, k)=pro;
       }
     if (signe(gcoeff(a,j,j)) < 0)
       for (k=j; k<r; k++) gcoeff(a,k,j) = negi(gcoeff(a,k,j));
     for (k=1; k<j; k++)
     {
-      q=diviiround(gcoeff(a,j,k),gcoeff(a,j,j));
+      GEN q=diviiround(gcoeff(a,j,k),gcoeff(a,j,j));
       gel(a,k) = mtran(gel(a,k),gel(a,j),q,rmod,rmodo2, k);
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1842,7 +1842,7 @@ Fp_basis(GEN nf, GEN pr)
   l = lg(x);
   y = cgetg(l, t_MAT);
   for (i=j=1; i<l; i++)
-    if (gequal1(gcoeff(x,i,i))) y[j++] = x[i];
+    if (gequal1(gcoeff(x,i,i))) gel(y,j++) = gel(x,i);
   setlg(y, j); return y;
 }
 /* Let Ip = prod_{ P | p } P be the p-radical. The list L contains the
@@ -2145,7 +2145,7 @@ lift_to_zk(GEN v, GEN c, long N)
 {
   GEN w = zerocol(N);
   long i, l = lg(c);
-  for (i=1; i<l; i++) w[c[i]] = v[i];
+  for (i=1; i<l; i++) gel(w,c[i]) = gel(v,i);
   return w;
 }
 
@@ -2920,7 +2920,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     /* compute Ip =  pr-radical [ could use Ker(trace) if q large ] */
     MWmod = nfM_to_FqM(MW,nf,modpr);
-    F = cgetg(n+1, t_MAT); F[1] = rnfId[1];
+    F = cgetg(n+1, t_MAT); gel(F,1) = gel(rnfId,1);
     for (j=2; j<=n; j++) gel(F,j) = rnfelementid_powmod(MWmod, j, q1, T,p);
     Ip = FqM_ker(F,T,p);
     if (lg(Ip) == 1) { W = W0; I = I0; break; }

@@ -2829,7 +2829,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
       p2 = utoipos(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {
-        P[j] = p1[k];
+        gel(P,j) = gel(p1,k);
         gel(E,j) = p2;
       }
       continue;
@@ -2843,7 +2843,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
       p2 = gel(p2,2);
       for (k=1; k<lg(p1); k++,j++)
       {
-        P[j] = p1[k];
+        gel(P,j) = gel(p1,k);
         gel(E,j) = muliu(gel(p2,k),ex[i]);
       }
     }

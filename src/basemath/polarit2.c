@@ -44,7 +44,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   {
     if (typ(y0) != t_COL) pari_err_TYPE("polsym_gen",y0);
     m = lg(y0)-1;
-    for (i=1; i<=m; i++) y[i] = y0[i]; /* not memory clean */
+    for (i=1; i<=m; i++) gel(y,i) = gel(y0,i); /* not memory clean */
   }
   else
   {
@@ -840,7 +840,7 @@ divide_conquer_assoc(GEN x, void *data, GEN (*mul)(void *,GEN,GEN))
     lx = k; k = 1;
     for (i=1; i<lx-1; i+=2)
       gel(x,k++) = mul(data,gel(x,i),gel(x,i+1));
-    if (i < lx) x[k++] = x[i];
+    if (i < lx) gel(x,k++) = gel(x,i);
     if (low_stack(lim,stack_lim(av,1)))
       gerepilecoeffs(ltop,x+1,k-1);
   }

@@ -1072,7 +1072,7 @@ fixedfieldinclusion(GEN O, GEN PL)
   for (i = 1; i <= f; i++)
   {
     GEN Oi = gel(O,i);
-    for (j = 1; j <= g; j++) S[ Oi[j] ] = PL[i];
+    for (j = 1; j <= g; j++) gel(S, Oi[j]) = gel(PL, i);
   }
   return S;
 }
@@ -2414,7 +2414,7 @@ fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod, GEN mod2,
       gel(G,k) = FpV_roots_to_pol(vecpermute(Lp, gel(O,k)), mod, x);
     for (j = 1; j < lo; j++)
     {
-      for(k = 1; k < l; k++) V[k] = mael(G,k,j+1);
+      for(k = 1; k < l; k++) gel(V,k) = gmael(G,k,j+1);
       gel(F,j) = vectopol(V, M, den, mod, mod2, y);
     }
     gel(res,i) = gerepileupto(av,gtopolyrev(F,x));
