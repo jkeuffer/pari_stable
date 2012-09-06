@@ -70,7 +70,7 @@ fnz(GEN x,long j)
 {
   long i;
   for (i=1; i<j; i++)
-    if (signe(x[i])) return 0;
+    if (signe(gel(x,i))) return 0;
   return 1;
 }
 /* return list u[i], 2 by 2 coprime with the same prime divisors as ab */
@@ -1890,7 +1890,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   setlg(u, lg(P));
   u = centermod(ZM_ZC_mul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
-  if (signe(u[1]) <= 0) /* make sure u[1] in ]-p,p] */
+  if (signe(gel(u,1)) <= 0) /* make sure u[1] in ]-p,p] */
     gel(u,1) = addii(gel(u,1), p); /* try u + p */
   else
     gel(u,1) = subii(gel(u,1), p); /* try u - p */

@@ -137,7 +137,7 @@ addTp(GEN x, GEN y) { pari_sp av = avma; GEN z;
 
   if (!valp(y)) z = cvtop2(x,y);
   else {
-    long l = signe(y[4])? valp(y) + precp(y): valp(y);
+    long l = signe(gel(y,4))? valp(y) + precp(y): valp(y);
     z  = cvtop(x, gel(y,2), l);
   }
   return gerepileupto(av, addsub_pp(z, y, addii));
@@ -1006,7 +1006,7 @@ gadd(GEN x, GEN y)
       switch(ty)
       {
         case t_FRAC:
-          if (!signe(y[1])) return rcopy(x);
+          if (!signe(gel(y,1))) return rcopy(x);
           if (!signe(x))
           {
             lx = expi(gel(y,1)) - expi(gel(y,2)) - expo(x);
@@ -1045,7 +1045,7 @@ gadd(GEN x, GEN y)
       {
         case t_COMPLEX: return addRc(x, y);
         case t_PADIC:
-          if (!signe(x[1])) return gcopy(y);
+          if (!signe(gel(x,1))) return gcopy(y);
           return addQp(x,y);
         case t_QUAD: return addRq(x, y);
         case t_FFELT: return FF_Q_add(y, x);
@@ -1543,7 +1543,7 @@ did_add(GEN x, GEN y, GEN *z)
       else
       { *z = addri(x,y); return 1; }
     case t_FRAC:
-      if (signe(x) == -signe(y[1]))
+      if (signe(x) == -signe(gel(y,1)))
       { *z = gsub(x,y); return 0; }
       else
       { *z = gadd(x,y); return 1; }
@@ -1556,7 +1556,7 @@ did_add(GEN x, GEN y, GEN *z)
       else
       { *z = addir(x,y); return 1; }
     case t_FRAC:
-      if (signe(x[1]) == -signe(y))
+      if (signe(gel(x,1)) == -signe(y))
       { *z = gsub(x,y); return 0; }
       else
       { *z = gadd(x,y); return 1; }
@@ -1649,8 +1649,8 @@ mulpp(GEN x, GEN y) {
   pari_sp av;
   GEN z, t;
   if (!equalii(gel(x,2),gel(y,2))) pari_err_OP("*",x,y);
-  if (!signe(x[4])) return zeropadic(gel(x,2), l);
-  if (!signe(y[4])) return zeropadic(gel(x,2), l);
+  if (!signe(gel(x,4))) return zeropadic(gel(x,2), l);
+  if (!signe(gel(y,4))) return zeropadic(gel(x,2), l);
 
   t = (precp(x) > precp(y))? y: x;
   z = cgetp(t); setvalp(z,l); av = avma;
@@ -1910,7 +1910,7 @@ gmul(GEN x, GEN y)
       switch(ty)
       {
         case t_COMPLEX: return mulRc(x, y);
-        case t_PADIC: return signe(x[1])? mulTp(x, y): gen_0;
+        case t_PADIC: return signe(gel(x,1))? mulTp(x, y): gen_0;
         case t_QUAD:  return mulRq(x, y);
         case t_FFELT: return FF_Z_Z_muldiv(y, gel(x,1),gel(x,2));
       }
@@ -2119,7 +2119,7 @@ gsqr(GEN x)
 
     case t_PADIC:
       z = cgetg(5,t_PADIC);
-      i = (equaliu(gel(x,2), 2) && signe(x[4]))? 1: 0;
+      i = (equaliu(gel(x,2), 2) && signe(gel(x,4)))? 1: 0;
       if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
       z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
       gel(z,2) = icopy(gel(x,2));
@@ -2332,8 +2332,8 @@ divpp(GEN x, GEN y) {
   long a, b;
   GEN z, M;
 
-  if (!signe(y[4])) pari_err(e_INV);
-  if (!signe(x[4])) return zeropadic(gel(x,2), valp(x)-valp(y));
+  if (!signe(gel(y,4))) pari_err(e_INV);
+  if (!signe(gel(x,4))) return zeropadic(gel(x,2), valp(x)-valp(y));
   a = precp(x);
   b = precp(y); if (a > b) { M = gel(y,3); } else { M = gel(x,3); b = a; }
   z = cgetg(5, t_PADIC);
@@ -2640,7 +2640,7 @@ gdiv(GEN x, GEN y)
         case t_COMPLEX: return divRc(x, y);
 
         case t_PADIC:
-          if (!signe(x[1])) return gen_0;
+          if (!signe(gel(x,1))) return gen_0;
           return divTp(x, y);
 
         case t_QUAD:
@@ -2678,7 +2678,7 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
         case t_INT: case t_FRAC: { GEN p = gel(x,2);
-          return signe(x[4])? divpT(x, y)
+          return signe(gel(x,4))? divpT(x, y)
                             : zeropadic(p, valp(x) - Q_pval(y,p));
         }
         case t_INTMOD: { GEN Y = gel(y,1);
@@ -3208,7 +3208,7 @@ ginv(GEN x)
       return gerepile(av,tetpil,gdiv(p2,p1));
 
     case t_PADIC: z = cgetg(5,t_PADIC);
-      if (!signe(x[4])) pari_err(e_INV);
+      if (!signe(gel(x,4))) pari_err(e_INV);
       z[1] = evalprecp(precp(x)) | evalvalp(-valp(x));
       gel(z,2) = icopy(gel(x,2));
       gel(z,3) = icopy(gel(x,3));

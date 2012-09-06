@@ -807,7 +807,7 @@ FpX_is_totally_split(GEN f, GEN p)
   f = FpX_red(f, p);
   z = FpXQ_pow(pol_x(varn(f)), p, f, p);
   avma = av;
-  return degpol(z) == 1 && gequal1(gel(z,3)) && !signe(z[2]); /* x^p = x ? */
+  return degpol(z) == 1 && gequal1(gel(z,3)) && !signe(gel(z,2)); /* x^p = x ? */
 }
 
 /* Flv_Flx( Flm_Flc_mul(x, Flx_Flv(y), p) ) */
@@ -2061,7 +2061,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
   {
     GEN polt;
     gel(pol,2) = random_FpX(dT,vT,p);
-    setlg(pol, signe(pol[2])? 3: 2);
+    setlg(pol, signe(gel(pol,2))? 3: 2);
     pol[1] = u[1];
     for (i=2; i<=d; i++)
       pol = gadd(pol, gmul(gel(vker,i), random_FpX(dT,vT,p)));
@@ -2611,7 +2611,7 @@ scalar_getprec(GEN x, long *pprec, GEN *pp)
 {
   if (typ(x)==t_PADIC)
   {
-    long e = valp(x); if (signe(x[4])) e += precp(x);
+    long e = valp(x); if (signe(gel(x,4))) e += precp(x);
     if (e < *pprec) *pprec = e;
     check_padic_p(x, *pp);
     *pp = gel(x,2);

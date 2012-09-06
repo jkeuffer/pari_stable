@@ -722,7 +722,7 @@ powps(GEN x, long n)
   GEN t, y, mod, p = gel(x,2);
   pari_sp av;
 
-  if (!signe(x[4])) {
+  if (!signe(gel(x,4))) {
     if (n < 0) pari_err(e_INV);
     return zeropadic(p, e);
   }
@@ -756,7 +756,7 @@ powp(GEN x, GEN n)
 
   if (valp(x)) pari_err_OVERFLOW("valp()");
 
-  if (!signe(x[4])) {
+  if (!signe(gel(x,4))) {
     if (signe(n) < 0) pari_err(e_INV);
     return zeropadic(p, 0);
   }
@@ -1491,7 +1491,7 @@ Qp_sqrtn(GEN x, GEN n, GEN *zetan)
   pari_sp av = avma, tetpil;
   GEN q, p = gel(x,2);
   long e;
-  if (!signe(x[4]))
+  if (!signe(gel(x,4)))
   {
     q = divii(addis(n, valp(x)-1), n);
     if (zetan) *zetan = gen_1;

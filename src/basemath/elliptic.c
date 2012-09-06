@@ -411,7 +411,7 @@ base_ring(GEN x, GEN *pp, long *prec)
     GEN q = gel(x,i);
     switch(typ(q)) {
       case t_PADIC: {
-        long e2 = signe(q[4])? precp(q)+valp(q): valp(q);
+        long e2 = signe(gel(q,4))? precp(q)+valp(q): valp(q);
         if (e2 < e) e = e2;
         if (!p)
           p = gel(q,2);
@@ -887,7 +887,7 @@ ellordinate_i(GEN e, GEN x, long prec)
   if (td == t_INTMOD && equaliu(gel(D,1), 2))
   { /* curve over F_2 */
     avma = av;
-    if (!signe(D[2])) {
+    if (!signe(gel(D,2))) {
       y = cgetg(2,t_VEC);
       gel(y,1) = mkintmodu(gequal0(a)?0:1, 2);
     } else {
@@ -1175,7 +1175,7 @@ ellmul(GEN e, GEN z, GEN n)
     case t_INT: return gerepilecopy(av, ellmul_Z(e,z,n));
     case t_QUAD: {
       GEN pol = gel(n,1), a = gel(n,2), b = gel(n,3);
-      if (signe(pol[2]) < 0) pari_err_TYPE("ellmul_CM",n); /* disc > 0 ? */
+      if (signe(gel(pol,2)) < 0) pari_err_TYPE("ellmul_CM",n); /* disc > 0 ? */
       return gerepileupto(av, ellmul_CM_aux(e,z,a,mkquad(pol, gen_0,b)));
     }
     case t_COMPLEX: {

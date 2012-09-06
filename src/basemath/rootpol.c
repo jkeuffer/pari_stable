@@ -497,8 +497,8 @@ myshiftrc(GEN z, long e)
 {
   if (typ(z)==t_COMPLEX)
   {
-    if (signe(z[1])) shiftr_inplace(gel(z,1), e);
-    if (signe(z[2])) shiftr_inplace(gel(z,2), e);
+    if (signe(gel(z,1))) shiftr_inplace(gel(z,1), e);
+    if (signe(gel(z,2))) shiftr_inplace(gel(z,2), e);
   }
   else
     if (signe(z)) shiftr_inplace(z, e);
@@ -510,7 +510,7 @@ myshiftic(GEN z, long e)
 {
   if (typ(z)==t_COMPLEX)
   {
-    gel(z,1) = signe(z[1])? mpshift(gel(z,1),e): gen_0;
+    gel(z,1) = signe(gel(z,1))? mpshift(gel(z,1),e): gen_0;
     gel(z,2) = mpshift(gel(z,2),e);
     return z;
   }

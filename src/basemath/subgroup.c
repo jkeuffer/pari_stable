@@ -453,7 +453,7 @@ subgroup_engine(subgp_iter *T)
     }
     avma = av; return;
   }
-  if (!signe(cyc[1])) pari_err_TYPE("forsubgroup [infinite group]", cyc);
+  if (!signe(gel(cyc,1))) pari_err_TYPE("forsubgroup [infinite group]", cyc);
   fa = Z_factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;

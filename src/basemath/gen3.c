@@ -1930,7 +1930,7 @@ integ(GEN x, long v)
       if (varncmp(vx, v) > 0)
       {
         y=cgetg(4,t_POL);
-        y[1] = signe(x[1])? evalvarn(v) | evalsigne(1)
+        y[1] = signe(gel(x,1))? evalvarn(v) | evalsigne(1)
                           : evalvarn(v);
         gel(y,2) = gen_0;
         gel(y,3) = gcopy(x); return y;
@@ -1938,8 +1938,8 @@ integ(GEN x, long v)
       if (varncmp(vx, v) < 0)
         return gerepileupto(av, swapvar_act(x, vx, v, integ_act, NULL));
 
-      tx = typ(x[1]); i = is_scalar_t(tx)? 0: degpol(gel(x,1));
-      tx = typ(x[2]); n = is_scalar_t(tx)? 0: degpol(gel(x,2));
+      tx = typ(gel(x,1)); i = is_scalar_t(tx)? 0: degpol(gel(x,1));
+      tx = typ(gel(x,2)); n = is_scalar_t(tx)? 0: degpol(gel(x,2));
       y = integ(gadd(x, zeroser(v,i+n + 2)), v);
       y = gdiv(gtrunc(gmul(gel(x,2), y)), gel(x,2));
       if (!gequal(deriv(y,v),x)) pari_err(e_MISC,"a log/atan appears in intformal");
@@ -2099,7 +2099,7 @@ ground(GEN x)
     case t_COMPLEX:
       av = avma; y = cgetg(3, t_COMPLEX);
       gel(y,2) = ground(gel(x,2));
-      if (!signe(y[2])) { avma = av; return ground(gel(x,1)); }
+      if (!signe(gel(y,2))) { avma = av; return ground(gel(x,1)); }
       gel(y,1) = ground(gel(x,1)); return y;
 
     case t_POL:
@@ -2160,7 +2160,7 @@ grndtoi(GEN x, long *e)
     case t_COMPLEX:
       av = avma; y = cgetg(3, t_COMPLEX);
       gel(y,2) = grndtoi(gel(x,2), e);
-      if (!signe(y[2])) {
+      if (!signe(gel(y,2))) {
         avma = av;
         y = grndtoi(gel(x,1), &e1);
       }
@@ -2378,7 +2378,7 @@ gtrunc(GEN x)
     case t_FRAC: return divii(gel(x,1),gel(x,2));
 
     case t_PADIC:
-      if (!signe(x[4])) return gen_0;
+      if (!signe(gel(x,4))) return gen_0;
       v = valp(x);
       if (!v) return icopy(gel(x,4));
       if (v>0)
@@ -3272,7 +3272,7 @@ numer(GEN x)
       return gcopy(x);
 
     case t_FRAC:
-      return (signe(x[2])>0)? icopy(gel(x,1)): negi(gel(x,1));
+      return (signe(gel(x,2))>0)? icopy(gel(x,1)): negi(gel(x,1));
 
     case t_POLMOD:
       av=avma; s=numer(gel(x,2)); tetpil=avma;
@@ -3427,7 +3427,7 @@ centerlift0(GEN x, long v)
       gel(y,3) = centerlift0(gel(x,3),v); return y;
 
     case t_PADIC:
-      if (!signe(x[4])) return gen_0;
+      if (!signe(gel(x,4))) return gen_0;
       v = valp(x);
       if (v>=0)
       { /* here p^v is an integer */
@@ -3838,13 +3838,13 @@ qfevalb0_Z(GEN q, GEN x, GEN y, long l)
   GEN res = gmul(gcoeff(q,1,1), mulii(gel(x,1),gel(y,1)));
   for (i=2;i<l;i++)
   {
-    if (!signe(x[i]))
+    if (!signe(gel(x,i)))
     {
-      if (!signe(y[i])) continue;
+      if (!signe(gel(y,i))) continue;
       for (j=1;j<i;j++)
         res = gadd(res, gmul(gcoeff(q,i,j), mulii(gel(x,j),gel(y,i))));
     }
-    else if (!signe(y[i]))
+    else if (!signe(gel(y,i)))
     {
       for (j=1;j<i;j++)
         res = gadd(res, gmul(gcoeff(q,i,j), mulii(gel(x,i),gel(y,j))));

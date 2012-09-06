@@ -667,7 +667,7 @@ ZV_equal0(GEN V)
 {
   long l = lg(V);
   while (--l > 0)
-    if (signe(V[l])) return 0;
+    if (signe(gel(V,l))) return 0;
   return 1;
 }
 

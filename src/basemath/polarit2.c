@@ -428,8 +428,8 @@ static GEN
 gauss_normal(GEN x)
 {
   if (typ(x) != t_COMPLEX) return (signe(x) < 0)? absi(x): x;
-  if (signe(x[1]) < 0) x = gneg(x);
-  if (signe(x[2]) < 0) x = mulcxI(x);
+  if (signe(gel(x,1)) < 0) x = gneg(x);
+  if (signe(gel(x,2)) < 0) x = mulcxI(x);
   return x;
 }
 
@@ -922,7 +922,7 @@ gen_factorback(GEN L, GEN e, GEN (*_mul)(void*,GEN,GEN),
   if (lx == 1) return gen_1;
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
-    if (signe(e[k])) gel(x,l++) = _pow(data, gel(p,k), gel(e,k));
+    if (signe(gel(e,k))) gel(x,l++) = _pow(data, gel(p,k), gel(e,k));
   x[0] = evaltyp(t_VEC) | _evallg(l);
   return gerepileupto(av, divide_conquer_assoc(x, data, _mul));
 }

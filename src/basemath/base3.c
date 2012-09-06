@@ -1036,7 +1036,7 @@ vec01_to_indices(GEN v)
   l = lg(v);
   p = new_chunk(l) + l;
   for (k=1, i=l-1; i; i--)
-    if (signe(v[i])) { *--p = i; k++; }
+    if (signe(gel(v,i))) { *--p = i; k++; }
   *--p = evallg(k) | evaltyp(t_VECSMALL);
   avma = (pari_sp)p; return p;
 }

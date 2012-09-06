@@ -3770,7 +3770,7 @@ quadunit(GEN x)
       gerepileall(av2,4, &a,&f,&u,&v);
     }
   }
-  if (signe(y[3]) < 0) y = gneg(y);
+  if (signe(gel(y,3)) < 0) y = gneg(y);
   return gerepileupto(av, y);
 }
 
@@ -3866,7 +3866,7 @@ end_classno(GEN h, GEN hin, GEN forms)
     b = gel(fh,2); p1 = fg;
     for (com=1; ; com++, p1 = gmul(p1,fg))
       if (equalii(gel(p1,1), a) && absi_equal(gel(p1,2), b)) break;
-    if (signe(p1[2]) == signe(b)) com = -com;
+    if (signe(gel(p1,2)) == signe(b)) com = -com;
     /* f_i ^ h(q+com) = 1 */
     q = addsi(com,q);
     if (gequal0(q))

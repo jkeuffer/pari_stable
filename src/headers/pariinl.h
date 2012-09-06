@@ -2055,7 +2055,7 @@ sqrfrac(GEN x)
 
 INLINE void
 normalize_frac(GEN z) {
-  if (signe(z[2]) < 0) { togglesign(gel(z,1)); setabssign(gel(z,2)); }
+  if (signe(gel(z,2)) < 0) { togglesign(gel(z,1)); setabssign(gel(z,2)); }
 }
 
 INLINE GEN

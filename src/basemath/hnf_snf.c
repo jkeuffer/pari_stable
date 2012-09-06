@@ -961,15 +961,15 @@ FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
   if (is_pm1(u)) {
     if (signe(u) > 0) {
       for (i = 1; i <= k; i++)
-        if (signe(z[i])) gel(z,i) = modii(gel(z,i), p);
+        if (signe(gel(z,i))) gel(z,i) = modii(gel(z,i), p);
     } else {
       for (i = 1; i <= k; i++)
-        if (signe(z[i])) gel(z,i) = modii(negi(gel(z,i)), p);
+        if (signe(gel(z,i))) gel(z,i) = modii(negi(gel(z,i)), p);
     }
   }
   else {
     for (i = 1; i <= k; i++)
-      if (signe(z[i])) gel(z,i) = Fp_mul(u,gel(z,i), p);
+      if (signe(gel(z,i))) gel(z,i) = Fp_mul(u,gel(z,i), p);
   }
 }
 static void
@@ -1196,7 +1196,7 @@ findi(GEN M)
 {
   long i, n = lg(M);
   for (i=1; i<n; i++)
-    if (signe(M[i])) return i;
+    if (signe(gel(M,i))) return i;
   return 0;
 }
 
@@ -1204,7 +1204,7 @@ static long
 findi_normalize(GEN Aj, GEN B, long j, GEN lambda)
 {
   long r = findi(Aj);
-  if (r && signe(Aj[r]) < 0)
+  if (r && signe(gel(Aj,r)) < 0)
   {
     ZV_togglesign(Aj); if (B) ZV_togglesign(gel(B,j));
     Minus(j,lambda);
@@ -1239,18 +1239,18 @@ reduce2(GEN A, GEN B, long k, long j, long *row0, long *row1, GEN lambda, GEN D)
       if (signe(q) > 0)
       {
         for (i=1; i<j; i++)
-          if (signe(Lj[i])) gel(Lk,i) = addii(gel(Lk,i), gel(Lj,i));
+          if (signe(gel(Lj,i))) gel(Lk,i) = addii(gel(Lk,i), gel(Lj,i));
       }
       else
       {
         for (i=1; i<j; i++)
-          if (signe(Lj[i])) gel(Lk,i) = subii(gel(Lk,i), gel(Lj,i));
+          if (signe(gel(Lj,i))) gel(Lk,i) = subii(gel(Lk,i), gel(Lj,i));
       }
     }
     else
     {
       for (i=1; i<j; i++)
-        if (signe(Lj[i])) gel(Lk,i) = addii(gel(Lk,i), mulii(q,gel(Lj,i)));
+        if (signe(gel(Lj,i))) gel(Lk,i) = addii(gel(Lk,i), mulii(q,gel(Lj,i)));
     }
   }
 }
@@ -1394,7 +1394,7 @@ reduce1(GEN A, GEN B, long k, long j, GEN lambda, GEN D)
   GEN q;
   long i;
 
-  if (signe(A[j]))
+  if (signe(gel(A,j)))
     q = diviiround(gel(A,k),gel(A,j));
   else if (absi_cmp(shifti(gcoeff(lambda,j,k), 1), gel(D,j)) > 0)
     q = diviiround(gcoeff(lambda,j,k), gel(D,j));
@@ -1409,7 +1409,7 @@ reduce1(GEN A, GEN B, long k, long j, GEN lambda, GEN D)
     ZC_lincomb1_inplace(gel(B,k),gel(B,j),q);
     gel(Lk,j) = addii(gel(Lk,j), mulii(q,gel(D,j)));
     for (i=1; i<j; i++)
-      if (signe(Lj[i])) gel(Lk,i) = addii(gel(Lk,i), mulii(q,gel(Lj,i)));
+      if (signe(gel(Lj,i))) gel(Lk,i) = addii(gel(Lk,i), mulii(q,gel(Lj,i)));
   }
 }
 
@@ -1434,8 +1434,8 @@ extendedgcd(GEN A)
     int do_swap;
 
     reduce1(A,B,k,k-1,lambda,D);
-    if (signe(A[k-1])) do_swap = 1;
-    else if (!signe(A[k]))
+    if (signe(gel(A,k-1))) do_swap = 1;
+    else if (!signe(gel(A,k)))
     {
       pari_sp av1 = avma;
       GEN z = addii(mulii(gel(D,k-2),gel(D,k)), sqri(gcoeff(lambda,k-1,k)));
@@ -1460,7 +1460,7 @@ extendedgcd(GEN A)
       k++;
     }
   }
-  if (signe(A[n-1]) < 0)
+  if (signe(gel(A,n-1)) < 0)
   {
     togglesign_safe(&gel(A,n-1));
     ZV_togglesign(gel(B,n-1));

@@ -379,7 +379,7 @@ Monomial(GEN r, PERM bb, long nbv)
   for (i = 1; i <= nbv; i++)
   {
     t = gel(r,(int)bb[i]);
-    if (typ(t) == t_COMPLEX && signe(t[1]) < 0) { s = -s; t = gneg(t); }
+    if (typ(t) == t_COMPLEX && signe(gel(t,1)) < 0) { s = -s; t = gneg(t); }
     gel(R,i) = t;
   }
   if (nbv > 2)
@@ -395,7 +395,7 @@ Monomial(GEN r, PERM bb, long nbv)
       GEN n = gel(R,++i);
       if (!absr_cmp(gel(n,1), gel(c,1))
        && !absr_cmp(gel(n,2), gel(c,2))
-       && signe(c[2]) != signe(n[2]))
+       && signe(gel(c,2)) != signe(gel(n,2)))
         c = addrr(sqrr(gel(c,1)), sqrr(gel(c,2)));
       else
         c = gmul(c,n);

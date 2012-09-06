@@ -532,7 +532,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
     GEN beta = gel(idep,2);
     long i, j = lg(ep);
     for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
-      if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
+      if (typ(gel(El,i)) != t_INT && signe(gel(ep,i))) /* <==> != 1 */
         beta = famat_mul(to_famat_shallow(gel(El,i), negi(gel(ep,i))), beta);
     ep = shallowconcat(ep, ideallog(nf,beta,bid));
   }
@@ -1836,7 +1836,7 @@ get_nz(GEN bnf, GEN ideal, GEN arch, long clhray)
   long nz = 0, l = lg(arch), k, clhss;
   for (k = 1; k < l; k++)
   { /* FIXME: this is wasteful. Use the same algorithm as bnrconductor */
-    if (signe(arch[k]))
+    if (signe(gel(arch,k)))
     {
       gel(arch2,k) = gen_0; clhss = itos(bnrclassno(bnf,mod));
       gel(arch2,k) = gen_1;
@@ -2132,7 +2132,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     nba = r1;
   } else {
     matarchunit = NULL;
-    for (nba=0,i=1; i<=r1; i++) if (signe(arch[i])) nba++;
+    for (nba=0,i=1; i<=r1; i++) if (signe(gel(arch,i))) nba++;
   }
 
   /* what follows was rewritten from Ideallist */

@@ -351,7 +351,7 @@ gequal0(GEN x)
       return 0;
 
     case t_PADIC:
-      return !signe(x[4]);
+      return !signe(gel(x,4));
 
     case t_QUAD:
       return gequal0(gel(x,2)) && gequal0(gel(x,3));
@@ -2032,7 +2032,7 @@ vecmin(GEN x) { return vecmin0(x, NULL); }
 static void
 padicaff0(GEN x)
 {
-  if (signe(x[4]))
+  if (signe(gel(x,4)))
   {
     setvalp(x, valp(x)|precp(x));
     affsi(0,gel(x,4));
@@ -2194,7 +2194,7 @@ gaffect(GEN x, GEN y)
           avma = av; break;
         case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
         case t_PADIC:
-          if (!signe(x[1])) { padicaff0(y); break; }
+          if (!signe(gel(x,1))) { padicaff0(y); break; }
           num = gel(x,1);
           den = gel(x,2);
           av = avma; vx = Z_pvalrem(num, gel(y,2), &num);
@@ -2302,7 +2302,7 @@ GEN
 cvstop2(long s, GEN y)
 {
   GEN z, p = gel(y,2);
-  long v, d = signe(y[4])? precp(y): 0;
+  long v, d = signe(gel(y,4))? precp(y): 0;
   if (!s) return zeropadic(p, d);
   v = z_pvalrem(s, p, &s);
   if (d <= 0) return zeropadic(p, v);
@@ -2318,7 +2318,7 @@ GEN
 cvtop2(GEN x, GEN y)
 {
   GEN z, p = gel(y,2);
-  long v, d = signe(y[4])? precp(y): 0;
+  long v, d = signe(gel(y,4))? precp(y): 0;
   switch(typ(x))
   {
     case t_INT:
@@ -2553,7 +2553,7 @@ gsigne(GEN x)
   switch(typ(x))
   {
     case t_INT: case t_REAL: return signe(x);
-    case t_FRAC: return signe(x[1]);
+    case t_FRAC: return signe(gel(x,1));
   }
   pari_err_TYPE("gsigne",x);
   return 0; /* not reached */

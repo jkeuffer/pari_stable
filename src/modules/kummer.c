@@ -474,7 +474,7 @@ famat_factorback(GEN v, GEN e)
   long i, l = lg(e);
   GEN V = cgetg(1, t_MAT);
   for (i=1; i<l; i++)
-    if (signe(e[i])) V = famat_mul(V, famat_pow(gel(v,i), gel(e,i)));
+    if (signe(gel(e,i))) V = famat_mul(V, famat_pow(gel(v,i), gel(e,i)));
   return V;
 }
 

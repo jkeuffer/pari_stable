@@ -741,7 +741,7 @@ divisors(GEN n)
     P = gel(n,1); l = lg(P);
   }
   E = gel(n,2);
-  if (isint && l>1 && signe(P[1]) < 0) { E++; P++; l--; } /* skip -1 */
+  if (isint && l>1 && signe(gel(P,1)) < 0) { E++; P++; l--; } /* skip -1 */
   e = cgetg(l, t_VECSMALL);
   nbdiv = 1;
   for (i=1; i<l; i++)

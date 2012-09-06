@@ -581,7 +581,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   }
   bnd = itos(divii(nsp, Z)) + 1;
 
-  while (!signe(short_pol[dim])) dim--;
+  while (!signe(gel(short_pol,dim))) dim--;
 
   R = cgetg(dim + 2, t_POL); R[1] = P[1];
   for (j = 1; j <= dim; j++)
@@ -1233,7 +1233,7 @@ clonefill(GEN S, long s, long t)
 INLINE void
 step(GEN x, GEN y, GEN inc, long k)
 {
-  if (!signe(y[k]))
+  if (!signe(gel(y,k)))
     gel(x,k) = addis(gel(x,k), 1); /* leading coeff > 0 */
   else
   {
@@ -1393,7 +1393,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         p1 = norm_aux(gel(x,k), gel(y,k), gel(z,k), gel(v,k));
         gel(y,l) = gerepileuptoleaf(av1, p1);
         /* skip the [x_1,...,x_skipfirst,0,...,0] */
-        if ((l <= skipfirst && !signe(y[skipfirst]))
+        if ((l <= skipfirst && !signe(gel(y,skipfirst)))
          || mplessthan(borne1, gel(y,l))) fl = 1;
         else
           gel(x,l) = mpround( mpneg(gel(z,l)) );
@@ -1423,7 +1423,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       }
     }
     while (k > 1);
-    if (!signe(x[1]) && !signe(y[1])) continue; /* exclude 0 */
+    if (!signe(gel(x,1)) && !signe(gel(y,1))) continue; /* exclude 0 */
 
     av1 = avma;
     norme1 = norm_aux(gel(x,1),gel(y,1),gel(z,1),gel(v,1));

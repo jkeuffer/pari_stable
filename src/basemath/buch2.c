@@ -1086,7 +1086,7 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
   GEN d,N,I,e,n,ne,de;
   d = N = gen_1;
   for (i=1; i<c; i++)
-    if (signe(ex[i]))
+    if (signe(gel(ex,i)))
     {
       I = gel(gen,i); e = gel(ex,i); n = ZM_det_triangular(I);
       ne = powii(n,e);
@@ -1550,7 +1550,7 @@ red_mod_units(GEN col, GEN z)
   x = lll(shallowconcat(mat,x));
   if (typ(x) != t_MAT) return NULL;
   x = gel(x,RU);
-  if (signe(x[RU]) < 0) x = gneg_i(x);
+  if (signe(gel(x,RU)) < 0) x = gneg_i(x);
   if (!gequal1(gel(x,RU))) pari_err_BUG("red_mod_units");
   setlg(x,RU); return x;
 }
@@ -1579,7 +1579,7 @@ act_arch(GEN A, GEN x)
   { /* A a t_COL of t_INT. Assume lg(A)==lg(x) */
     a = gmul(gel(A,1), gel(x,1));
     for (i=2; i<l; i++)
-      if (signe(A[i])) a = gadd(a, gmul(gel(A,i), gel(x,i)));
+      if (signe(gel(A,i))) a = gadd(a, gmul(gel(A,i), gel(x,i)));
   }
   settyp(a, t_VEC); return a;
 }
@@ -1653,7 +1653,7 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
   long i, c = lg(e);
   GEN z = C? C: gen_1;
   for (i=1; i<c; i++)
-    if (signe(e[i])) z = idealmul(nf, z, idealpow(nf, gel(g,i), gel(e,i)));
+    if (signe(gel(e,i))) z = idealmul(nf, z, idealpow(nf, gel(g,i), gel(e,i)));
   if (typ(z) != t_MAT) z = idealhnf_shallow(nf,z);
   if (typ(y) != t_MAT) y = idealhnf_shallow(nf,y);
   i = ZM_equal(y, z); avma = av; return i;
@@ -1887,7 +1887,7 @@ expand(GEN nf, GEN C, GEN P, GEN e)
   long i, l = lg(e);
   GEN B, A = C;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
-    if (signe(e[i]))
+    if (signe(gel(e,i)))
     {
       B = idealpowred(nf, gel(P,i), gel(e,i));
       A = A? idealmulred(nf,A,B): B;
@@ -1900,7 +1900,7 @@ expandext(GEN nf, GEN C, GEN P, GEN e)
   long i, l = lg(e);
   GEN B, A = gel(C,1), C1 = A;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
-    if (signe(e[i]))
+    if (signe(gel(e,i)))
     {
       gel(C,1) = gel(P,i);
       B = idealpowred(nf, C, gel(e,i));

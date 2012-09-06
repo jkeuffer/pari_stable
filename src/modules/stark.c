@@ -123,7 +123,7 @@ ConjChar(GEN chi, GEN cyc)
   long i, l = lg(chi);
   GEN z = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
-    gel(z,i) = signe(chi[i])? subii(gel(cyc,i), gel(chi,i)): gen_0;
+    gel(z,i) = signe(gel(chi,i))? subii(gel(cyc,i), gel(chi,i)): gen_0;
   return z;
 }
 
@@ -852,7 +852,7 @@ _data4(GEN arch, long r1, long r2)
   GEN z = cgetg(5, t_VECSMALL);
   long i, b, q = 0;
 
-  for (i=1; i<=r1; i++) if (signe(arch[i])) q++;
+  for (i=1; i<=r1; i++) if (signe(gel(arch,i))) q++;
   z[1] = q; b = r1 - q;
   z[2] = b;
   z[3] = r2;
@@ -2056,8 +2056,8 @@ get_cS_cT(ST_t *T, long n)
     B = gel(bij,i0); s = gel(B,1);
     for (j = 2; j <= r; j++)
     {
-      if (signe(B[j])) s = mpadd(s, mulrr(gel(Z,j), gel(B,j)));
-      if (signe(A[j])) t = mpadd(t, mulrr(gel(Z,j), gel(A,j)));
+      if (signe(gel(B,j))) s = mpadd(s, mulrr(gel(Z,j), gel(B,j)));
+      if (signe(gel(A,j))) t = mpadd(t, mulrr(gel(Z,j), gel(A,j)));
     }
   for (i = i0 - 1; i > 1; i--)
   {
@@ -2065,21 +2065,21 @@ get_cS_cT(ST_t *T, long n)
     B = gel(bij,i); if (signe(s)) s = mulrr(s, nsurc);
     for (j = odd(i)? T->rc2: T->rc1; j > 1; j--)
     {
-      if (signe(B[j])) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
-      if (signe(A[j])) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
+      if (signe(gel(B,j))) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
+      if (signe(gel(A,j))) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
     }
-    if (signe(B[1])) s = addrr(s, gel(B,1));
-    if (signe(A[1])) t = addrr(t, gel(A,1));
+    if (signe(gel(B,1))) s = addrr(s, gel(B,1));
+    if (signe(gel(A,1))) t = addrr(t, gel(A,1));
   }
   /* i = 1 */
     A = gel(aij,1); if (signe(t)) t = mulrr(t, nsurc);
     B = gel(bij,1); if (signe(s)) s = mulrr(s, nsurc);
-    if (signe(B[1])) s = addrr(s, gel(B,1));
-    if (signe(A[1])) t = addrr(t, gel(A,1));
+    if (signe(gel(B,1))) s = addrr(s, gel(B,1));
+    if (signe(gel(A,1))) t = addrr(t, gel(A,1));
     for (j = 2; j <= r; j++)
     {
-      if (signe(B[j])) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
-      if (signe(A[j])) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
+      if (signe(gel(B,j))) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
+      if (signe(gel(A,j))) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
     }
   s = addrr(s, T->b? mulrr(csurn, gel(T->powracpi,T->b)): csurn);
   gel(T->cS,n) = gclone(s);
@@ -3338,7 +3338,7 @@ do_compo(GEN x, GEN y)
   GEN z;
   y = leafcopy(y); /* y := t^deg(y) y(#/t) */
   for (i = 2; i < l; i++)
-    if (signe(y[i])) gel(y,i) = monomial(gel(y,i), l-i-1, MAXVARN);
+    if (signe(gel(y,i))) gel(y,i) = monomial(gel(y,i), l-i-1, MAXVARN);
   for  (a = 0;; a = nexta(a))
   {
     if (a) x = gsubst(x, 0, gaddsg(a, pol_x(0)));

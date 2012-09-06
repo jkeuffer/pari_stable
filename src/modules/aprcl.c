@@ -102,7 +102,7 @@ red_cyclo2n_ip(GEN x, long n)
 {
   long i, pow2 = 1L<<(n-1);
   for (i = lg(x)-1; i>pow2+1; i--)
-    if (signe(x[i])) gel(x,i-pow2) = subii(gel(x,i-pow2), gel(x,i));
+    if (signe(gel(x,i))) gel(x,i-pow2) = subii(gel(x,i-pow2), gel(x,i));
   return normalizepol_lg(x, i+1);
 }
 static GEN

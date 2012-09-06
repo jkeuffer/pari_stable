@@ -100,7 +100,7 @@ galoisconj2pol(GEN x, long prec)
   {
     gel(w,n+1) = gel(polr,i);
     p1 = lindep2(w, prec);
-    if (signe(p1[n+1]))
+    if (signe(gel(p1,n+1)))
     {
       p1[0] = evallg(n+1) | evaltyp(t_COL);
       p2 = gdiv(RgV_to_RgX(p1, v), negi(gel(p1,n+1)));
@@ -141,7 +141,7 @@ galoisconj2(GEN nf, long prec)
   {
     gel(w,n+1) = gel(polr,i);
     p1 = lindep2(w, prec);
-    if (signe(p1[n+1]))
+    if (signe(gel(p1,n+1)))
     {
       p1[0] = evallg(n+1) | evaltyp(t_COL);
       p2 = gdiv(coltoliftalg(nf, p1), negi(gel(p1, n+1)));

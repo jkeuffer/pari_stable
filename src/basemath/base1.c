@@ -320,7 +320,7 @@ ZX_Z_normalize(GEN pol, GEN *ptk)
     for (j=n-1; j>=0; j--)
     {
       long v;
-      if (!signe(a[j])) continue;
+      if (!signe(gel(a,j))) continue;
       v = Z_pval(gel(a,j), p) / (n - j);
       if (v < vmin) vmin = v;
     }
@@ -366,7 +366,7 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
     /* k = ceil(e[i] / n); find d, k such that  p^d pol(x / p^k) monic */
     for (j=n-1; j>0; j--)
     {
-      if (!signe(a[j])) continue;
+      if (!signe(gel(a,j))) continue;
       v = Z_pval(gel(a,j), p);
       while (v + d < k * j) { k++; d += n; }
     }
@@ -2046,7 +2046,7 @@ ZX_canon_neg(GEN z)
 
   for (i = lg(z)-2; i >= 2; i -= 2)
   { /* examine the odd (resp. even) part of z if deg(z) even (resp. odd). */
-    s = signe(z[i]);
+    s = signe(gel(z,i));
     if (!s) continue;
     /* non trivial */
     if (s < 0) break; /* the condition is already satisfied */

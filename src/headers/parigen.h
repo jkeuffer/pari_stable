@@ -110,7 +110,7 @@ typedef unsigned long pari_ulong;
 #define setlg(x,s)    (((ulong*)(x))[0]=\
                       (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 
-#define signe(x)      ((((long*)(x))[1]) >> SIGNSHIFT)
+#define signe(x)      (((long)((x)[1])) >> SIGNSHIFT)
 #define setsigne(x,s) (((ulong*)(x))[1]=\
                         (((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
 

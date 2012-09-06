@@ -2317,7 +2317,7 @@ dbg_pari_heap(void)
   avma = av;
 }
 
-#define isnull_for_pol(g)  ((typ(g)==t_INTMOD)? !signe(g[2]): isnull(g))
+#define isnull_for_pol(g)  ((typ(g)==t_INTMOD)? !signe(gel(g,2)): isnull(g))
 
 /* is to be printed as '0' */
 static long

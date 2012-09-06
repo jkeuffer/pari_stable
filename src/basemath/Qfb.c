@@ -668,7 +668,7 @@ rhoimag(GEN x)
     int fg = absi_cmp(a, b);
     if (fg >= 0) {
       x = qfi(a,b,c);
-      if ((!fl || !fg) && signe(x[2]) < 0) setsigne(x[2], 1);
+      if ((!fl || !fg) && signe(gel(x,2)) < 0) setsigne(gel(x,2), 1);
       return x;
     }
   }

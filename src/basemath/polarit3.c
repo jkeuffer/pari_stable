@@ -2241,7 +2241,7 @@ FpV_polint(GEN xa, GEN ya, GEN p, long v)
   av = avma; lim = stack_lim(av,2);
   for (i=1; i<n; i++)
   {
-    if (!signe(ya[i])) continue;
+    if (!signe(gel(ya,i))) continue;
     T = FpX_div_by_X_x(Q, gel(xa,i), p, NULL);
     inv = Fp_inv(FpX_eval(T,gel(xa,i), p), p);
     if (i < n-1 && equalii(addii(gel(xa,i), gel(xa,i+1)), p))

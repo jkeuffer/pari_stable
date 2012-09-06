@@ -309,7 +309,7 @@ addmul_col(GEN a, long s, GEN b)
   if (!a) return gmulsg(s,b);
   l = lg(a);
   for (i=1; i<l; i++)
-    if (signe(b[i])) gel(a,i) = addii(gel(a,i), mulsi(s, gel(b,i)));
+    if (signe(gel(b,i))) gel(a,i) = addii(gel(a,i), mulsi(s, gel(b,i)));
   return a;
 }
 
@@ -2164,7 +2164,7 @@ factorbackprime(GEN nf, GEN L, GEN e)
   if (l == 1) return matid(nf_get_degree(nf));
   z = idealpow(nf, gel(L,1), gel(e,1));
   for (i=2; i<l; i++)
-    if (signe(e[i])) z = idealmulpowprime(nf,z, gel(L,i),gel(e,i));
+    if (signe(gel(e,i))) z = idealmulpowprime(nf,z, gel(L,i),gel(e,i));
   return z;
 }
 
@@ -2229,7 +2229,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   z = NULL; r = lg(e);
   for (i = 1; i < r; i++)
   {
-    long s = signe(e[i]);
+    long s = signe(gel(e,i));
     GEN pi, q;
     if (!s) continue;
     if (s < 0) flagden = 1;
@@ -2343,7 +2343,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   else
     e = leafcopy(e); /* do not destroy x[2] */
   for (i=1; i<r; i++)
-    if (signe(e[i]) < 0) gel(e,i) = gen_0;
+    if (signe(gel(e,i)) < 0) gel(e,i) = gen_0;
 
   F = factorbackprime(nf, L, e);
   s = NULL;
