@@ -2928,19 +2928,18 @@ det0(GEN a,long flag)
   return NULL; /* not reached */
 }
 
+/* A a 2x2 matrix
+   returns the determinant of A computed by the simple formula
+*/
 static GEN
-det2x2 (GEN A)
-  /* A a 2x2 matrix
-     returns the determinant of A computed by the simple formula
-  */
+det2x2(GEN A)
 {
   pari_sp av = avma;
-  GEN a = gcoeff (A, 1, 1),
-      b = gcoeff (A, 1, 2),
-      c = gcoeff (A, 2, 1),
-      d = gcoeff (A, 2, 2);
-
-  return gerepileupto (av, gsub (gmul (a, d), gmul (b, c)));
+  GEN a = gcoeff(A, 1, 1),
+      b = gcoeff(A, 1, 2),
+      c = gcoeff(A, 2, 1),
+      d = gcoeff(A, 2, 2);
+  return gerepileupto(av, gsub(gmul(a, d), gmul(b, c)));
 }
 
 
@@ -2996,8 +2995,7 @@ det2(GEN a)
   if (typ(a)!=t_MAT) pari_err_TYPE("det2",a);
   if (!nbco) return gen_1;
   if (nbco != lg(a[1])-1) pari_err_DIM("det2");
-  if (nbco == 2)
-    return det2x2 (a);
+  if (nbco == 2) return det2x2(a);
   pivot = get_pivot_fun(a, &data);
   return det_simple_gauss(a, data, pivot);
 }
@@ -3135,7 +3133,7 @@ det_develop(GEN M, long max, double bound)
   {
     case 0: return gen_1;
     case 1: return gcopy(gcoeff(M,1,1));
-    case 2: return det2x2 (M);
+    case 2: return det2x2(M);
   }
   if (max > ((n+2)>>1)) max = (n+2)>>1;
   for (j = 1; j <= n; j++)
@@ -3166,9 +3164,10 @@ det_develop(GEN M, long max, double bound)
   }
   if (best_row)
   {
+    double d = lbest-1;
     GEN s = NULL;
     long k;
-    bound /= (lbest-1);
+    bound /= d*d*d;
     for (k = 1; k < lbest; k++)
     {
       GEN c = coeff_det(M, best_row, best[k], max, bound);
@@ -3178,9 +3177,10 @@ det_develop(GEN M, long max, double bound)
   }
   if (best_col)
   {
+    double d = lbest-1;
     GEN s = NULL;
     long k;
-    bound /= (lbest-1);
+    bound /= d*d*d;
     for (k = 1; k < lbest; k++)
     {
       GEN c = coeff_det(M, best[k], best_col, max, bound);
@@ -3276,7 +3276,6 @@ ZM_det_i(GEN a, long n)
 GEN
 det(GEN a)
 {
-  const long DIXON_THRESHOLD = 40;
   long n = lg(a)-1;
   double B;
   GEN data, p=NULL;
@@ -3286,19 +3285,26 @@ det(GEN a)
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err_DIM("det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
-  if (RgM_is_FpM(a, &p) && (p || n > DIXON_THRESHOLD))
+  if (RgM_is_FpM(a, &p))
   {
     pari_sp av;
-    if (!p) return ZM_det_i(a, n);
-    av = avma;
-    return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
+    if (!p)
+    { /* ZM */
+      const long DIXON_THRESHOLD = 40;
+      if (n > DIXON_THRESHOLD) return ZM_det_i(a, n);
+      return det_simple_gauss(a, NULL, &gauss_get_pivot_NZ);
+    }
+    else
+    { /* FpM */
+      av = avma;
+      return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
+    }
   }
-  if (n == 2)
-    return det2x2 (a);
+  if (n == 2) return det2x2(a);
   pivot = get_pivot_fun(a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
-  B = (double)n; B = B*B; B = B*B;
-  return det_develop(a, 7, B);
+  B = (double)n;
+  return det_develop(a, 7, B*B*B);
 }
 
 GEN
