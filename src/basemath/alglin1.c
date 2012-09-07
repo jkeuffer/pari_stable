@@ -3215,15 +3215,17 @@ RgM_Hadamard(GEN a)
   return gerepileuptoint(av, ceil_safe(B));
 }
 
-/* assume dim(a) = n > 1 */
+/* assume dim(a) = n > 0 */
 static GEN
 ZM_det_i(GEN a, long n)
 {
+  const long DIXON_THRESHOLD = 40;
   pari_sp av = avma, av2;
   long i;
   ulong p, compp, Dp = 1;
   byteptr d;
   GEN D, h, q, v, comp;
+  if (n == 1) return icopy(gcoeff(a,1,1));
   if (n == 2) {
     D = subii(mulii(gcoeff(a,1,1), gcoeff(a,2,2)),
               mulii(gcoeff(a,2,1), gcoeff(a,1,2)));
@@ -3242,18 +3244,23 @@ ZM_det_i(GEN a, long n)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   if (!Dp) { avma = av; return gen_0; }
-  av2 = avma;
-  v = cgetg(n+1, t_COL);
-  gel(v, 1) = gen_1; /* ensure content(v) = 1 */
-  for (i = 2; i <= n; i++) gel(v, i) = stoi(random_Fl(15) - 7);
-  D = Q_denom(ZM_gauss(a, v));
-  if (expi(D) < expi(h) >> 1)
-  { /* First try unlucky, try once more */
+  if (n <= DIXON_THRESHOLD)
+    D = q;
+  else
+  {
+    av2 = avma;
+    v = cgetg(n+1, t_COL);
+    gel(v, 1) = gen_1; /* ensure content(v) = 1 */
     for (i = 2; i <= n; i++) gel(v, i) = stoi(random_Fl(15) - 7);
-    D = lcmii(D, Q_denom(ZM_gauss(a, v)));
+    D = Q_denom(ZM_gauss(a, v));
+    if (expi(D) < expi(h) >> 1)
+    { /* First try unlucky, try once more */
+      for (i = 2; i <= n; i++) gel(v, i) = stoi(random_Fl(15) - 7);
+      D = lcmii(D, Q_denom(ZM_gauss(a, v)));
+    }
+    D = gerepileuptoint(av2, D);
+    if (q != gen_1) D = lcmii(D, q);
   }
-  D = gerepileuptoint(av2, D);
-  if (q != gen_1) D = lcmii(D, q);
   /* determinant is a multiple of D */
   h = shifti(divii(h, D), 1);
 
@@ -3289,17 +3296,10 @@ det(GEN a)
   if (RgM_is_FpM(a, &p))
   {
     pari_sp av;
-    if (!p)
-    { /* ZM */
-      const long DIXON_THRESHOLD = 40;
-      if (n > DIXON_THRESHOLD) return ZM_det_i(a, n);
-      return det_simple_gauss(a, NULL, &gauss_get_pivot_NZ);
-    }
-    else
-    { /* FpM */
-      av = avma;
-      return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
-    }
+    if (!p) return ZM_det_i(a, n); /* ZM */
+    /* FpM */
+    av = avma;
+    return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
   }
   pivot = get_pivot_fun(a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
@@ -3315,7 +3315,6 @@ ZM_det(GEN a)
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err_DIM("ZM_det");
   RgM_check_ZM(a, "ZM_det");
-  if (n == 1) return icopy(gcoeff(a,1,1));
   return ZM_det_i(a, n);
 }
 
