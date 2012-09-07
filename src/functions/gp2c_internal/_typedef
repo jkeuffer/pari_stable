@@ -9,6 +9,7 @@ Description:
  (C!byteptr)       byteptr
  (C!pari_sp)       pari_sp
  (C!func_GG)       GEN
+ (C!forprime_t)    forprime_t
 
 Function: _decl_ext
 Class: gp2c_internal
@@ -39,6 +40,7 @@ Description:
  (genstr)       GEN
  (str)          char*
  (bptr)         byteptr
+ (forprime)     forprime_t
  (func_GG)      func_GG
  (pari_sp)      pari_sp
  (typ)          long

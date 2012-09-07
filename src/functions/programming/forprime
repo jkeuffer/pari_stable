@@ -10,6 +10,32 @@ Help: Compute the next prime from the diffptr table.
 Description:
  (*small,*bptr):void  NEXT_PRIME_VIADIFF($1, $2)
 
+Function: _forprime_init
+Class: gp2c_internal
+Help: Initialize forprime_t
+Description:
+ (forprime,int):void                  forprime_init(&$1, $2, NULL);
+ (forprime,int,int):void              forprime_init(&$1, $2, $3);
+
+Function: _forprime_next_
+Class: gp2c_internal
+Help: Compute the next prime
+Description:
+ (forprime):int                       forprime_next(&$1)
+
+Function: _u_forprime_init
+Class: gp2c_internal
+Help: Initialize forprime_t (ulong version)
+Description:
+ (forprime,small):void              u_forprime_init(&$1, $2, ULONG_MAX);
+ (forprime,small,small):void        u_forprime_init(&$1, $2, $3);
+
+Function: _u_forprime_next
+Class: gp2c_internal
+Help: Compute the next prime (ulong version)
+Description:
+ (forprime):small                   u_forprime_next(&$1)
+
 Function: forprime
 Section: programming/control
 C-Name: forprime
