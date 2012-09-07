@@ -3285,6 +3285,7 @@ det(GEN a)
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err_DIM("det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
+  if (n == 2) return det2x2(a);
   if (RgM_is_FpM(a, &p))
   {
     pari_sp av;
@@ -3300,7 +3301,6 @@ det(GEN a)
       return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
     }
   }
-  if (n == 2) return det2x2(a);
   pivot = get_pivot_fun(a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
   B = (double)n;
