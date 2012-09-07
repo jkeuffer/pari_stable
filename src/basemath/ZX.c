@@ -80,7 +80,7 @@ ZX_max_lg(GEN x)
 {
   long i, prec = 0, lx = lg(x);
 
-  for (i=2; i<lx; i++) { long l = lgefint(x[i]); if (l > prec) prec = l; }
+  for (i=2; i<lx; i++) { long l = lgefint(gel(x,i)); if (l > prec) prec = l; }
   return prec;
 }
 

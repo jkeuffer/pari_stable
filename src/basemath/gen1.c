@@ -574,7 +574,7 @@ addsub_pp(GEN x, GEN y, GEN (*op)(GEN,GEN))
   GEN u, z, mod, p = gel(x,2);
   int swap;
 
-  (void)new_chunk(5 + lgefint(x[3]) + lgefint(y[3]));
+  (void)new_chunk(5 + lgefint(gel(x,3)) + lgefint(gel(y,3)));
   e = valp(x);
   r = valp(y); d = r-e;
   if (d < 0) { swap = 1; swap(x,y); e = r; d = -d; } else swap = 0;

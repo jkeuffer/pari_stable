@@ -46,7 +46,7 @@ long
 ZV_max_lg(GEN x)
 {
   long i, prec = 2, m = lg(x);
-  for (i=1; i<m; i++) { long l = lgefint(x[i]); if (l > prec) prec = l; }
+  for (i=1; i<m; i++) { long l = lgefint(gel(x,i)); if (l > prec) prec = l; }
   return prec;
 }
 long
@@ -59,7 +59,7 @@ ZM_max_lg(GEN x)
     for (j=1; j<n; j++)
     {
       GEN c = gel(x,j);
-      for (i=1; i<m; i++) { long l = lgefint(c[i]); if (l > prec) prec = l; }
+      for (i=1; i<m; i++) { long l = lgefint(gel(c,i)); if (l > prec) prec = l; }
     }
   }
   return prec;

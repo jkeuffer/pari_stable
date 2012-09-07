@@ -872,7 +872,7 @@ hnfmerge_get_1(GEN A, GEN B)
         GEN u = gel(U,k);
         long h;
         for (h=1; h<l; h++)
-          if (lgefint(u[h]) > lb) gel(u,h) = remii(gel(u,h), b);
+          if (lgefint(gel(u,h)) > lb) gel(u,h) = remii(gel(u,h), b);
       }
     }
     if (j == 1)
@@ -1021,8 +1021,8 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
       p2 = gel(x,k);
       for (k = 1; k < i; k++)
       {
-        if (lgefint(p1[k]) > ldm) gel(p1,k) = centermodii(gel(p1,k), dm,dm2);
-        if (lgefint(p2[k]) > ldm) gel(p2,k) = centermodii(gel(p2,k), dm,dm2);
+        if (lgefint(gel(p1,k)) > ldm) gel(p1,k) = centermodii(gel(p1,k), dm,dm2);
+        if (lgefint(gel(p2,k)) > ldm) gel(p2,k) = centermodii(gel(p2,k), dm,dm2);
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
@@ -1103,7 +1103,7 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
   for (i = li-2; i > 0; i--)
   {
     GEN diag = gcoeff(x,i,i);
-    ldm = lgefint(dm[i]);
+    ldm = lgefint(gel(dm,i));
     for (j = i+1; j < li; j++)
     {
       b = gcoeff(x,i,j);
@@ -1113,7 +1113,7 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
       ZC_lincomb1_inplace(gel(x,j), gel(x,i),b);
       p1 = gel(x,j);
       for (k=1; k<i; k++)
-        if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
+        if (lgefint(gel(p1,k)) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnfmod[3]. i=%ld", i);

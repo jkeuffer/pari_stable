@@ -114,11 +114,11 @@ typedef unsigned long pari_ulong;
 #define setsigne(x,s) (((ulong*)(x))[1]=\
                         (((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
 
-#define lgefint(x)      ((long)(((ulong*)(x))[1] & LGBITS))
+#define lgefint(x)      ((long)(((ulong)((x)[1])) & LGBITS))
 #define setlgefint(x,s) (((ulong*)(x))[1]=\
                           (((ulong*)(x))[1]&(~LGBITS)) | (ulong)evallgefint(s))
 
-#define realprec(x)   ((long)(((ulong*)(x))[0] & LGBITS))
+#define realprec(x)   ((long)(((ulong)((x)[0])) & LGBITS))
 #define setprec(x,s)  (((ulong*)(x))[0]=\
                       (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 #define incrprec(x)   ((x)++)

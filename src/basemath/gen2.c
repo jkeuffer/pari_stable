@@ -143,7 +143,7 @@ cgetp(GEN x)
   y[1] = evalprecp(precp(x)) | _evalvalp(0);
   gel(y,2) = icopy(gel(x,2));
   gel(y,3) = icopy(gel(x,3));
-  gel(y,4) = cgeti(lgefint(x[3])); return y;
+  gel(y,4) = cgeti(lgefint(gel(x,3))); return y;
 }
 
 /*******************************************************************/
