@@ -1652,9 +1652,9 @@ degpol(GEN x) { return lg(x)-3; }
 INLINE long
 lgpol(GEN x) { return lg(x)-2; }
 INLINE long
-lgcols(GEN x) { return lg(x[1]); }
+lgcols(GEN x) { return lg(gel(x,1)); }
 INLINE long
-nbrows(GEN x) { return lg(x[1])-1; }
+nbrows(GEN x) { return lg(gel(x,1))-1; }
 INLINE GEN
 truecoeff(GEN x, long n) { return polcoeff0(x,n,-1); }
 
