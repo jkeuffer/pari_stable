@@ -248,7 +248,7 @@ mtran_long(GEN v, GEN w, long q, long m, long k0)
 static void
 rowred_long(GEN a, long rmod)
 {
-  long j,k, c = lg(a), r = lg(a[1]);
+  long j,k, c = lg(a), r = lgcols(a);
 
   for (j=1; j<r; j++)
   {
@@ -275,7 +275,7 @@ rowred_long(GEN a, long rmod)
 static void
 rowred(GEN a, GEN rmod)
 {
-  long j,k, c = lg(a), r = lg(a[1]);
+  long j,k, c = lg(a), r = lgcols(a);
   pari_sp av=avma, lim=stack_lim(av,1);
   GEN rmodo2 = shifti(rmod,-1);
 
@@ -1969,7 +1969,7 @@ pradical(GEN nf, GEN p, GEN *phi)
 static GEN
 get_powers(GEN mul, GEN p)
 {
-  long i, d = lg(mul[1]);
+  long i, d = lgcols(mul);
   GEN z, pow = cgetg(d+2,t_MAT), P = pow+1;
 
   gel(P,0) = scalarcol_shallow(gen_1, d-1);
@@ -2498,7 +2498,7 @@ FqM_to_nfM(GEN A, GEN modpr)
   GEN B = cgetg(l, t_MAT);
 
   if (l == 1) return B;
-  h = lg(A[1]);
+  h = lgcols(A);
   for (j=1; j<l; j++)
   {
     GEN Aj = gel(A,j), Bj = cgetg(h,t_COL); gel(B,j) = Bj;
@@ -2542,7 +2542,7 @@ nfM_to_FqM(GEN A, GEN nf,GEN modpr)
   GEN B = cgetg(l,t_MAT);
 
   if (l == 1) return B;
-  h = lg(A[1]);
+  h = lgcols(A);
   for (j=1; j<l; j++)
   {
     GEN Aj = gel(A,j), Bj = cgetg(h,t_COL); gel(B,j) = Bj;
@@ -3128,7 +3128,7 @@ is_pseudo_matrix(GEN O)
   return (typ(O) ==t_VEC && lg(O) >= 3
           && typ(gel(O,1)) == t_MAT
           && typ(gel(O,2)) == t_VEC
-          && lg(gel(O,1)) == lg(gel(O,2)));
+          && lgcols(O) == lg(gel(O,2)));
 }
 
 /* given bnf and a pseudo-basis of an order in HNF [A,I], tries to simplify

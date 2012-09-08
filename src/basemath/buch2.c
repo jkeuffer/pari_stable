@@ -961,7 +961,7 @@ expgexpo(GEN x)
   GEN p1;
 
   for (i=1; i<lg(x); i++)
-    for (j=1; j<lg(x[1]); j++)
+    for (j=1; j<lgcols(x); j++)
     {
       p1 = gmael(x,i,j);
       if (typ(p1)==t_COMPLEX) p1 = gel(p1,1);
@@ -1999,7 +1999,7 @@ bnfisunit(GEN bnf,GEN x)
   n = bnf_get_tuN(bnf); /* # { roots of 1 } */
   if (tx == t_MAT)
   { /* famat, assumed integral */
-    if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
+    if (lg(x) != 3 || lgcols(x) != lg(x[2]))
       pari_err(e_MISC, "not a factorization matrix in bnfisunit");
   } else {
     x = nf_to_scalar_or_basis(nf,x);
@@ -2789,7 +2789,7 @@ clean_cols(GEN A, int *precpb)
   GEN B;
   *precpb = 0;
   if (l == 1) return A;
-  h = lg(gel(A,1));;
+  h = lgcols(A);;
   B = cgetg(l, t_MAT);
   for (i = k = 1; i < l; i++)
   {
@@ -3214,7 +3214,7 @@ get_regulator(GEN mun)
   GEN R;
 
   if (lg(mun) == 1) return gen_1;
-  R = det( rowslice(real_i(mun), 1, lg(mun[1])-2) );
+  R = det( rowslice(real_i(mun), 1, lgcols(mun)-2) );
   setabssign(R); return gerepileuptoleaf(av, R);
 }
 
@@ -3591,7 +3591,7 @@ static GEN
 automorphism_perms(GEN M, GEN auts, GEN cyclic, long N)
 {
   pari_sp av;
-  const long r1plusr2 = lg(gel(M, 1)), r1 = 2*r1plusr2-N-2, r2 = r1plusr2-r1-1;
+  const long r1plusr2 = lgcols(M), r1 = 2*r1plusr2-N-2, r2 = r1plusr2-r1-1;
   long nauts = lg(auts), ncyc = lg(cyclic), i, j, l, m;
   GEN Mt, perms = cgetg(nauts, t_VEC);
 

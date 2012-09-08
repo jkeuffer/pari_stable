@@ -1040,7 +1040,7 @@ closure_eval(GEN C)
         sp--;
         if (typ(p)!=t_MAT)
           pari_err_TYPE("_[_,] OCcompoL [not a matrix]", p);
-        check_array_index(r,lg(p) == 1? 1: lg(p[1]));
+        check_array_index(r,lg(p) == 1? 1: lgcols(p));
         gel(st,sp-1) = row(p,r);
         break;
       }
@@ -1053,7 +1053,7 @@ closure_eval(GEN C)
         sp--;
         if (typ(p)!=t_MAT)
           pari_err_TYPE("&_[_,] OCcompoLptr [not a matrix]", p);
-        check_array_index(r,lg(p) == 1? 1: lg(p[1]));
+        check_array_index(r,lg(p) == 1? 1: lgcols(p));
         p2 = rowcopy(p,r);
         C->full_row = r; /* record row number */
         C->ptcell = &p2;

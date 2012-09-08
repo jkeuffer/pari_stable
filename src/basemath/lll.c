@@ -352,7 +352,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   else
   {
     G = zeromatcopy(d,d);
-    n = lg(gel(B,1))-1;
+    n = nbrows(B);
   }
   U = *ptrU; /* NULL if inplace */
 
@@ -639,7 +639,7 @@ lllgramallgen(GEN x, long flag)
   int flc;
 
   n = lx-1; if (n<=1) return lll_trivial(x,flag);
-  if (lg(x[1]) != lx) pari_err_DIM("lllgramallgen");
+  if (lgcols(x) != lx) pari_err_DIM("lllgramallgen");
 
   fl = cgetg(lx, t_VECSMALL);
 
@@ -711,7 +711,7 @@ rescale_to_int(GEN x)
   int exact = 1;
 
   lx = lg(x); if (lx == 1) return x;
-  hx = lg(x[1]);
+  hx = lgcols(x);
   emin = HIGHEXPOBIT;
   for (j = 1; j < lx; j++)
     for (i = 1; i < hx; i++)

@@ -490,7 +490,7 @@ gpowg0(GEN x)
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      if (lx != lg(x[1])) pari_err_DIM("gpow");
+      if (lx != lgcols(x)) pari_err_DIM("gpow");
       y = matid(lx-1);
       for (i=1; i<lx; i++) gcoeff(y,i,i) = gpowg0(gcoeff(x,i,i));
       return y;
@@ -1177,7 +1177,7 @@ Zn_sqrt(GEN d, GEN fn)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
     pari_err_TYPE("Zn_sqrt",fn);
-  np = lg(gel(fn, 1))-1;
+  np = nbrows(fn);
   btop = avma; st_lim = stack_lim(btop, 1);
   for (j = 1; j <= np; ++j)
   {
@@ -1212,7 +1212,7 @@ Zn_issquare(GEN d, GEN fn)
     fn = Z_factor(absi(fn));
   else if (!is_Z_factor(fn))
     pari_err_TYPE("Zn_issquare",fn);
-  np = lg(gel(fn, 1))-1;
+  np = nbrows(fn);
   for (j = 1; j <= np; ++j)
   {
     GEN  r, p = gcoeff(fn, j, 1);

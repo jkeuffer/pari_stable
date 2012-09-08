@@ -163,7 +163,7 @@ Flm_Fl_add(GEN x, ulong y, ulong p)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (l != lg(x[1])) pari_err_OP( "+", x, utoi(y));
+  if (l != lgcols(x)) pari_err_OP( "+", x, utoi(y));
   for (i=1; i<l; i++)
   {
     GEN zi = cgetg(l,t_VECSMALL), xi = gel(x,i);
@@ -218,7 +218,7 @@ Flc_Fl_mul_inplace(GEN x, ulong y, ulong p)
 void
 Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
 {
-  long i, j, m = lg(y[1]), l = lg(y);
+  long i, j, m = lgcols(y), l = lg(y);
   if (HIGHWORD(x | p))
     for(j=1; j<l; j++)
       for(i=1; i<m; i++) ucoeff(y,i,j) = Fl_mul(ucoeff(y,i,j), x, p);
@@ -230,7 +230,7 @@ Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
 GEN
 Flm_Fl_mul(GEN y, ulong x, ulong p)
 {
-  long i, j, m = lg(y[1]), l = lg(y);
+  long i, j, m = lgcols(y), l = lg(y);
   GEN z = cgetg(l, t_MAT);
   if (HIGHWORD(x | p))
     for(j=1; j<l; j++) {
@@ -245,7 +245,7 @@ Flm_Fl_mul(GEN y, ulong x, ulong p)
   return y;
 }
 
-/* x[i,]*y. Assume lx > 1 and 0 < i < lg(x[1]) */
+/* x[i,]*y. Assume lx > 1 and 0 < i < lgcols(x) */
 static GEN
 ZMrow_ZC_mul_i(GEN x, GEN y, long lx, long i)
 {
@@ -365,7 +365,7 @@ FpM_mul(GEN x, GEN y, GEN p)
     }
     return gerepileupto(av, z);
   }
-  l = lg(x[1]); z = cgetg(ly,t_MAT);
+  l = lgcols(x); z = cgetg(ly,t_MAT);
   for (j=1; j<ly; j++) gel(z,j) = FpM_FpC_mul_i(x, gel(y,j), lx, l, p);
   return z;
 }
@@ -381,7 +381,7 @@ Flm_mul(GEN x, GEN y, ulong p)
     for (i=1; i<ly; i++) gel(z,i) = cgetg(1,t_VECSMALL);
     return z;
   }
-  l = lg(x[1]);
+  l = lgcols(x);
   if (SMALL_ULONG(p)) {
     for (j=1; j<ly; j++)
       gel(z,j) = Flm_Flc_mul_i_SMALL(x, gel(y,j), lx, l, p);
@@ -481,14 +481,14 @@ GEN
 FpM_FpC_mul(GEN x, GEN y, GEN p)
 {
   long lx = lg(x);
-  return lx==1? cgetg(1,t_COL): FpM_FpC_mul_i(x, y, lx, lg(x[1]), p);
+  return lx==1? cgetg(1,t_COL): FpM_FpC_mul_i(x, y, lx, lgcols(x), p);
 }
 GEN
 Flm_Flc_mul(GEN x, GEN y, ulong p)
 {
   long l, lx = lg(x);
   if (lx==1) return cgetg(1,t_VECSMALL);
-  l = lg(x[1]);
+  l = lgcols(x);
   if (p==2)
     return Flm_Flc_mul_i_2(x, y, lx, l);
   else if (SMALL_ULONG(p))
@@ -511,7 +511,7 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
   long i, l, lx = lg(x);
   GEN z;
   if (lx==1) return pol_0(v);
-  l = lg(x[1]);
+  l = lgcols(x);
   z = new_chunk(l+1);
   for (i=l-1; i; i--)
   {
@@ -551,7 +551,7 @@ Flm_transpose(GEN x)
   long i, dx, lx = lg(x);
   GEN y;
   if (lx == 1) return cgetg(1,t_MAT);
-  dx = lg(x[1]); y = cgetg(dx,t_MAT);
+  dx = lgcols(x); y = cgetg(dx,t_MAT);
   for (i=1; i<dx; i++) gel(y,i) = row_Flm(x,i);
   return y;
 }
@@ -629,7 +629,7 @@ FpM_to_mod(GEN z, GEN p)
   long i, j, m, l = lg(z);
   GEN  x = cgetg(l,t_MAT), y, zi;
   if (l == 1) return x;
-  m = lg(gel(z,1));
+  m = lgcols(z);
   p = icopy(p);
   for (i=1; i<l; i++)
   {
@@ -646,7 +646,7 @@ FpVV_to_mod(GEN z, GEN p)
   long i, j, m, l = lg(z);
   GEN  x = cgetg(l,t_VEC), y, zi;
   if (l == 1) return x;
-  m = lg(gel(z,1));
+  m = lgcols(z);
   p = icopy(p);
   for (i=1; i<l; i++)
   {

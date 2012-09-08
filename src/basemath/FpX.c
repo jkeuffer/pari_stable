@@ -1357,7 +1357,7 @@ static GEN
 famat_Z_gcd(GEN M, GEN n)
 {
   pari_sp av=avma;
-  long i, j, l=lg(M[1]);
+  long i, j, l=lgcols(M);
   GEN F=cgetg(3,t_MAT);
   gel(F,1)=cgetg(l,t_COL);
   gel(F,2)=cgetg(l,t_COL);

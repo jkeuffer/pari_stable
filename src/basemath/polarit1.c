@@ -828,7 +828,7 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   GEN z;
   long vs=y[1];
   if (ly==1) return zero_Flx(vs);
-  l = lg(x[1]);
+  l = lgcols(x);
   y++;
   z = const_vecsmall(l,0) + 1;
   if (SMALL_ULONG(p))
@@ -1834,7 +1834,7 @@ F2x_split_Berlekamp(GEN *t)
   }
 
   vker = F2x_Berlekamp_ker(u);
-  lb = lg(gel(vker,1));
+  lb = lgcols(vker);
   d = lg(vker)-1;
   ir = 0;
   /* t[i] irreducible for i < ir, still to be treated for i < L */
@@ -3372,7 +3372,7 @@ static GEN
 FpX_factorff_i(GEN P, GEN T, GEN p)
 {
   GEN V, E, F = FpX_factor(P,p);
-  long i, lfact = 1, nmax = lgpol(P), n = lg(gel(F,1));
+  long i, lfact = 1, nmax = lgpol(P), n = lgcols(F);
 
   V = cgetg(nmax,t_VEC);
   E = cgetg(nmax,t_VECSMALL);

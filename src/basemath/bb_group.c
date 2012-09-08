@@ -443,7 +443,7 @@ gen_order(GEN a, GEN o, void *E, const struct bb_group *grp)
   m = dlog_get_ordfa(o);
   if (!m) pari_err_TYPE("gen_order [missing order]",a);
   o = gel(m,1);
-  m = gel(m,2); l = lg(m[1]);
+  m = gel(m,2); l = lgcols(m);
   for (i = l-1; i; i--)
   {
     GEN t, y, p = gcoeff(m,i,1);
@@ -482,7 +482,7 @@ gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp)
   m = dlog_get_ordfa(o);
   if (!m) pari_err_TYPE("gen_factored_order [missing order]",a);
   o = gel(m,1);
-  m = gel(m,2); l = lg(m[1]);
+  m = gel(m,2); l = lgcols(m);
   P = cgetg(l, t_COL); ind = 1;
   F = cgetg(l, t_COL);
   for (i = l-1; i; i--)
@@ -592,7 +592,7 @@ gen_gener(GEN o, void *E, const struct bb_group *grp)
   long i, lpr;
   GEN F, N, pr, z=NULL;
   F = dlog_get_ordfa(o);
-  N = gel(F,1); pr = gel(F,2); lpr = lg(gel(pr,1));
+  N = gel(F,1); pr = gel(F,2); lpr = lgcols(pr);
   av = avma; lim = stack_lim(av,2);
 
   for (i = 1; i < lpr; i++)
@@ -686,7 +686,7 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
     long i, j, e;
     GEN r, zeta, y, l;
     pari_sp av1 = avma;
-    for (i = lg(F[1])-1; i; i--)
+    for (i = nbrows(F); i; i--)
     {
       l = gcoeff(F,i,1);
       j = itos(gcoeff(F,i,2));

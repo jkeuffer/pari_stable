@@ -787,8 +787,8 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   GEN pf, ar, G, W, NN, NQ;
   pari_timer ti;
   if (DEBUGLEVEL >= 1) timer_start(&ti);
-  a = lg(F)-1; b = lg(F[1])-1;
-  c = lg(B)-1; d = lg(B[1])-1;
+  a = lg(F)-1; b = lg(gel(F,1))-1;
+  c = lg(B)-1; d = lg(gel(B,1))-1;
   n = a*b;
   s = (b+s) % b;
   pf = cgetg(n+1, t_VECSMALL);
@@ -925,7 +925,7 @@ listznstarelts(long m, long o)
 static GEN
 sympol_eval_newtonsum(long e, GEN O, GEN mod)
 {
-  long f = lg(O), g = lg(O[1]), i, j;
+  long f = lg(O), g = lg(gel(O,1)), i, j;
   GEN PL = cgetg(f, t_COL);
   for(i=1; i<f; i++)
   {
@@ -1015,7 +1015,7 @@ fixedfieldsurmer(GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
 static long
 sympol_is1to1_lg(GEN NS, long n)
 {
-  long i, j, k, l = lg(NS[1]);
+  long i, j, k, l = lgcols(NS);
   for (i=1; i<l; i++)
     for(j=i+1; j<l; j++)
     {
@@ -1038,7 +1038,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
   GEN NS = cgetg(n+1,t_MAT), sym = NULL, W = cgetg(n+1,t_VECSMALL);
   long i, e=1;
   if (DEBUGLEVEL>=4)
-    err_printf("FixedField: Size: %ldx%ld\n",lg(O)-1,lg(O[1])-1);
+    err_printf("FixedField: Size: %ldx%ld\n",lg(O)-1,lg(gel(O,1))-1);
   for (i=1; !sym && i<=n; i++)
   {
     GEN L = sympol_eval_newtonsum(e++, O, mod);
@@ -1067,7 +1067,7 @@ fixedfieldorbits(GEN O, GEN L)
 static GEN
 fixedfieldinclusion(GEN O, GEN PL)
 {
-  long i, j, f = lg(O)-1, g = lg(O[1])-1;
+  long i, j, f = lg(O)-1, g = lg(gel(O,1))-1;
   GEN S = cgetg(f*g + 1, t_COL);
   for (i = 1; i <= f; i++)
   {
@@ -1964,7 +1964,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     PG = galoisgen(P, PL, PM, Pden, &Pgb, &Pga);
     mod = Pgb.ladicabs; mod2 = shifti(mod, -1);
     if (PG == gen_0) return NULL;
-    for (j = 1; j < lg(PG[1]); j++)
+    for (j = 1; j < lg(gel(PG,1)); j++)
     {
       pari_sp btop=avma;
       tau = permtopol(gmael(PG,1,j), PL, PM, Pden, mod, mod2, x);
@@ -2055,7 +2055,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   p = gf.p; ip = utoipos(p);
   Tmod = gf.Tmod;
   O = perm_cycles(frob);
-  deg = lg(O[1])-1;
+  deg = lg(gel(O,1))-1;
   sigma = permtopol(frob, L, M, den, gb->ladicabs, shifti(gb->ladicabs,-1), x);
   if (DEBUGLEVEL >= 9) err_printf("GaloisConj:Orbite:%Ps\n", O);
   if (deg == n)        /* cyclic */
@@ -2100,7 +2100,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     GEN  gj = gel(PG1, j);
     long s  = gf.psi[Pg[j]];
     GEN  B  = perm_cycles(gj);
-    long oj = lg(B[1]) - 1;
+    long oj = lg(gel(B,1)) - 1;
     GEN  F  = factoru(oj);
     GEN  Fp = gel(F,1);
     GEN  Fe = gel(F,2);
@@ -2399,7 +2399,7 @@ fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod, GEN mod2,
                  long x,long y)
 {
   pari_sp ltop = avma;
-  long i, j, k, l = lg(O), lo = lg(O[1]);
+  long i, j, k, l = lg(O), lo = lg(gel(O,1));
   GEN V, res, cosets = galoiscosets(O,perm), F = cgetg(lo+1,t_COL);
 
   gel(F, lo) = gen_1;

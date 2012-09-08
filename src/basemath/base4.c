@@ -56,7 +56,7 @@ idealtyp(GEN *ideal, GEN *arch)
   {
     case t_MAT: lx = lg(x);
       if (lx == 1) { t = id_PRINCIPAL; x = gen_0; break; }
-      if (lx != lg(x[1])) pari_err_TYPE("idealtyp [non-square t_MAT]",x);
+      if (lx != lgcols(x)) pari_err_TYPE("idealtyp [non-square t_MAT]",x);
       t = id_MAT;
       break;
 
@@ -134,7 +134,7 @@ idealhnf_shallow(GEN nf, GEN x)
       long nx = lx-1;
       N = nf_get_degree(nf);
       if (nx == 0) return cgetg(1, t_MAT);
-      if (lg(x[1])-1 != N) pari_err_TYPE("idealhnf [wrong dimension]",x);
+      if (nbrows(x) != N) pari_err_TYPE("idealhnf [wrong dimension]",x);
       if (nx == 1) return idealhnf_principal(nf, gel(x,1));
 
       if (nx == N && RgM_is_ZM(x) && ZM_ishnf(x)) return x;
@@ -827,7 +827,7 @@ idealaddmultoone(GEN nf, GEN list)
     {
       nz++;
       RgM_check_ZM(I,"idealaddmultoone");
-      if (lg(gel(I,1)) != N+1)
+      if (lgcols(I) != N+1)
         pari_err_TYPE("idealaddmultoone [not an ideal]", I);
     }
     gel(L,i) = I;
@@ -1777,7 +1777,7 @@ isideal(GEN nf,GEN x)
   }
   N = degpol(T);
   if (lx-1 != N) return (lx == 1);
-  if (lg(x[1])-1 != N) return 0;
+  if (nbrows(x) != N) return 0;
 
   av = avma; x = Q_primpart(x);
   if (!ZM_ishnf(x)) return 0;
@@ -2625,7 +2625,7 @@ nfhnf(GEN nf, GEN x)
   A = gel(x,1);
   I = gel(x,2); k = lg(A)-1;
   if (!k) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
-  m = lg(A[1])-1;
+  m = nbrows(A);
   if (k < m) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
 
   av = avma; lim = stack_lim(av, 2);
@@ -2710,7 +2710,7 @@ nfsnf(GEN nf, GEN x)
   if (typ(J)!=t_VEC) pari_err_TYPE("nfsnf",J);
   if (lg(I)!=n+1 || lg(J)!=n+1) pari_err_DIM("nfsnf");
   if (!n) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
-  m = lg(A[1])-1;
+  m = nbrows(A);
   if (n < m) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
   if (n > m) pari_err_IMPL("nfsnf for non square matrices");
 
@@ -2876,7 +2876,7 @@ nfdetint(GEN nf, GEN x)
   I = gel(x,2);
   n = lg(A)-1; if (!n) return gen_1;
 
-  m1 = lg(A[1]); m = m1-1;
+  m1 = lgcols(A); m = m1-1;
   id = matid(N);
   c = new_chunk(m1); for (k=1; k<=m; k++) c[k] = 0;
   piv = pivprec = gen_1;
@@ -2996,7 +2996,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   I = gel(x,2);
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
 
-  li = lg(A[1]);
+  li = lgcols(A);
   detmat = Q_remove_denom(detmat, NULL);
   if (typ(detmat)!=t_MAT) pari_err_TYPE("nfhnfmod",detmat);
   RgM_check_ZM(detmat, "nfhnfmod");

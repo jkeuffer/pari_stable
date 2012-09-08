@@ -471,7 +471,7 @@ GEN
 special_pivot(GEN x)
 {
   GEN t, perm, H = ZM_hnfperm(x,NULL,&perm);
-  long i,j, l = lg(H), h = lg(H[1]);
+  long i,j, l = lg(H), h = lgcols(H);
   for (i=1; i<h; i++)
   {
     int fl = 0;

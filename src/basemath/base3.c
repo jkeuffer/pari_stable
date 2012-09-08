@@ -31,7 +31,7 @@ static GEN
 get_tab(GEN nf, long *N)
 {
   GEN tab = (typ(nf) == t_MAT)? nf: gel(nf,9);
-  *N = lg(tab[1])-1; return tab;
+  *N = nbrows(tab); return tab;
 }
 
 /* x != 0, y t_INT. Return x * y (not memory clean if x = 1) */
@@ -782,7 +782,7 @@ mulmat_pol(GEN A, GEN x)
   long i,l;
   GEN z;
   if (typ(x) != t_POL) return gmul(x,gel(A,1)); /* scalar */
-  l=lg(x)-1; if (l == 1) return typ(A)==t_VEC? gen_0: zerocol(lg(A[1])-1);
+  l=lg(x)-1; if (l == 1) return typ(A)==t_VEC? gen_0: zerocol(nbrows(A));
   x++; z = gmul(gel(x,1), gel(A,1));
   for (i=2; i<l ; i++)
     if (!gequal0(gel(x,i))) z = gadd(z, gmul(gel(x,i), gel(A,i)));
@@ -883,7 +883,7 @@ matbasistoalg(GEN nf,GEN x)
     case t_MAT: break;
     default: pari_err_TYPE("matbasistoalg",x);
   }
-  li = lg(x[1]);
+  li = lgcols(x);
   for (j=1; j<lx; j++)
   {
     GEN c = cgetg(li,t_COL), xj = gel(x,j);
@@ -908,7 +908,7 @@ matalgtobasis(GEN nf,GEN x)
     case t_MAT: break;
     default: pari_err_TYPE("matalgtobasis",x);
   }
-  li = lg(x[1]);
+  li = lgcols(x);
   for (j=1; j<lx; j++)
   {
     GEN c = cgetg(li,t_COL), xj = gel(x,j);
@@ -924,7 +924,7 @@ RgM_to_nfM(GEN nf,GEN x)
   GEN z = cgetg_copy(x, &lx);
 
   if (lx == 1) return z;
-  li = lg(x[1]);
+  li = lgcols(x);
   for (j=1; j<lx; j++)
   {
     GEN c = cgetg(li,t_COL), xj = gel(x,j);
@@ -1400,7 +1400,7 @@ increment(GEN y, long k, long d)
 GEN
 archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
 {
-  long i, r, lgmat, N = lg(bas)-1, nba = lg(v[1]) - 1;
+  long i, r, lgmat, N = lg(bas)-1, nba = nbrows(v);
   GEN lambda = cgetg(N+1, t_VECSMALL), mat = cgetg(nba+1,t_MAT);
 
   lgmat = lg(v); setlg(mat, lgmat+1);
@@ -1465,7 +1465,7 @@ nfarchstar(GEN nf, GEN x, GEN archp)
     else
     {
       GEN bas = nf_get_M(nf);
-      if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);
+      if (lgcols(bas) > lg(archp)) bas = rowpermute(bas, archp);
       gen = cgetg(nba+1,t_VEC);
       gel(gen,1) = gZ;
       mat = archstar_full_rk(x, bas, mkmat(const_vecsmall(nba,1)), gen);

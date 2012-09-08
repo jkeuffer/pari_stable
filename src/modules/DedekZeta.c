@@ -398,7 +398,7 @@ slambdak(GEN znf, long s, long flag, long prec)
   cstlog = gel(znf,6);
   coef   = gel(znf,8);
   coeflog= gel(znf,9);
-  i0 = lg(gel(C,1))-1;
+  i0 = nbrows(C);
   N0 = lg(coef)-1;
 
   if (s < 0 && (r2 || !odd(s))) s = 1 - s;
@@ -506,7 +506,7 @@ cxlambdak(GEN znf, GEN s, long flag, long prec)
   coeflog= gel(znf,9);
   r1 = mael(znf,1,1);
   r2 = mael(znf,1,2); r = r1+r2;
-  i0 = lg(gel(C,1))-1;
+  i0 = nbrows(C);
   N0 = lg(coef)-1;
   bigprec = precision(cst);
 

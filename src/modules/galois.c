@@ -2203,7 +2203,7 @@ closure11(long EVEN, buildroot *BR)
     h = leafcopy(h); setvarn(h, MAXVARN);
     setvarn(r, 0); r = nffactor(h, r);
     /* S11 of F_110[11] */
-    if (lg(r[1]) == 3) return 8; else return 4;
+    if (lgcols(r) == 3) return 8; else return 4;
   }
 }
 

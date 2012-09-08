@@ -153,7 +153,7 @@ FlxM_Flx_add_shallow(GEN x, GEN y, ulong p)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (l != lg(x[1])) pari_err_OP( "+", x, y);
+  if (l != lgcols(x)) pari_err_OP( "+", x, y);
   for (i=1; i<l; i++)
   {
     GEN zi = cgetg(l,t_COL), xi = gel(x,i);

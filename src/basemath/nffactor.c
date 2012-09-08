@@ -87,7 +87,7 @@ FpM_ratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
   long i, j, h, l = lg(M);
   GEN a, N = cgetg_copy(M, &l);
   if (l == 1) return N;
-  h = lg(gel(M,1));
+  h = lgcols(M);
   for (j = 1; j < l; ++j)
   {
     gel(N,j) = cgetg(h, t_COL);

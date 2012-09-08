@@ -91,13 +91,13 @@ void
 checksqmat(GEN x, long N)
 {
   if (typ(x)!=t_MAT) pari_err_TYPE("checksqmat",x);
-  if (lg(x) == 1 || lg(x[1]) != N+1) pari_err_DIM("checksqmat");
+  if (lg(x) == 1 || lgcols(x) != N+1) pari_err_DIM("checksqmat");
 }
 
 GEN
 checkbid_i(GEN bid)
 {
-  if (typ(bid)!=t_VEC || lg(bid)!=6 || lg(bid[1])!=3) return NULL;
+  if (typ(bid)!=t_VEC || lg(bid)!=6 || lg(gel(bid,1))!=3) return NULL;
   return bid;
 }
 void
@@ -152,7 +152,7 @@ check_ZKmodule(GEN x, const char *s)
   if (typ(x) != t_VEC || lg(x) < 3) pari_err_TYPE(s,x);
   if (typ(gel(x,1)) != t_MAT) pari_err_TYPE(s,gel(x,1));
   if (typ(gel(x,2)) != t_VEC) pari_err_TYPE(s,gel(x,2));
-  if (lg(gel(x,2)) != lg(gel(x,1))) pari_err_DIM(s);
+  if (lg(gel(x,2)) != lgcols(x)) pari_err_DIM(s);
 }
 
 GEN
@@ -866,7 +866,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
 
     case t_MAT: /* ideal */
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
-      if (lg(x[1])-1 != nf_get_degree(nf)) break;
+      if (nbrows(x) != nf_get_degree(nf)) break;
       aut = algtobasis(nf, aut);
       y = cgetg(lx,t_MAT);
       for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf, aut, gel(x,j));

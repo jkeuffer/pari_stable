@@ -530,7 +530,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     H = mathnfspec(U1,&perm,&dep,&B,&p1);
     lH = lg(H);
     lB = lg(B);
-    if (lg(dep) > 1 && lg(dep[1]) > 1) pari_err_BUG("bnfsunit");
+    if (lg(dep) > 1 && lgcols(dep) > 1) pari_err_BUG("bnfsunit");
    /*                   [ H B  ]            [ H^-1   - H^-1 B ]
     * perm o HNF(U1) =  [ 0 Id ], inverse = [  0         Id   ]
     * (permute the rows)
@@ -590,7 +590,7 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   perm = gel(p1,1);
   HB   = gel(p1,2);
   den  = gel(p1,3);
-  cH = lg(HB[1]) - 1;
+  cH = nbrows(HB);
   lB = lg(HB) - cH;
   v = const_vecsmall(ls-1, 0);
   N0 = N;

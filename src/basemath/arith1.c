@@ -3378,7 +3378,7 @@ pnqn(GEN x)
   }
   else
   {
-    long ly = lg(x[1]);
+    long ly = lgcols(x);
     if (ly==2)
     {
       p1 = gcoeff(x,1,1); q1 = gen_1;

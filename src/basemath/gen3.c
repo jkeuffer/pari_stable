@@ -1249,7 +1249,7 @@ RgX_deflate_max(GEN x, long *m)
 static GEN
 RgM_eval_powers(GEN P, GEN V, long a, long n)
 {
-  GEN z = scalarmat_shallow(gel(P,2+a), lg(V[1])-1); /* V[1] = 1 */
+  GEN z = scalarmat_shallow(gel(P,2+a), nbrows(V)); /* V[1] = 1 */
   long i;
   for (i=1; i<=n; i++) z = RgM_add(z, RgM_Rg_mul(gel(V,i+1),gel(P,2+a+i)));
   return z;
@@ -1259,7 +1259,7 @@ GEN
 RgX_RgMV_eval(GEN P, GEN V)
 {
   pari_sp av = avma;
-  long l = lg(V)-1, d = degpol(P), n = lg(V[1])-1;
+  long l = lg(V)-1, d = degpol(P), n = nbrows(V);
   GEN z;
 
   if (d < 0) return zeromat(n, n);
@@ -1326,7 +1326,7 @@ gsubst(GEN x, long v, GEN y)
   {
     case t_MAT:
       if (ly==1) return cgetg(1,t_MAT);
-      if (ly != lg(y[1]))
+      if (ly != lgcols(y))
         pari_err(e_MISC,"forbidden substitution by a non square matrix");
       break;
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
@@ -1943,7 +1943,7 @@ integ(GEN x, long v)
       y = integ(gadd(x, zeroser(v,i+n + 2)), v);
       y = gdiv(gtrunc(gmul(gel(x,2), y)), gel(x,2));
       if (!gequal(deriv(y,v),x)) pari_err(e_MISC,"a log/atan appears in intformal");
-      if (typ(y)==t_RFRAC && lg(y[1]) == lg(y[2]))
+      if (typ(y)==t_RFRAC && lg(gel(y,1)) == lg(gel(y,2)))
       {
         GEN p2;
         tx=typ(gel(y,1)); p1=is_scalar_t(tx)? gel(y,1): leading_term(gel(y,1));
@@ -2938,7 +2938,7 @@ gtocol(GEN x)
   tx = typ(x);
   if (tx != t_MAT) { y = gtovec(x); settyp(y, t_COL); return y; }
   lx = lg(x); if (lx == 1) return cgetg(1, t_COL);
-  h = lg(x[1]); y = cgetg(h, t_COL);
+  h = lgcols(x); y = cgetg(h, t_COL);
   for (i = 1 ; i < h; i++) {
     gel(y,i) = cgetg(lx, t_VEC);
     for (j = 1; j < lx; j++) gmael(y,i,j) = gcopy(gcoeff(x,i,j));
@@ -3581,7 +3581,7 @@ RgM_mulreal(GEN x, GEN y)
 {
   long i, j, k, l, lx = lg(x), ly = lg(y);
   GEN z = cgetg(ly,t_MAT);
-  l = (lx == 1)? 1: lg(x[1]);
+  l = (lx == 1)? 1: lgcols(x);
   for (j=1; j<ly; j++)
   {
     GEN zj = cgetg(l,t_COL), yj = gel(y,j);
@@ -3824,7 +3824,7 @@ hqfeval(GEN q, GEN x)
 
   if (lg(x) != l) pari_err_DIM("hqfeval");
   if (l==1) return gen_0;
-  if (lg(q[1]) != l) pari_err(e_MISC,"invalid quadratic form in hqfeval");
+  if (lgcols(q) != l) pari_err(e_MISC,"invalid quadratic form in hqfeval");
   return hqfeval0(q,x,l);
 }
 
@@ -3899,7 +3899,7 @@ init_qf_apply(GEN q, GEN M, long *k, long *l)
 {
   *l = lg(q); *k = lg(M);
   if (*l == 1) { if (*k == 1) return; }
-  else         { if (*k != 1 && lg(M[1]) == *l) return; }
+  else         { if (*k != 1 && lgcols(M) == *l) return; }
   pari_err_DIM("qf_apply_RgM");
 }
 /* Return X = M'.q.M, assuming q is a symetric matrix and M is a

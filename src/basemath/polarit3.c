@@ -1994,7 +1994,7 @@ ZX_init_CRT(GEN Hp, ulong p, long v)
 GEN
 ZM_init_CRT(GEN Hp, ulong p)
 {
-  long i,j, m = lg(Hp[1]), l = lg(Hp), lim = (long)(p>>1);
+  long i,j, m = lgcols(Hp), l = lg(Hp), lim = (long)(p>>1);
   GEN c,cp,H = cgetg(l, t_MAT);
   for (j=1; j<l; j++)
   {
@@ -2068,7 +2068,7 @@ ZM_incremental_CRT(GEN *pH, GEN Hp, GEN *ptq, ulong p)
 {
   GEN h, H = *pH, q = *ptq, qp = muliu(q, p), lim = shifti(qp,-1);
   ulong qinv = Fl_inv(umodiu(q,p), p);
-  long i,j, l = lg(H), m = lg(H[1]);
+  long i,j, l = lg(H), m = lgcols(H);
   int stable = 1;
   for (j=1; j<l; j++)
     for (i=1; i<m; i++)

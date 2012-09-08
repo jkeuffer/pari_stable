@@ -1215,7 +1215,7 @@ gtodblList(GEN data, long flags)
 
   if (! is_vec_t(tx)) pari_err_TYPE("gtodblList",data);
   if (!nl) return NULL;
-  lx1 = lg(data[1]);
+  lx1 = lg(gel(data,1));
 
   if (nl == 1 && !cplx) pari_err(e_MISC,"single vector in gtodblList");
   /* Allocate memory, then convert coord. to double */

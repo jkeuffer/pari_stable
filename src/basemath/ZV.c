@@ -35,7 +35,7 @@ RgM_check_ZM(GEN A, const char *s)
   long n = lg(A);
   if (n != 1)
   {
-    long j, m = lg(A[1]);
+    long j, m = lgcols(A);
     for (j=1; j<n; j++)
       if (!check_ZV(gel(A,j), m))
         pari_err_TYPE(stack_strcat(s," [integer matrix]"), A);
@@ -55,7 +55,7 @@ ZM_max_lg(GEN x)
   long i, prec = 2, n = lg(x);
   if (n != 1)
   {
-    long j, m = lg(x[1]);
+    long j, m = lgcols(x);
     for (j=1; j<n; j++)
     {
       GEN c = gel(x,j);
@@ -71,7 +71,7 @@ ZM_supnorm(GEN x)
   long i, j, h, lx = lg(x);
   GEN s = gen_0;
   if (lx == 1) return gen_1;
-  h = lg(x[1]);
+  h = lgcols(x);
   for (j=1; j<lx; j++)
   {
     GEN xj = gel(x,j);
@@ -127,7 +127,7 @@ GEN
 ZM_zc_mul(GEN x, GEN y) {
   long l = lg(x);
   if (l == 1) return cgetg(1, t_COL);
-  return ZM_zc_mul_i(x,y, l, lg(x[1]));
+  return ZM_zc_mul_i(x,y, l, lgcols(x));
 }
 
 /* x ZM, y a compatible zm (dimension > 0). */
@@ -137,7 +137,7 @@ ZM_zm_mul(GEN x, GEN y)
   long j, c, l = lg(x), ly = lg(y);
   GEN z = cgetg(ly, t_MAT);
   if (l == 1) return z;
-  c = lg(x[1]);
+  c = lgcols(x);
   for (j = 1; j < ly; j++) gel(z,j) = ZM_zc_mul_i(x, gel(y,j), l,c);
   return z;
 }
@@ -148,12 +148,12 @@ ZM_nm_mul(GEN x, GEN y)
   long j, c, l = lg(x), ly = lg(y);
   GEN z = cgetg(ly, t_MAT);
   if (l == 1) return z;
-  c = lg(x[1]);
+  c = lgcols(x);
   for (j = 1; j < ly; j++) gel(z,j) = ZM_nc_mul_i(x, gel(y,j), l,c);
   return z;
 }
 
-/* x[i,]*y. Assume lg(x) > 1 and 0 < i < lg(x[1]) */
+/* x[i,]*y. Assume lg(x) > 1 and 0 < i < lgcols(x) */
 static GEN
 ZMrow_ZC_mul_i(GEN x, GEN y, long i, long lx)
 {
@@ -173,7 +173,7 @@ ZMrow_ZC_mul(GEN x, GEN y, long i)
   return ZMrow_ZC_mul_i(x, y, i, lg(x));
 }
 
-/* return x * y, 1 < lx = lg(x), l = lg(x[1]) */
+/* return x * y, 1 < lx = lg(x), l = lgcols(x) */
 static GEN
 ZM_ZC_mul_i(GEN x, GEN y, long lx, long l)
 {
@@ -189,7 +189,7 @@ ZM_mul(GEN x, GEN y)
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
   if (lx==1) return zeromat(0, ly-1);
-  l = lg(x[1]); z = cgetg(ly,t_MAT);
+  l = lgcols(x); z = cgetg(ly,t_MAT);
   for (j=1; j<ly; j++) gel(z,j) = ZM_ZC_mul_i(x, gel(y,j), lx, l);
   return z;
 }
@@ -197,7 +197,7 @@ GEN
 ZM_ZC_mul(GEN x, GEN y)
 {
   long lx = lg(x);
-  return lx==1? cgetg(1,t_COL): ZM_ZC_mul_i(x, y, lx, lg(x[1]));
+  return lx==1? cgetg(1,t_COL): ZM_ZC_mul_i(x, y, lx, lgcols(x));
 }
 
 /* assume lx > 1 is lg(x) = lg(y) */
@@ -330,7 +330,7 @@ ZM_add(GEN x, GEN y)
   long lx = lg(x), l, j;
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
-  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  z = cgetg(lx, t_MAT); l = lgcols(x);
   for (j = 1; j < lx; j++) gel(z,j) = ZC_add_i(gel(x,j), gel(y,j), l);
   return z;
 }
@@ -340,7 +340,7 @@ ZM_sub(GEN x, GEN y)
   long lx = lg(x), l, j;
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
-  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  z = cgetg(lx, t_MAT); l = lgcols(x);
   for (j = 1; j < lx; j++) gel(z,j) = ZC_sub_i(gel(x,j), gel(y,j), l);
   return z;
 }
@@ -398,7 +398,7 @@ nm_Z_mul(GEN X, GEN c)
   long i, j, h, l = lg(X), s = signe(c);
   GEN A;
   if (l == 1) return cgetg(1, t_MAT);
-  h = lg(X[1]);
+  h = lgcols(X);
   if (!s) return zeromat(h-1, l-1);
   if (is_pm1(c)) {
     if (s > 0) return Flm_to_ZM(X);
@@ -419,7 +419,7 @@ ZM_Z_mul(GEN X, GEN c)
   long i, j, h, l = lg(X);
   GEN A;
   if (l == 1) return cgetg(1, t_MAT);
-  h = lg(X[1]);
+  h = lgcols(X);
   if (!signe(c)) return zeromat(h-1, l-1);
   if (is_pm1(c)) return (signe(c) > 0)? ZM_copy(X): ZM_neg(X);
   A = cgetg(l, t_MAT);
@@ -691,8 +691,8 @@ ZM_equal(GEN A, GEN B)
   long i, m, l = lg(A);
   if (lg(B) != l) return 0;
   if (l == 1) return 1;
-  m = lg(A[1]);
-  if (lg(B[1]) != m) return 0;
+  m = lgcols(A);
+  if (lgcols(B) != m) return 0;
   for (i = 1; i < l; i++)
     if (!ZV_equal_lg(gel(A,i), gel(B,i), m)) return 0;
   return 1;
@@ -741,7 +741,7 @@ ZM_isidentity(GEN x)
   long i,j, lx = lg(x);
 
   if (lx == 1) return 1;
-  if (lx != lg(x[1])) return 0;
+  if (lx != lgcols(x)) return 0;
   for (j=1; j<lx; j++)
   {
     GEN c = gel(x,j), t;

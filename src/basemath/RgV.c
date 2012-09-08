@@ -49,7 +49,7 @@ RgM_zc_mul_i(GEN x, GEN y, long c, long l)
   return z;
 }
 GEN
-RgM_zc_mul(GEN x, GEN y) { return RgM_zc_mul_i(x,y, lg(x), lg(x[1])); }
+RgM_zc_mul(GEN x, GEN y) { return RgM_zc_mul_i(x,y, lg(x), lgcols(x)); }
 /* x t_MAT, y a compatible zm (dimension > 0). */
 GEN
 RgM_zm_mul(GEN x, GEN y)
@@ -57,7 +57,7 @@ RgM_zm_mul(GEN x, GEN y)
   long j, c, l = lg(x), ly = lg(y);
   GEN z = cgetg(ly, t_MAT);
   if (l == 1) return z;
-  c = lg(x[1]);
+  c = lgcols(x);
   for (j = 1; j < ly; j++) gel(z,j) = RgM_zc_mul_i(x, gel(y,j), l,c);
   return z;
 }
@@ -156,7 +156,7 @@ RgM_Rg_add(GEN x, GEN y)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (l != lg(x[1])) pari_err_OP( "+", x, y);
+  if (l != lgcols(x)) pari_err_OP( "+", x, y);
   z = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
@@ -174,7 +174,7 @@ RgM_Rg_add_shallow(GEN x, GEN y)
   GEN z = cgetg(l,t_MAT);
 
   if (l==1) return z;
-  if (l != lg(x[1])) pari_err_OP( "+", x, y);
+  if (l != lgcols(x)) pari_err_OP( "+", x, y);
   for (i=1; i<l; i++)
   {
     GEN zi = cgetg(l,t_COL), xi = gel(x,i);
@@ -240,7 +240,7 @@ RgM_add(GEN x, GEN y)
   long lx = lg(x), l, j;
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
-  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  z = cgetg(lx, t_MAT); l = lgcols(x);
   for (j = 1; j < lx; j++) gel(z,j) = RgC_add_i(gel(x,j), gel(y,j), l);
   return z;
 }
@@ -250,7 +250,7 @@ RgM_sub(GEN x, GEN y)
   long lx = lg(x), l, j;
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
-  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  z = cgetg(lx, t_MAT); l = lgcols(x);
   for (j = 1; j < lx; j++) gel(z,j) = RgC_sub_i(gel(x,j), gel(y,j), l);
   return z;
 }
@@ -279,7 +279,7 @@ RgM_neg(GEN x)
   long i, hx, lx = lg(x);
   GEN y = cgetg(lx, t_MAT);
   if (lx == 1) return y;
-  hx = lg(x[1]);
+  hx = lgcols(x);
   for (i=1; i<lx; i++) gel(y,i) = RgC_neg_i(gel(x,i), hx);
   return y;
 }
@@ -304,7 +304,7 @@ RgC_RgM_mul(GEN x, GEN y)
 {
   long i, ly = lg(y);
   GEN z = cgetg(ly,t_MAT);
-  if (ly != 1 && lg(y[1]) != 2) pari_err_OP("operation 'RgC_RgM_mul'",x,y);
+  if (ly != 1 && lgcols(y) != 2) pari_err_OP("operation 'RgC_RgM_mul'",x,y);
   for (i=1; i<ly; i++) gel(z,i) = RgC_Rg_mul(x, gcoeff(y,1,i));
   return z;
 }
@@ -315,7 +315,7 @@ RgM_RgV_mul(GEN x, GEN y)
   return RgC_RgV_mul(gel(x,1), y);
 }
 
-/* compatible t_MAT * t_COL, l = lg(x) = lg(y), lz = l>1? lg(x[1]): 1 */
+/* compatible t_MAT * t_COL, l = lg(x) = lg(y), lz = l>1? lgcols(x): 1 */
 static GEN
 RgM_RgC_mul_i(GEN x, GEN y, long l, long lz)
 {
@@ -335,7 +335,7 @@ RgM_RgC_mul(GEN x, GEN y)
 {
   long lx = lg(x);
   if (lx != lg(y)) pari_err_OP("operation 'RgM_RgC_mul'", x,y);
-  return RgM_RgC_mul_i(x, y, lx, (lx == 1)? 1: lg(x[1]));
+  return RgM_RgC_mul_i(x, y, lx, (lx == 1)? 1: lgcols(x));
 }
 GEN
 RgV_RgM_mul(GEN x, GEN y)
@@ -344,7 +344,7 @@ RgV_RgM_mul(GEN x, GEN y)
   GEN z;
   if (ly == 1) return cgetg(1,t_VEC);
   lx = lg(x);
-  if (lx != lg(y[1])) pari_err_OP("operation 'RgV_RgM_mul'", x,y);
+  if (lx != lgcols(y)) pari_err_OP("operation 'RgV_RgM_mul'", x,y);
   z = cgetg(ly, t_VEC);
   for (i=1; i<ly; i++) gel(z,i) = RgV_dotproduct_i(x, gel(y,i), lx);
   return z;
@@ -380,10 +380,10 @@ RgM_mul(GEN x, GEN y)
   GEN z;
   if (ly == 1) return cgetg(1,t_MAT);
   lx = lg(x);
-  if (lx != lg(y[1])) pari_err_OP("operation 'RgM_mul'", x,y);
+  if (lx != lgcols(y)) pari_err_OP("operation 'RgM_mul'", x,y);
   if (is_modular_mul(x,y,&z)) return gerepileupto(av, z);
   z = cgetg(ly, t_MAT);
-  l = (lx == 1)? 1: lg(x[1]);
+  l = (lx == 1)? 1: lgcols(x);
   for (j=1; j<ly; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(y,j), lx, l);
   return z;
 }
@@ -394,7 +394,7 @@ RgM_sqr(GEN x)
   long j, lx = lg(x);
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
-  if (lx != lg(x[1])) pari_err_OP("operation 'RgM_mul'", x,x);
+  if (lx != lgcols(x)) pari_err_OP("operation 'RgM_mul'", x,x);
   if (is_modular_sqr(x,&z)) return gerepileupto(av, z);
   z = cgetg(lx, t_MAT);
   for (j=1; j<lx; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(x,j), lx, lx);
@@ -445,7 +445,7 @@ RgM_Rg_div(GEN X, GEN c) {
   long i, j, h, l = lg(X);
   GEN A = cgetg(l, t_MAT);
   if (l == 1) return A;
-  h = lg(X[1]);
+  h = lgcols(X);
   for (j=1; j<l; j++)
   {
     GEN a = cgetg(h, t_COL), x = gel(X, j);
@@ -459,7 +459,7 @@ RgM_Rg_mul(GEN X, GEN c) {
   long i, j, h, l = lg(X);
   GEN A = cgetg(l, t_MAT);
   if (l == 1) return A;
-  h = lg(X[1]);
+  h = lgcols(X);
   for (j=1; j<l; j++)
   {
     GEN a = cgetg(h, t_COL), x = gel(X, j);
@@ -534,7 +534,7 @@ RgM_isscalar(GEN x, GEN s)
   long i, j, lx = lg(x);
 
   if (lx == 1) return 1;
-  if (lx != lg(x[1])) return 0;
+  if (lx != lgcols(x)) return 0;
   if (!s) s = gcoeff(x,1,1);
 
   for (j=1; j<lx; j++)
@@ -556,7 +556,7 @@ RgM_isidentity(GEN x)
   long i,j, lx = lg(x);
 
   if (lx == 1) return 1;
-  if (lx != lg(x[1])) return 0;
+  if (lx != lgcols(x)) return 0;
   for (j=1; j<lx; j++)
   {
     GEN c = gel(x,j);
@@ -575,7 +575,7 @@ RgM_isdiagonal(GEN x)
 {
   long i,j, lx = lg(x);
   if (lx == 1) return 1;
-  if (lx != lg(x[1])) return 0;
+  if (lx != lgcols(x)) return 0;
 
   for (j=1; j<lx; j++)
   {

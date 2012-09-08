@@ -86,8 +86,8 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   long lnz, nlze, lig;
 
   if (col == 0) return matgen;
-  lnz = lg(matgen[1])-1; /* was called lnz-1 - nr in hnfspec */
-  nlze = lg(dep[1])-1;
+  lnz = nbrows(matgen); /* was called lnz-1 - nr in hnfspec */
+  nlze = nbrows(dep);
   lig = nlze + lnz;
   /* H: lnz x lnz [disregarding initial 0 cols], U: col x col */
   H = ZM_hnflll(matgen, &U, 0);
@@ -220,7 +220,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   long co, n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p;
   GEN mat;
   GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, C, H, dep, permpro;
-  const long li = lg(perm); /* = lg(mat0[1]) */
+  const long li = lg(perm); /* = lgcols(mat0) */
   const long CO = lg(mat0);
 
   n = 0; /* -Wall */
@@ -248,7 +248,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   av = avma; lim = stack_lim(av,1);
 
   i = lig = li-1; col = co-1; lk0 = k0;
-  T = (k0 || (lg(C) > 1 && lg(C[1]) > 1))? matid(col): NULL;
+  T = (k0 || (lg(C) > 1 && lgcols(C) > 1))? matid(col): NULL;
   /* Look for lines with a single non-0 entry, equal to 1 in absolute value */
   while (i > lk0 && col)
     switch( count(mat,perm[i],col,&n) )
@@ -531,7 +531,7 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
   long i,j,k,ly,lx = lg(x);
   GEN z, perm;
   if (lx == 1) return cgetg(1, t_MAT);
-  ly = lg(x[1]);
+  ly = lgcols(x);
   *ptperm = perm = identity_perm(ly-1);
   z = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
@@ -910,7 +910,7 @@ hnf_i(GEN A, int remove)
 
   if (!n) return cgetg(1,t_MAT);
   av = avma; A = RgM_shallowcopy(A);
-  m = lg(A[1])-1;
+  m = nbrows(A);
 
   lim = stack_lim(av,1);
   def = n; ldef = (m>n)? m-n: 0;
@@ -993,7 +993,7 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
   GEN a, b, p1, p2, u, dm2;
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
-  li = lg(x[1]); dm2 = shifti(dm, -1);
+  li = lgcols(x); dm2 = shifti(dm, -1);
   av = avma; lim = stack_lim(av,1);
   x = RgM_shallowcopy(x);
 
@@ -1287,7 +1287,7 @@ reverse_rows(GEN A)
 {
   long i, j, h, n = lg(A);
   if (n == 1) return A;
-  h = lg(A[1]);
+  h = lgcols(A);
   for (j=1; j<n; j++)
   {
     GEN c = gel(A,j);
@@ -1483,7 +1483,7 @@ ZM_hnfperm(GEN A, GEN *ptU, GEN *ptperm)
     if (ptperm) *ptperm = cgetg(1,t_VEC);
     return cgetg(1, t_MAT);
   }
-  m = lg(A[1])-1;
+  m = nbrows(A);
   c = const_vecsmall(m, 0);
   l = const_vecsmall(n, 0);
   perm = cgetg(m+1, t_VECSMALL);
@@ -1612,7 +1612,7 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
     if (ptB) *ptB = cgetg(1,t_MAT);
     return cgetg(1,t_MAT);
   }
-  m = lg(A[1])-1;
+  m = nbrows(A);
   c = const_vecsmall(m, 0);
   h = const_vecsmall(n, m);
   av1 = avma; lim = stack_lim(av1,1);
@@ -1755,7 +1755,7 @@ hnf_invimage(GEN A, GEN b)
   GEN u, r;
 
   if (!n) return NULL;
-  m = lg(A[1])-1; /* m >= n */
+  m = nbrows(A); /* m >= n */
   u = cgetg(n+1, t_COL);
   for (i = n, k = m; k > 0; k--)
   {
@@ -1897,7 +1897,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
     return cgetg(1, return_vec? t_VEC: t_MAT);
   }
   av = avma;
-  m0 = m = lg(x[1])-1;
+  m0 = m = nbrows(x);
 
   U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
   V = ptV? gen_1: NULL;
@@ -2122,7 +2122,7 @@ smithclean(GEN z)
   D = gel(z,3);
   l = lg(D);
   if (l == 1) return gcopy(z);
-  h = lg(gel(D,1));
+  h = lgcols(D);
   if (h > l)
   { /* D = vconcat(zero matrix, diagonal matrix) */
     for (c=1+h-l, d=1; c<h; c++,d++)
@@ -2216,7 +2216,7 @@ RgM_hnfall(GEN A, GEN *pB, long remove)
     RgM_check_ZM(A, "mathnf0");
     return ZM_hnfall(A, pB, remove);
   }
-  m = lg(A[1]) - 1;
+  m = nbrows(A);
   av = avma; lim = stack_lim(av,1);
   A = RgM_shallowcopy(A);
   B = pB? matid(n): NULL;
@@ -2267,7 +2267,7 @@ gsmithall_i(GEN x,long all)
   if (vx==NO_VARIABLE) return all? smithall(x): smith(x);
   n = lg(x)-1;
   if (!n) return trivsmith(all);
-  if (lg(x[1]) != n+1) pari_err_DIM("gsmithall");
+  if (lgcols(x) != n+1) pari_err_DIM("gsmithall");
   av = avma; lim = stack_lim(av,1);
   x = RgM_shallowcopy(x);
   if (all) { U = matid(n); V = matid(n); }
@@ -2479,7 +2479,7 @@ matfrobenius(GEN M, long flag, long v)
   if (varncmp(gvar(M), v) <= 0)
     pari_err(e_MISC,"variable must have higher priority in matfrobenius");
   n = lg(M)-1;
-  if (n && lg(M[1])!=n+1) pari_err_DIM("matfrobenius");
+  if (n && lgcols(M)!=n+1) pari_err_DIM("matfrobenius");
   M_x = RgM_Rg_add_shallow(M, monomial(gen_m1, 1, v));
   if (flag<2)
   {

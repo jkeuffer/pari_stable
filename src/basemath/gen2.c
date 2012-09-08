@@ -178,7 +178,7 @@ matsize(GEN x)
   {
     case t_VEC: return mkvec2s(1, L);
     case t_COL: return mkvec2s(L, 1);
-    case t_MAT: return mkvec2s(L? lg(x[1])-1: 0, L);
+    case t_MAT: return mkvec2s(L? nbrows(x): 0, L);
   }
   pari_err_TYPE("matsize",x);
   return NULL; /* not reached */
@@ -407,7 +407,7 @@ mat_test(GEN x, int(*test)(GEN))
 {
   long i, j, l = lg(x);
   if (l == 1) return 1;
-  if (l != lg(gel(x,1))) return 0;
+  if (l != lgcols(x)) return 0;
   for (i = 1; i < l; i++)
     for (j = 1; j < l; j++)
       if (i == j) {
@@ -1957,7 +1957,7 @@ vecmax0(GEN x, GEN *pi)
       return gcopy(gel(x, i));
     case t_MAT: {
       long lx2, lx = lg(x);
-      if (lx==1 || (lx2 = lg(x[1])) == 1)
+      if (lx==1 || (lx2 = lgcols(x)) == 1)
       {
         pari_err(e_MISC, "empty vector in vecmax");
         return NULL;/*not reached*/
@@ -1993,7 +1993,7 @@ vecmin0(GEN x, GEN *pi)
       return gcopy(gel(x, i));
     case t_MAT: {
       long lx2, lx = lg(x);
-      if (lx==1 || (lx2 = lg(x[1])) == 1)
+      if (lx==1 || (lx2 = lgcols(x)) == 1)
       {
         pari_err(e_MISC, "empty vector in vecmin");
         return NULL;/*not reached*/

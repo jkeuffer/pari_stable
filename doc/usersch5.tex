@@ -411,6 +411,12 @@ if \kbd{x} is numerically equal to zero. If \kbd{x} is of type
 \typ{COMPLEX}, returns the minimum of the precisions of the real and
 imaginary part. Otherwise, returns~0 (which stands for infinite precision).
 
+\fun{long}{lgcols}{GEN x} is equal to \kbd{lg(gel(x,1))}. This is the length
+of the columns of a \typ{MAT} with at least one column.
+
+\fun{long}{nbrows}{GEN x} is equal to \kbd{lg(gel(x,1))-1}. This is the number
+of rows of a \typ{MAT} with at least one column.
+
 \fun{long}{gprecision}{GEN x} as \kbd{precision} for scalars. Returns the
 lowest precision encountered among the components otherwise.
 

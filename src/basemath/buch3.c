@@ -95,7 +95,7 @@ static GEN
 compute_fact(GEN nf, GEN u1, GEN gen)
 {
   GEN G, basecl;
-  long i, j, l = lg(u1), h = lg(u1[1]); /* l > 1 */
+  long i, j, l = lg(u1), h = lgcols(u1); /* l > 1 */
 
   basecl = cgetg(l,t_VEC);
   G = cgetg(3,t_VEC);
@@ -1274,11 +1274,11 @@ ideallog_to_bnr(GEN bnr, GEN z)
 
   if (lg(z) == 1) return z;
   col = (typ(z) == t_COL); /* else t_MAT */
-  lz = col? lg(z): lg(z[1]);
+  lz = col? lg(z): lgcols(z);
   lU = lg(U);
   if (lz != lU)
   {
-    if (lz == 1) return zerocol(lg(U[1]) - 1); /* lU != 1 */
+    if (lz == 1) return zerocol(nbrows(U)); /* lU != 1 */
     U = vecslice(U, lU-lz+1, lU-1); /* remove Cl(K) part */
   }
   if (col) {
@@ -2038,7 +2038,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
   if (!matU) return bnrclassnointern(B,h);
   lx = lg(B); if (lx == 1) return B;
 
-  r1 = lg(matU[1])-1; _2 = const_vec(r1, gen_2);
+  r1 = nbrows(matU); _2 = const_vec(r1, gen_2);
   L = cgetg(lx,t_VEC); nbarch = 1L<<r1;
   for (j=1; j<lx; j++)
   {

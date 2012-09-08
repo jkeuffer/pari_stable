@@ -54,7 +54,7 @@ static void
 gen_gerepile_gauss_ker(GEN x, long k, long t, pari_sp av, void *E, GEN (*copy)(void*, GEN))
 {
   pari_sp tetpil = avma;
-  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
+  long u,i, n = lg(x)-1, m = n? nbrows(x): 0;
 
   if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++) gcoeff(x,u,k) = copy(E,gcoeff(x,u,k));
@@ -86,7 +86,7 @@ static void
 gerepile_gauss(GEN x,long k,long t,pari_sp av, long j, GEN c)
 {
   pari_sp tetpil = avma, A;
-  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
+  long u,i, n = lg(x)-1, m = n? nbrows(x): 0;
   size_t dec;
 
   if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
@@ -127,7 +127,7 @@ gen_ker(GEN x, long deplin, void *E, const struct bb_field *ff)
   long i, j, k, r, t, n, m;
 
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  m=lg(x[1])-1; r=0;
+  m=nbrows(x); r=0;
   x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
   d=new_chunk(n+1);
@@ -204,7 +204,7 @@ gen_Gauss_pivot(GEN x, long *rr, void *E, const struct bb_field *ff)
 
   if (!n) { *rr = 0; return NULL; }
 
-  m=lg(x[1])-1; r=0;
+  m=nbrows(x); r=0;
   d = cgetg(n+1, t_VECSMALL);
   x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
@@ -322,7 +322,7 @@ gen_Gauss(GEN a, GEN b, void *E, const struct bb_field *ff)
 
   lim = stack_lim(av,1);
   a = RgM_shallowcopy(a);
-  aco = lg(a)-1; bco = lg(b)-1; li = lg(gel(a,1))-1;
+  aco = lg(a)-1; bco = lg(b)-1; li = nbrows(a);
   for (i=1; i<=aco; i++)
   {
     GEN invpiv;
@@ -500,7 +500,7 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
   const int OK_ulong = SMALL_ULONG(p);
 
   n = lg(x)-1;
-  m=lg(x[1])-1; r=0;
+  m=nbrows(x); r=0;
 
   c = const_vecsmall(m, 0);
   d = new_chunk(n+1);
@@ -780,7 +780,7 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
 
   n=lg(x)-1; if (!n) { *rr=0; return NULL; }
 
-  m=lg(x[1])-1; r=0;
+  m=nbrows(x); r=0;
   d=cgetg(n+1,t_VECSMALL);
   c = const_vecsmall(m, 0);
   for (k=1; k<=n; k++)
@@ -944,7 +944,7 @@ sFlm_invimage(GEN mat, GEN y, ulong p)
   ulong t;
 
   if (l==1) return NULL;
-  if (lg(y) != lg(mat[1])) pari_err_DIM("Flm_invimage");
+  if (lg(y) != lgcols(mat)) pari_err_DIM("Flm_invimage");
 
   for (i=1; i<l; i++) gel(M,i) = gel(mat,i);
   gel(M,l) = y; M = Flm_ker(M,p);
@@ -993,7 +993,7 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
   GEN M = cgetg(l+1,t_MAT), col, t;
 
   if (l==1) return NULL;
-  if (lg(y) != lg(mat[1])) pari_err_DIM("FpM_invimage");
+  if (lg(y) != lgcols(mat)) pari_err_DIM("FpM_invimage");
 
   for (i=1; i<l; i++) gel(M,i) = gel(mat,i);
   gel(M,l) = y; M = FpM_ker(M,p);
@@ -1212,7 +1212,7 @@ get_pivot_fun(GEN x, GEN *data)
 
   *data = NULL;
   if (lx == 1) return &gauss_get_pivot_NZ;
-  hx = lg(x[1]);
+  hx = lgcols(x);
   for (j=1; j<lx; j++)
   {
     GEN xj = gel(x,j);
@@ -1319,7 +1319,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
     if (*b && lg(*b) != 1) pari_err_DIM("gauss");
     *li = 0; return 0;
   }
-  *li = lg(a[1])-1;
+  *li = nbrows(a);
   if (*li < *aco) pari_err_DIM("gauss");
   if (*b)
   {
@@ -1515,7 +1515,7 @@ split_realimag(GEN x, long r1, long r2)
 GEN
 RgM_solve_realimag(GEN M, GEN y)
 {
-  long l = lg(M), r2 = l - lg(M[1]), r1 = l-1 - 2*r2;
+  long l = lg(M), r2 = l - lgcols(M), r1 = l-1 - 2*r2;
   return RgM_solve(split_realimag(M, r1,r2),
                    split_realimag(y, r1,r2));
 }
@@ -1622,7 +1622,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
   GEN u;
 
   if (!aco) { if (detp) *detp = 1; return cgetg(1,t_MAT); }
-  li = lg(a[1])-1;
+  li = nbrows(a);
   bco = lg(b)-1;
   for (i=1; i<=aco; i++)
   {
@@ -1949,7 +1949,7 @@ ZM_detmult(GEN A)
   long rg, i, j, k, m, n = lg(A) - 1;
 
   if (!n) return gen_1;
-  m = lg(A[1]) - 1;
+  m = nbrows(A);
   if (n < m) return gen_0;
   c = const_vecsmall(m, 0);
   av1 = avma;
@@ -2055,7 +2055,7 @@ keri(GEN x)
   long i, j, k, r, t, n, m;
 
   n = lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  av0 = avma; m = lg(x[1])-1;
+  av0 = avma; m = nbrows(x);
   pp = cgetg(n+1,t_COL);
   x = RgM_shallowcopy(x);
   c = const_vecsmall(m, 0);
@@ -2134,7 +2134,7 @@ deplin(GEN x0)
     x = gtomat(x0);
   }
   nc = lg(x)-1; if (!nc) { avma=av; return cgetg(1,t_COL); }
-  nl = lg(x[1])-1;
+  nl = nbrows(x);
   d = const_vec(nl, gen_1); /* pivot list */
   c = const_vecsmall(nl, 0);
   l = cgetg(nc+1, t_VECSMALL); /* not initialized */
@@ -2187,7 +2187,7 @@ gauss_pivot_ker(GEN x0, GEN *dd, long *rr)
   pivot_fun pivot;
 
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
-  m=lg(x0[1])-1; r=0;
+  m=nbrows(x0); r=0;
   pivot = get_pivot_fun(x0, &data);
   x = RgM_shallowcopy(x0);
   c = const_vecsmall(m, 0);
@@ -2242,7 +2242,7 @@ RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot)
 
   d = cgetg(n+1, t_VECSMALL);
   x = RgM_shallowcopy(x0);
-  m = lg(x[1])-1; r = 0;
+  m = nbrows(x); r = 0;
   c = const_vecsmall(m, 0);
   av = avma; lim = stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -2294,7 +2294,7 @@ ZM_pivots(GEN M0, long *rr)
   zc = ZM_count_0_cols(M0);
   if (n == zc) { *rr = zc; return zero_zv(n); }
 
-  m = lg(M0[1])-1;
+  m = nbrows(M0);
   rmin = (m < n-zc) ? n-m : zc;
   bp = init_modular(&mod_p);
   imax = (n < (1<<4))? 1: (n>>3); /* heuristic */
@@ -2461,7 +2461,7 @@ sinverseimage(GEN mat, GEN y)
   GEN col,p1 = cgetg(nbcol+1,t_MAT);
 
   if (nbcol==1) return NULL;
-  if (lg(y) != lg(mat[1])) pari_err_DIM("inverseimage");
+  if (lg(y) != lgcols(mat)) pari_err_DIM("inverseimage");
 
   gel(p1,nbcol) = y;
   for (i=1; i<nbcol; i++) p1[i]=mat[i];
@@ -2510,7 +2510,7 @@ get_suppl(GEN x, GEN d, long r)
   long j, k, n, rx = lg(x)-1;
 
   if (!rx) pari_err(e_MISC,"empty matrix in suppl");
-  n = lg(x[1])-1;
+  n = nbrows(x);
   if (rx == n && r == 0) return gcopy(x);
   y = cgetg(n+1, t_MAT);
   av = avma; c = const_vecsmall(n,0);
@@ -2533,7 +2533,7 @@ init_suppl(GEN x)
 {
   if (lg(x) == 1) pari_err(e_MISC,"empty matrix in suppl");
   /* HACK: avoid overwriting d from gauss_pivot() after avma=av */
-  (void)new_chunk(lg(x[1]) * 2);
+  (void)new_chunk(lgcols(x) * 2);
 }
 
 /* x is an n x k matrix, rank(x) = k <= n. Return an invertible n x n matrix
@@ -2880,7 +2880,7 @@ eigen(GEN x, long prec)
   pari_sp av = avma;
 
   if (typ(x)!=t_MAT) pari_err_TYPE("eigen",x);
-  if (n != 1 && n != lg(x[1])) pari_err_DIM("eigen");
+  if (n != 1 && n != lgcols(x)) pari_err_DIM("eigen");
   if (n<=2) return gcopy(x);
 
   ex = 16 - prec2nbits(prec);
@@ -3028,7 +3028,7 @@ det2(GEN a)
   long n = lg(a)-1;
   if (typ(a)!=t_MAT) pari_err_TYPE("det2",a);
   if (!n) return gen_1;
-  if (n != lg(a[1])-1) pari_err_DIM("det2");
+  if (n != nbrows(a)) pari_err_DIM("det2");
   if (n == 1) return gcopy(gcoeff(a,1,1));
   if (n == 2) return RgM_det2(a);
   pivot = get_pivot_fun(a, &data);
@@ -3322,7 +3322,7 @@ det(GEN a)
 
   if (typ(a)!=t_MAT) pari_err_TYPE("det",a);
   if (!n) return gen_1;
-  if (n != lg(a[1])-1) pari_err_DIM("det");
+  if (n != nbrows(a)) pari_err_DIM("det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
   if (n == 2) return RgM_det2(a);
   if (RgM_is_FpM(a, &p))
@@ -3345,7 +3345,7 @@ ZM_det(GEN a)
   long n = lg(a)-1;
   if (typ(a)!=t_MAT) pari_err_TYPE("ZM_det",a);
   if (!n) return gen_1;
-  if (n != lg(a[1])-1) pari_err_DIM("ZM_det");
+  if (n != nbrows(a)) pari_err_DIM("ZM_det");
   RgM_check_ZM(a, "ZM_det");
   return ZM_det_i(a, n);
 }
@@ -3378,7 +3378,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     if (ptu1) *ptu1 = cgetg(1, t_MAT);
     return gen_0;
   }
-  n = lg(M[1])-1;
+  n = nbrows(M);
   switch(typ(D))
   {
     case t_COL:

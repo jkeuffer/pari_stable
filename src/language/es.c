@@ -885,7 +885,7 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
             str_puts(S, "[;]");
           else
           {
-            h = lg(gvalue[1]);
+            h = lgcols(gvalue);
             for (i=1; i<l; i++)
             {
               str_putc(S, '[');
@@ -1094,7 +1094,7 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
           str_puts(S, "[;]");
         else
         {
-          h = lg(gvalue[1]);
+          h = lgcols(gvalue);
           for (i=1; i<l; i++)
           {
             str_putc(S, '[');
@@ -2820,7 +2820,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       OUT_FUN print;
 
       r = lg(g); if (r==1) { str_puts(S, "[;]"); return; }
-      l = lg(g[1]);
+      l = lgcols(g);
       if (l==1)
       {
         str_puts(S, "matrix(0,");
@@ -2871,8 +2871,8 @@ matbruti(GEN g, pariout_t *T, outString *S)
 
   if (typ(g) != t_MAT) { bruti(g,T,S); return; }
 
-  r=lg(g); if (r==1 || lg(g[1])==1) { str_puts(S, "[;]"); return; }
-  l = lg(g[1]); str_putc(S, '\n');
+  r=lg(g); if (r==1 || lgcols(g)==1) { str_puts(S, "[;]"); return; }
+  l = lgcols(g); str_putc(S, '\n');
   print = (typ(gel(g,1)) == t_VECSMALL)? prints: bruti;
   av = avma;
   w = term_width();
@@ -3094,7 +3094,7 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
       {
         OUT_FUN print = (typ(gel(g,1)) == t_VECSMALL)? prints: texi;
 
-        l = lg(g[1]);
+        l = lgcols(g);
         for (i=1; i<l; i++)
         {
           for (j=1; j<r; j++)

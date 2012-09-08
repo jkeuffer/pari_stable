@@ -501,7 +501,7 @@ conjvec(GEN x,long prec)
       lx = lg(x); z = cgetg(lx,t_MAT);
       if (lx == 1) return z;
       gel(z,1) = conjvec(gel(x,1),prec);
-      s = lg(gel(z,1));
+      s = lgcols(z);
       for (i=2; i<lx; i++)
       {
         gel(z,i) = conjvec(gel(x,i),prec);
@@ -974,7 +974,7 @@ gadd(GEN x, GEN y)
       lx = lg(x);
       if (lg(y) != lx) pari_err_OP("+",x,y);
       if (lx == 1) return cgetg(1, t_MAT);
-      if (lg(y[1]) != lg(x[1])) pari_err_OP("+",x,y);
+      if (lgcols(y) != lgcols(x)) pari_err_OP("+",x,y);
       return RgM_add(x,y);
 
     default: pari_err_TYPE2("+",x,y);
@@ -1263,7 +1263,7 @@ gsub(GEN x, GEN y)
       long lx = lg(x);
       if (lg(y) != lx) pari_err_OP("+",x,y);
       if (lx == 1) return cgetg(1, t_MAT);
-      if (lg(y[1]) != lg(x[1])) pari_err_OP("+",x,y);
+      if (lgcols(y) != lgcols(x)) pari_err_OP("+",x,y);
       return RgM_sub(x,y);
     }
     case t_RFRAC: case t_SER: break;

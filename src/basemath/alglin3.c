@@ -63,7 +63,7 @@ shallowtrans(GEN x)
 
     case t_MAT:
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
-      dx = lg(x[1]); y = cgetg(dx,tx);
+      dx = lgcols(x); y = cgetg(dx,tx);
       for (i = 1; i < dx; i++) gel(y,i) = row_transpose(x,i);
       break;
 
@@ -89,7 +89,7 @@ gtrans(GEN x)
 
     case t_MAT:
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
-      dx = lg(x[1]); y = cgetg(dx,tx);
+      dx = lgcols(x); y = cgetg(dx,tx);
       for (i = 1; i < dx; i++) gel(y,i) = row_transposecopy(x,i);
       break;
 
@@ -318,7 +318,7 @@ extract0(GEN x, GEN l1, GEN l2)
     if (select_0(l1)) { avma = av; return zeromat(0, lg(y)-1); }
     if (lg(y) == 1 && lg(x) > 1)
     {
-      if (!extract_selector_ok(lg(gel(x,1)), l1))
+      if (!extract_selector_ok(lgcols(x), l1))
         pari_err_TYPE("vecextract [incorrect mask]", l1);
       avma = av; return cgetg(1, t_MAT);
     }
@@ -570,7 +570,7 @@ gtomat(GEN x)
       lx=lg(x); y=cgetg(lx,t_MAT);
       if (lx == 1) break;
       if (typ(gel(x,1)) == t_COL) {
-        long h = lg(gel(x,1));
+        long h = lgcols(x);
         for (i=2; i<lx; i++) {
           if (typ(gel(x,i)) != t_COL || lg(gel(x,i)) != h) break;
         }
@@ -587,7 +587,7 @@ gtomat(GEN x)
       lx = lg(x);
       if (lx == 1) return cgetg(1, t_MAT);
       if (typ(gel(x,1)) == t_VEC) {
-        long j, h = lg(gel(x,1));
+        long j, h = lgcols(x);
         for (i=2; i<lx; i++) {
           if (typ(gel(x,i)) != t_VEC || lg(gel(x,i)) != h) break;
         }
@@ -676,8 +676,8 @@ matmultodiagonal(GEN A, GEN B)
 
   if (typ(A) != t_MAT) pari_err_TYPE("matmultodiagonal",A);
   if (typ(B) != t_MAT) pari_err_TYPE("matmultodiagonal",B);
-  hA = (lA == 1)? lB: lg(A[1]);
-  hB = (lB == 1)? lA: lg(B[1]);
+  hA = (lA == 1)? lB: lgcols(A);
+  hB = (lB == 1)? lA: lgcols(B);
   if (lA != hB || lB != hA) pari_err_OP("operation 'matmultodiagonal'", A,B);
   for (i=1; i<lB; i++)
   {

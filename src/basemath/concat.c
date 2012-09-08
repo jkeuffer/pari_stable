@@ -85,8 +85,8 @@ vconcat(GEN A, GEN B)
   if (!B) return A;
   la = lg(A); if (la==1) return A;
   T = typ(gel(A,1)); /* t_COL or t_VECSMALL */
-  ha = lg(gel(A,1)); M = cgetg(la,t_MAT);
-  hb = lg(gel(B,1)); hc = ha+hb-1;
+  ha = lgcols(A); M = cgetg(la,t_MAT);
+  hb = lgcols(B); hc = ha+hb-1;
   for (j=1; j<la; j++)
   {
     c = cgetg(hc, T); gel(M, j) = c;
@@ -130,7 +130,7 @@ shallowconcat(GEN x, GEN y)
   if (tx == ty)
   {
     if (tx == t_MAT)
-    { if (lg(x[1]) != lg(y[1])) err_cat(x,y); }
+    { if (lgcols(x) != lgcols(y)) err_cat(x,y); }
     else
       if (!is_matvec_t(tx) && tx != t_VECSMALL) return mkvec2(x, y);
     z=cgetg(lx+ly-1,tx);
@@ -146,7 +146,7 @@ shallowconcat(GEN x, GEN y)
     if (ty != t_MAT) p1 = x;
     else
     {
-      if (lg(y[1])!=2) err_cat(x,y);
+      if (lgcols(y)!=2) err_cat(x,y);
       p1 = mkcol(x);
     }
     for (i=2; i<=ly; i++) z[i] = y[i-1];
@@ -158,7 +158,7 @@ shallowconcat(GEN x, GEN y)
     if (tx != t_MAT) p1 = y;
     else
     {
-      if (lg(x[1])!=2) err_cat(x,y);
+      if (lgcols(x)!=2) err_cat(x,y);
       p1 = mkcol(y);
     }
     for (i=1; i<lx; i++) z[i]=x[i];
@@ -189,7 +189,7 @@ shallowconcat(GEN x, GEN y)
           if (ly>=3) break;
           return (ly==1)? x: shallowconcat(x, gel(y,1));
         case t_MAT:
-          if (lx != lg(y[1])) break;
+          if (lx != lgcols(y)) break;
           z=cgetg(ly+1,t_MAT); gel(z,1) = x;
           for (i=2; i<=ly; i++) z[i]=y[i-1];
           return z;
@@ -204,7 +204,7 @@ shallowconcat(GEN x, GEN y)
           for (i=1; i<lx; i++) gel(z,i) = shallowconcat(gel(x,i), gel(y,i));
           return z;
         case t_COL:
-          if (ly != lg(x[1])) break;
+          if (ly != lgcols(x)) break;
           z=cgetg(lx+1,t_MAT); gel(z,lx) = y;
           for (i=1; i<lx; i++) z[i]=x[i];
           return z;
@@ -226,10 +226,10 @@ catmanyMAT(GEN y1, GEN y2)
     GEN c = gel(y,0);
     long nc = lg(c)-1;
     if (nc == 0) continue;
-    if (h != lg(c[1]))
+    if (h != lgcols(c))
     {
       if (h) err_cat(gel(y2,0), c);
-      h = lg(c[1]);
+      h = lgcols(c);
     }
     L += nc;
     z = new_chunk(nc) - 1;
@@ -348,7 +348,7 @@ matfill(GEN M, GEN c, long xoff, long yoff, long n)
         gcoeff(M,xoff+i,yoff+1) = gel(c,i);
       break;
     case t_MAT:
-      h = lg(gel(c,1));
+      h = lgcols(c);
       for (j = 1; j < l; j++)
         for (i = 1; i < h; i++) gcoeff(M,xoff+i,yoff+j) = gcoeff(c,i,j);
       break;
@@ -367,7 +367,7 @@ _matsize(GEN x)
   { /* matsize */
     case t_VEC: return mkvecsmall2(1, L);
     case t_COL: return mkvecsmall2(L, 1);
-    case t_MAT: return mkvecsmall2(L? lg(x[1])-1: 0, L);
+    case t_MAT: return mkvecsmall2(L? nbrows(x): 0, L);
     default:
       if (is_noncalc_t(t)) pari_err_TYPE("_matsize", x);
       return mkvecsmall2(1, 1);
@@ -420,7 +420,7 @@ matconcat_shallow(GEN v)
       }
       return M;
     case t_MAT:
-      h = lg(gel(v,1));
+      h = lgcols(v);
       maxh = const_vecsmall(h-1, 0);
       maxl = const_vecsmall(l-1, 0);
       for (j = 1; j < l; j++)
@@ -489,7 +489,7 @@ concat(GEN x, GEN y)
 
   if (tx == ty)
   {
-    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
+    if (tx == t_MAT && lgcols(x) != lgcols(y)) err_cat(x,y);
     if (!is_matvec_t(tx))
     {
       if (tx != t_VECSMALL) return mkvec2copy(x, y);
@@ -511,7 +511,7 @@ concat(GEN x, GEN y)
     if (ty != t_MAT) p1 = gcopy(x);
     else
     {
-      if (lg(y[1])!=2) err_cat(x,y);
+      if (lgcols(y)!=2) err_cat(x,y);
       p1 = mkcolcopy(x);
     }
     for (i=2; i<=ly; i++) gel(z,i) = gcopy(gel(y,i-1));
@@ -523,7 +523,7 @@ concat(GEN x, GEN y)
     if (tx != t_MAT) p1 = gcopy(y);
     else
     {
-      if (lg(x[1])!=2) err_cat(x,y);
+      if (lgcols(x)!=2) err_cat(x,y);
       p1 = mkcolcopy(y);
     }
     for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
@@ -554,7 +554,7 @@ concat(GEN x, GEN y)
           if (ly>=3) break;
           return (ly==1)? gcopy(x): concat(x,gel(y,1));
         case t_MAT:
-          if (lx != lg(y[1])) break;
+          if (lx != lgcols(y)) break;
           z=cgetg(ly+1,t_MAT); gel(z,1) = gcopy(x);
           for (i=2; i<=ly; i++) gel(z,i) = gcopy(gel(y,i-1));
           return z;
@@ -569,7 +569,7 @@ concat(GEN x, GEN y)
           for (i=1; i<lx; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
           return z;
         case t_COL:
-          if (ly != lg(x[1])) break;
+          if (ly != lgcols(x)) break;
           z=cgetg(lx+1,t_MAT); gel(z,lx) = gcopy(y);
           for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
           return z;

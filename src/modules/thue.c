@@ -639,7 +639,7 @@ thueinit(GEN pol, long flag, long prec)
   pol = POL;
 
   fa = ZX_factor(pol);
-  lfa = lg(gel(fa,1));
+  lfa = lgcols(fa);
   if (lfa > 2 || itos(gcoeff(fa,1,2)) > 1)
   { /* reducible polynomial */
     GEN P, Q, R, g, f = gcoeff(fa,1,1), E = gcoeff(fa,1,2);
