@@ -2928,20 +2928,54 @@ det0(GEN a,long flag)
   return NULL; /* not reached */
 }
 
-/* A a 2x2 matrix
-   returns the determinant of A computed by the simple formula
-*/
+/* M a 2x2 matrix, returns det(M) */
 static GEN
-det2x2(GEN A)
+RgM_det2(GEN M)
 {
   pari_sp av = avma;
-  GEN a = gcoeff(A, 1, 1),
-      b = gcoeff(A, 1, 2),
-      c = gcoeff(A, 2, 1),
-      d = gcoeff(A, 2, 2);
-  return gerepileupto(av, gsub(gmul(a, d), gmul(b, c)));
+  GEN a = gcoeff(M,1,1), b = gcoeff(M,1,2);
+  GEN c = gcoeff(M,2,1), d = gcoeff(M,2,2);
+  return gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
 }
-
+/* M a 2x2 ZM, returns det(M) */
+static GEN
+ZM_det2(GEN M)
+{
+  pari_sp av = avma;
+  GEN a = gcoeff(M,1,1), b = gcoeff(M,1,2);
+  GEN c = gcoeff(M,2,1), d = gcoeff(M,2,2);
+  return gerepileuptoint(av, subii(mulii(a,d), mulii(b, c)));
+}
+/* M a 3x3 ZM, return det(M) */
+static GEN
+ZM_det3(GEN M)
+{
+  pari_sp av = avma;
+  GEN a = gcoeff(M,1,1), b = gcoeff(M,1,2), c = gcoeff(M,1,3);
+  GEN d = gcoeff(M,2,1), e = gcoeff(M,2,2), f = gcoeff(M,2,3);
+  GEN g = gcoeff(M,3,1), h = gcoeff(M,3,2), i = gcoeff(M,3,3);
+  GEN p1,p2,p3,p4,p5,p6, D;
+  if (!signe(i)) p1 = p5 = gen_0;
+  else
+  {
+    p1 = mulii(mulii(a,e), i);
+    p5 = mulii(mulii(b,d), i);
+  }
+  if (!signe(g)) p2 = p6 = gen_0;
+  else
+  {
+    p2 = mulii(mulii(b,f), g);
+    p6 = mulii(mulii(c,e), g);
+  }
+  if (!signe(h)) p3 = p4 = gen_0;
+  else
+  {
+    p3 = mulii(mulii(c,d), h);
+    p4 = mulii(mulii(a,f), h);
+  }
+  D = subii(addii(p1,addii(p2,p3)), addii(p4,addii(p5,p6)));
+  return gerepileuptoint(av, D);
+}
 
 static GEN
 det_simple_gauss(GEN a, GEN data, pivot_fun pivot)
@@ -2991,11 +3025,12 @@ det2(GEN a)
 {
   GEN data;
   pivot_fun pivot;
-  long nbco = lg(a)-1;
+  long n = lg(a)-1;
   if (typ(a)!=t_MAT) pari_err_TYPE("det2",a);
-  if (!nbco) return gen_1;
-  if (nbco != lg(a[1])-1) pari_err_DIM("det2");
-  if (nbco == 2) return det2x2(a);
+  if (!n) return gen_1;
+  if (n != lg(a[1])-1) pari_err_DIM("det2");
+  if (n == 1) return gcopy(gcoeff(a,1,1));
+  if (n == 2) return RgM_det2(a);
   pivot = get_pivot_fun(a, &data);
   return det_simple_gauss(a, data, pivot);
 }
@@ -3133,7 +3168,7 @@ det_develop(GEN M, long max, double bound)
   {
     case 0: return gen_1;
     case 1: return gcopy(gcoeff(M,1,1));
-    case 2: return det2x2(M);
+    case 2: return RgM_det2(M);
   }
   if (max > ((n+2)>>1)) max = (n+2)>>1;
   for (j = 1; j <= n; j++)
@@ -3217,7 +3252,7 @@ RgM_Hadamard(GEN a)
 
 /* assume dim(a) = n > 0 */
 static GEN
-ZM_det_i(GEN a, long n)
+ZM_det_i(GEN M, long n)
 {
   const long DIXON_THRESHOLD = 40;
   pari_sp av = avma, av2;
@@ -3225,19 +3260,16 @@ ZM_det_i(GEN a, long n)
   ulong p, compp, Dp = 1;
   byteptr d;
   GEN D, h, q, v, comp;
-  if (n == 1) return icopy(gcoeff(a,1,1));
-  if (n == 2) {
-    D = subii(mulii(gcoeff(a,1,1), gcoeff(a,2,2)),
-              mulii(gcoeff(a,2,1), gcoeff(a,1,2)));
-    return gerepileuptoint(av, D);
-  }
-  h = RgM_Hadamard(a);
+  if (n == 1) return icopy(gcoeff(M,1,1));
+  if (n == 2) return ZM_det2(M);
+  if (n == 3) return ZM_det3(M);
+  h = RgM_Hadamard(M);
   if (!signe(h)) { avma = av; return gen_0; }
   h = sqrti(h);
   for (q = gen_1, d = init_modular(&p); cmpii(q, h) <= 0; )
   {
     av2 = avma;
-    Dp = Flm_det(ZM_to_Flm(a, p), p);
+    Dp = Flm_det(ZM_to_Flm(M, p), p);
     avma = av2;
     if (Dp) break;
     q = muliu(q, p);
@@ -3252,16 +3284,16 @@ ZM_det_i(GEN a, long n)
     v = cgetg(n+1, t_COL);
     gel(v, 1) = gen_1; /* ensure content(v) = 1 */
     for (i = 2; i <= n; i++) gel(v, i) = stoi(random_Fl(15) - 7);
-    D = Q_denom(ZM_gauss(a, v));
+    D = Q_denom(ZM_gauss(M, v));
     if (expi(D) < expi(h) >> 1)
     { /* First try unlucky, try once more */
       for (i = 2; i <= n; i++) gel(v, i) = stoi(random_Fl(15) - 7);
-      D = lcmii(D, Q_denom(ZM_gauss(a, v)));
+      D = lcmii(D, Q_denom(ZM_gauss(M, v)));
     }
     D = gerepileuptoint(av2, D);
     if (q != gen_1) D = lcmii(D, q);
   }
-  /* determinant is a multiple of D */
+  /* determinant is M multiple of D */
   h = shifti(divii(h, D), 1);
 
   compp = Fl_div(Dp, umodiu(D,p), p);
@@ -3273,7 +3305,7 @@ ZM_det_i(GEN a, long n)
     Dp = umodiu(D, p);
     if (!Dp) continue;
     av2 = avma;
-    compp = Fl_div(Flm_det(ZM_to_Flm(a, p), p), Dp, p);
+    compp = Fl_div(Flm_det(ZM_to_Flm(M, p), p), Dp, p);
     avma = av2;
     (void) Z_incremental_CRT(&comp, compp, &q, p);
   }
@@ -3292,7 +3324,7 @@ det(GEN a)
   if (!n) return gen_1;
   if (n != lg(a[1])-1) pari_err_DIM("det");
   if (n == 1) return gcopy(gcoeff(a,1,1));
-  if (n == 2) return det2x2(a);
+  if (n == 2) return RgM_det2(a);
   if (RgM_is_FpM(a, &p))
   {
     pari_sp av;
