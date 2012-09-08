@@ -757,11 +757,14 @@ static GEN
 FlxqX_split_part(GEN f, GEN T, ulong p)
 {
   long n = degpol(f);
+  GEN xp,Xp,Xq;
   GEN z, X = pol_x(varn(f));
   if (n <= 1) return f;
   f = FlxqX_red(f, T, p);
-  z = FlxqXQ_pow(X, powuu(p, degpol(T)), f, T, p);
-  z = FlxX_sub(z, X , p);
+  xp = Flxq_powu(polx_Flx(T[1]), p, T, p);
+  Xp = FlxqXQ_pow(pol_x(0), utoi(p), f, T, p);
+  Xq = gel(FlxqXQV_autpow(mkvec2(xp,Xp), degpol(T), f, T, p),2);
+  z = FlxX_sub(Xq, X , p);
   return FlxqX_gcd(z, f, T, p);
 }
 
