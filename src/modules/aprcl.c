@@ -311,9 +311,9 @@ powpolmod(Cache *C, Red *R, long p, long k, GEN jac)
 }
 
 /* Return e(t) = \prod_{p-1 | t} p^{1+v_p(t)}}
- * globfa contains the odd prime divisors of e(t) */
+ * faet contains the odd prime divisors of e(t) */
 static GEN
-compute_e(ulong t, GEN *globfa)
+compute_e(ulong t, GEN *faet)
 {
   GEN L, P, D = divisorsu(t);
   long l = lg(D);
@@ -331,7 +331,7 @@ compute_e(ulong t, GEN *globfa)
       vecsmalltrunc_append(L, upowuu(d, 1 + u_lval(t,d)));
     }
   }
-  if (globfa) *globfa = P;
+  if (faet) *faet = P;
   return shifti(zv_prod_Z(L), 2 + u_lval(t,2));
 }
 
@@ -441,9 +441,9 @@ compute_t_small(double C)
   return  8648640;
 }
 
-/* return t such that e(t) > sqrt(N) */
+/* return t such that e(t) > sqrt(N), set *faet = odd prime divisors of e(t) */
 static ulong
-compute_t(GEN N, GEN *e, GEN *globfa)
+compute_t(GEN N, GEN *e, GEN *faet)
 {
   pari_sp av0 = avma;
   /* 2^e b <= N < 2^e (b+1), where b >= 2^52. Approximating log_2 N by
@@ -457,14 +457,14 @@ compute_t(GEN N, GEN *e, GEN *globfa)
   if (C < 3515.0)
   {
     t = compute_t_small(C);
-    *e = compute_e(t, globfa);
+    *e = compute_e(t, faet);
     return t;
   }
   B = sqrti(N);
   for (t = 8648640+840;; t+=840)
   {
     pari_sp av = avma;
-    *e = compute_e(t, globfa);
+    *e = compute_e(t, faet);
     if (cmpii(*e, B) > 0) break;
     avma = av;
   }
@@ -668,6 +668,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
   av = avma; m = divis(R->N, pk);
   for (e=1; e<=ltab && signe(m); e++)
   {
+//    long s = Z_lvalrem(m, 2, &m);
     long s = vali(m); m = shifti(m,-s);
     tabt[e] = e==1? s: s + R->k;
     taba[e] = signe(m)? ((mod2BIL(m) & R->mask)+1)>>1: 0;
@@ -681,7 +682,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
 static Cache *
 alloc_cache(void)
 {
-  Cache *C = (Cache*)new_chunk(sizeof(Cache) / sizeof(long));
+  Cache *C = (Cache*)stack_malloc(sizeof(Cache));
   C->matvite = NULL;
   C->avite   = NULL;
   C->ctsgt = 0; return C;
@@ -691,44 +692,35 @@ static Cache **
 calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
 {
   GEN fat, P, E, PE;
-  long lv, lfa, pk, p, e, i, k;
-  long ltab, b;
+  long lv, i, k, b;
   Cache **pC;
 
   b = expi(R->N)+1;
-
   k = 3; while (((k+1)*(k+2) << (k-1)) < b) k++;
-  *pltab = ltab = (b/k) + 2;
+  *pltab = (b/k)+2;
   R->k  = k;
   R->lv = 1L << (k-1);
   R->mask = (1UL << k) - 1;
 
   fat = factoru_pow(t);
-  P = gel(fat,1); lfa = lg(P);
+  P = gel(fat,1);
   E = gel(fat,2);
   PE= gel(fat,3);
-  lv = 1;
-  for (i=1; i<lfa; i++)
-  {
-    long pe = PE[i];
-    if (pe > lv) lv = pe;
-  }
-  pC = (Cache**)cgetg(lv + 1, t_VEC);
+  lv = vecsmall_max(PE); /* max(p^e, p^e | t) */
+  pC = (Cache**)stack_malloc((lv+1)*sizeof(Cache*));
   pC[1] = alloc_cache(); /* to be used as temp in step5() */
   for (i = 2; i <= lv; i++) pC[i] = NULL;
-  for (i=1; i<lfa; i++)
+  for (i=1; i<lg(P); i++)
   {
-    pk = p = P[i];
-    e = E[i];
+    long pk, p = P[i], e = E[i];
+    pk = p;
     for (k=1; k<=e; k++, pk*=p)
     {
       pC[pk] = alloc_cache();
-      if (!filltabs(pC[pk], pC[p], R, p,pk, ltab)) return NULL;
+      if (!filltabs(pC[pk], pC[p], R, p,pk, *pltab)) return NULL;
     }
   }
-  if (DEBUGLEVEL) err_printf("\n");
-  *pP = P;
-  return pC;
+  *pP = P; return pC;
 }
 
 /* sig_a^{-1}(z) for z in Q(zeta_pk) and sig_a: zeta -> zeta^a. Assume
@@ -806,13 +798,14 @@ look_eta2(long k, GEN z)
 }
 
 static long
-step4a(Cache *C, Red *R, ulong q, long p, long k, GEN jpq)
+step4a(Cache *C, Red *R, ulong q, long p, long k, GEN tabg)
 {
   const long pk = upowuu(p,k);
   long ind;
-  GEN s1, s2, s3;
+  GEN jpq, s1, s2, s3;
 
-  if (!jpq) jpq = get_jac(C, q, pk, compute_g(q));
+  if (!tabg) tabg = compute_g(q);
+  jpq = get_jac(C, q, pk, tabg);
   s1 = autvec_TH(pk, jpq, C->E, C->cyc);
   s2 = powpolmod(C,R, p,k, s1);
   s3 = autvec_AL(pk, jpq, C->E, R);
@@ -902,14 +895,16 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
   while( (q = u_forprime_next(&T)) )
   { /* q = 1 (mod p) */
     if (umodiu(et,q) == 0) continue;
-
     if (umodiu(R->N,q) == 0) return _res(1,p);
     k = u_lval(q-1, p);
     pk = upowuu(p,k);
-    if (pk < lg(pC) && pC[pk]) { C = pC[pk]; Cp = pC[p]; }
-    else {
-      C = pC[1]; C->matvite = NULL; /* re-init */
+    if (pk < lg(pC) && pC[pk]) {
+      C = pC[pk];
+      Cp = pC[p];
+    } else {
+      C = pC[1];
       Cp = NULL;
+      C->matvite = NULL; /* re-init */
     }
 
     av = avma;
@@ -938,7 +933,7 @@ step6(GEN N, ulong t, GEN et)
   for (i=1; i<t; i++)
   {
     r = remii(mulii(r,N1), et);
-    if (gequal1(r)) break;
+    if (equali1(r)) break;
     if (!signe(remii(N,r)) && !equalii(r,N)) return mkvec2(r, gen_0);
     if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
@@ -948,7 +943,7 @@ step6(GEN N, ulong t, GEN et)
 static GEN
 aprcl(GEN N)
 {
-  GEN et, fat, flaglp, res, globfa;
+  GEN et, fat, flaglp, faet;
   long i, j, l, ltab, lfat;
   ulong t;
   Red R;
@@ -962,8 +957,8 @@ aprcl(GEN N)
       default: return _res(0,0);
     }
   if (Z_issquare(N)) return _res(0,0);
-  t = compute_t(N, &et, &globfa);
-  if (DEBUGLEVEL) err_printf("Starting APRCL: Choosing t = %ld\n",t);
+  t = compute_t(N, &et, &faet);
+  if (DEBUGLEVEL) err_printf("Starting APRCL with t = %ld\n",t);
   if (cmpii(sqri(et),N) < 0) pari_err_BUG("aprcl: e(t) too small");
   if (!equali1(gcdii(N,mului(t,et)))) return _res(1,0);
 
@@ -977,31 +972,27 @@ aprcl(GEN N)
   for (i=2; i<lfat; i++)
   {
     ulong p = fat[i];
-    GEN q = sqru(p);
-    flaglp[i] = equaliu(Fp_powu(N, p-1, q), 1);
+    flaglp[i] = equaliu(Fp_powu(N, p-1, sqru(p)), 1);
   }
-  vecsmall_sort(globfa);
+  vecsmall_sort(faet);
 
-  l = lg(globfa);
+  l = lg(faet);
   if (DEBUGLEVEL>2) err_printf("Step4: %ld q-values\n", l-1);
   for (i=l-1; i>0; i--) /* decreasing order: slowest first */
   {
-    ulong q = globfa[i];
-    GEN P, E, PE, faq = factoru_pow(q-1);
-    long lfaq;
-    pari_sp av1 = avma, av2;
-    GEN tabg = compute_g(q);
-    av2 = avma;
-    P = gel(faq,1), E = gel(faq,2), PE = gel(faq,3);
-    lfaq = lg(P);
-    if (DEBUGLEVEL>2)
-      err_printf("Jacobi sums computed for q = %ld...",q);
+    pari_sp av1 = avma;
+    ulong q = faet[i];
+    GEN faq = factoru_pow(q-1), tabg = compute_g(q);
+    GEN P = gel(faq,1), E = gel(faq,2), PE = gel(faq,3);
+    long lfaq = lg(P);
+    pari_sp av2 = avma;
+    if (DEBUGLEVEL>2) err_printf("testing Jacobi sums for q = %ld...",q);
     for (j=1; j<lfaq; j++, avma = av2)
     {
       long p = P[j], e = E[j], pe = PE[j], fl;
       Cache *C = pC[pe];
       R.C = C->cyc;
-      if (p >= 3)      fl = step4a(C,&R, q,p,e, get_jac(pC[pe], q, pe, tabg));
+      if (p >= 3)      fl = step4a(C,&R, q,p,e, tabg);
       else if (e >= 3) fl = step4b(C,&R, q,e);
       else if (e == 2) fl = step4c(C,&R, q);
       else             fl = step4d(C,&R, q);
@@ -1020,8 +1011,6 @@ aprcl(GEN N)
     if (flaglp[i] && (r = step5(pC, &R, p, et, ltab))) return r;
     avma = av;
   }
-  if (DEBUGLEVEL>2) err_printf("Step6: testing potential divisors\n");
-  res = step6(N, t, et);
   if (DEBUGLEVEL>2)
   {
     ulong sc = pC[1]->ctsgt;
@@ -1032,8 +1021,9 @@ aprcl(GEN N)
         sc += pC[i]->ctsgt;
       }
     err_printf("Number of Fermat powerings = %lu\n",sc);
+    err_printf("Step6: testing potential divisors\n");
   }
-  return res;
+  return step6(N, t, et);
 }
 
 long
