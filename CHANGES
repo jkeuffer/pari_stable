@@ -324,6 +324,7 @@ BA 98- GP function digits
    99- GP default 'sopath' [ rewritten from initial patch by GTo ]
 LGr100- allow polylog(n, t_SER) around a != 0
 BA 101- PARI functions ZX_shifti, ZX_remi2n
+   102- PARI functions cxexp1, mpsincos1
 
   Removed
     1- dropped DOS support

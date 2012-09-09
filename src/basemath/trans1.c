@@ -2463,8 +2463,8 @@ glog(GEN x, long prec)
 /********************************************************************/
 
 /* Reduce x0 mod Pi/2 to x in [-Pi/4, Pi/4]. Return cos(x)-1 */
-static GEN
-mpsc1(GEN x, long *ptmod8)
+GEN
+mpsincos1(GEN x, long *ptmod8)
 {
   long a = expo(x), l = realprec(x), b, L, i, n, m, B;
   GEN y, p2, x2;
@@ -2479,7 +2479,7 @@ mpsc1(GEN x, long *ptmod8)
     {
       GEN z, pitemp = Pi2n(-2, nbits2prec(a + 32));
       z = addrr(x,pitemp); /* = x + Pi/4 */
-      if (expo(z) >= bit_prec(z) + 3) pari_err_PREC("mpsc1");
+      if (expo(z) >= bit_prec(z) + 3) pari_err_PREC("mpsincos1");
       shiftr_inplace(pitemp, 1);
       q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
       p = l+EXTRAPRECWORD; x = rtor(x,p);
@@ -2491,7 +2491,7 @@ mpsc1(GEN x, long *ptmod8)
     {
       x = subrr(x, mulir(q, Pi2n(-1,p))); /* x mod Pi/2  */
       a = expo(x);
-      if (!signe(x) && a >= 0) pari_err_PREC("mpsc1");
+      if (!signe(x) && a >= 0) pari_err_PREC("mpsincos1");
       n = mod4(q); if (n && signe(q) < 0) n = 4 - n;
     }
   }
@@ -2596,7 +2596,7 @@ mpcos(GEN x)
     return real_1(l);
   }
 
-  av = avma; p1 = mpsc1(x,&mod8);
+  av = avma; p1 = mpsincos1(x,&mod8);
   switch(mod8)
   {
     case 0: case 4: y = addsr(1,p1); break;
@@ -2671,7 +2671,7 @@ mpsin(GEN x)
 
   if (!signe(x)) return real_0_bit(expo(x));
 
-  av = avma; p1 = mpsc1(x,&mod8);
+  av = avma; p1 = mpsincos1(x,&mod8);
   switch(mod8)
   {
     case 0: case 6: y=mpaut(p1); break;
@@ -2747,7 +2747,7 @@ mpsincos(GEN x, GEN *s, GEN *c)
     return;
   }
 
-  av=avma; p1=mpsc1(x,&mod8); tetpil=avma;
+  av=avma; p1=mpsincos1(x,&mod8); tetpil=avma;
   switch(mod8)
   {
     case 0: *c=addsr( 1,p1); *s=mpaut(p1); break;
@@ -2764,7 +2764,7 @@ mpsincos(GEN x, GEN *s, GEN *c)
 }
 
 /* SINE and COSINE - 1 */
-void
+static void
 mpsincosm1(GEN x, GEN *s, GEN *c)
 {
   long mod8;
@@ -2779,7 +2779,7 @@ mpsincosm1(GEN x, GEN *s, GEN *c)
     return;
   }
 
-  av=avma; p1=mpsc1(x,&mod8); tetpil=avma;
+  av=avma; p1=mpsincos1(x,&mod8); tetpil=avma;
   *c=gcopy(p1); *s=mpaut(p1);
   switch(mod8)
   {
@@ -2803,7 +2803,7 @@ exp_Ir(GEN x)
 }
 
 /* return exp(ix)-1, x a t_REAL */
-GEN
+static GEN
 expm1_Ir(GEN x)
 {
   pari_sp av = avma;
@@ -2815,7 +2815,7 @@ expm1_Ir(GEN x)
 
 /* return exp(z)-1, z complex */
 GEN
-cxexpm1(GEN z, long prec)
+cxexp1(GEN z, long prec)
 {
   pari_sp av = avma;
   GEN X, Y, x = real_i(z), y = imag_i(z);
