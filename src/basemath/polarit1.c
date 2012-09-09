@@ -782,7 +782,14 @@ long
 FpXQX_nbroots(GEN f, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN z = FpXQX_split_part(f, T, p);
+  GEN z;
+  if(lgefint(p)==3)
+  {
+    ulong pp=p[2];
+    z = FlxqX_split_part(ZXX_to_FlxX(f,pp,varn(T)),ZX_to_Flx(T,pp),pp);
+  }
+  else
+    z = FpXQX_split_part(f, T, p);
   avma = av; return degpol(z);
 }
 
