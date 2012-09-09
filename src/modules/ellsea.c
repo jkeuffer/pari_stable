@@ -694,7 +694,7 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
 enum mod_type {MTpathological, MTAtkin, MTElkies, MTone_root, MTroots};
 
 static GEN
-Flxq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, ulong p, long *pt_dG, long *pt_r)
+Flxq_study_eqn(long ell, GEN mpoly, GEN T, ulong p, long *pt_dG, long *pt_r)
 {
   GEN xp = Flxq_powu(polx_Flx(T[1]), p, T, p);
   GEN Xp = FlxqXQ_pow(pol_x(0), utoi(p), mpoly, T, p);
@@ -736,7 +736,7 @@ Fq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
     ulong pp = p[2];
     GEN Tp = ZX_to_Flx(T,pp);
     GEN mpolyp = ZXX_to_FlxX(mpoly,pp,varn(Tp));
-    G = Flxq_study_eqn(ell, q, mpolyp, Tp, pp, pt_dG, pt_r);
+    G = Flxq_study_eqn(ell, mpolyp, Tp, pp, pt_dG, pt_r);
     if (!G) return NULL;
     G = FlxX_to_ZXX(G);
   }
