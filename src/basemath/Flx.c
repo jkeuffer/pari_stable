@@ -1405,11 +1405,10 @@ Flx_halfgcd_basecase(GEN a, GEN b, ulong p)
   }
   return gerepilecopy(av, mkmat2(mkcol2(u,u1), mkcol2(v,v1)));
 }
+/* ux + vy */
 static GEN
 Flx_addmulmul(GEN u, GEN v, GEN x, GEN y, ulong p)
-{
-  return Flx_add(Flx_mul(u, x, p),Flx_mul(v, y, p), p);
-}
+{ return Flx_add(Flx_mul(u,x, p), Flx_mul(v,y, p), p); }
 
 static GEN
 FlxM_Flx_mul2(GEN M, GEN x, GEN y, ulong p)
@@ -1420,13 +1419,33 @@ FlxM_Flx_mul2(GEN M, GEN x, GEN y, ulong p)
   return res;
 }
 
+#if 0
 static GEN
-FlxM_mul2(GEN M, GEN N, ulong p)
+FlxM_mul2_old(GEN M, GEN N, ulong p)
 {
   GEN res = cgetg(3, t_MAT);
   gel(res, 1) = FlxM_Flx_mul2(M,gcoeff(N,1,1),gcoeff(N,2,1),p);
   gel(res, 2) = FlxM_Flx_mul2(M,gcoeff(N,1,2),gcoeff(N,2,2),p);
   return res;
+}
+#endif
+/* A,B are 2x2 matrices, Flx entries. Return A x B using Strassen 7M formula */
+static GEN
+FlxM_mul2(GEN A, GEN B, ulong p)
+{
+  GEN A11=gcoeff(A,1,1),A12=gcoeff(A,1,2), B11=gcoeff(B,1,1),B12=gcoeff(B,1,2);
+  GEN A21=gcoeff(A,2,1),A22=gcoeff(A,2,2), B21=gcoeff(B,2,1),B22=gcoeff(B,2,2);
+  GEN M1 = Flx_mul(Flx_add(A11,A22, p), Flx_add(B11,B22, p), p);
+  GEN M2 = Flx_mul(Flx_add(A21,A22, p), B11, p);
+  GEN M3 = Flx_mul(A11, Flx_sub(B12,B22, p), p);
+  GEN M4 = Flx_mul(A22, Flx_sub(B21,B11, p), p);
+  GEN M5 = Flx_mul(Flx_add(A11,A12, p), B22, p);
+  GEN M6 = Flx_mul(Flx_sub(A21,A11, p), Flx_add(B11,B12, p), p);
+  GEN M7 = Flx_mul(Flx_sub(A12,A22, p), Flx_add(B21,B22, p), p);
+  GEN T1 = Flx_add(M1,M4, p), T2 = Flx_sub(M7,M5, p);
+  GEN T3 = Flx_sub(M1,M2, p), T4 = Flx_add(M3,M6, p);
+  retmkmat2(mkcol2(Flx_add(T1,T2, p), Flx_add(M2,M4, p)),
+            mkcol2(Flx_add(M3,M5, p), Flx_add(T3,T4, p)));
 }
 
 /* Return [0,1;1,-q]*M */
