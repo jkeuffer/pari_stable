@@ -2563,8 +2563,7 @@ RgXQ_charpoly(GEN x, GEN T, long v)
   vx = varn(x);
   vp = varn(T);
   if (varncmp(vx, vp) > 0) return caract_const(av, x, v, d);
-  if (varncmp(vx, vp) < 0)
-    pari_err(e_MISC,"incorrect variable priorities in RgXQ_charpoly");
+  if (varncmp(vx, vp) < 0) pari_err_VAR("RgXQ_charpoly [var priorities]",x,T);
   dx = degpol(x);
   if (dx <= 0)
     return dx? monomial(gen_1, d, v): caract_const(av, gel(x,2), v, d);

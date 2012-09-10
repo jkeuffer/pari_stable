@@ -2999,7 +2999,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
   GEN Q = cgetg(lP, t_POL);
   if (typ(P) != t_POL) pari_err_TYPE("rnf function [t_POL expected]", P);
   if (varncmp(varn(P), vT) >= 0)
-    pari_err(e_MISC,"incorrect polynomial in rnf function");
+    pari_err_VAR("rnf function [var priorities]", P, T);
   Q[1] = P[1];
   for (i=2; i<lP; i++)
   {

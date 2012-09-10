@@ -102,7 +102,7 @@ static GEN
 fix_pol(pari_sp av, GEN p)
 {
   long w = gvar2(p), v = varn(p);
-  if (w == v) pari_err(e_MISC,"incorrect variable in charpoly");
+  if (w == v) pari_err_BUG("charpoly [incorrect variable]");
   if (varncmp(w,v) < 0) p = gerepileupto(av, poleval(p, pol_x(v)));
   return p;
 }
