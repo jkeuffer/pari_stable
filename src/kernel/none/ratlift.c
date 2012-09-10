@@ -53,17 +53,16 @@ int
 ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
 {
   pari_sp av = avma;
-  if (signe(bmax) <= 0)
-    pari_err(e_MISC, "ratlift: bmax must be > 0, found\n\tbmax=%Ps", bmax);
-  if (signe(amax) < 0)
-    pari_err(e_MISC, "ratilft: amax must be >= 0, found\n\tamax=%Ps", amax);
+  if (signe(bmax) <= 0) pari_err_DOMAIN("ratlift", "bmax", "<=", gen_0, bmax);
+  if (signe(amax) < 0) pari_err_DOMAIN("ratlift", "amax", "<", gen_0, amax);
   /* check 2*amax*bmax < m */
   if (cmpii(shifti(mulii(amax, bmax), 1), m) >= 0)
-    pari_err(e_MISC, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Ps\n\tbmax=%Ps\n\tm=%Ps", amax,bmax,m);
+    pari_err_DOMAIN("ratlift", "2*amax*bmax", ">=", m, mkvec3(amax,bmax,m));
   /* we _could_ silently replace x with modii(x,m) instead of the following,
    * but let's leave this up to the caller */
-  if (signe(x) < 0 || cmpii(x,m) >= 0)
-    pari_err(e_MISC, "ratlift: must have 0 <= x < m, found\n\tx=%Ps\n\tm=%Ps", x,m);
+  if (signe(x) < 0) pari_err_DOMAIN("ratlift", "x", "<", gen_0, x);
+  if (cmpii(x,m) >= 0) pari_err_DOMAIN("ratlift", "x", ">=", m, x);
+  if (cmpii(x,m) >= 0)
   avma = av; return Fp_ratlift(x, m, amax, bmax, a, b);
 }
 

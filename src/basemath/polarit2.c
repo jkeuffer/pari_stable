@@ -2201,7 +2201,7 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
   if (typ(x)!=t_POL) pari_err_TYPE("RgXQ_ratlift",x);
   if (typ(T)!=t_POL) pari_err_TYPE("RgXQ_ratlift",T);
   if ( varncmp(varn(x),varn(T)) ) pari_err_VAR("RgXQ_ratlift",x,T);
-  if (bmax < 0) pari_err(e_MISC, "ratlift: bmax must be >= 0");
+  if (bmax < 0) pari_err_DOMAIN("ratlift", "bmax", "<", gen_0, stoi(bmax));
   if (!signe(T)) {
     if (degpol(x) <= amax) {
       *P = gcopy(x);
@@ -2211,7 +2211,8 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
     return 0;
   }
   if (amax+bmax >= degpol(T))
-    pari_err(e_MISC, "ratlift: must have amax+bmax < deg(T)");
+    pari_err_DOMAIN("ratlift", "amax+bmax", ">=", stoi(degpol(T)),
+                    mkvec3(stoi(amax), stoi(bmax), T));
   vx = varn(T);
   u = x = primitive_part(x, &cu);
   v = T = primitive_part(T, &cv);
