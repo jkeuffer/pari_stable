@@ -1999,8 +1999,7 @@ bnfisunit(GEN bnf,GEN x)
   n = bnf_get_tuN(bnf); /* # { roots of 1 } */
   if (tx == t_MAT)
   { /* famat, assumed integral */
-    if (lg(x) != 3 || lgcols(x) != lg(x[2]))
-      pari_err(e_MISC, "not a factorization matrix in bnfisunit");
+    if (lg(x) != 3) pari_err_TYPE("bnfisunit [not a factorization]", x);
   } else {
     x = nf_to_scalar_or_basis(nf,x);
     if (typ(x) != t_COL)

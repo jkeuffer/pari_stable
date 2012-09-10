@@ -2073,7 +2073,7 @@ decodemodule(GEN nf, GEN fa)
 
   nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
-    pari_err(e_MISC,"not a factorisation in decodemodule");
+    pari_err_TYPE("decodemodule [not a factorization]", fa);
   n = nf_get_degree(nf); nn = n*n; id = NULL;
   G = gel(fa,1);
   E = gel(fa,2);
@@ -2081,7 +2081,7 @@ decodemodule(GEN nf, GEN fa)
   {
     long code = itos(gel(G,k)), p = code / nn, j = (code%n)+1;
     GEN P = idealprimedec(nf, utoipos(p)), e = gel(E,k);
-    if (lg(P) <= j) pari_err(e_MISC, "incorrect hash code in decodemodule");
+    if (lg(P) <= j) pari_err_BUG("decodemodule [incorrect hash code]");
     pr = gel(P,j);
     id = id? idealmulpowprime(nf,id, pr,e)
            : idealpow(nf, pr,e);
