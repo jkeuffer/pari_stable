@@ -215,6 +215,10 @@ BA 76- binary(0) now return []
    77- polisirreducible() now avoids factoring in most cases
 HC 78- reimplement incgam()
    79- allow eint1(t_COMPLEX)
+   80- when 'echo = 1', no longer echo commands if they were entered
+       interactively [commands ended up printed twice]
+   81- unless 'echo = 1', no longer log commands entered non-interactively
+       when 'log = 1'. '\r file' used to log the entire content of 'file'.
 
   Added
     1- mathnf for matrices over K[X] [#41]

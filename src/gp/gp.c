@@ -1398,6 +1398,13 @@ do_prompt(char *buf, const char *prompt, filtre_t *F)
 /*                           GP MAIN LOOP                           */
 /*                                                                  */
 /********************************************************************/
+static int
+is_interactive(void)
+{
+  ulong f = GP_DATA->flags&(gpd_TEXMACS|gpd_TEST);
+  return pari_infile == stdin && !f && gp_is_interactive;
+}
+
 static const char esc = (0x1f & '['); /* C-[ = escape */
 static char *
 strip_prompt(const char *s)
@@ -1427,6 +1434,7 @@ update_logfile(const char *prompt, const char *s)
   pari_sp av;
   const char *p;
   if (!pari_logfile) return;
+  if (!is_interactive() && !GP_DATA->echo) return;
   av = avma;
   p = strip_prompt(prompt); /* raw prompt */
 
@@ -1451,7 +1459,7 @@ update_logfile(const char *prompt, const char *s)
 void
 echo_and_log(const char *prompt, const char *s)
 {
-  if (GP_DATA->echo) {
+  if (GP_DATA->echo && !is_interactive()) {
     /* not pari_puts(): would duplicate in logfile */
     fputs(prompt, pari_outfile);
     fputs(s,      pari_outfile);
@@ -1492,13 +1500,6 @@ get_line_from_file(const char *prompt, filtre_t *F, FILE *file)
       tm_start_output();
   }
   return 1;
-}
-
-static int
-is_interactive(void)
-{
-  ulong f = GP_DATA->flags&(gpd_TEXMACS|gpd_TEST);
-  return pari_infile == stdin && !f && gp_is_interactive;
 }
 
 /* return 0 if no line could be read (EOF). If PROMPT = NULL, expand and
