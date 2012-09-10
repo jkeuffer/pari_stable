@@ -1404,7 +1404,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
   GEN lambda = cgetg(N+1, t_VECSMALL), mat = cgetg(nba+1,t_MAT);
 
   lgmat = lg(v); setlg(mat, lgmat+1);
-  for (i = 1; i < lgmat; i++) mat[i] = v[i];
+  for (i = 1; i < lgmat; i++) gel(mat,i) = gel(v,i);
   for (     ; i <= nba; i++)  gel(mat,i) = cgetg(nba+1, t_VECSMALL);
 
   if (x) { x = ZM_lll(x, 0.75, LLL_INPLACE); bas = RgV_RgM_mul(bas, x); }

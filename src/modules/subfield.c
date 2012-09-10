@@ -87,9 +87,9 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
 
   Zp   = cgetg(lnon,t_VEC);
   Zpp  = cgetg(lnon,t_VEC); nn = 0;
-  for (i=1; i<r; i++) { n[i] = lg(Z[i])-1; nn += n[i]; }
+  for (i=1; i<r; i++) { n[i] = lg(gel(Z,i))-1; nn += n[i]; }
   lY = lg(Y); Yp = cgetg(lY+1,t_VEC);
-  for (j=1; j<lY; j++) Yp[j] = Y[j];
+  for (j=1; j<lY; j++) gel(Yp,j) = gel(Y,j);
 
   {
     pari_sp av = avma;

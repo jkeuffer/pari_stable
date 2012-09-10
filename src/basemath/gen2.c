@@ -2648,7 +2648,7 @@ listinsert(GEN L, GEN x, long index)
   if (index <= 0 || index > l) pari_err(e_MISC,"bad index in listinsert");
   ensure_nb(L, l);
   z = list_data(L);
-  for (i=l; i > index; i--) z[i] = z[i-1];
+  for (i=l; i > index; i--) gel(z,i) = gel(z,i-1);
   z[0] = evaltyp(t_VEC) | evallg(l+1);
   return gel(z,index) = gclone(x);
 }
