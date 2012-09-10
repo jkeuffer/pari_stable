@@ -3586,7 +3586,7 @@ pari_get_homedir(const char *user)
 }
 #else
 char *
-pari_get_homedir(const char *user) { return NULL; }
+pari_get_homedir(const char *user) { (void) user; return NULL; }
 #endif
 
 /*******************************************************************/
@@ -4600,7 +4600,7 @@ pari_is_rwx(const char *s)
 #if defined(UNIX) || defined (__EMX__)
   return access(s, R_OK | W_OK | X_OK) == 0;
 #else
-  return 1;
+  (void) s; return 1;
 #endif
 }
 
@@ -4617,7 +4617,7 @@ static int
 pari_dir_exists(const char *s) { return mkdir(s, 0777); }
 #elif defined(_WIN32)
 static int
-pari_file_exists(const char *s) { return GetFileAttributesA(s) != ~0; }
+pari_file_exists(const char *s) { return GetFileAttributesA(s) != ~0UL; }
 static int
 pari_dir_exists(const char *s) { return mkdir(s); }
 #else

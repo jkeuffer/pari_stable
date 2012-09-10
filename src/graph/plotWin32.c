@@ -104,6 +104,7 @@ PARI_get_plot(long f)
 {
   HDC hdc;
   TEXTMETRIC tm;
+  (void) f;
   if (pari_plot.init) return;      /* pari_plot is already set */
 
   pari_plot.init    = 1;

@@ -262,7 +262,7 @@ pari_stackcheck_init(void *pari_stack_base)
 void
 pari_stackcheck_init(void *pari_stack_base)
 {
-  PARI_stack_limit = NULL;
+  (void) pari_stack_base; PARI_stack_limit = NULL;
 }
 #endif /* STACK_CHECK */
 
