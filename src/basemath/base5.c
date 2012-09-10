@@ -591,7 +591,7 @@ mattocomplex(GEN nf, GEN x)
 static GEN
 nf_all_roots(GEN nf, GEN x, long prec)
 {
-  long i, j, l = lg(x), ru = lg(nf[6]);
+  long i, j, l = lg(x), ru = lg(nf_get_roots(nf));
   GEN y = cgetg(l, t_POL), v, z;
 
   x = RgX_to_nfX(nf, x);

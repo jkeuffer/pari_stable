@@ -821,7 +821,7 @@ rnfisnorm(GEN T, GEN x, long flag)
 
   A = lift_intern(bnfissunit(bnf,bnfS,x));
   L = lg(sunitrel);
-  itu = lg(nf[6])-1; /* index of torsion unit in bnfsunit(nf) output */
+  itu = lg(nf_get_roots(nf))-1; /* index of torsion unit in bnfsunit(nf) output */
   M = cgetg(L+1,t_MAT);
   for (i=1; i<L; i++)
   {

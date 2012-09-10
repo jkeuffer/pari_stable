@@ -83,7 +83,7 @@ void
 checkbnrgen(GEN bnr)
 {
   checkbnr(bnr);
-  if (lg(bnr[5])<=3)
+  if (lg(bnr_get_clgp(bnr))<=3)
     pari_err_TYPE("checkbnrgen [apply bnrinit(,,1), not bnrinit()]",bnr);
 }
 
