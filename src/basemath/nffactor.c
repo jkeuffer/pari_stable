@@ -841,7 +841,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
 
   T->dPinvS = ZM_mul(L->iprk, S);
   l = lg(S);
-  h = lg(T->dPinvS[1]);
+  h = lgcols(T->dPinvS);
   T->PinvSdbl = (double**)cgetg(l, t_MAT);
   init_dalloc();
   for (j = 1; j < l; j++)

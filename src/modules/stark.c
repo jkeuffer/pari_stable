@@ -486,7 +486,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
   minnorm = 1;
 
   /* if the extension is cyclic then we _must_ find a suitable conductor */
-  if (lg(dtQ[2]) == 2) iscyc = 1;
+  if (lg(gel(dtQ,2)) == 2) iscyc = 1;
 
   if (DEBUGLEVEL>1)
     err_printf("Looking for a modulus of norm: ");

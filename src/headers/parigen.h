@@ -106,7 +106,7 @@ typedef unsigned long pari_ulong;
 #define setisclone(x) (((ulong*) (x))[0] |= CLONEBIT)
 #define unsetisclone(x) (((ulong*) (x))[0] &= (~CLONEBIT))
 
-#define lg(x)         ((long)(((ulong*)(x))[0] & LGBITS))
+#define lg(x)         ((long)(((ulong)((x)[0])) & LGBITS))
 #define setlg(x,s)    (((ulong*)(x))[0]=\
                       (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 

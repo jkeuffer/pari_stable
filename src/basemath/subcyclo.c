@@ -628,7 +628,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
           pari_err(e_MISC,"not a HNF matrix in galoissubcyclo");
         if (!Z)
           pari_err(e_MISC,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
-        if ( lg(Z[2]) != lg(sg) || lg(Z[3]) != lg(sg))
+        if ( lg(gel(Z,2)) != lg(sg) || lg(gel(Z,3)) != lg(sg))
           pari_err(e_MISC,"Matrix of wrong dimensions in galoissubcyclo");
         V = znstar_hnf_generators(znstar_small(Z),sg);
       }
@@ -735,7 +735,7 @@ polsubcyclo(long n, long d, long v)
   pari_sp ltop = avma;
   GEN L, Z = znstar(stoi(n));
   /* polsubcyclo_g is twice faster but Z must be cyclic */
-  if (lg(Z[2]) == 2 && dvdis(gel(Z,1), d))
+  if (lg(gel(Z,2)) == 2 && dvdis(gel(Z,1), d))
   {
     avma = ltop;
     return polsubcyclo_g(n, d, Z, v);

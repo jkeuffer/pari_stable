@@ -1150,7 +1150,7 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
     if (!L[p]) continue;
     FB[++i] = p;
     gel(LV,p) = vecpermute(Vbase, gel(L,p));
-    iLP[p]= ip; ip += lg(L[p])-1;
+    iLP[p]= ip; ip += lg(gel(L,p))-1;
   }
   F->KCZ = i;
   F->KC = ip;

@@ -1383,11 +1383,11 @@ compilefunc(entree *ep, long n, int mode, long flag)
             for(l1=0,k=1;k<=n;k++)
             {
               gel(g,k)=cattovec(arg[j+k-1],OPcat);
-              l1+=lg(g[k])-1;
+              l1+=lg(gel(g,k))-1;
             }
             op_push_loc(OCvec, l1+1, str);
             for(m=1,k=1;k<=n;k++)
-              for(l=1;l<lg(g[k]);l++,m++)
+              for(l=1;l<lg(gel(g,k));l++,m++)
               {
                 compilenode(mael(g,k,l),Ggen,FLsurvive);
                 op_push(OCstackgen,m,mael(g,k,l));

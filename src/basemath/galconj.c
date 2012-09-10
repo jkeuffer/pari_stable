@@ -1519,7 +1519,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   Q = gl->Q; Q2 = shifti(Q,-1);
   res = gel(u,2);
   for (i = 1; i < d; i++)
-    if (lg(liftpow[i])>2)
+    if (lg(gel(liftpow,i))>2)
       res = addii(res, mulii(gmael(liftpow,i,2), gel(u,i+2)));
   res = remii(res,Q);
   if (gl->den != gen_1) res = mulii(res, gl->den);
@@ -1527,7 +1527,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   if (absi_cmp(res, gl->gb->bornesol) > 0) { avma = av; return 0; }
   res = scalar_ZX_shallow(gel(u,2),varn(u));
   for (i = 1; i < d ; i++)
-    if (lg(liftpow[i])>2)
+    if (lg(gel(liftpow,i))>2)
       res = ZX_add(res, ZX_Z_mul(gel(liftpow,i), gel(u,i+2)));
   res = FpX_red(res, Q);
   if (gl->den != gen_1) res = FpX_Fp_mul(res, gl->den, Q);
@@ -1823,7 +1823,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
       if (e!=1) lo = galoisfindgroups(lo, sg, dgf);
       if (DEBUGLEVEL>=4) err_printf("Galoisconj:Subgroups list:%Ps\n", lo);
       for (l = 1; l < lg(lo); l++)
-        if (lg(lo[l])>2 && frobeniusliftall(gel(lo,l), el, &pf,&gl,&gt, frob))
+        if (lg(gel(lo,l))>2 && frobeniusliftall(gel(lo,l), el, &pf,&gl,&gt, frob))
         {
           sg  = gcopy(gel(lo,l));
           psi = galoismakepsi(g,sg,pf);

@@ -2797,7 +2797,7 @@ factorpadic2(GEN f, GEN p, long prec)
   for (i=1; i<l; i++)
   {
     gel(fa,i) = padicff(gel(fa,i),p,prec);
-    n += lg(fa[i])-1;
+    n += lg(gel(fa,i))-1;
   }
 
   y = fact_from_DDF(fa,ex,n);

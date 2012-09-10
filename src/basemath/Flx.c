@@ -2842,7 +2842,7 @@ FlxX_swap(GEN x, long n, long ws)
     GEN p1 = cgetg(lx, t_VECSMALL);
     p1[1] = ws;
     for (k=2; k<lx; k++)
-      if( j<lg(x[k]))
+      if (j<lg(gel(x,k)))
         p1[k] = mael(x,k,j);
       else
         p1[k] = 0;

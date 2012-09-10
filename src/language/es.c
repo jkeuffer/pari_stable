@@ -2621,7 +2621,7 @@ print_0_or_pm1(GEN g, outString *S, int addsign)
 static void
 print_context(GEN g, pariout_t *T, outString *S, long tex)
 {
-  if (lg(g)>=8 && lg(gel(g,7))>1 && lg(mael(g,5,3))>=2)
+  if (lg(g)>=8 && lg(gel(g,7))>1 && lg(gmael(g,5,3))>=2)
   {
     GEN v = gel(g,7), d = gmael3(g,5,3,1);
     long i, l = lg(v);

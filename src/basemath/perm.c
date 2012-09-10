@@ -285,7 +285,7 @@ perm_order(GEN v)
   pari_sp ltop = avma;
   GEN c = vecperm_orbits_i(mkvec(v), lg(v)-1);
   long i, d;
-  for(i=1, d=1; i<lg(c); i++) d = clcm(d, lg(c[i])-1);
+  for(i=1, d=1; i<lg(c); i++) d = clcm(d, lg(gel(c,i))-1);
   avma = ltop; return d;
 }
 
@@ -296,7 +296,7 @@ cyc_pow(GEN cyc, long exp)
   GEN c;
   for (r = j = 1; j < lg(cyc); j++)
   {
-    long n = lg(cyc[j]) - 1;
+    long n = lg(gel(cyc,j)) - 1;
     r += cgcd(n, exp);
   }
   c = cgetg(r, t_VEC);
@@ -325,7 +325,7 @@ cyc_pow_perm(GEN cyc, long exp)
 {
   long e, j, k, l, n;
   GEN p;
-  for (n = 0, j = 1; j < lg(cyc); j++) n += lg(cyc[j])-1;
+  for (n = 0, j = 1; j < lg(cyc); j++) n += lg(gel(cyc,j))-1;
   p = cgetg(n + 1, t_VECSMALL);
   for (j = 1; j < lg(cyc); j++)
   {

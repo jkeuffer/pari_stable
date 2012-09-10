@@ -226,7 +226,7 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
     GEN Yi = gel(Y,i);
     long ki = 0, si = lg(Yi)-1;
 
-    for (j=1; j<=si; j++) { n[j] = lg(Yi[j])-1; ki += n[j]; }
+    for (j=1; j<=si; j++) { n[j] = lg(gel(Yi,j))-1; ki += n[j]; }
     ki /= B->size;
     De = cgetg(ki+1,t_VEC);
     for (j=1; j<=ki; j++) gel(De,j) = VOID;

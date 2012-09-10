@@ -1335,7 +1335,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
         break;
       default: pari_err_TYPE("gauss",*b);
     }
-    if (lg((*b)[1])-1 != *li) pari_err_DIM("gauss");
+    if (nbrows(*b) != *li) pari_err_DIM("gauss");
   }
   else
     *b = matid(*li);

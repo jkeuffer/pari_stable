@@ -983,7 +983,7 @@ closure_eval(GEN C)
         long d=st[sp-1];
         if (typ(p)!=t_MAT) pari_err_TYPE("_[_,_] OCcompo2 [not a matrix]", p);
         check_array_index(d, lg(p));
-        check_array_index(c, lg(p[d]));
+        check_array_index(c, lg(gel(p,d)));
         sp-=3;
         closure_castgen(gcoeff(p,c,d),operand);
         break;
@@ -999,7 +999,7 @@ closure_eval(GEN C)
         if (typ(p)!=t_MAT)
           pari_err_TYPE("&_[_,_] OCcompo2ptr [not a matrix]", p);
         check_array_index(d, lg(p));
-        check_array_index(c, lg(p[d]));
+        check_array_index(c, lg(gel(p,d)));
         C->ptcell = (GEN *) gel(p,d)+c;
         C->parent   = p;
         g->x = *(C->ptcell);
@@ -1839,7 +1839,7 @@ closure_relink(GEN C, hashtable *table)
     if (opcode_need_relink((op_code)code[i]))
       oper[i] = (long) hash_search(table,(void*) oper[i])->val;
   for (i=1;i<lg(fram);i++)
-    for (j=1;j<lg(fram[i]);j++)
+    for (j=1;j<lg(gel(fram,i));j++)
       mael(fram,i,j) = (long) hash_search(table,(void*) mael(fram,i,j))->val;
 }
 
@@ -1877,7 +1877,7 @@ closure_unlink(GEN C)
       relocs[n] = (entree *) oper[i];
     }
   for (i=1;i<lg(fram);i++)
-    for (j=1;j<lg(fram[i]);j++)
+    for (j=1;j<lg(gel(fram,i));j++)
     {
       long n = pari_stack_new(&s_relocs);
       relocs[n] = (entree *) mael(fram,i,j);

@@ -1016,7 +1016,7 @@ ZX_factor_i(GEN x)
   for (i=1; i<l; i++)
   {
     gel(fa,i) = ZX_DDF(gel(fa,i));
-    n += lg(fa[i])-1;
+    n += lg(gel(fa,i))-1;
   }
   y = fact_from_DDF(fa,ex,n);
   return sort_factor_pol(y, cmpii);
