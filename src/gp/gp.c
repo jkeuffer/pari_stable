@@ -192,7 +192,8 @@ handle_texmacs_command(const char *s)
 }
 #else
 static void
-handle_texmacs_command(const char *s) { pari_err(e_MISC, "readline not available"); }
+handle_texmacs_command(const char *s)
+{ (void)s;pari_err(e_MISC, "readline not available"); }
 #endif
 
 /*******************************************************************/
