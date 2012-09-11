@@ -370,7 +370,6 @@ GEN     FpXV_red(GEN z, GEN p);
 int     Fq_issquare(GEN x, GEN T, GEN p);
 GEN     FqV_inv(GEN x, GEN T, GEN p);
 GEN     Z_to_FpX(GEN a, GEN p, long v);
-long    brent_kung_optpow(long d, long n, long m);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 GEN     random_FpX(long d, long v, GEN p);
 
@@ -469,6 +468,8 @@ GEN     RgV_sumpart(GEN v, long n);
 GEN     RgV_sumpart2(GEN v, long m, long n);
 GEN     RgV_zc_mul(GEN x, GEN y);
 GEN     RgV_zm_mul(GEN x, GEN y);
+GEN     RgX_RgM_eval(GEN x, GEN y);
+GEN     RgX_RgMV_eval(GEN x, GEN y);
 int     isdiagonal(GEN x);
 GEN     matid(long n);
 GEN     matid_F2m(long n);
@@ -551,6 +552,9 @@ GEN     RgX_unscale(GEN P, GEN h);
 GEN     Rg_RgX_sub(GEN x, GEN y);
 GEN     ZX_unscale(GEN P, GEN h);
 GEN     ZX_unscale_div(GEN P, GEN h);
+long    brent_kung_optpow(long d, long n, long m);
+GEN     gen_RgX_bkeval(GEN Q, GEN x, int use_sqr, void *E, struct bb_algebra *ff);
+GEN     gen_RgX_bkeval_powers(GEN P, GEN V, void *E, struct bb_algebra *ff);
 
 /* ZV.c */
 
@@ -1976,9 +1980,7 @@ long    z_pvalrem(long n, GEN p, long *py);
 /* gen3.c */
 
 GEN     RgM_mulreal(GEN x, GEN y);
-GEN     RgX_RgM_eval(GEN x, GEN y);
 GEN     RgX_RgM_eval_col(GEN x, GEN M, long c);
-GEN     RgX_RgMV_eval(GEN x, GEN y);
 GEN     RgX_deflate_max(GEN x0, long *m);
 GEN     RgX_integ(GEN x);
 GEN     ceil_safe(GEN x);

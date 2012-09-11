@@ -314,7 +314,7 @@ BA 85- PARI functions FqXY_eval, FqXY_evalx, FpXY_Fq_evaly
 BA 86- SEA over non-prime finite field (for char p > 1000)
 LGr87- Add clock_gettime timer option
    88- add new error type e_DOMAIN
-BA 89- Add blackbox finite field for generic linear algebra
+BA 89- Add black box finite fields for generic linear algebra
 BA 90- PARI functions FlxqM_image, FlxqM_ker, FqM_deplin
 BA 91- GP function ellneg
 BA 92- PARI functions Fp_ellcard, FpXQ_ellcard, Flxq_ellcard
@@ -332,6 +332,7 @@ BA 101- PARI functions ZX_shifti, ZX_remi2n
 BA 103- GP function ellfromj
    103- GP function forcomposite
    104- new error class e_PRIORITY [ pari_err() ]
+BA 105- Add black box algebra for Brent and Kung algorithm
 
   Removed
     1- dropped DOS support

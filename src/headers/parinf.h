@@ -93,6 +93,18 @@ struct bb_field
   GEN (*s)(void *E, long);
 };
 
+/* black box algebra */
+struct bb_algebra
+{
+  GEN (*red)(void *E, GEN x);
+  GEN (*add)(void *E, GEN x, GEN y);
+  GEN (*smul)(void *E, GEN x, GEN y);
+  GEN (*mul)(void *E, GEN x, GEN y);
+  GEN (*sqr)(void *E, GEN x);
+  GEN (*one)(void *E);
+  GEN (*zero)(void *E);
+};
+
 /* qfr3 / qfr5 */
 struct qfr_data { GEN D, sqrtD, isqrtD; };
 

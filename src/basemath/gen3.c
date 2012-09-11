@@ -1245,59 +1245,6 @@ RgX_deflate_max(GEN x, long *m)
   return RgX_deflate(x, *m);
 }
 
-static GEN
-RgM_eval_powers(GEN P, GEN V, long a, long n)
-{
-  GEN z = scalarmat_shallow(gel(P,2+a), nbrows(V)); /* V[1] = 1 */
-  long i;
-  for (i=1; i<=n; i++) z = RgM_add(z, RgM_Rg_mul(gel(V,i+1),gel(P,2+a+i)));
-  return z;
-}
-
-GEN
-RgX_RgMV_eval(GEN P, GEN V)
-{
-  pari_sp av = avma;
-  long l = lg(V)-1, d = degpol(P), n = nbrows(V);
-  GEN z;
-
-  if (d < 0) return zeromat(n, n);
-  if (d < l)
-  {
-    z = RgM_eval_powers(P,V,0,d);
-    return gerepileupto(av, z);
-  }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in RgX_RgMV_eval");
-  d -= l;
-  z = RgM_eval_powers(P,V,d+1,l-1);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    z = RgM_add(RgM_eval_powers(P,V,d+1,l-2), RgM_mul(z,gel(V,l)));
-    z = gerepileupto(av, z);
-  }
-  z = RgM_add(RgM_eval_powers(P,V,0,d), RgM_mul(z,gel(V,d+2)));
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("RgX_RgMV_eval: %ld RgM_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileupto(av, z);
-}
-
-GEN
-RgX_RgM_eval(GEN Q, GEN x)
-{
-  pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd, n = lg(x)-1;
-  if (d < 0) return zeromat(n, n);
-  if (d == 0) return scalarmat(gel(Q,2), n);
-  rtd = (long) sqrt((double)d);
-  z = RgX_RgMV_eval(Q, RgM_powers(x, rtd));
-  return gerepileupto(av, z);
-}
-
 GEN
 RgX_RgM_eval_col(GEN x, GEN M, long c)
 {

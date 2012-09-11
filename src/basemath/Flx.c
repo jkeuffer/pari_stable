@@ -3483,7 +3483,21 @@ typedef struct {
   GEN T, S, mg;
   ulong p;
 } FlxqXQ_muldata;
-
+static GEN
+_FlxqXQ_add(void *data, GEN x, GEN y) {
+  FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
+  return FlxX_add(x,y, d->p);
+}
+static GEN
+_FlxqXQ_smul(void *data, GEN x, GEN y) {
+  FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
+  return FlxY_Flx_mul(x,y, d->p);
+}
+static GEN
+_FlxqXQ_red(void *data, GEN x) {
+  FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
+  return FlxqX_red(x, d->T, d->p);
+}
 static GEN
 _FlxqXQ_mul(void *data, GEN x, GEN y) {
   FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
@@ -3500,6 +3514,14 @@ _FlxqXQ_one(void *data) {
   FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
   return pol_1(varn(d->S));
 }
+
+static GEN
+_FlxqXQ_zero(void *data) {
+  FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
+  return pol_0(varn(d->S));
+}
+
+static struct bb_algebra FlxqXQ_algebra = { _FlxqXQ_red,_FlxqXQ_add,_FlxqXQ_smul,_FlxqXQ_mul,_FlxqXQ_sqr,_FlxqXQ_one,_FlxqXQ_zero };
 
 /* x over Fq, return lift(x^n) mod S */
 GEN
@@ -3536,70 +3558,23 @@ FlxqXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, ulong p)
   return RgXV_to_RgM(FlxqXQ_powers(y,m-1,S,T,p),n);
 }
 
-/*Close to FlxqXV_FlxqC_mul*/
-static GEN
-FlxqXQ_eval_powers(GEN P, GEN V, long a, long n, GEN T, ulong p)
-{
-  pari_sp av = avma;
-  GEN z = scalarpol_shallow(gel(P,2+a), varn(P)); /* V[1] = 1 */
-  long i;
-  for (i=1; i<=n; i++)
-  {
-    z = FlxX_add(z, FlxY_Flx_mul(gel(V,i+1),gel(P,2+a+i),p),p);
-    if ((i & 7) == 0) z = gerepileupto(av, z);
-  }
-  return FlxqX_red(z, T, p);
-}
-
-/* Brent & Kung
- * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
- *
- * V as output by FlxqXQ_powers(x,l,T,p). For optimal performance, l is as given
- * by brent_kung_optpow */
 GEN
 FlxqX_FlxqXQV_eval(GEN P, GEN V, GEN S, GEN T, ulong p)
 {
-  pari_sp av = avma;
-  long l = lg(V)-1, d = degpol(P);
-  GEN z, u;
-
-  if (d < 0) return pol_0(varn(S));
-  if (d < l)
-  {
-    z = FlxqXQ_eval_powers(P,V,0,d,T,p);
-    return gerepileupto(av, z);
-  }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in FlxqX_FlxqXQV_eval");
-  d -= l;
-  z = FlxqXQ_eval_powers(P,V,d+1,l-1,T,p);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    u = FlxqXQ_eval_powers(P,V,d+1,l-2,T,p);
-    z = FlxX_add(u, FlxqXQ_mul(z,gel(V,l),S,T,p), p);
-    z = gerepileupto(av, z);
-  }
-  u = FlxqXQ_eval_powers(P,V,0,d,T,p);
-  z = FlxX_add(u, FlxqXQ_mul(z,gel(V,d+2),S,T,p), p);
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("FlxqX_FlxqXQV_eval: %ld FlxqXQ_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileupto(av, z);
+  FlxqXQ_muldata D;
+  D.mg = FlxqX_invBarrett(S,T,p);
+  D.S=S; D.T=T; D.p=p;
+  return gen_RgX_bkeval_powers(P,V,(void*)&D,&FlxqXQ_algebra);
 }
 
-/* Q in Z[X] and x in Flxq[X]/(T). Return a lift of Q(x) */
 GEN
 FlxqX_FlxqXQ_eval(GEN Q, GEN x, GEN S, GEN T, ulong p)
 {
-  pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd;
-  if (d < 0) return pol_0(varn(Q));
-  rtd = (long) sqrt((double)d);
-  z = FlxqX_FlxqXQV_eval(Q, FlxqXQ_powers(x,rtd,S,T,p), S,T,p);
-  return gerepileupto(av, z);
+  FlxqXQ_muldata D;
+  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  D.mg = FlxqX_invBarrett(S,T,p);
+  D.S=S; D.T=T; D.p=p;
+  return gen_RgX_bkeval(Q,x,use_sqr,(void*)&D,&FlxqXQ_algebra);
 }
 
 static GEN

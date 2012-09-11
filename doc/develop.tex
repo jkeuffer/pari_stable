@@ -403,6 +403,59 @@ fields:
 
 \fun{const struct bb_field *}{get_Flxq_field}{void **pt_E, GEN T, ulong p}
 
+\section{Black box algebra}
+
+A black box algebra is defined by a \tet{bb_algebra} struct, describing methods
+available to handle field elements:
+\bprog
+struct bb_algebra
+{
+  GEN (*red)(void *E, GEN x);
+  GEN (*add)(void *E, GEN x, GEN y);
+  GEN (*smul)(void *E, GEN x, GEN y);
+  GEN (*mul)(void *E, GEN x, GEN y);
+  GEN (*sqr)(void *E, GEN x);
+  GEN (*one)(void *E);
+  GEN (*zero)(void *E);
+};
+@eprog
+
+Note that, in contrast of black box group, elements can have non canonical forms, and
+\kbd{add} and \kbd{smul} are not required to return a canonical form.
+
+\kbd{red(E,x)} returns the canonical form of $x$.
+
+\kbd{add(E,x,y)} returns the sum $x+y$.
+
+\kbd{smul(E,x,a)} $a$ being an element of the base field, returns $a\*x$.
+
+\kbd{mul(E,x,y)} returns the product $x\*y$.
+
+\kbd{sqr(E,x)} returns the square $x^2$.
+
+\kbd{one(E)} returns the unit element.
+
+\kbd{zero(E)} returns the zero element.
+
+An algebra is thus described by a \kbd{struct bb\_algebra} as above and auxiliary
+data typecast to \kbd{void*}. The following functions operate on black box
+algebra:
+
+\fun{GEN}{gen_RgX_bkeval}{GEN P, GEN x, int use_sqr, void *E, const struct bb_field *ff}
+$P$ being a \typ{POL} with coefficients in the base field, and $x$ an element of the
+black box algebra, returns $P(x)$. The flag \kbd{use\_sqr} has the same meaning as for
+\kbd{gen\_powers}. This implement an algorithm of Brent and Kung (1978).
+
+\fun{GEN}{gen_RgX_bkeval_powers}{GEN P, GEN V, void *E, const struct bb_field *ff}
+as \kbd{gen\_RgX\_bkeval} assuming $V$ was output by \kbd{gen\_powers(x, l, E, ff)}
+for some $l\geq 1$. For optimal performance, $l$ should be computed by
+\kbd{brent\_kung\_optpow}.
+
+\fun{long}{brent_kung_optpow}{long d, long n, long m} returns the optimal
+parameter $l$ for the evaluation of $n/m$ polynomials of degree $d$ Fractional
+values can be used if the evaluations are done with different accuracies, and
+thus have different weights.
+
 \section{Public functions useless outside of GP context}
 
 These functions implement GP functionality for which the C language or

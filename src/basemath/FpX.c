@@ -1113,6 +1113,18 @@ _mul_Barrett(void *data, GEN x, GEN y)
 }
 
 static GEN
+_FpXQ_add(void *data, GEN x, GEN y)
+{
+  (void) data;
+  return ZX_add(x, y);
+}
+static GEN
+_FpXQ_smul(void *data, GEN x, GEN y)
+{
+  (void) data;
+  return ZX_Z_mul(x, y);
+}
+static GEN
 _FpXQ_sqr(void *data, GEN x)
 {
   FpX_muldata *D = (FpX_muldata*)data;
@@ -1125,11 +1137,25 @@ _FpXQ_mul(void *data, GEN x, GEN y)
   return FpXQ_mul(x,y, D->T, D->p);
 }
 static GEN
+_FpXQ_zero(void *data)
+{
+  FpX_muldata *D = (FpX_muldata*)data;
+  return pol_0(varn(D->T));
+}
+static GEN
 _FpXQ_one(void *data)
 {
   FpX_muldata *D = (FpX_muldata*)data;
   return pol_1(varn(D->T));
 }
+static GEN
+_FpXQ_red(void *data, GEN x)
+{
+  FpX_muldata *D = (FpX_muldata*)data;
+  return FpX_red(x,D->p);
+}
+
+static struct bb_algebra FpXQ_algebra = { _FpXQ_red,_FpXQ_add,_FpXQ_smul, _FpXQ_mul,_FpXQ_sqr,_FpXQ_one,_FpXQ_zero};
 
 /* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
 GEN
@@ -1225,87 +1251,21 @@ FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
   return RgXV_to_RgM(FpXQ_powers(y,m-1,P,l),n);
 }
 
-/* Return optimal parameter l for the evaluation of n/m polynomials of degree d
-   Fractional values can be used if the evaluations are done with different
-   accuracies, and thus have different weights.
- */
-long
-brent_kung_optpow(long d, long n, long m)
-{
-  long p, r;
-  long pold=1, rold=n*(d-1);
-  for(p=2; p<=d; p++)
-  {
-    r = m*(p-1) + n*((d-1)/p);
-    if (r<rold) { pold=p; rold=r; }
-  }
-  return pold;
-}
-
-/*Close to FpXV_FpC_mul*/
-static GEN
-FpXQ_eval_powers(GEN P, GEN V, long a, long n, GEN p)
-{
-  pari_sp av = avma;
-  GEN z = scalar_ZX_shallow(gel(P,2+a), varn(P)); /* V[1] = 1 */
-  long i;
-  for (i=1; i<=n; i++)
-  {
-    z = ZX_add(z, ZX_Z_mul(gel(V,i+1),gel(P,2+a+i)));
-    if ((i & 7) == 0) z = gerepileupto(av, z);
-  }
-  return FpX_red(z, p);
-}
-
-/* Brent & Kung
- * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
- *
- * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
- * by brent_kung_optpow */
 GEN
-FpX_FpXQV_eval(GEN P, GEN V, GEN T, GEN p)
+FpX_FpXQV_eval(GEN Q, GEN x, GEN T, GEN p)
 {
-  pari_sp av = avma;
-  long l = lg(V)-1, d = degpol(P);
-  GEN z, u;
-
-  if (d < 0) return pol_0(varn(T));
-  if (d < l)
-  {
-    z = FpXQ_eval_powers(P,V,0,d,p);
-    return gerepileupto(av, z);
-  }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in FpX_FpXQV_eval");
-  d -= l;
-  z = FpXQ_eval_powers(P,V,d+1,l-1,p);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    u = FpXQ_eval_powers(P,V,d+1,l-2,p);
-    z = FpX_add(u, FpXQ_mul(z,gel(V,l),T,p), p);
-    z = gerepileupto(av, z);
-  }
-  u = FpXQ_eval_powers(P,V,0,d,p);
-  z = FpX_add(u, FpXQ_mul(z,gel(V,d+2),T,p), p);
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("FpX_FpXQV_eval: %ld FpXQ_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileupto(av, z);
+  FpX_muldata D;
+  D.T=T; D.p=p;
+  return gen_RgX_bkeval_powers(Q,x,(void*)&D,&FpXQ_algebra);
 }
 
-/* Q in Z[X] and x in Fp[X]/(T). Return a lift of Q(x) */
 GEN
 FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
 {
-  pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd;
-  if (d < 0) return pol_0(varn(Q));
-  rtd = (long) sqrt((double)d);
-  z = FpX_FpXQV_eval(Q, FpXQ_powers(x,rtd,T,p), T,p);
-  return gerepileupto(av, z);
+  FpX_muldata D;
+  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  D.T=T; D.p=p;
+  return gen_RgX_bkeval(Q,x,use_sqr,(void*)&D,&FpXQ_algebra);
 }
 
 GEN

@@ -16,6 +16,99 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+/*******************************************************************/
+/*                                                                 */
+/*                         GENERIC                                 */
+/*                                                                 */
+/*******************************************************************/
+
+/* Return optimal parameter l for the evaluation of n/m polynomials of degree d
+   Fractional values can be used if the evaluations are done with different
+   accuracies, and thus have different weights.
+ */
+long
+brent_kung_optpow(long d, long n, long m)
+{
+  long p, r;
+  long pold=1, rold=n*(d-1);
+  for(p=2; p<=d; p++)
+  {
+    r = m*(p-1) + n*((d-1)/p);
+    if (r<rold) { pold=p; rold=r; }
+  }
+  return pold;
+}
+
+static GEN
+gen_RgXQ_eval_powers(GEN P, GEN V, long a, long n, void *E, struct bb_algebra *ff)
+{
+  pari_sp av = avma, lim=stack_lim(av,2);
+  long i;
+  GEN z = ff->smul(E,ff->one(E),gel(P,2+a));
+  for (i=1; i<=n; i++)
+  {
+    z = ff->add(E, z, ff->smul(E, gel(V,i+1),gel(P,2+a+i)));
+    if (low_stack(lim, stack_lim(av,2)))
+      z = gerepileupto(av, z);
+  }
+  return ff->red(E,z);
+}
+
+/* Brent & Kung
+ * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
+ *
+ * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
+ * by brent_kung_optpow */
+GEN
+gen_RgX_bkeval_powers(GEN P, GEN V, void *E, struct bb_algebra *ff)
+{
+  pari_sp av = avma, lim;
+  long l = lg(V)-1, d = degpol(P);
+  GEN z, u;
+
+  if (d < 0) return ff->zero(E);
+  if (d < l)
+    return gerepileupto(av, gen_RgXQ_eval_powers(P,V,0,d,E,ff));
+  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in gen_RgX_bkeval_powers");
+  d -= l;
+  z = gen_RgXQ_eval_powers(P,V,d+1,l-1,E,ff);
+  lim = stack_lim(av,2);
+  while (d >= l-1)
+  {
+    d -= l-1;
+    u = gen_RgXQ_eval_powers(P,V,d+1,l-2,E,ff);
+    z = ff->add(E,u, ff->mul(E,z,gel(V,l)));
+    if (low_stack(lim, stack_lim(av,2)))
+      z = gerepileupto(av, z);
+  }
+  u = gen_RgXQ_eval_powers(P,V,0,d,E,ff);
+  z = ff->add(E,u, ff->mul(E,z,gel(V,d+2)));
+  if (DEBUGLEVEL>=8)
+  {
+    long cnt = 1 + (degpol(P) - l) / (l-1);
+    err_printf("RgX_RgXQV_eval: %ld RgXQ_mul [%ld]\n", cnt, l-1);
+  }
+  return gerepileupto(av, ff->red(E,z));
+}
+
+GEN
+gen_RgX_bkeval(GEN Q, GEN x, int use_sqr, void *E, struct bb_algebra *ff)
+{
+  pari_sp av = avma;
+  GEN z;
+  long d = degpol(Q), rtd;
+  if (d < 0) return ff->zero(E);
+  rtd = (long) sqrt((double)d);
+  z = gen_RgX_bkeval_powers(Q, gen_powers(x,rtd,use_sqr,E,ff->sqr,ff->mul,ff->one), E, ff);
+  return gerepileupto(av, z);
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                         RgX                                     */
+/*                                                                 */
+/*******************************************************************/
+
 long
 RgX_equal(GEN x, GEN y)
 {
@@ -63,73 +156,6 @@ RgX_get_0(GEN x)
     case t_FFELT: return FF_zero(T);
     default: return gen_0;
   }
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                         COMPOSITION                            **/
-/**                                                                **/
-/********************************************************************/
-
-static GEN
-RgXQ_eval_powers(GEN P, GEN V, long a, long n)
-{
-  GEN z = scalarpol(gel(P,2+a), varn(P)); /* V[1] = 1 */
-  long i;
-  for (i=1; i<=n; i++) z = RgX_add(z, RgX_Rg_mul(gel(V,i+1), gel(P,2+a+i)));
-  return z;
-}
-
-/* Brent & Kung
- * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
- *
- * V as output by RgXQ_powers(x,l,T,p). For optimal performance, l is as given
- * by brent_kung_optpow */
-GEN
-RgX_RgXQV_eval(GEN P, GEN V, GEN T)
-{
-  pari_sp av = avma, btop;
-  long l = lg(V)-1, d = degpol(P);
-  GEN z, u;
-
-  if (d < 0) return pol_0(varn(T));
-  if (d < l)
-  {
-    z = RgXQ_eval_powers(P,V,0,d);
-    return gerepileupto(av, z);
-  }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in RgX_RgXQV_eval");
-  d -= l;
-  btop = avma;
-  z = RgXQ_eval_powers(P,V,d+1,l-1);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    u = RgXQ_eval_powers(P,V,d+1,l-2);
-    z = RgX_add(u, RgXQ_mul(z, gel(V,l), T));
-    z = gerepileupto(btop, z);
-  }
-  u = RgXQ_eval_powers(P,V,0,d);
-  z = RgX_add(u, RgXQ_mul(z, gel(V,d+2), T));
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("RgX_RgXQV_eval: %ld RgXQ_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileupto(av, z);
-}
-
-/* Q in Z[X] and x in Rg[X]/(T). Return a lift of Q(x) */
-GEN
-RgX_RgXQ_eval(GEN Q, GEN x, GEN T)
-{
-  pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd;
-  if (d < 0) return pol_0(varn(Q));
-  rtd = (long) sqrt((double)d);
-  z = RgX_RgXQV_eval(Q, RgXQ_powers(x, rtd, T), T);
-  return gerepileupto(av, z);
 }
 
 GEN
@@ -1659,11 +1685,34 @@ RgXQX_sqr(GEN x, GEN T)
 }
 
 static GEN
+_add(void *data, GEN x, GEN y) { (void)data; return RgX_add(x, y); }
+static GEN
 _sqr(void *data, GEN x) { return RgXQ_sqr(x, (GEN)data); }
 static GEN
 _mul(void *data, GEN x, GEN y) { return RgXQ_mul(x,y, (GEN)data); }
 static GEN
+_smul(void *data, GEN x, GEN y) { (void)data; return RgX_Rg_mul(x,y); }
+static GEN
 _one(void *data) { return pol_1(varn((GEN)data)); }
+static GEN
+_zero(void *data) { return pol_0(varn((GEN)data)); }
+static GEN
+_red(void *data, GEN x) { (void)data; return gcopy(x); }
+
+static struct bb_algebra RgXQ_algebra = { _red,_add,_smul, _mul,_sqr,_one,_zero };
+
+GEN
+RgX_RgXQV_eval(GEN Q, GEN x, GEN T)
+{
+  return gen_RgX_bkeval_powers(Q,x,(void*)T,&RgXQ_algebra);
+}
+
+GEN
+RgX_RgXQ_eval(GEN Q, GEN x, GEN T)
+{
+  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  return gen_RgX_bkeval(Q,x,use_sqr,(void*)T,&RgXQ_algebra);
+}
 
 /* x,T in Rg[X], n in N, compute lift(x^n mod T)) */
 GEN
