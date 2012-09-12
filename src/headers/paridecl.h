@@ -73,6 +73,7 @@ long    F2x_valrem(GEN x, GEN *Z);
 GEN     F2xC_to_ZXC(GEN x);
 GEN     F2xV_to_F2m(GEN v, long n);
 GEN     F2xq_Artin_Schreier(GEN a, GEN T);
+GEN     FlxqXQV_autsum(GEN aut, long n, GEN S, GEN T, ulong p);
 GEN     F2xq_autpow(GEN x, long n, GEN T);
 GEN     F2xq_conjvec(GEN x, GEN T);
 GEN     F2xq_div(GEN x,GEN y,GEN T);

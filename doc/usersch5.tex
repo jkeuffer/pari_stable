@@ -4618,6 +4618,12 @@ occur).
 $\sigma$ being the automorphism defined by $\sigma(x)=a[1]\mod{T}$,
 $\sigma(X)=a[2]\mod{S,T}$, returns $[\sigma^n(x),\sigma^n(X)]$.
 
+\fun{GEN}{FlxqXQV_autsum}{GEN a, long n, GEN S, GEN T, ulong p}
+$\sigma$ being the automorphism defined by $\sigma(x)=a[1]\mod{T}$,
+$\sigma(X)=a[2]\mod{S,T}$, returns the vector
+$[\sigma^n(x),\sigma^n(X),b\sigma(b)\ldots\sigma^{n-1}(b)]$
+where $b=a[3]$.
+
 \subsec{\kbd{F2x}} An \kbd{F2x}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial over $\F_2[X]$. Specifically
 \kbd{z[0]} is the usual codeword, \kbd{z[1] = evalvarn($v$)} for some

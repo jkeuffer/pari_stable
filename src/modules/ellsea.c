@@ -227,6 +227,17 @@ struct eigen_ellinit
   ulong pp;
 };
 
+/*TODO: rename and document. Return x^((q-1)/2) */
+static GEN
+FlxqXQ_halffrob(GEN a, GEN S, GEN T, ulong p)
+{
+  GEN xp = Flxq_powu(polx_Flx(T[1]), p, T, p);
+  GEN Xp = FlxqXQ_pow(pol_x(0), utoi(p), S, T, p);
+  GEN ap2 = FlxqXQ_pow(a,shifti(utoi(p),-1), S, T, p);
+  GEN V = FlxqXQV_autsum(mkvec3(xp,Xp,ap2), degpol(T), S, T, p);
+  return gel(V,3);
+}
+
 static void
 init_eigen(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN T, GEN p)
 {
@@ -265,8 +276,7 @@ init_eigenu(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN T, ulong p)
   GEN C = FlxX_sub(FlxqXQ_mul(lambda, DRHS, h, T, p), monomial(Fl_to_Flx(2,T[1]),1,0), p);
   GEN D = FlxqXQ_mul(FlxX_Fl_mul(lambda, 2, p),FlxX_sub(pol_x(0), C, p), h, T, p);
   GEN X12 = mkvec2(C, FlxX_Flx_add(D, Fl_to_Flx(p-1,T[1]), p));
-  GEN q = powuu(p, degpol(T));
-  GEN Gr = FlxqXQ_pow(RHS, shifti(q, -1), h, T, p);
+  GEN Gr = FlxqXQ_halffrob(RHS,h,T,p);
   GEN nGr = FlxX_neg(Gr, p);
   GEN O = mkvec2(monomial(g1,1,0), monomial(g1,0,0));
   gerepileall(ltop, 6, &RHS, &DRHS, &X12, &Gr, &nGr, &O);

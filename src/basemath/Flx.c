@@ -3781,6 +3781,36 @@ FlxqXQV_autpow(GEN aut, long n, GEN S, GEN T, ulong p)
   return gen_powu(aut,n,&D,FlxqXQ_autpow_sqr,FlxqXQ_autpow_mul);
 }
 
+static GEN
+FlxqXQ_autsum_mul(void * T, GEN x, GEN y)
+{
+  FlxqXQ_muldata *D = (FlxqXQ_muldata *)T;
+  GEN phi1 = gel(x,1), S1 = gel(x,2), a1 = gel(x,3);
+  GEN phi2 = gel(y,1), S2 = gel(y,2), a2 = gel(y,3);
+  GEN phi3 = Flx_Flxq_eval(phi1,phi2,D->T,D->p);
+  GEN Sphi = FlxY_Flxq_evalx(S1,phi2,D->T,D->p);
+  long n = brent_kung_optpow(degpol(D->S)-1,2,1);
+  GEN V = FlxqXQ_powers(S2, n, D->S,D->T,D->p);
+  GEN S3 = FlxqX_FlxqXQV_eval(Sphi, V, D->S,D->T,D->p);
+  GEN aphi = FlxY_Flxq_evalx(a1,phi2,D->T,D->p);
+  GEN aS = FlxqX_FlxqXQV_eval(aphi,V,D->S,D->T,D->p);
+  GEN a3 = FlxqXQ_mul(aS,a2,D->S,D->T,D->p);
+  return mkvec3(phi3, S3, a3);
+}
+
+static GEN
+FlxqXQ_autsum_sqr(void * T, GEN x)
+{ return FlxqXQ_autsum_mul(T,x,x); }
+
+
+GEN
+FlxqXQV_autsum(GEN aut, long n, GEN S, GEN T, ulong p)
+{
+  FlxqXQ_muldata D;
+  D.S=S; D.T=T; D.p=p;
+  return gen_powu(aut,n,&D,FlxqXQ_autsum_sqr,FlxqXQ_autsum_mul);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                      FlxYqQ                                     */
