@@ -1492,5 +1492,7 @@ ellsea(GEN E, GEN p, long smallfact)
   pari_sp av = avma;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
-  return gerepileuptoint(av, subii(addis(p,1),Fp_ellcard_SEA(a4, a6, p, smallfact)));
+  GEN card = Fp_ellcard_SEA(a4, a6, p, smallfact);
+  if (!card) pari_err(e_MISC,"package seadata is required");
+  return gerepileuptoint(av, subii(addis(p,1),card));
 }
