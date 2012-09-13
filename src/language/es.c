@@ -3540,7 +3540,7 @@ os_getenv(const char *s)
 #ifdef HAS_GETENV
   return getenv(s);
 #else
-  return NULL;
+  (void) s; return NULL;
 #endif
 }
 
@@ -3627,7 +3627,7 @@ pari_is_dir(const char *name)
 #  ifdef HAS_OPENDIR
   return is_dir_opendir(name);
 #  else
-  return 0;
+  (void) name; return 0;
 #  endif
 #endif
 }
@@ -3642,7 +3642,7 @@ pari_is_file(const char *name)
   if (stat(name, &buf)) return 1;
   return S_ISREG(buf.st_mode);
 #else
-  return 1;
+  (void) name; return 1;
 #endif
 }
 
