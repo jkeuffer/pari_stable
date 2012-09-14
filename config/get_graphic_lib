@@ -5,7 +5,7 @@ fi
 _graphic_list="which_graphic_lib X11 X11_INC X11_LIBS \
 FLTKDIR FLTK_LIBS QTDIR QTLIB"
 
-if test -z "$has_waitpid" -o -z "$has_setsid"; then
+if test "$has_waitpid" = no -o "$has_setsid" = no; then
   echo "### Missing waitpid() or setsid(), no Hi-Res graphing window"
   which_graphic_lib=none
 else
