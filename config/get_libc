@@ -7,19 +7,22 @@ list=exp2; . ./look
 list=log2; . ./look
 extra_flags=
 list=strftime; . ./look
-extra_flags=-lrt
-if test -n "$timing_fun"; then
-  list=$timing_fun
+if test "$timing_fun" = "clock_gettime"; then
+  extra_flags=-lrt
+  list=clock_gettime; . ./look
+  extra_flags=
+  if test "$has_clock_gettime" = yes; then
+    RT_LIBS=-lrt
+  fi
 else
-  case "$osname" in
-    *cygwin*) list='times ftime';; # getrusage based timer always returns 0
-    *) list='getrusage clock_gettime times ftime';;
-  esac;
-fi; . ./look
-if test "$has_clock_gettime" = yes; then
-  RT_LIBS=-lrt
-else
-  RT_LIBS=
+  if test -n "$timing_fun"; then
+    list=$timing_fun
+  else
+    case "$osname" in
+      *cygwin*) list='times ftime';; # getrusage based timer always returns 0
+      *) list='getrusage times ftime';;
+    esac;
+  fi; . ./look
 fi
 list=sigaction; . ./look
 list=TIOCGWINSZ; . ./look
