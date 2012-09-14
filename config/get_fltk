@@ -22,6 +22,6 @@ else
 fi
 case "$osname" in
   cygwin) FLTK_LIBS="-lgdi32 -lole32 -luuid -lwsock32 -lsupc++" ;;
-  darwin) FLTK_LIBS="-framework Carbon -lsupc++" ;;
+  darwin) FLTK_LIBS="-framework Carbon -framework Cocoa -lsupc++" ;;
   *)      FLTK_LIBS="$X11_LIBS -lstdc++" ;;
 esac
