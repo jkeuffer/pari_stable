@@ -411,7 +411,7 @@ expand_sub(GEN x, long n)
   for (i=1; i<m; i++)
   {
     q = gel(p,i); c = gel(x,i);
-    for (j=1; j<m; j++) q[j] = c[j];
+    for (j=1; j<m; j++) gel(q,j) = gel(c,j);
     for (   ; j<n; j++) gel(q,j) = gen_0;
   }
   return p;

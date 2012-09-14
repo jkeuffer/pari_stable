@@ -304,7 +304,7 @@ nextK:
         if (j <= K && i == ind[j]) j++;
         else
         {
-          famod[k] = famod[i];
+          gel(famod,k) = gel(famod,i);
           trace1[k] = trace1[i];
           trace2[k] = trace2[i];
           deg[k] = deg[i]; k++;
@@ -636,7 +636,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       GEN p2 = polsym_gen(gel(famod,i), gel(TT,i), tnew, NULL, pa);
       gel(TT,i) = p2;
       p2 += 1+tmax; /* ignore traces number 0...tmax */
-      for (j=1; j<=N0; j++) p1[j] = p2[j];
+      for (j=1; j<=N0; j++) gel(p1,j) = gel(p2,j);
       if (lP)
       { /* make Newton sums integral */
         GEN lPpow = powiu(lP, tmax);

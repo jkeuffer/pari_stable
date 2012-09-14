@@ -1772,12 +1772,12 @@ factordivexact(GEN fa1,GEN fa2)
   for (c = i = 1; i < l; i++)
   {
     j = RgV_isin(P2,gel(P1,i));
-    if (!j) { P[c] = P1[i]; E[c] = E1[i]; c++; }
+    if (!j) { gel(P,c) = gel(P1,i); gel(E,c) = gel(E1,i); c++; }
     else
     {
       p1 = subii(gel(E1,i), gel(E2,j)); k = signe(p1);
       if (k < 0) pari_err(e_MISC,"factordivexact is not exact!");
-      if (k > 0) { P[c] = P1[i]; gel(E,c) = p1; c++; }
+      if (k > 0) { gel(P,c) = gel(P1,i); gel(E,c) = p1; c++; }
     }
   }
   setlg(P, c);
@@ -1821,7 +1821,7 @@ factormul(GEN fa1,GEN fa2)
     {
       c++; P = gel(pnew,i);
       gel(p,c) = P;
-      e[c] = enew[i];
+      gel(e,c) = gel(enew,i);
     }
   }
   setlg(p, c+1);

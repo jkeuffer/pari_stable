@@ -1259,7 +1259,7 @@ sqrt_ser(GEN b, long prec)
     for (j = lold+2; j < l+2; j++) gel(y,j) = gsub(gel(y,j), gel(a,j));
     y += lold; setvalp(y, lold);
     y = gsub(x, gdiv(y, x2)); /* = gmuloldn(gadd(x, gdiv(a,x)), -1); */
-    for (j = lold+2; j < l+2; j++) x[j] = y[j];
+    for (j = lold+2; j < l+2; j++) gel(x,j) = gel(y,j);
     lold = l;
   }
   x[1] = evalsigne(1) | evalvarn(vx) | _evalvalp(e >> 1);
@@ -1913,7 +1913,7 @@ serexp(GEN x, long prec)
   }
   av = avma; y = cgetg(lx, t_SER);
   y[1] = x[1]; gel(y,2) = gen_0;
-  for (i=3; i <lx; i++) y[i] = x[i];
+  for (i=3; i <lx; i++) gel(y,i) = gel(x,i);
   p1 = gexp(gel(x,2),prec);
   y = gmul(p1, serexp(normalize(y),prec));
   return gerepileupto(av, y);

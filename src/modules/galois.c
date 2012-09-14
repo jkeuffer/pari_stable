@@ -739,9 +739,9 @@ sortroots(GEN newr, GEN oldr)
         e = gexpo(gsub(gel(oldr,i), gel(newr,j)));
         if (e < e0) { e0 = e; k = j; }
       }
-    z[i] = newr[k]; t[k] = 0;
+    gel(z,i) = gel(newr,k); t[k] = 0;
   }
-  for (i=1; i<l; i++) r[i] = z[i];
+  for (i=1; i<l; i++) gel(r,i) = gel(z,i);
   return r;
 }
 

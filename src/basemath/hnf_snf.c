@@ -102,8 +102,8 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   av = avma; lim = stack_lim(av,1);
   Cnew = cgetg(co, typ(C));
   setlg(C, col+1); p1 = gmul(C,U);
-  for (j=1; j<=col; j++) Cnew[j] = p1[j];
-  for (   ; j<co ; j++)  Cnew[j] = C[j];
+  for (j=1; j<=col; j++) gel(Cnew,j) = gel(p1,j);
+  for (   ; j<co ; j++)  gel(Cnew,j) = gel(C,j);
 
   /* Clean up B using new H */
   for (s=0,i=lnz; i; i--)
@@ -130,10 +130,10 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   p1 = cgetg(lnz+1,t_VEC); p2 = perm + nlze;
   for (i1=0, j1=lnz-s, i=1; i<=lnz; i++) /* push the 1 rows down */
     if (diagH1[i])
-      p1[++j1] = p2[i];
+      gel(p1,++j1) = gel(p2,i);
     else
-      p2[++i1] = p2[i];
-  for (i=i1+1; i<=lnz; i++) p2[i] = p1[i];
+      gel(p2,++i1) = gel(p2,i);
+  for (i=i1+1; i<=lnz; i++) gel(p2,i) = gel(p1,i);
 
   /* s = # extra redundant generators taken from H
    *          zc  col-s  co   zc = col - lnz
@@ -171,10 +171,10 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   {
     GEN z = gel(B,j-s);
     p1 = cgetg(lig+1,t_COL); gel(Bnew,j) = p1;
-    for (i=1; i<=nlze; i++) p1[i] = z[i];
+    for (i=1; i<=nlze; i++) gel(p1,i) = gel(z,i);
     z += nlze; p1 += nlze;
     for (i=k=1; k<=lnz; i++)
-      if (!diagH1[i]) p1[k++] = z[i];
+      if (!diagH1[i]) gel(p1,k++) = gel(z,i);
   }
   *ptdep = depnew;
   *ptC = C;
@@ -419,8 +419,8 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     GEN z = gel(matt,j);
     GEN t = (gel(matb,j)) + nlze - k0;
     p2=cgetg(lnz,t_COL); gel(extramat,j) = p2;
-    for (i=1; i<=k0; i++) p2[i] = z[i]; /* top k0 rows */
-    for (   ; i<lnz; i++) p2[i] = t[i]; /* other non-0 rows */
+    for (i=1; i<=k0; i++) gel(p2,i) = gel(z,i); /* top k0 rows */
+    for (   ; i<lnz; i++) gel(p2,i) = gel(t,i); /* other non-0 rows */
   }
   if (!col) {
     permpro = identity_perm(lnz);
@@ -474,12 +474,12 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     GEN y = gel(matt,j);
     GEN z = gel(matb,j);
     p1=cgetg(lig+1,t_COL); gel(B,j-col) = p1;
-    for (i=1; i<=nlze; i++) p1[i] = z[i];
+    for (i=1; i<=nlze; i++) gel(p1,i) = gel(z,i);
     p1 += nlze; z += nlze-k0;
     for (k=1; k<lnz; k++)
     {
       i = permpro[k];
-      p1[k] = (i <= k0)? y[i]: z[i];
+      gel(p1,k) = (i <= k0)? gel(y,i): gel(z,i);
     }
   }
   if (T) C = typ(C)==t_MAT? RgM_mul(C,T): RgV_RgM_mul(C,T);
@@ -503,7 +503,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       emb = cgetg(l + 1, typ(C));
       for (j = 1 ; j <= l; j++)
       {
-        MAT[j] = m0[j];
+        gel(MAT,j) = gel(m0,j);
         emb[j] = CC[j];
       }
       H = hnfadd_i(H, perm, ptdep, ptB, &C, MAT, emb);
@@ -1033,9 +1033,9 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
     if (modid && !signe(gcoeff(x,i,def)))
     { /* missing pivot on line i, insert column */
       GEN a = cgetg(co + 1, t_MAT);
-      for (k = 1; k <= def; k++) a[k] = x[k];
+      for (k = 1; k <= def; k++) gel(a,k) = gel(x,k);
       gel(a,k++) = Rg_col_ei(dm, li-1, i);
-      for (     ; k <= co;  k++) a[k] = x[k-1];
+      for (     ; k <= co;  k++) gel(a,k) = gel(x,k-1);
       ldef--; if (ldef < 0) ldef = 0;
       co++; def++; x = a;
     }
@@ -1044,7 +1044,7 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
   if (modid)
   { /* w[li] is an accumulator, discarded at the end */
     GEN w = cgetg(li+1, t_MAT);
-    for (i = li-1; i > ldef; i--) w[i] = x[i];
+    for (i = li-1; i > ldef; i--) gel(w,i) = gel(x,i);
     for (        ; i > 0;    i--) gel(w,i) = Rg_col_ei(dm, li-1, i);
     x = w;
     for (i = li-1; i > 0; i--)

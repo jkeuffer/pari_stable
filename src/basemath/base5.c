@@ -811,7 +811,7 @@ PRECPB:
   }
   if (DEBUGLEVEL) err_printf("k = ");
   gel(B,1) = real_i(rnfscal(mth,gel(MC,1),gel(MC,1)));
-  MCS[1] = MC[1];
+  gel(MCS,1) = gel(MC,1);
   kmax = 1; k = 2;
   do
   {
@@ -819,7 +819,7 @@ PRECPB:
     if (DEBUGLEVEL) err_printf("%ld ",k);
     if (k > kmax)
     { /* Incremental Gram-Schmidt */
-      kmax = k; MCS[k] = MC[k];
+      kmax = k; gel(MCS,k) = gel(MC,k);
       for (j=1; j<k; j++)
       {
         gcoeff(mu,k,j) = vecdiv(rnfscal(mth,gel(MCS,j),gel(MC,k)),

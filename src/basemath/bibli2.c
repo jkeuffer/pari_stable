@@ -1664,15 +1664,15 @@ merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN))
   {
     int s = cmp(data, gel(x,ix), gel(y,iy));
     if (s < 0)
-    { M[m] = x[ix]; E[m] = e[ix]; ix++; }
+    { gel(M,m) = gel(x,ix); gel(E,m) = gel(e,ix); ix++; }
     else if (s == 0)
-    { M[m] = x[ix]; gel(E,m) = addii(gel(e,ix), gel(f,iy)); iy++; ix++; }
+    { gel(M,m) = gel(x,ix); gel(E,m) = addii(gel(e,ix), gel(f,iy)); iy++; ix++; }
     else
-    { M[m] = y[iy]; E[m] = f[iy]; iy++; }
+    { gel(M,m) = gel(y,iy); gel(E,m) = gel(f,iy); iy++; }
     m++;
   }
-  while (ix<lx) { M[m] = x[ix]; E[m] = e[ix]; ix++; m++; }
-  while (iy<ly) { M[m] = y[iy]; E[m] = f[iy]; iy++; m++; }
+  while (ix<lx) { gel(M,m) = gel(x,ix); gel(E,m) = gel(e,ix); ix++; m++; }
+  while (iy<ly) { gel(M,m) = gel(y,iy); gel(E,m) = gel(f,iy); iy++; m++; }
   setlg(M, m);
   setlg(E, m); return mkmat2(M, E);
 }

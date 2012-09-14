@@ -863,9 +863,9 @@ static void
 update_trace(trace_data *T, long k, long i)
 {
   if (!T) return;
-  T->S1[k]       = T->S1[i];
-  T->dPinvS[k]   = T->dPinvS[i];
-  T->PinvSdbl[k] = T->PinvSdbl[i];
+  gel(T->S1,k)     = gel(T->S1,i);
+  gel(T->dPinvS,k) = gel(T->dPinvS,i);
+  T->PinvSdbl[k]   = T->PinvSdbl[i];
 }
 
 /* reduce coeffs mod (T,pk), then center mod pk */
@@ -1068,7 +1068,7 @@ nextK:
         if (j <= K && i == ind[j]) j++;
         else
         {
-          famod[k] = famod[i];
+          gel(famod,k) = gel(famod,i);
           update_trace(T1, k, i);
           update_trace(T2, k, i);
           deg[k] = deg[i]; k++;

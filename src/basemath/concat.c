@@ -233,7 +233,7 @@ catmanyMAT(GEN y1, GEN y2)
     }
     L += nc;
     z = new_chunk(nc) - 1;
-    for (i=1; i<=nc; i++) z[i] = c[i];
+    for (i=1; i<=nc; i++) gel(z,i) = gel(c,i);
   }
   z = new_chunk(1);
   *z = evaltyp(t_MAT) | evallg(L);

@@ -1077,7 +1077,7 @@ ser2pol_i(GEN x, long lx)
   GEN y;
   while (i > 1 && isexactzero(gel(x,i))) i--;
   y = cgetg(i+1, t_POL); y[1] = x[1] & ~VALPBITS;
-  for ( ; i > 1; i--) y[i] = x[i];
+  for ( ; i > 1; i--) gel(y,i) = gel(x,i);
   return y;
 }
 

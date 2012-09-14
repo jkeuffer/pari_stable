@@ -371,7 +371,7 @@ vec_shorten(GEN v, long n)
 {
   long i;
   GEN V = cgetg(n+1,t_VEC);
-  for(i=1;i<=n;i++) V[i] = v[i];
+  for(i=1;i<=n;i++) gel(V,i) = gel(v,i);
   return V;
 }
 /* shallow*/
@@ -381,7 +381,7 @@ vec_lengthen(GEN v, long n)
   long i;
   long l=lg(v);
   GEN V = cgetg(n+1,t_VEC);
-  for(i=1;i<l;i++) V[i] = v[i];
+  for(i=1;i<l;i++) gel(V,i) = gel(v,i);
   return V;
 }
 /* shallow*/
@@ -1770,7 +1770,7 @@ RgX_shift_inplace(GEN x, long v)
   z = x + lx;
   /* stackdummy from normalizepol: move it up */
   if (lg(z) != v) x[lx + v] = z[0];
-  for (i = lx-1; i >= 2; i--) y[i] = x[i];
+  for (i = lx-1; i >= 2; i--) gel(y,i) = gel(x,i);
   for (i = v+1;  i >= 2; i--) gel(x,i) = gen_0;
   /* leave x[1] alone: it is correct */
   x[0] = evaltyp(t_POL) | evallg(lx+v); return x;

@@ -2139,7 +2139,7 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
   if (!z) return zerocol(RU);
   arch = typ(z) == t_COL? RgM_RgC_mul(M, z): RgC_Rg_mul(gel(M,1), z);
   C = cgetg(RU+1, t_COL); arch = glog(arch, prec);
-  for (i=1; i<=R1; i++) C[i] = arch[i];
+  for (i=1; i<=R1; i++) gel(C,i) = gel(arch,i);
   for (   ; i<=RU; i++) gel(C,i) = gmul2n(gel(arch,i), 1);
   return C;
 }

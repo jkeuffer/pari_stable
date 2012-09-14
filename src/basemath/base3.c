@@ -108,7 +108,7 @@ ei_multable(GEN TAB, long i)
   GEN m, tab = get_tab(TAB, &N);
   tab += (i-1)*N;
   m = cgetg(N+1,t_MAT);
-  for (k=1; k<=N; k++) m[k] = tab[k];
+  for (k=1; k<=N; k++) gel(m,k) = gel(tab,k);
   return m;
 }
 
@@ -1939,8 +1939,8 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   lists2 = gel(bid2,4); lx2 = lg(lists2);
   /* concat (lists1 - last elt [nfarchstar]) + lists2 */
   lx = lx1+lx2-2; lists = cgetg(lx,t_VEC);
-  for (i=1; i<lx1-1; i++) lists[i] = lists1[i];
-  for (   ; i<lx; i++)    lists[i] = lists2[i-lx1+2];
+  for (i=1; i<lx1-1; i++) gel(lists,i) = gel(lists1,i);
+  for (   ; i<lx; i++)    gel(lists,i) = gel(lists2,i-lx1+2);
 
   cyc1 = gel(G1,2); l1 = lg(cyc1);
   cyc2 = gel(G2,2); l2 = lg(cyc2);

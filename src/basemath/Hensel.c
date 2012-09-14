@@ -39,7 +39,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
   long k = lg(a)-1;
   long i, j, s, minp, mind;
 
-  for (i=1; i<=k; i++) { V[i] = a[i]; link[i] = -i; }
+  for (i=1; i<=k; i++) { gel(V,i) = gel(a,i); link[i] = -i; }
 
   for (j=1; j <= 2*k-5; j+=2,i++)
   {

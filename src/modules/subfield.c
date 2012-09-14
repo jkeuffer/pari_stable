@@ -204,7 +204,7 @@ append(GEN D, GEN a)
 {
   long i,l = lg(D), m = lg(a);
   GEN x = D + (l-1);
-  for (i=1; i<m; i++) x[i] = a[i];
+  for (i=1; i<m; i++) gel(x,i) = gel(a,i);
   setlg(D, l+m-1);
 }
 

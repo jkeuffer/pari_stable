@@ -2152,7 +2152,7 @@ deplin(GEN x0)
     i = gauss_get_pivot_NZ(x, NULL, k, c);
     if (i > nl) break;
 
-    d[k] = ck[i];
+    gel(d,k) = gel(ck,i);
     c[i] = k; l[k] = i; /* pivot d[k] in x[i,k] */
   }
   if (k > nc) { avma = av; return zerocol(nc); }

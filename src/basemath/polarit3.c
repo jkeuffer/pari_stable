@@ -367,12 +367,12 @@ Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
   x[1] = z[1];
   for (i=2; i<lx+2; i++)
   {
-    for (j=2; j<N; j++) t[j] = z[j];
+    for (j=2; j<N; j++) gel(t,j) = gel(z,j);
     z += (N-2);
     gel(x,i) = FpX_rem(FpX_renormalize(t,N), T,p);
   }
   N = (l-2) % (N-2) + 2;
-  for (j=2; j<N; j++) t[j] = z[j];
+  for (j=2; j<N; j++) gel(t,j) = gel(z,j);
   gel(x,i) = FpX_rem(FpX_renormalize(t,N), T,p);
   return FpXQX_renormalize(x, i+1);
 }

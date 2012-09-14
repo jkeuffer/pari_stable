@@ -252,7 +252,7 @@ RgX_deflate(GEN x0, long d)
   y = cgetg(dy+3, t_POL); y[1] = x0[1];
   z = y + 2;
   x = x0+ 2;
-  for (i=id=0; i<=dy; i++,id+=d) z[i] = x[id];
+  for (i=id=0; i<=dy; i++,id+=d) gel(z,i) = gel(x,id);
   return y;
 }
 
@@ -267,7 +267,7 @@ RgX_inflate(GEN x0, long d)
   y = cgetg(dy+3, t_POL); y[1] = x0[1];
   z = y + 2;
   for (i=0; i<=dy; i++) gel(z,i) = gen_0;
-  for (i=id=0; i<=dx; i++,id+=d) z[id] = x[i];
+  for (i=id=0; i<=dx; i++,id+=d) gel(z,id) = gel(x,i);
   return y;
 }
 
@@ -421,7 +421,7 @@ RgV_to_RgX(GEN x, long v)
   if (!k) return pol_0(v);
   i = k+2; p = cgetg(i,t_POL);
   p[1] = evalsigne(1) | evalvarn(v);
-  x--; for (k=2; k<i; k++) p[k] = x[k];
+  x--; for (k=2; k<i; k++) gel(p,k) = gel(x,k);
   return p;
 }
 
@@ -687,7 +687,7 @@ RgX_recip_shallow(GEN x)
 {
   long lx, i, j;
   GEN y = cgetg_copy(x, &lx);
-  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = x[j];
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gel(x,j);
   return y;
 }
 /*******************************************************************/

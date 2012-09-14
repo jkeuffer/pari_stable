@@ -942,7 +942,7 @@ split_pol(GEN x, long v, long a, long b)
   if (a > b || varn(x) != v) return pol_0(v);
   l = b-a + 3;
   z = cgetg(l, t_POL); z[1] = x[1];
-  for (i = 2; i < l; i++) z[i] = y[i];
+  for (i = 2; i < l; i++) gel(z,i) = gel(y,i);
   return normalizepol_lg(z, l);
 }
 

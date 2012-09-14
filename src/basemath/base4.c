@@ -1094,8 +1094,8 @@ famat_reduce(GEN fa)
   /* merge */
   for (k=i=1; i<l; i++,k++)
   {
-    G[k] = g[L[i]];
-    E[k] = e[L[i]];
+    gel(G,k) = gel(g,L[i]);
+    gel(E,k) = gel(e,L[i]);
     if (k > 1 && elt_egal(gel(G,k), gel(G,k-1)))
     {
       gel(E,k-1) = addii(gel(E,k), gel(E,k-1));
@@ -1107,8 +1107,8 @@ famat_reduce(GEN fa)
   for (k=i=1; i<l; i++)
     if (!gequal0(gel(E,i)))
     {
-      G[k] = G[i];
-      E[k] = E[i]; k++;
+      gel(G,k) = gel(G,i);
+      gel(E,k) = gel(E,i); k++;
     }
   setlg(G, k);
   setlg(E, k); return mkmat2(G,E);

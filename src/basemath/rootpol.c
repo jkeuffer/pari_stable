@@ -170,12 +170,12 @@ RgX_addspec(GEN x, long nx, GEN y, long ny)
   if (ny < nx) {
     z = cgetg(nx+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
     for (i=0; i < ny; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
-    for (   ; i < nx; i++) t[i] = x[i];
+    for (   ; i < nx; i++) gel(t,i) = gel(x,i);
     return normalizepol_lg(z, nx+2);
   } else {
     z = cgetg(ny+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
     for (i=0; i < nx; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
-    for (   ; i < ny; i++) t[i] = y[i];
+    for (   ; i < ny; i++) gel(t,i) = gel(y,i);
     return normalizepol_lg(z, ny+2);
   }
 }
@@ -220,10 +220,10 @@ karasquare(GEN P, long nP)
   N = (n<<1) + 1;
   a = cgetg(N + 2, t_POL); a[1] = evalsigne(1)|evalvarn(0);
   t = a+2; l = lgpol(s0); s0 += 2; N0 = n0<<1;
-  for (i=0; i < l;  i++) t[i] = s0[i];
+  for (i=0; i < l;  i++) gel(t,i) = gel(s0,i);
   for (   ; i < N0; i++) gel(t,i) = gen_0;
   t = a+2 + N0; l = lgpol(s2); s2 += 2; N1 = N - N0;
-  for (i=0; i < l;  i++) t[i] = s2[i];
+  for (i=0; i < l;  i++) gel(t,i) = gel(s2,i);
   for (   ; i < N1; i++) gel(t,i) = gen_0;
   t = a+2 + n0; l = lgpol(s1); s1 += 2;
   for (i=0; i < l; i++)  gel(t,i) = gadd(gel(t,i), gel(s1,i));
@@ -2033,7 +2033,7 @@ roots_com(GEN q, long bit)
     z = real_0_bit(x); l = v + lg(L);
     M = cgetg(l, t_VEC); L -= v;
     for (i = 1; i <= v; i++) gel(M,i) = z;
-    for (     ; i <  l; i++) M[i] = L[i];
+    for (     ; i <  l; i++) gel(M,i) = gel(L,i);
     L = M;
   }
   return L;

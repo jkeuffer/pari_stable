@@ -685,7 +685,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   while ( (i = NextElt(&G)) )
   {
     gel(vB,i) = FpC_red(nfmuli(nf, gel(vB,i), gel(gen,i)), condZ);
-    for (j=1; j<i; j++) vB[j] = vB[i];
+    for (j=1; j<i; j++) gel(vB,j) = gel(vB,i);
 
     for (ic = 1; ic <= nChar; ic++)
     {

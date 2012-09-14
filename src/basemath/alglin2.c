@@ -527,7 +527,7 @@ carberkowitz(GEN x, long v)
         t = gadd(t, gmul(gel(C,i+1-j), gel(V,j)));
       gel(Q,i) = gerepileupto(av, t);
     }
-    for (i = 1; i <= r+1; i++) V[i] = Q[i];
+    for (i = 1; i <= r+1; i++) gel(V,i) = gel(Q,i);
   }
   V = RgV_to_RgX(vecreverse(V), v); /* not gtopoly: fail if v > gvar(V) */
   V = odd(lx)? gcopy(V): RgX_neg(V);
@@ -835,7 +835,7 @@ qfgaussred_positive(GEN a)
     GEN p1=cgetg(n,t_COL), p2=gel(a,j);
 
     gel(b,j) = p1;
-    for (i=1; i<=j; i++) p1[i] = p2[i];
+    for (i=1; i<=j; i++) gel(p1,i) = gel(p2,i);
     for (   ; i<n ; i++) gel(p1,i) = gen_0;
   }
   for (k=1; k<n; k++)
