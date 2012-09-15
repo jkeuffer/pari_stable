@@ -2464,7 +2464,7 @@ sinverseimage(GEN mat, GEN y)
   if (lg(y) != lgcols(mat)) pari_err_DIM("inverseimage");
 
   gel(p1,nbcol) = y;
-  for (i=1; i<nbcol; i++) p1[i]=mat[i];
+  for (i=1; i<nbcol; i++) gel(p1,i) = gel(mat,i);
   p1 = ker(p1); i=lg(p1)-1;
   if (!i) return NULL;
 

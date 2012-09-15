@@ -190,8 +190,8 @@ shallowconcat(GEN x, GEN y)
           return (ly==1)? x: shallowconcat(x, gel(y,1));
         case t_MAT:
           if (lx != lgcols(y)) break;
-          z=cgetg(ly+1,t_MAT); gel(z,1) = x;
-          for (i=2; i<=ly; i++) z[i]=y[i-1];
+          z=cgetg(ly+1,t_MAT);  gel(z,1) = x;
+          for (i=2; i<=ly; i++) gel(z,i) = gel(y,i-1);
           return z;
       }
       break;

@@ -1304,7 +1304,7 @@ polzagreel(long n, long m, long prec)
     {
       h = cgetg(n+3,t_POL);
       h[1] = evalsigne(1);
-      h[2] = g[2];
+      gel(h,2) = gel(g,2);
       for (k=1; k<n; k++)
         gel(h,k+2) = gadd(gmulsg(k+k+1,gel(g,k+2)), gmulsg(k<<1,gel(g,k+1)));
       gel(h,n+2) = gmulsg(n<<1, gel(g,n+1));

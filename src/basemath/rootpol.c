@@ -1036,7 +1036,7 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
   q = mygprec(p,bit) + 2;
   A = cgetg(Lmax+1,t_VEC); A++;
   pc= cgetg(Lmax+1,t_VEC); pc++;
-  for (i=0; i <= n; i++) pc[i]= q[i];
+  for (i=0; i <= n; i++) gel(pc,i)= gel(q,i);
   for (   ; i<Lmax; i++) gel(pc,i) = gen_0;
 
   *mu = pariINFINITY;

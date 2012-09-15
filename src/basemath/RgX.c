@@ -438,7 +438,7 @@ RgX_to_RgV(GEN x, long N)
     return z;
   }
   l = lg(x)-1; x++;
-  for (i=1; i<l ; i++) z[i]=x[i];
+  for (i=1; i<l ; i++) gel(z,i) = gel(x,i);
   for (   ; i<=N; i++) gel(z,i) = gen_0;
   return z;
 }
@@ -832,7 +832,7 @@ addpol(GEN x, GEN y, long lx, long ly)
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx+2; z = cgetg(lz,t_POL) + 2;
   for (i=0; i<ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
-  for (   ; i<lx; i++) z[i]=x[i];
+  for (   ; i<lx; i++) gel(z,i) = gel(x,i);
   z -= 2; z[1]=0; return normalizepol_lg(z, lz);
 }
 

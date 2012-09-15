@@ -445,9 +445,9 @@ Buchray(GEN bnf, GEN module, long flag)
 
   u2 = cgetg(Ri+1,t_MAT);
   u1 = cgetg(RU+1,t_MAT);
-  for (j=1; j<=RU; j++) { u1[j]=u[j]; setlg(u[j],RU+1); }
+  for (j=1; j<=RU; j++) { gel(u1,j) = gel(u,j); setlg(u[j],RU+1); }
   u += RU;
-  for (j=1; j<=Ri; j++) { u2[j]=u[j]; setlg(u[j],RU+1); }
+  for (j=1; j<=Ri; j++) { gel(u2,j) = gel(u,j); setlg(u[j],RU+1); }
 
   /* log(Units) U2 = H (mod D)
    * log(Units) U1 = 0 (mod D) */
