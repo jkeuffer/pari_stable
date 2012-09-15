@@ -5280,7 +5280,7 @@ A \kbd{F2xqE} is a point of $E(\F_2[X]/(T))$.  In the supersingular case, the
 parameter \kbd{a2} is actually the \typ{VEC} $[a_3,a_4,a_3^{-1}]$.
 
 \fun{GEN}{F2xq_ellcard}{GEN a2, GEN a6, GEN T}
-Return the order of the group $E(\F_p[X]/(T))$.
+Return the order of the group $E(\F_2[X]/(T))$.
 
 \fun{GEN}{F2xq_ellgroup}{GEN a2, GEN a6, GEN N, GEN T, GEN *pt_m}
 Return the group structure $D$ of the group $E(\F_2[X]/(T))$,
@@ -5288,18 +5288,18 @@ which is assumed to be of order $N$ and set $*pt_m=m$.
 
 \fun{GEN}{F2xq_ellgens}{GEN a2, GEN a6, GEN ch, GEN D, GEN m, GEN T}
 Returns generators of the group $E(\F_2[X]/(T))$ with the base change \kbd{ch}
-(see \kbd{FlxqE\_changepoint}), where $D$ and $m$ are as returned by
-\kbd{Flxq\_ellgroup}.
+(see \kbd{F2xqE\_changepoint}), where $D$ and $m$ are as returned by
+\kbd{F2xq\_ellgroup}.
 
 \subsec{\kbd{F2xqE}}
 
 \fun{GEN}{F2xqE_changepoint}{GEN P, GEN m, GEN a2, GEN T} returns the image
 $Q$ of the point $P$ on the curve $E:y^2+x*y=x^3+a_2\*x^2+a_6$ by the coordinate
-change $m$ (which is a \kbd{FlxqV}).
+change $m$ (which is a \kbd{F2xqV}).
 
 \fun{GEN}{F2xqE_changepointinv}{GEN P, GEN m, GEN a2, GEN T} returns the image
 $Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
-coordinate change $m$ (which is a \kbd{FlxqV}).
+coordinate change $m$ (which is a \kbd{F2xqV}).
 
 \fun{GEN}{F2xqE_add}{GEN P, GEN Q, GEN a2, GEN T}
 
@@ -5314,7 +5314,7 @@ coordinate change $m$ (which is a \kbd{FlxqV}).
 \fun{GEN}{random_F2xqE}{GEN a2, GEN a6, GEN T}
 
 \fun{GEN}{F2xqE_order}{GEN P, GEN o, GEN a2, GEN T} returns the order of $P$ in
-the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
+the group $E(\F_2[X]/(T))$, where $o$ is a multiple of the order of $P$, or its
 factorization.
 
 \fun{GEN}{F2xqE_log}{GEN P, GEN G, GEN o, GEN a2, GEN T} Let \kbd{G} be a
@@ -5375,7 +5375,7 @@ coordinate change $m$ (which is a \kbd{FlxqV}).
 \fun{GEN}{random_FlxqE}{GEN a4, GEN a6, GEN T, ulong p}
 
 \fun{GEN}{FlxqE_order}{GEN P, GEN o, GEN a4, GEN T, ulong p} returns the order of $P$ in
-the group $E(\F_p)$, where $o$ is a multiple of the order of $P$, or its
+the group $E(\F_p[X]/(T))$, where $o$ is a multiple of the order of $P$, or its
 factorization.
 
 \fun{GEN}{FlxqE_log}{GEN P, GEN G, GEN o, GEN a4, GEN T, ulong p} Let \kbd{G} be a
