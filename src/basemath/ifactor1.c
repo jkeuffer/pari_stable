@@ -3495,7 +3495,7 @@ factoru(ulong n)
   }
   /* tiny integers without small factors are often primes */
   oldi = i;
-  if (uisprime_nosmalldiv(n)) { P[i] = n; E[i] = 1; i++; goto END; }
+  if (uisprime_661(n)) { P[i] = n; E[i] = 1; i++; goto END; }
   while (p < lim)
   {
     int stop;
@@ -3511,7 +3511,7 @@ factoru(ulong n)
       goto END;
     }
   }
-  if (i != oldi && uisprime_nosmalldiv(n)) { P[i] = n; E[i] = 1; i++; }
+  if (i != oldi && uisprime_661(n)) { P[i] = n; E[i] = 1; i++; }
   else
   {
     GEN perm;
@@ -3573,7 +3573,7 @@ moebiusu(ulong n)
   }
   /* tiny integers without small factors are often primes */
   test_prime = 0;
-  if (uisprime_nosmalldiv(n)) return -s;
+  if (uisprime_661(n)) return -s;
   while (p < lim)
   {
     int stop;
@@ -3587,7 +3587,7 @@ moebiusu(ulong n)
     }
     if (stop) return n == 1? s: -s;
   }
-  if (test_prime && uisprime_nosmalldiv(n)) return -s;
+  if (test_prime && uisprime_661(n)) return -s;
   else
   {
     pari_sp av = avma;

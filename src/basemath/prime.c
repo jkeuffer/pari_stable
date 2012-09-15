@@ -394,11 +394,53 @@ uu_coprime(ulong n, ulong u)
   return gcduodd(n, u) == 1;
 }
 
-/* Fl_BPSW_psp */
+/* composite strong 2-pseudoprime < 1016801 whose prime divisors are > 101 */
+static int
+is_2_prp_101(ulong n)
+{
+  switch(n) {
+  case 42799:
+  case 49141:
+  case 88357:
+  case 90751:
+  case 104653:
+  case 130561:
+  case 196093:
+  case 220729:
+  case 253241:
+  case 256999:
+  case 271951:
+  case 280601:
+  case 357761:
+  case 390937:
+  case 458989:
+  case 486737:
+  case 489997:
+  case 514447:
+  case 580337:
+  case 741751:
+  case 838861:
+  case 873181:
+  case 877099:
+  case 916327:
+  case 976873:
+  case 983401: return 1;
+  } return 0;
+}
+
+static int
+u_2_prp(ulong n)
+{
+  Fl_MR_Jaeschke_t S;
+  Fl_init_MR_Jaeschke(&S, n);
+  return Fl_bad_for_base(&S, 2) == 0;
+}
+static int
+uBPSW_psp(ulong n) { return (u_2_prp(n) && uislucaspsp(n)); }
+
 int
 uisprime(ulong n)
 {
-  Fl_MR_Jaeschke_t S;
   if (n < 103)
     switch(n)
     {
@@ -430,7 +472,7 @@ uisprime(ulong n)
       case 101: return 1;
       default: return 0;
     }
-  if (!(n & 1)) return 0;
+  if (!odd(n)) return 0;
 #ifdef LONG_IS_64BIT
   /* 16294579238595022365 = 3*5*7*11*13*17*19*23*29*31*37*41*43*47*53
    *  7145393598349078859 = 59*61*67*71*73*79*83*89*97*101 */
@@ -447,51 +489,22 @@ uisprime(ulong n)
       !uu_coprime(n, 4269855901UL)) return 0;
 #endif
   if (n < 10427) return 1;
-  Fl_init_MR_Jaeschke(&S, n);
-  if (Fl_bad_for_base(&S, 2)) return 0;
-  if (n < 1016801) switch(n) {
-  /* strong 2-pseudoprimes without prime divisors < 103. All have 2 prime
-   * divisor, one of which is <= 661 */
-    case 42799:
-    case 49141:
-    case 88357:
-    case 90751:
-    case 104653:
-    case 130561:
-    case 196093:
-    case 220729:
-    case 253241:
-    case 256999:
-    case 271951:
-    case 280601:
-    case 357761:
-    case 390937:
-    case 458989:
-    case 486737:
-    case 489997:
-    case 514447:
-    case 580337:
-    case 741751:
-    case 838861:
-    case 873181:
-    case 877099:
-    case 916327:
-    case 976873:
-    case 983401: return 0;
-    default: return 1;
-  }
-  return uislucaspsp(n);
+  if (n < 1016801) return !is_2_prp_101(n) && u_2_prp(n);
+  return uBPSW_psp(n);
+}
+
+/* assume no prime divisor <= 101 */
+int
+uisprime_101(ulong n)
+{
+  if (n < 10427) return 1;
+  if (n < 1016801) return !is_2_prp_101(n) && u_2_prp(n);
+  return uBPSW_psp(n);
 }
 
 /* assume no prime divisor <= 661 */
 int
-uisprime_nosmalldiv(ulong n)
-{
-  Fl_MR_Jaeschke_t S;
-  Fl_init_MR_Jaeschke(&S, n);
-  if (Fl_bad_for_base(&S, 2)) return 0;
-  return uislucaspsp(n);
-}
+uisprime_661(ulong n) { return uBPSW_psp(n); }
 
 long
 BPSW_psp(GEN N)
@@ -552,7 +565,7 @@ BPSW_psp_nosmalldiv(GEN N)
   long l = lgefint(N);
   int k;
 
-  if (l == 3) return uisprime_nosmalldiv((ulong)N[2]);
+  if (l == 3) return uisprime_661((ulong)N[2]);
   av = avma;
   /* N large: test for pure power, rarely succeeds, but requires < 1% of
    * compositeness test times */

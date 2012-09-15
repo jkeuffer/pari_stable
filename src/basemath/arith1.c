@@ -1367,7 +1367,7 @@ uisprimepower(ulong n, ulong *pp)
 {
   /* We must have CUTOFF^11 >= ULONG_MAX and CUTOFF^3 < ULONG_MAX.
    * Tests suggest that 200-300 is the best range for 64-bit platforms. */
-  const ulong CUTOFF = 199UL;
+  const ulong CUTOFF = 400UL;
   const ulong CUTOFF3 = CUTOFF*CUTOFF*CUTOFF;
 #ifdef LONG_IS_64BIT
   /* primes preceeding the appropriate root of ULONG_MAX. */
@@ -1389,9 +1389,8 @@ uisprimepower(ulong n, ulong *pp)
   int e;
   if (n < 2) return 0;
   if (!odd(n)) {
-    v = vals(n);
-    if (n == 1UL << v) { *pp = 2; return v; }
-    return 0;
+    if (n & (n-1)) return 0;
+    *pp = 2; return vals(n);
   }
   if (n < 8) { *pp = n; return 1; } /* 3,5,7 */
 
@@ -1401,9 +1400,9 @@ uisprimepower(ulong n, ulong *pp)
   {
     NEXT_PRIME_VIADIFF(p, d);
     if (p >= CUTOFF) break;
-    v = u_lvalrem(n, p, &n);
-    if (v)
+    if (n % p == 0)
     {
+      v = u_lvalrem(n, p, &n);
       if (n == 1) { *pp = p; return v; }
       return 0;
     }
@@ -1412,7 +1411,7 @@ uisprimepower(ulong n, ulong *pp)
 
   if (n < CUTOFF3)
   {
-    if (n < CUTOFF*CUTOFF || uisprime(n)) { *pp = n; return 1; }
+    if (n < CUTOFF*CUTOFF || uisprime_101(n)) { *pp = n; return 1; }
     if (uissquareall(n, &n)) { *pp = n; return 2; }
     return 0;
   }
@@ -1442,7 +1441,7 @@ uisprimepower(ulong n, ulong *pp)
   if (CUTOFF <= ROOT9 && (e = uis_357_power(n, &n, &mask))) { v *= e; mask=1; }
   if ((e = uis_357_power(n, &n, &mask))) v *= e;
 
-  if (uisprime(n)) { *pp = n; return v; }
+  if (uisprime_101(n)) { *pp = n; return v; }
   return 0;
 }
 
