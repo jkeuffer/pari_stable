@@ -1419,9 +1419,13 @@ uisprimepower(ulong n, ulong *pp)
 
   /* Check for squares, fourth powers, and eighth powers as appropriate. */
   v = 1;
-  if (CUTOFF <= ROOT8 && uissquareall(n, &n)) v <<= 1;
-  if (CUTOFF <= ROOT4 && uissquareall(n, &n)) v <<= 1;
-  if (uissquareall(n, &n)) v <<= 1;
+  if (uissquareall(n, &n)) {
+    v <<= 1;
+    if (CUTOFF <= ROOT4 && uissquareall(n, &n)) {
+      v <<= 1;
+      if (CUTOFF <= ROOT8 && uissquareall(n, &n)) v <<= 1;
+    }
+  }
 
   if (CUTOFF > ROOT5) mask = 1;
   else
