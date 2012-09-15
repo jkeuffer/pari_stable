@@ -281,7 +281,7 @@ BA 52- library functions FpVV_to_mod, FpE_changepoint, FpE_changepointinv
 BA 53- GP syntax [a..b] : [a,a+1,...,b]
 BA 54- GP syntax [a(x)|x<-b,c(x)] : apply(a,select(c,b))
 BA 55- GP syntax M[a..b,^c] : vecextract(M,"a..b","^c")
-BA 56- GP function FpE_log
+BA 56- library function FpE_log
    57- select(f, v, 1) for indirect selection
    58- hamming() function [initial implementation CG]
    59- ispowerful() function
@@ -321,7 +321,7 @@ BA 92- PARI functions Fp_ellcard, FpXQ_ellcard, Flxq_ellcard
 LGr93- vecmax / vecmin: add optional pointer argument (to hold index of a
        largest/smallest entry)
    94- printsep() function
-   95- isprimepower() function
+CG 95- isprimepower() function
    96- PARI functions F2v_to_F2x, F2x_valrem, F2x_deflate
    97- PARI function RgV_polint
 BA 98- GP function digits
