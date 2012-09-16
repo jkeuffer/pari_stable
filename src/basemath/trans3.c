@@ -382,6 +382,7 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
   return s;
 }
 
+/* flag = 0: K / flag = 1: N */
 static GEN
 kbesselintern(GEN n, GEN z, long flag, long prec)
 {
@@ -395,7 +396,8 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
   {
     case t_INT: case t_FRAC: case t_QUAD:
     case t_REAL: case t_COMPLEX:
-      if (gequal0(z)) pari_err(e_MISC,"zero argument in a k/n bessel function");
+      if (gequal0(z))
+        pari_err_DOMAIN(flag? "besseln": "besselk", "argument", "=", gen_0, z);
       i = precision(z); if (i) prec = i;
       i = precision(n); if (i && prec > i) prec = i;
       ex = gexpo(z);
@@ -538,8 +540,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   GEN y = ex? cgetc(l): cgetr(l);
   pari_sp av = avma;
 
-  if(gsigne(gx) <= 0)
-    pari_err(e_MISC,"hyperu's third argument must be positive");
+  if (gsigne(gx) <= 0) pari_err_IMPL("non-positive third argument in hyperu");
   x = gtofp(gx, l);
   a1 = gaddsg(1, gadd(a,mb)); P = gmul(a1, a);
   p1 = gabs(gtofp(P,LOWDEFAULTPREC), LOWDEFAULTPREC);
@@ -975,7 +976,7 @@ veceint1(GEN C, GEN nmax, long prec)
     C = gtofp(C, prec);
     if (typ(C) != t_REAL) pari_err_TYPE("veceint1",C);
   }
-  if (signe(C) <= 0) pari_err(e_MISC,"negative or zero constant in veceint1");
+  if (signe(C) <= 0) pari_err_DOMAIN("veceint1", "argument", "<=", gen_0,C);
   return mpveceint1(C, NULL, itos(nmax));
 }
 
@@ -2081,7 +2082,7 @@ polylog(long m, GEN x, long prec)
   pari_sp av, av1, limpile;
   GEN X, Xn, z, p1, p2, y, res;
 
-  if (m < 0) pari_err(e_MISC,"negative index in polylog");
+  if (m < 0) pari_err_DOMAIN("polylog", "index", "<", gen_0, stoi(m));
   if (!m) return mkfrac(gen_m1,gen_2);
   if (gequal0(x)) return gcopy(x);
   if (m==1)
@@ -2336,7 +2337,7 @@ upper_half(GEN x, long *prec)
   long tx = typ(x), l;
   if (tx == t_QUAD) { x = quadtofp(x, *prec); tx = typ(x); }
   if (tx != t_COMPLEX || gsigne(gel(x,2)) <= 0)
-    pari_err(e_MISC,"argument '%Ps' does not belong to upper half-plane", x);
+    pari_err_DOMAIN("modular function", "Im(argument)", "<=", gen_0, x);
   l = precision(x); if (l) *prec = l;
   return x;
 }
@@ -2918,6 +2919,17 @@ weber0(GEN x, long flag,long prec)
   return NULL; /* not reached */
 }
 
+/* check |q| < 1 */
+static GEN
+check_unit_disc(const char *fun, GEN q, long prec)
+{
+  GEN Q = gtofp(q, prec), Qlow;
+  Qlow = (prec > LOWDEFAULTPREC)? gtofp(Q,LOWDEFAULTPREC): Q;
+  if (gcmp(gnorm(Qlow), gen_1) >= 0)
+    pari_err_DOMAIN(fun, "abs(q)", ">=", gen_1, q);
+  return Q;
+}
+
 GEN
 theta(GEN q, GEN z, long prec)
 {
@@ -2929,7 +2941,7 @@ theta(GEN q, GEN z, long prec)
   n = precision(z); if (n && n < l) l = n;
   if (l) prec = l;
   z = gtofp(z, prec);
-  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(e_MISC,"q >= 1 in theta");
+  q = check_unit_disc("theta", q, prec);
   zold = NULL; /* gcc -Wall */
   zy = imag_i(z);
   if (gequal0(zy)) k = gen_0;
@@ -2982,10 +2994,11 @@ thetanullk(GEN q, long k, long prec)
   pari_sp av = avma;
   GEN p1, ps, qn, y, ps2;
 
-  if (k < 0) pari_err(e_MISC,"k < 0 in thetanullk");
+  if (k < 0)
+    pari_err_DOMAIN("thetanullk", "k", "<", gen_0, stoi(k));
   l = precision(q);
   if (l) prec = l;
-  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(e_MISC,"q >= 1 in theta");
+  q = check_unit_disc("thetanullk", q, prec);
 
   if (!(k&1)) { avma = av; return gen_0; }
   qn = gen_1;
@@ -3014,7 +3027,7 @@ vecthetanullk(GEN q, long k, long prec)
   GEN p1, ps, qn, y, ps2;
 
   l = precision(q); if (l) prec = l;
-  q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(e_MISC,"q >= 1 in theta");
+  q = check_unit_disc("vecthetanullk", q, prec);
 
   qn = gen_1;
   ps2 = gsqr(q);

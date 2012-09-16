@@ -358,7 +358,7 @@ garg(GEN x, long prec)
   long tx = typ(x);
   pari_sp av;
 
-  if (gequal0(x)) pari_err(e_MISC,"zero argument in garg");
+  if (gequal0(x)) pari_err_DOMAIN("arg", "argument", "=", gen_0, x);
   switch(tx)
   {
     case t_REAL: prec = realprec(x); /* fall through */
@@ -704,10 +704,10 @@ gath(GEN x, long prec)
       y = cgetg(3,t_COMPLEX);
       av = avma;
       z = subrs(x,1);
-      if (!signe(z)) pari_err(e_MISC,"singular argument in atanh");
+      if (!signe(z)) pari_err_DOMAIN("atanh", "argument", "=", gen_1, x);
       z = invr(z); shiftr_inplace(z, 1); /* 2/(x-1)*/
       z = addrs(z,1);
-      if (!signe(z)) pari_err(e_MISC,"singular argument in atanh");
+      if (!signe(z)) pari_err_DOMAIN("atanh", "argument", "=", gen_m1, x);
       z = logr_abs(z);
       shiftr_inplace(z, -1); /* (1/2)log((1+x)/(x-1)) */
       gel(y,1) = gerepileuptoleaf(av, z);
@@ -1126,7 +1126,9 @@ cxgamma(GEN s0, int dolog, long prec)
   y = s;
   if (typ(s0) == t_INT)
   {
-    if (signe(s0) <= 0) pari_err(e_MISC,"non-positive integer argument in cxgamma");
+    if (signe(s0) <= 0)
+      pari_err_DOMAIN("gamma","argument", "=",
+                       strtoGENstr("non-positive integer"), s0);
     if (is_bigint(s0)) {
       for (i=1; i < nn; i++)
       {
@@ -1404,8 +1406,7 @@ Qp_gamma(GEN x)
 {
   GEN n, m, N, p = gel(x,2);
   long s, e = precp(x);
-  if (valp(x) < 0)
-    pari_err(e_MISC,"Gamma not defined for non-integral p-adic number");
+  if (valp(x) < 0) pari_err_DOMAIN("gamma","v_p(x)", "<", gen_0, x);
   n = gtrunc(x);
   m = gtrunc(gneg(x));
   N = cmpii(n,m)<=0?n:m;
@@ -1425,7 +1426,9 @@ ggamma(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
-      if (signe(x) <= 0) pari_err(e_MISC,"non-positive integer argument in ggamma");
+      if (signe(x) <= 0)
+        pari_err_DOMAIN("gamma","argument", "=",
+                         strtoGENstr("non-positive integer"), x);
       if (cmpiu(x,481177) > 0) pari_err_OVERFLOW("ggamma");
       return mpfactr(itos(x) - 1, prec);
 
@@ -1478,7 +1481,9 @@ glngamma(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
-      if (signe(x) <= 0) pari_err(e_MISC,"non-positive integer in glngamma");
+      if (signe(x) <= 0)
+        pari_err_DOMAIN("lngamma","argument", "=",
+                         strtoGENstr("non-positive integer"), x);
       if (cmpiu(x,200 + 50*(prec-2)) > 0) /* heuristic */
         return cxgamma(x, 1, prec);
       av = avma;
@@ -1523,7 +1528,8 @@ cxpsi(GEN s0, long prec)
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (signe(sig) <= 0) { funeq = 1; s = gsub(gen_1, s); sig = real_i(s); }
   if (typ(s0) == t_INT && signe(s0) <= 0)
-    pari_err(e_MISC,"non-positive integer argument in cxpsi");
+    pari_err_DOMAIN("psi","argument", "=",
+                    strtoGENstr("non-positive integer"), s0);
 
   if (expo(sig) > 300 || (typ(s) == t_COMPLEX && gexpo(gel(s,2)) > 300))
   { /* |s| is HUGE. Play safe */

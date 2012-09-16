@@ -1402,7 +1402,7 @@ Qp_log(GEN x)
   pari_sp av = avma;
   GEN y, p = gel(x,2), a = gel(x,4);
 
-  if (!signe(a)) pari_err(e_MISC,"zero argument in Qp_log");
+  if (!signe(a)) pari_err_DOMAIN("Qp_log", "argument", "=", gen_0, x);
   y = leafcopy(x); setvalp(y,0);
   if (equaliu(p,2))
     y = palogaux(gsqr(y));
@@ -1534,7 +1534,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   pari_sp av;
   GEN y, z;
   if (typ(n)!=t_INT) pari_err_TYPE("gsqrtn",n);
-  if (!signe(n)) pari_err(e_MISC,"1/0 exponent in gsqrtn");
+  if (!signe(n)) pari_err_DOMAIN("sqrtn", "n", "=", gen_0, n);
   if (is_pm1(n))
   {
     if (zetan) *zetan = gen_1;
@@ -1739,7 +1739,8 @@ mpexp_basecase(GEN x)
 #ifdef DEBUG
 {
   GEN t = mplog(z), u = divrr(subrr(x, t),x);
-  if (signe(u) && expo(u) > 5-prec2nbits(minss(l,realprec(t)))) pari_err(e_MISC,"");
+  if (signe(u) && expo(u) > 5-prec2nbits(minss(l,realprec(t))))
+    pari_err_BUG("exp");
 }
 #endif
   return gerepileuptoleaf(av, z); /* NOT affrr, precision often increases */
@@ -2346,7 +2347,7 @@ logagmcx(GEN q, long prec)
 GEN
 mplog(GEN x)
 {
-  if (signe(x)<=0) pari_err(e_MISC,"non positive argument in mplog");
+  if (signe(x)<=0) pari_err_DOMAIN("mplog", "argument", "<=", gen_0, x);
   return logr_abs(x);
 }
 
@@ -2427,7 +2428,7 @@ glog(GEN x, long prec)
     case t_REAL:
       if (signe(x) >= 0)
       {
-        if (!signe(x)) pari_err(e_MISC,"zero argument in mplog");
+        if (!signe(x)) pari_err_DOMAIN("mplog", "argument", "=", gen_0, x);
         return logr_abs(x);
       }
       y = cgetg(3,t_COMPLEX);
@@ -2936,7 +2937,8 @@ mptan(GEN x)
   GEN s, c;
 
   mpsincos(x,&s,&c);
-  if (!signe(c)) pari_err(e_MISC, "can't compute tan(Pi/2 + kPi)");
+  if (!signe(c))
+    pari_err_DOMAIN("tan", "argument", "=", strtoGENstr("Pi/2 + kPi"),x);
   return gerepileuptoleaf(av, divrr(s,c));
 }
 
@@ -3025,7 +3027,7 @@ gcotan(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gequal0(y)) pari_err(e_MISC,"0 argument in cotan");
+      if (gequal0(y)) pari_err_DOMAIN("cotan", "argument", "=", gen_0, y);
       if (valp(y) < 0) pari_err_NEGVAL("cotan"); /* fall through */
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
