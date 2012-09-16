@@ -533,6 +533,46 @@ forprime(GEN a, GEN b, GEN code)
 }
 
 void
+forcomposite(GEN a, GEN b, GEN code)
+{
+  pari_sp av = avma;
+  GEN n, p;
+  forprime_t T;
+
+  a = gceil(a);
+  b = gfloor(b);
+  if (!forprime_init(&T, a,b)) { avma = av; return; }
+  if (signe(a) < 0) pari_err_DOMAIN("forcomposite", "a", "<", gen_0, a);
+  if (cmpiu(a, 2) < 0) a = gen_2;
+
+  n = setloop(a);
+
+  push_lex(n,code);
+  while( (p = forprime_next(&T)))
+  {
+    while(cmpii(n, p) < 0)
+    {
+      closure_evalvoid(code); if (loop_break()) break;
+      /* n changed in 'code', complain */
+      if (get_lex(-1) != n)
+        pari_err(e_MISC,"index read-only: was changed to %Ps", get_lex(-1));
+      incloop(n);
+    }
+    incloop(n);
+    /* n = p+1 */
+  }
+  while(cmpii(n, b) <= 0)
+  {
+    closure_evalvoid(code); if (loop_break()) break;
+    /* n changed in 'code', complain */
+    if (get_lex(-1) != n)
+      pari_err(e_MISC,"index read-only: was changed to %Ps", get_lex(-1));
+    incloop(n);
+  }
+  pop_lex(1); avma = av;
+}
+
+void
 fordiv(GEN a, GEN code)
 {
   long i, l;

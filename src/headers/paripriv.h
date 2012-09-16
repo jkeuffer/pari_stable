@@ -84,6 +84,7 @@ GEN  derivnum0(GEN a, GEN code, long prec);
 GEN  derivfun0(GEN code, GEN args, long prec);
 GEN  direuler0(GEN a, GEN b, GEN code, GEN c);
 GEN  divsum(GEN num, GEN code);
+void forcomposite(GEN a, GEN b, GEN code);
 void fordiv(GEN a, GEN code);
 void forell0(long a, long b, GEN code);
 void forprime(GEN a, GEN b, GEN code);
