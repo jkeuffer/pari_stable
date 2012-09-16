@@ -232,7 +232,7 @@ nffactormod(GEN nf, GEN x, GEN pr)
   nf = checknf(nf);
   vn = nf_get_varn(nf);
   if (typ(x)!=t_POL) pari_err_TYPE("nffactormod",x);
-  if (varncmp(vx,vn) >= 0) pari_err_PRIORITY("nffactormod", x, ">=" vn);
+  if (varncmp(vx,vn) >= 0) pari_err_PRIORITY("nffactormod", x, ">=", vn);
 
   modpr = nf_to_Fq_init(nf, &pr, &T, &p);
   xrd = nfX_to_FqX(x, nf, modpr);
