@@ -342,8 +342,8 @@ ellinit_padic(GEN x, GEN p, long prec)
   for (i=1; i<=13; i++)
     if (typ(gel(y,i)) != t_PADIC) gel(y,i) = cvtop(gel(y,i), p, prec);
   j = ell_get_j(y);
-  if (gequal0(j) || valp(j) >= 0) /* p | j */
-    pari_err(e_MISC,"valuation of j must be negative in p-adic ellinit");
+  if (valp(j) >= 0) /* p | j */
+    pari_err_DOMAIN("ellinit [p-adic]", "v(j)", ">=", gen_0, j);
   if (equaliu(p,2))
   {
     pv = utoipos(4);
@@ -1785,7 +1785,7 @@ ellzeta(GEN w, GEN z, long prec0)
   }
   if (!get_periods(w, &T)) pari_err_TYPE("ellzeta", w);
   Z = reduce_z(z, &T);
-  if (!Z) pari_err(e_MISC,"can't evaluate ellzeta at a pole");
+  if (!Z) pari_err_DOMAIN("ellzeta", "z", "=", gen_0, z);
   prec = precision(Z);
   if (!prec) { prec = precision(T.tau); if (!prec) prec = prec0; }
   if (!gequal0(T.x) || !gequal0(T.y))

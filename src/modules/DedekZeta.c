@@ -575,12 +575,12 @@ gzetakall(GEN znf, GEN s, long flag, long prec)
   if (isint(s, &s))
   {
     long ss = itos(s), r1, r2;
-    if (ss==1) pari_err(e_MISC,"s = 1 is a pole (gzetakall)");
+    if (ss==1) pari_err_DOMAIN("zetak", "argument", "=", gen_1, s);
     znf_get_sign(znf, &r1, &r2);
     if (ss==0)
     {
       avma = av;
-      if (flag) pari_err(e_MISC,"s = 0 is a pole (gzetakall)");
+      if (flag) pari_err_DOMAIN("zetak", "argument", "=", gen_0, s);
       if (r1 + r2 > 1) return gen_0;
       return r1? mkfrac(gen_m1, gen_2): gneg(gel(znf, 2));
     }
