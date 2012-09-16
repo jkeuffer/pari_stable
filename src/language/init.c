@@ -971,6 +971,13 @@ pari_sigint(const char *time_s)
        gel(_v,2) = (y);\
        gel(_v,3) = (z);\
        gel(_v,4) = (t); return _v; } while(0)
+#define retmkerr5(x,y,z,t,u)\
+  do { GEN _v = cgetg(6, t_ERROR);\
+       _v[1] = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t);\
+       gel(_v,5) = (u); return _v; } while(0)
 #define retmkerr6(x,y,z,t,u,v)\
   do { GEN _v = cgetg(7, t_ERROR);\
        _v[1] = (x);\
@@ -1050,6 +1057,14 @@ pari_err2GEN(long numerr, va_list ap)
       GEN l = va_arg(ap, GEN);
       GEN x = va_arg(ap, GEN);
       retmkerr6(numerr,strtoGENstr(f),strtoGENstr(v),strtoGENstr(op),l,x);
+    }
+  case e_PRIORITY:
+    {
+      const char *f = va_arg(ap, const char*);
+      GEN x = va_arg(ap, GEN);
+      const char *op = va_arg(ap, const char *);
+      long v = va_arg(ap, long);
+      retmkerr5(numerr,strtoGENstr(f),x,strtoGENstr(op),stoi(v));
     }
   case e_MAXPRIME:
     retmkerr2(numerr, utoi(va_arg(ap, ulong)));
@@ -1169,6 +1184,15 @@ pari_err2str(GEN err)
       const char *op= GSTR(gel(err,4));
       GEN l = gel(err,5);
       return pari_sprintf("domain error in %s: %s %s %Ps",f,v,op,l);
+    }
+  case e_PRIORITY:
+    {
+      const char *f = GSTR(gel(err,2));
+      long vx = gvar(gel(err,3));
+      const char *op= GSTR(gel(err,4));
+      long v = itos(gel(err,5));
+      return pari_sprintf("incorrect priority in %s: variable %Ps %s %Ps",f,
+             pol_x(vx), op, pol_x(v));
     }
   case e_OVERFLOW:
     return pari_sprintf("overflow in %Ps.", gel(err,2));
@@ -1304,6 +1328,9 @@ void
 pari_err_TYPE2(const char *f, GEN x, GEN y) { pari_err(e_TYPE2, f,x,y); }
 void
 pari_err_VAR(const char *f, GEN x, GEN y) { pari_err(e_VAR, f,x,y); }
+void
+pari_err_PRIORITY(const char *f, GEN x, const char *op, long v)
+{ pari_err(e_PRIORITY, f,x,op,v); }
 
 const char *
 numerr_name(long numerr)
@@ -1334,6 +1361,7 @@ numerr_name(long numerr)
   case e_OVERFLOW: return "e_OVERFLOW";
   case e_PREC:     return "e_PREC";
   case e_PRIME:    return "e_PRIME";
+  case e_PRIORITY: return "e_PRIORITY";
   case e_ROOTS0:   return "e_ROOTS0";
   case e_SQRTN:    return "e_SQRTN";
   case e_STACK:    return "e_STACK";
@@ -1373,6 +1401,7 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_OVERFLOW")) return e_OVERFLOW;
   if (!strcmp(s,"e_PREC"))     return e_PREC;
   if (!strcmp(s,"e_PRIME"))    return e_PRIME;
+  if (!strcmp(s,"e_PRIORITY")) return e_PRIORITY;
   if (!strcmp(s,"e_ROOTS0"))   return e_ROOTS0;
   if (!strcmp(s,"e_SQRTN"))    return e_SQRTN;
   if (!strcmp(s,"e_STACK"))    return e_STACK;

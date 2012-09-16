@@ -4415,8 +4415,7 @@ elldivpol(GEN e, long n, long v)
   GEN ret;
   checksmallell(e);
   if (v==-1) v = 0;
-  if (varncmp(gvar(e), v) <= 0)
-    pari_err_VAR("elldivpol [var priorities]", e, pol_x(v));
+  if (varncmp(gvar(e), v) <= 0) pari_err_PRIORITY("elldivpol", e, "<=", v);
   if (n<0) n = -n;
   if (n==1 || n==3)
     ret = elldivpol4(e, n, v);

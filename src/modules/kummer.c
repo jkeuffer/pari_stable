@@ -1117,7 +1117,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bnf = bnr_get_bnf(bnr);
   nf  = bnf_get_nf(bnf);
   polnf = nf_get_pol(nf); vnf = varn(polnf);
-  if (!vnf) pari_err(e_MISC,"main variable in kummer must not be x");
+  if (!vnf) pari_err_PRIORITY("rnfkummer", polnf, "=", 0);
   /* step 7 */
   p1 = bnrconductor(bnr, subgroup, 2);
   if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] conductor");

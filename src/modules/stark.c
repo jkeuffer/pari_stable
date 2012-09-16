@@ -2469,7 +2469,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   /* check the bnf */
   if (!nf_get_varn(nf))
-    pari_err(e_MISC, "main variable in bnrstark must not be x");
+    pari_err_PRIORITY("bnrstark", nf_get_pol(nf), "=", 0);
   if (nf_get_r2(nf)) pari_err(e_MISC, "base field not totally real in bnrstark");
   Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
   subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");

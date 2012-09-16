@@ -2998,8 +2998,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
   long i, vT = varn(T), lP = lg(P);
   GEN Q = cgetg(lP, t_POL);
   if (typ(P) != t_POL) pari_err_TYPE("rnf function [t_POL expected]", P);
-  if (varncmp(varn(P), vT) >= 0)
-    pari_err_VAR("rnf function [var priorities]", P, T);
+  if (varncmp(varn(P), vT) >= 0) pari_err_PRIORITY("rnf function", P, ">=", vT);
   Q[1] = P[1];
   for (i=2; i<lP; i++)
   {
@@ -3008,8 +3007,7 @@ rnf_fix_pol(GEN T, GEN P, int lift)
     {
       case t_INT: case t_FRAC: break;
       case t_POL:
-        if (varn(c) != vT)
-          pari_err_VAR("rnf function", c,T);
+        if (varn(c) != vT) pari_err_VAR("rnf function", c,T);
         if (lg(c) >= lg(T)) c = RgX_rem(c,T);
         check_pol(&c);
         if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);

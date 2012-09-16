@@ -331,6 +331,7 @@ BA 101- PARI functions ZX_shifti, ZX_remi2n
    102- PARI functions cxexp1, mpsincos1
 BA 103- GP function ellfromj
    103- GP function forcomposite
+   104- new error class e_PRIORITY [ pari_err() ]
 
   Removed
     1- dropped DOS support

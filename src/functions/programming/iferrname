@@ -79,6 +79,16 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \var{E} has three components, 1 (\typ{STR}): the operator name \var{op},
   2: first argument, 3: second argument.
 
+  \item \kbd{"e\_PRIORITY"}. Object $o$ in function $s$ contains
+  variables whose priority is incompatible with the expected operation.
+  E.g.~\kbd{Pol([x,1], 'y)}: this raises an error because it's not possible to
+  create a polynomial whose coefficients involve variables with higher priority
+  than the main variable. $E$ has four components: 1 (\typ{STR}): the function
+  name $s$, 2: the offending argument $o$, 3 (\typ{STR}): an operator
+  $\var{op}$ describing the priority error, 4 (\typ{POL}):
+  the variable $v$ describing the priority error. The argument
+  satisfies $\kbd{variable}(x)~\var{op} \kbd{variable}(v)$.
+
   \item \kbd{"e\_VAR"}. The variables of arguments $x$ and $y$ submitted
   to function $s$ does not match up. E.g., considering the algebraic number
   \kbd{Mod(t,t\pow2+1)} in \kbd{nfinit(x\pow2+1)}.

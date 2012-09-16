@@ -2476,8 +2476,7 @@ matfrobenius(GEN M, long flag, long v)
   GEN D, A, N, B, R, M_x;
   if (typ(M)!=t_MAT) pari_err_TYPE("matfrobenius",M);
   if (v<0) v=0;
-  if (varncmp(gvar(M), v) <= 0)
-    pari_err(e_MISC,"variable must have higher priority in matfrobenius");
+  if (varncmp(gvar(M), v) <= 0) pari_err_PRIORITY("matfrobenius", M, "<=", v);
   n = lg(M)-1;
   if (n && lgcols(M)!=n+1) pari_err_DIM("matfrobenius");
   M_x = RgM_Rg_add_shallow(M, monomial(gen_m1, 1, v));

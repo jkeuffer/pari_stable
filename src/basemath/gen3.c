@@ -1094,7 +1094,7 @@ mod_r(GEN x, long v, GEN T)
   {
     case t_POLMOD:
       w = varn(gel(x,1));
-      if (w == v) pari_err(e_MISC, "subst: unexpected variable precedence");
+      if (w == v) pari_err_PRIORITY("subst", gel(x,1), "=", v);
       if (varncmp(v, w) < 0) return x;
       return gmodulo(mod_r(gel(x,2),v,T), mod_r(gel(x,1),v,T));
     case t_POL:
@@ -1134,8 +1134,7 @@ gsubst_expr(GEN expr, GEN from, GEN to)
       y = gsub(from, pol_x(v));        /* M = from - t */
   }
   w = gvar(from);
-  if (varncmp(v,w) <= 0)
-    pari_err(e_MISC, "subst: unexpected variable precedence");
+  if (varncmp(v,w) <= 0) pari_err_PRIORITY("subst", pol_x(v), "<=", w);
   y = gsubst(mod_r(expr, w, y), v, to);
   (void)delete_var(); return gerepileupto(av, y);
 }
@@ -2567,23 +2566,23 @@ _gtopoly(GEN x, long v, int reverse)
   {
     case t_POL:
       if (varncmp(varn(x), v) < 0)
-        pari_err(e_MISC,"variable must have higher priority in gtopoly");
+        pari_err(e_PRIORITY,"gtopoly", x, "<", v);
       y=gcopy(x); break;
     case t_SER:
       if (varncmp(varn(x), v) < 0)
-        pari_err(e_MISC,"variable must have higher priority in gtopoly");
+        pari_err(e_PRIORITY,"gtopoly", x, "<", v);
       y = ser2rfrac(x);
       if (typ(y) != t_POL)
         pari_err(e_MISC,"t_SER with negative valuation in gtopoly");
       break;
     case t_RFRAC:
       if (varncmp(varn(gel(x,2)), v) < 0)
-        pari_err(e_MISC,"variable must have higher priority in gtopoly");
+        pari_err(e_PRIORITY,"gtopoly", x, "<", v);
       y=gdeuc(gel(x,1),gel(x,2)); break;
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); if (tx == t_QFR) lx--;
       if (varncmp(gvar(x), v) <= 0)
-        pari_err(e_MISC,"variable must have higher priority in gtopoly");
+        pari_err(e_PRIORITY,"gtopoly", x, "<=", v);
       if (reverse)
       { /* cf normalizepol_lg */
         for (i = lx-1; i>0; i--)
@@ -2722,8 +2721,7 @@ gtoser(GEN x, long v, long prec)
   switch(tx)
   {
     case t_POL:
-      if (varncmp(varn(x), v) < 0)
-        pari_err(e_MISC,"main variable must have higher priority in gtoser");
+      if (varncmp(varn(x), v) < 0) pari_err(e_PRIORITY,"gtoser", x, "<", v);
       y = poltoser(x, v, prec); l = lg(y);
       for (i=2; i<l; i++)
         if (gel(y,i) != gen_0) gel(y,i) = gcopy(gel(y,i));
@@ -2731,13 +2729,13 @@ gtoser(GEN x, long v, long prec)
 
     case t_RFRAC:
       if (varncmp(varn(gel(x,2)), v) < 0)
-        pari_err(e_MISC,"main variable must have higher priority in gtoser");
+        pari_err(e_PRIORITY,"gtoser", x, "<", v);
       av = avma;
       return gerepileupto(av, rfractoser(x, v, prec));
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
       if (varncmp(gvar(x), v) <= 0)
-        pari_err(e_MISC,"main variable must have higher priority in gtoser");
+        pari_err(e_PRIORITY,"gtoser", x, "<=", v);
       lx = lg(x); if (tx == t_QFR) lx--;
       /* see normalize() */
       for (i=1; i < lx; i++)

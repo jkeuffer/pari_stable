@@ -3500,7 +3500,7 @@ ffcheck(pari_sp *av, GEN *f, GEN *T, GEN p)
   if (typ(p)!=t_INT) pari_err_TYPE("factorff",p);
   v = varn(*T);
   if (varncmp(v, varn(*f)) <= 0)
-    pari_err(e_MISC,"polynomial variable must have higher priority in factorff");
+    pari_err_PRIORITY("factorff", *T, "<=", varn(*f));
   *T = RgX_to_FpX(*T, p); *av = avma;
   *f = RgX_to_FqX(*f, *T,p);
 }

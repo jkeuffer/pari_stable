@@ -2441,10 +2441,10 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
   pari_sp lbot, ltop = avma;
   GEN T, L, P, S, PL, O, res, mod, mod2;
-  long x, n, i;
+  long vT, n, i;
   if (flag<0 || flag>2) pari_err_FLAG("galoisfixedfield");
   gal = checkgal(gal); T = gal_get_pol(gal);
-  x = varn(T);
+  vT = varn(T);
   L = gal_get_roots(gal); n = lg(L)-1;
   mod = gal_get_mod(gal);
   if (typ(perm) == t_VEC)
@@ -2461,14 +2461,14 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 
   {
     GEN OL= fixedfieldorbits(O,L);
-    GEN V = fixedfieldsympol(OL, mod, gal_get_p(gal), NULL, x);
+    GEN V = fixedfieldsympol(OL, mod, gal_get_p(gal), NULL, vT);
     PL= gel(V,2);
     P = gel(V,3);
   }
   if (flag==1) return gerepileupto(ltop,P);
   mod2 = shifti(mod,-1);
   S = fixedfieldinclusion(O, PL);
-  S = vectopol(S, gal_get_invvdm(gal), gal_get_den(gal), mod, mod2, x);
+  S = vectopol(S, gal_get_invvdm(gal), gal_get_den(gal), mod, mod2, vT);
   if (flag==0)
   { lbot = avma; res = cgetg(3, t_VEC); }
   else
@@ -2488,10 +2488,10 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     }
     PM = vandermondeinversemod(PL, P, Pden, mod);
     if (y < 0) y = fetch_user_var("y");
-    if (y <= x)
-      pari_err(e_MISC,"variable priority too high in galoisfixedfield");
+    if (varncmp(y, vT) <= 0)
+      pari_err_PRIORITY("galoisfixedfield", T, "<=", y);
     lbot = avma; res = cgetg(4, t_VEC);
-    gel(res,3) = fixedfieldfactor(L,O,gal_get_group(gal), PM,Pden,mod,mod2,x,y);
+    gel(res,3) = fixedfieldfactor(L,O,gal_get_group(gal), PM,Pden,mod,mod2,vT,y);
   }
   gel(res,1) = gcopy(P);
   gel(res,2) = gmodulo(S, T);
