@@ -1422,7 +1422,7 @@ INLINE GEN
 Fp_inv(GEN a, GEN m)
 {
   GEN res;
-  if (! invmod(a,m,&res)) pari_err(e_INTMOD, gmodulo(res,m));
+  if (! invmod(a,m,&res)) pari_err_INV("Fp_inv", mkintmod(res,m));
   return res;
 }
 INLINE GEN
@@ -2351,3 +2351,56 @@ INLINE GEN closure_get_data(GEN C)  { return gel(C,4); }
 INLINE GEN closure_get_dbg(GEN C)   { return gel(C,5); }
 INLINE GEN closure_get_text(GEN C)  { return gel(C,6); }
 INLINE GEN closure_get_frame(GEN C) { return gel(C,7); }
+
+/*******************************************************************/
+/*                                                                 */
+/*                               ERRORS                            */
+/*                                                                 */
+/*******************************************************************/
+INLINE void
+pari_err_BUG(const char *f) { pari_err(e_BUG,f); }
+INLINE void
+pari_err_CONSTPOL(const char *f) { pari_err(e_CONSTPOL, f); }
+INLINE void
+pari_err_COPRIME(const char *f, GEN x, GEN y) { pari_err(e_COPRIME, f,x,y); }
+INLINE void
+pari_err_DIM(const char *f) { pari_err(e_DIM, f); }
+INLINE void
+pari_err_FILE(const char *f, const char *g) { pari_err(e_FILE, f,g); }
+INLINE void
+pari_err_FLAG(const char *f) { pari_err(e_FLAG,f); }
+INLINE void
+pari_err_IMPL(const char *f) { pari_err(e_IMPL,f); }
+INLINE void
+pari_err_INV(const char *f, GEN x) { pari_err(e_INV,f,x); }
+INLINE void
+pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
+INLINE void
+pari_err_DOMAIN(const char *f, const char *v, const char *op, GEN l, GEN x) { pari_err(e_DOMAIN, f,v,op,l,x); }
+INLINE void
+pari_err_MAXPRIME(ulong c) { pari_err(e_MAXPRIME, c); }
+INLINE void
+pari_err_NEGVAL(const char *f) { pari_err(e_NEGVAL, f); }
+INLINE void
+pari_err_OP(const char *f, GEN x, GEN y) { pari_err(e_OP, f,x,y); }
+INLINE void
+pari_err_OVERFLOW(const char *f) { pari_err(e_OVERFLOW, f); }
+INLINE void
+pari_err_PREC(const char *f) { pari_err(e_PREC,f); }
+INLINE void
+pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }
+INLINE void
+pari_err_MODULUS(const char *f, GEN x, GEN y) { pari_err(e_MODULUS, f,x,y); }
+INLINE void
+pari_err_ROOTS0(const char *f) { pari_err(e_ROOTS0, f); }
+INLINE void
+pari_err_SQRTN(const char *f, GEN x) { pari_err(e_SQRTN, f,x); }
+INLINE void
+pari_err_TYPE(const char *f, GEN x) { pari_err(e_TYPE, f,x); }
+INLINE void
+pari_err_TYPE2(const char *f, GEN x, GEN y) { pari_err(e_TYPE2, f,x,y); }
+INLINE void
+pari_err_VAR(const char *f, GEN x, GEN y) { pari_err(e_VAR, f,x,y); }
+INLINE void
+pari_err_PRIORITY(const char *f, GEN x, const char *op, long v)
+{ pari_err(e_PRIORITY, f,x,op,v); }

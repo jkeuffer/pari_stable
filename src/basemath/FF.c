@@ -451,7 +451,7 @@ FF_Z_Z_muldiv(GEN x, GEN a, GEN b)
     r = FpX_Fp_mul(A, Fp_div(a,b,p), p);
     break;
   case t_FF_F2xq:
-    if (!mpodd(b)) pari_err(e_INV);
+    if (!mpodd(b)) pari_err_INV("FF_Z_Z_muldiv", b);
     r = mpodd(a)? vecsmall_copy(A): zero_Flx(A[1]);
     break;
   default:
@@ -498,7 +498,7 @@ FF_mul2n(GEN x, long n)
     }
     break;
   case t_FF_F2xq:
-    if (n<0) pari_err(e_INV);
+    if (n<0) pari_err_INV("FF_mul2n", gen_2);
     r = n==0? vecsmall_copy(A): zero_Flx(A[1]);
     break;
   default:

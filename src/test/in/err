@@ -24,16 +24,16 @@ ecm(N,t,B)=
      iferr(
        my(E=ellinit([0,0,0,a,1]*Mod(1,N)));
        ellmul(E,[0,1]*Mod(1,N),B),
-       err,if(errname(err)=="e_INTMOD",return(gcd(lift(component(err,1)),N)),error(err))));
+       err,if(errname(err)=="e_INV",return(gcd(lift(component(err,2)),N)),error(err))));
 }
 ecm(2^64+1,10,200!)
 ecm2(N,t,B)=
 {
   for(a=1,t,
-     iferrname("e_INTMOD",
+     iferrname("e_INV",
        my(E=ellinit([0,0,0,a,1]*Mod(1,N)));
        ellmul(E,[0,1]*Mod(1,N),B),
-       err,my(d=gcd(lift(component(err,1)),N));if(d>1,return(d))));
+       err,my(d=gcd(lift(component(err,2)),N));if(d>1,return(d))));
 }
 ecm2(2^64+1,10,200!)
 \\ e_COPRIME

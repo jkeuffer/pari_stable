@@ -25,7 +25,7 @@ enum err_list {
 
   e_STACK, e_OVERFLOW, e_DOMAIN,
 
-  e_MAXPRIME, e_INTMOD,
+  e_MAXPRIME,
 
   e_CONSTPOL, e_IRREDPOL, e_COPRIME, e_PRIME, e_MODULUS, e_ROOTS0,
 

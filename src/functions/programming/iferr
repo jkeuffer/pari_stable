@@ -22,7 +22,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error occurs,
    {
      for(a = 1, nb,
        iferr(ellmul(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
-         E, if(errname(E)=="e_INTMOD",
+         E, if(errname(E)=="e_INV",
               return(gcd(lift(component(E,1)),N)),
               error(E))));
    }

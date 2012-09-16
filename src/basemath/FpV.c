@@ -814,7 +814,7 @@ ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C)
   long i;
   if (!C) {
     C = Flm_inv(ZM_to_Flm(a, p), p);
-    if (!C) pari_err(e_INV);
+    if (!C) pari_err_INV("ZlM_gauss", a);
   }
   P = utoipos(p);
   av2 = avma;
@@ -938,10 +938,10 @@ GEN
 FpMs_FpCs_solve_safe(GEN M, GEN A, long nbrow, GEN p)
 {
   GEN res;
-  CATCH(e_INTMOD)
+  CATCH(e_INV)
   {
     if (DEBUGLEVEL)
-      pari_warn(warner,"FpMs_FpCs_solve_safe, impossible inverse %Ps", gel(global_err_data,2));
+      pari_warn(warner,"FpMs_FpCs_solve_safe, impossible inverse %Ps", gel(global_err_data,3));
     res = NULL;
   } TRY {
     res = ZpMs_ZpCs_solve(M, A, nbrow, p, 1);

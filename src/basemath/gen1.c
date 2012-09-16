@@ -239,7 +239,7 @@ gred_rfrac_simple(GEN n, GEN d)
 
   if (dd <= 0)
   {
-    if (dd < 0) pari_err(e_INV);
+    if (dd < 0) pari_err_INV("gred_rfrac_simple", d);
     return scalarpol(gdiv(n, gel(d,2)), varn(d));
   }
 
@@ -2291,7 +2291,7 @@ div_ser(GEN x, GEN y, long vx)
   long i, j, l = valp(x) - valp(y), lx = lg(x), ly = lg(y);
   GEN y_lead, p1, p2, z;
 
-  if (!signe(y)) pari_err(e_INV);
+  if (!signe(y)) pari_err_INV("div_ser", y);
   if (lx == 2) return zeroser(vx, l);
   y_lead = gel(y,2);
   if (gequal0(y_lead)) /* normalize denominator if leading term is 0 */
@@ -2302,7 +2302,7 @@ div_ser(GEN x, GEN y, long vx)
       y_lead = gel(y,2);
       if (!gequal0(y_lead)) break;
     }
-    if (ly <= 2) pari_err(e_INV);
+    if (ly <= 2) pari_err_INV("div_ser", y);
   }
   if (ly < lx) lx = ly;
   p2 = cgetg(lx, t_VECSMALL); /* left on stack for efficiency */
@@ -2332,7 +2332,7 @@ divpp(GEN x, GEN y) {
   long a, b;
   GEN z, M;
 
-  if (!signe(gel(y,4))) pari_err(e_INV);
+  if (!signe(gel(y,4))) pari_err_INV("divpp",y);
   if (!signe(gel(x,4))) return zeropadic(gel(x,2), valp(x)-valp(y));
   a = precp(x);
   b = precp(y); if (a > b) { M = gel(y,3); } else { M = gel(x,3); b = a; }
@@ -2401,7 +2401,7 @@ gdiv(GEN x, GEN y)
       if (is_pm1(y)) return (signe(y) < 0)? negi(x): icopy(x);
       if (is_pm1(x)) {
         long s = signe(y);
-        if (!s) pari_err(e_INV);
+        if (!s) pari_err_INV("gdiv",y);
         if (signe(x) < 0) s = -s;
         z = cgetg(3, t_FRAC);
         gel(z,1) = s<0? gen_m1: gen_1;
@@ -2474,7 +2474,7 @@ gdiv(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return RgX_Rg_div(x, y);
                             else return div_scal_pol(x, y);
       }
-      if (!signe(y)) pari_err(e_INV);
+      if (!signe(y)) pari_err_INV("gdiv",y);
       if (lg(y) == 3) return RgX_Rg_div(x,gel(y,2));
       return gred_rfrac2(x,y);
 
@@ -2499,9 +2499,9 @@ gdiv(GEN x, GEN y)
     case t_QFR: av = avma; return gerepileupto(av, qfrcomp(x, ginv(y)));
 
     case t_MAT:
-      av = avma; y = RgM_inv(y);
-      if (!y) pari_err(e_INV);
-      return gerepileupto(av, RgM_mul(x, y));
+      av = avma; p1 = RgM_inv(y);
+      if (!p1) pari_err_INV("gdiv",y);
+      return gerepileupto(av, RgM_mul(x, p1));
 
     default: pari_err_TYPE2("/",x,y);
   }
@@ -2510,7 +2510,7 @@ gdiv(GEN x, GEN y)
   {
     long s = signe(x);
     if (!s) {
-      if (gequal0(y)) pari_err(e_INV);
+      if (gequal0(y)) pari_err_INV("gdiv",y);
       switch (ty)
       {
       default: return gen_0;
@@ -2559,7 +2559,7 @@ gdiv(GEN x, GEN y)
         return gerepile(av, tetpil, gdiv(p2,p1));
     }
   }
-  if (gequal0(y) && ty != t_MAT) pari_err(e_INV);
+  if (gequal0(y) && ty != t_MAT) pari_err_INV("gdiv",y);
 
   if (is_const_t(tx) && is_const_t(ty)) switch(tx)
   {
@@ -2711,9 +2711,9 @@ gdiv(GEN x, GEN y)
     case t_REAL: case t_INTMOD: case t_PADIC: case t_POLMOD:
       return gmul(x, ginv(y)); /* missing gerepile, for speed */
     case t_MAT:
-      av = avma; y = RgM_inv(y);
-      if (!y) pari_err(e_INV);
-      return gerepileupto(av, gmul(x, y));
+      av = avma; p1 = RgM_inv(y);
+      if (!p1) pari_err_INV("gdiv",y);
+      return gerepileupto(av, gmul(x, p1));
     case t_VEC: case t_COL:
     case t_LIST: case t_STR: case t_VECSMALL: case t_CLOSURE:
       pari_err_TYPE2("/",x,y);
@@ -2898,7 +2898,7 @@ gdivgs(GEN x, long s)
   pari_sp av;
   GEN z, y, p1;
 
-  if (!s) pari_err(e_INV);
+  if (!s) pari_err_INV("gdivgs",gen_0);
   switch(typ(x))
   {
     case t_INT:
@@ -3092,7 +3092,7 @@ inv_ser(GEN b)
   GEN y, x = cgetg(l, t_SER), a = leafcopy(b);
   ulong mask = quadratic_prec_mask(l - 2);
 
-  if (!signe(b)) pari_err(e_INV);
+  if (!signe(b)) pari_err_INV("inv_ser",b);
 
   for (j = 3; j < l; j++) gel(x,j) = gen_0;
   gel(x,2) = ginv(gel(b,2));
@@ -3176,7 +3176,7 @@ ginv(GEN x)
   {
     case t_INT:
       if (is_pm1(x)) return icopy(x);
-      s = signe(x); if (!s) pari_err(e_INV);
+      s = signe(x); if (!s) pari_err_INV("ginv",gen_0);
       z = cgetg(3,t_FRAC);
       gel(z,1) = s<0? gen_m1: gen_1;
       gel(z,2) = absi(x); return z;
@@ -3208,7 +3208,7 @@ ginv(GEN x)
       return gerepile(av,tetpil,gdiv(p2,p1));
 
     case t_PADIC: z = cgetg(5,t_PADIC);
-      if (!signe(gel(x,4))) pari_err(e_INV);
+      if (!signe(gel(x,4))) pari_err_INV("ginv",x);
       z[1] = evalprecp(precp(x)) | evalvalp(-valp(x));
       gel(z,2) = icopy(gel(x,2));
       gel(z,3) = icopy(gel(x,3));
@@ -3223,7 +3223,7 @@ ginv(GEN x)
     {
       GEN n = gel(x,1), d = gel(x,2);
       pari_sp av = avma, ltop;
-      if (gequal0(n)) pari_err(e_INV);
+      if (gequal0(n)) pari_err_INV("ginv",x);
 
       n = simplify_shallow(n);
       if (typ(n) != t_POL || varn(n) != varn(d))
@@ -3256,7 +3256,7 @@ ginv(GEN x)
       return y;
     case t_MAT:
       y = RgM_inv(x);
-      if (!y) pari_err(e_INV);
+      if (!y) pari_err_INV("ginv",x);
       return y;
     case t_VECSMALL:
     {

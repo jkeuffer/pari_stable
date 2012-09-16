@@ -36,7 +36,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
     if (pr == ONLY_REM) {
-      if (gequal0(y)) pari_err(e_INV);
+      if (gequal0(y)) pari_err_INV("poldivrem",y);
       return gen_0;
     }
     if (pr && pr != ONLY_DIVIDES) *pr=gen_0;
@@ -46,7 +46,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
-    if (!signe(y)) pari_err(e_INV);
+    if (!signe(y)) pari_err_INV("poldivrem",y);
     if (!degpol(y)) /* constant */
     {
       if (pr == ONLY_REM) return pol_0(vy);
@@ -83,7 +83,7 @@ gdeuc(GEN x, GEN y)
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
-    if (!signe(y)) pari_err(e_INV);
+    if (!signe(y)) pari_err_INV("gdeuc",y);
     if (!degpol(y)) return gdiv(x, gel(y,2)); /* constant */
     return gen_0;
   }
@@ -98,14 +98,14 @@ grem(GEN x, GEN y)
 
   if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
-    if (gequal0(y)) pari_err(e_INV);
+    if (gequal0(y)) pari_err_INV("grem",y);
     return gen_0;
   }
   if (ty != t_POL) pari_err_TYPE2("euclidean division",x,y);
   tx = typ(x);
   if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
-    if (!signe(y)) pari_err(e_INV);
+    if (!signe(y)) pari_err_INV("grem",y);
     if (!degpol(y)) return pol_0(vy); /* constant */
     return gcopy(x);
   }

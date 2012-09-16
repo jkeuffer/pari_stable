@@ -1141,7 +1141,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   long sv=x[1];
 
   dy = degpol(y);
-  if (dy<0) pari_err(e_INV);
+  if (dy<0) pari_err_INV("Flx_divrem",y);
   if (pr == ONLY_REM) return Flx_rem(x, y, p);
   if (!dy)
   {
@@ -1968,7 +1968,7 @@ Flxq_inv(GEN x,GEN T,ulong p)
 {
   pari_sp av=avma;
   GEN U = Flxq_invsafe(x, T, p);
-  if (!U) pari_err(e_INV);
+  if (!U) pari_err_INV("Flxq_inv",x);
   return gerepileuptoleaf(av, U);
 }
 
@@ -3128,7 +3128,7 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!signe(y)) pari_err(e_INV);
+  if (!signe(y)) pari_err_INV("FlxqX_divrem",y);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
   if (dx < dy)
   {
@@ -3459,7 +3459,7 @@ FlxqXQ_inv(GEN x, GEN S, GEN T,ulong p)
 {
   pari_sp av = avma;
   GEN U = FlxqXQ_invsafe(x, S, T, p);
-  if (!U) pari_err(e_INV);
+  if (!U) pari_err_INV("FlxqXQ_inv",x);
   return gerepileupto(av, U);
 }
 

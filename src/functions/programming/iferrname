@@ -13,7 +13,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
  ? ecm(N, B = 1000!, t = 100)=
    {
      for(a = 1, t,
-       iferrname("e_INTMOD",
+       iferrname("e_INV",
          ellmul(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
          E, return(gcd(lift(component(E,1)),N))));
    }
@@ -146,15 +146,10 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \var{E} has three component, 1 (\typ{STR}): the function name $s$,
   2: the argument $x$, 3: the argument $y$.
 
-  \item \kbd{"e\_INTMOD"}. Tried to invert a non-invertible \typ{INTMOD}
-  \kbd{Mod($a$,$b$)}. Provided $a$ is not $0$ mod $b$, this allows to factor
-  the modulus, as \kbd{gcd($a$,$b$)} is a non-trivial divisor of $b$.
-  \var{E} has one component, 1 (\typ{INTMOD}): the element
-  \kbd{Mod($a$,$b$)}.
-
-  \item \kbd{"e\_INV"}. Tried to invert a non-invertible object, which is not
-  a \typ{INTMOD}. Indeed, in the latter case, we raise \kbd{e\_INTMOD} instead.
-  \var{E} has no component.
+  \item \kbd{"e\_INV"}. Tried to invert a non-invertible object $x$.
+  \var{E} has one component, the non-invertible $x$. If $x = \kbd{Mod}(a,b)$
+  is a \typ{INTMOD} and $a$ is not $0$ mod $b$, this allows to factor
+  the modulus, as \kbd{gcd}$(a,b)$ is a non-trivial divisor of $b$.
 
   \item \kbd{"e\_IRREDPOL"}. Function $s$ expected an irreducible polynomial,
   and did receive $T$, which was not. (As in \kbd{nfinit(x\pow2-1)}.)

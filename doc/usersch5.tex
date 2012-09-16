@@ -8960,20 +8960,14 @@ receive $x$, $y$ which were not.
 @eprog\noindent prints the error message: \kbd{elements not coprime in $s$:
 $x, y$}.
 
-\subsubsec{e\_INTMOD} Tried to invert a non-invertible \typ{INTMOD}
-\kbd{Mod($a$,$b$)}. Provided $a$ is not $0$ mod $b$, this allows to factor
-the modulus, as \kbd{gcd($a$,$b$)} is a non-trivial divisor of $b$.
+\subsubsec{e\_INV} Tried to invert a non-invertible object $x$.
 \bprog
-  pari_err(e_INTMOD, GEN x)
-@eprog\noindent prints the error message: \kbd{impossible inverse modulo: $x$}.
-
-\subsubsec{e\_INV} Tried to invert a non-invertible object, which
-is not a \typ{INTMOD}. Indeed, in the latter case, we raise \kbd{e\_INTMOD}
-instead.
-\bprog
-  pari_err(e_INV)
-@eprog\noindent prints the error message: \kbd{division by a non-invertible
-object}.
+  pari_err(e_INV, GEN x)
+  pari_err_INV(GEN x)
+@eprog\noindent prints the error message: \kbd{impossible inverse: $x$}.
+If $x = \kbd{Mod}(a,b)$ is a \typ{INTMOD} and $a$ is not $0$ mod $b$, this
+allows to factor the modulus, as \kbd{gcd}$(a,b)$ is a non-trivial divisor of
+$b$.
 
 \subsubsec{e\_IRREDPOL} Function $s$ expected an irreducible polynomial,
 and did not receive one. (As in \kbd{nfinit(x\pow2-1)}.)

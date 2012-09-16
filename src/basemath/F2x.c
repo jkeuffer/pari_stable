@@ -508,7 +508,7 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   GEN z;
 
   dy = F2x_degree(y);
-  if (dy<0) pari_err(e_INV);
+  if (dy<0) pari_err_INV("F2x_divrem",y);
   if (pr == ONLY_REM) return F2x_rem(x, y);
   if (!dy)
   {
@@ -731,7 +731,7 @@ F2xq_inv(GEN x,GEN T)
 {
   pari_sp av=avma;
   GEN U = F2xq_invsafe(x, T);
-  if (!U) pari_err(e_INV);
+  if (!U) pari_err_INV("F2xq_inv",x);
   return gerepileuptoleaf(av, U);
 }
 

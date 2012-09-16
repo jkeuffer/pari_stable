@@ -554,7 +554,7 @@ umodiu(GEN y, ulong x)
 {
   long sy=signe(y);
   ulong hi;
-  if (!x) pari_err(e_INV);
+  if (!x) pari_err_INV("umodiu",gen_0);
   if (!sy) return 0;
   hi = mpn_mod_1(LIMBS(y),NLIMBS(y),x);
   if (!hi) return 0;
@@ -568,7 +568,7 @@ diviu_rem(GEN y, ulong x, ulong *rem)
   long ly;
   GEN z;
 
-  if (!x) pari_err(e_INV);
+  if (!x) pari_err_INV("diviu_rem",gen_0);
   if (!signe(y)) { *rem = 0; return gen_0; }
 
   ly = lgefint(y);
@@ -587,7 +587,7 @@ divis_rem(GEN y, long x, long *rem)
   long sy=signe(y),ly,s;
   GEN z;
 
-  if (!x) pari_err(e_INV);
+  if (!x) pari_err_INV("divis_rem",gen_0);
   if (!sy) { *rem = 0; return gen_0; }
   if (x<0) { s = -sy; x = -x; } else s = sy;
 
@@ -608,7 +608,7 @@ divis(GEN y, long x)
   long sy=signe(y),ly,s;
   GEN z;
 
-  if (!x) pari_err(e_INV);
+  if (!x) pari_err_INV("divis",gen_0);
   if (!sy) return gen_0;
   if (x<0) { s = -sy; x = -x; } else s=sy;
 
@@ -703,7 +703,7 @@ divri(GEN x, GEN y)
 {
   long  s = signe(y);
 
-  if (!s) pari_err(e_INV);
+  if (!s) pari_err_INV("divri",gen_0);
   if (!signe(x)) return real_0_bit(expo(x) - expi(y));
   if (!is_bigint(y)) {
     GEN z = divru(x, y[2]);
@@ -720,7 +720,7 @@ divrr(GEN x, GEN y)
   ulong y0,y1;
   GEN r, r1;
 
-  if (!sy) pari_err(e_INV);
+  if (!sy) pari_err_INV("divrr",y);
   e = expo(x) - expo(y);
   if (!sx) return real_0_bit(e);
   if (sy<0) sx = -sx;
@@ -845,7 +845,11 @@ dvmdii(GEN x, GEN y, GEN *z)
   pari_sp av;
   GEN r,q;
 
-  if (!sy) { if (z == ONLY_REM && !sx) return gen_0; pari_err(e_INV); }
+  if (!sy)
+  {
+    if (z == ONLY_REM && !sx) return gen_0;
+    pari_err_INV("dvmdii",y);
+  }
   if (!sx)
   {
     if (!z || z == ONLY_REM) return gen_0;
@@ -1068,7 +1072,7 @@ diviuexact(GEN x, ulong y)
 GEN
 diviiexact(GEN x, GEN y)
 {
-  if (!signe(y)) pari_err(e_INV);
+  if (!signe(y)) pari_err_INV("diviiexact",y);
   if (lgefint(y) == 3)
   {
     GEN z = diviuexact(x, y[2]);

@@ -576,8 +576,8 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
     /* includes the silly case where P[i] = -1 */
     if (E[i] <= 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
     av = avma;
-    CATCH(e_INTMOD) { /* caught false prime, update factorization */
-      GEN x = gel(global_err_data,2);
+    CATCH(e_INV) { /* caught false prime, update factorization */
+      GEN x = gel(global_err_data,3);
       GEN N, p = gcdii(gel(x,1), gel(x,2)), u = diviiexact(gel(x,1),p);
       long l;
       if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);

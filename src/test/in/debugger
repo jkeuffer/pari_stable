@@ -27,6 +27,6 @@ z
 
 z
 
-iferrname("e_INTMOD",vector(10000,i,1/(i-100)),E,Vec(E))
+iferrname("e_VAR",vector(10000,i,1/(i-100)),E,Vec(E))
 i
 break

@@ -479,7 +479,7 @@ divsi(long x, GEN y)
   long p1, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) pari_err(e_INV);
+  if (!s) pari_err_INV("divsi",gen_0);
   if (!x || lgefint(y)>3 || ((long)y[2])<0) return gen_0;
   hiremainder=0; p1=divll(labs(x),y[2]);
   if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
@@ -494,7 +494,7 @@ divir(GEN x, GEN y)
   long ly = lg(y), lx = lgefint(x);
   pari_sp av;
 
-  if (ly == 2) pari_err(e_INV);
+  if (ly == 2) pari_err_INV("divir",y);
   if (lx == 2) return div0r(y);
   if (lx == 3) {
     z = divur(x[2], y);
@@ -513,7 +513,7 @@ divur(ulong x, GEN y)
   long ly = lg(y);
   GEN z;
 
-  if (ly == 2) pari_err(e_INV);
+  if (ly == 2) pari_err_INV("divur",y);
   if (!x) return div0r(y);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
@@ -532,7 +532,7 @@ divsr(long x, GEN y)
   long ly = lg(y);
   GEN z;
 
-  if (ly == 2) pari_err(e_INV);
+  if (ly == 2) pari_err_INV("divsr",y);
   if (!x) return div0r(y);
   if (ly > INVNEWTON_LIMIT) {
     av = avma; z = invr(y);
@@ -565,7 +565,7 @@ invr(GEN b)
   ulong mask;
 
   if (l <= maxss(INVNEWTON_LIMIT, (1L<<s) + 2)) {
-    if (l == 2) pari_err(e_INV);
+    if (l == 2) pari_err_INV("invr",b);
     return invr_basecase(b);
   }
   mask = quadratic_prec_mask(l-2);
@@ -620,7 +620,7 @@ divrs(GEN x, long y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!y) pari_err(e_INV);
+  if (!y) pari_err_INV("divrs",gen_0);
   if (y<0) { s = -s; y = -y; }
   if (!s) return real_0_bit(expo(x) - expu(y));
   if (y==1) { z = rcopy(x); setsigne(z,s); return z; }
@@ -644,7 +644,7 @@ divru(GEN x, ulong y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!y) pari_err(e_INV);
+  if (!y) pari_err_INV("divru",gen_0);
   if (!s) return real_0_bit(expo(x) - expu(y));
   if (y==1) return rcopy(x);
   if (y==2) return shiftr(x, -1);

@@ -2074,7 +2074,7 @@ padic_to_Fp(GEN x, GEN Y) {
   pari_sp av = avma;
   GEN p = gel(x,2), z;
   long vy, vx = valp(x);
-  if (!signe(Y)) pari_err(e_INV);
+  if (!signe(Y)) pari_err_INV("padic_to_Fp",Y);
   vy = Z_pvalrem(Y,p, &z);
   if (vx < 0 || !gequal1(z)) pari_err_OP("",x, mkintmod(gen_1,Y));
   if (vx >= vy) { avma = av; return gen_0; }

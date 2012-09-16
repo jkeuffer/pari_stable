@@ -595,7 +595,7 @@ sdivss_rem(long x, long y, long *r)
 {
   long q;
   LOCAL_HIREMAINDER;
-  if (!y) pari_err(e_INV);
+  if (!y) pari_err_INV("sdivss_rem",gen_0);
   hiremainder = 0; q = divll((ulong)labs(x),(ulong)labs(y));
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (y < 0) q = -q;
@@ -606,7 +606,7 @@ divss_rem(long x, long y, long *r) { return stoi(sdivss_rem(x,y,r)); }
 INLINE ulong
 udivuu_rem(ulong x, ulong y, ulong *r)
 {
-  if (!y) pari_err(e_INV);
+  if (!y) pari_err_INV("udivuu_rem",gen_0);
   *r = x % y; return x / y;
 }
 
@@ -616,7 +616,7 @@ udivui_rem(ulong x, GEN y, ulong *r)
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) pari_err(e_INV);
+  if (!s) pari_err_INV("udivui_rem",gen_0);
   if (!x || lgefint(y)>3) { *r = x; return 0; }
   hiremainder=0; q = (long)divll(x, (ulong)y[2]);
   if (s < 0) q = -q;
@@ -629,7 +629,7 @@ sdivsi_rem(long x, GEN y, long *r)
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) pari_err(e_INV);
+  if (!s) pari_err_INV("sdivsi_rem",gen_0);
   if (!x || lgefint(y)>3 || ((long)y[2]) < 0) { *r = x; return 0; }
   hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
@@ -644,7 +644,7 @@ sdivsi(long x, GEN y)
 {
   long q, s = signe(y);
 
-  if (!s) pari_err(e_INV);
+  if (!s) pari_err_INV("sdivsi",gen_0);
   if (!x || lgefint(y)>3 || ((long)y[2]) < 0) return 0;
   q = labs(x) / y[2];
   if (x < 0) q = -q;
@@ -697,7 +697,7 @@ modsi(long x, GEN y) {
 INLINE ulong
 umodui(ulong x, GEN y)
 {
-  if (!signe(y)) pari_err(e_INV);
+  if (!signe(y)) pari_err_INV("umodui",gen_0);
   if (!x || lgefint(y) > 3) return x;
   return x % (ulong)y[2];
 }

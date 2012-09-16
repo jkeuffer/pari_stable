@@ -556,7 +556,7 @@ powis(GEN x, long n)
   if (!n) return gen_1;
   sx = signe(x);
   if (!sx) {
-    if (n < 0) pari_err(e_INV);
+    if (n < 0) pari_err_INV("powis",gen_0);
     return gen_0;
   }
   s = (sx < 0 && odd(n))? -1: 1;
@@ -723,7 +723,7 @@ powps(GEN x, long n)
   pari_sp av;
 
   if (!signe(gel(x,4))) {
-    if (n < 0) pari_err(e_INV);
+    if (n < 0) pari_err_INV("powps",x);
     return zeropadic(p, e);
   }
   v = z_pval(n, p);
@@ -757,7 +757,7 @@ powp(GEN x, GEN n)
   if (valp(x)) pari_err_OVERFLOW("valp()");
 
   if (!signe(gel(x,4))) {
-    if (signe(n) < 0) pari_err(e_INV);
+    if (signe(n) < 0) pari_err_INV("powp",x);
     return zeropadic(p, 0);
   }
   v = Z_pval(n, p);
@@ -835,12 +835,7 @@ gpowgs(GEN x, long n)
     case t_FRAC:
     {
       GEN a = gel(x,1), b = gel(x,2);
-      long sx = signe(a), s;
-      if (!sx) {
-        if (n < 0) pari_err(e_INV);
-        return gen_0;
-      }
-      s = (sx < 0 && odd(n))? -1: 1;
+      long s = (signe(a) < 0 && odd(n))? -1: 1;
       if (n < 0) {
         n = -n;
         if (is_pm1(a)) return powiu_sign(b, n, s); /* +-1/x[2] inverts to t_INT */
@@ -895,7 +890,7 @@ powgi(GEN x, GEN n)
     case t_INT:
       if (is_pm1(x)) return (signe(x) < 0 && mpodd(n))? gen_m1: gen_1;
       if (signe(x)) pari_err_OVERFLOW("lg()");
-      if (signe(n) < 0) pari_err(e_INV);
+      if (signe(n) < 0) pari_err_INV("powgi",gen_0);
       return gen_0;
     case t_FRAC:
       pari_err_OVERFLOW("lg()");
@@ -1584,7 +1579,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
       y = real_1(prec);
     else if (gequal0(x))
     {
-      if (signe(n) < 0) pari_err(e_INV);
+      if (signe(n) < 0) pari_err_INV("gsqrtn",x);
       if (isinexactreal(x))
       {
         long e = gexpo(x), junk;

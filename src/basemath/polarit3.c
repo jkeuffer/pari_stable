@@ -560,7 +560,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   GEN z,p1,rem,lead;
 
   if (!T) return FpX_divrem(x,y,p,pr);
-  if (!signe(y)) pari_err(e_INV);
+  if (!signe(y)) pari_err_INV("FpX_divrem",y);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
   if (dx < dy)
   {
@@ -739,7 +739,7 @@ FpXQXQ_inv(GEN x, GEN S, GEN T,GEN p)
 {
   pari_sp av = avma;
   GEN U = FpXQXQ_invsafe(x, S, T, p);
-  if (!U) pari_err(e_INV);
+  if (!U) pari_err_INV("FpXQXQ_inv",x);
   return gerepileupto(av, U);
 }
 
@@ -2455,7 +2455,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   long vx = varn(x), dx, dy, dz, i, lx, dp;
   pari_sp av = avma, av2, lim;
 
-  if (!signe(y)) pari_err(e_INV);
+  if (!signe(y)) pari_err_INV("FlxX_pseudorem",y);
   (void)new_chunk(2);
   dx=degpol(x); x = RgX_recip_shallow(x)+2;
   dy=degpol(y); y = RgX_recip_shallow(y)+2; dz=dx-dy; dp = dz+1;

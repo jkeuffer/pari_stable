@@ -1530,7 +1530,7 @@ gauss(GEN a, GEN b)
     z = ZM_gauss(a,b);
   else
     z = RgM_solve(a,b);
-  if (!z) pari_err(e_INV);
+  if (!z) pari_err_INV("gauss",a);
   return z;
 }
 
@@ -1886,7 +1886,7 @@ ZM_inv(GEN M, GEN dM)
       if (dM) {
         dMp = umodiu(dM,p); if (!dMp) continue;
         Hp = Flm_inv_sp(Mp, NULL, p);
-        if (!Hp) pari_err(e_INV);
+        if (!Hp) pari_err_INV("ZM_inv", Mp);
       } else {
         Hp = Flm_inv_sp(Mp, &dMp, p);
         if (!Hp) continue;

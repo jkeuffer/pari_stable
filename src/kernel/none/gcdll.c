@@ -1081,6 +1081,6 @@ ulong
 Fl_inv(ulong x, ulong p)
 {
   ulong xv  = Fl_invsafe(x, p);
-  if (!xv && p!=1UL) pari_err(e_INTMOD, mkintmod(utoi(x), utoi(p)));
+  if (!xv && p!=1UL) pari_err_INV("Fl_inv", mkintmod(utoi(x), utoi(p)));
   return xv;
 }
