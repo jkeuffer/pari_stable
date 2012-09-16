@@ -4197,8 +4197,8 @@ GEN
 ellfromj(GEN j)
 {
   pari_sp av=avma;
-  GEN k, kj, k2j, T=NULL, p=NULL;
-  if (Rg_is_FpXQ(j,&T,&p) && p)
+  GEN k, kj, k2j, T = NULL, p = typ(j)==t_FFELT? FF_p_i(j): NULL;
+  if (p || (Rg_is_FpXQ(j,&T,&p) && p))
   {
     if (equaliu(p,2))
     {
