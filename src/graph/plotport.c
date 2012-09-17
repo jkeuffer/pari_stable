@@ -244,18 +244,20 @@ free_graph(void)
 static PariRect *
 check_rect(long ne)
 {
-  if (ne >= 0 && ne < NUMRECT) return rectgraph[ne];
-  pari_err(e_MISC,
-           "incorrect rectwindow number in graphic function (%ld not in [0, %ld])",
-           ne, NUMRECT-1);
-  return NULL; /*not reached*/
+  const long m = NUMRECT-1;
+  if (ne < 0)
+    pari_err_DOMAIN("graphic function", "rectwindow", "<", gen_0, stoi(ne));
+  if (ne > m)
+    pari_err_DOMAIN("graphic function", "rectwindow", ">", stoi(m), stoi(ne));
+  return rectgraph[ne];
 }
 
 static PariRect *
 check_rect_init(long ne)
 {
   PariRect *e = check_rect(ne);
-  if (!RHead(e)) pari_err(e_MISC,"you must initialize the rectwindow first");
+  if (!RHead(e))
+    pari_err_TYPE("graphic function [use plotinit() first]", stoi(ne));
   return e;
 }
 
@@ -294,7 +296,8 @@ initrect(long ne, long x, long y)
   PariRect *e;
   RectObj *z;
 
-  if (x<=1 || y<=1) pari_err(e_MISC,"incorrect dimensions in initrect");
+  if (x <= 1) pari_err_DOMAIN("initrect", "x", "<=", gen_1, stoi(x));
+  if (y <= 1) pari_err_DOMAIN("initrect", "y", "<=", gen_1, stoi(y));
   e = check_rect(ne); if (RHead(e)) killrect(ne);
 
   z = (RectObj*) pari_malloc(sizeof(RectObj));
@@ -392,9 +395,10 @@ rectrpoint(long ne, GEN x, GEN y)
 void
 rectcolor(long ne, long c)
 {
+  long n = lg(pari_colormap)-2;
   check_rect(ne);
-  if (c < 1 || c >= lg(pari_colormap)-1)
-    pari_err(e_MISC,"This is not a valid color");
+  if (c < 1) pari_err_DOMAIN("rectcolor", "color", "<", gen_1, stoi(c));
+  if (c > n) pari_err_DOMAIN("rectcolor", "color", ">", stoi(n), stoi(c));
   current_color[ne] = c;
 }
 
@@ -1156,13 +1160,13 @@ get_xy(long cplx, GEN t, double *x, double *y)
 {
   if (cplx)
   {
-    if (lg(t) != 2) pari_err(e_MISC,"inconsistent data in get_xy");
+    if (lg(t) != 2) pari_err_DIM("get_xy");
     *x = gtodouble( real_i(gel(t,1)) );
     *y = gtodouble( imag_i(gel(t,1)) );
   }
   else
   {
-    if (lg(t) != 3) pari_err(e_MISC,"inconsistent data in get_xy");
+    if (lg(t) != 3) pari_err_DIM("get_xy");
     *x = gtodouble( gel(t,1) );
     *y = gtodouble( gel(t,2) );
   }
@@ -1217,7 +1221,7 @@ gtodblList(GEN data, long flags)
   if (!nl) return NULL;
   lx1 = lg(gel(data,1));
 
-  if (nl == 1 && !cplx) pari_err(e_MISC,"single vector in gtodblList");
+  if (nl == 1 && !cplx) pari_err_DIM("gtodblList");
   /* Allocate memory, then convert coord. to double */
   l = (dblPointList*) pari_malloc((cplx ? 2*nl:nl)*sizeof(dblPointList));
   for (i=0; i<nl-1; i+=2)
@@ -1403,7 +1407,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       nl++;
     }
     if (recur && nc > 1)
-      pari_err(e_MISC,"multi-curves cannot be plot recursively");
+      pari_err_TYPE("ploth [multi-curves cannot be plot recursively]",t);
     single_c=0;
 
     if (param)
@@ -1505,7 +1509,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
         long k;
         t = cplx? READ_EXPR_VEC(code,x)
                 : READ_EXPR(code,x);
-        if (lg(t)!=nl+1) pari_err(e_MISC,"inconsistent data in rectplothin");
+        if (lg(t)!=nl+1) pari_err_DIM("rectplothin");
         k = 0; j = 1;
         while (j <= nl)
         {
@@ -1521,7 +1525,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
         t = READ_EXPR(code,x);
-        if (lg(t) != nl) pari_err(e_MISC,"inconsistent data in rectplothin");
+        if (lg(t) != nl) pari_err_DIM("rectplothin");
         pl[0].d[i] = gtodouble(x);
         for (j=1; j<nl; j++) Appendy(&pl[0],&pl[j], gtodouble(gel(t,j)));
       }
@@ -1910,7 +1914,7 @@ gendraw(GEN list, long ps, long flag)
 
   if (typ(list) != t_VEC) pari_err_TYPE("rectdraw",list);
   n = lg(list)-1; if (!n) return;
-  if (n%3) pari_err(e_MISC,"incorrect number of components in rectdraw");
+  if (n%3) pari_err_DIM("rectdraw");
   n = n/3;
   w = (long*)pari_malloc(n*sizeof(long));
   x = (long*)pari_malloc(n*sizeof(long));
