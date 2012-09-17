@@ -1841,7 +1841,7 @@ mod(2, 7)
 ? mod(10873,49649)^-1
   ***   at top-level: mod(10873,49649)^-1
   ***                                 ^---
-  *** _^_: impossible inverse modulo: mod(131, 49649).
+  *** _^_: impossible inverse in Fp_inv: mod(131, 49649).
 ? modreverse(mod(x^2+1,x^3-x-1))
 mod(x^2 - 3*x + 2, x^3 - 5*x^2 + 8*x - 5)
 ? move(0,243,583);cursor(0)
@@ -2599,4 +2599,4 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [602, 106567]
 ? print("Total time spent: ",gettime);
-Total time spent: 232
+Total time spent: 220
