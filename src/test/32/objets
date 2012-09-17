@@ -119,8 +119,8 @@ O(x^12)
 ? Mod(10873,49649)^-1
   ***   at top-level: Mod(10873,49649)^-1
   ***                                 ^---
-  *** _^_: impossible inverse modulo: Mod(131, 49649).
+  *** _^_: impossible inverse in Fp_inv: Mod(131, 49649).
 ? getheap
 [59, 809]
 ? print("Total time spent: ",gettime);
-Total time spent: 0
+Total time spent: 4

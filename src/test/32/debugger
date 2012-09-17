@@ -19,12 +19,12 @@ break> break
 ? my(p=120);for(i=1,100,1/0)
   ***   at top-level: my(p=120);for(i=1,100,1/0)
   ***                                        ^---
-  *** _/_: division by a non-invertible object
+  *** _/_: impossible inverse in gdiv: 0.
   ***   Break loop: type 'break' to go back to GP prompt
 break> [p,i]
 [120, 1]
 break> dbg_err()
-error("division by a non-invertible object")
+error("impossible inverse in gdiv: 0.")
 break> break
 
 ? fun(N)=check(N^2+1);
@@ -61,10 +61,10 @@ break> z
 13
 ? z
 z
-? iferrname("e_INTMOD",vector(10000,i,1/(i-100)),E,Vec(E))
-  ***   at top-level: ..._INTMOD",vector(10000,i,1/(i-100)),E,Vec(E))
+? iferrname("e_VAR",vector(10000,i,1/(i-100)),E,Vec(E))
+  ***   at top-level: ...("e_VAR",vector(10000,i,1/(i-100)),E,Vec(E))
   ***                                             ^-------------------
-  *** _/_: division by a non-invertible object
+  *** _/_: impossible inverse in gdiv: 0.
   ***   Break loop: type 'break' to go back to GP prompt
 break> i
 100

@@ -731,7 +731,7 @@ dvmdii(GEN x, GEN y, GEN *z)
   if (!sy)
   {
     if (z == ONLY_REM && !sx) return gen_0;
-    if (!s) pari_err_INV("dvmdii",gen_0);
+    if (!sy) pari_err_INV("dvmdii",gen_0);
   }
   if (!sx)
   {

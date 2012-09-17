@@ -4,17 +4,17 @@
   ***                             ^-----
   ***   in function f: 1/x
   ***                   ^--
-  *** _/_: division by a non-invertible object
+  *** _/_: impossible inverse in gdiv: 0.
 
   ***   at top-level: f(Mat(0),Col(1))
   ***                 ^----------------
   ***   in function f: matsolve
   ***                  ^--------
-  *** matsolve: division by a non-invertible object
+  *** matsolve: impossible inverse in gauss: Mat(0).
 
   ***   at top-level: (matsolve)(Mat(0),Col
   ***                  ^--------------------
-  *** matsolve: division by a non-invertible object
+  *** matsolve: impossible inverse in gauss: Mat(0).
 
   ***   at top-level: g(I)
   ***                 ^----
@@ -22,13 +22,13 @@
   ***                     ^----
   ***   in member function foo: 1/(1+a^2)
   ***                            ^--------
-  *** _/_: division by a non-invertible object
+  *** _/_: impossible inverse in gdiv: 0.
 
   ***   at top-level: (x->1/x)(0)
   ***                  ^----------
   ***   in anonymous function: 1/x
   ***                           ^--
-  *** _/_: division by a non-invertible object
+  *** _/_: impossible inverse in gdiv: 0.
 
 274177
 274177
@@ -126,4 +126,4 @@
   ***   at top-level: matrix(1,-1,i,j,0)
   ***                 ^------------------
   *** matrix: domain error in matrix: nbcols < 0
-Total time spent: 20
+Total time spent: 8
