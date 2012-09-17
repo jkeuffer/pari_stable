@@ -4234,7 +4234,14 @@ ellffinit(GEN x, GEN fg, long flag)
   if (typ(fg)==t_INTMOD) fg=gel(fg,1);
   if (typ(fg)==t_FFELT)
     G = FF_ellinit(E,fg,&e,&N,&m);
-  else if (typ(fg)==t_INT)
+  else if (typ(fg)!=t_INT)
+  { pari_err_TYPE("ellffinit",fg); return NULL; /*NOTREACHED*/ }
+  else if (cmpiu(fg,3)<=0) /* ell_to_a4a6_bc does not handle p<=3 */
+  {
+    fg = p_to_FF(fg,0);
+    G = FF_ellinit(E,fg,&e,&N,&m);
+  }
+  else
   {
     long i;
     GEN p = fg;
@@ -4244,7 +4251,6 @@ ellffinit(GEN x, GEN fg, long flag)
     N = ellcard_ram(E, p);
     G = Fp_ellgroup(gel(e,1),gel(e,2),N,p,&m);
   }
-  else { pari_err_TYPE("ellffinit",fg); return NULL; /*NOTREACHED*/ }
   d1 = lg(G)>1 ? gel(G,1): gen_1;
   gel(E,14) = fg;
   gel(E,15) = e;
