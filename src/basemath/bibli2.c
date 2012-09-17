@@ -211,7 +211,7 @@ polhermite(long n, long v)
   GEN q,a,r;
 
   if (v<0) v = 0;
-  if (n < 0) pari_err(e_MISC,"negative degree in hermite");
+  if (n < 0) pari_err_DOMAIN("polhermite", "degree", "<", gen_0, stoi(n));
   if (n==0) return pol_1(v);
 
   q = cgetg(n+3, t_POL); r = q + n+2;
@@ -379,7 +379,7 @@ polcyclo(long n, long v)
     {
       case 1: return deg1pol_shallow(gen_1, gen_m1, v);
       case 2: return deg1pol_shallow(gen_1, gen_1, v);
-      default: pari_err(e_MISC, "argument must be positive in polcyclo");
+      default: pari_err_DOMAIN("polcyclo", "index", "<=", gen_0, stoi(n));
     }
   P = gel(factoru(n), 1); l = lg(P);
   s = P[1]; T = polcyclo_prime(s, v);
@@ -405,7 +405,7 @@ polcyclo_eval(long n, GEN x)
   if (!x) return polcyclo(n, 0);
   tx = typ(x);
   if (gcmpX(x)) return polcyclo(n, varn(x));
-  if (n <= 0) pari_err(e_MISC, "argument must be positive in polcyclo");
+  if (n <= 0) pari_err_DOMAIN("polcyclo", "index", "<=", gen_0, stoi(n));
   if (n == 1) return gsubgs(x, 1);
   /* n >= 2 */
   P = gel(factoru(n), 1); l = lg(P)-1;
@@ -455,7 +455,7 @@ mathilbert(long n) /* Hilbert matrix of order n */
   long i,j;
   GEN p;
 
-  if (n < 0) pari_err(e_MISC,"negative dimension in mathilbert");
+  if (n < 0) pari_err_DOMAIN("mathilbert", "dimension", "<", gen_0, stoi(n));
   p = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
@@ -475,7 +475,7 @@ matqpascal(long n, GEN q)
   pari_sp av = avma;
   GEN m, qpow = NULL; /* gcc -Wall */
 
-  if (n < -1) pari_err(e_MISC,"Pascal triangle of negative order in matpascal");
+  if (n < -1)  pari_err_DOMAIN("matpascal", "n", "<", gen_m1, stoi(n));
   n++; m = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) gel(m,j) = cgetg(n+1,t_COL);
   if (q)
@@ -516,7 +516,7 @@ gprec(GEN x, long l)
   long lx, i;
   GEN y;
 
-  if (l <= 0) pari_err(e_MISC,"precision<=0 in gprec");
+  if (l <= 0) pari_err_DOMAIN("gprec", "precision", "<=", gen_0, stoi(l));
   switch(typ(x))
   {
     case t_REAL:
@@ -920,7 +920,8 @@ stirling1(ulong n, ulong m)
 GEN
 stirling(long n, long m, long flag)
 {
-  if (n<0 || m<0) pari_err(e_MISC, "Negative arguments in stirling");
+  if (n < 0) pari_err_DOMAIN("stirling", "n", "<", gen_0, stoi(n));
+  if (m < 0) pari_err_DOMAIN("stirling", "m", "<", gen_0, stoi(m));
   switch (flag)
   {
     case 1: return stirling1((ulong)n,(ulong)m);
@@ -940,7 +941,7 @@ numtoperm(long n, GEN x)
   ulong i, r;
   GEN v;
 
-  if (n < 0) pari_err(e_MISC,"n too small (%ld) in numtoperm",n);
+  if (n < 0) pari_err_DOMAIN("numtoperm", "n", "<", gen_0, stoi(n));
   if (typ(x) != t_INT) pari_err_TYPE("numtoperm",x);
   v = cgetg(n+1, t_VEC);
   v[1] = 1; av = avma;
@@ -1116,8 +1117,7 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
     if (ptdy) *ptdy = gen_0;
     if (lx == 1) return zeropol(0);
     Y = gel(Y,1);
-    if (gvar(Y) == 0)
-      pari_err(e_MISC,"polynomials in 'x in polinterpolate's data");
+    if (gvar(Y) == 0) pari_err_PRIORITY("polinterpolate", Y, "=", 0);
     return scalarpol(Y, 0);
   }
   if (!x) return RgV_polint(X, Y, 0);

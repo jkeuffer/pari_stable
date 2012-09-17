@@ -1073,7 +1073,8 @@ nfsign_arch(GEN nf, GEN x, GEN arch)
   switch(typ(x))
   {
     case t_INT:
-      s = signe(x); if (!s) pari_err(e_MISC,"zero element in nfsign_arch");
+      s = signe(x);
+      if (!s) pari_err_DOMAIN("nfsign_arch","element","=",gen_0,x);
       avma = av; return const_vecsmall(n, (s < 0)? 1: 0);
     case t_FRAC:
       s = signe(gel(x,1));
@@ -1133,7 +1134,7 @@ nfinvmodideal(GEN nf, GEN x, GEN y)
   if (typ(x) == t_INT) return gerepileupto(av, Fp_inv(x, yZ));
 
   a = hnfmerge_get_1(idealhnf_principal(nf,x), y);
-  if (!a) pari_err(e_MISC, "element not invertible in nfinvmodideal");
+  if (!a) pari_err_INV("nfinvmodideal", x);
   return gerepileupto(av, ZC_hnfrem(nfdiv(nf,a,x), y));
 }
 

@@ -139,10 +139,8 @@ get_prid(GEN x)
 GEN
 checknfelt_mod(GEN nf, GEN x, const char *s)
 {
-  GEN T = gel(x,1), a = gel(x,2);
-  if (!RgX_equal_var(T, nf_get_pol(nf)))
-    pari_err(e_MISC, "incompatible modulus in %s:\n  mod = %Ps,\n  nf  = %Ps",
-             s, a, T);
+  GEN T = gel(x,1), a = gel(x,2), Tnf = nf_get_pol(nf);
+  if (!RgX_equal_var(T, Tnf)) pari_err_MODULUS(s, T, Tnf);
   return a;
 }
 
