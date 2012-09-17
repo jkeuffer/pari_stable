@@ -1311,6 +1311,42 @@ ffgen(GEN T, long v)
 }
 
 GEN
+p_to_FF(GEN p, long v)
+{
+  GEN A, T;
+  GEN ff = cgetg(5,t_FFELT);
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    long sv = evalvarn(v);
+    if (pp==2)
+    {
+      ff[1] = t_FF_F2xq;
+      T = polx_F2x(sv);
+      A = pol1_F2x(sv);
+      p = gen_2;
+    }
+    else
+    {
+      ff[1] = t_FF_Flxq;
+      T = polx_Flx(sv);
+      A = pol1_Flx(sv);
+      p = icopy(p);
+    }
+  }
+  else
+  {
+    ff[1] = t_FF_FpXQ;
+    T = pol_x(v);
+    A = pol_1(v);
+    p = icopy(p);
+  }
+  gel(ff,2) = A;
+  gel(ff,3) = T;
+  gel(ff,4) = p; return ff;
+}
+
+GEN
 fforder(GEN x, GEN o)
 {
   if (typ(x)!=t_FFELT) pari_err_TYPE("fforder",x);

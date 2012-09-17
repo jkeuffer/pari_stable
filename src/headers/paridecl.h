@@ -1840,6 +1840,7 @@ GEN     fforder(GEN x, GEN o);
 GEN     ffprimroot(GEN x, GEN *o);
 GEN     ffrandom(GEN ff);
 int     is_Z_factor(GEN f);
+GEN     p_to_FF(GEN p, long v);
 
 /* galconj.c */
 
