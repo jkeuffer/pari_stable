@@ -6523,7 +6523,7 @@ polynomial of \kbd{Mod(x, T)}, in variable $v$.
 $T$.
 
 \fun{GEN}{RgX_RgXQV_eval}{GEN f, GEN V} as \kbd{RgX\_RgXQ\_eval(f, x, T)},
-assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)}.
+assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)} for some $n\geq 1$.
 
 \fun{GEN}{QX_ZXQV_eval}{GEN f, GEN nV, GEN dV} as \kbd{RgX\_RgXQV\_eval},
 except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitly
@@ -7778,6 +7778,8 @@ returns $[\kbd{x}^0, \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC};
 \kbd{mul(D, $x$, $y$)} implements the multiplication
 in the underlying monoid; \kbd{sqr} is a (presumably optimized) shortcut for
 \kbd{mul(D, $x$, $x$)}; \kbd{one} returns the monoid unit.
+The flag \kbd{use\_sqr} should be set to $1$ if squaring are faster than
+multiplication by $x$.
 
 \fun{GEN}{gen_factorback}{GEN L, GEN e, F2 mul, F2 pow, void *D} generic form
 of \tet{factorback}. The pair $[L,e]$ is of the form
