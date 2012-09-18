@@ -211,7 +211,7 @@ to delay an eventual pending alarm.
 (\kbd{SIGINT} was blocked) or \kbd{SIGALRM} (\kbd{SIGALRM} was blocked).
 Take action as appropriate.
 
-\section{Black-box groups}
+\section{Black box groups}
 
 A black box group is defined by a \tet{bb_group} struct, describing methods
 available to handle group elements:
@@ -224,7 +224,7 @@ available to handle group elements:
       GEN (*rand)(void*);
       int (*equal)(GEN, GEN);
       int (*equal1)(GEN);
-      GEN   (*easylog)(void *E, GEN, GEN, GEN);
+      GEN (*easylog)(void *E, GEN, GEN, GEN);
     };
 @eprog
 \kbd{mul(E,x,y)} returns the product $x\*y$.
@@ -245,7 +245,7 @@ $n$ such that $g^n=a$, the element $g$ being of order $o$. This provides a
 short-cut in situation where a better algorithm than the generic one is known.
 
 A group is thus described by a \kbd{struct bb\_group} as above and auxiliary
-data typecast to \kbd{void*}. The following functions operate on black-box
+data typecast to \kbd{void*}. The following functions operate on black box
 groups:
 
 \fun{GEN}{gen_Shanks_log}{GEN x, GEN g, GEN N, void *E, const struct bb_group
@@ -275,7 +275,7 @@ field.
 
 \fun{GEN}{gen_Shanks_sqrtn}{GEN a, GEN n, GEN N, GEN *zetan, void *E, const
 struct bb_group *grp} \hbadness 10000 returns one solution of $x^n = a$ in a
-black-box cyclic group of order $N$. Return \kbd{NULL} if no solution exists.
+black box cyclic group of order $N$. Return \kbd{NULL} if no solution exists.
 If \kbd{zetan} is not \kbd{NULL} it is set to an element of exact order $n$.
 
 This function uses \kbd{gen\_plog} for all prime divisors of $\gcd(n,N)$.
@@ -307,7 +307,7 @@ ambiguity.
 returns a random generator of the group, assuming it is of order exactly
 $o$ (which can be given by a factorization matrix).
 
-\subsec{Black-box groups with pairing}
+\subsec{Black box groups with pairing}
 
 Theses functions handle groups of rank at most $2$ equipped with a family of
 bilinear pairings which behave like the Weil pairing on elliptic curves over
@@ -331,15 +331,15 @@ the parameters $d_1$, $d_2$, $m$ being as returned by \kbd{gen\_ellgroup}, retur
 of generators $[P,Q]$ such that $P$ is of order $d_1$ and the $m$-pairing of $P$ and
 $Q$ is of order $m$. (Note: $Q$ needs not be of order $d_2$).
 
-\subsec{Functions returning black-box groups}
+\subsec{Functions returning black box groups}
 
 \fun{const struct bb_group *}{get_FpE_group}{void **pt_E, GEN a4, GEN a6, GEN p}
-returns a pointer to a black-box group and set \kbd{*pt\_E} to the necessary data for
+returns a pointer to a black box group and set \kbd{*pt\_E} to the necessary data for
 computing in the group $E(\F_p)$ where $E$ is the elliptic curve $E:y^2=x^3+a_4\*x+a_6$,
 with $a_4$ and $a_6$ in $\F_p$.
 
 \fun{const struct bb_group *}{get_FpXQE_group}{void **pt_E, GEN a4, GEN a6, GEN T, GEN p}
-returns a pointer to a black-box group and set \kbd{*pt\_E} to the necessary data for
+returns a pointer to a black box group and set \kbd{*pt\_E} to the necessary data for
 computing in the group $E(\F_p[X]/(T))$ where $E$ is the elliptic curve $E:y^2=x^3+a_4\*x+a_6$,
 with $a_4$ and $a_6$ in $\F_p[X]/(T)$.
 
@@ -349,7 +349,7 @@ idem for small $p$.
 \fun{const struct bb_group *}{get_F2xqE_group}{void **pt_E, GEN a2, GEN a6, GEN T}
 idem for $p=2$.
 
-\section{Black-box finite fields}
+\section{Black box finite fields}
 
 A black box finite field is defined by a \tet{bb_field} struct, describing methods
 available to handle field elements:
@@ -373,17 +373,19 @@ only \kbd{red} is required to return a canonical form.
 
 \kbd{add(E,x,y)} returns the sum $x+y$.
 
-\kbd{neg(E,x,y)} returns $-x$.
+\kbd{mul(E,x,y)} returns the product $x\*y$.
 
-\kbd{inv(E)} returns the inverse of $x$.
+\kbd{neg(E,x)} returns $-x$.
+
+\kbd{inv(E,x)} returns the inverse of $x$.
 
 \kbd{equal0(x)} $x$ being in canonical form, returns one if $x=0$ and zero otherwise.
 
-\kbd{s(x)} $x$ being a small signed integer, returns $s$ times the unit element.
+\kbd{s(n)} $n$ being a small signed integer, returns $n$ times the unit element.
 
-A field is thus described by a \kbd{struct bb\_field} as above and auxiliary
-data typecast to \kbd{void*}. The following functions operate on black-box
-groups:
+A finite field is thus described by a \kbd{struct bb\_field} as above and auxiliary
+data typecast to \kbd{void*}. The following functions operate on black box
+fields:
 
 \fun{GEN}{gen_Gauss}{GEN a, GEN b, void *E, const struct bb_field *ff}
 
@@ -393,7 +395,7 @@ groups:
 
 \fun{GEN}{gen_ker}{GEN x, long deplin, void *E, const struct bb_field *ff}
 
-\subsec{Functions returning black-box fields}
+\subsec{Functions returning black box fields}
 
 \fun{const struct bb_field *}{get_Fp_field}{void **pt_E, GEN p}
 
