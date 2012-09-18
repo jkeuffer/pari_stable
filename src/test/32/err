@@ -42,7 +42,7 @@
   ***   incorrect type in matrix col assignment (t_INT).
   ***   at top-level: M[,3]=1
   ***                  ^------
-  ***   array index (3) out of allowed range [1-2].
+  ***   domain error in check_array_index: array index > 2
   ***   at top-level: M[,1]=[1,2]
   ***                 ^-----------
   ***   incorrect type in matrix col assignment (t_VEC).
@@ -54,7 +54,7 @@
   ***   incorrect type in matrix row assignment (t_INT).
   ***   at top-level: M[3,]=1
   ***                  ^------
-  ***   array index (3) out of allowed range [1-2].
+  ***   domain error in check_array_index: array index > 2
   ***   at top-level: M[1,]=[1,2]~
   ***                 ^------------
   ***   incorrect type in matrix row assignment (t_COL).
@@ -63,10 +63,10 @@
   ***   inconsistent dimensions in matrix row assignment.
   ***   at top-level: [;][1,]
   ***                    ^----
-  ***   array index (1) out of allowed range [none].
+  ***   domain error in check_array_index: array index > 0
   ***   at top-level: [;][,1]
   ***                    ^----
-  ***   array index (1) out of allowed range [none].
+  ***   domain error in check_array_index: array index > 0
   ***   at top-level: 1[1]
   ***                  ^---
   ***   incorrect type in _[_] OCcompo1 [not a vector] (t_INT).
@@ -90,7 +90,7 @@
   ***   incorrect type in &_[_,] OCcompoLptr [not a matrix] (t_POL).
   ***   at top-level: v[2]=1
   ***                  ^-----
-  ***   array index (2) out of allowed range [1].
+  ***   domain error in check_array_index: array index > 1
   ***   at top-level: v[1]=Pi
   ***                 ^-------
   ***   incorrect type in t_VECSMALL assignment (t_REAL).
@@ -126,4 +126,18 @@
   ***   at top-level: matrix(1,-1,i,j,0)
   ***                 ^------------------
   *** matrix: domain error in matrix: nbcols < 0
-Total time spent: 8
+  ***   at top-level: next(-1)
+  ***                 ^--------
+  *** next: domain error in next: n < 1
+  ***   at top-level: break(-1)
+  ***                 ^---------
+  *** break: domain error in break: n < 1
+  ***   at top-level: v[-1]
+  ***                  ^----
+  ***   domain error in check_array_index: array index < 1
+  ***   at top-level: v[#v+1]
+  ***                  ^------
+  ***   domain error in check_array_index: array index > 1
+  ***   variable name expected: subst(x,1,0)
+  ***                                   ^----
+Total time spent: 16

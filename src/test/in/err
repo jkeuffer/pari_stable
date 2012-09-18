@@ -78,3 +78,8 @@ vectorv(-1,i,0)
 vectorsmall(-1,i,0)
 matrix(-1,1,i,j,0)
 matrix(1,-1,i,j,0)
+next(-1)
+break(-1)
+v[-1]
+v[#v+1]
+subst(x,1,0)

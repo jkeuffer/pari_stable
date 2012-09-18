@@ -60,8 +60,7 @@ return0(GEN x)
 GEN
 next0(long n)
 {
-  if (n < 1)
-    pari_err(e_MISC,"positive integer expected in next");
+  if (n < 1) pari_err_DOMAIN("next", "n", "<", gen_1, stoi(n));
   if (n == 1) br_status = br_NEXT;
   else
   {
@@ -74,8 +73,7 @@ next0(long n)
 GEN
 break0(long n)
 {
-  if (n < 1)
-    pari_err(e_MISC,"positive integer expected in break");
+  if (n < 1) pari_err_DOMAIN("break", "n", "<", gen_1, stoi(n));
   br_count = n;
   br_status = br_BREAK; return NULL;
 }
@@ -217,7 +215,7 @@ copyvalue(entree *ep)
 }
 
 INLINE void
-err_var(void) { pari_err(e_MISC, "variable name expected"); }
+err_var(GEN x) { pari_err_TYPE("evaluator [variable name expected]", x); }
 
 INLINE void
 checkvalue(entree *ep)
@@ -229,7 +227,7 @@ checkvalue(entree *ep)
     ep->value = initial_value(ep);
   }
   else if (ep->valence!=EpVAR)
-    err_var();
+    err_var((GEN)ep->value);
 }
 
 /* make GP variables safe for avma = top */
@@ -251,15 +249,13 @@ lvar_make_safe(void)
 }
 
 static void
-check_array_index(long c, long max)
+check_array_index(long c, long l)
 {
-  if (c < 1 || c >= max)
-  {
-    if (max <= 2)
-      pari_err(e_MISC,"array index (%ld) out of allowed range [%s]",c,max==1?"none":"1");
-    else
-      pari_err(e_MISC,"array index (%ld) out of allowed range [1-%ld]",c,max-1);
-  }
+  if (c < 1)
+    pari_err_DOMAIN("check_array_index", "array index", "<", gen_1, stoi(c));
+  if (c >= l)
+    pari_err_DOMAIN("check_array_index", "array index", ">",
+                    stoi(l-1), stoi(c));
 }
 
 typedef struct matcomp
@@ -542,7 +538,7 @@ INLINE long
 closure_varn(GEN x)
 {
   if (!x) return -1;
-  if (!gcmpX(x)) err_var();
+  if (!gcmpX(x)) err_var(x);
   return varn(x);
 }
 
@@ -579,7 +575,7 @@ closure_castlong(long z, long mode)
     gel(st,sp++)=stoi(z);
     break;
   case Gvar:
-    err_var();
+    err_var(stoi(z));
   default:
     pari_err_BUG("closure_castlong, type unknown");
   }
