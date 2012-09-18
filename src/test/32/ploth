@@ -49,7 +49,7 @@
 ? ploth(t=0,2*Pi,[sin(5*t),sin(7*t)],2,100)
   ***   at top-level: ploth(t=0,2*Pi,[sin(5*t),sin(7*t)],
   ***                                ^--------------------
-  ***   multi-curves cannot be plot recursively.
+  ***   incorrect type in ploth [multi-curves cannot be plot recursively] (t_VEC).
 ? ploth(t=0,2*Pi,[sin(5*t),sin(7*t)],3,100)
 [-1.000000000000000000, 1.000000000000000000, -1.000000000000000000, 1.00000
 0000000000000]
@@ -72,4 +72,4 @@
 ? plotdraw([0,10,10])
 ? psdraw([0,10,10])
 ? print("Total time spent: ",gettime);
-Total time spent: 32
+Total time spent: 16
