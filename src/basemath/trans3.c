@@ -42,9 +42,9 @@ _jbessel(GEN n, GEN z, long flag, long m)
   if (typ(z) == t_SER)
   {
     long v = valp(z);
+    if (v < 0) pari_err_DOMAIN("besselj","valuation", "<", gen_0, z);
     k = lg(Z)-2 - v;
-    if (v < 0) pari_err_NEGVAL("jbessel");
-    if (v == 0) pari_err_IMPL("jbessel around a!=0");
+    if (v == 0) pari_err_IMPL("besselj around a!=0");
     if (k <= 0) return scalarser(gen_1, varn(z), 2*v);
     setlg(Z, k+2);
   }
@@ -55,7 +55,7 @@ _jbessel(GEN n, GEN z, long flag, long m)
     s = gaddsg(1, gdiv(gmul(Z,s), gmulgs(gaddgs(n,k),k)));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"jbessel");
+      if (DEBUGMEM>1) pari_warn(warnmem,"besselj");
       s = gerepileupto(av, s);
     }
   }
@@ -216,13 +216,13 @@ jbesselh(GEN n, GEN z, long prec)
     default:
       av = avma; if (!(y = toser_i(z))) break;
       if (gequal0(y)) return gerepileupto(av, gpowgs(y,k));
-      if (valp(y) < 0) pari_err_NEGVAL("jbesselh");
+      if (valp(y) < 0) pari_err_DOMAIN("besseljh","valuation", "<", gen_0, y);
       y = gprec(y, lg(y)-2 + (2*k+1)*valp(y));
       p1 = gdiv(_jbesselh(k,y,prec),gpowgs(y,k));
       for (i=1; i<=k; i++) p1 = gmulgs(p1,2*i+1);
       return gerepilecopy(av,p1);
   }
-  pari_err_TYPE("jbesselh",z);
+  pari_err_TYPE("besseljh",z);
   return NULL; /* not reached */
 }
 
@@ -338,8 +338,8 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
   if (typ(z) == t_SER)
   {
     long v = valp(z);
+    if (v < 0) pari_err_DOMAIN("_kbessel1","valuation", "<", gen_0, z);
     k = lg(Z)-2 - v;
-    if (v < 0) pari_err_NEGVAL("_kbessel1");
     if (v == 0) pari_err_IMPL("Bessel K around a!=0");
     if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
     setlg(Z, k+2);
@@ -2293,7 +2293,7 @@ gpolylog(long m, GEN x, long prec)
       if (m==1) return gerepileupto(av, gneg( glog(gsub(gen_1,y),prec) ));
       if (gequal0(y)) return gerepilecopy(av, y);
       v = valp(y);
-      if (v < 0) pari_err_NEGVAL("gpolylog");
+      if (v < 0) pari_err_DOMAIN("polylog","valuation", "<", gen_0, x);
       if (v > 0) {
         n = (lg(y)-3 + v) / v;
         a = zeroser(varn(y), lg(y)-2);

@@ -2380,8 +2380,6 @@ pari_err_DOMAIN(const char *f, const char *v, const char *op, GEN l, GEN x) { pa
 INLINE void
 pari_err_MAXPRIME(ulong c) { pari_err(e_MAXPRIME, c); }
 INLINE void
-pari_err_NEGVAL(const char *f) { pari_err(e_NEGVAL, f); }
-INLINE void
 pari_err_OP(const char *f, GEN x, GEN y) { pari_err(e_OP, f,x,y); }
 INLINE void
 pari_err_OVERFLOW(const char *f) { pari_err(e_OVERFLOW, f); }

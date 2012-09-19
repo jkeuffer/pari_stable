@@ -1016,7 +1016,6 @@ pari_err2GEN(long numerr, va_list ap)
   case e_OVERFLOW:
   case e_IMPL:
   case e_DIM:
-  case e_NEGVAL:
   case e_CONSTPOL:
   case e_ROOTS0:
   case e_FLAG:
@@ -1151,8 +1150,6 @@ pari_err2str(GEN e)
       return pari_sprintf("inconsistent moduli in %Ps:\n    %Ps\n    %Ps",
                           gel(e,2), x, y);
     }
-  case e_NEGVAL:
-    return pari_sprintf("negative valuation in %Ps.", gel(e,2));
   case e_NONE: return NULL;
   case e_NOTFUNC:
     return pari_strdup("not a function in function call");
@@ -1305,7 +1302,6 @@ numerr_name(long numerr)
   case e_MEM:      return "e_MEM";
   case e_MISC:     return "e_MISC";
   case e_MODULUS:  return "e_MODULUS";
-  case e_NEGVAL:   return "e_NEGVAL";
   case e_NONE:     return "e_NONE";
   case e_NOTFUNC:  return "e_NOTFUNC";
   case e_OP:       return "e_OP";
@@ -1344,7 +1340,6 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_MEM"))      return e_MEM;
   if (!strcmp(s,"e_MISC"))     return e_MISC;
   if (!strcmp(s,"e_MODULUS"))  return e_MODULUS;
-  if (!strcmp(s,"e_NEGVAL"))   return e_NEGVAL;
   if (!strcmp(s,"e_NONE"))     return e_NONE;
   if (!strcmp(s,"e_NOTFUNC"))  return e_NOTFUNC;
   if (!strcmp(s,"e_OP"))       return e_OP;

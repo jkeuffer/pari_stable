@@ -33,7 +33,7 @@ enum err_list {
 
   e_MEM,
 
-  e_NEGVAL, e_SQRTN,
+  e_SQRTN,
 
 /* NO ERROR */
   e_NONE

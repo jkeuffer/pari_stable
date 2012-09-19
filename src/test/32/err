@@ -140,4 +140,55 @@
   ***   domain error in check_array_index: array index > 1
   ***   variable name expected: subst(x,1,0)
   ***                                   ^----
-Total time spent: 16
+  ***   at top-level: exp(1/x)
+  ***                 ^--------
+  *** exp: domain error in exp: valuation < 0
+  ***   at top-level: cos(1/x)
+  ***                 ^--------
+  *** cos: domain error in cos: valuation < 0
+  ***   at top-level: sin(1/x)
+  ***                 ^--------
+  *** sin: domain error in sin: valuation < 0
+  ***   at top-level: tan(1/x)
+  ***                 ^--------
+  *** tan: domain error in tan: valuation < 0
+  ***   at top-level: cotan(1/x)
+  ***                 ^----------
+  *** cotan: domain error in cotan: valuation < 0
+  ***   at top-level: atan(1/x)
+  ***                 ^---------
+  *** atan: domain error in atan: valuation < 0
+  ***   at top-level: asin(1/x)
+  ***                 ^---------
+  *** asin: domain error in asin: valuation < 0
+  ***   at top-level: acos(1/x)
+  ***                 ^---------
+  *** acos: domain error in acos: valuation < 0
+  ***   at top-level: asinh(1/x)
+  ***                 ^----------
+  *** asinh: domain error in ash: valuation < 0
+  ***   at top-level: acosh(1/x)
+  ***                 ^----------
+  *** acosh: domain error in ach: valuation < 0
+  ***   at top-level: atanh(1/x)
+  ***                 ^----------
+  *** atanh: domain error in ath: valuation < 0
+  ***   at top-level: lngamma(x)
+  ***                 ^----------
+  *** lngamma: domain error in lngamma: valuation != 0
+  ***   at top-level: besselj(2,1/x)
+  ***                 ^--------------
+  *** besselj: domain error in besselj: valuation < 0
+  ***   at top-level: besseljh(2,1/x)
+  ***                 ^---------------
+  *** besseljh: domain error in besseljh: valuation < 0
+  ***   at top-level: besselk(2,1/x)
+  ***                 ^--------------
+  *** besselk: domain error in _kbessel1: valuation < 0
+  ***   at top-level: besseln(2,1/x)
+  ***                 ^--------------
+  *** besseln: domain error in _kbessel1: valuation < 0
+  ***   at top-level: polylog(2,1/x)
+  ***                 ^--------------
+  *** polylog: domain error in polylog: valuation < 0
+Total time spent: 12

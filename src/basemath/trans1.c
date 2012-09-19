@@ -1885,7 +1885,7 @@ serexp(GEN x, long prec)
   GEN p1,y,xd,yd;
 
   ex = valp(x);
-  if (ex < 0) pari_err_NEGVAL("gexp");
+  if (ex < 0) pari_err_DOMAIN("exp","valuation", "<", gen_0, x);
   if (gequal0(x)) return gaddsg(1,x);
   lx = lg(x);
   if (ex)
@@ -2648,7 +2648,8 @@ gcos(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepileupto(av, gaddsg(1,y));
-      if (valp(y) < 0) pari_err_NEGVAL("gcos");
+      if (valp(y) < 0)
+        pari_err_DOMAIN("cos","valuation", "<", gen_0, x);
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,v);
   }
@@ -2718,7 +2719,8 @@ gsin(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0) pari_err_NEGVAL("gsin");
+      if (valp(y) < 0)
+        pari_err_DOMAIN("sin","valuation", "<", gen_0, x);
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,u);
   }
@@ -2970,7 +2972,8 @@ gtan(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0) pari_err_NEGVAL("gtan");
+      if (valp(y) < 0)
+        pari_err_DOMAIN("tan","valuation", "<", gen_0, x);
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
   }
@@ -3023,7 +3026,7 @@ gcotan(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) pari_err_DOMAIN("cotan", "argument", "=", gen_0, y);
-      if (valp(y) < 0) pari_err_NEGVAL("cotan"); /* fall through */
+      if (valp(y) < 0) pari_err_DOMAIN("cotan","valuation", "<", gen_0, x);
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(c,s));
   }

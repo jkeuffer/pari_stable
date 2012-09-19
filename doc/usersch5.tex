@@ -8993,14 +8993,6 @@ inconsistent. E.g., considering the algebraic number
 @eprog\noindent prints the error message: \kbd{inconsistent moduli in $s$},
 then the moduli.
 
-\subsubsec{e\_NEGVAL} An argument of function $s$ is a power series with
-negative valuation, which does not make sense since the function is not
-analytic at infinity. (As in \kbd{cos(1/x)}.)
-\bprog
-  pari_err(e_NEGVAL, const char *s)
-  pari_err_NEGVAL(const char *s)
-@eprog\noindent prints the error message: \kbd{negative valuation in $s$}.
-
 \subsubsec{e\_PRIME} Function $s$ expected a prime number, and did receive $p$,
 which was not. (As in \kbd{idealprimedec(nf, 4)}.)
 \bprog
