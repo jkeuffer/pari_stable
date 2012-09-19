@@ -191,4 +191,22 @@
   ***   at top-level: polylog(2,1/x)
   ***                 ^--------------
   *** polylog: domain error in polylog: valuation < 0
+  ***   at top-level: sqrt(x)
+  ***                 ^-------
+  *** sqrt: domain error in sqrtn: valuation != Mod(0, 2)
+  ***   at top-level: sqrt(2+O(2^2))
+  ***                 ^--------------
+  *** sqrt: domain error in sqrt: valuation != Mod(0, 2)
+  ***   at top-level: sqrtn(x,3)
+  ***                 ^----------
+  *** sqrtn: domain error in sqrtn: valuation != Mod(0, 3)
+  ***   at top-level: sqrtn(2+O(2^2),3)
+  ***                 ^-----------------
+  *** sqrtn: not an n-th power residue in gsqrtn: 2 + O(2^2).
+  ***   at top-level: log(x)
+  ***                 ^------
+  *** log: domain error in log: series valuation != 0
+  ***   at top-level: log(0)
+  ***                 ^------
+  *** log: domain error in log: argument = 0
 Total time spent: 12

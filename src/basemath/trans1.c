@@ -966,7 +966,7 @@ ser_powfrac(GEN x, GEN q, long prec)
 
   if (!signe(x)) return zeroser(varn(x), val_from_i(gfloor(E)));
   if (typ(E) != t_INT)
-    pari_err(e_MISC,"%Ps should divide valuation (= %ld) in sqrtn",q[2], e);
+    pari_err_DOMAIN("sqrtn", "valuation", "!=", mkintmod(gen_0, gel(q,2)), x);
   e = val_from_i(E);
   y = leafcopy(x); setvalp(y, 0);
   y = ser_pow(y, q, prec);
@@ -1140,7 +1140,8 @@ Qp_sqrt(GEN x)
   GEN z,y,mod, p = gel(x,2);
 
   if (gequal0(x)) return zeropadic(p, (e+1) >> 1);
-  if (e & 1) pari_err(e_MISC,"odd valuation in p-adic sqrt");
+  if (e & 1)
+    pari_err_DOMAIN("sqrt", "valuation", "!=", mkintmod(gen_0, gen_2), x);
 
   y = cgetg(5,t_PADIC);
   pp = precp(x);
@@ -1233,7 +1234,8 @@ sqrt_ser(GEN b, long prec)
   if (!signe(b)) return zeroser(vx, e>>1);
   a = leafcopy(b);
   x = cgetg_copy(b, &lx);
-  if (e & 1) pari_err(e_MISC,"2 should divide valuation (= %ld) in sqrtn",e);
+  if (e & 1)
+    pari_err_DOMAIN("sqrtn", "valuation", "!=", mkintmod(gen_0, gen_2), x);
   a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
   if (gissquareall(gel(a,2), &gel(x,2)) == gen_0)
     gel(x,2) = gsqrt(gel(a,2), prec);
@@ -2423,7 +2425,7 @@ glog(GEN x, long prec)
     case t_REAL:
       if (signe(x) >= 0)
       {
-        if (!signe(x)) pari_err_DOMAIN("mplog", "argument", "=", gen_0, x);
+        if (!signe(x)) pari_err_DOMAIN("log", "argument", "=", gen_0, x);
         return logr_abs(x);
       }
       y = cgetg(3,t_COMPLEX);
@@ -2445,7 +2447,8 @@ glog(GEN x, long prec)
     case t_INTMOD: pari_err_TYPE("glog",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) || gequal0(y)) pari_err(e_MISC,"log is not meromorphic at 0");
+      if (gequal0(y)) pari_err_DOMAIN("log", "argument", "=", gen_0, x);
+      if (valp(y)) pari_err_DOMAIN("log", "series valuation", "!=", gen_0, x);
       p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
       if (!gequal1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
       return gerepileupto(av, p1);
@@ -2870,7 +2873,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       if (gequal0(y)) { *s = gerepilecopy(av,y); *c = gaddsg(1,*s); return; }
 
       ex = valp(y); lx = lg(y); ex2 = 2*ex+2;
-      if (ex < 0) pari_err(e_MISC,"non zero exponent in gsincos");
+      if (ex < 0) pari_err_DOMAIN("gsincos","valuation", "<", gen_0, x);
       if (ex2 > lx)
       {
         *s = x == y? gcopy(y): gerepilecopy(av, y); av = avma;
