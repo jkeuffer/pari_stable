@@ -129,3 +129,4 @@ idealhnf(K, Qfb(1,1,1))
 idealfactor(K, [;])
 idealval(K, [;], idealprimedec(K,2)[1]);
 idealdiv(K,2,0, 1);
+valuation(Pi,2)

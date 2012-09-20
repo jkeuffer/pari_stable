@@ -1094,11 +1094,11 @@ gvaluation(GEN x, GEN p)
   {
     case t_INT:
       if (signe(p) && !is_pm1(p)) break;
-      pari_err(e_MISC, "forbidden divisor %Ps in gvaluation", p);
+      pari_err_DOMAIN("gvaluation", "p", "=", p, p);
     case t_POL:
       if (degpol(p) > 0) break;
     default:
-      pari_err(e_MISC, "forbidden divisor %Ps in gvaluation", p);
+      pari_err_DOMAIN("gvaluation", "p", "=", p, p);
   }
 
   switch(tx)
@@ -1182,7 +1182,7 @@ gvaluation(GEN x, GEN p)
         if (vp == vx)
         {
           long val = RgX_val(p);
-          if (!val) pari_err(e_MISC, "forbidden divisor %Ps in gvaluation", p);
+          if (!val) pari_err_DOMAIN("gvaluation", "p", "=", p, p);
           return (long)(valp(x) / val);
         }
         if (varncmp(vx, vp) > 0) return 0;
@@ -1196,7 +1196,7 @@ gvaluation(GEN x, GEN p)
     case t_COMPLEX: case t_QUAD: case t_VEC: case t_COL: case t_MAT:
       return minval(x,p);
   }
-  pari_err(e_MISC,"forbidden or conflicting type in gval");
+  pari_err_OP("valuation", x,p);
   return 0; /* not reached */
 }
 

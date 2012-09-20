@@ -224,8 +224,7 @@ rfrac_denom_mul_scal(GEN d, GEN y)
   if (lg(D) != lg(d))
   { /* try to generate a meaningful diagnostic */
     D = gdiv(leading_term(d), y); /* should fail */
-    /* better than nothing */
-    pari_err(e_MISC,"%Ps is not invertible in gred_rfrac()", y);
+    pari_err_INV("gred_rfrac", y); /* better than nothing */
   }
   return D;
 }
@@ -331,7 +330,7 @@ gred_rfrac2_i(GEN n, GEN d)
   {
     if (varncmp(vd, gvar(n)) >= 0) return gdiv(n,d);
     if (varncmp(vd, gvar2(n)) < 0) return gred_rfrac_simple(n,d);
-    pari_err(e_MISC,"incompatible variables in gred");
+    pari_err_BUG("gred_rfrac2_i [incompatible variables]");
   }
   vn = varn(n);
   if (varncmp(vd, vn) < 0) return gred_rfrac_simple(n,d);
@@ -505,8 +504,7 @@ conjvec(GEN x,long prec)
       for (i=2; i<lx; i++)
       {
         gel(z,i) = conjvec(gel(x,i),prec);
-        if (lg(gel(z,i)) != s)
-          pari_err(e_MISC,"incompatible field degrees in conjvec");
+        if (lg(gel(z,i)) != s) pari_err_OP("conjvec", gel(z,1), gel(z,i));
       }
       break;
 
@@ -3266,7 +3264,7 @@ ginv(GEN x)
       {
         long xi = x[i];
         if (xi<1 || xi>lx || y[xi])
-          pari_err(e_MISC,"incorrect permutation to inverse");
+          pari_err_TYPE("ginv [not a permutation]", x);
         y[xi] = i;
       }
       return y;

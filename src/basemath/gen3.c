@@ -231,8 +231,7 @@ padicprec(GEN x, GEN p)
       return Z_pval(gel(x,1),p);
 
     case t_PADIC:
-      if (!equalii(gel(x,2),p))
-        pari_err(e_MISC,"not the same prime in padicprec");
+      if (!equalii(gel(x,2),p)) pari_err_MODULUS("padicprec", gel(x,2), p);
       return precp(x)+valp(x);
 
     case t_POL: case t_SER:
@@ -1169,7 +1168,7 @@ gdeflate(GEN x, long v, long d)
   long i, lx, tx = typ(x);
   GEN z;
   if (is_scalar_t(tx)) return gcopy(x);
-  if (d <= 0) pari_err(e_MISC,"need positive degree in gdeflate");
+  if (d <= 0) pari_err_DOMAIN("gdeflate", "degree", "<=", gen_0,stoi(d));
   if (tx == t_POL || tx == t_SER)
   {
     long vx = varn(x);
@@ -1273,10 +1272,10 @@ gsubst(GEN x, long v, GEN y)
     case t_MAT:
       if (ly==1) return cgetg(1,t_MAT);
       if (ly != lgcols(y))
-        pari_err(e_MISC,"forbidden substitution by a non square matrix");
+        pari_err_TYPE2("substitution",x,y);
       break;
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
-      pari_err(e_MISC,"forbidden substitution by a vector");
+      pari_err_TYPE2("substitution",x,y);
       break; /* not reached */
   }
 
@@ -1290,8 +1289,7 @@ gsubst(GEN x, long v, GEN y)
     av=avma;
     p1=gsubst(gel(x,1),v,y); vx=varn(p1);
     p2=gsubst(gel(x,2),v,y); vy=gvar(p2);
-    if (typ(p1)!=t_POL)
-      pari_err(e_MISC,"forbidden substitution in a scalar type");
+    if (typ(p1)!=t_POL) pari_err_TYPE2("substitution",x,y);
     if (varncmp(vy, vx) >= 0) return gerepileupto(av, gmodulo(p2,p1));
     modp1 = mkpolmod(gen_1,p1);
     lx = lg(p2);
@@ -1412,13 +1410,12 @@ gsubst(GEN x, long v, GEN y)
         case t_RFRAC:
           vy = gvar(y); e = gval(y,vy);
           if (e <= 0)
-            pari_err(e_MISC,"non positive valuation in a series substitution");
+            pari_err_DOMAIN("gsubst [t_SER]","valuation(y)", "<=", gen_0,y);
           av = avma; p1 = poleval(ser2pol_i(x, lg(x)), y);
           z = gmul(gpowgs(y,ex), gadd(p1, zeroser(vy, e*(lx-2))));
           return gerepileupto(av, z);
 
-        default:
-          pari_err(e_MISC,"non polynomial or series type substituted in a series");
+        default: pari_err_TYPE2("substitution",x,y);
       }
       break;
 
@@ -1453,7 +1450,7 @@ gsubstvec(GEN e, GEN v, GEN r)
   for(i=j=1;i<l;i++)
   {
     GEN T = gel(v,i), ri = gel(r,i);
-    if (!gcmpX(T)) pari_err(e_MISC,"not a variable in substvec (%Ps)", T);
+    if (!gcmpX(T)) pari_err_TYPE("substvec [not a variable]", T);
     if (gvar(ri) == NO_VARIABLE) /* no need to take precautions */
       e = gsubst(e, varn(T), ri);
     else
@@ -1484,8 +1481,8 @@ recip(GEN x)
   GEN p1, a, y, u;
 
   if (typ(x)!=t_SER) pari_err_TYPE("serreverse",x);
-  if (valp(x)!=1 || lx < 3)
-    pari_err(e_MISC,"valuation not equal to 1 in serreverse");
+  if (valp(x)!=1) pari_err_DOMAIN("serreverse", "valuation", "!=", gen_1,x);
+  if (lx < 3) pari_err_DOMAIN("serreverse", "x", "=", gen_0,x);
 
   a=gel(x,2);
   if (gequal1(a))
@@ -1764,20 +1761,20 @@ ggrando(GEN x, long n)
 
   switch(typ(x))
   {
-  case t_INT:/* bug 3 + O(1). We suppose x is a truc() */
-    if (signe(x) <= 0) pari_err(e_MISC,"non-positive argument in O()");
+  case t_INT:/* bug 3 + O(1) */
+    if (signe(x) <= 0) pari_err_DOMAIN("O", "x", "<=", gen_0, x);
     if (!is_pm1(x)) return zeropadic(x,n);
     /* +/-1 = x^0 */
     v = m = 0; break;
   case t_POL:
-    if (!signe(x)) pari_err(e_MISC,"zero argument in O()");
-    v = varn(x); if ((ulong)v > MAXVARN) pari_err(e_MISC,"incorrect object in O()");
+    if (!signe(x)) pari_err_DOMAIN("O", "x", "=", gen_0, x);
+    v = varn(x);
     m = n * RgX_val(x); break;
   case t_RFRAC:
-    if (!gequal0(gel(x,1))) pari_err(e_MISC,"zero argument in O()");
-    v = gvar(x); if ((ulong)v > MAXVARN) pari_err(e_MISC,"incorrect object in O()");
+    if (!gequal0(gel(x,1))) pari_err_DOMAIN("O", "x", "=", gen_0, x);
+    v = gvar(x);
     m = n * gval(x,v); break;
-    default: pari_err(e_MISC,"incorrect argument in O()");
+    default:  pari_err_TYPE("O", x);
       v = m = 0; /* not reached */
   }
   return zeroser(v,m);
@@ -2520,7 +2517,7 @@ _gtopoly(GEN x, long v, int reverse)
         pari_err(e_PRIORITY,"gtopoly", x, "<", v);
       y = ser2rfrac(x);
       if (typ(y) != t_POL)
-        pari_err(e_MISC,"t_SER with negative valuation in gtopoly");
+        pari_err_DOMAIN("gtopoly", "valuation", "<", gen_0, x);
       break;
     case t_RFRAC:
       if (varncmp(varn(gel(x,2)), v) < 0)
