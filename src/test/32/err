@@ -209,4 +209,33 @@
   ***   at top-level: log(0)
   ***                 ^------
   *** log: domain error in log: argument = 0
-Total time spent: 12
+  ***   at top-level: abs(x+O(x^2))
+  ***                 ^-------------
+  *** abs: domain error in abs: series valuation != 0
+  ***   at top-level: vecmax([])
+  ***                 ^----------
+  *** vecmax: domain error in vecindexmax: empty argument = []
+  ***   at top-level: vecmax([],&i)
+  ***                 ^-------------
+  *** vecmax: domain error in vecindexmax: empty argument = []
+  ***   at top-level: vecmin([])
+  ***                 ^----------
+  *** vecmin: domain error in vecindexmin: empty argument = []
+  ***   unexpected character '&': vecmmin([],&i)
+  ***                                        ^---
+  ***   at top-level: vecmax(matrix(0,2))
+  ***                 ^-------------------
+  *** vecmax: domain error in vecmax: empty argument = matrix(0,2)
+  ***   at top-level: listput(L,x,-1)
+  ***                 ^---------------
+  *** listput: domain error in listput: index < 0
+  ***   at top-level: listinsert(L,x,-1)
+  ***                 ^------------------
+  *** listinsert: domain error in listinsert: index <= 0
+  ***   at top-level: listinsert(L,x,10)
+  ***                 ^------------------
+  *** listinsert: domain error in listinsert: index > 1
+  ***   at top-level: listpop(L)
+  ***                 ^----------
+  *** listpop: domain error in listpop: list = List([])
+Total time spent: 4

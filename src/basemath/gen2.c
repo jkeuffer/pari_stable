@@ -194,7 +194,7 @@ greffe_aux(GEN x, long l, long lx, long v)
 {
   GEN y = cgetg(l,t_SER);
   long i;
-  if (l <= 2) pari_err(e_MISC, "l <= 2 in RgX_to_ser");
+  if (l <= 2) pari_err_BUG("RgX_to_ser (l <= 2)");
   y[1] = x[1]; setvalp(y, v);
   x += v; lx -= v;
   if (lx > l) {
@@ -1294,7 +1294,7 @@ Z_lval(GEN x, ulong p)
     if (r) break;
     vx++; x = q;
     if (vx == VAL_DC_THRESHOLD) {
-      if (p == 1) pari_err(e_MISC, "p = 1 in Z_lvalrem");
+      if (p == 1) pari_err_DOMAIN("Z_lval", "p", "=", gen_1, gen_1);
       vx += Z_pvalrem_DC(x, sqru(p), &x) << 1;
       q = diviu_rem(x, p, &r); if (!r) vx++;
       break;
@@ -1323,7 +1323,7 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
     if (r) break;
     vx++; x = q;
     if (vx == VAL_DC_THRESHOLD) {
-      if (p == 1) pari_err(e_MISC, "p = 1 in Z_lvalrem");
+      if (p == 1) pari_err_DOMAIN("Z_lvalrem", "p", "=", gen_1, gen_1);
       vx += Z_pvalrem_DC(x, sqru(p), &x) << 1;
       q = diviu_rem(x, p, &r); if (!r) { vx++; x = q; }
       break;
@@ -1574,7 +1574,7 @@ gen_pval(GEN x, GEN p, long imin)
   {
     if (v == VAL_DC_THRESHOLD)
     {
-      if (is_pm1(p)) pari_err(e_MISC, "p = 1 in gen_pvalrem");
+      if (is_pm1(p)) pari_err_DOMAIN("gen_pval", "p", "=", p, p);
       v += gen_pvalrem_DC(y, p, &y, imin);
       avma = av; return v;
     }
@@ -1624,7 +1624,7 @@ gen_lvalrem(GEN x, ulong p, GEN *px, long imin)
   {
     if (v == VAL_DC_THRESHOLD)
     {
-      if (p == 1) pari_err(e_MISC, "p = 1 in gen_lvalrem");
+      if (p == 1) pari_err_DOMAIN("gen_lvalrem", "p", "=", gen_1, gen_1);
       v += gen_pvalrem_DC(x, sqru(p), px, imin) << 1;
       x = gen_z_divides(*px, p, imin);
       if (x) { *px = x; v++; }
@@ -1658,7 +1658,7 @@ gen_pvalrem(GEN x, GEN p, GEN *px, long imin)
   {
     if (v == VAL_DC_THRESHOLD)
     {
-      if (is_pm1(p)) pari_err(e_MISC, "p = 1 in gen_pvalrem");
+      if (is_pm1(p)) pari_err_DOMAIN("gen_pvalrem", "p", "=", p, p);
       return v + gen_pvalrem_DC(x, p, px, imin);
     }
 
@@ -1877,8 +1877,8 @@ gabs(GEN x, long prec)
       return is_negative(gel(x,lx-1))? gneg(x): gcopy(x);
 
     case t_SER:
-     if (valp(x) || !signe(x))
-       pari_err(e_MISC, "abs is not meromorphic at 0");
+     if (!signe(x)) pari_err_DOMAIN("abs", "argument", "=", gen_0, x);
+     if (valp(x)) pari_err_DOMAIN("abs", "series valuation", "!=", gen_0, x);
      return is_negative(gel(x,2))? gneg(x): gcopy(x);
 
     case t_VEC: case t_COL: case t_MAT:
@@ -1906,7 +1906,7 @@ vecindexmax(GEN x)
   long lx = lg(x), i0, i;
   GEN s;
 
-  if (lx==1) pari_err(e_MISC, "empty vector in vecindexmax");
+  if (lx==1) pari_err_DOMAIN("vecindexmax", "empty argument", "=", x,x);
   switch(typ(x))
   {
     case t_VEC: case t_COL:
@@ -1927,7 +1927,7 @@ vecindexmin(GEN x)
   long lx = lg(x), i0, i;
   GEN s;
 
-  if (lx==1) pari_err(e_MISC, "empty vector in vecindexmin");
+  if (lx==1) pari_err_DOMAIN("vecindexmin", "empty argument", "=", x,x);
   switch(typ(x))
   {
     case t_VEC: case t_COL:
@@ -1959,7 +1959,7 @@ vecmax0(GEN x, GEN *pi)
       long lx2, lx = lg(x);
       if (lx==1 || (lx2 = lgcols(x)) == 1)
       {
-        pari_err(e_MISC, "empty vector in vecmax");
+        pari_err_DOMAIN("vecmax", "empty argument", "=", x,x);
         return NULL;/*not reached*/
       }
       s = gcoeff(x,i0=1,j0=1); i = 2;
@@ -1995,7 +1995,7 @@ vecmin0(GEN x, GEN *pi)
       long lx2, lx = lg(x);
       if (lx==1 || (lx2 = lgcols(x)) == 1)
       {
-        pari_err(e_MISC, "empty vector in vecmin");
+        pari_err_DOMAIN("vecmin", "empty argument", "=", x,x);
         return NULL;/*not reached*/
       }
       s = gcoeff(x,i0=1,j0=1); i = 2;
@@ -2620,7 +2620,7 @@ listput(GEN L, GEN x, long index)
   GEN z;
 
   if (typ(L) != t_LIST) pari_err_TYPE("listput",L);
-  if (index < 0) pari_err(e_MISC,"negative index (%ld) in listput", index);
+  if (index < 0) pari_err_DOMAIN("listput", "index", "<", gen_0, stoi(index));
   z = list_data(L);
   l = z? lg(z): 1;
 
@@ -2643,9 +2643,11 @@ listinsert(GEN L, GEN x, long index)
   GEN z;
 
   if (typ(L) != t_LIST) pari_err_TYPE("listinsert",L);
-
   z = list_data(L); l = z? lg(z): 1;
-  if (index <= 0 || index > l) pari_err(e_MISC,"bad index in listinsert");
+  if (index <= 0)
+    pari_err_DOMAIN("listinsert", "index", "<=", gen_0, stoi(index));
+  if (index > l)
+    pari_err_DOMAIN("listinsert", "index", ">", stoi(l), stoi(index));
   ensure_nb(L, l);
   z = list_data(L);
   for (i=l; i > index; i--) gel(z,i) = gel(z,i-1);
@@ -2660,12 +2662,10 @@ listpop(GEN L, long index)
   GEN z;
 
   if (typ(L) != t_LIST) pari_err_TYPE("listinsert",L);
-
-  if (index < 0) pari_err(e_MISC,"negative index (%ld) in listpop", index);
+  if (index < 0)
+    pari_err_DOMAIN("listpop", "index", "<", gen_0, stoi(index));
   z = list_data(L);
-  if (!z) pari_err(e_MISC,"empty list in listpop");
-  l = lg(z)-1;
-  if (!l) pari_err(e_MISC,"empty list in listpop");
+  if (!z || (l = lg(z)-1) == 0) pari_err_DOMAIN("listpop", "list", "=", L,L);
 
   if (!index || index > l) index = l;
   gunclone_deep( gel(z, index) );

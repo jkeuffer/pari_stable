@@ -2447,7 +2447,7 @@ glog(GEN x, long prec)
     case t_INTMOD: pari_err_TYPE("glog",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gequal0(y)) pari_err_DOMAIN("log", "argument", "=", gen_0, x);
+      if (!signe(y)) pari_err_DOMAIN("log", "argument", "=", gen_0, x);
       if (valp(y)) pari_err_DOMAIN("log", "series valuation", "!=", gen_0, x);
       p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
       if (!gequal1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
