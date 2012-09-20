@@ -2624,9 +2624,9 @@ nfhnf(GEN nf, GEN x)
   nf = checknf(nf);
   check_ZKmodule(x, "nfhnf");
   A = gel(x,1);
-  I = gel(x,2); k = lg(A)-1;
-  if (!k || k < (m=nbrows(A)))
-    pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
+  I = gel(x,2);
+  RgM_dimensions(A, &m, &k);
+  if (!k || k < m) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
 
   av = avma; lim = stack_lim(av, 2);
   A = RgM_to_nfM(nf,A);
@@ -2709,8 +2709,8 @@ nfsnf(GEN nf, GEN x)
   if (typ(I)!=t_VEC) pari_err_TYPE("nfsnf",I);
   if (typ(J)!=t_VEC) pari_err_TYPE("nfsnf",J);
   if (lg(I)!=n+1 || lg(J)!=n+1) pari_err_DIM("nfsnf");
-  if (!n || n < (m=nbrows(A)))
-    pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
+  RgM_dimensions(A, &m, &n);
+  if (!n || n < m) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
   if (n > m) pari_err_IMPL("nfsnf for non square matrices");
 
   av = avma; lim = stack_lim(av,1);

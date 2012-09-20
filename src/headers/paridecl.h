@@ -3381,6 +3381,7 @@ INLINE GEN    Q_abs(GEN x);
 INLINE int    QV_isscalar(GEN x);
 INLINE GEN    RgC_fpnorml2(GEN x, long prec);
 INLINE GEN    RgC_gtofp(GEN x, long prec);
+INLINE void   RgM_dimensions(GEN x, long *m, long *n);
 INLINE GEN    RgM_fpnorml2(GEN x, long prec);
 INLINE GEN    RgM_gtofp(GEN x, long prec);
 INLINE GEN    RgM_inv(GEN a);

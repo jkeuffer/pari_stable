@@ -5684,6 +5684,9 @@ are equal and $0$ otherwise.
 of the same dimension. \kbd{RgM} assume the inputs are \kbd{MAT} of
 compatible dimensions.
 
+\fun{void}{RgM_dimensions}{GEN}{x, long *m, long *n} sets $m$, resp.~$n$, to
+the number of rows, resp.~columns of the \typ{MAT} $x$.
+
 \fun{GEN}{RgC_add}{GEN x, GEN y} returns $x + y$ as a \typ{COL}.
 
 \fun{GEN}{RgC_neg}{GEN x} returns $-x$ as a \typ{COL}.

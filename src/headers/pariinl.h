@@ -1809,6 +1809,8 @@ INLINE GEN
 ZM_hnfrem(GEN x, GEN y) { return ZM_hnfremdiv(x,y,NULL); }
 INLINE GEN
 ZM_lll(GEN x, double D, long f) { return ZM_lll_norms(x,D,f,NULL); }
+INLINE void
+RgM_dimensions(GEN x, long *m, long *n) { *n = lg(x)-1; *m = *n? nbrows(x): 0; }
 INLINE GEN
 RgM_inv(GEN a) { return RgM_solve(a, NULL); }
 INLINE GEN

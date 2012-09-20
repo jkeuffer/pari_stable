@@ -333,6 +333,7 @@ BA 103- GP function ellfromj
    103- GP function forcomposite
    104- new error class e_PRIORITY [ pari_err() ]
 BA 105- Add black box algebra for Brent and Kung algorithm
+   106- PARI function RgM_dimensions()
 
   Removed
     1- dropped DOS support
