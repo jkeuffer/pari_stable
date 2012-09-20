@@ -256,4 +256,13 @@
   ***   at top-level: eta(1/x)
   ***                 ^--------
   *** eta: domain error in eta: v_p(q) <= 0
-Total time spent: 16
+  ***   at top-level: idealhnf(K,Qfb(1,1,1
+  ***                 ^--------------------
+  *** idealhnf: domain error in idealhnf [Qfb]: disc(q) != -4
+  ***   at top-level: idealfactor(K,[;])
+  ***                 ^------------------
+  *** idealfactor: domain error in idealfactor: ideal = 0
+  ***   at top-level: idealdiv(K,2,0,1)
+  ***                 ^-----------------
+  *** idealdiv: impossible inverse in idealdivexact: 0.
+Total time spent: 20

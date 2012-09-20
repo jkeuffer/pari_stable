@@ -153,7 +153,7 @@ idealhnf_shallow(GEN nf, GEN x)
       if (N != 2)
         pari_err_TYPE("idealhnf [Qfb for non-quadratic fields]", x);
       if (!equalii(qfb_disc(x), D))
-        pari_err(e_MISC,"%Ps has discriminant != %Ps in idealhnf", x, D);
+        pari_err_DOMAIN("idealhnf [Qfb]", "disc(q)", "!=", D, x);
       /* x -> A Z + (-B + sqrt(D)) / 2 Z
          K = Q[t]/T(t), t^2 + ut + v = 0,  u^2 - 4v = Df^2
          => t = (-u + sqrt(D) f)/2
@@ -577,12 +577,13 @@ idealfactor(GEN nf, GEN x)
   }
   if (tx == id_PRINCIPAL)
   {
-    x = nf_to_scalar_or_basis(nf, x);
-    if (typ(x) != t_COL)
+    y = nf_to_scalar_or_basis(nf, x);
+    if (typ(y) != t_COL)
     {
       GEN c1, c2;
       long lfa, i,j;
-      f = factor(Q_abs(x));
+      if (isintzero(y)) pari_err_DOMAIN("idealfactor", "ideal", "=",gen_0,x);
+      f = factor(Q_abs(y));
       c1 = gel(f,1); lfa = lg(c1);
       if (lfa == 1) { avma = av; return trivial_fact(); }
       c2 = gel(f,2);
@@ -603,12 +604,12 @@ idealfactor(GEN nf, GEN x)
       gel(f,2) = c2; return gerepilecopy(av, f);
     }
   }
-  x = idealnumden(nf, x);
-  if (isintzero(gel(x,1))) pari_err(e_MISC,"zero ideal in idealfactor");
-  fa = idealfactor_HNF(nf, gel(x,1));
-  if (!isint1(gel(x,2)))
+  y = idealnumden(nf, x);
+  if (isintzero(gel(y,1))) pari_err_DOMAIN("idealfactor", "ideal", "=",gen_0,x);
+  fa = idealfactor_HNF(nf, gel(y,1));
+  if (!isint1(gel(y,2)))
   {
-    GEN fa2 = idealfactor_HNF(nf, gel(x,2));
+    GEN fa2 = idealfactor_HNF(nf, gel(y,2));
     fa2 = famat_inv_shallow(fa2);
     fa = famat_mul_shallow(fa, fa2);
   }
@@ -637,7 +638,7 @@ idealval(GEN nf, GEN ix, GEN P)
   }
   /* id_MAT */
   nf = checknf(nf);
-  N = lg(ix)-1; if (!N) pari_err(e_MISC,"zero ideal in idealval");
+  N = nf_get_degree(nf);
   ix = Q_primitive_part(ix, &cx);
   f = pr_get_f(P);
   if (f == N) { v = cx? Q_pval(cx,p): 0; avma = av; return v; }
@@ -1826,7 +1827,7 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   nf = checknf(nf);
   x = idealhnf_shallow(nf, x0);
   y = idealhnf_shallow(nf, y0);
-  if (lg(y) == 1) pari_err(e_MISC, "cannot invert zero ideal");
+  if (lg(y) == 1) pari_err_INV("idealdivexact", y0);
   if (lg(x) == 1) { avma = av; return cgetg(1, t_MAT); } /* numerator is zero */
   y = Q_primitive_part(y, &cy);
   if (cy) x = RgM_Rg_div(x,cy);
@@ -2624,9 +2625,8 @@ nfhnf(GEN nf, GEN x)
   check_ZKmodule(x, "nfhnf");
   A = gel(x,1);
   I = gel(x,2); k = lg(A)-1;
-  if (!k) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
-  m = nbrows(A);
-  if (k < m) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
+  if (!k || k < (m=nbrows(A)))
+    pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
 
   av = avma; lim = stack_lim(av, 2);
   A = RgM_to_nfM(nf,A);
@@ -2709,9 +2709,8 @@ nfsnf(GEN nf, GEN x)
   if (typ(I)!=t_VEC) pari_err_TYPE("nfsnf",I);
   if (typ(J)!=t_VEC) pari_err_TYPE("nfsnf",J);
   if (lg(I)!=n+1 || lg(J)!=n+1) pari_err_DIM("nfsnf");
-  if (!n) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
-  m = nbrows(A);
-  if (n < m) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
+  if (!n || n < (m=nbrows(A)))
+    pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
   if (n > m) pari_err_IMPL("nfsnf for non square matrices");
 
   av = avma; lim = stack_lim(av,1);

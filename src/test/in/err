@@ -124,3 +124,8 @@ ellj(Mod(1,2))
 ellj(Qfb(1,1,1))
 eta(1+O(2))
 eta(1/x)
+K = nfinit(x^2+1);
+idealhnf(K, Qfb(1,1,1))
+idealfactor(K, [;])
+idealval(K, [;], idealprimedec(K,2)[1]);
+idealdiv(K,2,0, 1);
