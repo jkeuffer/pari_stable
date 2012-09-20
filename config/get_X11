@@ -9,7 +9,7 @@ cd ..; rm -rf $tdir
 # Check xmkmf answer
 # X11 -- Headers
 if test ! -f $Xincroot/X11/Xos.h; then
-  x11pth="\
+  x11pth="$addlib64\
     /usr/openwin/share/lib\
     /usr/openwin/lib\
     /usr/X11R6/lib       /usr/X11R5/lib       /usr/X11R4/lib\
