@@ -481,7 +481,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
         return gerepilecopy(av, _kbessel1(k,y,flag+2,lg(y)-2,prec));
       }
       if (!issmall(gmul2n(n,1),&ki))
-        pari_err(e_MISC,"cannot give a power series result in k/n bessel function");
+        pari_err_DOMAIN(flag? "besseln": "besselk", "2n mod Z", "!=", gen_0,n);
       k = labs(ki); n = gmul2n(stoi(k),-1);
       fl2 = (k&3)==1;
       pm = jbesselintern(gneg(n),y,flag,prec);
@@ -1883,8 +1883,7 @@ zetap(GEN s)
   pari_sp av = avma;
   GEN gp, q, vz, is, cff, val, va, cft;
 
-  if (valp(s) < 0)
-    pari_err(e_MISC, "argument must be a p-adic integer");
+  if (valp(s) < 0) pari_err_DOMAIN("zetap", "v_p(s)", "<", gen_0, s);
   if (!prec) prec = 1;
 
   gp = gel(s,2); p = itou(gp);
@@ -2336,8 +2335,15 @@ upper_half(GEN x, long *prec)
 {
   long tx = typ(x), l;
   if (tx == t_QUAD) { x = quadtofp(x, *prec); tx = typ(x); }
-  if (tx != t_COMPLEX || gsigne(gel(x,2)) <= 0)
-    pari_err_DOMAIN("modular function", "Im(argument)", "<=", gen_0, x);
+  switch(tx)
+  {
+    case t_COMPLEX:
+      if (gsigne(gel(x,2)) > 0) break; /*fall through*/
+    case t_REAL: case t_INT: case t_FRAC:
+      pari_err_DOMAIN("modular function", "Im(argument)", "<=", gen_0, x);
+    default:
+      pari_err_TYPE("modular function", x);
+  }
   l = precision(x); if (l) *prec = l;
   return x;
 }
@@ -2422,6 +2428,7 @@ static GEN
 qq(GEN x, long prec)
 {
   long tx = typ(x);
+  GEN y;
 
   if (is_scalar_t(tx))
   {
@@ -2429,8 +2436,8 @@ qq(GEN x, long prec)
     x = upper_half(x, &prec);
     return exp_IPiC(gmul2n(x,1), prec); /* e(x) */
   }
-  if (! ( x = toser_i(x)) ) pari_err(e_MISC,"bad argument for modular function");
-  return x;
+  if (! ( y = toser_i(x)) ) pari_err_TYPE("modular function", x);
+  return y;
 }
 
 /* return (y * X^d) + x. Assume d > 0, x != 0, valp(x) = 0 */
@@ -2502,7 +2509,7 @@ inteta(GEN q)
   y = gen_1; qn = gen_1; ps = gen_1;
   if (tx==t_PADIC)
   {
-    if (valp(q) <= 0) pari_err(e_MISC,"non-positive valuation in eta");
+    if (valp(q) <= 0) pari_err_DOMAIN("eta", "v_p(q)", "<=",gen_0,q);
     for(;;)
     {
       GEN t = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -2519,7 +2526,7 @@ inteta(GEN q)
     pari_sp av, lim;
 
     v = valp(q); /* handle valuation separately to avoid overflow */
-    if (v <= 0) pari_err(e_MISC,"non-positive valuation in eta");
+    if (v <= 0) pari_err_DOMAIN("eta", "v_p(q)", "<=",gen_0,q);
     y = ser2pol_i(q, l); /* t_SER inefficient when input has low degree */
     n = degpol(y);
     if (n == 1 || n < (l>>2)) return inteta_pol(y, v, l);
@@ -2555,12 +2562,10 @@ inteta(GEN q)
     long l; /* gcc -Wall */
     pari_sp av = avma, lim = stack_lim(av, 3);
 
-    if (is_scalar_t(tx)) l = -prec2nbits(precision(q));
+    if (tx == t_SER)
+      l = lg(q)-2;
     else
-    {
-      l = lg(q)-2; tx = 0;
-      if (valp(q) <= 0) pari_err(e_MISC,"non-positive valuation in eta");
-    }
+      l = -prec2nbits(precision(q));
     for(;;)
     {
       GEN t = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -2569,10 +2574,10 @@ inteta(GEN q)
        * t = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
       y = gadd(y,t); qn = gmul(qn,q); ps = gmul(t,qn);
       y = gadd(y,ps);
-      if (tx)
-        { if (gexpo(ps)-gexpo(y) < l) return y; }
-      else
+      if (tx == t_SER)
         { if (valp(ps) >= l) return y; }
+      else
+        { if (gexpo(ps)-gexpo(y) < l) return y; }
       if (low_stack(lim, stack_lim(av,3)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"eta");
