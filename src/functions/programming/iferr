@@ -11,19 +11,19 @@ Help: iferr(seq1,E,seq2): evaluates the expression sequence seq1. If
 Doc: evaluates the expression sequence \var{seq1}. If an error occurs,
  \var{seq2} is evaluated with the formal parameter \var{E} set to the error
  data. The error type is given by \kbd{errname(E)}, and other data can be
- accessed using the \tet{component} function (see the documentation if
- \kbd{iferrname} below). The code \var{seq2} should check whether the error is
+ accessed using the \tet{component} function (see the documentation of
+ \tet{iferrname}). The code \var{seq2} should check whether the error is
  the one expected. In the negative the error can be rethrown using
  \tet{error(E)} (and possibly caught by an higher \kbd{iferr} instance). The
  following uses \kbd{iferr} to implement Lenstra's ECM factoring method
  (however see \tet{iferrname} for a simpler implementation).
  \bprog
  ? ecm(N, B = 1000!, nb = 100)=
-   {
+   { my(T);
      for(a = 1, nb,
        iferr(ellmul(ellinit([a,1]*Mod(1,N)), [0,1]*Mod(1,N), B),
-         E, if(errname(E)=="e_INV",
-              return(gcd(lift(component(E,1)),N)),
+         E, if(errname(E)=="e_INV" && type( T=component(E,2) ) == "t_INTMOD",
+              return(gcd(lift(T),N)),
               error(E))));
    }
  ? ecm(2^101-1)
