@@ -2235,17 +2235,16 @@ the problem.
 A slightly different situation, still related to error recovery, is when you
 actually foresee that some error may occur, are unable to prevent it, but
 quite capable of recovering from it, given the chance. Examples include lazy
-factorization (cf.~\tet{addpseudoprimes}), where you knowingly use a pseudo
-prime $N$ as if it were prime; you may then encounter an ``impossible''
-situation, but this would usually exhibit a factor of $N$, enabling you to
-refine the
-factorization and go on. Or you might run an expensive computation at low
-precision to guess the size of the output, hence the right precision to use.
-You can then encounter errors like ``precision loss in truncation'', e.g when
-trying to convert \kbd{1E1000}, known to $28$ digits of accuracy, to an
-integer; or ``division by 0'', e.g inverting \kbd{0E1000} when all accuracy
-has been lost, and no significant digit remains. It would be enough to
-restart part of the computation at a slightly higher precision.
+factorization, where you knowingly use a pseudo prime $N$ as if it were
+prime; you may then encounter an ``impossible'' situation, but this would
+usually exhibit a factor of $N$, enabling you to refine the factorization and
+go on. Or you might run an expensive computation at low precision to guess
+the size of the output, hence the right precision to use. You can then
+encounter errors like ``precision loss in truncation'', e.g when trying to
+convert \kbd{1E1000}, known to $28$ digits of accuracy, to an integer; or
+``division by 0'', e.g inverting \kbd{0E1000} when all accuracy has been
+lost, and no significant digit remains. It would be enough to restart part of
+the computation at a slightly higher precision.
 
 We now describe \tev{error trapping}, a useful mechanism which alleviates
 much of the pain in the first situation (the break loop debugger), and

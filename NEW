@@ -156,8 +156,7 @@ for the full list.
     assigning the closure f to the first entry of vector v.
 
   - private "prime table" (addprimes) must now contain primes only: its
-    entries are now used in all arithmetic functions [new function
-    addpseudoprimes to cover old usage: in factorint() only]
+    entries are now used in all arithmetic functions
 
   - The pseudo-random number generator has been changed. The old linear
     congruential generator has been replaced by Brent's XORGEN, which uses
