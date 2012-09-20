@@ -2495,25 +2495,26 @@ static GEN
 fix_pol(GEN x, long v, long *mx)
 {
   long vx;
-  GEN p1;
-
-  if (typ(x) == t_POL)
+  if (typ(x) != t_POL) return x;
+  vx = varn(x);
+  if (v == vx)
   {
-    vx = varn(x);
-    if (vx)
-    {
-      if (v>=vx) return gsubst(x,v,pol_x(0));
-      p1 = cgetg(3,t_POL);
-      p1[1] = evalvarn(0)|evalsigne(signe(x));
-      gel(p1,2) = x; return p1;
-    }
-    if (v)
-    {
-      *mx = 1;
-      return gsubst(gsubst(x,0,pol_x(MAXVARN)),v,pol_x(0));
-    }
+    if (v) { x = leafcopy(x); setvarn(x, 0); }
+    return x;
   }
-  return x;
+  if (!vx)
+  {
+    *mx = 1;
+    x = poleval(x, pol_x(MAXVARN));
+    vx = varn(x);
+    if (v == vx) { setvarn(x, 0); return x; }
+  }
+  if (varncmp(v, vx) > 0)
+  {
+    x = gsubst(x,v,pol_x(0));
+    if (typ(x) == t_POL && varn(x) == 0) return x;
+  }
+  return scalarpol_shallow(x, 0);
 }
 
 /* resultant of x and y with respect to variable v, or with respect to their
