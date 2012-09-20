@@ -53,6 +53,12 @@ case "$osname" in
   darwin)
     ld_install_name="-Wl,-install_name -Wl,\"$libdir\"/\$(LIBPARI_DYN)";;
 esac
+case "$osname" in
+  mingw|cywin)
+    install_implib="\$(INSTALL_DATA) \$(LIBPARI_SO)\$(_A) \$(LIBDIR)/\$(LIBPARI_SO)\$(_A)";;
+  *)
+    install_implib="";;
+esac
 
 PLOTCFLAGS=
 PLOTLIBS=
@@ -475,6 +481,8 @@ install-lib-dyn-base:
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME) \$(LIBDIR)/\$(LIBPARI_SO)
 	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
+	$install_implib
+
 install-lib-dyn-link: install-lib-dyn-base
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME);\
