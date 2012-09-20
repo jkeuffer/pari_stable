@@ -1364,10 +1364,9 @@ isprimepower(GEN n, GEN *pt)
 
 long
 uisprimepower(ulong n, ulong *pp)
-{
-  /* We must have CUTOFF^11 >= ULONG_MAX and CUTOFF^3 < ULONG_MAX.
+{ /* We must have CUTOFF^11 >= ULONG_MAX and CUTOFF^3 < ULONG_MAX.
    * Tests suggest that 200-300 is the best range for 64-bit platforms. */
-  const ulong CUTOFF = 400UL;
+  const ulong CUTOFF = 200UL;
   const ulong CUTOFF3 = CUTOFF*CUTOFF*CUTOFF;
 #ifdef LONG_IS_64BIT
   /* primes preceeding the appropriate root of ULONG_MAX. */
