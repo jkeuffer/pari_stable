@@ -2957,9 +2957,9 @@ RgXQ_inv_inexact(GEN x, GEN y)
   long i, dx = degpol(x), dy = degpol(y), dz = dx+dy;
   GEN v, z;
 
-  if (dx < 0 || dy < 0) pari_err(e_MISC,"non-invertible polynomial in RgXQ_inv");
+  if (dx < 0) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
   v = RgM_solve(sylvestermatrix(y,x), col_ei(dz, dz));
-  if (!v) pari_err(e_MISC,"non-invertible polynomial in RgXQ_inv");
+  if (!v) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
   z = cgetg(dy+2,t_POL); z[1] = y[1];
   for (i=2; i<dy+2; i++) z[i] = v[dz-i+2];
   return gerepilecopy(av, normalizepol_lg(z, dy+2));
@@ -2979,16 +2979,16 @@ RgXQ_inv(GEN x, GEN y)
       d = (vx == NO_VARIABLE)? ginv(x): gred_rfrac_simple(gen_1, x);
       return scalarpol(d, vy);
     }
-    if (lg(x)!=3) pari_err(e_MISC,"non-invertible polynomial in RgXQ_inv");
+    if (lg(x)!=3) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
     x = gel(x,2); vx = gvar(x);
   }
   if (isinexact(x) || isinexact(y)) return RgXQ_inv_inexact(x,y);
 
   av = avma; d = subresext(x,y,&u,&v/*junk*/);
-  if (gequal0(d)) pari_err(e_MISC,"non-invertible polynomial in RgXQ_inv");
+  if (gequal0(d)) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
   if (typ(d) == t_POL && varn(d) == vx)
   {
-    if (lg(d) > 3) pari_err(e_MISC,"non-invertible polynomial in RgXQ_inv");
+    if (lg(d) > 3) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
     d = gel(d,2);
   }
   d = gdiv(u,d);
