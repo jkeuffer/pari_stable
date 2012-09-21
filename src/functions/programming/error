@@ -14,6 +14,7 @@ C-Name: error0
 Prototype: vs*
 Help: error({str}*): abort script with error message str.
 Description:
+ (error):void  pari_err(0, $1)
  (?gen,...):void  pari_err(e_MISC, "${2 format_string}"${2 format_args})
 Doc: outputs its argument list (each of
  them interpreted as a string), then interrupts the running \kbd{gp} program,

@@ -37,6 +37,7 @@ Description:
  (pol)          GEN
  (gen)          GEN
  (closure)      GEN
+ (error)        GEN
  (genstr)       GEN
  (str)          char*
  (bptr)         byteptr
