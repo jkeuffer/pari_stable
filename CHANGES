@@ -112,6 +112,7 @@ BA 90- printf() did not flush output
        logint(3^64, 3) --> 33
    92- eint1(x < 0) normalization. Now eint1(x) = incgam(0, x) [#418]
    93- polrootsff(2*x+1,2,y) -> SEGV [#1350]
+   94- resultant(x,x,y) -> 0 and related problems
 
   Changed
     1- mathnf: swapped flag 3 and 5.
