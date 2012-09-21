@@ -605,7 +605,7 @@ group_quotient(GEN G, GEN H)
     for(j=1;j<lg(V);j++)
     {
       long b = el[mael(V,j,1)];
-      if (b==0) pari_err(e_MISC, "not a WSS group");
+      if (b==0) pari_err_IMPL("group_quotient for a non-WSS group");
       F2v_set(used,b);
     }
     for (j = 1; j <= o; j++)
@@ -625,7 +625,7 @@ quotient_perm(GEN C, GEN p)
   for (j = 1; j < l; ++j)
   {
     p3[j] = coset[p[mael(gen,j,1)]];
-    if (p3[j]==0) pari_err(e_MISC,"not a WSS group");
+    if (p3[j]==0) pari_err_IMPL("quotient_perm for a non-WSS group");
   }
   return p3;
 }

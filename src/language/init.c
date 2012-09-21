@@ -1178,6 +1178,8 @@ pari_err2str(GEN e)
       const char *v = GSTR(gel(e,3));
       const char *op= GSTR(gel(e,4));
       GEN l = gel(e,5);
+      if (!*op)
+        return pari_sprintf("domain error in %s: %s out of range",f,v);
       return pari_sprintf("domain error in %s: %s %s %Ps",f,v,op,l);
     }
   case e_PRIORITY:

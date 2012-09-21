@@ -8901,7 +8901,9 @@ respectively.
   pari_err(e_DOMAIN, const char *f, const char *v, const char *op, GEN lim, GEN x)
   pari_err_DOMAIN(const char *f, const char *v, const char *op, GEN lim, GEN x)
 @eprog\noindent prints the error message: \kbd{domain error in $f$: $v$
-\var{op} \var{lim}}.
+\var{op} \var{lim}}. Special case: if \var{op} is the empty string, we ignore
+\var{lim} and print the error message: \kbd{domain error in $f$: $v$ out of
+range}.
 
 \subsubsec{e\_MAXPRIME} A function using the precomputed list of prime numbers
 ran out of primes.

@@ -268,4 +268,28 @@
   ***   at top-level: valuation(Pi,2)
   ***                 ^---------------
   *** valuation: inconsistent valuation t_REAL , t_INT.
-Total time spent: 8
+  ***   at top-level: x^Pi
+  ***                  ^---
+  *** _^_: domain error in gpow [irrational exponent]: valuation != 0
+  ***   at top-level: x^x
+  ***                  ^--
+  *** _^_: domain error in gpow [irrational exponent]: valuation != 0
+  ***   at top-level: 0^0.
+  ***                  ^---
+  *** _^_: domain error in gpow(0,n): n <= 0
+  ***   at top-level: agm([],[])
+  ***                 ^----------
+  *** agm: forbidden agm t_VEC (0 elts) , t_VEC (0 elts).
+  ***   at top-level: sin(1/2+O(2^1))
+  ***                 ^---------------
+  *** sin: domain error in gsin(t_PADIC): argument out of range
+  ***   at top-level: cos(1/9+O(3^1))
+  ***                 ^---------------
+  *** cos: domain error in gcos(t_PADIC): argument out of range
+  ***   at top-level: exp(1/9+O(3^1))
+  ***                 ^---------------
+  *** exp: domain error in gexp(t_PADIC): argument out of range
+  ***   at top-level: ...],Vecsmall([2,2,2,2,3])];galoissubgroups(G)
+  ***                                             ^------------------
+  *** galoissubgroups: sorry, group_quotient for a non-WSS group is not yet implemented.
+Total time spent: 0

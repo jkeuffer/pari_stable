@@ -391,7 +391,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
   GEN p1, y;
   long lx, i;
 
-  if (prec < 3) pari_err(e_MISC, "incorrect precision in transc");
+  if (prec < 3) pari_err_BUG("transc [prec < 3]");
   switch(typ(x))
   {
     case t_INT:
@@ -999,17 +999,21 @@ gpow(GEN x, GEN n, long prec)
     case t_SER:
       if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
       if (valp(x))
-        pari_err(e_MISC,"gpow: need integer exponent if series valuation != 0");
+        pari_err_DOMAIN("gpow [irrational exponent]",
+                        "valuation", "!=", gen_0, x);
       if (lg(x) == 2) return gerepilecopy(av, x); /* O(1) */
       return gerepileupto(av, ser_pow(x, n, prec));
   }
   if (gequal0(x))
   {
-    if (!is_scalar_t(tn) || tn == t_PADIC || tn == t_INTMOD)
-      pari_err(e_MISC,"gpow: 0 to a forbidden power");
+    switch(tn)
+    {
+      case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
+        break;
+      default: pari_err_TYPE("gpow(0,n)", n);
+    }
     n = real_i(n);
-    if (gsigne(n) <= 0)
-      pari_err(e_MISC,"gpow: 0 to a non positive exponent");
+    if (gsigne(n) <= 0) pari_err_DOMAIN("gpow(0,n)", "n", "<=", gen_0, n);
     if (!precision(x)) return gcopy(x);
 
     x = ground(gmulsg(gexpo(x),n));
@@ -1035,7 +1039,7 @@ gpow(GEN x, GEN n, long prec)
       }
 
     case t_PADIC:
-      z = equaliu(d, 2)? Qp_sqrt(x): Qp_sqrtn(x, d, NULL);
+      z = Qp_sqrtn(x, d, NULL);
       if (!z) pari_err_SQRTN("gpow",x);
       return gerepileupto(av, powgi(z, a));
 
@@ -1485,9 +1489,15 @@ Qp_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 GEN
 Qp_sqrtn(GEN x, GEN n, GEN *zetan)
 {
-  pari_sp av = avma, tetpil;
-  GEN q, p = gel(x,2);
+  pari_sp av, tetpil;
+  GEN q, p;
   long e;
+  if (equaliu(n, 2))
+  {
+    if (zetan) *zetan = gen_m1;
+    return Qp_sqrt(x);
+  }
+  av = avma; p = gel(x,2);
   if (!signe(gel(x,4)))
   {
     q = divii(addis(n, valp(x)-1), n);
@@ -1821,7 +1831,7 @@ GEN
 Qp_exp(GEN x)
 {
   GEN y = Qp_exp_safe(x);
-  if (!y) pari_err(e_MISC,"p-adic argument out of range in gexp");
+  if (!y) pari_err_DOMAIN("gexp(t_PADIC)","argument","",gen_0,x);
   return y;
 }
 
@@ -2111,13 +2121,10 @@ agm1(GEN x, long prec)
 GEN
 agm(GEN x, GEN y, long prec)
 {
-  long ty = typ(y);
   pari_sp av;
-
-  if (is_matvec_t(ty))
+  if (is_matvec_t(typ(y)))
   {
-    ty = typ(x);
-    if (is_matvec_t(ty)) pari_err(e_MISC,"agm of two vector/matrices");
+    if (is_matvec_t(typ(x))) pari_err_TYPE2("agm",x,y);
     swap(x, y);
   }
   if (gequal0(y)) return gcopy(y);
@@ -2644,9 +2651,9 @@ gcos(GEN x, long prec)
 
     case t_INTMOD: pari_err_TYPE("gcos",x);
 
-    case t_PADIC: x = cos_p(x);
-      if (!x) pari_err(e_MISC,"p-adic argument out of range in gcos");
-      return x;
+    case t_PADIC: y = cos_p(x);
+      if (!y) pari_err_DOMAIN("gcos(t_PADIC)","argument","",gen_0,x);
+      return y;
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
@@ -2715,9 +2722,9 @@ gsin(GEN x, long prec)
 
     case t_INTMOD: pari_err_TYPE("gsin",x);
 
-    case t_PADIC: x = sin_p(x);
-      if (!x) pari_err(e_MISC,"p-adic argument out of range in gsin");
-      return x;
+    case t_PADIC: y = sin_p(x);
+      if (!y) pari_err_DOMAIN("gsin(t_PADIC)","argument","",gen_0,x);
+      return y;
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
