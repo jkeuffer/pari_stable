@@ -342,12 +342,10 @@ install(compute_e, "LD&"); \\ remove 'static' first
 table(first = 6, step = 6, MAXT = 8648640)=
 {
   emax = 0;
-  L = List();
   forstep(t = first, MAXT, step,
     e = compute_e(t);
-    if (e > 1.9*emax,
-      listput(L, [t, e]); emax = e;
-      printf("  if (C < %5.5g) return %8d;\n", 2*log(e)/log(2), t)
+    if (e > 1.9*emax, emax = e;
+      printf("  if (C < %5.5g) return %8d;\n", 2*log(e)/log(2)*0.9999, t)
     );
   );
 }
@@ -360,84 +358,84 @@ for (i=1,#T, t=T[i]; printf("  if (C < %5.5g) return %8d;\n", f(t),t));
 
 */
 
-/* assume C < 3515 */
+/* assume C < 3514.6 */
 static ulong
 compute_t_small(double C)
 {
-  if (C < 17.955) return        6;
-  if (C < 31.999) return       12;
-  if (C < 33.999) return       24;
-  if (C < 54.084) return       36;
-  if (C < 65.332) return       60;
-  if (C < 68.464) return       72;
-  if (C < 70.790) return      108;
-  if (C < 78.047) return      120;
-  if (C < 102.42) return      180;
-  if (C < 127.51) return      360;
-  if (C < 136.69) return      420;
-  if (C < 153.45) return      540;
-  if (C < 165.68) return      840;
-  if (C < 169.19) return     1008;
-  if (C < 178.54) return     1080;
-  if (C < 192.70) return     1200;
-  if (C < 206.36) return     1260;
-  if (C < 211.97) return     1620;
-  if (C < 222.11) return     1680;
-  if (C < 225.13) return     2016;
-  if (C < 244.21) return     2160;
-  if (C < 270.32) return     2520;
-  if (C < 279.53) return     3360;
-  if (C < 293.65) return     3780;
-  if (C < 346.71) return     5040;
-  if (C < 348.74) return     6480;
-  if (C < 383.38) return     7560;
-  if (C < 396.72) return     8400;
-  if (C < 426.09) return    10080;
-  if (C < 458.39) return    12600;
-  if (C < 527.21) return    15120;
-  if (C < 595.44) return    25200;
-  if (C < 636.35) return    30240;
-  if (C < 672.59) return    42840;
-  if (C < 684.97) return    45360;
-  if (C < 708.85) return    55440;
-  if (C < 771.38) return    60480;
-  if (C < 775.94) return    75600;
-  if (C < 859.70) return    85680;
-  if (C < 893.25) return   100800;
-  if (C < 912.36) return   110880;
-  if (C < 966.23) return   128520;
-  if (C < 1009.2) return   131040;
-  if (C < 1042.1) return   166320;
-  if (C < 1125.0) return   196560;
-  if (C < 1251.1) return   257040;
-  if (C < 1375.1) return   332640;
-  if (C < 1431.1) return   393120;
-  if (C < 1483.5) return   514080;
-  if (C < 1546.5) return   655200;
-  if (C < 1585.9) return   665280;
-  if (C < 1661.4) return   786240;
-  if (C < 1667.7) return   831600;
-  if (C < 1677.1) return   917280;
-  if (C < 1728.2) return   982800;
-  if (C < 1747.6) return  1081080;
-  if (C < 1773.8) return  1179360;
-  if (C < 1810.8) return  1285200;
-  if (C < 1924.7) return  1310400;
-  if (C < 2001.3) return  1441440;
-  if (C < 2096.5) return  1663200;
-  if (C < 2166.0) return  1965600;
-  if (C < 2321.9) return  2162160;
-  if (C < 2368.5) return  2751840;
-  if (C < 2377.4) return  2827440;
-  if (C < 2515.0) return  3326400;
-  if (C < 2588.7) return  3341520;
-  if (C < 2636.8) return  3603600;
-  if (C < 2667.5) return  3931200;
-  if (C < 3028.9) return  4324320;
-  if (C < 3045.8) return  5654880;
-  if (C < 3080.8) return  6652800;
-  if (C < 3121.9) return  6683040;
-  if (C < 3283.4) return  7207200;
+  if (C < 17.953) return        6;
+  if (C < 31.996) return       12;
+  if (C < 33.996) return       24;
+  if (C < 54.079) return       36;
+  if (C < 65.325) return       60;
+  if (C < 68.457) return       72;
+  if (C < 70.783) return      108;
+  if (C < 78.039) return      120;
+  if (C < 102.41) return      180;
+  if (C < 127.50) return      360;
+  if (C < 136.68) return      420;
+  if (C < 153.43) return      540;
+  if (C < 165.66) return      840;
+  if (C < 169.17) return     1008;
+  if (C < 178.52) return     1080;
+  if (C < 192.68) return     1200;
+  if (C < 206.34) return     1260;
+  if (C < 211.94) return     1620;
+  if (C < 222.09) return     1680;
+  if (C < 225.11) return     2016;
+  if (C < 244.19) return     2160;
+  if (C < 270.29) return     2520;
+  if (C < 279.50) return     3360;
+  if (C < 293.62) return     3780;
+  if (C < 346.68) return     5040;
+  if (C < 348.70) return     6480;
+  if (C < 383.34) return     7560;
+  if (C < 396.68) return     8400;
+  if (C < 426.04) return    10080;
+  if (C < 458.34) return    12600;
+  if (C < 527.16) return    15120;
+  if (C < 595.38) return    25200;
+  if (C < 636.29) return    30240;
+  if (C < 672.53) return    42840;
+  if (C < 684.90) return    45360;
+  if (C < 708.78) return    55440;
+  if (C < 771.30) return    60480;
+  if (C < 775.86) return    75600;
+  if (C < 859.62) return    85680;
+  if (C < 893.16) return   100800;
+  if (C < 912.27) return   110880;
+  if (C < 966.13) return   128520;
+  if (C < 1009.1) return   131040;
+  if (C < 1041.9) return   166320;
+  if (C < 1124.9) return   196560;
+  if (C < 1251.0) return   257040;
+  if (C < 1375.0) return   332640;
+  if (C < 1431.0) return   393120;
+  if (C < 1483.3) return   514080;
+  if (C < 1546.3) return   655200;
+  if (C < 1585.8) return   665280;
+  if (C < 1661.3) return   786240;
+  if (C < 1667.5) return   831600;
+  if (C < 1676.9) return   917280;
+  if (C < 1728.0) return   982800;
+  if (C < 1747.4) return  1081080;
+  if (C < 1773.6) return  1179360;
+  if (C < 1810.6) return  1285200;
+  if (C < 1924.5) return  1310400;
+  if (C < 2001.1) return  1441440;
+  if (C < 2096.3) return  1663200;
+  if (C < 2165.8) return  1965600;
+  if (C < 2321.6) return  2162160;
+  if (C < 2368.2) return  2751840;
+  if (C < 2377.2) return  2827440;
+  if (C < 2514.7) return  3326400;
+  if (C < 2588.5) return  3341520;
+  if (C < 2636.6) return  3603600;
+  if (C < 2667.2) return  3931200;
+  if (C < 3028.6) return  4324320;
+  if (C < 3045.5) return  5654880;
+  if (C < 3080.5) return  6652800;
+  if (C < 3121.6) return  6683040;
+  if (C < 3283.1) return  7207200;
   return  8648640;
 }
 
@@ -454,7 +452,7 @@ compute_t(GEN N, GEN *e, GEN *faet)
   avma = av0;
   /* Return "smallest" t such that f(t) >= C, which implies e(t) > sqrt(N) */
   /* For N < 2^3515 ~ 10^1058 */
-  if (C < 3515.0)
+  if (C < 3514.6)
   {
     t = compute_t_small(C);
     *e = compute_e(t, faet);
