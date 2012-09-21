@@ -9,6 +9,7 @@ Description:
  (empty, bool, small_int, small)
  (empty, void, negbool, bool)
  (empty, typ, str, genstr,gen)
+ (empty, errtyp, str)
  (empty, vecsmall, gen)
  (empty, vec, gen)
  (empty, list, gen)
@@ -120,8 +121,10 @@ Description:
  (gen):str GENtostr_unquoted($1)
  (genstr):str GSTR($1)
  (typ):str type_name($1)
+ (errtyp):str numerr_name($1)
 
  (#str):typ  ${1 str_format}
+ (#str):errtyp  ${1 str_format}
 
  (bnf):nf              bnf_get_nf($1)
  (gen):nf

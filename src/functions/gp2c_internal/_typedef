@@ -44,6 +44,7 @@ Description:
  (func_GG)      func_GG
  (pari_sp)      pari_sp
  (typ)          long
+ (errtyp)       long
  (nf)           GEN
  (bnf)          GEN
  (bnr)          GEN
