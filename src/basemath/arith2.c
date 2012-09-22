@@ -862,7 +862,7 @@ coredisc2(GEN n)
   pari_sp av = avma;
   GEN y = core2_i(n);
   GEN c = gel(y,1), f = gel(y,2);
-  if (_mod4(c)<=1) return y;
+  if (_mod4(c)<=1) return gerepilecopy(av, y);
   y = cgetg(3,t_VEC);
   gel(y,1) = shifti(c,2);
   gel(y,2) = gmul2n(f,-1); return gerepileupto(av, y);
