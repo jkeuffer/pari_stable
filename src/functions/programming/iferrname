@@ -146,8 +146,10 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \var{E} has three component, 1 (\typ{STR}): the function name $s$,
   2: the argument $x$, 3: the argument $y$.
 
-  \item \kbd{"e\_INV"}. Tried to invert a non-invertible object $x$.
-  \var{E} has one component, the non-invertible $x$. If $x = \kbd{Mod}(a,b)$
+  \item \kbd{"e\_INV"}. Tried to invert a non-invertible object $x$ in
+  function $s$.
+  \var{E} has two components, 1 (\typ{STR}): the function name $s$,
+  2: the non-invertible $x$. If $x = \kbd{Mod}(a,b)$
   is a \typ{INTMOD} and $a$ is not $0$ mod $b$, this allows to factor
   the modulus, as \kbd{gcd}$(a,b)$ is a non-trivial divisor of $b$.
 

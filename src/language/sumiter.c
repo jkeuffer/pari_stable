@@ -23,21 +23,19 @@ iferrnum(long errnum, GEN a, GEN b)
   GEN res;
   struct pari_evalstate state;
   evalstate_save(&state);
-  CATCH(errnum)
+  pari_CATCH(errnum)
   {
+    GEN E;
     evalstate_restore(&state);
     if (!b) return gnil;
-    if (global_err_data)
-      global_err_data = gerepilecopy(avma, global_err_data);
-    else
-      global_err_data = mkerr(e_STACK);
-    push_lex(global_err_data,b);
+    E = gerepilecopy(avma, pari_err_last());
+    push_lex(E,b);
     res = closure_evalgen(b);
     pop_lex(1);
     return res;
-  } TRY {
+  } pari_TRY {
     res = closure_evalgen(a);
-  } ENDCATCH;
+  } pari_ENDCATCH;
   return res;
 }
 

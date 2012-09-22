@@ -1356,8 +1356,8 @@ closure_trapgen(GEN C, long numerr)
   VOLATILE GEN x;
   struct pari_evalstate state;
   evalstate_save(&state);
-  CATCH(numerr) { x = (GEN)1L; }
-  TRY { x = closure_evalgen(C); } ENDCATCH;
+  pari_CATCH(numerr) { x = (GEN)1L; }
+  pari_TRY { x = closure_evalgen(C); } pari_ENDCATCH;
   if (x == (GEN)1L) evalstate_restore(&state);
   return x;
 }

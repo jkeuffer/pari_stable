@@ -31,19 +31,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define STMT_START        do
 #define STMT_END        while (0)
 /*=====================================================================*/
-/* CATCH(numer) {
+/* pari_CATCH(numer) {
  *   recovery
- * } TRY {
+ * } pari_TRY {
  *   code
- * } ENDCATCH
+ * } pari_ENDCATCH
  * will execute 'code', then 'recovery' if exception 'numer' is thrown
  * [ any exception if numer == CATCH_ALL ].
- * RETRY = as TRY, but execute 'recovery', then 'code' again [still catching] */
+ * pari_RETRY = as pari_TRY, but execute 'recovery', then 'code' again [still catching] */
 
 extern THREAD jmp_buf *iferr_env;
 extern const long CATCH_ALL;
 
-#define CATCH(err) {         \
+#define pari_CATCH(err) {         \
   jmp_buf *__iferr_old=iferr_env; \
   jmp_buf __env;             \
   iferr_env = &__env;        \
@@ -53,10 +53,11 @@ extern const long CATCH_ALL;
     if (err!=CATCH_ALL && err_get_num(global_err_data) != err) \
       pari_err(0, global_err_data);
 
-#define RETRY } iferr_env = &__env; {
-#define TRY } else {
+#define pari_RETRY } iferr_env = &__env; {
+#define pari_TRY } else {
+#define pari_CATCH_reset() (iferr_env = __iferr_old)
 
-#define ENDCATCH iferr_env = __iferr_old; } }
+#define pari_ENDCATCH iferr_env = __iferr_old; } }
 
 extern const double LOG2, LOG10_2, LOG2_10;
 #ifndef  PI
@@ -68,7 +69,7 @@ extern int new_galois_format, factor_add_primes, factor_proven;
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern THREAD GEN  bernzone;
 extern GEN primetab;
-extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gen_0,gnil;
+extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gen_0,gnil,err_e_STACK;
 extern VOLATILE THREAD int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 extern const long lontyp[];

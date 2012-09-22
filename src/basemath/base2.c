@@ -576,10 +576,13 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
     /* includes the silly case where P[i] = -1 */
     if (E[i] <= 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
     av = avma;
-    CATCH(e_INV) { /* caught false prime, update factorization */
-      GEN x = gel(global_err_data,3);
-      GEN N, p = gcdii(gel(x,1), gel(x,2)), u = diviiexact(gel(x,1),p);
+    pari_CATCH(e_INV) { /* caught false prime, update factorization */
+      GEN x, N, p, u, E = pari_err_last();
       long l;
+      x = err_get_compo(E, 2);
+      if (typ(x) != t_INTMOD) pari_err(0, E);
+      p = gcdii(gel(x,1), gel(x,2));
+      u = diviiexact(gel(x,1),p);
       if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);
       gerepileall(av, 2, &p, &u);
 
@@ -591,10 +594,10 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
       av = avma;
       N = S->dT; E[i] = Z_pvalrem(N, gel(P,i), &N);
       for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
-    } RETRY {
+    } pari_RETRY {
       if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n",P[i],E[i]);
       ordmax = shallowconcat(ordmax, mkvec( maxord(gel(P,i),T,E[i]) ));
-    } ENDCATCH;
+    } pari_ENDCATCH;
   }
   allbase_from_ordmax(S, ordmax, P, T);
 }

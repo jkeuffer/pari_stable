@@ -956,16 +956,17 @@ static int
 gequal_try(GEN x, GEN y)
 {
   int i;
-  CATCH(CATCH_ALL) {
-    switch(err_get_num(global_err_data))
+  pari_CATCH(CATCH_ALL) {
+    GEN E = pari_err_last();
+    switch(err_get_num(E))
     {
       case e_STACK: case e_MEM: case e_ALARM:
-        pari_err(0, global_err_data);
+        pari_err(0, E); /* rethrow */
     }
     return 0;
-  } TRY {
+  } pari_TRY {
     i = gequal0(gadd(x, gneg_i(y)));
-  } ENDCATCH;
+  } pari_ENDCATCH;
   return i;
 }
 

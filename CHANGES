@@ -336,6 +336,8 @@ BA 103- GP function ellfromj
 BA 105- Add black box algebra for Brent and Kung algorithm
    106- PARI function RgM_dimensions()
 BA 107- PARI function RgX_splitting()
+   108- made public the CATCH / TRY interface, renamed pari_CATCH / pari_TRY
+        PARI functions err_get_num(), err_get_compo(), pari_err_last()
 
   Removed
     1- dropped DOS support

@@ -2733,13 +2733,13 @@ quadhilbertreal(GEN D, long prec)
 
   for(;;) {
     VOLATILE GEN pol = NULL;
-    CATCH(e_PREC) {
+    pari_CATCH(e_PREC) {
       prec += EXTRA_PREC;
       if (DEBUGLEVEL) pari_warn(warnprec, "quadhilbertreal", prec);
       bnr = bnrnewprec_shallow(bnr, prec);
       bnf = bnr_get_bnf(bnr);
       nf  = bnf_get_nf(bnf);
-    } TRY {
+    } pari_TRY {
       /* find the modulus defining N */
       pari_timer T;
       if (DEBUGLEVEL) timer_start(&T);
@@ -2765,7 +2765,7 @@ quadhilbertreal(GEN D, long prec)
         nf = nfnewprec_shallow(nf, newprec);
       }
       pol = AllStark(data, nf, 0, newprec);
-    } ENDCATCH;
+    } pari_ENDCATCH;
     if (pol) {
       pol = makescind(nf, pol);
       return gerepileupto(av, polredbest(pol, 0));

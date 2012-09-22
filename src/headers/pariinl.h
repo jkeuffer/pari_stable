@@ -2359,6 +2359,11 @@ INLINE GEN closure_get_frame(GEN C) { return gel(C,7); }
 /*                               ERRORS                            */
 /*                                                                 */
 /*******************************************************************/
+INLINE long
+err_get_num(GEN e) { return e[1]; }
+INLINE GEN
+err_get_compo(GEN e, long i) { return gel(e, i+1); }
+
 INLINE void
 pari_err_BUG(const char *f) { pari_err(e_BUG,f); }
 INLINE void

@@ -1611,14 +1611,14 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   for (i=1; i<l; i++) { uperm[l-i] = u[perm[i]]; rperm[l-i] = r[perm[i]]; }
   u = uperm;
   r = rperm; res = NULL;
-  CATCH(e_PREC) { }
-  TRY {
+  pari_CATCH(e_PREC) { }
+  pari_TRY {
     GEN q;
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
     q = Q_from_QR(r, gprecision(vnorm));
     if (!q) pari_err_PREC("fincke_pohst");
     res = smallvectors(q, bound, stockmax, CHECK);
-  } ENDCATCH;
+  } pari_ENDCATCH;
   if (CHECK)
   {
     if (CHECK->f_post) res = CHECK->f_post(CHECK, res, u);

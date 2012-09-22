@@ -2140,7 +2140,7 @@ void
 dbgGEN(GEN x, long nb) { dbg(x,nb,0); }
 
 GEN
-dbg_err(void) { return global_err_data? gcopy(global_err_data):gnil; }
+dbg_err(void) { GEN E = pari_err_last(); return E? gcopy(E):gnil; }
 
 static void
 print_entree(entree *ep, long hash)
@@ -3426,15 +3426,15 @@ static int
 ok_pipe(FILE *f)
 {
   if (DEBUGFILES) err_printf("I/O: checking output pipe...\n");
-  CATCH(CATCH_ALL) {
+  pari_CATCH(CATCH_ALL) {
     return 0;
   }
-  TRY {
+  pari_TRY {
     int i;
     fprintf(f,"\n\n"); fflush(f);
     for (i=1; i<1000; i++) fprintf(f,"                  \n");
     fprintf(f,"\n"); fflush(f);
-  } ENDCATCH;
+  } pari_ENDCATCH;
   return 1;
 }
 

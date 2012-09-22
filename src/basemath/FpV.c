@@ -938,13 +938,16 @@ GEN
 FpMs_FpCs_solve_safe(GEN M, GEN A, long nbrow, GEN p)
 {
   GEN res;
-  CATCH(e_INV)
+  pari_CATCH(e_INV)
   {
+    GEN E = pari_err_last();
+    GEN x = err_get_compo(E,2);
+    if (typ(x) != t_INTMOD) pari_err(0,E);
     if (DEBUGLEVEL)
-      pari_warn(warner,"FpMs_FpCs_solve_safe, impossible inverse %Ps", gel(global_err_data,3));
+      pari_warn(warner,"FpMs_FpCs_solve_safe, impossible inverse %Ps", x);
     res = NULL;
-  } TRY {
+  } pari_TRY {
     res = ZpMs_ZpCs_solve(M, A, nbrow, p, 1);
-  } ENDCATCH
+  } pari_ENDCATCH
   return res;
 }

@@ -1801,10 +1801,17 @@ and no remaining arguments. The general syntax is
 
 \noindent where \kbd{numerr} is a codeword which specifies the error class
 and what to do with the remaining arguments and what message to print.
-For instance, \kbd{pari\_err(e\_TYPE,"extgcd")} prints the message:
+For instance, if $x$ is a \kbd{GEN} with internal type \typ{STR}, say,
+\kbd{pari\_err(e\_TYPE,"extgcd", $x$)} prints the message:
 \bprog
-    ***   incorrect type in extgcd.
-@eprog\noindent See \secref{se:errors} for details.
+    ***   incorrect type in extgcd (t_STR),
+@eprog\noindent See \secref{se:errors} for details. In the libpari code
+itself, the general-purpose \kbd{e\_MISC} is used sparingly: it is so
+flexible that the corresponding error contexts (\typ{ERROR}) become hard to
+use reliably. Other more rigid error types are generally more useful: for
+instance the error context associated to the \kbd{e\_TYPE} exception above is
+precisely documented and contains \kbd{"extgcd"} and $x$ (not only its type)
+as readily available components.
 
 \subsec{Warnings}
 
@@ -2115,6 +2122,82 @@ Since you can set \kbd{E} to a pointer to any \kbd{struct} (typecast to
 \kbd{void*}) the above mechanism handles arbitrary functions. For simple
 functions without extra parameters, you may set \kbd{E = NULL} and ignore
 that argument in your function definition.
+
+\section{Catching exceptions}
+
+\subsec{Basic use}
+
+PARI provides a mechanism to trap exceptions generated via \kbd{pari\_err}
+using the \tet{pari_CATCH} construction. The basic usage is as follows
+\bprog
+ pari_CATCH(err_code) {
+   @com recovery branch
+ }
+ pari_TRY {
+   @com main branch
+ }
+ pari_ENDCATCH
+@eprog\noindent This fragment executes the main branch, then the recovery
+branch \emph{if} exception \kbd{err\_code} is thrown, e.g. \kbd{e\_TYPE}.
+See \secref{se:errors} for the description of all error classes.
+The special error code \tet{CATCH_ALL} is available to catch all errors.
+
+One can replace the \tet{pari_TRY} keyword by \tet{pari_RETRY}, in which case
+once the recovery branch is run, we run the main branch again, still catching
+the same exceptions.
+
+\misctitle{Restrictions}
+
+\item Such constructs can be nested without adverse effect, the innermost
+handler catching the exception.
+
+\item It is \emph{valid} to leave either branch using \tet{pari_err}.
+
+\item It is \emph{invalid} to use C flow control instructions (\kbd{break},
+\kbd{continue}, \kbd{return}) to directly leave either branch without seeing
+the \tet{pari_ENDCATCH} keyword. This would leave an invalid structure in the
+exception handler stack, and the next exception would crash.
+
+\item In order to leave using \kbd{break}, \kbd{continue} or \kbd{return},
+one must precede the keyword by a call to
+
+\fun{void}{pari_CATCH_reset}{} disable the current handler, allowing to leave
+without adverse effect.
+
+\subsec{Advanced use}
+
+In the recovery branch, the exception context can be examined via the
+following helper routines:
+
+\fun{GEN}{pari_err_last}{} returns the exception context, as a \typ{ERROR}.
+The exception $E$ returned by \tet{pari_err_last} can be rethrown, using
+\bprog
+  pari_err(0, E);
+@eprog
+
+\fun{long}{err_get_num}{GEN E} returns the error symbolic name. E.g
+\kbd{e\_TYPE}.
+
+\fun{GEN}{err_get_compo}{GEN E, long i} error $i$-th component, as documented
+in \secref{se:iferrname}.
+
+\noindent For instance
+\bprog
+ pari_CATCH(CATCH_ALL) { /* catch everything */
+    GEN x, E = pari_err_last();
+    long code = err_get_num(E);
+    if (code != e_INV) pari_err(0, E); /* unexpected error, rethrow */
+    x = err_get_compo(E, 2);
+    /* e_INV has two components, 1: function name 2: non-invertible x */
+    if (typ(x) != t_INTMOD) pari_err(0, E); /* unexpected type, rethrow */
+    pari_CATCH_reset();
+    return x; /* leave ! */
+    @com @dots
+ } pari_TRY {
+   @com main branch
+ }
+ pari_ENDCATCH
+@eprog
 
 \section{A complete program}
 \label{se:prog}

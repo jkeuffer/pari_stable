@@ -2884,8 +2884,8 @@ static GEN
 bestappr_noer(GEN x, GEN k)
 {
   GEN y;
-  CATCH(e_PREC) { y = NULL; }
-  TRY { y = bestappr(x,k); } ENDCATCH;
+  pari_CATCH(e_PREC) { y = NULL; }
+  pari_TRY { y = bestappr(x,k); } pari_ENDCATCH;
   return y;
 }
 

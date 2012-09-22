@@ -1932,15 +1932,13 @@ closure_alarmer(GEN C, long s)
 #ifndef HAS_ALARM
   pari_err(e_ARCH,"alarm");
 #endif
-  CATCH(CATCH_ALL) /* We need to stop the timer after any error */
+  pari_CATCH(CATCH_ALL) /* We need to stop the timer after any error */
   {
-    if (err_get_num(global_err_data)!=e_ALARM)
-    {
-      alarm0(0); pari_err(0, global_err_data);
-    }
-    evalstate_restore(&state); x = gerepilecopy(avma, global_err_data);
+    GEN E = pari_err_last();
+    if (err_get_num(E) != e_ALARM) { alarm0(0); pari_err(0, E); }
+    evalstate_restore(&state); x = gerepilecopy(avma, E);
   }
-  TRY { alarm0(s); x = closure_evalgen(C); alarm0(0); } ENDCATCH;
+  pari_TRY { alarm0(s); x = closure_evalgen(C); alarm0(0); } pari_ENDCATCH;
   return x;
 }
 

@@ -33,7 +33,7 @@ const double LOG2    = 0.6931471805599453; /* log(2) */
 const double LOG10_2 = 0.3010299956639812; /* log_10(2) */
 const double LOG2_10 = 3.321928094887362;  /* log_2(10) */
 
-GEN     gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf;
+GEN gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf, err_e_STACK;
 
 static const ulong readonly_constants[] = {
   evaltyp(t_INT) | _evallg(2),  /* gen_0 */
@@ -57,6 +57,10 @@ static const long readonly_ghalf[] = {
   evaltyp(t_FRAC) | _evallg(3), /* ghalf */
   (long)(readonly_constants+4),
   (long)(readonly_constants+7)
+};
+static const ulong readonly_err_STACK[] = {
+  evaltyp(t_ERROR) | _evallg(2),
+  e_STACK
 };
 THREAD GEN    bernzone;
 GEN     primetab; /* private primetable */
@@ -453,6 +457,7 @@ init_universal_constants(void)
   gen_m1 = (GEN)readonly_constants+10;
   gen_m2 = (GEN)readonly_constants+13;
   ghalf  = (GEN)readonly_ghalf;
+  err_e_STACK = (GEN)readonly_err_STACK;
 }
 
 static size_t
@@ -486,6 +491,13 @@ pari_init_stack(size_t size, size_t old)
   memused = 0;
 }
 
+static void
+pari_init_errcatch(void)
+{
+  iferr_env = NULL;
+  global_err_data = NULL;
+}
+
 void
 allocatemem(ulong newsize)
 {
@@ -496,8 +508,7 @@ allocatemem(ulong newsize)
   pari_init_stack(newsize, old);
   s = top - bot;
   pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
-  global_err_data = NULL;
-  iferr_env = NULL;
+  pari_init_errcatch();
   cb_pari_err_recover(-1);
 }
 
@@ -622,13 +633,6 @@ pari_add_oldmodule(entree *ep)
   if (!new_fun_set)
     pari_fill_hashtable(functions_hash, ep);
   pari_stack_pushp(&s_OLDMODULES, ep);
-}
-
-static void
-pari_init_errcatch(void)
-{
-  iferr_env = NULL;
-  global_err_data = NULL;
 }
 
 /*********************************************************************/
@@ -809,7 +813,6 @@ pari_close(void)
 /*                         ERROR RECOVERY                          */
 /*                                                                 */
 /*******************************************************************/
-
 void
 gp_context_save(struct gp_context* rec)
 {
@@ -866,8 +869,7 @@ err_recover(long numerr)
   evalstate_reset();
   initout(0);
   killallfiles();
-  iferr_env = NULL;
-  global_err_data = NULL;
+  pari_init_errcatch();
   out_puts(pariErr, "\n");
   pariErr->flush();
 
@@ -987,7 +989,6 @@ pari_sigint(const char *time_s)
        gel(_v,5) = (u);\
        gel(_v,6) = (v); return _v; } while(0)
 
-/* if numerr=e_STACK, return NULL */
 static GEN
 pari_err2GEN(long numerr, va_list ap)
 {
@@ -1068,16 +1069,10 @@ pari_err2GEN(long numerr, va_list ap)
   case e_MAXPRIME:
     retmkerr2(numerr, utoi(va_arg(ap, ulong)));
   case e_STACK:
-    return NULL;
+    return err_e_STACK;
   default:
     return mkerr(numerr);
   }
-}
-
-long
-err_get_num(GEN e)
-{
-  return e? e[1]: e_STACK;
 }
 
 static char *
@@ -1265,16 +1260,22 @@ void
 pari_err(int numerr, ...)
 {
   va_list ap;
+  GEN E;
 
   va_start(ap,numerr);
 
-  global_err_data = numerr ? pari_err2GEN(numerr,ap):va_arg(ap,GEN);
-  if (!numerr) numerr = err_get_num(global_err_data);
-  if (*iferr_env)
-    longjmp(*iferr_env, numerr);
+  if (numerr)
+    E = pari_err2GEN(numerr,ap);
+  else
+  {
+    E = va_arg(ap,GEN);
+    numerr = err_get_num(E);
+  }
+  global_err_data = E;
+  if (*iferr_env) longjmp(*iferr_env, numerr);
   err_init();
   if (numerr != e_SYNTAX) closure_err(0);
-  pari_err_display(global_err_data);
+  pari_err_display(E);
   out_term_color(pariErr, c_NONE);
   va_end(ap);
   pariErr->flush();
@@ -1282,6 +1283,9 @@ pari_err(int numerr, ...)
       cb_pari_handle_exception(numerr)) return;
   err_recover(numerr);
 }
+
+GEN
+pari_err_last() { return global_err_data; }
 
 const char *
 numerr_name(long numerr)
