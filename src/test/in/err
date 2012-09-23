@@ -150,3 +150,4 @@ galoissubcyclo(znstar(5),matid(2))
 galoissubcyclo(bnrinit(bnfinit(y^2+1),1,1), 2)
 polsubcyclo(-1,2);
 polsubcyclo(2,-1);
+random(-1)

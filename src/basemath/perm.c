@@ -462,7 +462,7 @@ long
 group_domain(GEN G)
 {
   GEN gen = grp_get_gen(G);
-  if (lg(gen) < 2) pari_err(e_MISC,"empty group in group_domain");
+  if (lg(gen) < 2) pari_err_DOMAIN("group_domain", "#G", "=", gen_1,G);
   return lg(gel(gen,1)) - 1;
 }
 
@@ -880,7 +880,7 @@ group_abelianHNF(GEN G, GEN S)
     for(j=1; j<lg(S); j++)
       if (zv_equal(P, gel(S,j))) break;
     avma = av;
-    if (j==lg(S)) pari_err(e_MISC,"wrong argument in galoisisabelian");
+    if (j==lg(S)) pari_err_BUG("galoisisabelian [inconsistent group]");
     j--;
     for(k=1; k<i; k++)
     {
@@ -930,14 +930,15 @@ abelian_group(GEN v)
   return G;
 }
 
-/*return 1 if G is abelian, else 0*/
+/*return 1 if H is a normal subgroup of G*/
 long
 group_subgroup_isnormal(GEN G, GEN H)
 {
   GEN g = grp_get_gen(G);
   long i, n = lg(g);
   if (lg(grp_get_gen(H)) > 1 && group_domain(G) != group_domain(H))
-    pari_err(e_MISC,"not a subgroup in group_subgroup_isnormal");
+    pari_err_DOMAIN("group_subgroup_isnormal","domain(H)","!=",
+                    strtoGENstr("domain(G)"), H);
   for(i=1; i<n; i++)
     if (!group_perm_normalize(H, gel(g,i))) return 0;
   return 1;

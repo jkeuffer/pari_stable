@@ -330,4 +330,7 @@
   ***   at top-level: polsubcyclo(2,-1)
   ***                 ^-----------------
   *** polsubcyclo: domain error in polsubcyclo: d <= 0
-Total time spent: 20
+  ***   at top-level: random(-1)
+  ***                 ^----------
+  *** random: domain error in random: N <= 0
+Total time spent: 16

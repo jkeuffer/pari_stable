@@ -196,7 +196,7 @@ genrand(GEN N)
   switch(typ(N))
   {
     case t_INT:
-      if (signe(N)<=0) pari_err(e_MISC,"invalid bound in random");
+      if (signe(N)<=0) pari_err_DOMAIN("random","N","<=",gen_0,gen_0);
       return randomi(N);
     case t_REAL:
       return randomr(realprec(N));
