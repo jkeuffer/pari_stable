@@ -2470,7 +2470,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   /* check the bnf */
   if (!nf_get_varn(nf))
     pari_err_PRIORITY("bnrstark", nf_get_pol(nf), "=", 0);
-  if (nf_get_r2(nf)) pari_err(e_MISC, "base field not totally real in bnrstark");
+  if (nf_get_r2(nf)) pari_err_DOMAIN("bnrstark", "r2", "!=", gen_0, nf);
   Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
   subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");
 
@@ -2482,7 +2482,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   /* check the class field */
   if (!gequal0(gel(bnr_get_mod(bnr), 2)))
-    pari_err(e_MISC, "class field not totally real in bnrstark");
+    pari_err_DOMAIN("bnrstark", "r2(class field)", "!=", gen_0, bnr);
 
   /* find a suitable extension N */
   dtQ = InitQuotient(subgrp);
@@ -2691,14 +2691,14 @@ quadray_init(GEN *pD, GEN f, GEN *pbnf, long prec)
     }
     else
       isfund = Z_isfundamental(D);
-    if (!isfund) pari_err(e_MISC,"quadray needs a fundamental discriminant");
+    if (!isfund) pari_err_DOMAIN("quadray", "isfundamental(D)", "=",gen_0, D);
   }
   else
   {
     bnf = checkbnf(D);
     nf = bnf_get_nf(bnf);
     if (nf_get_degree(nf) != 2)
-      pari_err(e_MISC,"not a polynomial of degree 2 in quadray");
+      pari_err_DOMAIN("quadray", "degree", "!=", gen_2, nf_get_pol(nf));
     D = nf_get_disc(nf);
   }
   if (pbnf) *pbnf = bnf;

@@ -180,7 +180,6 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
   if (!bnf)
   {
-    if (!gequal1(leading_term(P))) pari_err(e_MISC,"non-monic polynomial in thue");
     bnf = Buchall(P, nf_FORCE, DEFAULTPREC);
     if (flag) (void)bnfcertify(bnf);
     else
@@ -665,7 +664,7 @@ thueinit(GEN pol, long flag, long prec)
     return gerepilecopy(av, tnf);
   }
 
-  if (dpol <= 2) pari_err(e_MISC,"invalid polynomial in thue (need deg>2)");
+  if (dpol <= 2) pari_err_DOMAIN("thue", "degree","<=",gen_2,pol);
   s = sturm(pol);
   if (s)
   {

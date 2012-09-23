@@ -292,4 +292,16 @@
   ***   at top-level: ...],Vecsmall([2,2,2,2,3])];galoissubgroups(G)
   ***                                             ^------------------
   *** galoissubgroups: sorry, group_quotient for a non-WSS group is not yet implemented.
-Total time spent: 0
+  ***   at top-level: bnrstark(bnrinit(bnf
+  ***                 ^--------------------
+  *** bnrstark: domain error in bnrstark: r2 != 0
+  ***   at top-level: bnrstark(bnrinit(bnf
+  ***                 ^--------------------
+  *** bnrstark: domain error in bnrstark: r2(class field) != 0
+  ***   at top-level: quadray(-16,1)
+  ***                 ^--------------
+  *** quadray: domain error in quadray: isfundamental(D) = 0
+  ***   at top-level: quadray(bnfinit(x^3-
+  ***                 ^--------------------
+  *** quadray: domain error in quadray: degree != 2
+Total time spent: 20
