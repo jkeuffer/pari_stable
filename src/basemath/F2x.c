@@ -825,7 +825,7 @@ F2x_F2xqV_eval(GEN P, GEN V, GEN T)
     z = F2xq_eval_powers(P,V,0,d);
     return gerepileuptoleaf(av, z);
   }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in F2x_F2xqV_eval");
+  if (l<=1) pari_err_DOMAIN("F2x_F2xqV_eval", "#powers", "<=", gen_1, V);
   d -= l;
   btop = avma;
   z = F2xq_eval_powers(P,V,d+1,l-1);

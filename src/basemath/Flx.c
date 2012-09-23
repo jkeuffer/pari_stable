@@ -2022,7 +2022,7 @@ Flx_FlxqV_eval(GEN P, GEN V, GEN T, ulong p)
     z = Flxq_eval_powers(P,V,0,d,p);
     return gerepileupto(av, z);
   }
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in Flx_FlxqV_eval");
+  if (l<=1) pari_err_DOMAIN("Flx_FlxqV_eval", "#powers", "<=", gen_1, V);
   d -= l;
   btop = avma;
   z = Flxq_eval_powers(P,V,d+1,l-1,p);
