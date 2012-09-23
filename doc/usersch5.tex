@@ -8800,6 +8800,13 @@ this system}.
 @eprog\noindent prints the error message: \kbd{sorry, $s$ is not yet
 implemented}.
 
+\subsubsec{e\_PACKAGE} Missing optional package $s$.
+\bprog
+  pari_err(e_PACKAGE, const char *s)
+  pari_err_PACKAGE(const char *s)
+@eprog\noindent prints the error message: \kbd{package $s$ is required,
+please install it}
+
 \subsec{Syntax errors, type errors}
 
 \subsubsec{e\_DIM} arguments submitted to function $s$ have inconsistent

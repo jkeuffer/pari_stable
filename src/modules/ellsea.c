@@ -85,9 +85,7 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
 {
   GEN eqn;
   long idx = uprimepi(ell)-1;
-  if (!modular_eqn && !get_seadata(0))
-    pari_err_FILE("seadata package",
-                  stack_strcat(pari_datadir,"/seadata/sea0"));
+  if (!modular_eqn && !get_seadata(0)) pari_err_PACKAGE("seadata");
   if (idx && idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
   else eqn = get_seadata(ell);
@@ -96,6 +94,10 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
   M->eq = list_to_pol(gel(eqn, 3), vx, vy);
   return 1;
 }
+
+static void
+err_modular_eqn(long ell)
+{ pari_err(e_MISC,"modular equation of level %ld is not available", ell); }
 
 GEN
 ellmodulareqn(long ell, long vx, long vy)
@@ -111,7 +113,7 @@ ellmodulareqn(long ell, long vx, long vy)
 
   res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
-    pari_err(e_MISC,"modular equation of level %ld is not available", ell);
+    err_modular_eqn(ell);
   else
   {
     gel(res,1) = meqn.eq;
@@ -912,8 +914,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN q, GEN T, GEN p, long *ptr_kt, ulong s
     }
   }
   kt = k;
-  if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN))
-    pari_err(e_MISC,"not enough modular polynomials");
+  if (!get_modular_eqn(&MEQN, ell, 0, MAXVARN)) err_modular_eqn(ell);
   if (DEBUGLEVEL)
   { err_printf("Process prime %5ld. ", ell); timer_start(&ti); }
   meqnj = FqXY_evalx(MEQN.eq, Fq_ellj(a4, a6, T, p), T, p);
@@ -1494,6 +1495,6 @@ ellsea(GEN E, GEN p, long smallfact)
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
   GEN card = Fp_ellcard_SEA(a4, a6, p, smallfact);
-  if (!card) pari_err(e_MISC,"package seadata is required");
+  if (!card) pari_err_PACKAGE("seadata");
   return gerepileuptoint(av, subii(addis(p,1),card));
 }

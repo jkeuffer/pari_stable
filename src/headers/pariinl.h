@@ -2393,6 +2393,8 @@ pari_err_OVERFLOW(const char *f) { pari_err(e_OVERFLOW, f); }
 INLINE void
 pari_err_PREC(const char *f) { pari_err(e_PREC,f); }
 INLINE void
+pari_err_PACKAGE(const char *f) { pari_err(e_PACKAGE,f); }
+INLINE void
 pari_err_PRIME(const char *f, GEN x) { pari_err(e_PRIME, f,x); }
 INLINE void
 pari_err_MODULUS(const char *f, GEN x, GEN y) { pari_err(e_MODULUS, f,x,y); }

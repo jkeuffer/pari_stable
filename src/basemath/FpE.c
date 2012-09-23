@@ -1023,8 +1023,7 @@ Fp_ellcard(GEN a4, GEN a6, GEN p)
     return utoi(Fl_ellcard_Shanks(itou(a4), itou(a6), pp));
   if (lp >= 62)
   { GEN a = Fp_ellcard_SEA(a4, a6, p, 0); if (a) return a; }
-  if (lp >= 90)
-    pari_err(e_MISC,"package seadata is required");
+  if (lp >= 90) pari_err_PACKAGE("seadata");
   return Fp_ellcard_Shanks(a4, a6, p);
 }
 
@@ -1478,7 +1477,7 @@ FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
   else
   {
     r = Fq_ellcard_SEA(a4, a6, q, T, p, 0);
-    if (!r) pari_err(e_MISC,"package seadata is required");
+    if (!r) pari_err_PACKAGE("seadata");
   }
   return gerepileuptoint(av, r);
 }

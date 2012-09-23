@@ -3671,6 +3671,7 @@ INLINE void    pari_err_MAXPRIME(ulong c);
 INLINE void    pari_err_MODULUS(const char *f, GEN x, GEN y);
 INLINE void    pari_err_OP(const char *f, GEN x, GEN y);
 INLINE void    pari_err_OVERFLOW(const char *f);
+INLINE void    pari_err_PACKAGE(const char *f);
 INLINE void    pari_err_PREC(const char *f);
 INLINE void    pari_err_PRIME(const char *f, GEN x);
 INLINE void    pari_err_PRIORITY(const char *f, GEN x, const char *op, long v);

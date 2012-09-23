@@ -695,7 +695,7 @@ Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
   else
   {
     r = Fq_ellcard_SEA(Flx_to_ZX(a4),Flx_to_ZX(a6),q,Flx_to_ZX(T),utoi(p),0);
-    if (!r) pari_err(e_MISC,"package seadata is required");
+    if (!r) pari_err_PACKAGE("seadata");
   }
   return gerepileuptoint(av, r);
 }

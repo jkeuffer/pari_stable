@@ -42,6 +42,9 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   \item \kbd{"e\_IMPL"}. A requested feature $s$ is not implemented.
   \var{E} has one component, 1 (\typ{STR}): the feature name $s$.
 
+  \item \kbd{"e\_PACKAGE"}. Missing optional package $s$.
+  \var{E} has one component, 1 (\typ{STR}): the package name $s$.
+
   \misctitle{Syntax errors, type errors}
 
   \item \kbd{"e\_DIM"}. The dimensions of arguments $x$ and $y$ submitted

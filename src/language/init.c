@@ -1023,6 +1023,7 @@ pari_err2GEN(long numerr, va_list ap)
   case e_PREC:
   case e_BUG:
   case e_ARCH:
+  case e_PACKAGE:
     retmkerr2(numerr, strtoGENstr(va_arg(ap, char*)));
   case e_MODULUS:
   case e_VAR:
@@ -1125,6 +1126,8 @@ pari_err2str(GEN e)
     return pari_sprintf("invalid flag in %Ps.", gel(e,2));
   case e_IMPL:
     return pari_sprintf("sorry, %Ps is not yet implemented.", gel(e,2));
+  case e_PACKAGE:
+    return pari_sprintf("package %Ps is required, please install it.", gel(e,2));
   case e_INV:
     return pari_sprintf("impossible inverse in %Ps: %Ps.", gel(e,2), gel(e,3));
   case e_IRREDPOL:
@@ -1312,6 +1315,7 @@ numerr_name(long numerr)
   case e_NOTFUNC:  return "e_NOTFUNC";
   case e_OP:       return "e_OP";
   case e_OVERFLOW: return "e_OVERFLOW";
+  case e_PACKAGE:  return "e_PACKAGE";
   case e_PREC:     return "e_PREC";
   case e_PRIME:    return "e_PRIME";
   case e_PRIORITY: return "e_PRIORITY";
@@ -1350,6 +1354,7 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_NOTFUNC"))  return e_NOTFUNC;
   if (!strcmp(s,"e_OP"))       return e_OP;
   if (!strcmp(s,"e_OVERFLOW")) return e_OVERFLOW;
+  if (!strcmp(s,"e_PACKAGE"))  return e_PACKAGE;
   if (!strcmp(s,"e_PREC"))     return e_PREC;
   if (!strcmp(s,"e_PRIME"))    return e_PRIME;
   if (!strcmp(s,"e_PRIORITY")) return e_PRIORITY;

@@ -19,7 +19,7 @@ enum err_list {
 
   e_ALARM, e_FILE,
 
-  e_MISC, e_FLAG, e_IMPL, e_ARCH, e_NOTFUNC,
+  e_MISC, e_FLAG, e_IMPL, e_ARCH, e_PACKAGE, e_NOTFUNC,
 
   e_PREC, e_TYPE, e_DIM, e_VAR, e_PRIORITY, e_USER,
 
