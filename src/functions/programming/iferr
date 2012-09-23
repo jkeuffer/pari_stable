@@ -1,10 +1,18 @@
+Function: _iferr_CATCH
+Class: gp2c_internal
+Description:
+  ()          pari_CATCH(CATCH_ALL)
+  (errtyp)    pari_CATCH($1)
+
+Function: _iferr_error
+Class: gp2c_internal
+Description:
+  ():error pari_err_last()
+
 Function: iferr
 Section: programming/control
 C-Name: iferrpari
 Prototype: EVE
-Wrapper: (_,_)
-Description:
- (closure,closure):gen iferrpari($1, $2)
 Help: iferr(seq1,E,seq2): evaluates the expression sequence seq1. If
  an error occurs, seq2 is evaluated with the formal parameter E set to the
  error data.
