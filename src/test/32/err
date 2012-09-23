@@ -304,4 +304,30 @@
   ***   at top-level: quadray(bnfinit(x^3-
   ***                 ^--------------------
   *** quadray: domain error in quadray: degree != 2
+  ***   at top-level: galoissubcyclo(-1)
+  ***                 ^------------------
+  *** galoissubcyclo: domain error in galoissubcyclo: degree <= 0
+  ***   at top-level: galoissubcyclo(6,Mod
+  ***                 ^--------------------
+  *** galoissubcyclo: inconsistent moduli in galoissubcyclo:
+    6
+    3
+  ***   at top-level: galoissubcyclo(6,[;]
+  ***                 ^--------------------
+  *** galoissubcyclo: incorrect type in galoissubcyclo [H not in HNF] (t_MAT).
+  ***   at top-level: galoissubcyclo(6,Mat
+  ***                 ^--------------------
+  *** galoissubcyclo: incorrect type in galoissubcyclo [N not a bnrinit or znstar] (t_MAT).
+  ***   at top-level: galoissubcyclo(znsta
+  ***                 ^--------------------
+  *** galoissubcyclo: inconsistent dimensions in galoissubcyclo.
+  ***   at top-level: galoissubcyclo(bnrin
+  ***                 ^--------------------
+  *** galoissubcyclo: domain error in bnr_to_znstar: bnr != Q
+  ***   at top-level: polsubcyclo(-1,2)
+  ***                 ^-----------------
+  *** polsubcyclo: domain error in polsubcyclo: n <= 0
+  ***   at top-level: polsubcyclo(2,-1)
+  ***                 ^-----------------
+  *** polsubcyclo: domain error in polsubcyclo: d <= 0
 Total time spent: 20
