@@ -45,12 +45,16 @@ pari_close_seadata(void) { if (modular_eqn) gunclone(modular_eqn); }
 static int
 FqX_equal(GEN x, GEN y) { return gequal(x,y); }
 
+static char *
+seadata_filename(ulong ell)
+{ return pari_sprintf("%s/seadata/sea%ld", pari_datadir, ell); }
+
 static GEN
 get_seadata(ulong ell)
 {
   pari_sp av=avma;
   GEN eqn;
-  char *s = pari_sprintf("%s/seadata/sea%ld", pari_datadir, ell);
+  char *s = seadata_filename(ell);
   pariFILE *F = pari_fopengz(s);
   free(s); if (!F) return NULL;
   if (ell==0)
@@ -97,7 +101,10 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
 
 static void
 err_modular_eqn(long ell)
-{ pari_err(e_MISC,"modular equation of level %ld is not available", ell); }
+{
+  char *s = seadata_filename(ell), *t = stack_strdup(s);
+  free(s); pari_err_FILE("seadata file", t);
+}
 
 GEN
 ellmodulareqn(long ell, long vx, long vy)

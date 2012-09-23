@@ -540,9 +540,8 @@ group_ident_trans(GEN G, GEN S)
   long n = group_order(G), s;
   const long *t;
   if (n == 1) return 1;
-  if (n > 30)
-    pari_err(e_MISC,
-        "Classification of transitive groups of order > 30 is not known");
+  /* N.B. known up to 32 (Cannon-Holt) */
+  if (n > 30) pari_err_IMPL("group_ident_trans [n > 30]");
   if (uisprime(n)) return 1;
   s = group_ident(G,S);
   for(t=tab;*t>=0;t++)

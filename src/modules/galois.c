@@ -254,7 +254,7 @@ fixprec(buildroot *BR)
   GEN r = BR->r;
   long i, l = lg(r), p = BR->pr;
 
-  if (p > BR->prmax) pari_err(e_MISC,"too large precision in fixprec()");
+  if (p > BR->prmax) pari_err_BUG("fixprex [precision too large]");
   for (i = 1; i < l; i++) preci(gel(r,i), p);
 }
 

@@ -4420,6 +4420,18 @@ pari_sprintf(const char *fmt, ...) /* variadic version of Strprintf */
   va_end(ap); return s;
 }
 
+char *
+stack_sprintf(const char *fmt, ...)
+{
+  char *s, *t;
+  va_list ap;
+  va_start(ap, fmt);
+  s = pari_vsprintf(fmt, ap);
+  va_end(ap);
+  t = stack_strdup(s);
+  free(s); return t;
+}
+
 GEN
 gsprintf(const char *fmt, ...) /* variadic version of gvsprintf */
 {

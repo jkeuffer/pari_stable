@@ -181,7 +181,7 @@ idealsqrtn(GEN nf, GEN x, GEN gn, int strict)
   {
     long ex = itos(gel(Ex,i));
     GEN e = stoi(ex / n);
-    if (strict && ex % n) pari_err(e_MISC,"not an n-th power in idealsqrtn");
+    if (strict && ex % n) pari_err_SQRTN("idealsqrtn", fa);
     if (q) q = idealmulpowprime(nf, q, gel(Pr,i), e);
     else   q = idealpow(nf, gel(Pr,i), e);
   }
@@ -350,7 +350,7 @@ downtoK(toK_s *T, GEN x)
 static GEN
 no_sol(long all, long i)
 {
-  if (!all) pari_err(e_MISC,"bug%d in kummer",i);
+  if (!all) pari_err_BUG(stack_sprintf("kummer [bug%ld]", i));
   return cgetg(1,t_VEC);
 }
 

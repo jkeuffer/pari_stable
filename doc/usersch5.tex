@@ -8488,6 +8488,9 @@ on the PARI stack (uses \kbd{stack\_malloc}).
 concatenation of $s$ and $t$, allocated on the PARI stack (uses
 \kbd{stack\_malloc}).
 
+\fun{char*}{stack_sprintf}{const char *fmt, ...} runs \kbd{pari\_sprintf}
+on the given arguments, returning a string allocated on the PARI stack.
+
 \fun{char*}{itostr}{GEN x} writes the \typ{INT} $x$ to a \tet{stack_malloc}'ed
 string.
 
@@ -9023,13 +9026,14 @@ we need to consider its roots. (As in \kbd{polroots(0)}.)
   pari_err_ROOTS0(const char *s)
 @eprog\noindent prints the error message: \kbd{zero polynomial in $s$}.
 
-\subsubsec{e\_SQRTN} Tried to compute an $n$-th root of $x$, which does not exist.
+\subsubsec{e\_SQRTN} Tried to compute an $n$-th root of $x$, which does not
+exist, in function $s$.
 (As in \kbd{sqrt(Mod(-1,3))}.)
 \bprog
   pari_err(e_SQRTN, GEN x)
   pari_err_SQRTN(GEN x)
 @eprog\noindent prints the error message: \kbd{not an n-th power residue in
-sqrtn: $x$}.
+$s$: $x$}.
 
 \section{Hashtables}
 A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys

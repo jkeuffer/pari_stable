@@ -1736,6 +1736,7 @@ void    print1(GEN g);
 void    printf0(const char *fmt, GEN args);
 void    printsep(const char *s, GEN g, long flag);
 void    printtex(GEN g);
+char*   stack_sprintf(const char *fmt, ...);
 char*   stack_strcat(const char *s, const char *t);
 char*   stack_strdup(const char *s);
 void    strftime_expand(const char *s, char *buf, long max);

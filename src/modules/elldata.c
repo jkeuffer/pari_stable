@@ -138,13 +138,15 @@ ellcondlist(long f)
 static GEN
 ellsearchbyname(GEN V, char *name)
 {
+  GEN x;
   long j;
   for (j=1; j<lg(V); j++)
   {
     GEN v = gel(V,j);
     if (!strcmp(GSTR(gel(v,1)), name)) return v;
   }
-  pari_err(e_MISC,"No such elliptic curve");
+  x = strtoGENstr(name);
+  pari_err_DOMAIN("ellsearchbyname", "name", "=", x,x);
   return NULL;
 }
 
@@ -175,7 +177,7 @@ ellsearch(GEN A)
     pari_err_TYPE("ellsearch",A);
     return NULL;
   }
-  if (f <= 0) pari_err(e_MISC,"Non-positive conductor in ellsearch");
+  if (f <= 0) pari_err_DOMAIN("ellsearch", "conductor", "<=", gen_0,stoi(f));
   V = ellcondlist(f);
   if (c >= 0)
     V = (i < 0)? ellsearchbyclass(V,c): ellsearchbyname(V, GSTR(A));

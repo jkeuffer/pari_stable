@@ -186,7 +186,7 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
   one component, 1 (\typ{STR}): the function name $s$.
 
   \item \kbd{"e\_SQRTN"}. Trying to compute an $n$-th root of $x$, which does
-  not exist. (As in \kbd{sqrt(Mod(-1,3))}.)
+  not exist, in function $s$. (As in \kbd{sqrt(Mod(-1,3))}.)
   \var{E} has two components, 1 (\typ{STR}): the function name $s$,
   2: the argument $x$.
 

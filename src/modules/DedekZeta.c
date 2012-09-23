@@ -91,7 +91,7 @@ dirzetak(GEN nf, GEN b)
   if (typ(b) != t_INT) pari_err_TYPE("dirzetak",b);
   if (signe(b) <= 0) return cgetg(1,t_VEC);
   nf = checknf(nf);
-  n = itos_or_0(b); if (!n) pari_err(e_MISC,"too many terms in dirzetak");
+  n = itou_or_0(b); if (!n) pari_err_OVERFLOW("dirzetak");
   c = dirzetak0(nf, n);
   z = vecsmall_to_vec(c); pari_free(c); return z;
 }
@@ -122,8 +122,7 @@ zeta_get_N0(GEN C,  GEN limx)
   long e;
   pari_sp av = avma;
   GEN z = gcvtoi(gdiv(C, limx), &e); /* avoid truncation error */
-  if (e >= 0 || is_bigint(z))
-    pari_err(e_MISC, "need %Ps coefficients in initzeta: computation impossible", z);
+  if (e >= 0 || is_bigint(z)) pari_err_OVERFLOW("zeta_get_N0");
   if (DEBUGLEVEL>1) err_printf("\ninitzeta: N0 = %Ps\n", z);
   avma = av; return itos(z);
 }

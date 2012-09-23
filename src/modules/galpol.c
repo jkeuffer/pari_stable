@@ -53,8 +53,8 @@ galoisgetpol(long a, long b, long sig)
   if (!F)
   {
     long n = itos(galoisnbpol(a));
-    if (b > n) pari_err(e_MISC,"Only %ld group%s of order %ld",
-                        n, n>1? "s": "", a);
+    if (b > n)
+      pari_err_DOMAIN("galoisgetpol", "group index", ">", stoi(n), stoi(b));
     else pari_err_FILE("galpol file", F->name);
   }
   V = gp_read_stream(F->file);

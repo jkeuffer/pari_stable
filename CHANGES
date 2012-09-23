@@ -338,6 +338,7 @@ BA 105- Add black box algebra for Brent and Kung algorithm
 BA 107- PARI function RgX_splitting()
    108- made public the CATCH / TRY interface, renamed pari_CATCH / pari_TRY
         PARI functions err_get_num(), err_get_compo(), pari_err_last()
+   109- PARI function stack_sprintf()
 
   Removed
     1- dropped DOS support
