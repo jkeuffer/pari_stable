@@ -5,13 +5,18 @@ Prototype: GGDG
 Help: thue(tnf,a,{sol}): solve the equation P(x,y)=a, where tnf was created
  with thueinit(P), and sol, if present, contains the solutions of Norm(x)=a
  modulo units in the number field defined by P. If tnf was computed without
- assuming GRH (flag 1 in thueinit), the result is unconditional.
+ assuming GRH (flag 1 in thueinit), the result is unconditional. If tnf is a
+ polynomial, compute thue(thueinit(P,0), a).
 Doc: returns all solutions of the equation
  $P(x,y)=a$ in integers $x$ and $y$, where \var{tnf} was created with
  $\kbd{thueinit}(P)$. If present, \var{sol} must contain the solutions of
  $\Norm(x)=a$ modulo units of positive norm in the number field
  defined by $P$ (as computed by \kbd{bnfisintnorm}). If there are infinitely
  many solutions, an error will be issued.
+
+ It is allowed to input directly the polynial $P$ instead of a \var{tnf},
+ in which case, the function performs \kbd{thueinit(P,0)} itself. This is
+ very wasteful if more than one value of $a$ is used.
 
  If \var{tnf} was computed without assuming GRH (flag $1$ in \tet{thueinit}),
  then the result is unconditional. Otherwise, it depends in principle of the

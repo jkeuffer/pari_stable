@@ -625,10 +625,11 @@ thueinit(GEN pol, long flag, long prec)
 {
   GEN POL, C, L, fa, tnf, bnf = NULL;
   pari_sp av = avma;
-  long k, s, lfa, dpol = degpol(pol);
+  long k, s, lfa, dpol;
 
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
   if (typ(pol)!=t_POL) pari_err_TYPE("thueinit",pol);
+  dpol = degpol(pol);
   if (dpol <= 0) pari_err_CONSTPOL("thueinit");
   RgX_check_ZX(pol, "thueinit");
   if (varn(pol)) { pol = leafcopy(pol); setvarn(pol, 0); }
@@ -649,7 +650,7 @@ thueinit(GEN pol, long flag, long prec)
     if (e != 1)
     {
       if (lfa == 2) {
-        tnf = mkvec2(thueinit(f, flag, prec), E);
+        tnf = mkvec2(mkvec3(pol,C,L), mkvec2(thueinit(f, flag, prec), E));
         return gerepilecopy(av, tnf);
       }
       P = gpowgs(f,e);
@@ -1038,6 +1039,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
   pari_sp av = avma;
   GEN POL, C, L, x3, S;
 
+  if (typ(tnf) == t_POL) tnf = thueinit(tnf, 0, DEFAULTPREC);
   if (!checktnf(tnf)) pari_err_TYPE("thue [please apply thueinit()]", tnf);
   if (typ(rhs) != t_INT) pari_err_TYPE("thue",rhs);
 
@@ -1056,9 +1058,19 @@ thue(GEN tnf, GEN rhs, GEN ne)
     if (!x3) { avma = (pari_sp)S; return S; }
     S = SmallSols(S, x3, POL, rhs);
   }
-  else if (typ(gel(tnf,2)) == t_INT) /* reducible case, pure power*/
+  else if (typ(gel(tnf,2)) == t_REAL)
+  { /* Case s=0. All solutions are "small". */
+    GEN c0 = gel(tnf,2); /* t_REAL */
+    if (!signe(rhs)) { avma = av; return sol_0(); }
+    x3 = sqrtnr(mulir(absi(rhs),c0), degpol(POL));
+    x3 = addrr(x3, dbltor(0.1)); /* guard from round-off errors */
+    S = SmallSols(S, x3, POL, rhs);
+  }
+  else if (typ(gmael(tnf,2,1)) == t_VEC) /* reducible case, pure power*/
   {
-    long e = itos( gel(tnf,2) );
+    long e;
+    tnf = gel(tnf,2);
+    e = itos( gel(tnf,2) );
     if (!signe(rhs)) { avma = av; return sol_0(); }
 
     if (!Z_ispowerall(rhs, e, &rhs)) { avma = av; return cgetg(1, t_VEC); }
@@ -1095,14 +1107,6 @@ thue(GEN tnf, GEN rhs, GEN ne)
           if (typ(gel(ry,k)) == t_INT) check_y(&S, P, POL, gel(ry,k), rhs);
       }
     }
-  }
-  else
-  { /* Case s=0. All solutions are "small". */
-    GEN c0 = gel(tnf,2); /* t_REAL */
-    if (!signe(rhs)) { avma = av; return sol_0(); }
-    x3 = sqrtnr(mulir(absi(rhs),c0), degpol(POL));
-    x3 = addrr(x3, dbltor(0.1)); /* guard from round-off errors */
-    S = SmallSols(S, x3, POL, rhs);
   }
   return gerepilecopy(av, filter_sol_x(S, L));
 }
