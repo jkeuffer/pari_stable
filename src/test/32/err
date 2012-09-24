@@ -333,4 +333,13 @@
   ***   at top-level: random(-1)
   ***                 ^----------
   *** random: domain error in random: N <= 0
-Total time spent: 16
+  ***   at top-level: znprimroot(0)
+  ***                 ^-------------
+  *** znprimroot: domain error in znprimroot: modulus = 0
+  ***   at top-level: sqrtint(-1)
+  ***                 ^-----------
+  *** sqrtint: domain error in sqrtint: argument < 0
+  ***   at top-level: znprimroot(8)
+  ***                 ^-------------
+  *** znprimroot: domain error in znprimroot: modulus = 8
+Total time spent: 24

@@ -138,7 +138,7 @@ ulong
 pgener_Zl(ulong p)
 {
   ulong x;
-  if (p == 2) pari_err(e_MISC,"primitive root mod 2^3 does not exist");
+  if (p == 2) pari_err_DOMAIN("pgener_Zl","p","=",gen_2,gen_2);
   /* only p < 2^32 such that znprimroot(p) != znprimroot(p^2) */
   if (p == 40487) return 40492;
   x = pgener_Fl(p);
@@ -185,7 +185,7 @@ znprimroot(GEN m)
   GEN x, z;
 
   if (typ(m) != t_INT) pari_err_TYPE("znprimroot",m);
-  if (!signe(m)) pari_err(e_MISC,"zero modulus in znprimroot");
+  if (!signe(m)) pari_err_DOMAIN("znprimroot","modulus","=",gen_0,gen_0);
   if (is_pm1(m)) return mkintmodu(0,1);
   z = cgetg(3, t_INTMOD);
   m = absi(m);
@@ -194,8 +194,8 @@ znprimroot(GEN m)
   switch(mod4(m))
   {
     case 0: /* m = 0 mod 4 */
-      if (!equaliu(m,4)) /* m != 4, non cyclic */
-        pari_err(e_MISC,"primitive root mod %Ps does not exist", m);
+      /* m != 4, non cyclic */
+      if (!equaliu(m,4)) pari_err_DOMAIN("znprimroot", "modulus","=",m,m);
       x = utoipos(3);
       break;
     case 2: /* m = 2 mod 4 */
@@ -464,7 +464,7 @@ sqrtint(GEN a)
   {
     case 1: return sqrti(a);
     case 0: return gen_0;
-    default: pari_err(e_MISC, "negative integer in sqrtint");
+    default: pari_err_DOMAIN("sqrtint", "argument", "<", gen_0,a);
   }
   return NULL; /* not reached */
 }
@@ -975,7 +975,7 @@ ispower(GEN x, GEN K, GEN *pt)
 
   if (!K) return gisanypower(x, pt);
   if (typ(K) != t_INT) pari_err_TYPE("ispower",K);
-  if (signe(K) <= 0) pari_err(e_MISC, "non-positive exponent %Ps in ispower",K);
+  if (signe(K) <= 0) pari_err_DOMAIN("ispower","exponent","<=",gen_0,K);
   if (equali1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
