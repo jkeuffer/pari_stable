@@ -2357,8 +2357,7 @@ static void
 check_padic_p(GEN x, GEN p)
 {
   GEN q = gel(x,2);
-  if (p && !equalii(p, q))
-    pari_err(e_MISC, "different primes in Zp_to_Z: %Ps != %Ps", p, q);
+  if (p && !equalii(p, q)) pari_err_MODULUS("Zp_to_Z", p,q);
 }
 static GEN
 Zp_to_Z(GEN x, GEN p) {
@@ -2588,7 +2587,8 @@ rootpadic(GEN f, GEN p, long prec)
   if (typ(p)!=t_INT) pari_err_TYPE("rootpadic",p);
   if (typ(f)!=t_POL) pari_err_TYPE("rootpadic",f);
   if (gequal0(f)) pari_err_ROOTS0("rootpadic");
-  if (prec <= 0) pari_err(e_MISC,"non-positive precision in rootpadic");
+  if (prec <= 0)
+    pari_err_DOMAIN("rootpadic", "precision", "<=",gen_0,stoi(prec));
   f = QpX_to_ZX(f, p);
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
   y = ZX_Zp_roots(f,p,PREC);
@@ -2901,7 +2901,8 @@ factorpadic0(GEN f,GEN p,long r,long flag)
   if (typ(f)!=t_POL) pari_err_TYPE("factorpadic",f);
   if (typ(p)!=t_INT) pari_err_TYPE("factorpadic",p);
   if (!signe(f)) return zero_fact(f);
-  if (r <= 0) pari_err(e_MISC,"non-positive precision in factorpadic");
+  if (r <= 0)
+    pari_err_DOMAIN("factorpadic", "precision", "<=",gen_0,stoi(r));
   switch(flag)
   {
      case 0: return factorpadic(f,p,r);
@@ -3071,7 +3072,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
     GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
     F = FqX_normalize(FqX_gcd(u, F, T, p), T, p);
     if (typ(F) != t_POL || degpol(F) == 0)
-      pari_err(e_MISC,"reducible modulus in FqX_split_Trager");
+      pari_err_IRREDPOL("FqX_split_Trager [modulus]",T);
     u = FqX_div(u, F, T, p);
     gel(P,i) = F;
   }

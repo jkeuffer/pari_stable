@@ -351,4 +351,44 @@
   ***   at top-level: addprimes(-1)
   ***                 ^-------------
   *** addprimes: domain error in addprimes: p < 2
+  ***   at top-level: padicappr(x^2+1+O(3^
+  ***                 ^--------------------
+  *** padicappr: inconsistent moduli in Zp_to_Z:
+    5
+    3
+  ***   at top-level: factorpadic(x^2+1,2,
+  ***                 ^--------------------
+  *** factorpadic: domain error in factorpadic: precision <= 0
+  ***   at top-level: polrootspadic(x^2+1,
+  ***                 ^--------------------
+  *** polrootspadic: domain error in rootpadic: precision <= 0
+  ***   at top-level: ellinit([1+O(3),1+O(
+  ***                 ^--------------------
+  *** ellinit: inconsistent moduli in ellinit:
+    3
+    5
+  ***   at top-level: ellwp([1,I],I)
+  ***                 ^--------------
+  *** ellwp: domain error in ellwp: argument = 0
+  ***   at top-level: ellsigma([1,I],x,1)
+  ***                 ^-------------------
+  *** ellsigma: incorrect type in log(ellsigma) (t_SER).
+  ***   at top-level: ellsigma([1,I],1,1)
+  ***                 ^-------------------
+  *** ellsigma: domain error in log(ellsigma): argument = 0
+  ***   at top-level: ellap(E)
+  ***                 ^--------
+  *** ellap: incorrect type in ellap [can't determine p] (t_VEC).
+  ***   at top-level: elltaniyama(E,-1)
+  ***                 ^-----------------
+  *** elltaniyama: domain error in elltaniyama: precision < 0
+  ***   at top-level: ellheight(E,[2,2])
+  ***                 ^------------------
+  *** ellheight: domain error in ellheight: point not on E
+  ***   at top-level: elllog(ellinit([ffge
+  ***                 ^--------------------
+  *** elllog: sorry, elllog [non prime finite field without group order] is not yet implemented.
+  ***   at top-level: ellorder(ellinit([ff
+  ***                 ^--------------------
+  *** ellorder: sorry, ellorder [non prime finite field without group order] is not yet implemented.
 Total time spent: 20

@@ -416,7 +416,7 @@ base_ring(GEN x, GEN *pp, long *prec)
         if (!p)
           p = gel(q,2);
         else if (!equalii(p, gel(q,2)))
-          pari_err(e_MISC,"incompatible p-adic numbers in ellinit");
+          pari_err_MODULUS("ellinit", p,gel(q,2));
         break;
       }
       case t_INT: case t_REAL: case t_FRAC:
@@ -1437,7 +1437,8 @@ red_modSL2(SL2_red *T)
   long s;
   T->tau = gdiv(T->w1,T->w2);
   s = gsigne(imag_i(T->tau));
-  if (!s) pari_err(e_MISC,"w1 and w2 R-linearly dependent in elliptic function");
+  if (!s) pari_err_DOMAIN("elliptic function", "det(w1,w2)", "=", gen_0,
+                          mkvec2(T->w1,T->w2));
   T->swap = (s < 0);
   if (T->swap) { swap(T->w1, T->w2); T->tau = ginv(T->tau); }
   set_gamma(T->tau, &T->a, &T->b, &T->c, &T->d);
@@ -1758,7 +1759,7 @@ ellwp0(GEN w, GEN z, long flag, long prec)
   }
   if (!get_periods(w, &T)) pari_err_TYPE("ellwp",w);
   y = ellwpnum_all(&T,z,flag,prec);
-  if (!y) pari_err(e_MISC, "argument in lattice in ellwp");
+  if (!y) pari_err_DOMAIN("ellwp", "argument","=", gen_0,z);
   return gerepileupto(av, y);
 }
 
@@ -1837,8 +1838,8 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q;
-    if (v <= 0) pari_err(e_IMPL,"ellsigma(t_SER) away from 0");
-    if (dolog) pari_err(e_MISC,"can't compute log(ellsigma(t_SER))");
+    if (v <= 0) pari_err_IMPL("ellsigma(t_SER) away from 0");
+    if (dolog) pari_err_TYPE("log(ellsigma)",y);
     if (gequal0(y)) { check_periods(w); avma = av; return zeroser(vy, -v); }
     P = ellwpseries0(w, vy, lg(y)-2, prec0);
     P = integ(gneg(P), vy); /* \zeta' = - \wp*/
@@ -1854,7 +1855,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   if (!Z)
   {
     if (!dolog) return gen_0;
-    pari_err(e_MISC,"can't evaluate log(ellsigma) at lattice point");
+    pari_err_DOMAIN("log(ellsigma)", "argument","=",gen_0,z);
   }
   prec = precision(Z);
   if (!prec) { prec = precision(T.tau); if (!prec) prec = prec0; }
@@ -2789,18 +2790,15 @@ get_p(GEN e, GEN p, const char *name)
 {
   GEN disc = ell_get_disc(e);
   GEN pp = p;
-  if (p && (typ(p)!=t_INT || signe(p) <= 0))
-    pari_err_PRIME(name, p);
+  if (p && (typ(p)!=t_INT || signe(p) <= 0)) pari_err_PRIME(name, p);
   if (lg(e)==19) pp = pp ? p :gen_0;
   else switch(typ(disc))
   {
     case t_INTMOD: pp = gel(disc,1); break;
     case t_FFELT:  pp = gel(disc,2); break;
   }
-  if (!pp)
-    pari_err(e_MISC,"cannot determine the prime p in %s", name);
-  if (p && !equalii(p, pp))
-    pari_err(e_MISC,"incompatible prime number in %s", name);
+  if (!pp) pari_err_TYPE(stack_strcat(name," [can't determine p]"), e);
+  if (p && !equalii(p, pp)) pari_err_MODULUS(name, p, pp);
   return pp;
 }
 
@@ -2966,7 +2964,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   else
   {
     if (gsigne(A)<=0)
-      pari_err(e_MISC,"cut-off point must be positive in lseriesell");
+      pari_err_DOMAIN("elllseries", "cut-off point", "<=", gen_0,A);
     if (gcmpgs(A,1) < 0) A = ginv(A);
   }
   if (isint(s, &s) && signe(s) <= 0) { avma = av; return gen_0; }
@@ -3186,8 +3184,8 @@ ellheight0(GEN e, GEN a, long flag, long prec)
     return z;
   }
   if (ell_is_inf(a)) return gen_0;
-  if (!oncurve(e,a)) pari_err(e_MISC, "point not on elliptic curve");
-
+  if (!oncurve(e,a))
+    pari_err_DOMAIN("ellheight", "point", "not on", strtoGENstr("E"),a);
   psi2 = numer(d_ellLHS(e,a));
   if (!signe(psi2)) { avma = av; return gen_0; }
   switch(flag)
@@ -3336,7 +3334,7 @@ elltaniyama(GEN e, long prec)
   pari_sp av = avma;
 
   checksmallell(e);
-  if (prec < 0) pari_err(e_MISC, "negative precision in elltaniyama");
+  if (prec < 0) pari_err_DOMAIN("elltaniyama","precision","<",gen_0,stoi(prec));
   if (!prec) retmkvec2(triv_ser(gen_1,-2), triv_ser(gen_m1,-3));
 
   x = cgetg(prec+3,t_SER);
@@ -3510,7 +3508,7 @@ elllog(GEN e, GEN a, GEN g, GEN o)
     else if (!o) o = ellorder(e,g,o);
   }
   else if (!o)
-    pari_err(e_MISC,"group order required for non-prime finite field");
+    pari_err_IMPL("elllog [non prime finite field without group order]");
   z = gen_PH_log(a,g,o, (void*)e,&ell_group);
   return gerepileupto(av, z? z: cgetg(1,t_VEC));
 }
@@ -3592,7 +3590,7 @@ ellorder(GEN e, GEN z, GEN o)
     if (ell_is_FpE(e, z, &p) && p)
       o = ellcard(e,p);
     else
-      pari_err(e_MISC,"curve order required");
+      pari_err_IMPL("ellorder [non prime finite field without group order]");
   }
   return gerepileuptoint(av, gen_order(z, o, (void*)e, &ell_group));
 }
@@ -3746,7 +3744,7 @@ myround(GEN x, long *e)
 {
   GEN y = grndtoi(x,e);
   if (*e > -5 && prec2nbits(gprecision(x)) < gexpo(y) - 10)
-    pari_err(e_MISC, "ellinit data not accurate enough. Increase precision");
+    pari_err_PREC("elltors");
   return y;
 }
 

@@ -1695,7 +1695,7 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
     F = RgXQX_translate(F, x0, T);
     /* F = gcd(f, u(t - x0)) [t + x0] = gcd(f(t + x0), u), more efficient */
     if (typ(F) != t_POL || degpol(F) == 0)
-      pari_err(e_MISC,"reducible modulus in factornf");
+      pari_err_IRREDPOL("factornf [modulus]",T);
     gel(P,i) = QXQX_normalize(F, T);
   }
   return P;

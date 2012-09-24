@@ -157,3 +157,18 @@ znprimroot(8)
 polroots(x^2+Mod(1,2))
 prime(-2)
 addprimes(-1)
+padicappr(x^2+1+O(3^5), 1+O(5))
+factorpadic(x^2+1,2,-1)
+polrootspadic(x^2+1,2,-1)
+ellinit([1+O(3),1+O(5)])
+ellwp([1,I],I)
+ellsigma([1,I],x,1)
+ellsigma([1,I],1,1)
+E=ellinit([1,1]);
+ellap(E)
+elltaniyama(E,-1)
+ellheight(E,[2,2])
+elllog(ellinit([ffgen(ffinit(5,2)),0]), [1,1], [1,1])
+ellorder(ellinit([ffgen(ffinit(5,2)),0]), [1,1])
+
+
