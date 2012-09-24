@@ -342,4 +342,13 @@
   ***   at top-level: znprimroot(8)
   ***                 ^-------------
   *** znprimroot: domain error in znprimroot: modulus = 8
-Total time spent: 24
+  ***   at top-level: polroots(x^2+Mod(1,2
+  ***                 ^--------------------
+  *** polroots: incorrect type in roots (t_INTMOD).
+  ***   at top-level: prime(-2)
+  ***                 ^---------
+  *** prime: domain error in prime: n <= 0
+  ***   at top-level: addprimes(-1)
+  ***                 ^-------------
+  *** addprimes: domain error in addprimes: p < 2
+Total time spent: 20

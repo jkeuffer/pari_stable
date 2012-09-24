@@ -906,7 +906,7 @@ uprime(long N)
 {
   byteptr d;
   ulong p;
-  if (N <= 0) pari_err(e_MISC, "n-th prime meaningless if n = %ld",N);
+  if (N <= 0) pari_err_DOMAIN("prime", "n", "<=",gen_0, stoi(N));
   prime_table_find_n(N, &d, &p);
   return p;
 }
@@ -1098,8 +1098,7 @@ addp(GEN *T, GEN p)
   RgV_check_ZV(p, "addprimes");
   v = gen_indexsort_uniq(p, (void*)&cmpii, &cmp_nodata);
   p = vecpermute(p, v);
-  if (cmpii(gel(p,1), gen_1) <= 0)
-    pari_err(e_MISC,"entries must be > 1 in addprimes");
+  if (cmpiu(gel(p,1), 2) < 0) pari_err_DOMAIN("addprimes", "p", "<", gen_2,p);
   p = addp_union(*T, p);
   l = lg(p);
   if (l != lg(*T))

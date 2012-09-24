@@ -933,7 +933,7 @@ initRUgen(long N, long bit)
 GEN
 FFTinit(long k, long prec)
 {
-  if (k <= 0) pari_err(e_MISC, "non-positive k in FFTinit");
+  if (k <= 0) pari_err_DOMAIN("FFTinit", "k", "<=", gen_0, stoi(k));
   return initRU(1L << k, prec2nbits(prec)) - 1;
 }
 
@@ -1954,13 +1954,12 @@ isvalidcoeff(GEN x)
   return 0;
 }
 
-static long
-isvalidpol(GEN p)
+static void
+checkvalidpol(GEN p)
 {
   long i,n = lg(p);
   for (i=2; i<n; i++)
-    if (!isvalidcoeff(gel(p,i))) return 0;
-  return 1;
+    if (!isvalidcoeff(gel(p,i))) pari_err_TYPE("roots", gel(p,i));
 }
 
 static GEN
@@ -2078,7 +2077,7 @@ roots_aux(GEN p, long l, long clean)
     return cgetg(1,t_COL); /* constant polynomial */
   }
   if (!signe(p)) pari_err_ROOTS0("roots");
-  if (!isvalidpol(p)) pari_err(e_MISC,"invalid coefficients in roots");
+  checkvalidpol(p);
   if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
 
   if (l < LOWDEFAULTPREC) l = LOWDEFAULTPREC;
