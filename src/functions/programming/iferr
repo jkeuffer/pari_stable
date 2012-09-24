@@ -4,6 +4,11 @@ Description:
   ()          pari_CATCH(CATCH_ALL)
   (errtyp)    pari_CATCH($1)
 
+Function: _iferr_CATCH_reset
+Class: gp2c_internal
+Description:
+  ():void  pari_CATCH_reset()
+
 Function: _iferr_error
 Class: gp2c_internal
 Description:
