@@ -223,6 +223,7 @@ HC 78- reimplement incgam()
    81- unless 'echo = 1', no longer log commands entered non-interactively
        when 'log = 1'. '\r file' used to log the entire content of 'file'.
    82- allow thue(t_POL, rhs) for thue(thueinit(t_POL, rhs))
+   83- elltors now uses division polynomials by default
 
   Added
     1- mathnf for matrices over K[X] [#41]

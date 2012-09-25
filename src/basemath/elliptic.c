@@ -3718,25 +3718,27 @@ nagelllutz(GEN e)
 static long
 torsbound(GEN e)
 {
-  long m, b, bold, p = 2;
-  pari_sp av = avma;
-  byteptr diff = diffptr+1;
   GEN D = ell_get_disc(e);
-  long n = expi(D) >> 3;
-  /* n = number of primes to try ~ 1 prime every 8 bits in D */
+  pari_sp av = avma, av2;
+  long m, b, bold, nb = expi(D) >> 3;
+  forprime_t S;
+  /* nb = number of primes to try ~ 1 prime every 8 bits in D */
   b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
   m = 0;
-  while (m < n)
+  (void)u_forprime_init(&S, 3, ULONG_MAX);
+  av2 = avma;
+  while (m < nb || (b > 12 && b != 16))
   {
-    NEXT_PRIME_VIADIFF_CHECK(p,diff);
+    ulong p = u_forprime_next(&S);
+    if (!p) pari_err_BUG("torsbound [ran out of primes]");
     if (!umodiu(D, p)) continue;
 
     b = ugcd(b, p+1 - ellap_small_goodred(e, p));
-    avma = av;
+    avma = av2;
     if (b == 1) break;
     if (b == bold) m++; else { bold = b; m = 0; }
   }
-  return b;
+  avma = av; return b;
 }
 
 static GEN
@@ -3765,7 +3767,7 @@ torspnt(GEN E, GEN w, long n, long prec)
 }
 
 GEN
-elltors(GEN e)
+elltors_doud(GEN e)
 {
   long B, i, ord, pr, prec, k = 1;
   pari_sp av=avma;
@@ -3862,6 +3864,134 @@ elltors(GEN e)
   return gerepileupto(av, tors(e,k,p,tor2, v));
 }
 
+/* return a rational point of order pk = p^k on E, or NULL if E(Q)[k] = O.
+ * *fk is either NULL (pk = 4 or prime) or elldivpol(p^(k-1)).
+ * Set *fk to elldivpol(p^k) */
+static GEN
+tpoint(GEN E, long pk, GEN *fk)
+{
+  GEN f = elldivpol(E,pk,0), g = *fk, v;
+  long i, l;
+  *fk = f;
+  if (g) f = RgX_div(f, g);
+  v = nfrootsQ(f); l = lg(v);
+  for (i = 1; i < l; i++)
+  {
+    GEN x = gel(v,i);
+    GEN y = ellordinate_i(E,x,0);
+    if (lg(y) != 1) return mkvec2(x,gel(y,1));
+  }
+  return NULL;
+}
+/* return E(Q)[2] */
+static GEN
+t2points(GEN E, GEN *f2)
+{
+  long i, l;
+  GEN v;
+  *f2 = RHSpol(E);
+  v = nfrootsQ(*f2); l = lg(v);
+  for (i = 1; i < l; i++)
+  {
+    GEN x = gel(v,i);
+    GEN y = ellordinate_i(E,x,0);
+    if (lg(y) != 1) gel(v,i) = mkvec2(x,gel(y,1));
+  }
+  return v;
+}
+
+static GEN
+elltors_divpol(GEN E)
+{
+  GEN T2 = NULL, p, P, Q, v;
+  long v2, r2, B;
+
+  checkell_real(E);
+  v = ellintegralmodel(E);
+  if (v) E = _coordch(E,v);
+
+  B = torsbound(E); /* #E_tor | B */
+  if (B == 1) return tors(E,1,NULL,NULL, v);
+  v2 = vals(B); /* bound for v_2(point order) */
+  B >>= v2;
+  p = const_vec(9, NULL);
+  if (v) gel(v,1) = ginv(gel(v,1));
+  r2 = 0;
+  if (v2) {
+    GEN f;
+    T2 = t2points(E, &f);
+    switch(lg(T2)-1)
+    {
+      case 0:  v2 = 0; break;
+      case 1:  r2 = 1; if (v2 == 4) v2 = 3; break;
+      default: r2 = 2; v2--; break; /* 3 */
+    }
+    if (v2) gel(p,2) = gel(T2,1);
+    /* f = f_2 */
+    if (v2 > 1) { gel(p,4) = tpoint(E,4, &f); if (!gel(p,4)) v2 = 1; }
+    /* if (v2>1) now f = f4 */
+    if (v2 > 2) { gel(p,8) = tpoint(E,8, &f); if (!gel(p,8)) v2 = 2; }
+  }
+  B <<= v2;
+  if (B % 3 == 0) {
+    GEN f3 = NULL;
+    gel(p,3) = tpoint(E,3,&f3);
+    if (!gel(p,3)) B /= (B%9)? 3: 9;
+    if (gel(p,3) && B % 9 == 0)
+    {
+      gel(p,9) = tpoint(E,9,&f3);
+      if (!gel(p,9)) B /= 3;
+    }
+  }
+  if (B % 5 == 0) {
+    GEN junk = NULL;
+    gel(p,5) = tpoint(E,5,&junk);
+    if (!gel(p,5)) B /= 5;
+  }
+  if (B % 7 == 0) {
+    GEN junk = NULL;
+    gel(p,7) = tpoint(E,7,&junk);
+    if (!gel(p,7)) B /= 7;
+  }
+  /* B is the exponent of E_tors(Q), r2 is the rank of its 2-Sylow,
+   * for i > 2, p[i] is a point of order i if one exists and i is a prime power
+   * and NULL otherwise */
+  if (r2 == 2) /* 2 cyclic factors */
+  { /* C2 x C2 */
+    if (B == 2) return tors(E,2, gel(T2,1), gel(T2,2), v);
+    else if (B == 6)
+    { /* C2 x C6 */
+      P = elladd(E, gel(p,3), gel(T2,1));
+      Q = gel(T2,2);
+    }
+    else
+    { /* C2 x C4 or C2 x C8 */
+      P = gel(p, B);
+      Q = gel(T2,2);
+      if (gequal(Q, ellmul(E, P, utoipos(B>>1)))) Q = gel(T2,1);
+    }
+  }
+  else /* cyclic */
+  {
+    Q = NULL;
+    if (v2)
+    {
+      if (B>>v2 == 1)
+        P = gel(p, B);
+      else
+        P = elladd(E, gel(p, B>>v2), gel(T2,1));
+    }
+    else P = gel(p, B);
+  }
+  return tors(E,B, P, Q, v);
+}
+GEN
+elltors(GEN e)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, elltors_divpol(e));
+}
+
 GEN
 elltors0(GEN e, long flag)
 {
@@ -3869,6 +3999,7 @@ elltors0(GEN e, long flag)
   {
     case 0: return elltors(e);
     case 1: return nagelllutz(e);
+    case 2: return elltors_doud(e);
     default: pari_err_FLAG("elltors");
   }
   return NULL; /* not reached */
@@ -4362,6 +4493,7 @@ ellffweilpairing(GEN E, GEN P, GEN Q, GEN m)
   }
 }
 
+/* n <= 4 */
 static GEN
 elldivpol4(GEN e, long n, long v)
 {
@@ -4425,11 +4557,7 @@ elldivpol(GEN e, long n, long v)
     ret = elldivpol4(e, n, v);
   else
   {
-    GEN a1 = ell_get_a1(e), a2 = ell_get_a2(e), a3 = ell_get_a3(e);
-    GEN a4 = ell_get_a4(e), a6 = ell_get_a6(e);
-    GEN f1 = mkpoln(4, gen_1, a2, a4, a6); /* x^3 + a2 x^2 + a4 x + a6 */
-    GEN f2 = mkpoln(2, a1, a3); /* a1 x + a3 */
-    GEN d2 = RgX_add(gmulsg(4, f1), RgX_sqr(f2)); /* (2y + a1x + 3)^2 mod E */
+    GEN d2 = RHSpol(e); /* (2y + a1x + 3)^2 mod E */
     setvarn(d2,v);
     if (n <= 4)
       ret = elldivpol4(e, n, v);
