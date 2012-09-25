@@ -224,6 +224,8 @@ HC 78- reimplement incgam()
        when 'log = 1'. '\r file' used to log the entire content of 'file'.
    82- allow thue(t_POL, rhs) for thue(thueinit(t_POL, rhs))
    83- elltors now uses division polynomials by default
+   84- modified "Hit Return to Continue" message so that it becomes a comment
+       when copy-pasted
 
   Added
     1- mathnf for matrices over K[X] [#41]
