@@ -136,6 +136,16 @@ FlxC_to_ZXC(GEN x)
   return z;
 }
 
+/*FlxC_to_ZXC=zxV_to_ZXV*/
+GEN
+FlxV_to_ZXV(GEN x)
+{
+  long i, l=lg(x);
+  GEN z = cgetg(l,t_VEC);
+  for (i=1; i<l ; i++) gel(z,i) = Flx_to_ZX(gel(x,i));
+  return z;
+}
+
 /*FlxM_to_ZXM=zxM_to_ZXM*/
 GEN
 FlxM_to_ZXM(GEN z)

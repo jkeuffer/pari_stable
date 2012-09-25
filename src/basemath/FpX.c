@@ -1234,7 +1234,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   int use_sqr = (degpol(x)<<1)>=degpol(T);
   if (l>2 && lgefint(p) == 3) {
     long pp = p[2];
-    return FlxC_to_ZXC(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
+    return FlxV_to_ZXV(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
   }
   D.T = T; D.p = p;
   if (l>2 && lg(T)>FpX_POW_BARRETT_LIMIT)
