@@ -917,7 +917,7 @@ idealfrobenius(GEN nf, GEN gal, GEN pr)
   GEN S=NULL, g=NULL; /*-Wall*/
   GEN T, p, a, b, modpr;
   long f, n, s;
-  checknf(nf);
+  nf = checknf(nf);
   checkgal(gal);
   checkprid(pr);
   if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))
@@ -1058,7 +1058,7 @@ idealramgroups(GEN nf, GEN gal, GEN pr)
   GEN tbl, idx, res, set, sub;
   long i, j, e, n, maxm, p;
   ulong et;
-  checknf(nf);
+  nf = checknf(nf);
   checkgal(gal);
   checkprid(pr);
   if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))

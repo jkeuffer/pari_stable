@@ -114,6 +114,7 @@ BA 90- printf() did not flush output
    93- polrootsff(2*x+1,2,y) -> SEGV [#1350]
    94- resultant(x,x,y) -> 0 and related problems
    95- thue((x^4+1)^2, 4) -> no solution
+BA 96- idealramgroups() and idealfrobenius() did not accept a bnf
 
   Changed
     1- mathnf: swapped flag 3 and 5.
