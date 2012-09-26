@@ -1048,7 +1048,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
     if (sympol_is1to1_lg(NS,i+1))
       sym = fixedfieldsurmer(mod,l,p,v,NS,vecsmall_shorten(W,i));
   }
-  if (!sym) pari_err(e_MISC,"p too small in fixedfieldsympol");
+  if (!sym) pari_err_BUG("fixedfieldsympol [p too small]");
   if (DEBUGLEVEL>=2) err_printf("FixedField: Found: %Ps\n",gel(sym,1));
   return gerepilecopy(ltop,sym);
 }
@@ -2180,9 +2180,8 @@ galoisconj4_main(GEN T, GEN den, long flag)
     if (n <= 0) pari_err_IRREDPOL("galoisinit",T);
     RgX_check_ZX(T, "galoisinit");
     if (!ZX_is_squarefree(T))
-      pari_err(e_MISC, "Polynomial not squarefree in galoisinit");
-    if (!gequal1(gel(T,n+2)))
-      pari_err(e_MISC, "non-monic polynomial in galoisinit");
+      pari_err_DOMAIN("galoisinit","issquarefree(pol)","=",gen_0,T);
+    if (!gequal1(gel(T,n+2))) pari_err_IMPL("galoisinit(non-monic)");
   }
   if (n == 1)
   {

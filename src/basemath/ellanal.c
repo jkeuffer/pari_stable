@@ -462,7 +462,7 @@ ellL1_bitprec(GEN E, long r, long bitprec)
   struct bg_data bg;
   long parity;
   long prec = nbits2prec(bitprec)+1;
-  if (r<0) pari_err(e_MISC,"derivative order must be nonnegative");
+  if (r<0) pari_err_DOMAIN("ellL1","derivative order","<",gen_0,stoi(r));
   init_el(&el, E, &parity, bitprec);
   if (parity != (r & 1)) return gen_0;
   return gerepileuptoleaf(av, ellL1_i(&el, &bg, r, NULL, prec));
@@ -1314,7 +1314,7 @@ ellheegner(GEN E)
 
   if (trivial_change(cb)) cb = NULL; else E = ellchangecurve(E, cb);
   if (ellrootno_global(E, faN) == 1)
-    pari_err(e_MISC, "The curve has even analytic rank");
+    pari_err_DOMAIN("ellheegner", "(analytic rank)%2","=",gen_0,E);
   w1 = gel(E,15); /* real period */
   while (1)
   {
@@ -1322,7 +1322,7 @@ ellheegner(GEN E)
     GEN l1 = ellL1_bitprec(E, 1, bitprec);
     long bitneeded;
     if (expo(l1) < 1 - bitprec/2)
-      pari_err(e_MISC, "The curve has (probably) analytic rank > 1");
+      pari_err_DOMAIN("ellheegner", "analytic rank",">",gen_1,E);
     ht = divrr(mulrs(l1, wtor * wtor), mulri(w1, tam));
     if (DEBUGLEVEL) err_printf("Expected height=%Ps\n", ht);
     hnaive = hnaive_max(E, ht);

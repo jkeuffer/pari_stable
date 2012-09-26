@@ -398,4 +398,19 @@
   ***   at top-level: qfbcompraw(Qfb(21,1,
   ***                 ^--------------------
   *** qfbcompraw: forbidden composition t_QFI , t_QFI.
-Total time spent: 16
+  ***   at top-level: galoisinit(x^2)
+  ***                 ^---------------
+  *** galoisinit: domain error in galoisinit: issquarefree(pol) = 0
+  ***   at top-level: galoisinit(2*x)
+  ***                 ^---------------
+  *** galoisinit: sorry, galoisinit(non-monic) is not yet implemented.
+  ***   at top-level: ellL1(1,-1)
+  ***                 ^-----------
+  *** ellL1: domain error in ellL1: derivative order < 0
+  ***   at top-level: ellheegner(ellinit([
+  ***                 ^--------------------
+  *** ellheegner: domain error in ellheegner: (analytic rank)%2 = 0
+  ***   at top-level: ellheegner(ellinit([
+  ***                 ^--------------------
+  *** ellheegner: domain error in ellheegner: analytic rank > 1
+Total time spent: 24
