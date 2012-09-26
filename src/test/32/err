@@ -383,4 +383,19 @@
   ***   at top-level: ellorder(ellinit([ff
   ***                 ^--------------------
   *** ellorder: sorry, ellorder [non prime finite field without group order] is not yet implemented.
+  ***   at top-level: Qfb(0,0,0)
+  ***                 ^----------
+  *** Qfb: domain error in Qfb: issquare(disc) = 1
+  ***   at top-level: quadpoly(2)
+  ***                 ^-----------
+  *** quadpoly: domain error in quadpoly: disc % 4 > 1
+  ***   at top-level: qfbprimeform(2,5)
+  ***                 ^-----------------
+  *** qfbprimeform: domain error in primeform: disc % 4 > 1
+  ***   at top-level: qfbcomp(Qfb(1,1,1),Q
+  ***                 ^--------------------
+  ***   not a function in function call
+  ***   at top-level: qfbcompraw(Qfb(21,1,
+  ***                 ^--------------------
+  *** qfbcompraw: forbidden composition t_QFI , t_QFI.
 Total time spent: 16

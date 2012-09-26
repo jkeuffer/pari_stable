@@ -23,23 +23,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 void
 check_quaddisc(GEN x, long *s, long *r, const char *f)
 {
-  if (typ(x) != t_INT) pari_err_TYPE("check_quaddisc",x);
+  if (typ(x) != t_INT) pari_err_TYPE(f,x);
   *s = signe(x);
-  if (Z_issquare(x)) pari_err(e_MISC,"square discriminant in %s", f);
+  if (Z_issquare(x)) pari_err_DOMAIN(f,"issquare(disc)","=", gen_1,x);
   *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
-  if (*r > 1) pari_err(e_MISC, "discriminant not congruent to 0,1 mod 4 in %s", f);
+  if (*r > 1) pari_err_DOMAIN(f,"disc % 4",">", gen_1,x);
 }
 void
 check_quaddisc_real(GEN x, long *r, const char *f)
 {
   long sx; check_quaddisc(x, &sx, r, f);
-  if (sx < 0) pari_err(e_MISC, "negative discriminant in %s", f);
+  if (sx < 0) pari_err_DOMAIN(f, "disc","<",gen_0,x);
 }
 void
 check_quaddisc_imag(GEN x, long *r, const char *f)
 {
   long sx; check_quaddisc(x, &sx, r, f);
-  if (sx > 0) pari_err(e_MISC, "positive discriminant in %s", f);
+  if (sx > 0) pari_err_DOMAIN(f, "disc",">",gen_0,x);
 }
 
 static GEN
@@ -118,13 +118,13 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
 {
   pari_sp av = avma;
   GEN D;
-  long s;
+  long s, r;
   if (typ(x)!=t_INT) pari_err_TYPE("Qfb",x);
   if (typ(y)!=t_INT) pari_err_TYPE("Qfb",y);
   if (typ(z)!=t_INT) pari_err_TYPE("Qfb",z);
   D = qfb_disc3(x,y,z);
-  if (Z_issquare(D)) pari_err(e_MISC,"square discriminant in Qfb");
-  s = signe(D); avma = av;
+  check_quaddisc(D, &s, &r, "Qfb");
+  avma = av;
   if (s < 0) return qfi(x, y, z);
 
   d = d? gtofp(d,prec): real_0(prec);
@@ -190,7 +190,7 @@ qfb_comp(GEN z, GEN x, GEN y)
   gel(z,1) = mulii(v1,v2);
   gel(z,2) = addii(gel(y,2), shifti(p1,1));
   gel(z,3) = dvmdii(c3,v1, &s);
-  if (signe(s)) pari_err(e_MISC,"different discriminants in qfb_comp");
+  if (signe(s)) pari_err_TYPE2("composition",x,y);
 }
 
 static GEN
@@ -722,7 +722,7 @@ static void
 rho_get_BC(GEN *B, GEN *C, GEN b, GEN c, struct qfr_data *S)
 {
   GEN t, u;
-  u = shifti(c,1); if (u == gen_0) pari_err(e_MISC, "reducible form in qfr_rho");
+  u = shifti(c,1);
   t = (absi_cmp(S->isqrtD,c) >= 0)? S->isqrtD: c;
   u = remii(addii_sign(t,1, b,signe(b)), u);
   *B = addii_sign(t, 1, u, -signe(u)); /* |t| - (|t|+b) % |2c| */
@@ -847,7 +847,7 @@ get_disc(GEN x, struct qfr_data *S)
 {
   if (!S->D) S->D = qfb_disc(x);
   else if (typ(S->D) != t_INT) pari_err_TYPE("qfr_init",S->D);
-  if (!signe(S->D)) pari_err(e_MISC,"reducible form in qfr_init");
+  if (!signe(S->D)) pari_err_DOMAIN("qfr_init", "disc", "=", gen_0,x);
 }
 
 void
@@ -1046,7 +1046,7 @@ primeform_u(GEN x, ulong p)
 
   s = mod8(x); if (signe(x) < 0 && s) s = 8-s;
   /* 2 or 3 mod 4 */
-  if (s & 2) pari_err(e_MISC,"discriminant not congruent to 0,1 mod 4 in primeform");
+  if (s & 2) pari_err_DOMAIN("primeform", "disc % 4", ">",gen_1, x);
   if (p == 2) {
     switch(s) {
       case 0: b = 0; break;
@@ -1078,7 +1078,8 @@ primeform(GEN x, GEN p, long prec)
 
   if (typ(x) != t_INT) pari_err_TYPE("primeform",x);
   if (typ(p) != t_INT) pari_err_TYPE("primeform",p);
-  if (!sp || !sx) pari_err(e_MISC,"argument is zero in primeform");
+  if (!sp) pari_err_DOMAIN("primeform","p","=",gen_0,p);
+  if (!sx) pari_err_DOMAIN("primeform","D","=",gen_0,x);
   if (lgefint(p) == 3)
   {
     if (p[2] == 1) {
@@ -1111,7 +1112,7 @@ primeform(GEN x, GEN p, long prec)
     gel(y,4) = real_0(prec);
   }
   /* 2 or 3 mod 4 */
-  if (s & 2) pari_err(e_MISC,"discriminant not congruent to 0,1 mod 4 in primeform");
+  if (s & 2) pari_err_DOMAIN("primeform", "disc % 4", ">",gen_1, x);
   absp = absi(p); av = avma;
   b = Fp_sqrt(x, absp); if (!b) pari_err_SQRTN("primeform", mkintmod(x,absp));
   s &= 1; /* s = x mod 2 */
@@ -1321,7 +1322,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
 
   if (typ(d) != t_INT) pari_err_TYPE("cornacchia", d);
   if (typ(p) != t_INT) pari_err_TYPE("cornacchia", p);
-  if (signe(d) <= 0) pari_err(e_MISC, "d must be positive");
+  if (signe(d) <= 0) pari_err_DOMAIN("cornacchia", "d","<=",gen_0,d);
   *px = *py = gen_0;
   b = subii(p, d);
   if (signe(b) < 0) return 0;
@@ -1354,12 +1355,12 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   GEN a, b, c, L, r, px4;
   long k;
 
-  if (typ(d) != t_INT) pari_err_TYPE("cornacchia", d);
-  if (typ(p) != t_INT) pari_err_TYPE("cornacchia", p);
-  if (signe(d) <= 0) pari_err(e_MISC, "d must be positive");
+  if (typ(d) != t_INT) pari_err_TYPE("cornacchia2", d);
+  if (typ(p) != t_INT) pari_err_TYPE("cornacchia2", p);
+  if (signe(d) <= 0) pari_err_DOMAIN("cornacchia2", "d","<=",gen_0,d);
   *px = *py = gen_0;
   k = mod4(d);
-  if (k == 1 || k == 2) pari_err(e_MISC,"d must be 0 or 3 mod 4");
+  if (k == 1 || k == 2) pari_err_DOMAIN("cornacchia2","-d mod 4", ">",gen_1,d);
   px4 = shifti(p,2);
   if (absi_cmp(px4, d) < 0) { avma = av; return 0; }
   if (equaliu(p, 2))

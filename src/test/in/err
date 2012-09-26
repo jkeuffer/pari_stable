@@ -170,5 +170,8 @@ elltaniyama(E,-1)
 ellheight(E,[2,2])
 elllog(ellinit([ffgen(ffinit(5,2)),0]), [1,1], [1,1])
 ellorder(ellinit([ffgen(ffinit(5,2)),0]), [1,1])
-
-
+Qfb(0,0,0)
+quadpoly(2)
+qfbprimeform(2,5)
+qfbcomp(Qfb(1,1,1),Qfb(1,0,2))
+qfbcompraw(Qfb(21,1,2),Qfb(112,0,2))

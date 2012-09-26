@@ -243,7 +243,8 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
   ulong mask;
   pari_timer Ti;
 
-  if (k < 2 || e0 < 1) pari_err(e_MISC, "MultiLift: bad args");
+  if (k < 2) pari_err_DOMAIN("MultiLift", "#(modular factors)", "<", gen_2,a);
+  if (e0 < 1) pari_err_DOMAIN("MultiLift", "precision", "<", gen_1,stoi(e0));
   if (e0 == 1) return a;
 
   if (DEBUGLEVEL > 3) timer_start(&Ti);
@@ -389,7 +390,7 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
     p = gel(p,1); t = typ(p);
   }
   if (t != t_INT) pari_err_TYPE("polhensellift",p);
-  if (N < 1) pari_err(e_MISC, "not a positive exponent in polhensellift");
+  if (N < 1) pari_err_DOMAIN("polhensellift", "precision", "<", gen_1,stoi(N));
 
   l = lg(L); L = leafcopy(L);
   for (i = 1; i < l; i++)
