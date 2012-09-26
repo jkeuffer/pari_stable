@@ -108,9 +108,7 @@
   *** addprimes: incorrect type in addprimes [integer vector] (t_VEC).
   ***   at top-level: nfalgtobasis(nfinit(
   ***                 ^--------------------
-  *** nfalgtobasis: inconsistent moduli in algtobasis:
-    t^3 - 2
-    t^2 + 1
+  *** nfalgtobasis: inconsistent moduli in algtobasis: t^3 - 2 != t^2 + 1
   ***   at top-level: vector(-1,i,0)
   ***                 ^--------------
   *** vector: domain error in vector: dimension < 0
@@ -309,9 +307,7 @@
   *** galoissubcyclo: domain error in galoissubcyclo: degree <= 0
   ***   at top-level: galoissubcyclo(6,Mod
   ***                 ^--------------------
-  *** galoissubcyclo: inconsistent moduli in galoissubcyclo:
-    6
-    3
+  *** galoissubcyclo: inconsistent moduli in galoissubcyclo: 6 != 3
   ***   at top-level: galoissubcyclo(6,[;]
   ***                 ^--------------------
   *** galoissubcyclo: incorrect type in galoissubcyclo [H not in HNF] (t_MAT).
@@ -353,9 +349,7 @@
   *** addprimes: domain error in addprimes: p < 2
   ***   at top-level: padicappr(x^2+1+O(3^
   ***                 ^--------------------
-  *** padicappr: inconsistent moduli in Zp_to_Z:
-    5
-    3
+  *** padicappr: inconsistent moduli in Zp_to_Z: 5 != 3
   ***   at top-level: factorpadic(x^2+1,2,
   ***                 ^--------------------
   *** factorpadic: domain error in factorpadic: precision <= 0
@@ -364,9 +358,7 @@
   *** polrootspadic: domain error in rootpadic: precision <= 0
   ***   at top-level: ellinit([1+O(3),1+O(
   ***                 ^--------------------
-  *** ellinit: inconsistent moduli in ellinit:
-    3
-    5
+  *** ellinit: inconsistent moduli in ellinit: 3 != 5
   ***   at top-level: ellwp([1,I],I)
   ***                 ^--------------
   *** ellwp: domain error in ellwp: argument = 0
@@ -391,4 +383,4 @@
   ***   at top-level: ellorder(ellinit([ff
   ***                 ^--------------------
   *** ellorder: sorry, ellorder [non prime finite field without group order] is not yet implemented.
-Total time spent: 20
+Total time spent: 16

@@ -1145,7 +1145,7 @@ pari_err2str(GEN e)
   case e_MODULUS:
     {
       GEN x = gel(e,3), y = gel(e,4);
-      return pari_sprintf("inconsistent moduli in %Ps:\n    %Ps\n    %Ps",
+      return pari_sprintf("inconsistent moduli in %Ps: %Ps != %Ps",
                           gel(e,2), x, y);
     }
   case e_NONE: return NULL;
