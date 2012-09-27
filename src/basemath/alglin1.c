@@ -1595,7 +1595,7 @@ matid_F2m(long n)
 {
   GEN y = cgetg(n+1,t_MAT);
   long i;
-  if (n < 0) pari_err(e_MISC,"negative size in matid_F2m");
+  if (n < 0) pari_err_DOMAIN("matid_F2m", "dimension","<",gen_0,stoi(n));
   for (i=1; i<=n; i++) { gel(y,i) = zero_F2v(n); F2v_set(gel(y,i),i); }
   return y;
 }
@@ -1716,7 +1716,7 @@ matid_Flm(long n)
 {
   GEN y = cgetg(n+1,t_MAT);
   long i;
-  if (n < 0) pari_err(e_MISC,"negative size in matid_Flm");
+  if (n < 0) pari_err_DOMAIN("matid_Flm", "dimension","<",gen_0,stoi(n));
   for (i=1; i<=n; i++) { gel(y,i) = const_vecsmall(n, 0); ucoeff(y, i,i) = 1; }
   return y;
 }
@@ -2509,7 +2509,7 @@ get_suppl(GEN x, GEN d, long r)
   GEN y, c;
   long j, k, n, rx = lg(x)-1;
 
-  if (!rx) pari_err(e_MISC,"empty matrix in suppl");
+  if (!rx) pari_err_IMPL("suppl [empty matrix]");
   n = nbrows(x);
   if (rx == n && r == 0) return gcopy(x);
   y = cgetg(n+1, t_MAT);
@@ -2531,7 +2531,7 @@ get_suppl(GEN x, GEN d, long r)
 static void
 init_suppl(GEN x)
 {
-  if (lg(x) == 1) pari_err(e_MISC,"empty matrix in suppl");
+  if (lg(x) == 1) pari_err_IMPL("suppl [empty matrix]");
   /* HACK: avoid overwriting d from gauss_pivot() after avma=av */
   (void)new_chunk(lgcols(x) * 2);
 }

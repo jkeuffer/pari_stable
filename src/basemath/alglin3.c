@@ -265,7 +265,8 @@ shallowextract(GEN x, GEN L)
     for (i=1; i<ll; i++)
     {
       j = itos(gel(L,i));
-      if (j>=lx || j<=0) pari_err(e_MISC,"no such component in vecextract");
+      if (j<=0) pari_err_DOMAIN("vecextract","index","<=",gen_0,stoi(j));
+      if (j>=lx) pari_err_DOMAIN("vecextract","index",">=",stoi(lx),stoi(j));
       gel(y,i) = gel(x,j);
     }
     return y;
@@ -276,7 +277,8 @@ shallowextract(GEN x, GEN L)
     for (i=1; i<ll; i++)
     {
       j = L[i];
-      if (j>=lx || j<=0) pari_err(e_MISC,"no such component in vecextract");
+      if (j<=0) pari_err_DOMAIN("vecextract","index","<=",gen_0,stoi(j));
+      if (j>=lx) pari_err_DOMAIN("vecextract","index",">=",stoi(lx),stoi(j));
       gel(y,i) = gel(x,j);
     }
     return y;

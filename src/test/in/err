@@ -190,3 +190,8 @@ polcoeff(x+O(x^2),2)
 polcoeff([],2)
 polcoeff([],-1)
 polcoeff("",2)
+matcompanion(0*x)
+matrixqz(Mat([1,2]))
+matrixqz(Mat(0))
+vecextract([1],[-1]);
+vecextract([1],[2]);

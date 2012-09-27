@@ -443,4 +443,19 @@
   ***   at top-level: polcoeff("",2)
   ***                 ^--------------
   *** polcoeff: incorrect type in polcoeff (t_STR).
-Total time spent: 24
+  ***   at top-level: matcompanion(0*x)
+  ***                 ^-----------------
+  *** matcompanion: domain error in matcompanion: polynomial = 0
+  ***   at top-level: matrixqz(Mat([1,2]))
+  ***                 ^--------------------
+  *** matrixqz: domain error in QM_minors_coprime: n > m
+  ***   at top-level: matrixqz(Mat(0))
+  ***                 ^----------------
+  *** matrixqz: domain error in QM_minors_coprime: rank(A) < 1
+  ***   at top-level: vecextract([1],[-1])
+  ***                 ^--------------------
+  *** vecextract: domain error in vecextract: index <= 0
+  ***   at top-level: vecextract([1],[2])
+  ***                 ^-------------------
+  *** vecextract: domain error in vecextract: index >= 2
+Total time spent: 4

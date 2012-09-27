@@ -732,7 +732,7 @@ matcompanion(GEN x)
   GEN y, c;
 
   if (typ(x)!=t_POL) pari_err_TYPE("matcompanion",x);
-  if (!signe(x)) pari_err(e_MISC,"matcompanion of the zero polynomial");
+  if (!signe(x)) pari_err_DOMAIN("matcompanion","polynomial","=",gen_0,x);
   if (n == 0) return cgetg(1, t_MAT);
 
   y = cgetg(n+1,t_MAT);
@@ -1127,22 +1127,21 @@ QM_minors_coprime(GEN x, GEN D)
 
   n = lg(x)-1; if (!n) return gcopy(x);
   m = nbrows(x);
-  if (n > m) pari_err(e_MISC,"need more rows than columns in QM_minors_coprime");
-  if (n==m)
-  {
-    D = det(x);
-    if (gequal0(D)) pari_err(e_MISC,"matrix of non-maximal rank in QM_minors_coprime");
-    avma = av; return matid(n);
-  }
-  /* m > n */
+  if (n > m) pari_err_DOMAIN("QM_minors_coprime","n",">",strtoGENstr("m"),x);
   y = x; x = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
     gel(x,j) = Q_primpart(gel(y,j));
     RgV_check_ZV(gel(x,j), "QM_minors_coprime");
   }
-
   /* x now a ZM */
+  if (n==m)
+  {
+    if (gequal0(ZM_det(x)))
+      pari_err_DOMAIN("QM_minors_coprime", "rank(A)", "<",stoi(n),x);
+    avma = av; return matid(n);
+  }
+  /* m > n */
   if (!D || gequal0(D))
   {
     pari_sp av2 = avma;
@@ -1169,7 +1168,7 @@ QM_minors_coprime(GEN x, GEN D)
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"QM_minors_coprime, prime p = %Ps", p);
+        if (DEBUGMEM>1) pari_warn(warnmem,"QM_minors_coprime, p = %Ps", p);
         x = gerepilecopy(av1, x); pov2 = shifti(p, -1);
       }
     }
