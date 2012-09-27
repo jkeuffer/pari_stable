@@ -511,7 +511,7 @@ rnfequationall(GEN A, GEN B, long *pk, GEN *pLPRS)
     if (lA<=3) pari_err_CONSTPOL("rnfequation");
     RgX_check_ZX(A,"rnfequation");
   }
-  B = rnf_fix_pol(A,B,1); lB = lg(B);
+  B = RgX_rnf_fix("rnfequation", A,B,1); lB = lg(B);
   if (lB<=3) pari_err_CONSTPOL("rnfequation");
   B = Q_primpart(B);
   RgX_check_ZXY(B,"rnfequation");
@@ -978,7 +978,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   nf = checknf(nf);
   if (DEBUGLEVEL>1) timer_start(&ti);
   T = nf_get_pol(nf);
-  relpol = rnf_fix_pol(T, relpol, 0);
+  relpol = RgX_rnf_fix("rnfpolredabs", T, relpol, 0);
   if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
     pari_err_IMPL("this combination of flags in rnfpolredabs");
   if (flag & nf_PARTIALFACT)
@@ -1008,7 +1008,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     return gerepilecopy(av, (flag & nf_ADDZK)? red: pol);
 
   elt = RgXQX_translate(gel(red,2), deg1pol_shallow(a,gen_0,varn(T)), T);
-  elt = rnf_fix_pol(T, elt, 0);
+  elt = RgX_rnf_fix("rnfpolredabs", T, elt, 0);
   pol = RgXQ_charpoly(elt, relpol, varn(relpol));
   pol = lift_if_rational(pol);
   if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(RgXQ_reverse(elt,relpol),pol));

@@ -226,6 +226,7 @@ HC 78- reimplement incgam()
    83- elltors now uses division polynomials by default
    84- modified "Hit Return to Continue" message so that it becomes a comment
        when copy-pasted
+   85- rnf_fix_pol() takes an extra argument, the calling function's name
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -345,6 +346,7 @@ BA 107- PARI function RgX_splitting()
    108- made public the CATCH / TRY interface, renamed pari_CATCH / pari_TRY
         PARI functions err_get_num(), err_get_compo(), pari_err_last()
    109- PARI function stack_sprintf()
+   110- PARI function RgX_is_QX()
 
   Removed
     1- dropped DOS support

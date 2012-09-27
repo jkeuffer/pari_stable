@@ -541,7 +541,7 @@ conjvec(GEN x,long prec)
           pari_err_TYPE("conjvec [not a rational t_POL]",x);
         retconst_col(lx-3, gcopy(x));
       }
-      RgX_check_QX(x, "conjvec");
+      if (!RgX_is_QX(x)) pari_err_TYPE("conjvec", x);
       av = avma;
       if (varn(x) != varn(T)) pari_err_VAR("conjvec",x,T);
       r = cleanroots(T,prec);

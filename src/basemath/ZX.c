@@ -21,33 +21,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*                                ZX                               */
 /*                                                                 */
 /*******************************************************************/
-static int
-_check_QX(GEN x)
-{
-  long k = lg(x)-1;
-  for ( ; k>1; k--)
-    if (!is_rational_t(typ(gel(x,k)))) return 0;
-  return 1;
-}
-static int
-_check_ZX(GEN x)
-{
-  long k = lg(x)-1;
-  for ( ; k>1; k--)
-    if (typ(gel(x,k))!=t_INT) return 0;
-  return 1;
-}
 void
 RgX_check_QX(GEN x, const char *s)
-{
-  if (! _check_QX(x)) pari_err(e_MISC,"polynomial not in Q[X] in %s",s);
-}
-
+{ if (!RgX_is_QX(x)) pari_err_TYPE(stack_strcat(s," [not in Q[X]]"), x); }
 void
 RgX_check_ZX(GEN x, const char *s)
-{
-  if (! _check_ZX(x)) pari_err(e_MISC,"polynomial not in Z[X] in %s",s);
-}
+{ if (!RgX_is_ZX(x)) pari_err_TYPE(stack_strcat(s," [not in Z[X]]"), x); }
 void
 RgX_check_ZXY(GEN x, const char *s)
 {
@@ -56,9 +35,9 @@ RgX_check_ZXY(GEN x, const char *s)
     GEN t = gel(x,k);
     switch(typ(t)) {
       case t_INT: break;
-      case t_POL: if (_check_ZX(t)) break;
+      case t_POL: if (RgX_is_ZX(t)) break;
       /* fall through */
-      default: pari_err(e_MISC,"polynomial not in Z[X,Y] in %s",s);
+      default: pari_err_TYPE(stack_strcat(s, " not in Z[X,Y]"),x);
     }
   }
 }

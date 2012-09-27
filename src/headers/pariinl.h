@@ -600,6 +600,14 @@ RgX_is_ZX(GEN x)
   return 1;
 }
 INLINE int
+RgX_is_QX(GEN x)
+{
+  long k = lg(x)-1;
+  for ( ; k>1; k--)
+    if (!is_rational_t(typ(gel(x,k)))) return 0;
+  return 1;
+}
+INLINE int
 RgX_is_monomial(GEN x)
 {
   long i;

@@ -506,7 +506,7 @@ static void
 fill_scalmat(GEN y, GEN t, GEN _0, long n)
 {
   long i;
-  if (n < 0) pari_err(e_MISC,"negative size in fill_scalmat");
+  if (n < 0) pari_err_DOMAIN("fill_scalmat", "size", "<", 0, stoi(n));
   for (i = 1; i <= n; i++)
   {
     gel(y,i) = const_col(n, _0);
@@ -538,7 +538,7 @@ static void
 fill_scalcol(GEN y, GEN t, long n)
 {
   long i;
-  if (n < 0) pari_err(e_MISC,"negative size in fill_scalcol");
+  if (n < 0) pari_err_DOMAIN("fill_scalcol", "size", "<", 0, stoi(n));
   if (n) {
     gel(y,1) = t;
     for (i=2; i<=n; i++) gel(y,i) = gen_0;

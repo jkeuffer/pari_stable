@@ -38,6 +38,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     and always set pd to a pointer into the private prime table.
   - powell, addell, subell renamed to ellpow, elladd, ellsub.
   - last tow arguments of FpX_factorff and FpX_rootsff have been swapped.
+  - rnf_fix_pol() takes an extra argument, the calling function's name
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

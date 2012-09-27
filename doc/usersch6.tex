@@ -1197,13 +1197,16 @@ remainder sequence associated to $A(Y)$ and $B(X-kY)$, leading to $C =
 \text{Res}_Y(A(Y), B(Y-kX))$. In particular $a := -h_0/h_1$ is a root of $A$
 in $\Q[X]/(C)$, and $X - ka$ is a root of $B$.
 
-\fun{GEN}{rnf_fix_pol}{GEN T, GEN B, int lift} check whether $B$ is a
-polynomials with coefficients in the number field defined by the absolute
-equation $T(y) = 0$, where $T$ is a \kbd{ZX} and returned a cleaned up version of
-$B$. This means that $B$ is a \typ{POL} whose coefficients are \typ{INT},
-\typ{FRAC}, \typ{POL} in the variable $y$ with rational coefficients, or
-\typ{POLMOD} modulo $T$ which lift to a rational \typ{POL} as above. The cleanup
-consists in the following improvements:
+\fun{GEN}{RgX_rnf_fix}{const char *f, GEN T, GEN B, int lift} check whether
+$B$ is a polynomials with coefficients in the number field defined by the
+absolute equation $T(y) = 0$, where $T$ is a \kbd{ZX} and returns a cleaned
+up version of $B$. The string $f$ is the calling function name, used to
+report errors.
+
+This means that $B$ is a \typ{POL} whose coefficients are
+\typ{INT}, \typ{FRAC}, \typ{POL} in the variable $y$ with rational
+coefficients, or \typ{POLMOD} modulo $T$ which lift to a rational \typ{POL}
+as above. The cleanup consists in the following improvements:
 
 \item \typ{POL} coefficients are reduced modulo $T$.
 
@@ -1213,7 +1216,7 @@ converted to rationals.
 \item if \kbd{lift} is non-zero, lift all \typ{POLMOD}, otherwise convert all
 \typ{POL} to \typ{POLMOD}s modulo $T$.
 
-\noindent For instance, \kbd{rnfequationall} applies \tet{rnf_fix_pol} to its
+\noindent For instance, \kbd{rnfequationall} applies \tet{RgX_rnf_fix} to its
 argument $B$ (with \kbd{lift} equal to $1$).
 
 \fun{long}{numberofconjugates}{GEN T, long pinit} returns a quick

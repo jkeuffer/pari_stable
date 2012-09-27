@@ -714,7 +714,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   drel = degpol(relpol);
   if (drel <= 2) galois = 1;
 
-  relpol = rnf_fix_pol(T, relpol, 1);
+  relpol = RgX_rnf_fix("rnfisnorminit", T, relpol, 1);
   rnfeq = NULL; /* no reltoabs needed */
   if (nf_get_degree(nf) == 1) { /* over Q */
     polabs = relpol;

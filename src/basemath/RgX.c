@@ -67,9 +67,8 @@ gen_RgX_bkeval_powers(GEN P, GEN V, void *E, struct bb_algebra *ff)
   GEN z, u;
 
   if (d < 0) return ff->zero(E);
-  if (d < l)
-    return gerepileupto(av, gen_RgXQ_eval_powers(P,V,0,d,E,ff));
-  if (l<=1) pari_err(e_MISC,"powers is only [] or [1] in gen_RgX_bkeval_powers");
+  if (d < l) return gerepileupto(av, gen_RgXQ_eval_powers(P,V,0,d,E,ff));
+  if (l<2) pari_err_DOMAIN("gen_RgX_bkeval_powers", "#powers", "<",gen_2,V);
   d -= l;
   z = gen_RgXQ_eval_powers(P,V,d+1,l-1,E,ff);
   lim = stack_lim(av,2);
@@ -546,7 +545,7 @@ RgX_modXn_shallow(GEN a, long n)
   long i, L, l = lg(a);
   GEN  b;
   if (l == 2 || !n) return pol_0(varn(a));
-  if (n < 0) pari_err(e_MISC,"n < 0 in RgX_modXn");
+  if (n < 0) pari_err_DOMAIN("RgX_modXn", "n", "<", gen_0, stoi(n));
   L = n+2; if (L > l) L = l;
   b = cgetg(L, t_POL); b[1] = a[1];
   for (i=2; i<L; i++) gel(b,i) = gel(a,i);
