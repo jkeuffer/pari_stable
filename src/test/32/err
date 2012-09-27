@@ -464,4 +464,10 @@
   ***   at top-level: nfisincl(x^2,x^2)
   ***                 ^-----------------
   *** nfisincl: not an irreducible polynomial in nfisincl: x^2.
-Total time spent: 28
+  ***   at top-level: polcompositum(x^2,x)
+  ***                 ^--------------------
+  *** polcompositum: domain error in polcompositum: issquarefree(arg) = 0
+  ***   at top-level: rnfdedekind(K,x^2+x-
+  ***                 ^--------------------
+  *** rnfdedekind: incorrect type in rnfdedekind [non integral pol] (t_POL).
+Total time spent: 20

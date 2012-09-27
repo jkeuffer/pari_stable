@@ -124,7 +124,7 @@ ellj(Mod(1,2))
 ellj(Qfb(1,1,1))
 eta(1+O(2))
 eta(1/x)
-K = nfinit(x^2+1);
+K = nfinit(y^2+1);
 idealhnf(K, Qfb(1,1,1))
 idealfactor(K, [;])
 idealval(K, [;], idealprimedec(K,2)[1]);
@@ -197,3 +197,5 @@ vecextract([1],[-1]);
 vecextract([1],[2]);
 idealfrobenius(K,galoisinit(K),idealprimedec(K,2)[1])
 nfisincl(x^2,x^2)
+polcompositum(x^2,x)
+rnfdedekind(K, x^2+x-1/3)

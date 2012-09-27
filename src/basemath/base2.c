@@ -2432,9 +2432,9 @@ nfreducemodpr_i(GEN x, GEN prh)
 
 /* nf a true nf */
 static GEN
-Rg_to_ff(GEN nf, GEN x, GEN modpr)
+Rg_to_ff(GEN nf, GEN x0, GEN modpr)
 {
-  GEN den, pr = gel(modpr,mpr_PR), p = pr_get_p(pr);
+  GEN x = x0, den, pr = gel(modpr,mpr_PR), p = pr_get_p(pr);
   long tx = typ(x);
 
   if (tx == t_POLMOD) { x = gel(x,2); tx = typ(x); }
@@ -2443,7 +2443,11 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     case t_INT: return modii(x, p);
     case t_FRAC: return Rg_to_Fp(x, p);
     case t_POL:
-      if (lg(x) == 3) return Rg_to_Fp(gel(x,2), p);
+      switch(lg(x))
+      {
+        case 2: return gen_0;
+        case 3: return Rg_to_Fp(gel(x,2), p);
+      }
       x = Q_remove_denom(x, &den);
       x = poltobasis(nf, x);
       break;
@@ -2458,7 +2462,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     if (v)
     {
       GEN tau = modpr_TAU(modpr);
-      if (!tau) pari_err(e_MISC,"modpr initialized for integers only!");
+      if (!tau) pari_err_TYPE("zk_to_ff", x0);
       x = nfmuli(nf,x, nfpow_u(nf, tau, v));
       x = ZC_Z_divexact(x, powiu(p, v));
     }
@@ -2684,8 +2688,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
   GEN Ppr, A, I, p, tau, g, h, k, base, T, gzk, hzk, prinvp, pal, nfT, modpr;
   long m, vt, r, d, i, j, mpr;
 
-  if (vdisc < 0)
-    pari_err(e_MISC,"relative polynomial with non-integral coefficients");
+  if (vdisc < 0) pari_err_TYPE("rnfdedekind [non integral pol]", P);
   if (vdisc == 1) return NULL; /* pr-maximal */
   if (!only_maximal && !gequal1(leading_term(P)))
     pari_err_IMPL( "the full Dedekind criterion in the non-monic case");
@@ -3360,6 +3363,14 @@ rnfisfree(GEN bnf, GEN order)
 /**                   COMPOSITUM OF TWO NUMBER FIELDS                **/
 /**                                                                  **/
 /**********************************************************************/
+static GEN
+compositum_fix(GEN A)
+{
+  A = Q_primpart(A); RgX_check_ZX(A,"polcompositum");
+  if (!ZX_is_squarefree(A))
+    pari_err_DOMAIN("polcompositum","issquarefree(arg)","=",gen_0,A);
+  return A;
+}
 /* modular version */
 GEN
 polcompositum0(GEN A, GEN B, long flall)
@@ -3369,18 +3380,14 @@ polcompositum0(GEN A, GEN B, long flall)
   long v, k;
   GEN C, D, LPRS;
 
-  if (typ(A)!=t_POL) pari_err_TYPE("polcompositum0",A);
-  if (typ(B)!=t_POL) pari_err_TYPE("polcompositum0",B);
-  if (degpol(A)<=0 || degpol(B)<=0) pari_err_CONSTPOL("compositum");
+  if (typ(A)!=t_POL) pari_err_TYPE("polcompositum",A);
+  if (typ(B)!=t_POL) pari_err_TYPE("polcompositum",B);
+  if (degpol(A)<=0 || degpol(B)<=0) pari_err_CONSTPOL("polcompositum");
   v = varn(A);
-  if (varn(B) != v) pari_err_VAR("compositum", A,B);
+  if (varn(B) != v) pari_err_VAR("polcompositum", A,B);
   same = (A == B || RgX_equal(A,B));
-  A = Q_primpart(A); RgX_check_ZX(A,"compositum");
-  if (!ZX_is_squarefree(A)) pari_err(e_MISC,"compositum: %Ps inseparable", A);
-  if (!same) {
-    B = Q_primpart(B); RgX_check_ZX(B,"compositum");
-    if (!ZX_is_squarefree(B)) pari_err(e_MISC,"compositum: %Ps inseparable", B);
-  }
+  A = compositum_fix(A);
+  if (!same) B = compositum_fix(B);
 
   D = NULL; /* -Wall */
   k = same? -1: 1;
