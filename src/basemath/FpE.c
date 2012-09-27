@@ -790,7 +790,7 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
-  x = 0; u = c6; KRO = kross(u, p); KROold = -KRO;
+  x = 0; u = c6; KRO = krouu(u, p); KROold = -KRO;
 
   switch(Flx_nbroots(mkvecsmalln(5,0, 1, 0, c4, c6), p))
   {

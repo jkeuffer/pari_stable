@@ -378,7 +378,7 @@ Flx_quad_root(GEN x, ulong p, int unknown)
 {
   ulong s, u, b = x[3], c = x[2];
   ulong D = Fl_sub(Fl_sqr(b,p), Fl_mul(c,4,p), p);
-  if (unknown && kross(D,p) == -1) return p;
+  if (unknown && krouu(D,p) == -1) return p;
   s = Fl_sqrt(D,p);
   if (s==~0UL) return p;
   u = (p>>1)+1;
