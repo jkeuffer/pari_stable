@@ -470,4 +470,33 @@
   ***   at top-level: rnfdedekind(K,x^2+x-
   ***                 ^--------------------
   *** rnfdedekind: incorrect type in rnfdedekind [non integral pol] (t_POL).
-Total time spent: 20
+  ***   at top-level: hilbert(Mod(1,2),1)
+  ***                 ^-------------------
+  *** hilbert: precision too low in hilbert.
+  ***   at top-level: hilbert(Mod(1,3),Mod
+  ***                 ^--------------------
+  *** hilbert: inconsistent moduli in hilbert: 5 != 3
+  ***   at top-level: hilbert(Mod(1,3),2,0
+  ***                 ^--------------------
+  *** hilbert: inconsistent moduli in hilbert: 3 != oo
+  ***   at top-level: znorder(0)
+  ***                 ^----------
+  *** znorder: incorrect type in znorder [t_INTMOD expected] (t_INT).
+  ***   at top-level: znorder(Mod(2,4))
+  ***                 ^-----------------
+  *** znorder: elements not coprime in znorder:
+    2
+    4
+  ***   at top-level: contfrac(1e100)
+  ***                 ^---------------
+  *** contfrac: precision too low in gboundcf.
+  ***   at top-level: contfrac(1.,[1],10)
+  ***                 ^-------------------
+  *** contfrac: inconsistent dimensions in contfrac [too few denominators].
+  ***   at top-level: contfrac(1,,-1)
+  ***                 ^---------------
+  *** contfrac: domain error in gboundcf: nmax < 0
+  ***   at top-level: contfracpnqn(matrix(
+  ***                 ^--------------------
+  *** contfracpnqn: inconsistent dimensions in pnqn [ nbrows != 1,2 ].
+Total time spent: 24

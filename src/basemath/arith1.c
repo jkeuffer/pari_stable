@@ -1118,7 +1118,7 @@ gisanypower(GEN x, GEN *pty)
     *pty = gerepilecopy(av, mkfrac(a, b));
     return k;
   }
-  pari_err(e_MISC, "missing exponent");
+  pari_err_TYPE("gisanypower", x);
   return 0; /* not reached */
 }
 
@@ -1690,14 +1690,11 @@ hilbertii(GEN x, GEN y, GEN p)
 }
 
 static void
-err_prec(void)
-{ pari_err(e_MISC, "insufficient precision in hilbert"); }
+err_prec(void) { pari_err_PREC("hilbert"); }
 static void
-err_p(GEN p, GEN q)
-{ pari_err(e_MISC, "different primes in hilbert: %Ps != %Ps", p,q); }
+err_p(GEN p, GEN q) { pari_err_MODULUS("hilbert", p,q); }
 static void
-err_oo(GEN p)
-{ pari_err(e_MISC, "different primes in hilbert: %Ps != oo", p); }
+err_oo(GEN p) { pari_err_MODULUS("hilbert", p, strtoGENstr("oo")); }
 
 /* x t_INTMOD, *pp = prime or NULL [ unset, set it to x.mod ].
  * Return lift(x) provided it's p-adic accuracy is large enough to decide
@@ -2556,11 +2553,9 @@ znorder(GEN x, GEN o)
   pari_sp av = avma;
   GEN b, a;
 
-  if (typ(x) != t_INTMOD)
-    pari_err(e_MISC,"not an element of (Z/nZ)* in order");
+  if (typ(x) != t_INTMOD) pari_err_TYPE("znorder [t_INTMOD expected]",x);
   b = gel(x,1); a = gel(x,2);
-  if (!equali1(gcdii(a,b)))
-    pari_err(e_MISC,"not an element of (Z/nZ)* in order");
+  if (!equali1(gcdii(a,b))) pari_err_COPRIME("znorder", a,b);
   if (!o)
   {
     GEN fa = Z_factor(b), P = gel(fa,1), E = gel(fa,2);
@@ -2973,7 +2968,7 @@ znlog(GEN h, GEN g, GEN o)
     case t_INTMOD:
       N = gel(g,1);
       g = gel(g,2); break;
-    default: pari_err(e_MISC,"not an element of (Z/NZ)* in znlog");
+    default: pari_err_TYPE("znlog", g);
       return NULL; /* not reached */
   }
   if (equali1(N)) { avma = av; return gen_0; }
@@ -3121,7 +3116,7 @@ mpfact(long n)
 {
   if (n < 2)
   {
-    if (n < 0) pari_err(e_MISC,"negative argument in factorial function");
+    if (n < 0) pari_err_DOMAIN("factorial", "argument","<",gen_0,stoi(n));
     return gen_1;
   }
   return mulu_interval(2UL, (ulong)n);
@@ -3260,7 +3255,7 @@ gboundcf(GEN x, long k)
   long tx = typ(x), e;
   GEN y, a, b, c;
 
-  if (k < 0) pari_err(e_MISC, "negative nmax in gboundcf");
+  if (k < 0) pari_err_DOMAIN("gboundcf","nmax","<",gen_0,stoi(k));
   if (is_scalar_t(tx))
   {
     if (gequal0(x)) return mkvec(gen_0);
@@ -3270,7 +3265,7 @@ gboundcf(GEN x, long k)
       case t_REAL:
         av = avma;
         c = mantissa_real(x,&e);
-        if (e < 0) pari_err(e_MISC,"integral part not significant in gboundcf");
+        if (e < 0) pari_err_PREC("gboundcf");
         y = int2n(e);
         a = Qsfcont(c,y, NULL, k);
         b = addsi(signe(x), c);
@@ -3306,7 +3301,7 @@ sfcont2(GEN b, GEN x, long k)
 
   if (k)
   {
-    if (k >= lb) pari_err(e_MISC,"list of numerators too short in sfcontf2");
+    if (k >= lb) pari_err_DIM("contfrac [too few denominators]");
     lb = k+1;
   }
   y = cgetg(lb,t_VEC);
@@ -3354,7 +3349,7 @@ contfrac0(GEN x, GEN b, long nmax)
   tb = typ(b);
   if (tb == t_INT) return gboundcf(x,itos(b));
   if (! is_vec_t(tb)) pari_err_TYPE("contfrac0",b);
-  if (nmax < 0) pari_err(e_MISC, "negative nmax in contfrac0");
+  if (nmax < 0) pari_err_DOMAIN("contfrac","nmax","<",gen_0,stoi(nmax));
   return sfcont2(b,x,nmax);
 }
 
@@ -3393,7 +3388,7 @@ pnqn(GEN x)
     }
     else
     {
-      if (ly != 3) pari_err(e_MISC,"incorrect size in pnqn");
+      if (ly != 3) pari_err_DIM("pnqn [ nbrows != 1,2 ]");
       p1 = gcoeff(x,2,1); q1 = gcoeff(x,1,1);
       for (i=2; i<lx; i++)
       {
