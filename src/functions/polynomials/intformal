@@ -5,7 +5,7 @@ Prototype: GDn
 Help: intformal(x,{v}): formal integration of x with respect to v, or to the
  main variable of x if v is omitted.
 Doc: \idx{formal integration} of $x$ with respect to the variable $v$ (wrt.
- the main variable if $v$ is omitted. Since PARI cannot represent
+ the main variable if $v$ is omitted). Since PARI cannot represent
  logarithmic or arctangent terms, any such term in the result will yield an
  error:
  \bprog
