@@ -458,4 +458,10 @@
   ***   at top-level: vecextract([1],[2])
   ***                 ^-------------------
   *** vecextract: domain error in vecextract: index >= 2
-Total time spent: 4
+  ***   at top-level: idealfrobenius(K,gal
+  ***                 ^--------------------
+  *** idealfrobenius: domain error in idealfrobenius: pr.e > 1
+  ***   at top-level: nfisincl(x^2,x^2)
+  ***                 ^-----------------
+  *** nfisincl: not an irreducible polynomial in nfisincl: x^2.
+Total time spent: 28

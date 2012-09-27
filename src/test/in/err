@@ -195,3 +195,5 @@ matrixqz(Mat([1,2]))
 matrixqz(Mat(0))
 vecextract([1],[-1]);
 vecextract([1],[2]);
+idealfrobenius(K,galoisinit(K),idealprimedec(K,2)[1])
+nfisincl(x^2,x^2)

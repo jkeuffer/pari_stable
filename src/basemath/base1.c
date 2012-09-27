@@ -906,9 +906,13 @@ idealquasifrob(GEN nf, GEN gal, GEN pr, GEN subg, GEN *S)
       avma = av;
     }
   }
-  pari_err(e_MISC,"Frobenius element not found");
+  pari_err_BUG("idealquasifrob [Frobenius not foundelement]");
   return NULL; /*NOT REACHED*/
 }
+
+static void
+gal_check_pol(const char *f, GEN x, GEN y)
+{ if (!RgX_equal_var(x,y)) pari_err_MODULUS(f,x,y); }
 
 GEN
 idealfrobenius(GEN nf, GEN gal, GEN pr)
@@ -920,10 +924,8 @@ idealfrobenius(GEN nf, GEN gal, GEN pr)
   nf = checknf(nf);
   checkgal(gal);
   checkprid(pr);
-  if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))
-    pari_err(e_MISC,"incompatible data in idealfrobenius");
-  if (pr_get_e(pr)>1)
-    pari_err(e_MISC,"ramified prime in idealfrobenius");
+  gal_check_pol("idealfrobenius",nf_get_pol(nf),gal_get_pol(gal));
+  if (pr_get_e(pr)>1) pari_err_DOMAIN("idealfrobenius","pr.e", ">", gen_1,pr);
   f = pr_get_f(pr); n = nf_get_degree(nf);
   if (f==1) { avma = av; return identity_perm(n); }
   modpr = nf_to_Fq_init(nf,&pr,&T,&p);
@@ -966,7 +968,7 @@ idealinertiagroup(GEN nf, GEN gal, GEN pr)
       avma = ltop;
     }
   }
-  pari_err(e_MISC,"no isotrope element not found");
+  pari_err_BUG("idealinertiagroup [no isotropic element]");
   return NULL;
 }
 
@@ -1061,8 +1063,7 @@ idealramgroups(GEN nf, GEN gal, GEN pr)
   nf = checknf(nf);
   checkgal(gal);
   checkprid(pr);
-  if (!gequal(nf_get_pol(nf), gal_get_pol(gal)))
-    pari_err(e_MISC,"incompatible data in idealramgroups");
+  gal_check_pol("idealramgroups",nf_get_pol(nf),gal_get_pol(gal));
   e = pr_get_e(pr); n = nf_get_degree(nf);
   p = itos(pr_get_p(pr));
   if (e%p) return idealramgroupstame(nf, gal, pr);
@@ -1124,14 +1125,15 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
               dvdii(nf_get_disc(nfb), powiu(nf_get_disc(nfa), q)));
   }
   da = nfa? nf_get_disc(nfa): ZX_disc(a);
+  if (!signe(da)) pari_err_IRREDPOL("nfisincl",a);
   db = nfb? nf_get_disc(nfb): ZX_disc(b);
+  if (!signe(db)) pari_err_IRREDPOL("nfisincl",a);
   if (fliso) return (gissquare(gdiv(da,db)) == gen_1);
 
   if (odd(q) && signe(da) != signe(db)) return 0;
   fa = Z_factor_limit(absi(da), 0);
   P = gel(fa,1);
   E = gel(fa,2); nP = lg(P) - 1;
-  if (!nP) pari_err(e_MISC,"inconsistent data in nfisincl");
   for (i=1; i<nP; i++)
     if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q))) return 0;
   U = gel(P,nP);
