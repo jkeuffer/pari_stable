@@ -413,4 +413,10 @@
   ***   at top-level: ellheegner(ellinit([
   ***                 ^--------------------
   *** ellheegner: domain error in ellheegner: analytic rank > 1
-Total time spent: 24
+  ***   at top-level: substpol(x+O(x^2),x^
+  ***                 ^--------------------
+  *** substpol: domain error in gdeflate: valuation(x) % 3 != 0
+  ***   at top-level: intformal(1/(x^2+1))
+  ***                 ^--------------------
+  *** intformal: domain error in intformal: residue(series, pole) != 0
+Total time spent: 16

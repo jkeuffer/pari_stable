@@ -1194,7 +1194,10 @@ gdeflate(GEN x, long v, long d)
       if (lx == 2) return zeroser(v, V / d);
       y = ser2pol_i(x, lx);
       if (V % d != 0 || checkdeflate(y) % d != 0)
-        pari_err(e_MISC, "can't deflate this power series (d = %ld): %Ps", d, x);
+      {
+        const char *s = stack_sprintf("valuation(x) %% %ld", d);
+        pari_err_DOMAIN("gdeflate", s, "!=", gen_0,x);
+      }
       y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
       setvalp(y, V/d); return gerepilecopy(av, y);
     }
@@ -1806,6 +1809,10 @@ RgX_integ(GEN x)
   return y;
 }
 
+static void
+err_intformal(GEN x)
+{ pari_err_DOMAIN("intformal", "residue(series, pole)", "!=", gen_0, x); }
+
 GEN
 integ(GEN x, long v)
 {
@@ -1859,41 +1866,44 @@ integ(GEN x, long v)
       for (i=2; i<lx; i++)
       {
         long j = i+e-1;
-        if (!j)
+        GEN c = gel(x,i);
+        if (j)
+          c = gdivgs(c, j);
+        else
         { /* should be isexactzero, but try to avoid error */
-          if (gequal0(gel(x,i))) { gel(y,i) = gen_0; continue; }
-          pari_err(e_MISC, "a log appears in intformal");
+          if (!gequal0(c)) err_intformal(x);
+          c = gen_0;
         }
-        else gel(y,i) = gdivgs(gel(x,i),j);
+        gel(y,i) = c;
       }
       y[1] = evalsigne(1) | evalvarn(vx) | evalvalp(e+1); return y;
 
     case t_RFRAC:
-      vx = gvar(x);
-      if (varncmp(vx, v) > 0)
-      {
-        y=cgetg(4,t_POL);
-        y[1] = signe(gel(x,1))? evalvarn(v) | evalsigne(1)
-                          : evalvarn(v);
-        gel(y,2) = gen_0;
-        gel(y,3) = gcopy(x); return y;
-      }
+    {
+      GEN a = gel(x,1), b = gel(x,2), c, d, s;
+      vx = varn(b);
+      if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
       if (varncmp(vx, v) < 0)
         return gerepileupto(av, swapvar_act(x, vx, v, integ_act, NULL));
 
-      tx = typ(gel(x,1)); i = is_scalar_t(tx)? 0: degpol(gel(x,1));
-      tx = typ(gel(x,2)); n = is_scalar_t(tx)? 0: degpol(gel(x,2));
-      y = integ(gadd(x, zeroser(v,i+n + 2)), v);
-      y = gdiv(gtrunc(gmul(gel(x,2), y)), gel(x,2));
-      if (!gequal(deriv(y,v),x)) pari_err(e_MISC,"a log/atan appears in intformal");
+      n = degpol(b);
+      if (typ(a) == t_POL && varn(a) == vx) n += degpol(a);
+      y = integ(gadd(x, zeroser(v,n + 2)), v);
+      y = gdiv(gtrunc(gmul(b, y)), b);
+      if (typ(y) != t_RFRAC) pari_err_BUG("intformal(t_RFRAC)");
+      c = gel(y,1); d = gel(y,2);
+      s = gsub(gmul(deriv(c,v),d), gmul(c,deriv(d,v)));
+      /* (c'd-cd')/d^2 = y' = x = a/b ? */
+      if (!gequal(gmul(s,b), gmul(a,gsqr(d)))) err_intformal(x);
       if (typ(y)==t_RFRAC && lg(gel(y,1)) == lg(gel(y,2)))
       {
-        GEN p2;
-        tx=typ(gel(y,1)); p1=is_scalar_t(tx)? gel(y,1): leading_term(gel(y,1));
-        tx=typ(gel(y,2)); p2=is_scalar_t(tx)? gel(y,2): leading_term(gel(y,2));
+        GEN p2 = leading_term(gel(y,2));
+        p1 = gel(y,1);
+        if (typ(p1) == t_POL && varn(p1) == vx) p1 = leading_term(p1);
         y = gsub(y, gdiv(p1,p2));
       }
       return gerepileupto(av,y);
+    }
 
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
