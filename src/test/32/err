@@ -42,7 +42,7 @@
   ***   incorrect type in matrix col assignment (t_INT).
   ***   at top-level: M[,3]=1
   ***                  ^------
-  ***   domain error in check_array_index: array index > 2
+  ***   domain error in component: index > 2
   ***   at top-level: M[,1]=[1,2]
   ***                 ^-----------
   ***   incorrect type in matrix col assignment (t_VEC).
@@ -54,7 +54,7 @@
   ***   incorrect type in matrix row assignment (t_INT).
   ***   at top-level: M[3,]=1
   ***                  ^------
-  ***   domain error in check_array_index: array index > 2
+  ***   domain error in component: index > 2
   ***   at top-level: M[1,]=[1,2]~
   ***                 ^------------
   ***   incorrect type in matrix row assignment (t_COL).
@@ -63,10 +63,10 @@
   ***   inconsistent dimensions in matrix row assignment.
   ***   at top-level: [;][1,]
   ***                    ^----
-  ***   domain error in check_array_index: array index > 0
+  ***   domain error in component: index > 0
   ***   at top-level: [;][,1]
   ***                    ^----
-  ***   domain error in check_array_index: array index > 0
+  ***   domain error in component: index > 0
   ***   at top-level: 1[1]
   ***                  ^---
   ***   incorrect type in _[_] OCcompo1 [not a vector] (t_INT).
@@ -90,7 +90,7 @@
   ***   incorrect type in &_[_,] OCcompoLptr [not a matrix] (t_POL).
   ***   at top-level: v[2]=1
   ***                  ^-----
-  ***   domain error in check_array_index: array index > 1
+  ***   domain error in component: index > 1
   ***   at top-level: v[1]=Pi
   ***                 ^-------
   ***   incorrect type in t_VECSMALL assignment (t_REAL).
@@ -132,10 +132,10 @@
   *** break: domain error in break: n < 1
   ***   at top-level: v[-1]
   ***                  ^----
-  ***   domain error in check_array_index: array index < 1
+  ***   domain error in component: index < 1
   ***   at top-level: v[#v+1]
   ***                  ^------
-  ***   domain error in check_array_index: array index > 1
+  ***   domain error in component: index > 1
   ***   variable name expected: subst(x,1,0)
   ***                                   ^----
   ***   at top-level: exp(1/x)
@@ -419,4 +419,28 @@
   ***   at top-level: intformal(1/(x^2+1))
   ***                 ^--------------------
   *** intformal: domain error in intformal: residue(series, pole) != 0
-Total time spent: 16
+  ***   at top-level: component(x,-1)
+  ***                 ^---------------
+  *** component: domain error in component: index < 1
+  ***   at top-level: component(O(x),2)
+  ***                 ^-----------------
+  *** component: domain error in component: index > 1
+  ***   at top-level: component(Vecsmall([
+  ***                 ^--------------------
+  *** component: domain error in component: index > 0
+  ***   at top-level: polcoeff(O(x),2)
+  ***                 ^----------------
+  *** polcoeff: domain error in polcoeff: t_SER = O(x)
+  ***   at top-level: polcoeff(x+O(x^2),2)
+  ***                 ^--------------------
+  *** polcoeff: domain error in polcoeff: degree > 1
+  ***   at top-level: polcoeff([],2)
+  ***                 ^--------------
+  *** polcoeff: domain error in polcoeff: index > 0
+  ***   at top-level: polcoeff([],-1)
+  ***                 ^---------------
+  *** polcoeff: domain error in polcoeff: index < 1
+  ***   at top-level: polcoeff("",2)
+  ***                 ^--------------
+  *** polcoeff: incorrect type in polcoeff (t_STR).
+Total time spent: 24

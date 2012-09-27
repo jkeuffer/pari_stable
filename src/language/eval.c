@@ -251,11 +251,8 @@ lvar_make_safe(void)
 static void
 check_array_index(long c, long l)
 {
-  if (c < 1)
-    pari_err_DOMAIN("check_array_index", "array index", "<", gen_1, stoi(c));
-  if (c >= l)
-    pari_err_DOMAIN("check_array_index", "array index", ">",
-                    stoi(l-1), stoi(c));
+  if (c < 1) pari_err_DOMAIN("component", "index", "<", gen_1, stoi(c));
+  if (c >= l) pari_err_DOMAIN("component", "index", ">", stoi(l-1), stoi(c));
 }
 
 typedef struct matcomp

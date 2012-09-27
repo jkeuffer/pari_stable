@@ -19,5 +19,5 @@ Doc: coefficient of degree $n$ of the polynomial $x$, with respect to the
  is zero. If it is greater than the largest significant degree, then an error
  message is issued.
 
-  For greater flexibility, vector or matrix types are also accepted for $x$,
-  and the meaning is then identical with that of \kbd{component(x,n)}.
+  For greater flexibility, $x$ can be a vector or matrix type and the
+  function then returns \kbd{component(x,n)}.

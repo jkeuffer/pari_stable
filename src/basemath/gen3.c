@@ -3040,20 +3040,22 @@ compo(GEN x, long n)
   {
     if (tx == t_VECSMALL)
     {
-      if (n < 1 || (ulong)n >= lx) pari_err(e_MISC,"nonexistent component");
+      if (n < 1) pari_err_DOMAIN("component", "index", "<", gen_1, stoi(n));
+      if ((ulong)n >= lx)
+        pari_err_DOMAIN("component", "index", ">", utoi(lx-1), stoi(n));
       return stoi(x[n]);
     }
-    pari_err(e_MISC, "this object is a leaf. It has no components");
+    pari_err_TYPE("component [leaf]", x);
   }
-  if (n < 1) pari_err(e_MISC,"nonexistent component");
+  if (n < 1) pari_err_DOMAIN("component", "index", "<", gen_1, stoi(n));
   if (tx == t_POL && (ulong)n+1 >= lx) return gen_0;
   if (tx == t_LIST) {
-    long llx;
-    x = list_data(x); llx = x? lg(x): 1;
-    lx = (ulong)llx; tx = t_VEC;
+    tx = t_VEC;
+    x = list_data(x);
+    lx = (ulong)(x? lg(x): 1);
   }
   l = (ulong)lontyp[tx] + (ulong)n-1; /* beware overflow */
-  if (l >= lx) pari_err(e_MISC,"nonexistent component");
+  if (l >= lx) pari_err_DOMAIN("component", "index", ">", utoi(lx-1), utoi(l));
   return gcopy(gel(x,l));
 }
 
@@ -3095,12 +3097,13 @@ _sercoeff(GEN x, long n, long v)
   GEN z;
   if (dx < 0)
   {
-    if (N >= 0) pari_err(e_MISC,"non existent component in truecoeff");
+    if (N >= 0) pari_err_DOMAIN("polcoeff", "t_SER", "=", x, x);
     return gen_0;
   }
   if (v < 0 || v == (w=varn(x)))
   {
-    if (N > dx) pari_err(e_MISC,"non existent component in truecoeff");
+    if (N > dx)
+      pari_err_DOMAIN("polcoeff", "degree", ">", stoi(dx+ex), stoi(n));
     return (N < 0)? gen_0: gel(x,N+2);
   }
   if (varncmp(w,v) > 0) return N? gen_0: x;
@@ -3141,11 +3144,10 @@ polcoeff_i(GEN x, long n, long v)
 GEN
 polcoeff0(GEN x, long n, long v)
 {
-  long tx=typ(x);
+  long lx, tx = typ(x);
   pari_sp av;
 
   if (is_scalar_t(tx)) return n? gen_0: gcopy(x);
-
   av = avma;
   switch(tx)
   {
@@ -3154,10 +3156,12 @@ polcoeff0(GEN x, long n, long v)
     case t_RFRAC: x = _rfraccoeff(x,n,v); break;
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      if (n>=1 && n<lg(x)) return gcopy(gel(x,n));
-    /* fall through */
+      if (n < 1) pari_err_DOMAIN("polcoeff","index","<",gen_1,stoi(n));
+      lx = lg(x);
+      if (n >= lx) pari_err_DOMAIN("polcoeff","index",">",stoi(lx-1),stoi(n));
+      return gcopy(gel(x,n));
 
-    default: pari_err(e_MISC,"nonexistent component in truecoeff");
+    default: pari_err_TYPE("polcoeff", x);
   }
   if (x == gen_0) return x;
   if (avma == av) return gcopy(x);
