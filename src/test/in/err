@@ -208,3 +208,4 @@ contfrac(1e100)
 contfrac(1.,[1],10)
 contfrac(1,,-1)
 contfracpnqn(matrix(3,1));
+divisors(1/2)

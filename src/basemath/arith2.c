@@ -236,8 +236,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
 
    */
 
-  if (model_type != 0)
-      pari_err(e_MISC, "unsupported type of cache model"); /* Future expansion */
+  if (model_type != 0) pari_err_IMPL("this cache model"); /* Future expansion */
 
   /* The simplest case: we fit into cache */
   if (total + fixed_to_cache <= cache_arena)
@@ -328,7 +327,7 @@ set_optimize(long what, GEN g)
     ret = (long)(cache_model.cutoff * 1000);
     break;
   default:
-    pari_err(e_MISC, "panic: set_optimize");
+    pari_err_BUG("set_optimize");
     break;
   }
   if (g != NULL) {
@@ -747,11 +746,10 @@ divisors(GEN n)
   for (i=1; i<l; i++)
   {
     e[i] = itos(gel(E,i));
-    if (e[i] < 0) pari_err(e_MISC, "denominators not allowed in divisors");
+    if (e[i] < 0) pari_err_TYPE("divisors [denominator]",n);
     nbdiv = itou_or_0( muluu(nbdiv, 1+e[i]) );
   }
-  if (!nbdiv || nbdiv & ~LGBITS)
-    pari_err(e_MISC, "too many divisors (more than %ld)", LGBITS - 1);
+  if (!nbdiv || nbdiv & ~LGBITS) pari_err_OVERFLOW("divisors");
   d = t = (GEN*) cgetg(nbdiv+1,t_VEC);
   *++d = gen_1;
   if (isint)
