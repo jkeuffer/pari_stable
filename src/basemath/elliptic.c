@@ -3766,7 +3766,7 @@ torspnt(GEN E, GEN w, long n, long prec)
       && _orderell(E,p) == n)? p: NULL;
 }
 
-GEN
+static GEN
 elltors_doud(GEN e)
 {
   long B, i, ord, pr, prec, k = 1;
