@@ -818,7 +818,8 @@ idealaddmultoone(GEN nf, GEN list)
   if (!is_vec_t(tx)) pari_err_TYPE("idealaddmultoone",list);
   l = lg(list);
   L = cgetg(l, t_VEC);
-  if (l == 1) pari_err(e_MISC,"ideals don't sum to Z_K in idealaddmultoone");
+  if (l == 1)
+    pari_err_DOMAIN("idealaddmultoone", "sum(ideals)", "!=", gen_1, L);
   nz = 0; /* number of non-zero ideals in L */
   for (i=1; i<l; i++)
   {
@@ -826,16 +827,14 @@ idealaddmultoone(GEN nf, GEN list)
     if (typ(I) != t_MAT) I = idealhnf_shallow(nf,I);
     if (lg(I) != 1)
     {
-      nz++;
-      RgM_check_ZM(I,"idealaddmultoone");
-      if (lgcols(I) != N+1)
-        pari_err_TYPE("idealaddmultoone [not an ideal]", I);
+      nz++; RgM_check_ZM(I,"idealaddmultoone");
+      if (lgcols(I) != N+1) pari_err_TYPE("idealaddmultoone [not an ideal]", I);
     }
     gel(L,i) = I;
   }
   H = ZM_hnfperm(shallowconcat1(L), &U, &perm);
-  if (lg(H) == 1 || !gequal1(gcoeff(H,1,1)))
-    pari_err(e_MISC,"ideals don't sum to Z_K in idealaddmultoone");
+  if (lg(H) == 1 || !equali1(gcoeff(H,1,1)))
+    pari_err_DOMAIN("idealaddmultoone", "sum(ideals)", "!=", gen_1, L);
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;
   U = gel(U,(nz-1)*N + i); /* (L[1]|...|L[nz]) U = 1 */
@@ -1834,7 +1833,8 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   Nx = idealnorm(nf,x);
   Ny = idealnorm(nf,y);
   if (typ(Nx) != t_INT || typ(Ny) != t_INT || !dvdii(Nx,Ny))
-    pari_err(e_MISC, "quotient not integral in idealdivexact");
+    pari_err_DOMAIN("idealdivexact","denominator(x/y)", "!=",
+                    gen_1,mkvec2(x,y));
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
   {
@@ -1890,8 +1890,7 @@ chk_vdir(GEN nf, GEN vdir)
 {
   long i, t, l = lg(vdir);
   GEN v;
-  if (l != lg(nf_get_roots(nf)))
-    pari_err(e_MISC, "incorrect vector length in idealred");
+  if (l != lg(nf_get_roots(nf))) pari_err_DIM("idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
   if (t != t_VEC) pari_err_TYPE("idealred",vdir);
@@ -2375,8 +2374,8 @@ mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
 }
 
 static void
-not_in_ideal(void) {
-  pari_err(e_MISC,"element not in ideal in idealtwoelt2");
+not_in_ideal(GEN a) {
+  pari_err_DOMAIN("idealtwoelt2","element mod ideal", "!=", gen_0, a);
 }
 
 /* Given an integral ideal x and a in x, gives a b such that
@@ -2392,19 +2391,19 @@ idealtwoelt2(GEN nf, GEN x, GEN a)
   x = idealhnf_shallow(nf,x);
   if (lg(x) == 1)
   {
-    if (!isintzero(a)) not_in_ideal();
+    if (!isintzero(a)) not_in_ideal(a);
     avma = av; return zerocol(nf_get_degree(nf));
   }
   x = Q_primitive_part(x, &cx);
   if (cx) a = gdiv(a, cx);
   if (typ(a) != t_COL)
   { /* rational number */
-    if (typ(a) != t_INT || !dvdii(a, gcoeff(x,1,1))) not_in_ideal();
+    if (typ(a) != t_INT || !dvdii(a, gcoeff(x,1,1))) not_in_ideal(a);
     mod = NULL;
   }
   else
   {
-    if (!hnf_invimage(x, a)) not_in_ideal();
+    if (!hnf_invimage(x, a)) not_in_ideal(a);
     mod = idealhnf_principal(nf, a);
   }
   b = mat_ideal_two_elt2(nf, x, a);
@@ -2710,8 +2709,7 @@ nfsnf(GEN nf, GEN x)
   if (typ(J)!=t_VEC) pari_err_TYPE("nfsnf",J);
   if (lg(I)!=n+1 || lg(J)!=n+1) pari_err_DIM("nfsnf");
   RgM_dimensions(A, &m, &n);
-  if (!n || n < m) pari_err(e_MISC,"not a matrix of maximal rank in nfsnf");
-  if (n > m) pari_err_IMPL("nfsnf for non square matrices");
+  if (!n || n != m) pari_err_IMPL("nfsnf for empty or non square matrices");
 
   av = avma; lim = stack_lim(av,1);
   A = RgM_to_nfM(nf, A);

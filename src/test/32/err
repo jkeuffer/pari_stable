@@ -502,4 +502,25 @@
   ***   at top-level: divisors(1/2)
   ***                 ^-------------
   *** divisors: incorrect type in divisors [denominator] (t_MAT).
-Total time spent: 20
+  ***   at top-level: idealstar(K,0)
+  ***                 ^--------------
+  *** idealstar: domain error in Idealstar: ideal = 0
+  ***   at top-level: idealstar(K,1/2)
+  ***                 ^----------------
+  *** idealstar: domain error in Idealstar: denominator(ideal) != 1
+  ***   at top-level: idealaddtoone(K,[[;]
+  ***                 ^--------------------
+  *** idealaddtoone: domain error in idealaddmultoone: sum(ideals) != 1
+  ***   at top-level: idealdiv(K,1,2,1)
+  ***                 ^-----------------
+  *** idealdiv: domain error in idealdivexact: denominator(x/y) != 1
+  ***   at top-level: idealred(K,matid(2),
+  ***                 ^--------------------
+  *** idealred: inconsistent dimensions in idealred.
+  ***   at top-level: idealtwoelt(K,matid(
+  ***                 ^--------------------
+  *** idealtwoelt: domain error in idealtwoelt2: element mod ideal != 0
+  ***   at top-level: rnf=rnfinit(K,x^2-y);rnfeltdown(rnf,x)
+  ***                                      ^-----------------
+  *** rnfeltdown: domain error in rnfelementdown: element not in the base field
+Total time spent: 12

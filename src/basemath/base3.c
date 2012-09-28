@@ -602,7 +602,7 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   if (typ(n) != t_INT) pari_err_TYPE("nfpow",n);
   nf = checknf(nf); N = nf_get_degree(nf);
   s = signe(n);
-  if (s < 0) pari_err(e_MISC,"negative power in pow_ei_mod_p");
+  if (s < 0) pari_err_IMPL("negative power in pow_ei_mod_p");
   if (!s || I == 1) return scalarcol_shallow(gen_1,N);
   D.nf = nf;
   D.p = p;
@@ -1735,8 +1735,9 @@ Idealstar(GEN nf, GEN ideal, long flag)
     archp = cgetg(1, t_VECSMALL);
   }
   x = idealhnf_shallow(nf, ideal);
-  if (lg(x) == 1 || typ(gcoeff(x,1,1)) != t_INT)
-    pari_err(e_MISC,"Idealstar needs an integral non-zero ideal: %Ps",x);
+  if (lg(x) == 1) pari_err_DOMAIN("Idealstar", "ideal","=",gen_0,x);
+  if (typ(gcoeff(x,1,1)) != t_INT)
+    pari_err_DOMAIN("Idealstar","denominator(ideal)", "!=",gen_1,x);
   sarch = nfarchstar(nf, x, archp);
   fa = idealfactor(nf, ideal);
   P = gel(fa,1);

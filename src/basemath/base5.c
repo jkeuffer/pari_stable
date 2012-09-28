@@ -37,9 +37,9 @@ _checkrnfeq(GEN x)
 GEN
 checkrnfeq(GEN x)
 {
-  x = _checkrnfeq(x);
-  if (!x) pari_err(e_MISC,"please apply rnfequation(,,1)");
-  return x;
+  GEN y = _checkrnfeq(x);
+  if (!y) pari_err_TYPE("checkrnfeq [please apply rnfequation(,,1)]", x);
+  return y;
 }
 
 GEN
@@ -71,7 +71,7 @@ eltreltoabs(GEN rnfeq, GEN x)
       case t_POL:
         c = RgX_RgXQ_eval(c, alpha, polabs); break;
       default:
-        if (!is_const_t(tc)) pari_err(e_MISC, "incorrect data in eltreltoabs");
+        if (!is_const_t(tc)) pari_err_TYPE("eltreltoabs",c);
     }
     s = RgX_rem(gadd(c, gmul(teta,s)), polabs);
   }
@@ -301,7 +301,8 @@ rnfelementdown(GEN rnf,GEN x)
         lx = lg(z);
         if (lx == 2) { avma = av; return gen_0; }
         if (lx > 3)
-          pari_err(e_MISC,"element is not in the base field in rnfelementdown");
+          pari_err_DOMAIN("rnfelementdown","element","not in",
+                          strtoGENstr("the base field"),x);
         z = gel(z,2);
       }
       return gerepilecopy(av, z);
@@ -514,10 +515,9 @@ rnfequationall(GEN A, GEN B, long *pk, GEN *pLPRS)
   B = RgX_rnf_fix("rnfequation", A,B,1); lB = lg(B);
   if (lB<=3) pari_err_CONSTPOL("rnfequation");
   B = Q_primpart(B);
-  RgX_check_ZXY(B,"rnfequation");
 
   if (!nfissquarefree(A,B))
-    pari_err(e_MISC,"inseparable relative equation in rnfequation");
+    pari_err_DOMAIN("rnfequation","issquarefree(B)","=",gen_0,B);
 
   *pk = 0; C = ZX_ZXY_resultant_all(A, B, pk, pLPRS);
   if (gsigne(leading_term(C)) < 0) C = RgX_neg(C);
