@@ -573,18 +573,19 @@ Z2XQ_log(GEN a, GEN T, long e)
 {
   pari_sp av = avma;
   long i,k= (long) pow((double)(e>>1),1./3);
-  GEN pe = int2n(e+k);
-  GEN ak = FpXQ_pow(a, int2n(k), T, pe);
-  GEN bn = ZX_shifti(Fp_FpX_sub(gen_1, ak, pe),-1);
-  GEN bd = ZX_shifti(FpX_Fp_add(ak, gen_1, pe),-1);
-  GEN bdi = ZpXQ_invlift(bd,pol_1(varn(T)),T,gen_2,e);
-  GEN b = FpXQ_mul(bn,bdi,T,pe), s;
+  GEN ak = FpXQ_pow(a, int2n(k), T, int2n(e+k));/*ak=1 [2^(k+1)] (e+k)*/
+  GEN bn = ZX_shifti(ak,-(k+1));
+  GEN bd = ZX_shifti(ZX_Z_add(ak, gen_1),-1);
+  GEN bdi= ZpXQ_invlift(bd,pol_1(varn(T)),T,gen_2,e-1);
+  GEN b  = ZX_shifti(FpXQ_mul(bn,bdi,T,int2n(e-1)),k);/*b=0 [2^k] (e+k-1)*/
+  GEN pe = int2n(e+k-1), s;
   long l = (e>>1)/k;
   GEN pol = cgetg(l+3,t_POL);
+  pol[1] = evalsigne(1)|evalvarn(0);
   for(i=0; i<=l; i++)
     gel(pol,i+2) = Fp_inv(utoi(2*i+1),pe);
   s = FpXQ_mul(b,FpX_FpXQ_eval(pol,FpXQ_sqr(b,T,pe),T,pe),T,pe);
-  return gerepileupto(av, FpX_neg(ZX_shifti(s,1-k), int2n(e)));
+  return gerepileupto(av, ZX_shifti(s,1-k));
 }
 
 /* Assume a = 1 [4] */
