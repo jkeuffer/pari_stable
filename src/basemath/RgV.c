@@ -506,7 +506,7 @@ static void
 fill_scalmat(GEN y, GEN t, GEN _0, long n)
 {
   long i;
-  if (n < 0) pari_err_DOMAIN("fill_scalmat", "size", "<", 0, stoi(n));
+  if (n < 0) pari_err_DOMAIN("fill_scalmat", "size", "<", gen_0, stoi(n));
   for (i = 1; i <= n; i++)
   {
     gel(y,i) = const_col(n, _0);
