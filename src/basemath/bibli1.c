@@ -748,7 +748,7 @@ algdep0(GEN x, long n, long bit)
   if (n <= 0)
   {
     if (!n) return gen_1;
-    pari_err_TYPE("algdet [negative degree]", stoi(n));
+    pari_err_DOMAIN("algdep", "degree", "<", gen_0, stoi(n));
   }
 
   av = avma; y = cgetg(n+2,t_COL);
@@ -831,19 +831,26 @@ struct qfvec
 };
 
 static void
+err_minim(GEN a)
+{
+  pari_err_DOMAIN("minim0","form","is not",
+                  strtoGENstr("positive definite"),a);
+}
+
+static void
 forqfvec_init(struct qfvec *qv, GEN a)
 {
   GEN r, u;
-  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err_TYPE("forqfvec",a);
+  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err_TYPE("qfminim",a);
   u = lllgramint(a);
-  if (lg(u) != lg(a)) pari_err(e_MISC, "not a definite form in minim0");
+  if (lg(u) != lg(a)) err_minim(a);
   a = qf_apply_ZM(a, u);
   qv->a = RgM_gtofp(a, DEFAULTPREC);
   r = qfgaussred_positive(qv->a);
   if (!r)
   {
     r = qfgaussred_positive(a); /* exact computation */
-    if (!r) pari_err(e_MISC,"not a positive definite form in minim0");
+    if (!r) err_minim(a);
     r = RgM_gtofp(r, DEFAULTPREC);
   }
   qv->r = r;
@@ -958,8 +965,8 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   double p,maxnorm,BOUND,*v,*y,*z,**q;
   const double eps = 1e-10;
   int stockall = 0;
+  struct qfvec qv;
 
-  if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err_TYPE("qfminim0",a);
   if (!BORNE)
     sBORNE = 0;
   else
@@ -1005,17 +1012,10 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   minim_alloc(n, &q, &x, &y, &z, &v);
   av1 = avma;
 
-  u = lllgramint(a);
-  if (lg(u) != n) pari_err(e_MISC,"not a definite form in minim0");
-  a = qf_apply_ZM(a,u);
-
+  forqfvec_init(&qv, a);
+  r = qv.r;
+  u = qv.u;
   n--;
-  r = qfgaussred_positive(RgM_gtofp(a, DEFAULTPREC));
-  if (!r) {
-    r = qfgaussred_positive(a); /* exact computation */
-    if (!r) pari_err(e_MISC,"not a positive definite form in minim0");
-    r = RgM_gtofp(r, DEFAULTPREC);
-  }
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));

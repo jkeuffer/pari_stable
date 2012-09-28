@@ -217,3 +217,6 @@ idealred(K,matid(2),[])
 idealtwoelt(K,matid(2),1/2)
 rnf=rnfinit(K,x^2-y); rnfeltdown(rnf, x)
 matid(-1)
+polinterpolate([1,1],[2,3],Pi)
+modreverse(Mod(-x^3+9*x,x^4-10*x^2+1))
+

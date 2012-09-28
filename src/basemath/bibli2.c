@@ -634,7 +634,7 @@ laplace(GEN x)
   GEN y, t;
 
   if (typ(x) != t_SER) pari_err_TYPE("laplace",x);
-  if (e < 0) pari_err(e_MISC,"negative valuation in laplace");
+  if (e < 0) pari_err_DOMAIN("laplace","valuation","<",gen_0,stoi(e));
   y = cgetg(l,t_SER);
   t = mpfact(e); y[1] = x[1];
   for (i=2; i<l; i++)
@@ -729,7 +729,7 @@ dirdiv(GEN x, GEN y)
   if (typ(y)!=t_VEC) pari_err_TYPE("dirdiv",y);
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
-  if (dy != 1 || ly == 1) pari_err(e_MISC,"not an invertible dirseries in dirdiv");
+  if (dy != 1 || ly == 1) pari_err_INV("dirdiv",y);
   lz = minss(lx,ly*dx); p1 = gel(y,1);
   if (!gequal1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = leafcopy(x);
   z = zerovec(lz-1);
@@ -1062,7 +1062,6 @@ polint_i(GEN X, GEN Y, GEN x, long n, GEN *ptdy)
             break;
           default:
             goto NODY;
-
         }
       }
       break;
@@ -1081,7 +1080,12 @@ NODY:
     for (i=0; i<n-m; i++)
     {
       GEN ho = gsub(gel(X,i),x), hp = gsub(gel(X,i+m),x), den = gsub(ho,hp);
-      if (gequal0(den)) pari_err(e_MISC,"two abcissas are equal in polint");
+      if (gequal0(den))
+      {
+        char *x1 = stack_sprintf("X[%ld]", i+1);
+        char *x2 = stack_sprintf("X[%ld]", i+m+1);
+        pari_err_DOMAIN("polinterpolate",x1,"=",strtoGENstr(x2), X);
+      }
       den = gdiv(gsub(gel(c,i+1),gel(d,i)), den);
       gel(c,i) = gmul(ho,den);
       gel(d,i) = gmul(hp,den);
@@ -1130,6 +1134,13 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
 /**                       MODREVERSE                               **/
 /**                                                                **/
 /********************************************************************/
+static void
+err_reverse(GEN x, GEN T)
+{
+  pari_err_DOMAIN("modreverse","deg(charpoly(z))", "<", stoi(degpol(T)),
+                  mkpolmod(x,T));
+}
+
 /* return y such that Mod(y, charpoly(Mod(a,T)) = Mod(a,T) */
 GEN
 RgXQ_reverse(GEN a, GEN T)
@@ -1142,12 +1153,10 @@ RgXQ_reverse(GEN a, GEN T)
     if (n <= 0) return gcopy(a);
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
   }
-  if (typ(a) != t_POL || !signe(a))
-    pari_err(e_MISC,"reverse polmod does not exist");
-
+  if (typ(a) != t_POL || !signe(a)) err_reverse(a,T);
   y = RgXV_to_RgM(RgXQ_powers(a,n-1,T), n);
   y = RgM_solve(y, col_ei(n, 2));
-  if (!y) pari_err(e_MISC,"reverse polmod does not exist: Mod(%Ps, %Ps)", a,T);
+  if (!y) err_reverse(a,T);
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
 GEN
@@ -1161,12 +1170,10 @@ QXQ_reverse(GEN a, GEN T)
     if (n <= 0) return gcopy(a);
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
   }
-  if (typ(a) != t_POL || !signe(a))
-    pari_err(e_MISC,"reverse polmod does not exist");
-
+  if (typ(a) != t_POL || !signe(a)) err_reverse(a,T);
   y = RgXV_to_RgM(QXQ_powers(a,n-1,T), n);
   y = RgM_solve(y, col_ei(n, 2));
-  if (!y) pari_err(e_MISC,"reverse polmod does not exist: Mod(%Ps, %Ps)", a,T);
+  if (!y) err_reverse(a,T);
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
 
