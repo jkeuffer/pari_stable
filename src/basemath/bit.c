@@ -156,7 +156,8 @@ gbitneg(GEN x, long bits)
   long lowbits, xl, len_out, i;
 
   if (typ(x) != t_INT) pari_err_TYPE("bitwise negation",x);
-  if (bits < -1) pari_err(e_MISC, "negative exponent in bitwise negation");
+  if (bits < -1)
+    pari_err_DOMAIN("bitwise negation","exponent","<",gen_m1,stoi(bits));
   if (bits == -1) return inegate(x);
   if (bits == 0) return gen_0;
   if (signe(x) < 0) { /* Consider as if mod big power of 2 */
