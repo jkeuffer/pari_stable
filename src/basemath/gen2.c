@@ -2104,7 +2104,9 @@ padic_to_Fl(GEN x, ulong Y) {
 
 static void
 croak(const char *s) {
-  pari_err(e_MISC,"trying to overwrite a universal object in gaffect (%s)", s);
+  char *t;
+  t = stack_sprintf("gaffect [overwriting universal object: %s]",s);
+  pari_err_BUG(t);
 }
 
 void

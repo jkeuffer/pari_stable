@@ -1001,7 +1001,8 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
   if (li > co)
   {
     ldef = li - co;
-    if (!modid) pari_err(e_MISC,"nb lines > nb columns in ZM_hnfmod");
+    if (!modid)
+      pari_err_DOMAIN("ZM_hnfmod","nb lines",">", strtoGENstr("nb columns"), x);
   }
   /* To prevent coeffs explosion, only reduce mod dm when lg() > ldm */
   ldm = lgefint(dm);
@@ -2417,7 +2418,7 @@ Frobeniusform(GEN V, long n)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
-    if (k+d-1 > n) pari_err(e_MISC, "accuracy lost in matfrobenius");
+    if (k+d-1 > n) pari_err_PREC("matfrobenius");
     for (j=0; j<d-1; j++, k++) gcoeff(M,k+1,k) = gen_1;
     for (j=0; j<d; j++) gcoeff(M,k-j,k) = gneg(gel(P, 1+d-j));
   }
@@ -2434,7 +2435,7 @@ build_frobeniusbc(GEN V, long n)
     GEN  P = gel(V,i);
     long d = degpol(P);
     if (d <= 0) continue;
-    if (l+d-2 > n) pari_err(e_MISC, "accuracy lost in matfrobenius");
+    if (l+d-2 > n) pari_err_PREC("matfrobenius");
     gcoeff(M,k,i) = gen_1;
     for (j=1; j<d; j++,k++,l++)
     {
@@ -2483,14 +2484,14 @@ matfrobenius(GEN M, long flag, long v)
   if (flag<2)
   {
     D = matsnf0(M_x,6);
-    if (prod_degree(D) != n) pari_err(e_MISC, "accuracy lost in matfrobenius");
+    if (prod_degree(D) != n) pari_err_PREC("matfrobenius");
     if (flag != 1) D = Frobeniusform(D, n);
     return gerepileupto(ltop, D);
   }
   if (flag>2) pari_err_FLAG("matfrobenius");
   A = matsnf0(M_x,3);
   D = smithclean(RgM_diagonal_shallow(gel(A,3)));
-  if (prod_degree(D) != n) pari_err(e_MISC, "accuracy lost in matfrobenius");
+  if (prod_degree(D) != n) pari_err_PREC("matfrobenius");
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);
   R = build_basischange(N, RgM_mul(B,gel(A,1)));

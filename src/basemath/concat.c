@@ -99,11 +99,7 @@ vconcat(GEN A, GEN B)
 }
 
 static void
-err_cat(GEN x, GEN y)
-{
-  pari_err(e_MISC,"impossible concatenation: %s %Ps . %s %Ps",
-      type_name(typ(x)), matsize(x), type_name(typ(y)), matsize(y));
-}
+err_cat(GEN x, GEN y) { pari_err_OP("concatenation",x,y); }
 
 GEN
 shallowconcat(GEN x, GEN y)
@@ -301,7 +297,7 @@ shallowconcat1(GEN x)
   { x = list_data(x); lx = x ? lg(x): 1; }
   else
   { pari_err_TYPE("concat",x); return NULL; /* not reached */ }
-  if (lx==1) pari_err(e_MISC,"trying to concat elements of an empty vector");
+  if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
   if (lx==2) return gel(x,1);
 
   z = gel(x,1);

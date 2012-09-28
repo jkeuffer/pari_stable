@@ -3780,7 +3780,7 @@ hqfeval(GEN q, GEN x)
 
   if (lg(x) != l) pari_err_DIM("hqfeval");
   if (l==1) return gen_0;
-  if (lgcols(q) != l) pari_err(e_MISC,"invalid quadratic form in hqfeval");
+  if (lgcols(q) != l) pari_err_DIM("hqfeval");
   return hqfeval0(q,x,l);
 }
 

@@ -24,12 +24,12 @@ Doc: concatenation of $x$ and $y$. If $x$ or $y$ is
  \bprog
  ? x = matid(2); y = 2*matid(2);
  ? concat(x,y)
- %2 = 
+ %2 =
  [1 0 2 0]
 
  [0 1 0 2]
  ? concat(x~,y~)~
- %3 = 
+ %3 =
  [1 0]
 
  [0 1]
@@ -38,7 +38,7 @@ Doc: concatenation of $x$ and $y$. If $x$ or $y$ is
 
  [0 2]
  ? matconcat([x;y])
- %4 = 
+ %4 =
  [1 0]
 
  [0 1]
@@ -56,12 +56,12 @@ Doc: concatenation of $x$ and $y$. If $x$ or $y$ is
  %3 = [1, 2, 3, 4]
 
  ? Mat([x,y]~)
- %4 = 
+ %4 =
  [1 2]
 
  [3 4]
  ? matconcat([x;y])
- %5 = 
+ %5 =
  [1 2]
 
  [3 4]
