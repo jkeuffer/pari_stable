@@ -532,4 +532,10 @@
   ***   at top-level: modreverse(Mod(-x^3+
   ***                 ^--------------------
   *** modreverse: domain error in modreverse: deg(charpoly(z)) < 4
-Total time spent: 8
+  ***   at top-level: bnrconductor(bnfinit
+  ***                 ^--------------------
+  *** bnrconductor: inconsistent subgroup t_MAT (1x1) , t_MAT (1x1).
+  ***   at top-level: rnfnormgroup(bnrinit
+  ***                 ^--------------------
+  *** rnfnormgroup: domain error in rnfnormgroup: rnfisabelian(bnr,pol) = 0
+Total time spent: 20

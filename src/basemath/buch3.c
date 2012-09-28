@@ -1166,7 +1166,7 @@ bnfcertify0(GEN bnf, long flag)
     err_printf("  Testing primes <= %Ps\n\n", B); err_flush();
   }
   bound = itou_or_0(B);
-  if (!bound) pari_err(e_MISC,"sorry, too many primes to check");
+  if (!bound) pari_err_OVERFLOW("bnfcertify [too many primes to check]");
   if (u_forprime_init(&T, 2, bound))
     while ( (p = u_forprime_next(&T)) ) check_prime(p,bnf, &S);
   if (lg(cyc) > 1)
@@ -1224,7 +1224,7 @@ ABC_to_bnr(GEN A, GEN B, GEN C, GEN *H, int gen)
       case 7: /* bnr */
         *H = B; return A;
       case 11: /* bnf */
-        if (!B) pari_err(e_MISC,"missing conductor in ABC_to_bnr");
+        if (!B) pari_err_TYPE("ABC_to_bnr [bnf+missing conductor]",A);
         *H = C; return Buchray(A,B, gen? nf_INIT | nf_GEN: nf_INIT);
     }
   pari_err_TYPE("ABC_to_bnr",A);
@@ -1246,7 +1246,7 @@ bnrisconductor0(GEN A,GEN B,GEN C)
 }
 
 static GEN
-check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
+check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL)
 {
   GEN h, D = NULL;
   if (H && gequal0(H)) H = NULL;
@@ -1256,7 +1256,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
     if (typ(H) != t_MAT) pari_err_TYPE("check_subgroup",H);
     RgM_check_ZM(H, "check_subgroup");
     H = ZM_hnf(H);
-    if (!hnfdivide(H, D)) pari_err(e_MISC,"incorrect subgroup in %s", s);
+    if (!hnfdivide(H, D)) pari_err_OP("subgroup",H,D);
     h = ZM_det_triangular(H);
     if (equalii(h, *clhray)) H = NULL; else *clhray = h;
   }
@@ -1322,7 +1322,7 @@ bnrconductor(GEN bnr, GEN H0, long flag)
   bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
   clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
-  H = check_subgroup(bnr, H0, &clhray, 1, "conductor");
+  H = check_subgroup(bnr, H0, &clhray, 1);
 
   archp = S.archp;
   e     = S.e; l = lg(e);
@@ -1378,7 +1378,7 @@ bnrisconductor(GEN bnr, GEN H0)
   bid = bnr_get_bid(bnr); init_zlog_bid(&S, bid);
   clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
-  H = check_subgroup(bnr, H0, &clhray, 1, "conductor");
+  H = check_subgroup(bnr, H0, &clhray, 1);
 
   archp = S.archp;
   e     = S.e; l = lg(e);
@@ -1392,6 +1392,10 @@ bnrisconductor(GEN bnr, GEN H0)
     if (contains(H, bnr_log_gen_arch(bnr, &S, k))) { avma = av; return 0; }
   avma = av; return 1;
 }
+
+static void
+err_rnfnormgroup(GEN T)
+{ pari_err_DOMAIN("rnfnormgroup","rnfisabelian(bnr,pol)","=", gen_0,T); }
 
 /* return the norm group corresponding to the relative extension given by
  * polrel over bnr.bnf, assuming it is abelian and the modulus of bnr is a
@@ -1421,8 +1425,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   detgroup = ZV_prod(group);
   group = diagonal_shallow(group);
   k = cmpiu(detgroup,reldeg);
-  if (k < 0)
-    pari_err(e_MISC,"not an Abelian extension in rnfnormgroup?");
+  if (k < 0) err_rnfnormgroup(polrel);
   if (!k) return gerepilecopy(av, group);
 
   discnf = nf_get_disc(nf);
@@ -1457,8 +1460,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       nfac = lg(fac)-1;
       /* check decomposition of pr has Galois type */
       for (j=2; j<=nfac; j++)
-        if (degpol(gel(fac,j)) != f)
-          pari_err(e_MISC,"non Galois extension in rnfnormgroup");
+        if (degpol(gel(fac,j)) != f) err_rnfnormgroup(polrel);
       if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
 
@@ -1470,7 +1472,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       group = ZM_hnf(shallowconcat(group, col));
       detgroup = ZM_det_triangular(group);
       k = cmpiu(detgroup,reldeg);
-      if (k < 0) pari_err(e_MISC,"not an Abelian extension in rnfnormgroup");
+      if (k < 0) err_rnfnormgroup(polrel);
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
@@ -1597,7 +1599,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
   ideal= bid_get_ideal(bid);
-  H0 = H = check_subgroup(bnr, H0, &clhray, 0, "bnrdiscray");
+  H0 = H = check_subgroup(bnr, H0, &clhray, 0);
   archp = S.archp;
   P     = S.P;
   e     = S.e; l = lg(e);
@@ -1680,7 +1682,7 @@ KerChar(GEN chi, GEN cyc)
   GEN m, U, d1;
 
   if (typ(chi) != t_VEC) pari_err_TYPE("KerChar",chi);
-  if (lg(chi) != l) pari_err(e_MISC,"incorrect character length in KerChar");
+  if (lg(chi) != l) pari_err_DIM("KerChar [incorrect character length]");
   if (l == 1) return NULL; /* trivial subgroup */
   d1 = gel(cyc,1); m = cgetg(l+1,t_MAT);
   for (i=1; i<l; i++)
@@ -1776,7 +1778,7 @@ factordivexact(GEN fa1,GEN fa2)
     else
     {
       p1 = subii(gel(E1,i), gel(E2,j)); k = signe(p1);
-      if (k < 0) pari_err(e_MISC,"factordivexact is not exact!");
+      if (k < 0) pari_err_BUG("factordivexact [not exact]");
       if (k > 0) { gel(P,c) = gel(P1,i); gel(E,c) = p1; c++; }
     }
   }
@@ -2112,7 +2114,8 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY;
   GEN res, embunit, h, Ray, discall, idealrel, idealrelinit, fadkabs;
 
-  if (bound <= 0) pari_err(e_MISC,"non-positive bound in Discrayabslist");
+  if (bound <= 0)
+    pari_err_DOMAIN("Discrayabslist","bound","<=",gen_0,stoi(bound));
   res = discall = NULL; /* -Wall */
 
   bnf = checkbnf(bnf);
@@ -2128,7 +2131,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   if (allarch) {
     matarchunit = zlog_units(nf, U, sgnU, bidp);
     bidp = Idealstar(nf,matid(degk), nf_INIT);
-    if (r1>15) pari_err(e_MISC,"r1>15 in discrayabslistarch");
+    if (r1>15) pari_err_IMPL("r1>15 in discrayabslistarch");
     nba = r1;
   } else {
     matarchunit = NULL;

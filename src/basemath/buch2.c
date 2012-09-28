@@ -917,7 +917,7 @@ cleanarch(GEN x, long N, long prec)
     }
     return y;
   }
-  if (!is_vec_t(tx)) pari_err(e_MISC,"not a vector/matrix in cleanarch");
+  if (!is_vec_t(tx)) pari_err_TYPE("cleanarch",x);
   RU = lg(x)-1; R1 = (RU<<1)-N;
   s = gdivgs(RgV_sum(real_i(x)), -N); /* -log |norm(x)| / N */
   y = cgetg(RU+1,tx);
@@ -1042,7 +1042,7 @@ init_units(GEN BNF)
     GEN nf = bnf_get_nf(bnf), A = bnf_get_logfu(bnf);
     funits = gerepilecopy(av, getfu(nf, &A, &l, 0));
     if (typ(funits) == t_MAT)
-      pari_err(e_MISC, "bnf accuracy too low to compute units on the fly");
+      pari_err_PREC("init_units [can't compute units on the fly]");
   }
   l = lg(funits) + 1;
   v = cgetg(l, t_VEC); gel(v,1) = bnf_get_tuU(bnf);
@@ -1465,7 +1465,7 @@ scalar_get_arch_real(GEN nf, GEN u, GEN *emb)
   GEN v, logu;
   long i, s = signe(u), RU = lg(nf_get_roots(nf))-1, R1 = nf_get_r1(nf);
 
-  if (!s) pari_err(e_MISC,"0 in get_arch_real");
+  if (!s) pari_err_DOMAIN("get_arch_real","argument","=",gen_0,u);
   v = cgetg(RU+1, t_COL);
   logu = logr_abs(u);
   for (i=1; i<=R1; i++) gel(v,i) = logu;
@@ -1787,7 +1787,7 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
   switch( idealtyp(&x, &arch) )
   {
     case id_PRINCIPAL:
-      if (gequal0(x)) pari_err(e_MISC,"zero ideal in isprincipal");
+      if (gequal0(x)) pari_err_DOMAIN("bnfisprincipal","ideal","=",gen_0,x);
       return triv_gen(bnf, x, flag);
     case id_PRIME:
       if (pr_is_inert(x))
@@ -1795,7 +1795,7 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
       x = idealhnf_two(bnf_get_nf(bnf), x);
       break;
     case id_MAT:
-      if (lg(x)==1) pari_err(e_MISC,"zero ideal in isprincipal");
+      if (lg(x)==1) pari_err_DOMAIN("bnfisprincipal","ideal","=",gen_0,x);
   }
   pr = prec_arch(bnf); /* precision of unit matrix */
   c = getrand();
@@ -3806,7 +3806,8 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 12.;
   }
-  if (cbach < 0.) pari_err(e_MISC,"Bach constant < 0 in buch");
+  if (cbach < 0.)
+    pari_err_DOMAIN("Buchall","Bach constant","<",gen_0,dbltor(cbach));
 
   cache.base = NULL; F.subFB = NULL; F.LP = NULL;
   init_GRHcheck(&GRHcheck, N, R1, LOGD);

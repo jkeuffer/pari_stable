@@ -175,25 +175,10 @@ qfi_random(struct buch_quad *B,GEN ex) { return random_form(B, ex, &QFI_comp); }
 /*                     Common subroutines                          */
 /*                                                                 */
 /*******************************************************************/
-double
-check_bach(double cbach, double B)
-{
-  if (cbach >= B)
-   pari_err(e_MISC,"sorry, couldn't deal with this field. PLEASE REPORT");
-  if (cbach <= 0.3)
-    cbach *= 2;
-  else
-    cbach += 0.2;
-  if (cbach > B) cbach = B;
-  if (DEBUGLEVEL) err_printf("\n*** Bach constant: %f\n", cbach);
-  return cbach;
-}
-
 long
 check_LIMC(long LIMC, long LIMCMAX)
 {
-  if (LIMC >= LIMCMAX)
-   pari_err(e_MISC,"sorry, couldn't deal with this field. PLEASE REPORT");
+  if (LIMC >= LIMCMAX) pari_err_BUG("Buchmann's algorithm");
   if (LIMC <= LIMCMAX/40) /* cbach <= 0.3 */
     LIMC *= 2;
   else if (LIMCMAX < 60) /* \Delta_K <= 9 */
@@ -1009,7 +994,8 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 6.;
   }
-  if (cbach < 0.) pari_err(e_MISC,"Bach constant < 0 in Buchquad");
+  if (cbach < 0.)
+    pari_err_DOMAIN("Buchquad","Bach constant","<",gen_0,dbltor(cbach));
   av = avma;
   BQ.powsubFB = BQ.subFB = NULL;
   minSFB = (expi(D) > 15)? 3: 2;
@@ -1179,8 +1165,8 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
   else
   {
     lx = lg(data);
-    if (typ(data)!=t_VEC || lx > 7)
-      pari_err(e_MISC,"incorrect parameters in quadclassunit");
+    if (typ(data)!=t_VEC) pari_err_TYPE("quadclassunit", data);
+    if (lx > 7) pari_err_DIM("quadclassunit [tech vector]");
     if (lx > 3) lx = 3;
   }
   switch(lx)
