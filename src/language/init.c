@@ -97,7 +97,7 @@ int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 void (*cb_pari_sigint)(void);
 void (*cb_pari_err_recover)(long);
 
-THREAD GEN global_err_data;
+static THREAD GEN global_err_data;
 THREAD jmp_buf *iferr_env;
 const long CATCH_ALL = -1;
 

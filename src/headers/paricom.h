@@ -49,9 +49,10 @@ extern const long CATCH_ALL;
   iferr_env = &__env;        \
   if (setjmp(*iferr_env))    \
   {                          \
+    GEN __iferr_data = pari_err_last(); \
     iferr_env = __iferr_old; \
-    if (err!=CATCH_ALL && err_get_num(global_err_data) != err) \
-      pari_err(0, global_err_data);
+    if (err!=CATCH_ALL && err_get_num(__iferr_data) != err) \
+      pari_err(0, __iferr_data);
 
 #define pari_RETRY } iferr_env = &__env; {
 #define pari_TRY } else {
@@ -73,7 +74,6 @@ extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gen_0,gnil,err_e_STACK;
 extern VOLATILE THREAD int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 extern const long lontyp[];
-extern THREAD GEN global_err_data;
 extern void (*cb_pari_ask_confirm)(const char *);
 extern int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 extern void (*cb_pari_sigint)(void);
