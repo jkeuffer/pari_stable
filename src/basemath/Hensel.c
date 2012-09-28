@@ -634,7 +634,7 @@ gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
     mask >>= 1; q = powiu(p,N); q2 = powiu(p, N2);
     v = eval(E, x, q);
     V = ZX_Z_divexact(gel(v,1), q2);
-    x = FpX_add(x, ZX_Z_mul(invd(E, V, v, M), q2), q);
+    x = FpX_sub(x, ZX_Z_mul(invd(E, V, v, M), q2), q);
     if (low_stack(st_lim, stack_lim(av, 1)))
       x = gerepileupto(av, x);
   }

@@ -444,52 +444,77 @@ F2xqE_tatepairing(GEN P, GEN Q, GEN m, GEN a2, GEN T)
 /**                                                                   **/
 /***********************************************************************/
 
-/* Solve the linear equation approximation in the Newton algorithm */
+/* Solve F(X) = V mod 2^N
+   F(Xn) = V [mod 2^n]
+   Vm = (V-F(Xn))/(2^n)
+   F(Xm) = Vm
+   X = Xn + 2^n*Xm
+*/
 
 static GEN
-Z2X_canonlift_aux(GEN f0, GEN f1, GEN V, long N)
+gen_Z2X_Dixon(GEN F, GEN V, long N, void *E,
+                     GEN lin(void *E, GEN F, GEN d, long N),
+                     GEN invl(void *E, GEN d))
 {
   pari_sp av = avma;
-  long N2, M;
-  GEN q, d0, d1, d2, d3, V2, bil;
+  long n, m;
+  GEN Xn, Xm, FXn, Vm;
   V = ZX_remi2n(V, N);
-  if (N == 1) return V;
-  N2 = (N + 1)>>1; M = N - N2;
-  q = int2n(N);
-  f0 = ZX_remi2n(f0, N); f1 = ZX_remi2n(f1, N);
-  d2 = Z2X_canonlift_aux(f0, f1, V, N2);
-  RgX_even_odd(d2, &d0, &d1);
-  bil = ZX_sub(FpX_mul(f0, d0, q), RgX_shift(FpX_mul(f1, d1, q), 1));
-  V2 = ZX_shifti(ZX_sub(ZX_add(V, d2), ZX_shifti(bil, 1)), -N2);
-  d3 = Z2X_canonlift_aux(f0, f1, V2, M);
-  return gerepileupto(av, FpX_add(d2, ZX_shifti(d3, N2), q));
+  if (N == 1) return invl(E, V);
+  n = (N + 1)>>1; m = N - n;
+  F = ZXV_remi2n(F, N);
+  Xn = gen_Z2X_Dixon(F, V, n, E, lin, invl);
+  FXn = lin(E, F, Xn, N);
+  Vm = ZX_shifti(ZX_sub(V, FXn), -n);
+  Xm = gen_Z2X_Dixon(F, Vm, m, E, lin, invl);
+  return gerepileupto(av, ZX_remi2n(ZX_add(Xn, ZX_shifti(Xm, n)), N));
 }
 
-/* Lift P to Q such that Q(x^2)=Q(x)*Q(-x) mod 2^n */
+/* H -> H mod 2*/
+
+static GEN _can_invl(void *E, GEN V) {(void) E; return V; }
+
+/* H -> H-(f0*H0-f1*H1) */
+
+static GEN _can_lin(void *E, GEN F, GEN V, long N)
+{
+  pari_sp av=avma;
+  GEN d0, d1, z;
+  (void) E;
+  RgX_even_odd(V, &d0, &d1);
+  z =  ZX_sub(V, ZX_sub(ZX_mul(gel(F,1), d0), ZX_mul(gel(F,2), d1)));
+  return gerepileupto(av, ZX_remi2n(z, N));
+}
+
+/* P -> P-(P0^2-X*P1^2) */
 
 static GEN
-F2x_canonlift(GEN P, long n)
+_can_iter(void *E, GEN f2, GEN q)
 {
-  pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
-  long N = 1, N2;
-  GEN f2 = F2x_to_ZX(P);
-  long mask = quadratic_prec_mask(n);
-  while (mask > 1)
-  {
-    GEN f0, f1, V, d, q;
-    N2 = N; N <<= 1;
-    if (mask&1UL) N--;
-    mask >>= 1; q = int2n(N);
-    RgX_even_odd(f2, &f0, &f1);
-    V = ZX_shifti(ZX_add(ZX_sub(f2, FpX_sqr(f0, q)), RgX_shift(FpX_sqr(f1, q), 1)), -N2);
-    d = Z2X_canonlift_aux(f0, f1, V, N2);
-    f2 = FpX_add(f2, ZX_shifti(d, N2), q);
-    if (low_stack(st_lim, stack_lim(ltop, 1)))
-      f2 = gerepileupto(ltop, f2);
-  }
-  if (odd(degpol(f2))) f2 = FpX_neg(f2,int2n(n));
-  return gerepileupto(ltop, f2);
+  GEN f0, f1, z;
+  (void) E;
+  RgX_even_odd(f2, &f0, &f1);
+  z = ZX_add(ZX_sub(f2, FpX_sqr(f0, q)), RgX_shift(FpX_sqr(f1, q), 1));
+  return mkvec3(z,f0,f1);
 }
+
+/* H -> H-(2*P0*H0-2*X*P1*H1) */
+
+static GEN
+_can_invd(void *E, GEN V, GEN v, long M)
+{
+  GEN F;
+  (void) E;
+  F = mkvec2(ZX_shifti(gel(v,2),1), ZX_shifti(RgX_shift(gel(v,3),1),1));
+  return gen_Z2X_Dixon(F, V, M, NULL, _can_lin, _can_invl);
+}
+
+/* Lift P to Q such that Q(x^2)=Q(x)*Q(-x) mod 2^n
+   if Q = Q0(X^2)+X*Q1(X^2), solve Q(x^2) = Q0^2-X*Q1^2
+*/
+static GEN
+F2x_canonlift(GEN P, long n)
+{ return gen_ZpX_Newton(F2x_to_ZX(P),gen_2, n, NULL, _can_iter, _can_invd); }
 
 static GEN
 Z2XQ_frob(GEN x, GEN B, GEN T, GEN q)
@@ -497,25 +522,64 @@ Z2XQ_frob(GEN x, GEN B, GEN T, GEN q)
   return FpX_rem_Barrett(RgX_inflate(x, 2), B, T, q);
 }
 
-/* Solve a*S(x)+b*x+c=0 mod 2^N where 2|b, a=1 [2] */
+struct _frob_lift
+{
+  GEN B, T, sqx;
+};
+
+/* H -> S^-1(H) mod 2 */
+
+static GEN _frob_invl(void *E, GEN V)
+{
+  struct _frob_lift *F = (struct _frob_lift*) E;
+  GEN sqx = F->sqx;
+  return F2x_to_ZX(F2xq_sqrt_fast(ZX_to_F2x(V), gel(sqx,1), gel(sqx,2)));
+}
+
+/* H -> f1*S(H) + f2*H */
+
+static GEN _frob_lin(void *E, GEN F, GEN x2, long N)
+{
+  GEN B = gel(F,3), T = gel(F,4);
+  GEN q   = int2n(N);
+  GEN y2  = Z2XQ_frob(x2, B, T, q);
+  GEN lin = ZX_add(ZX_mul(gel(F,1), y2), ZX_mul(gel(F,2), x2));
+  (void) E;
+  return FpX_rem_Barrett(ZX_remi2n(lin, N), B, T, q);
+}
+
+/* X -> P(X,S(X)) */
 
 static GEN
-solve_frob_eqn(GEN a, GEN b, GEN c, long N, GEN B, GEN T, GEN sqx)
+_lift_iter(void *E, GEN x2, GEN q)
 {
-  pari_sp ltop = avma;
-  GEN q, x2, y2, c2, D2, lin;
-  long N2, M;
-  if (N == 1) return F2x_to_ZX(F2xq_sqrt_fast(ZX_to_F2x(c), gel(sqx,1), gel(sqx,2)));
-  N2 = (N + 1)>>1; M = N - N2;
-  q = int2n(N);
-  a = ZX_remi2n(a, N); b = ZX_remi2n(b, N); c = ZX_remi2n(c, N);
-  B = ZX_remi2n(B, N); T = ZX_remi2n(T, N);
-  x2 = solve_frob_eqn(a, b, c, N2, B, T, sqx);
-  y2 = Z2XQ_frob(x2, B, T, q);
-  lin = ZX_add(ZX_add(ZX_mul(a, y2), ZX_mul(b, x2)), c);
-  c2 = ZX_shifti(FpX_rem_Barrett(ZX_remi2n(lin, N), B, T, q), -N2);
-  D2 = solve_frob_eqn(a, b, c2, M, B, T, sqx);
-  return gerepileupto(ltop, FpX_add(x2, ZX_shifti(D2, N2), q));
+  struct _frob_lift *F = (struct _frob_lift*) E;
+  long N = expi(q);
+  GEN BN = ZX_remi2n(F->B, N), TN = ZX_remi2n(F->T, N);
+  GEN y2 = Z2XQ_frob(x2, BN, TN, q);
+  GEN x2y2 = FpX_rem_Barrett(ZX_remi2n(ZX_mul(x2, y2), N), BN, TN, q);
+  GEN s = ZX_add(ZX_add(x2, ZX_shifti(y2, 1)), ZX_shifti(x2y2, 3));
+  GEN V = ZX_add(ZX_add(ZX_sqr(s), y2), ZX_shifti(x2y2, 2));
+  return mkvec4(FpX_rem_Barrett(ZX_remi2n(V, N), BN, TN, q),x2,y2,s);
+}
+
+/* H -> Dx*H+Dy*S(H) */
+
+static GEN
+_lift_invd(void *E, GEN V, GEN v, long M)
+{
+  struct _frob_lift *F = (struct _frob_lift*) E;
+  GEN BM = ZX_remi2n(F->B, M), TM = ZX_remi2n(F->T, M);
+  GEN qM = int2n(M);
+  GEN x2 = gel(v,2), y2 = gel(v,3), s = gel(v,4), r;
+  GEN Dx = ZX_add(ZX_mul(ZX_Z_add(ZX_shifti(y2, 4), gen_2), s),
+                         ZX_shifti(y2, 2));
+  GEN Dy = ZX_add(ZX_Z_add(ZX_mul(ZX_Z_add(ZX_shifti(x2, 4), utoi(4)), s),
+                           gen_1), ZX_shifti(x2, 2));
+  Dx = FpX_rem_Barrett(ZX_remi2n(Dx, M), BM, TM, qM);
+  Dy = FpX_rem_Barrett(ZX_remi2n(Dy, M), BM, TM, qM);
+  r = mkvec4(Dy, Dx, BM, TM);
+  return gen_Z2X_Dixon(r, V, M, E, _frob_lin, _frob_invl);
 }
 
 /*
@@ -531,40 +595,9 @@ solve_frob_eqn(GEN a, GEN b, GEN c, long N, GEN B, GEN T, GEN sqx)
 static GEN
 solve_AGM_eqn(GEN x0, long n, GEN B, GEN T, GEN sqx)
 {
-  pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
-  long mask, N = 1;
-  GEN x2 = x0;
-  mask = quadratic_prec_mask(n);
-  while (mask > 1)
-  {
-    GEN q, BN, TN;
-    GEN qM, BM, TM;
-    long M, N2;
-    GEN y2, x2y2, s, Dx, Dy, D2, V;
-    N2 = N; N <<= 1;
-    if (mask&1UL) N--;
-    mask >>= 1; M = N - N2;
-    BN = ZX_remi2n(B, N); TN = ZX_remi2n(T, N); q = int2n(N);
-    y2 = Z2XQ_frob(x2, BN, TN, q);
-    x2y2 = FpX_rem_Barrett(ZX_remi2n(ZX_mul(x2, y2), N), BN, TN, q);
-    s = ZX_add(ZX_add(x2, ZX_shifti(y2, 1)), ZX_shifti(x2y2, 3));
-    V = ZX_add(ZX_add(ZX_sqr(s), y2), ZX_shifti(x2y2, 2));
-    V = FpX_rem_Barrett(ZX_remi2n(V, N), BN, TN, q);
-    V = ZX_shifti(V, -N2);
-    BM = ZX_remi2n(B, M); TM = ZX_remi2n(T, M); qM = int2n(M);
-    Dx = ZX_add(ZX_mul(ZX_Z_add(ZX_shifti(y2, 4), gen_2), s), ZX_shifti(y2, 2));
-    Dx = FpX_rem_Barrett(ZX_remi2n(Dx, M), BM, TM, qM);
-    Dy = ZX_add(ZX_Z_add(ZX_mul(ZX_Z_add(ZX_shifti(x2, 4), utoi(4)), s), gen_1), ZX_shifti(x2, 2));
-    Dy = FpX_rem_Barrett(ZX_remi2n(Dy, M), BM, TM, qM);
-    D2 = solve_frob_eqn(Dy, Dx, V, M, BM, TM, sqx);
-    x2 = FpX_add(x2, ZX_shifti(D2, N2), q);
-    if (low_stack(st_lim, stack_lim(ltop, 1)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"solve_AGM_eqn");
-      x2 = gerepileupto(ltop, x2);
-    }
-  }
-  return gerepileupto(ltop, x2);
+  struct _frob_lift F;
+  F.B=B; F.T=T; F.sqx=sqx;
+  return gen_ZpX_Newton(x0, gen_2, n, &F, _lift_iter, _lift_invd);
 }
 
 /* Assume a = 1 [4], return log(a) */
@@ -612,7 +645,8 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
   long n = F2x_degree(T2), N = ((n + 1)>>1) + 2;
   if (n==1) return gen_m1;
   if (n==2) return F2x_degree(a6) ? gen_1 : stoi(-3);
-  if (n==3) return F2x_degree(a6) ? (F2xq_trace(a6,T2) ?  stoi(-3): gen_1) : stoi(5);
+  if (n==3) return F2x_degree(a6) ? (F2xq_trace(a6,T2) ?  stoi(-3): gen_1)
+                                  : stoi(5);
   timer_start(&ti);
   sqx = mkvec2(F2xq_sqrt(polx_F2x(T2[1]),T2), T2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Sqrtx");
@@ -694,7 +728,8 @@ F2xq_ellgroup(GEN a2, GEN a6, GEN N, GEN T, GEN *pt_m)
   struct _F2xqE e;
   GEN q = int2u(F2x_degree(T));
   e.a2=a2; e.a6=a6; e.T=T;
-  return gen_ellgroup(N, subis(q,1), pt_m, (void*)&e, &F2xqE_group, _F2xqE_pairorder);
+  return gen_ellgroup(N, subis(q,1), pt_m, (void*)&e, &F2xqE_group,
+                                                      _F2xqE_pairorder);
 }
 
 GEN
@@ -713,7 +748,8 @@ F2xq_ellgens(GEN a2, GEN a6, GEN ch, GEN D, GEN m, GEN T)
     P = mkvec(F2xqE_changepoint(P, ch, T));
     break;
   default:
-    P = gen_ellgens(gel(D,1), gel(D,2), m, (void*)&e, &F2xqE_group, _F2xqE_pairorder);
+    P = gen_ellgens(gel(D,1), gel(D,2), m, (void*)&e, &F2xqE_group,
+                                                      _F2xqE_pairorder);
     gel(P,1) = F2xqE_changepoint(gel(P,1), ch, T);
     gel(P,2) = F2xqE_changepoint(gel(P,2), ch, T);
     break;
