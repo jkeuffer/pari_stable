@@ -160,7 +160,7 @@ forstep(GEN a, GEN b, GEN s, GEN code)
     for (i=lg(v)-1; i; i--) s = gadd(s,gel(v,i));
   }
   ss = gsigne(s);
-  if (!ss) pari_err(e_MISC, "step equal to zero in forstep");
+  if (!ss) pari_err_DOMAIN("forstep","step","=",gen_0,s);
   cmp = (ss > 0)? &gcmp: &negcmp;
   i = 0;
   while (cmp(a,b) <= 0)
@@ -1062,6 +1062,10 @@ GEN
 prodeuler0(GEN a, GEN b, GEN code, long prec)
 { EXPR_WRAP(code, prodeuler(EXPR_ARG, a, b, prec)); }
 
+static void
+err_direuler(GEN x)
+{ pari_err_DOMAIN("direuler","constant term","!=", gen_1,x); }
+
 GEN
 direuler(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, GEN c)
 {
@@ -1108,7 +1112,7 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, GEN c)
     {
       if (!gequal1(polnum))
       {
-        if (!gequalm1(polnum)) pari_err(e_MISC,"constant term != 1 in direuler");
+        if (!gequalm1(polnum)) err_direuler(polnum);
         polden = gneg(polden);
       }
     }
@@ -1117,11 +1121,11 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, GEN c)
       ulong k1, q, qlim;
       if (tx != t_POL) pari_err_TYPE("direuler",polnum);
       lx = degpol(polnum);
-      if (lx < 0) pari_err(e_MISC,"constant term != 1 in direuler");
+      if (lx < 0) err_direuler(polnum);
       c = gel(polnum,2);
       if (!gequal1(c))
       {
-        if (!gequalm1(c)) pari_err(e_MISC,"constant term != 1 in direuler");
+        if (!gequalm1(c)) err_direuler(polnum);
         polnum = gneg(polnum);
         polden = gneg(polden);
       }

@@ -531,7 +531,7 @@
   *** polinterpolate: domain error in polinterpolate: X[1] = X[2]
   ***   at top-level: modreverse(Mod(-x^3+
   ***                 ^--------------------
-  *** modreverse: domain error in modreverse: deg(charpoly(z)) < 4
+  *** modreverse: domain error in modreverse: deg(minpoly(z)) < 4
   ***   at top-level: bnrconductor(bnfinit
   ***                 ^--------------------
   *** bnrconductor: inconsistent subgroup t_MAT (1x1) , t_MAT (1x1).
@@ -553,4 +553,7 @@
   ***   at top-level: removeprimes(2)
   ***                 ^---------------
   *** removeprimes: domain error in removeprime: prime not in primetable
-Total time spent: 32
+  ***   at top-level: forstep(a=1,2,0,)
+  ***                 ^-----------------
+  ***   domain error in forstep: step = 0
+Total time spent: 20
