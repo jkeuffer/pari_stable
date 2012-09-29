@@ -2685,7 +2685,7 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *plambda, GEN *LERS)
   if (LERS)
   {
     if (!checksqfree)
-      pari_err(e_MISC,"ZX_ZXY_resultant_all: LERS != NULL needs lambda");
+      pari_err_BUG("ZX_ZXY_resultant_all [LERS != NULL needs lambda]");
     C0 = cgetg(dres+2, t_VECSMALL);
     C1 = cgetg(dres+2, t_VECSMALL);
     dglist = cgetg(dres+1, t_VECSMALL);

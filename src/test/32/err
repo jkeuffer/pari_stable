@@ -550,4 +550,7 @@
   ***   at top-level: polsturm(x^2)
   ***                 ^-------------
   *** polsturm: domain error in polsturm: issquarefree(pol) = 0
-Total time spent: 20
+  ***   at top-level: removeprimes(2)
+  ***                 ^---------------
+  *** removeprimes: domain error in removeprime: prime not in primetable
+Total time spent: 32

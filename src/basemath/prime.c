@@ -1052,9 +1052,11 @@ static void
 rmprime(GEN T, GEN p)
 {
   long i;
-  if (typ(p) != t_INT) pari_err_TYPE("rmprime",p);
+  if (typ(p) != t_INT) pari_err_TYPE("removeprimes",p);
   i = ZV_search(T, p);
-  if (!i) pari_err(e_MISC,"prime %Ps is not in primetable", p);
+  if (!i)
+    pari_err_DOMAIN("removeprime","prime","not in",
+                    strtoGENstr("primetable"), p);
   gunclone(gel(T,i)); gel(T,i) = NULL;
   cleanprimetab(T);
 }
