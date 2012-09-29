@@ -1463,11 +1463,12 @@ Flx_intersect_ker(GEN P, GEN MA, GEN U, ulong p)
   V = Flm_Frobenius(MA, r, p, U[1]);
   if (DEBUGLEVEL>=4) timer_printf(&T,"pol[Frobenius]");
   M = FlxqV_Flx_Frobenius(V, U, P, p);
-  if (DEBUGLEVEL>=4) timer_printf(&T,"U[Frobenius]");
   if (p==2)
     A = F2m_to_Flm(F2m_ker(Flm_to_F2m(M)));
   else
     A = Flm_ker(M,p);
+  if (DEBUGLEVEL>=4) timer_printf(&T,"matrix polcyclo");
+  if (lg(A)!=r+1) pari_err_IRREDPOL("FpX_ffintersect", Flx_to_ZX(P));
   A = gerepileupto(ltop,A);
   /*The formula is
    * a_{r-1} = -\phi(a_0)/b_0
