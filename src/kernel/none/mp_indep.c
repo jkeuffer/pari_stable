@@ -861,7 +861,7 @@ dbltor(double x)
     const ulong a = fi.i;
     ulong A;
     e = ((a & (HIGHBIT-1)) >> mant_len) - exp_mid;
-    if (e == exp_mid+1) pari_err(e_MISC, "NaN or Infinity in dbltor");
+    if (e == exp_mid+1) pari_err_OVERFLOW("dbltor [NaN or Infinity]");
     A = a << expo_len;
     if (e == -exp_mid)
     { /* unnormalized values */
@@ -956,7 +956,7 @@ dbltor(double x)
     const ulong b = fi.i[INDEX1];
     ulong A, B;
     e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
-    if (e == exp_mid+1) pari_err(e_MISC, "NaN or Infinity in dbltor");
+    if (e == exp_mid+1) pari_err_OVERFLOW("dbltor [NaN or Infinity]");
     A = b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
     B = b << expo_len;
     if (e == -exp_mid)
