@@ -54,7 +54,7 @@ case "$osname" in
     ld_install_name="-Wl,-install_name -Wl,\"$libdir\"/\$(LIBPARI_DYN)";;
 esac
 case "$osname" in
-  mingw|cywin)
+  mingw|cygwin)
     install_implib="\$(INSTALL_DATA) \$(LIBPARI_SO)\$(_A) \$(LIBDIR)/\$(LIBPARI_SO)\$(_A)";;
   *)
     install_implib="";;
