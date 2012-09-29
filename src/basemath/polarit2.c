@@ -552,7 +552,6 @@ factor(GEN x)
   GEN  y, p, p1, p2, pol;
 
   if (gequal0(x))
-  {
     switch(tx)
     {
       case t_INT:
@@ -561,7 +560,6 @@ factor(GEN x)
       case t_RFRAC: return zero_fact(x);
       default: pari_err_TYPE("factor",x);
     }
-  }
   av = avma;
   switch(tx)
   {
@@ -633,7 +631,7 @@ factor(GEN x)
           {
             case t_INT: p1 = polfnf(x,pol); break;
             case t_INTMOD: p1 = factorff(x,p,pol); break;
-            default: pari_err_IMPL("factor of general polynomial");
+            default: pari_err_IMPL("factor for general polynomial");
               return NULL; /* not reached */
           }
           switch (t1)
@@ -644,7 +642,7 @@ factor(GEN x)
             case t_COMPLEX: w = gen_I(); break;
             case t_QUAD: w = mkquad(pol,gen_0,gen_1);
               break;
-            default: pari_err_IMPL("factor of general polynomial");
+            default: pari_err_IMPL("factor for general polynomial");
               return NULL; /* not reached */
           }
           p2=gel(p1,1);
@@ -672,12 +670,9 @@ factor(GEN x)
     case t_COMPLEX:
       y = gauss_factor(x);
       if (y) return y;
-      break;
-
-    default:
-      pari_err_TYPE("factor",x);
+      /* fall through */
   }
-  pari_err(e_MISC,"can't factor %Ps",x);
+  pari_err_TYPE("factor",x);
   return NULL; /* not reached */
 }
 
@@ -2603,12 +2598,11 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
   if (tx == t_POLMOD) {
     GEN M = gel(x,1);
     long vM = varn(M);
-    int ok = 1;
-    if      (vM == vQ) { if (!RgX_equal(M, Q)) ok = 0; }
-    else if (vM == vT) { if (!RgX_equal(M, T)) ok = 0; }
-    else ok = 0;
-    if (!ok)
-      pari_err(e_MISC,"not the same number field in rnfcharpoly");
+    if      (vM == vQ)
+    { if (!RgX_equal(M,Q)) pari_err_MODULUS("rnfcharpoly", M,Q); }
+    else if (vM == vT)
+    { if (!RgX_equal(M,T)) pari_err_MODULUS("rnfcharpoly", M,T); }
+    else pari_err_MODULUS("rnfcharpoly", M,T);
     x = gel(x, 2); tx = typ(x);
   }
   if (tx != t_POL) {
@@ -2838,11 +2832,11 @@ reduceddiscsmith(GEN x)
   pari_sp av = avma;
   GEN xp, M;
 
-  if (typ(x) != t_POL) pari_err_TYPE("reduceddiscsmith",x);
-  if (n<=0) pari_err_CONSTPOL("reduceddiscsmith");
+  if (typ(x) != t_POL) pari_err_TYPE("poldiscreduced",x);
+  if (n<=0) pari_err_CONSTPOL("poldiscreduced");
   RgX_check_ZX(x,"poldiscreduced");
   if (!gequal1(gel(x,n+2)))
-    pari_err(e_MISC,"non-monic polynomial in poldiscreduced");
+    pari_err_IMPL("non-monic polynomial in poldiscreduced");
   M = cgetg(n+1,t_MAT);
   xp = ZX_deriv(x);
   for (j=1; j<=n; j++)
@@ -2908,7 +2902,7 @@ sturmpart(GEN x, GEN a, GEN b)
     GEN p1, r = RgX_pseudorem(u,v);
     long du=lg(u), dv=lg(v), dr=lg(r), degq=du-dv;
 
-    if (dr<=2) pari_err(e_MISC,"not a squarefree polynomial in sturm");
+    if (dr<=2) pari_err_DOMAIN("polsturm","issquarefree(pol)","=",gen_0,x);
     if (gsigne(leading_term(v)) > 0 || degq&1) r=gneg_i(r);
     sl = gsigne(gel(r,dr-1));
     sr = b? gsigne(poleval(r,b)): sl;

@@ -538,4 +538,16 @@
   ***   at top-level: rnfnormgroup(bnrinit
   ***                 ^--------------------
   *** rnfnormgroup: domain error in rnfnormgroup: rnfisabelian(bnr,pol) = 0
+  ***   at top-level: concat([1,2],[3,4]~)
+  ***                 ^--------------------
+  *** concat: inconsistent concatenation t_VEC (2 elts) , t_COL (2 elts).
+  ***   at top-level: concat([])
+  ***                 ^----------
+  *** concat: domain error in concat: vector = []
+  ***   at top-level: mathnfmod([1;2],2)
+  ***                 ^------------------
+  *** mathnfmod: domain error in ZM_hnfmod: nb lines > nb columns
+  ***   at top-level: polsturm(x^2)
+  ***                 ^-------------
+  *** polsturm: domain error in polsturm: issquarefree(pol) = 0
 Total time spent: 20
