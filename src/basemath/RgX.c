@@ -502,14 +502,13 @@ RgM_to_RgXX(GEN x, long v,long w)
 }
 
 /* matrix whose entries are given by the coeffs of the polynomial v in
- * two variables (considered as degree n polynomials) */
+ * two variables (considered as degree n-1 polynomials) */
 GEN
 RgXX_to_RgM(GEN v, long n)
 {
   long j, N = lg(v)-1;
   GEN y = cgetg(N, t_MAT);
-  v++;
-  for (j=1; j<N; j++) gel(y,j) = RgX_to_RgV(gel(v,j), n);
+  for (j=1; j<N; j++) gel(y,j) = RgX_to_RgV(gel(v,j+1), n);
   return y;
 }
 
