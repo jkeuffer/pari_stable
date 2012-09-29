@@ -300,7 +300,7 @@ static GEN
 intinit_end(intdata *D, long pnt, long mnt)
 {
   GEN v = cgetg(8, t_VEC);
-  if (pnt < 0) pari_err(e_MISC,"incorrect table length in intnum initialization");
+  if (pnt < 0) pari_err_DOMAIN("intnuminit","table length","<",gen_0,stoi(pnt));
   gel(v,1) = stoi(D->m);
   TABx0(v) = D->tabx0;
   TABw0(v) = D->tabw0;
@@ -525,10 +525,11 @@ suminit_start(GEN sig)
     if (lg(sig) != 3) pari_err_TYPE("sumnum",sig);
     sig2 = gel(sig,2);
     sig  = gel(sig,1);
+    if (!isinR(sig2)) pari_err_TYPE("sumnum",sig2);
+    if (gsigne(sig2) > 0) sig2 = mulcxmI(sig2);
   }
   else sig2 = gen_0;
-  if (!isinR(sig) || !isinR(sig2)) pari_err(e_MISC, "incorrect abscissa in sumnum");
-  if (gsigne(sig2) > 0) sig2 = mulcxmI(sig2);
+  if (!isinR(sig)) pari_err_TYPE("sumnum",sig);
   return mkvec2(mkvec(gen_1), sig2);
 }
 
@@ -778,10 +779,12 @@ enum {
   f_YOSCS  = 5, /* +\infty, sine oscillating */
   f_YOSCC  = 6  /* +\infty, cosine oscillating */
 };
-
-#define is_fin_f(c) ((c) == f_REG || (c) == f_SING) /* is c finite */
-#define is_slow_f(c) ((c) == f_YSLOW || (c) == f_YVSLO) /* slow case */
-#define is_osc_f(c) ((c) == f_YOSCS || (c) == f_YOSCC) /* oscillating case */
+/* is c finite */
+static int
+is_fin_f(long c) { return c == f_REG || c == f_SING; }
+/* oscillating case: valid for +oo (c > 0) or -oo (c < 0) */
+static int
+is_osc_f(long c) { c = labs(c); return c == f_YOSCS || c == f_YOSCC; }
 
 static GEN
 f_getycplx(GEN a, long prec)
@@ -798,43 +801,55 @@ f_getycplx(GEN a, long prec)
   return tmp;
 }
 
-static long
-code_aux(GEN a2, int warn)
+static void
+err_code(GEN a, const char *name)
 {
-  GEN a2R = real_i(a2), a2I = imag_i(a2);
-  long s = gsigne(a2I);
+  char *s = stack_sprintf("intnum [incorrect %s]", name);
+  pari_err_TYPE(s, a);
+}
+
+/* a = [[+/-1], alpha]*/
+static long
+code_aux(GEN a, const char *name)
+{
+  GEN re, im, alpha = gel(a,2);
+  long s;
+  if (!isinC(alpha)) err_code(a, name);
+  re = real_i(alpha);
+  im = imag_i(alpha);
+  s = gsigne(im);
   if (s)
   {
-    if(warn && !gequal0(a2R))
-      pari_warn(warner,"both nonzero real and imag. part in coding, real ignored");
+    if(!gequal0(re))
+      pari_warn(warner,"real(z)*imag(z)!=0 in endpoint code, real(z) ignored");
     return s > 0 ? f_YOSCC : f_YOSCS;
   }
-  if (gequal0(a2R) || gcmpgs(a2R, -2)<=0) return f_YSLOW;
-  if (gsigne(a2R) > 0) return f_YFAST;
-  if (gcmpgs(a2R, -1) >= 0) pari_err(e_MISC,"incorrect a or b in intnum");
+  if (gequal0(re) || gcmpgs(re, -2)<=0) return f_YSLOW;
+  if (gsigne(re) > 0) return f_YFAST;
+  if (gcmpgs(re, -1) >= 0) err_code(a, name);
   return f_YVSLO;
 }
 
 static long
-transcode(GEN a, long warn)
+transcode(GEN a, const char *name)
 {
   GEN a1, a2;
-  long la;
-
   if (typ(a) != t_VEC) return f_REG;
-  la = lg(a);
-  if (la == 1 || la > 3) pari_err(e_MISC,"incorrect a or b in intnum");
-  if (la == 2) return gsigne(gel(a,1)) > 0 ? f_YSLOW : -f_YSLOW;
+  switch(lg(a))
+  {
+    case 2: return gsigne(gel(a,1)) > 0 ? f_YSLOW : -f_YSLOW;
+    case 3: a1 = gel(a,1); a2 = gel(a,2); break;
+    default: err_code(a,name);
+  }
   a1 = gel(a,1);
   a2 = gel(a,2);
   if (typ(a1) != t_VEC)
   {
-    if (!isinC(a1) || !isinR(a2) || gcmpgs(a2, -1) <= 0)
-      pari_err(e_MISC,"incorrect a or b in intnum");
+    if (!isinC(a1) || !isinR(a2) || gcmpgs(a2, -1) <= 0) err_code(a,name);
     return gsigne(a2) < 0 ? f_SING : f_REG;
   }
-  if (lg(a1) != 2 || !isinC(a2)) pari_err(e_MISC,"incorrect a or b in intnum");
-  return gsigne(gel(a1,1)) * code_aux(a2, warn);
+  if (lg(a1) != 2) err_code(a,name);
+  return gsigne(gel(a1,1)) * code_aux(a, name);
 }
 
 /* computes the necessary tabs, knowing a, b and m */
@@ -906,8 +921,8 @@ intnuminit(GEN a, GEN b, long m, long prec)
 
   if (m > 30) pari_err_OVERFLOW("intnuminit [m]");
   l = prec+EXTRAPRECWORD;
-  codea = transcode(a, 1);
-  codeb = transcode(b, 1);
+  codea = transcode(a, "a");
+  codeb = transcode(b, "b");
   if (is_fin_f(codea) && is_fin_f(codeb)) return inittanhsinh(m, l);
   if (labs(codea) > labs(codeb)) { swap(a, b); lswap(codea, codeb); }
   if (codea == f_REG)
@@ -1025,23 +1040,13 @@ sumnuminit0(GEN a, GEN tab, long sgn, long prec)
   return sumnuminit(a, m, sgn, prec);
 }
 
-/* here always eps = 2^(-k). */
-static GEN
-myderiv_num(void *E, GEN (*eval)(void*, GEN), GEN a, GEN eps, long k, long prec)
-{
-  GEN tmp = gmul2n(gsub(eval(E, gadd(a,eps)), eval(E, gsub(a,eps))), k - 1);
-  return gprec_w(tmp, prec);
-}
-
-/* User-defined change of variable phi(t) = f(t), where t always goes from
- * -\infty to +\infty, and a and b are as in intnuminit. If [a,b] compact,
- * assume phi(t) odd, otherwise assume nothing. */
+/* User-defined change of variable phi(t) = f(t), where t goes from -oo to +oo,
+ * and a and b are as in intnuminit. If [a,b] compact, assume phi(t) odd. */
 static int
-condfin(long code, GEN xw, GEN xwmod, long eps, long m, long k)
+condfin(long code, GEN xw, long eps, long m, long k)
 {
   GEN x, w;
   eps -= 8; /* for safety. Lose 8 bits, but took 1 whole word extra. */
-  if (!is_osc_f(labs(code))) xw = xwmod;
   x = gel(xw,1);
   w = gel(xw,2);
   switch(labs(code))
@@ -1053,123 +1058,118 @@ condfin(long code, GEN xw, GEN xwmod, long eps, long m, long k)
     case f_YFAST:
       return cmprs(x, (long)(LOG2 * (gexpo(w) + eps) + 1)) > 0;
     case f_YOSCS: case f_YOSCC:
-      return gexpo(x) + m + expi(stoi(10 * k)) < - eps;
+      return gexpo(x) + m + expu(10 * k) < - eps;
     default: return 0;
   }
 }
 
-/* Do not change the numbers below unless you understand what you are doing. */
-enum {
-  f_COMP = -1, /* [a,b] */
-  f_SEMI =  0, /* [a,+-\infty[, no oscillation */
-  f_OSC1 =  1, /* [a,+-\infty[, oscillation */
-  f_INF  =  2, /* ]-\infty,+\infty[, no oscillation */
-  f_OSC2 =  3  /* ]-\infty,+\infty[, oscillation */
-};
-
-#define not_osc(fl) ((fl) == f_COMP || (fl) == f_SEMI || (fl) == f_INF)
-#define not_odd(fl) ((fl) == f_SEMI || (fl) == f_OSC1)
-
+/* eps = 2^(-k). Return f'(a) ~ (f(a+eps) - f(a-eps)) / 2eps*/
 static GEN
-ffprime(void *E, GEN (*eval)(void*, GEN), GEN xpr, GEN xprn, GEN eps, long h, long precl)
+myderiv_num(void *E, GEN (*eval)(void*, GEN), GEN a, GEN eps, long k, long prec)
 {
-  GEN z = cgetg(3, t_VEC);
-  gel(z,1) = eval(E, xpr);
-  gel(z,2) = myderiv_num(E, eval, xprn, eps, h, precl);
-  return z;
+  GEN d = gmul2n(gsub(eval(E, gadd(a,eps)), eval(E, gsub(a,eps))), k-1);
+  return gprec_w(d, prec);
 }
-
+/* zp = z to a higher accuracy (enough to evaluate numerical derivative) */
 static GEN
-ffmodify(GEN tmp, GEN ab, long flag)
+ffprime(void *E, GEN (*eval)(void*, GEN), GEN z, GEN zp, GEN eps, long h, long precl)
 {
-  GEN z, t;
-
-  if (not_osc(flag)) return tmp;
-  t = ginv(gsubsg(1, gel(tmp,1)));
-  z = cgetg(3, t_VEC);
-  gel(z,1) = gmul(ab, t);
-  gel(z,2) = gadd(t, gmul(gsqr(t), gmul(ab, gel(tmp,2))));
-  return z;
+  GEN f = eval(E, z), fp = myderiv_num(E, eval, zp, eps, h, precl);
+  return mkvec2(f, fp);
 }
-
+/* v = [f(z), f'(z)]. Return h := z/(1-f(z)), h + h^2 zf'(z) */
+static GEN
+ffmodify(GEN v, GEN z)
+{
+  GEN f = gel(v,1), fp = gel(v,2), h = ginv(gsubsg(1, f));
+  return mkvec2(gmul(z, h), gadd(h, gmul(gsqr(h), gmul(z,fp))));
+}
 GEN
 intnuminitgen(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long m,
               long flext, long prec)
 {
+  enum {
+    f_COMP, /* [a,b] */
+    f_SEMI, /* [a,+-oo[, no oscillation */
+    f_OSC1, /* [a,+-oo[, oscillation */
+    f_INF , /* ]-oo,+oo[, no oscillation */
+    f_OSC2  /* ]-oo,+oo[, oscillation */
+  };
   pari_sp ltop = avma;
-  GEN hpr, hnpr, eps, pisurh = gen_0, tmpxw, tmpxwmodp, tmpxwmodm = gen_0, ab;
-  long k, h, newprec, nt, lim, ntn, precl = prec+EXTRAPRECWORD;
-  long flag = f_SEMI, codea = transcode(a, 1), codeb = transcode(b, 1);
+  GEN hnpr, eps, v;
+  long k, h, newprec, lim, precl = prec+EXTRAPRECWORD;
+  long flag, codea = transcode(a, "a"), codeb = transcode(b, "b");
+  int NOT_OSC, NOT_ODD;
   intdata D; intinit_start(&D, m, flext, precl);
 
-  if (flag < 0 || flag >= 3) pari_err_FLAG("intnuminitgen");
-  lim = lg(D.tabxp) - 1;
-  if (is_osc_f(labs(codea)) || is_osc_f(labs(codeb)))
-    { pisurh = Pi2n(D.m, precl); flag = f_OSC1; }
+  flag = f_SEMI;
+  if (is_osc_f(codea) || is_osc_f(codeb)) flag = f_OSC1;
   if (is_fin_f(codea) && is_fin_f(codeb)) flag = f_COMP;
   else if (!is_fin_f(codea) && !is_fin_f(codeb))
   {
-    if (codea * codeb > 0)
-      pari_err(e_MISC,"infinities of the same sign in intnuminitgen");
-    if (labs(codea) != labs(codeb))
-      pari_err(e_MISC,"infinities of different type in intnuminitgen");
+    if (codea * codeb > 0) return gen_0;
+    if (codea != -codeb)
+      pari_err_TYPE("intnuminitgen [infinities of different types]",
+                    mkvec2(a,b));
     flag = (flag == f_SEMI) ? f_INF : f_OSC2;
   }
+  NOT_OSC = (flag == f_COMP || flag == f_SEMI || flag == f_INF);
+  NOT_ODD = (flag == f_SEMI || flag == f_OSC1);
+
   newprec = (3*precl - 1)>>1;
   h = prec2nbits(precl)/2;
   eps = real2n(-h, newprec);
 
-  if (not_osc(flag) || !gequal1(eval(E, gen_0)))
+  if (NOT_OSC || !gequal1(eval(E, gen_0)))
   {
-    ab = real_0(precl);
-    tmpxw = ffprime(E, eval, ab, real_0(newprec), eps, h, precl);
-    tmpxwmodp = ffmodify(tmpxw, ab, flag);
-    D.tabx0 = gel(tmpxwmodp,1);
-    D.tabw0 = gel(tmpxwmodp,2);
+    GEN a0 = real_0(precl), a0n = real_0(newprec), xw, xwmod;
+    xw = ffprime(E, eval, a0, a0n, eps, h, precl);
+    xwmod = NOT_OSC? xw: ffmodify(xw, a0);
+    D.tabx0 = gel(xwmod,1);
+    D.tabw0 = gel(xwmod,2);
   }
   else
   {
-    tmpxw = gdiv(pol_x(0), gsubsg(1, eval(E, gadd(pol_x(0), zeroser(0, 4)))));
-    D.tabx0 = gprec_w(polcoeff0(tmpxw, 0, 0), precl);
-    D.tabw0 = gprec_w(polcoeff0(tmpxw, 1, 0), precl);
+    GEN xw = gdiv(pol_x(0), gsubsg(1, eval(E, gadd(pol_x(0), zeroser(0, 4)))));
+    D.tabx0 = gprec_w(polcoeff0(xw, 0, 0), precl);
+    D.tabw0 = gprec_w(polcoeff0(xw, 1, 0), precl);
   }
-  hpr = real2n(-D.m, precl);
-  hnpr= real2n(-D.m, newprec);
+  /* precl <= newprec */
+  hnpr = real2n(-D.m, newprec);
+  lim = lg(D.tabxp) - 1;
   for (k = 1; k <= lim; k++)
   {
+    GEN akn = mulur(k, hnpr), ak = rtor(akn, precl), xw, xwmod;
     int finb;
-    ab = mulur(k, hpr);
-    tmpxw = ffprime(E, eval, ab, mulur(k, hnpr), eps, h, precl);
-    tmpxwmodp = ffmodify(tmpxw, ab, flag);
-    D.tabxp[k] = tmpxwmodp[1];
-    D.tabwp[k] = tmpxwmodp[2];
-    finb = condfin(codeb, tmpxw, tmpxwmodp, D.eps, D.m, k);
-    if (not_odd(flag))
+    xw = ffprime(E, eval, ak, akn, eps, h, precl);
+    xwmod = NOT_OSC? xw: ffmodify(xw, ak);
+    gel(D.tabxp,k) = gel(xwmod,1);
+    gel(D.tabwp,k) = gel(xwmod,2);
+    finb = condfin(codeb, is_osc_f(codeb)? xw: xwmod, D.eps, D.m, k);
+    if (NOT_ODD)
     {
-      ab = negr(ab);
-      tmpxw = ffprime(E, eval, ab, mulsr(-k, hnpr), eps, h, precl);
-      tmpxwmodm = ffmodify(tmpxw, ab, flag);
-      D.tabxm[k] = tmpxwmodm[1];
-      D.tabwm[k] = tmpxwmodm[2];
-      if (finb && condfin(codea, tmpxw, tmpxwmodm, D.eps, D.m, k)) break;
+      ak = negr(ak); akn = negr(akn);
+      xw = ffprime(E, eval, ak, akn, eps, h, precl);
+      xwmod = NOT_OSC? xw: ffmodify(xw, ak);
+      gel(D.tabxm,k) = gel(xwmod,1);
+      gel(D.tabwm,k) = gel(xwmod,2);
+      if (finb && condfin(codea, is_osc_f(codeb)? xw: xwmod, D.eps, D.m, k))
+        break;
     }
     else if (finb) break;
   }
-  nt = k - 1;
-  if (!not_osc(flag))
+  v = intinit_end(&D, k-1, NOT_ODD? k-1: 0);
+  if (!NOT_OSC)
   {
-    D.tabx0 = gmul(D.tabx0, pisurh);
-    D.tabw0 = gmul(D.tabw0, pisurh);
-    setlg(D.tabxp, nt + 1); D.tabxp = gmul(D.tabxp, pisurh);
-    setlg(D.tabwp, nt + 1); D.tabwp = gmul(D.tabwp, pisurh);
+    GEN C = Pi2n(D.m, precl);
+    TABx0(v) = gmul(TABx0(v), C);
+    TABw0(v) = gmul(TABw0(v), C);
+    TABxp(v) = RgV_Rg_mul(TABxp(v), C);
+    TABwp(v) = RgV_Rg_mul(TABwp(v), C);
+    TABxm(v) = RgV_Rg_mul(TABxm(v), C);
+    TABwm(v) = RgV_Rg_mul(TABwm(v), C);
   }
-  if (flag == f_OSC1)
-  {
-    setlg(D.tabxm, nt + 1); D.tabxm = gmul(D.tabxm, pisurh);
-    setlg(D.tabwm, nt + 1); D.tabwm = gmul(D.tabwm, pisurh);
-  }
-  ntn = not_odd(flag) ? nt : 0;
-  return gerepilecopy(ltop, intinit_end(&D, nt, ntn));
+  return gerepilecopy(ltop, v);
 }
 
 /* Assigns the values of the function weighted by w[k] at quadrature points x[k]
@@ -1237,7 +1237,7 @@ intnum_i(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
 {
   GEN tmp, S = gen_0, res1, res2, tm, pi2, pi2p, pis2, pis2p, kma, kmb;
   GEN SP, SN;
-  long tmpi, sgns = 1, codea = transcode(a, 0), codeb = transcode(b, 0);
+  long tmpi, sgns = 1, codea = transcode(a, "a"), codeb = transcode(b, "b");
 
   if (codea == f_REG && typ(a) == t_VEC) a = gel(a,1);
   if (codeb == f_REG && typ(b) == t_VEC) b = gel(b,1);
@@ -1334,8 +1334,7 @@ intnum(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
   long l = prec+EXTRAPRECWORD;
   GEN S;
 
-  tab = intnuminit0(a, b, tab, prec); /* prec+EXTRAPRECWORD is done in intnuminit0 */
-
+  tab = intnuminit0(a, b, tab, prec);
   S = intnum_i(E, eval, gprec_w(a, l), gprec_w(b, l), tab, l);
   return gerepilecopy(ltop, gprec_wtrunc(S, prec));
 }
@@ -1409,7 +1408,7 @@ intinvintern(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long fla
   if (lg(sig) != 3 || !isinR(gel(sig,1)) || !isinR(gel(sig,2)))
     pari_err_TYPE("integral transform",sig);
   if (gsigne(gel(sig,2)) < 0)
-    pari_err(e_MISC,"exponential increase in integral transform");
+    pari_err_OVERFLOW("integral transform [exponential increase]");
   D.a = gel(sig,1);
   D.prec = prec;
   D.f = eval;
@@ -1473,7 +1472,7 @@ intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
   if (lg(sig) != 3 || !isinR(gel(sig,1)) || !isinR(gel(sig,2)))
     pari_err_TYPE("intmellininvshort",sig);
   if (gsigne(gel(sig,2)) <= 0)
-    pari_err(e_MISC,"need exponential decrease in intinvmellinshort");
+    pari_err_OVERFLOW("intinvmellinshort [need exponential decrease]");
   D.L = mulcxI(LX);
   D.prec = prec;
   tmpP = gettmpP(gel(sig,2));
@@ -1483,17 +1482,17 @@ intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
 
 /* a as in intnum. flag = 0 for sin, flag = 1 for cos. */
 static GEN
-mytra(GEN a, GEN x, long flag)
+mytra(GEN a, GEN x, long flag, const char *name)
 {
   GEN b, xa;
-  long s, codea = transcode(a, 1);
+  long s, codea = transcode(a, name);
 
   switch (labs(codea))
   {
     case f_REG: case f_SING: case f_YFAST: return a;
     case f_YSLOW: case f_YVSLO:
       xa = real_i(x); s = gsigne(xa);
-      if (!s) pari_err(e_MISC,"x = 0 in Fourier");
+      if (!s) pari_err_DOMAIN("Fourier transform","Re(x)","=",gen_0,x);
       if (s < 0) xa = gneg(xa);
       b = cgetg(3, t_VEC);
       gel(b,1) = mkvec( codea > 0 ? gen_1 : gen_m1 );
@@ -1532,7 +1531,9 @@ intfouriersin(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, lo
   D.prec = prec;
   D.f = eval;
   D.E = E;
-  z = intnum(&D, &auxfoursin, mytra(a, tmp, 0), mytra(b, tmp, 0), tab, prec);
+  a = mytra(a,tmp,0,"a");
+  b = mytra(b,tmp,0,"b");
+  z = intnum(&D, &auxfoursin, a, b, tab, prec);
   return z;
 }
 
@@ -1549,7 +1550,9 @@ intfouriercos(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, lo
   D.prec = prec;
   D.f = eval;
   D.E = E;
-  z = intnum(&D, &auxfourcos, mytra(a, tmp, 1), mytra(b, tmp, 1), tab, prec);
+  a = mytra(a,tmp,1,"a");
+  b = mytra(b,tmp,1,"b");
+  z = intnum(&D, &auxfourcos, a, b, tab, prec);
   return z;
 }
 
