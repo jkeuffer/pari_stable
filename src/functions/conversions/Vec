@@ -22,12 +22,15 @@ Doc:
  In this last case, \kbd{Vec} is the reciprocal function of \kbd{Pol} and
  \kbd{Ser} respectively,
 
- \item a matrix (the vector of columns comprising the matrix is returned),
+ \item a matrix: return the vector of columns comprising the matrix.
 
- \item a character string (a vector of individual characters is returned).
+ \item a character string: return the vector of individual characters.
 
- In the last two cases (matrix and character string), $n$ is meaningless and
- must be omitted or an error is raised. Otherwise, if $n$ is given, $0$
- entries are appended at the end of the vector if $n > 0$, and prepended at
- the beginning if $n < 0$. The dimension of the resulting vector is $|n|$.
-Variant: \fun{GEN}{gtovec}{GEN x} is also available.
+ \item an error context (\typ{ERROR}): return the error components, see
+ \tet{iferrname}.
+
+ In the last three cases (matrix, character string, error), $n$ is
+ meaningless and must be omitted or an error is raised. Otherwise, if $n$ is
+ given, $0$ entries are appended at the end of the vector if $n > 0$, and
+ prepended at the beginning if $n < 0$. The dimension of the resulting vector
+ is $|n|$. Variant: \fun{GEN}{gtovec}{GEN x} is also available.

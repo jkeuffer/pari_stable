@@ -879,7 +879,7 @@ error is printed immediately, the computation is aborted, and GP enters the
     ***   at top-level: 1/0;1+1
     ***                  ^------
     *** _/_: division by a non-invertible object
-    ***   Break loop: type 'break' to go back to GP
+    ***   Break loop: type 'break' to go back to the GP prompt
 
 @eprog\noindent Here the computation is aborted as soon as we try to evaluate
 $1/0$, and $1 + 1$ is never executed. Exceptions can be trapped
@@ -2126,15 +2126,16 @@ vector; \kbd{histlast(10)} returns the last $10$ history entries:
 \subsec{Errors} Your input program is first compiled to a more efficient
 bytecode; then the latter is evaluated, calling appropriate functions from
 the PARI library. Accordingly, there are two kind of errors: syntax errors
-occurring during the compilation phase, and runtime errors produced by
-functions in the PARI library. Both kinds are fatal to your computation:
-\kbd{gp} will report the error, perform some cleanup (restore variables
-modified while evaluating the erroneous command, close open files, reclaim
-unused memory, etc.), and output its usual prompt.
+produced by the compiler, and runtime errors produced by the PARI library
+either by the evaluator itself, or in a mathematical function.
+Both kinds are fatal to your computation: \kbd{gp} will report the error,
+perform some cleanup (restore variables modified while evaluating the
+erroneous command, close open files, reclaim unused memory, etc.), and output
+its usual prompt.
 
 When reporting a \emph{syntax error}, \kbd{gp} gives meaningful
 context by copying (part of) the expression it was trying to compile,
-indicating where the error with a little caret, as in
+indicating where the error occurred with a caret \kbd{\pow-}, as in
 \bprog
 ? factor()
   ***   too few arguments: factor()
@@ -2150,11 +2151,11 @@ possibly enlarged to a full arrow given enough trailing context
   ***                                              ^----------------
 @eprog\noindent
 These error messages may be mysterious, because \kbd{gp} cannot guess what
-you were trying to do, and the error usually occurs once \kbd{gp} has been
+you were trying to do, and the error may occur once \kbd{gp} has been
 sidetracked. The first error is straightforward: \kbd{factor} has one
-mandatory argument, which is missing there.
+mandatory argument, which is missing.
 
-The next two are simple typos involving an ill-formed addition
+The other two are simple typos involving an ill-formed addition
 \kbd{1 + } missing its second operand. The error messages differ
 because the parsing context is slightly different: in the first
 case we reach the end of input (\kbd{\$end}) while still expecting a token,
@@ -2202,17 +2203,18 @@ function call \kbd{siN(x)}.
 \emph{Library runtime errors} are even nicer because they have more
 mathematical content, which is easier to grasp than a parser's logic:
 \bprog
-? 1/0
-  ***   at top-level: 1/0
-  ***                  ^--
-  *** _/_: division by a non-invertible object
+? 1/Mod(2,4)
+  ***   at top-level: 1/Mod(2,4)
+  ***                  ^---------
+  *** _/_: impossible inverse in Fp_inv: Mod(2, 4).
 @eprog\noindent telling us that a runtime error occurred while evaluating the
 binary \kbd{/} operator (the \kbd{\_} surrounding the operator are
-placeholders). More context is provided if the error occurs deep in the
-call chain:
+placeholders), more precisely the \kbd{Fp\_inv} library function was fed
+the argument \kbd{Mod(2,4)} and could not invert it. More context is provided
+if the error occurs deep in the call chain:
 \bprog
 ? f(x) = 1/x;
-? g(N) = for(i = -N, N, f(i));
+? g(N) = for(i = -N, N, f(i + O(5)));
 ? g(10)
   ***   at top-level: g(10)
   ***                 ^-----
@@ -2220,19 +2222,22 @@ call chain:
   ***                             ^-----
   ***   in function f: 1/x
   ***                   ^--
-  *** _/_: division by a non-invertible object
-@eprog
+  *** _/_: impossible inverse in ginv: O(5).
+@eprog\noindent In this example, the debugger reports (at least) 3 enclosed
+frames: last (innermost) is the body of user function $f$, the body of $g$,
+and the top-level (global scope). In fact, the \kbd{for} loop in $g$'s body
+defines an extra frame, since there exist variables scoped to the loop body.
 
 \subsec{Error recovery}\sidx{error recovery}\label{se:errorrec}
 
-It is quite annoying to wait for some program to finish and find out the hard
+It is annoying to wait for a program to finish and find out the hard
 way that there was a mistake in it (like the division by 0 above), sending
 you back to the prompt. First you may lose some valuable intermediate data.
 Also, correcting the error may not be obvious; you might have to change your
-program, adding a number of extra statements and tests to try and narrow down
+program, adding a number of extra statements and tests to narrow down
 the problem.
 
-A slightly different situation, still related to error recovery, is when you
+A different situation, still related to error recovery, is when you
 actually foresee that some error may occur, are unable to prevent it, but
 quite capable of recovering from it, given the chance. Examples include lazy
 factorization, where you knowingly use a pseudo prime $N$ as if it were
@@ -2256,16 +2261,16 @@ provides satisfactory ways out of the second one (the \tet{iferr} and
 A \tev{break loop} is a special debugging mode that you enter whenever a
 user interrupt (\kbd{Control-C}) or runtime error occurs, freezing the
 \kbd{gp} state, and preventing cleanup until you get out of the loop. By
-runtime error, we mean an error from the library or a user error (from
-\tet{error}), but \emph{not} syntax errors. When a break loop starts, a
+runtime error, we mean an error from the evaluator, the library or a user error
+(from \tet{error}), \emph{not} syntax errors. When a break loop starts, a
 prompt is issued (\kbd{break>}). You can type in a \kbd{gp} command, which is
 evaluated when you hit the \kbd{<Return>} key, and the result is printed as
-during the main \kbd{gp} loop, except that no history of results is kept.
-Then the break loop prompt reappears and you can type further commands as
-long as you do not exit the loop. If you are using readline, the history of
-commands is kept, and line editing is available as usual. If you type in a
-command that results in an error, you are sent back to the break loop prompt
-(errors do \var{not} terminate the loop).
+during the main \kbd{gp} loop, except that no history of results is kept. Then
+the break loop prompt reappears and you can type further commands as long as
+you do not exit the loop. If you are using readline, the history of commands is
+kept, and line editing is available as usual. If you type in a command that
+results in an error, you are sent back to the break loop prompt: errors do
+\var{not} terminate the loop.
 
 To get out of a break loop, you can use \tet{next}, \tet{break}, \tet{return},
 or type \kbd{C-d} (\kbd{EOF}), any of which will let \kbd{gp} perform its
@@ -2274,13 +2279,13 @@ is slightly dangerous, since typing it \emph{twice} will not only send you
 back to the \kbd{gp} prompt, but to your shell prompt! (Since \kbd{C-d} at
 the \kbd{gp} prompt exits the gp session.)
 
-If the break loop was started by a user interrupt (and not by an error),
-inputting an empty line, i.e hitting the \kbd{<Return>} key at the \kbd{break>}
-prompt, resumes the temporarily interrupted computation. A single empty line
-has no effect in case of a fatal error, to avoid getting get out of the loop
-prematurely, thereby losing valuable debugging data. Any of \tet{next},
-\tet{break}, \tet{return}, or \kbd{C-d} will abort the computation and send you
-back to  the \kbd{gp} prompt as above.
+If the break loop was started by a user interrupt \kbd{Control-C}, and not by
+an error, inputting an empty line, i.e hitting the \kbd{<Return>} key at the
+\kbd{break>} prompt, resumes the temporarily interrupted computation. A single
+empty line has no effect in case of a fatal error, to avoid getting get out of
+the loop prematurely, thereby losing valuable debugging data. Any of
+\tet{next}, \tet{break}, \tet{return}, or \kbd{C-d} will abort the computation
+and send you back to  the \kbd{gp} prompt as above.
 
 Break loops are useful as a debugging tool. You may inspect the values of
 \kbd{gp} variables to understand why an error occurred, or change
@@ -2292,8 +2297,8 @@ explained above. A break loop looks like this:
 ? v = 0; 1/v
   ***   at top-level: v=0;1/v
   ***                      ^--
-  *** _/_: division by a non-invertible object
-  ***   Break loop (type 'break' or Control-d to go back to GP)
+  *** _/_: impossible inverse in gdiv: 0.
+  ***   Break loop (type 'break' to go back to the GP prompt)
 break>
 @eprog
 \noindent So the standard error message is printed first. The
@@ -2303,37 +2308,79 @@ break>
 break> v
 0
 @eprog\noindent explaining the problem. We could have typed any \kbd{gp}
-command, not only the name of a variable, of course. There is no special set
-of commands becoming available during a break loop, as they would in most
-debuggers.
-
-Even lexically-scoped variables are accessible to the evaluator during the
-break loop:
+command, not only the name of a variable, of course. Lexically-scoped
+variables are accessible to the evaluator during the break loop:
 \bprog
 ? for(v = -2, 2, print(1/v))
 -1/2
 -1
   ***   at top-level: for(v=-2,2,print(1/v))
   ***                                   ^----
-  *** _/_: division by a non-invertible object
-  ***   Break loop (type 'break' or Control-d to go back to GP)
+  *** _/_: impossible inverse in gdiv: 0.
+  ***   Break loop (type 'break' to go back to the GP prompt)
 break> v
 0
 @eprog\noindent
 Even though loop indices are automatically lexically scoped and no longer
 exist when the break loop is run, enough debugging information is retained in
-the bytecode to reconstruct the evaluation context.
+the bytecode to reconstruct the evaluation context. Of course, when the error
+occurs in a nested chain of user function calls, lexically scoped variables are
+available only in the corresponding frame:
+\bprog
+? f(x) = 1/x;
+? g(x) = for(i = 1, 10, f(x+i));
+? for(j = -5,5, g(j))
+  ***   at top-level: for(j=-5,5,g(j))
+  ***                            ^-----
+  ***   in function g: for(i=1,10,f(x+i))
+  ***                             ^-------
+  ***   in function f: 1/x
+  ***                   ^--
+  *** _/_: impossible inverse in gdiv: 0.
+  ***   Break loop: type 'break' to go back to GP prompt
+break> [i,j,x]     \\ @com the $x$ in $f$'s body.
+[i, j, 0]
+break> dbg_up      \\ @com go up one frame
+  ***   at top-level: for(j=-5,5,g(j))
+  ***                            ^-----
+  ***   in function g: for(i=1,10,f(x+i))
+  ***                             ^-------
+break> [i,j,x]      \\ @com the $x$ in $g$'s body, $i$ in the for loop.
+[5, j, -5]
+@eprog
+The following GP commands are available during a break loop to help debugging:
 
-\misctitle{Note} If you do not like this behavior, you may disable it by
+\tet{dbg_up}$(n)$: go up $n$ frames, as seen above.
+
+\tet{dbg_down}$(n)$: go down $n$ frames, cancelling previous \kbd{dbg\_up}'s.
+
+\tet{dbg_x}$(t)$: examine $t$, as \kbd{\bs x} but more flexible.
+
+\tet{dbg_err}$()$: returns the current error context \typ{ERROR}. The error
+ components often provide useful additional information:
+\bprog
+  ? O(2) + O(3)
+    ***   at top-level: O(2)+O(3)
+    ***                     ^-----
+    *** _+_: inconsistent addition t_PADIC + t_PADIC.
+    ***   Break loop: type 'break' to go back to GP prompt
+  break> E = dbg_err()
+  error("inconsistent addition t_PADIC + t_PADIC.")
+  break> Vec(E)
+  ["e_OP", "+", O(2), O(3)]
+@eprog
+
+\misctitle{Note} The debugger is enabled by default, and fires up as soon as
+a runtime error occurs. If you do not like this behavior, you may disable it by
 setting the default \tet{breakloop} to 0 in for \kbd{gprc}. A runtime error
 will send you back to the prompt. Note that the break loop is automatically
-disabled when running \kbd{gp} in non interactive mode, i.e.~when the
-program's standard input is not attached to a terminal.
+disabled when running \kbd{gp} in non interactive mode, i.e.~when the program's
+standard input is not attached to a terminal.
 
 \misctitle{Technical Note} When you enter a break loop due to a PARI stack
-overflow, the PARI stack is reset so that you can run commands (otherwise the
-stack would immediately overflow again). Still, as explained above, you do
-not lose the value of any \kbd{gp} variable in the process.
+overflow, the PARI stack is reset so that you can run commands. Otherwise the
+stack would immediately overflow again! Still, as explained above, you do not
+lose the value of any \kbd{gp} variable in the process.
 
 \subsec{Protecting code}
  The \tet{iferr} and \tet{iferrname} functions allow to define a temporary
@@ -2415,9 +2462,10 @@ and 0 if everything works.
 The \kbd{ERR} formal parameter contains more useful data than just the error
 name, which we recovered using \kbd{errname(ERR)}. In fact, a \typ{ERROR}
 object usually has extra components, which can be accessed as
-\kbd{component(ERR,1)}, \kbd{component(ERR,2)}, and so on. See
-\secref{se:iferrname} for the list of all exception types, and the
-corresponding contents of \kbd{ERR}.
+\kbd{component(ERR,1)}, \kbd{component(ERR,2)}, and so on. Or globally by
+casting the error to a \typ{VEC}: \kbd{Vec(ERR)} returns the vector
+of all comonents at once. See \secref{se:iferrname} for the list of all
+exception types, and the corresponding contents of \kbd{ERR}.
 
 \section{Interfacing GP with other languages}
 \noindent
