@@ -227,7 +227,7 @@ checkvalue(entree *ep)
     ep->value = initial_value(ep);
   }
   else if (ep->valence!=EpVAR)
-    err_var((GEN)ep->value);
+    err_var(strtoGENstr(ep->name));
 }
 
 /* make GP variables safe for avma = top */
