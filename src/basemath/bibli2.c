@@ -1137,7 +1137,7 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
 static void
 err_reverse(GEN x, GEN T)
 {
-  pari_err_DOMAIN("modreverse","deg(charpoly(z))", "<", stoi(degpol(T)),
+  pari_err_DOMAIN("modreverse","deg(minpoly(z))", "<", stoi(degpol(T)),
                   mkpolmod(x,T));
 }
 
