@@ -556,4 +556,19 @@
   ***   at top-level: forstep(a=1,2,0,)
   ***                 ^-----------------
   ***   domain error in forstep: step = 0
+  ***   at top-level: e.omega
+  ***                   ^-----
+  *** _.omega: incorrect type in omega [not defined over R] (t_VEC).
+  ***   at top-level: e.eta
+  ***                   ^---
+  *** _.eta: incorrect type in eta [not defined over R] (t_VEC).
+  ***   at top-level: e.area
+  ***                   ^----
+  *** _.area: incorrect type in area [not defined over R] (t_VEC).
+  ***   at top-level: e.tate
+  ***                   ^----
+  *** _.tate: incorrect type in tate [not defined over Qp] (t_VEC).
+  ***   at top-level: e.w
+  ***                   ^-
+  *** _.w: incorrect type in w [not defined over Qp] (t_VEC).
 Total time spent: 20

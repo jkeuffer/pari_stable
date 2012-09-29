@@ -508,7 +508,7 @@ GEN
 member_omega(GEN x)
 {
   if (!is_ell(x)) member_err("omega",x);
-  if (!ell_is_real(x)) pari_err(e_MISC,"curve not defined over R");
+  if (!ell_is_real(x)) pari_err_TYPE("omega [not defined over R]",x);
   return mkvec2(gel(x,15), gel(x,16));
 }
 
@@ -516,7 +516,7 @@ GEN
 member_eta(GEN x)
 {
   if (!is_ell(x)) member_err("eta",x);
-  if (!ell_is_real(x)) pari_err(e_MISC,"curve not defined over R");
+  if (!ell_is_real(x)) pari_err_TYPE("eta [not defined over R]",x);
   return mkvec2(gel(x,17), gel(x,18));
 }
 
@@ -524,7 +524,7 @@ GEN
 member_area(GEN x)
 {
   if (!is_ell(x)) member_err("area",x);
-  if (!ell_is_real(x)) pari_err(e_MISC,"curve not defined over R");
+  if (!ell_is_real(x)) pari_err_TYPE("area [not defined over R]",x);
   return gel(x,19);
 }
 
@@ -532,8 +532,7 @@ GEN
 member_tate(GEN x)
 {
   if (!is_ell(x)) member_err("tate",x);
-  if (!ell_is_padic(x))
-    pari_err(e_MISC,"curve not defined over a p-adic field");
+  if (!ell_is_padic(x)) pari_err_TYPE("tate [not defined over Qp]",x);
   return mkvec3(gel(x,15), gel(x,16), gel(x,17));
 }
 
@@ -541,7 +540,6 @@ GEN
 member_w(GEN x)
 {
   if (!is_ell(x)) member_err("w",x);
-  if (!ell_is_padic(x))
-    pari_err(e_MISC,"curve not defined over a p-adic field");
+  if (!ell_is_padic(x)) pari_err_TYPE("w [not defined over Qp]",x);
   return gel(x,18);
 }
