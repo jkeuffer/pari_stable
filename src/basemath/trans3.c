@@ -1271,20 +1271,21 @@ GEN
 inv_szeta_euler(long n, double lba, long prec)
 {
   GEN z, res = cgetr(prec);
-  pari_sp av = avma, avlim = stack_lim(av, 1);
-  byteptr d =  diffptr + 2;
+  pari_sp av = avma, av2, avlim = stack_lim(av, 1);
   double A = n / LOG2, D;
   ulong p, lim;
+  forprime_t S;
 
   if (n > prec2nbits(prec)) return real_1(prec);
   if (!lba) lba = prec2nbits_mul(prec, LOG2);
   D = exp((lba - log(n-1)) / (n-1));
   lim = 1 + (ulong)ceil(D);
-  maxprime_check(lim);
+  u_forprime_init(&S, 3, lim);
+  av2 = avma;
 
   incrprec(prec);
   z = subir(gen_1, real2n(-n, prec));
-  for (p = 3; p <= lim;)
+  while ((p = u_forprime_next(&S)))
   {
     long l = prec - nbits2extraprec((long)floor(A * log(p)) - BITS_IN_LONG);
     GEN h;
@@ -1296,9 +1297,8 @@ inv_szeta_euler(long n, double lba, long prec)
     if (low_stack(avlim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"inv_szeta_euler, p = %lu/%lu", p,lim);
-      affrr(z, res); avma = av;
+      affrr(z, res); avma = av2;
     }
-    NEXT_PRIME_VIADIFF(p,d);
   }
   affrr(z, res); avma = av; return res;
 }
@@ -1522,33 +1522,15 @@ szeta(long k, long prec)
   return szeta_odd(k, prec);
 }
 
-/* return x^n, assume n > 0 */
-static long
-pows(long x, long n)
-{
-  long i, y = x;
-  for (i=1; i<n; i++) y *= x;
-  return y;
-}
-
 /* return n^-s, n > 1 odd. tab[q] := q^-s, q prime power */
 static GEN
 n_s(ulong n, GEN *tab)
 {
-  byteptr d =  diffptr + 2;
-  GEN x = NULL;
-  long p, e;
+  GEN x, f = factoru(n), P = gel(f,1), E = gel(f,2);
+  long i, l = lg(P);
 
-  for (p = 3; n > 1; )
-  {
-    e = u_lvalrem(n, p, &n);
-    if (e)
-    {
-      GEN y = tab[pows(p,e)];
-      if (!x) x = y; else x = gmul(x,y);
-    }
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
-  }
+  x = tab[ upowuu(P[1], E[1]) ];
+  for (i = 2; i < l; i++) x = gmul(x, tab[ upowuu(P[i], E[i]) ]);
   return x;
 }
 
@@ -1563,8 +1545,8 @@ czeta(GEN s0, long prec)
   ulong p, sqn;
   long i, nn, lim, lim2, ct;
   pari_sp av0 = avma, av, av2, avlim;
-  byteptr d;
   pari_timer T;
+  forprime_t S;
 
   if (DEBUGLEVEL>2) timer_start(&T);
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
@@ -1583,29 +1565,26 @@ czeta(GEN s0, long prec)
     return gerepileupto(av0, funeq_factor);
   }
   optim_zeta(s, prec, &lim, &nn);
-  maxprime_check((ulong)nn);
+  u_forprime_init(&S, 2, nn-1);
   incrprec(prec); unr = real_1(prec); /* one extra word of precision */
 
   tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
   { /* general case */
     GEN ms = gneg(s), rp = cgetr(prec);
-    d = diffptr + 1;
-    for (p=2; p < (ulong)nn;)
+    while ((p = u_forprime_next(&S)))
     {
       affur(p, rp);
       tab[p] = gexp(gmul(ms, mplog(rp)), prec);
-      NEXT_PRIME_VIADIFF(p,d);
     }
     affsr(nn, rp);
     a = gexp(gmul(ms, mplog(rp)), prec);
   }
   sqn = (ulong)sqrt(nn-1.);
-  d = diffptr + 2; /* fill in odd prime powers */
-  for (p=3; p <= sqn; )
+  u_forprime_init(&S, 3, sqn); /* fill in odd prime powers */
+  while ((p = u_forprime_next(&S)))
   {
     ulong oldq = p, q = p*p;
     while (q<(ulong)nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
-    NEXT_PRIME_VIADIFF(p,d);
   }
   if (DEBUGLEVEL>2) timer_printf(&T,"tab[q^-s] from 1 to N-1");
 
