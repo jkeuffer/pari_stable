@@ -3265,17 +3265,17 @@ ZM_det_i(GEN M, long n)
   if (n == 3) return ZM_det3(M);
   h = RgM_Hadamard(M);
   if (!signe(h)) { avma = av; return gen_0; }
-  h = sqrti(h);
+  h = sqrti(h); q = gen_1;
   init_modular(&S);
-  for (q = gen_1; cmpii(q, h) <= 0; )
+  p = 0; /* -Wall */
+  while( cmpii(q, h) <= 0 && (p = u_forprime_next(&S)) )
   {
-    p = u_forprime_next(&S);
-    if (!p) pari_err_OVERFLOW("ZM_det [ran out of primes]");
     av2 = avma; Dp = Flm_det(ZM_to_Flm(M, p), p);
     avma = av2;
     if (Dp) break;
     q = muliu(q, p);
   }
+  if (!p) pari_err_OVERFLOW("ZM_det [ran out of primes]");
   if (!Dp) { avma = av; return gen_0; }
   if (n <= DIXON_THRESHOLD)
     D = q;
