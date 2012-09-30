@@ -167,6 +167,7 @@ GEN     Flx_rem(GEN x, GEN y, ulong p);
 GEN     Flx_renormalize(GEN x, long l);
 ulong   Flx_resultant(GEN a, GEN b, ulong p);
 GEN     Flx_shift(GEN a, long n);
+GEN     Flx_splitting(GEN p, long k);
 GEN     Flx_sqr(GEN x, ulong p);
 GEN     Flx_sub(GEN x, GEN y, ulong p);
 GEN     Flx_to_Flv(GEN x, long N);

@@ -342,7 +342,7 @@ BA 103- GP function ellfromj
    104- new error class e_PRIORITY [ pari_err() ]
 BA 105- Add black box algebra for Brent and Kung algorithm
    106- PARI function RgM_dimensions()
-BA 107- PARI function RgX_splitting()
+BA 107- PARI functions RgX_splitting(), Flx_splitting()
    108- made public the CATCH / TRY interface, renamed pari_CATCH / pari_TRY
         PARI functions err_get_num(), err_get_compo(), pari_err_last()
    109- PARI function stack_sprintf()

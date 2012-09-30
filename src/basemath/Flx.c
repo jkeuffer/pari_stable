@@ -1332,6 +1332,29 @@ Flx_inflate(GEN x0, long d)
   return y;
 }
 
+/* write p(X) = a_0(X^k) + X*a_1(X^k) + ... + X^(k-1)*a_{k-1}(X^k) */
+GEN
+Flx_splitting(GEN p, long k)
+{
+  long n = degpol(p), v = p[1], m, i, j, l;
+  GEN r;
+
+  m = n/k;
+  r = cgetg(k+1,t_VEC);
+  for(i=1; i<=k; i++)
+  {
+    gel(r,i) = cgetg(m+3, t_VECSMALL);
+    mael(r,i,1) = v;
+  }
+  for (j=1, i=0, l=2; i<=n; i++)
+  {
+    mael(r,j,l) = p[2+i];
+    if (j==k) { j=1; l++; } else j++;
+  }
+  for(i=1; i<=k; i++)
+    gel(r,i) = Flx_renormalize(gel(r,i),i<j?l+1:l);
+  return r;
+}
 static GEN
 Flx_halfgcd_basecase(GEN a, GEN b, ulong p)
 {
