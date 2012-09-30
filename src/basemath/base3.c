@@ -2050,10 +2050,10 @@ Ideallist(GEN bnf, ulong bound, long flag)
 {
   const long do_units = flag & 2, big_id = !(flag & 4);
   const long istar_flag = (flag & nf_GEN) | nf_INIT;
-  byteptr ptdif = diffptr;
   pari_sp lim, av, av0 = avma;
   long i, j, l;
   GEN nf, z, p, fa, id, U, empty = cgetg(1,t_VEC);
+  forprime_t S;
   ideal_data ID;
   GEN (*join_z)(ideal_data*, GEN) =
     do_units? &join_unit
@@ -2080,11 +2080,11 @@ Ideallist(GEN bnf, ulong bound, long flag)
   ID.nf = nf;
 
   p = cgetipos(3);
+  u_forprime_init(&S, 2, bound);
   av = avma; lim = stack_lim(av,1);
   maxprime_check(bound);
-  for (p[2] = 0; (ulong)p[2] <= bound; )
+  while ((p[2] = u_forprime_next(&S)))
   {
-    NEXT_PRIME_VIADIFF(p[2], ptdif);
     if (DEBUGLEVEL>1) { err_printf("%ld ",p[2]); err_flush(); }
     fa = idealprimedec(nf, p);
     for (j=1; j<lg(fa); j++)
