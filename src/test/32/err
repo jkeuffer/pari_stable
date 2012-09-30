@@ -544,6 +544,9 @@
   ***   at top-level: concat([])
   ***                 ^----------
   *** concat: domain error in concat: vector = []
+  ***   at top-level: concat(List())
+  ***                 ^--------------
+  *** concat: domain error in concat: vector = List([])
   ***   at top-level: mathnfmod([1;2],2)
   ***                 ^------------------
   *** mathnfmod: domain error in ZM_hnfmod: nb lines > nb columns
@@ -571,4 +574,4 @@
   ***   at top-level: e.w
   ***                   ^-
   *** _.w: incorrect type in w [not defined over Qp] (t_VEC).
-Total time spent: 20
+Total time spent: 16

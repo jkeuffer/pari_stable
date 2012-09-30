@@ -292,12 +292,14 @@ shallowconcat1(GEN x)
   long tx = typ(x), lx, t, i;
   GEN z;
 
-  if      (tx == t_VEC) lx = lg(x);
-  else if (tx == t_LIST)
-  { x = list_data(x); lx = x ? lg(x): 1; }
+  if (tx == t_VEC) {
+    lx = lg(x);
+    if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
+  } else if (tx == t_LIST) {
+    if (!list_data(x)) pari_err_DOMAIN("concat","vector","=",x,x);
+    x = list_data(x); lx = lg(x); }
   else
   { pari_err_TYPE("concat",x); return NULL; /* not reached */ }
-  if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
   if (lx==2) return gel(x,1);
 
   z = gel(x,1);
