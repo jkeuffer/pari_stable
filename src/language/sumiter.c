@@ -242,6 +242,7 @@ u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
     T->strategy = 1; /* paranoia */
     T->p = 0; /* empty */
     T->b = 0; /* empty */
+    T->d = diffptr;
     return 0;
   }
   maxp = maxprime();
