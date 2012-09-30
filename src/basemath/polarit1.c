@@ -1390,12 +1390,6 @@ Flx_factor_deg2(GEN f, ulong p, long d, long flag)
   }
 }
 
-static int
-cmp_small(GEN x, GEN y) {
-  long a = (long)x, b = (long)y;
-  return a>b? 1: (a<b? -1: 0);
-}
-
 static GEN
 F2x_factcantor_i(GEN f, long flag)
 {
@@ -1471,7 +1465,7 @@ F2x_factcantor_i(GEN f, long flag)
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
   return flag ? sort_factor(y, (void*)cmpGuGu, cmp_nodata)
-              : sort_factor_pol(y, cmp_small);
+              : sort_factor_pol(y, cmpGuGu);
 }
 GEN
 F2x_factcantor(GEN f, long flag)
@@ -1594,7 +1588,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
   return flag ? sort_factor(y, (void*)cmpGuGu, cmp_nodata)
-              : sort_factor_pol(y, cmp_small);
+              : sort_factor_pol(y, cmpGuGu);
 }
 GEN
 Flx_factcantor(GEN f, ulong p, long flag)
@@ -2165,7 +2159,7 @@ F2x_Berlekamp_i(GEN f, long flag)
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t,E);
   return flag ? sort_factor(y, (void*)&cmpGuGu, cmp_nodata)
-              : sort_factor_pol(y, cmp_small);
+              : sort_factor_pol(y, cmpGuGu);
 }
 
 static GEN
@@ -2238,7 +2232,7 @@ Flx_Berlekamp_i(GEN f, ulong p, long flag)
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t,E);
   return flag ? sort_factor(y, (void*)&cmpGuGu, cmp_nodata)
-              : sort_factor_pol(y, cmp_small);
+              : sort_factor_pol(y, cmpGuGu);
 }
 
 /* f an FpX or an Flx */
