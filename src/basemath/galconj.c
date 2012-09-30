@@ -216,7 +216,6 @@ struct galois_analysis {
   long l; /* l: prime number such that T is totally split mod l */
   long p4;
   enum ga_code group;
-  byteptr primepointer; /* allow computing the primes following p */
 };
 struct galois_frobenius {
   long p;
@@ -1186,8 +1185,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   long group, linf, n, p, i, karma = 0;
   GEN F, Fp, Fe, Fpe, O;
   long np, order, plift, nbmax, nbtest, deg;
-  byteptr primepointer, pp;
   pari_timer ti;
+  forprime_t S;
   if (DEBUGLEVEL >= 1) timer_start(&ti);
   n = degpol(T);
   O = const_vecsmall(n, 0);
@@ -1202,8 +1201,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   plift = 0;
   nbtest = 0;
   nbmax = 8+(n>>1);
-  pp = diffptr;
-  p = init_primepointer(n*maxss(expu(n)-3, 2), &primepointer);
+  u_forprime_init(&S, n*maxss(expu(n)-3, 2), ULONG_MAX);
   av = avma;
   while (!plift || (nbtest < nbmax && (nbtest <=8 || order < (n>>1)))
                 || (n == 24 && O[6] == 0 && O[4] == 0)
@@ -1213,8 +1211,9 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     GEN D, Tp;
 
     if ((group&ga_non_wss) && nbtest >= 3*nbmax) break; /* in all cases */
-
-    if (nbtest++) { avma = av; NEXT_PRIME_VIADIFF_CHECK(p,primepointer); }
+    nbtest++; avma = av;
+    p = u_forprime_next(&S);
+    if (!p) pari_err_OVERFLOW("galoisanalysis [ran out of primes]");
     Tp = ZX_to_Flx(T,p);
     if (!Flx_is_squarefree(Tp,p)) { if (!--nbtest) nbtest = 1; continue; }
 
@@ -1249,7 +1248,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
     else if (group&ga_all_normal) goto ga_end;
     else if (!improves(o, order, plift,p,n, &karma)) goto ga_end;
 
-    order = o; plift = p; pp = primepointer; /* STORE */
+    order = o; plift = p; /* STORE */
     ga_end:
     if (DEBUGLEVEL >= 5)
       err_printf("GaloisAnalysis:Nbtest=%ld,p=%ld,o=%ld,n_o=%d,best p=%ld,ord=%ld,k=%ld\n", nbtest, p, o, norm_o, plift, order,karma);
@@ -1267,23 +1266,27 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   linf = n;
   if (calcul_l && O[1] <= linf)
   {
-    pari_sp av2 = avma;
-    p = init_primepointer(linf+1, &primepointer);
-    for(;; avma = av2) /*find a totally split prime l*/
-    {
+    pari_sp av2;
+    forprime_t S2;
+    ulong p;
+    u_forprime_init(&S2, linf+1,ULONG_MAX);
+    av2 = avma;
+    while ((p = u_forprime_next(&S2)))
+    { /*find a totally split prime l > linf*/
       GEN Tp = ZX_to_Flx(T, p);
       long nb = Flx_nbroots(Tp, p);
       if (nb == n) { O[1] = p; break; }
       if (nb && Flx_is_squarefree(Tp,p)) {
-        notgalois(p,ga); avma = ltop; return 0;
+        notgalois(p,ga);
+        avma = ltop; return 0;
       }
-      NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
+      avma = av2;
     }
+    if (!p) pari_err_OVERFLOW("galoisanalysis [ran out of primes]");
   }
   ga->group = (enum ga_code)group;
   ga->deg = deg;
   ga->ord = order;
-  ga->primepointer = pp;
   ga->l  = O[1];
   ga->p4 = O[4];
   if (DEBUGLEVEL >= 4)
@@ -1867,21 +1870,26 @@ static GEN
 galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     struct galois_borne *gb, const struct galois_analysis *ga)
 {
-  pari_sp ltop = avma;
+  pari_sp ltop = avma, av;
   long Try = 0, n = degpol(T), deg, gmask = (ga->group&ga_ext_2)? 3: 1;
-  byteptr primepointer = ga->primepointer;
   GEN frob, Lden = makeLden(L,den,gb);
-  deg = gf->deg = ga->deg; gf->p = ga->p;
-  for (;;)
+  forprime_t S;
+
+  u_forprime_init(&S, ga->p, ULONG_MAX);
+  av = avma;
+  deg = gf->deg = ga->deg;
+  while ((gf->p = u_forprime_next(&S)))
   {
-    pari_sp lbot, av = avma;
-    GEN Ti, Tp = ZX_to_Flx(T, gf->p);
+    pari_sp lbot;
+    GEN Ti, Tp;
     long nb, d;
-    if (!Flx_is_squarefree(Tp, gf->p)) goto nextp;
+    avma = av;
+    Tp = ZX_to_Flx(T, gf->p);
+    if (!Flx_is_squarefree(Tp, gf->p)) continue;
     Ti = gel(Flx_factor(Tp, gf->p), 1);
     nb = lg(Ti)-1; d = degpol(gel(Ti,1));
     if (nb > 1 && degpol(gel(Ti,nb)) != d) { avma = ltop; return NULL; }
-    if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) goto nextp;
+    if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) continue;
     if (DEBUGLEVEL >= 1) err_printf("GaloisConj: Trying p=%ld\n", gf->p);
     Flxv_to_ZXV_inplace(Ti);
     gf->fp = d;
@@ -1900,13 +1908,12 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     if (!gmask) { avma = ltop; return NULL; }
     if ((ga->group&ga_non_wss) && ++Try > ((3*n)>>1))
     {
-      pari_warn(warner,"Galois group almost certainly not weakly super solvable");
+      pari_warn(warner,"Galois group probably not weakly super solvable");
       return NULL;
     }
-nextp:
-    NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
-    avma = av;
   }
+  if (!gf->p) pari_err_OVERFLOW("galoisfindfrobenius [ran out of primes]");
+  return NULL;
 }
 
 static GEN
