@@ -2238,36 +2238,41 @@ long
 numberofconjugates(GEN T, long pinit)
 {
   pari_sp av = avma;
-  long p, c, nbtest = 0, n = degpol(T), nbmax = (n < 10)? 20: (n<<1) + 1;
-  byteptr diff;
+  long c, nbtest, nbmax, n = degpol(T);
+  ulong p;
+  forprime_t S;
 
+  if (n == 1) return 1;
+  nbmax = (n < 10)? 20: (n<<1) + 1;
+  nbtest = 0;
 #if 0
   c = sturm(T); c = ugcd(c, n - c); /* too costly: finite primes are cheaper */
 #else
   c = n;
 #endif
-  p = init_primepointer(pinit, &diff);
-  for (; nbtest < nbmax && c > 1; avma = av)
+  u_forprime_init(&S, pinit, ULONG_MAX);
+  while((p = u_forprime_next(&S)))
   {
     GEN L, Tp = ZX_to_Flx(T,p);
     long i, nb;
-    if (Flx_is_squarefree(Tp, p))
-    { /* unramified */
-      nbtest++;
-      L = Flx_nbfact_by_degree(Tp, &nb, p); /* L[i] = #factors of degree i */
-      if (L[n/nb] == nb) {
-        if (c == n && nbtest > 10) break; /* probably Galois */
-      }
-      else
-      {
-        c = ugcd(c, L[1]);
-        for (i = 2; i <= n; i++)
-          if (L[i]) { c = ugcd(c, L[i]*i); if (c == 1) break; }
-      }
-      if (DEBUGLEVEL >= 6)
-        err_printf("NumberOfConjugates [%ld]:c=%ld,p=%ld\n", nbtest,c,p);
+    if (!Flx_is_squarefree(Tp, p)) continue;
+    /* unramified */
+    nbtest++;
+    L = Flx_nbfact_by_degree(Tp, &nb, p); /* L[i] = #factors of degree i */
+    if (L[n/nb] == nb) {
+      if (c == n && nbtest > 10) break; /* probably Galois */
     }
-    NEXT_PRIME_VIADIFF_CHECK(p,diff);
+    else
+    {
+      c = ugcd(c, L[1]);
+      for (i = 2; i <= n; i++)
+        if (L[i]) { c = ugcd(c, L[i]*i); if (c == 1) break; }
+      if (c == 1) break;
+    }
+    if (nbtest == nbmax) break;
+    if (DEBUGLEVEL >= 6)
+      err_printf("NumberOfConjugates [%ld]:c=%ld,p=%ld\n", nbtest,c,p);
+    avma = av;
   }
   if (DEBUGLEVEL >= 2) err_printf("NumberOfConjugates:c=%ld,p=%ld\n", c, p);
   avma = av; return c;
