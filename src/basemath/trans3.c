@@ -1270,21 +1270,24 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
 GEN
 inv_szeta_euler(long n, double lba, long prec)
 {
-  GEN z, res = cgetr(prec);
-  pari_sp av = avma, av2, avlim = stack_lim(av, 1);
-  double A = n / LOG2, D;
+  GEN z, res;
+  pari_sp av, av2, avlim;
+  double A, D;
   ulong p, lim;
   forprime_t S;
 
   if (n > prec2nbits(prec)) return real_1(prec);
+
   if (!lba) lba = prec2nbits_mul(prec, LOG2);
   D = exp((lba - log(n-1)) / (n-1));
   lim = 1 + (ulong)ceil(D);
-  u_forprime_init(&S, 3, lim);
-  av2 = avma;
-
-  incrprec(prec);
+  if (lim < 3) return subir(gen_1,real2n(-n,prec));
+  res = cgetr(prec); incrprec(prec);
+  av = avma; avlim = stack_lim(av, 1);
   z = subir(gen_1, real2n(-n, prec));
+
+  (void)u_forprime_init(&S, 3, lim);
+  av2 = avma; A = n / LOG2;
   while ((p = u_forprime_next(&S)))
   {
     long l = prec - nbits2extraprec((long)floor(A * log(p)) - BITS_IN_LONG);
