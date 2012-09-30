@@ -1960,29 +1960,34 @@ static GEN
 get_polchar(CG_data *d, GEN x)
 { return get_pol(d, RgM_RgC_mul(d->ZKembed,x)); }
 
-/* return a defining polynomial for Q(w_k) */
+
+/* return a defining polynomial for Q(alpha), v = embeddings of alpha.
+ * Return NULL on failure (low accuracy) */
 static GEN
-get_polmin_w(CG_data *d, long k)
+try_polmin(pari_sp av, CG_data *d, GEN v)
 {
-  GEN g = get_pol(d, gel(d->ZKembed,k));
-  if (g) (void)ZX_gcd_all(g, ZX_deriv(g), &g);
-  return g;
+  GEN g = get_pol(d, v);
+  if (!g) { avma = av; return NULL; }
+  (void)ZX_gcd_all(g, ZX_deriv(g), &g);
+  return gerepilecopy(av, g);
 }
-/* return a defining polynomial for Q(w_k+w_l) */
+/* defining polynomial for Q(w_k) */
 static GEN
-get_polmin_add2(CG_data *d, long k, long l)
-{
-  GEN g = get_pol(d, RgV_add(gel(d->ZKembed,k), gel(d->ZKembed,l)));
-  if (g) (void)ZX_gcd_all(g, ZX_deriv(g), &g);
-  return g;
+get_polmin_w(CG_data *d, long k) {
+  pari_sp av = avma;
+  return try_polmin(av, d, gel(d->ZKembed,k));
 }
-/* return a defining polynomial for Q(w_k-w_l) */
+/* defining polynomial for Q(w_k+w_l) */
 static GEN
-get_polmin_sub2(CG_data *d, long k, long l)
-{
-  GEN g = get_pol(d, RgV_sub(gel(d->ZKembed,k), gel(d->ZKembed,l)));
-  if (g) (void)ZX_gcd_all(g, ZX_deriv(g), &g);
-  return g;
+get_polmin_add2(CG_data *d, long k, long l) {
+  pari_sp av = avma;
+  return try_polmin(av, d, RgV_add(gel(d->ZKembed,k), gel(d->ZKembed,l)));
+}
+/* defining polynomial for Q(w_k-w_l) */
+static GEN
+get_polmin_sub2(CG_data *d, long k, long l) {
+  pari_sp av = avma;
+  return try_polmin(av, d, RgV_sub(gel(d->ZKembed,k), gel(d->ZKembed,l)));
 }
 
 /* does x generate the correct field ? */
@@ -2112,7 +2117,8 @@ filter(GEN y, GEN b, long n)
     GEN yi = gel(y,i), ai = gel(b,i);
     if (degpol(yi) == n)
     {
-      if (dx && !ZX_is_better(yi,x,&dx)) continue;
+      pari_sp av = avma;
+      if (dx && !ZX_is_better(yi,x,&dx)) { avma = av; continue; }
       if (!dx) dx = ZX_disc(yi);
       x = yi; a = ai; continue;
     }

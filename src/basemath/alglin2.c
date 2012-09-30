@@ -438,8 +438,8 @@ ZM_charpoly(GEN M)
   pari_sp av = avma;
   long l = lg(M), n = l-1, bit;
   GEN q = NULL, H = NULL, Hp;
+  forprime_t S;
   ulong p;
-  byteptr d;
   if (!n) return pol_1(0);
 
   bit = (long)charpoly_bound(M) + 1;
@@ -447,10 +447,9 @@ ZM_charpoly(GEN M)
     err_printf("ZM_charpoly: bit-bound 2^%ld\n", bit);
     timer_start(&T);
   }
-  d = init_modular(&p);
-  for(;;)
+  init_modular(&S);
+  while ((p = u_forprime_next(&S)))
   {
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     Hp = Flm_charpoly(ZM_to_Flm(M, p), p);
     if (!H)
     {
@@ -469,6 +468,7 @@ ZM_charpoly(GEN M)
       if (stable && expi(q) > bit) break;
     }
   }
+  if (!p) pari_err_OVERFLOW("ZM_charpoly [ran out of primes]");
   return gerepilecopy(av, H);
 }
 

@@ -642,7 +642,7 @@ GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
 ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
 GEN     ffinit_Artin_Shreier(GEN ip, long l);
 GEN     ffinit_rand(GEN p, long n);
-byteptr init_modular(ulong *p);
+void    init_modular(forprime_t *S);
 GEN     polint_triv(GEN xa, GEN ya);
 
 /* random.c */

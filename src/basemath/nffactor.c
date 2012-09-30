@@ -157,8 +157,7 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
   pari_sp btop, st_lim, ltop = avma;
   GEN lP, lQ, M, dsol, R, bo, sol, mod = NULL;
   long vP = varn(P), vT = varn(T), dT = degpol(T), dM = 0, dR;
-  ulong p;
-  byteptr primepointer;
+  forprime_t S;
 
   if (!signe(P)) { if (Pnew) *Pnew = pol_0(vT); return gcopy(Q); }
   if (!signe(Q)) { if (Pnew) *Pnew = pol_1(vT);   return gcopy(P); }
@@ -169,11 +168,12 @@ nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
     den = mulii(den, gcdii(ZX_resultant(lP, T), ZX_resultant(lQ, T)));
 
+  init_modular(&S);
   btop = avma; st_lim = stack_lim(btop, 1);
-  primepointer = init_modular(&p);
-  for (;;)
+  for(;;)
   {
-    NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
+    ulong p = u_forprime_next(&S);
+    if (!p) pari_err_OVERFLOW("nfgcd [ran out of primes]");
     /*Discard primes dividing disc(T) or lc(PQ) */
     if (!umodiu(den, p)) continue;
     if (DEBUGLEVEL>5) err_printf("nfgcd: p=%d\n",p);

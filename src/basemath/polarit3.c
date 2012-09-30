@@ -2650,16 +2650,15 @@ FpX_compositum(GEN A, GEN B, GEN p)
   }
 }
 
-/* check that theta(maxprime) - theta(27448) >= 2^bound */
+/* Return x such that theta(x) - theta(27448) >= 2^bound */
 /* NB: theta(27449) ~ 27225.387, theta(x) > 0.98 x for x>7481
  * (Schoenfeld, 1976 for x > 1155901 + direct calculations) */
-static void
-check_theta(ulong bound) {
-  maxprime_check( (ulong)ceil((bound * LOG2 + 27225.388) / 0.98) );
-}
+static ulong
+get_theta_x(ulong bound)
+{ return (ulong)ceil((bound * LOG2 + 27225.388) / 0.98); }
 /* 27449 = prime(3000) */
-byteptr
-init_modular(ulong *p) { *p = 27449; return diffptr + 3000; }
+void
+init_modular(forprime_t *S) { u_forprime_init(S, 27449, ULONG_MAX); }
 
 /* Assume A in Z[Y], B in Q[Y][X], and Res_Y(A, B) in Z[X].
  * If lambda = NULL, return Res_Y(A,B).
@@ -2680,7 +2679,7 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *plambda, GEN *LERS)
   long vX = varn(B0), vY = varn(A); /* assume vX << vY */
   long sX = evalvarn(vX);
   GEN x, y, dglist, dB, B, q, a, b, ev, H, H0, H1, Hp, H0p, H1p, C0, C1, L;
-  byteptr d = init_modular(&p);
+  forprime_t S;
 
   dglist = Hp = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
   if (LERS)
@@ -2704,8 +2703,7 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *plambda, GEN *LERS)
   lim = stack_lim(av,2);
 
   /* make sure p large enough */
-  while (p < (ulong)(dres<<1)) NEXT_PRIME_VIADIFF(p,d);
-
+  u_forprime_init(&S, maxuu(dres << 1, 27499), ULONG_MAX);
 INIT:
   /* allways except the first time */
   if (av2) { avma = av2; lambda = next_lambda(lambda); }
@@ -2738,12 +2736,9 @@ INIT:
   lb = lg(B);
   bound = ZX_ZXY_ResBound(A, B, dB);
   if (DEBUGLEVEL>4) err_printf("bound for resultant coeffs: 2^%ld\n",bound);
-  check_theta(bound);
-
   dp = 1;
-  for(;;)
+  while ((p = u_forprime_next(&S)))
   {
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (dB) { dp = smodis(dB, p); if (!dp) continue; }
 
     a = ZX_to_Flx(A, p);
@@ -2846,6 +2841,7 @@ INIT:
       gerepileall(av2, LERS? 4: 2, &H, &q, &H0, &H1);
     }
   }
+  if (!p) pari_err_OVERFLOW("ZX_ZXY_rnfequation [ran out of primes]");
 END:
   setvarn(H, vX); if (delvar) (void)delete_var();
   if (plambda) *plambda = lambda;
@@ -2963,11 +2959,10 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   long degA, degB;
   int stable;
   GEN q, a, b, H;
-  byteptr d;
+  forprime_t S;
 
   if ((H = trivial_case(A,B)) || (H = trivial_case(B,A))) return H;
   q = H = NULL;
-  av2 = avma; lim = stack_lim(av,2);
   degA = degpol(A);
   degB = degpol(B);
   if (!bound)
@@ -2989,14 +2984,13 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     }
   }
   if (DEBUGLEVEL>4) err_printf("bound for resultant: 2^%ld\n",bound);
-  d = init_modular(&p);
-  check_theta(bound);
+  u_forprime_init(&S, 27449, get_theta_x(bound));
+  av2 = avma; lim = stack_lim(av,2);
 
   dp = 1; /* denominator mod p */
-  for(;;)
+  while ((p = u_forprime_next(&S)))
   {
     long dropa, dropb;
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (dB) { dp = smodis(dB, p); if (!dp) continue; }
 
     a = ZX_to_Flx(A, p); dropa = degA - degpol(a);
@@ -3132,21 +3126,20 @@ QXQ_inv(GEN A, GEN B)
   GEN D, cU, q, U, V;
   ulong p;
   pari_sp av2, av = avma, avlim = stack_lim(av, 1);
-  byteptr d;
+  forprime_t S;
 
   if (is_scalar_t(typ(A))) return scalarpol(ginv(A), varn(B));
   /* A a QX, B a ZX */
   if (degpol(A) < 15) return RgXQ_inv(A,B);
   A = Q_primitive_part(A, &D);
   /* A, B in Z[X] */
+  init_modular(&S);
   av2 = avma; U = NULL;
-  d = init_modular(&p);
-  for(;;)
+  while ((p = u_forprime_next(&S)))
   {
     GEN a, b, qp, Up, Vp;
     int stable;
 
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p);
     /* if p | Res(A/G, B/G), discard */
@@ -3179,6 +3172,7 @@ QXQ_inv(GEN A, GEN B)
       gerepileall(av2, 3, &q,&U,&V);
     }
   }
+  if (!p) pari_err_OVERFLOW("QXQ_inv [ran out of primes]");
   cU = ZX_content(U);
   if (!is_pm1(cU)) { U = Q_div_to_int(U, cU); D = gdiv(D, cU); }
   return gerepileupto(av, RgX_Rg_div(U, D));

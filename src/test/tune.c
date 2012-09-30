@@ -555,7 +555,7 @@ main(int argc, char **argv)
   int i, r, n = 0;
   GEN v;
   pari_init(8000000, 2);
-  (void) init_modular(&DFLT_mod);
+  DFLT_mod = 27449;
   LARGE_mod=subis(powuu(3,128),62);
 #ifdef LONG_IS_64BIT
   DFLT_hmod = 257;

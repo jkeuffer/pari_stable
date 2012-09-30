@@ -1104,7 +1104,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
   long m, n, valX, valA, vA = varn(A);
   ulong p;
   pari_sp ltop, av, avlim;
-  byteptr d;
+  forprime_t S;
 
   if (!signe(A)) { if (Anew) *Anew = pol_0(vA); return ZX_copy(B); }
   if (!signe(B)) { if (Anew) *Anew = pol_1(vA); return ZX_copy(A); }
@@ -1122,12 +1122,11 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     Ag = ZX_Z_mul(A,g);
     Bg = ZX_Z_mul(B,g);
   }
-
+  init_modular(&S);
   av = avma; avlim = stack_lim(av, 1);
-  H = NULL; d = init_modular(&p);
-  for(;;)
+  H = NULL;
+  while ((p = u_forprime_next(&S)))
   {
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (g && !umodiu(g,p)) continue;
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p); Hp = Flx_gcd(a,b, p);
@@ -1165,14 +1164,15 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
     /* H stable: check divisibility */
     if (!ZX_divides(Bg, H)) continue;
     R = ZX_divides(Ag, H);
-    if (!R) continue;
-    if (Anew) {
-      A = R;
-      if (valA != valX) A = RgX_shift(A, valA - valX);
-      *Anew = A;
-    }
-    return valX ? RgX_shift(H, valX): H;
+    if (R) break;
   }
+  if (!p) pari_err_OVERFLOW("ZX_gcd_all [ran out of primes]");
+  if (Anew) {
+    A = R;
+    if (valA != valX) A = RgX_shift(A, valA - valX);
+    *Anew = A;
+  }
+  return valX ? RgX_shift(H, valX): H;
 }
 GEN
 ZX_gcd(GEN A, GEN B) { return ZX_gcd_all(A,B,NULL); }

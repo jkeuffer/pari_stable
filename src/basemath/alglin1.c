@@ -1856,9 +1856,9 @@ ZM_inv(GEN M, GEN dM)
   pari_sp av2, av = avma, lim = stack_lim(av,1);
   GEN Hp,q,H;
   ulong p;
-  byteptr d;
   long lM = lg(M), stable = 0;
   int negate = 0;
+  forprime_t S;
 
   if (lM == 1) return cgetg(1,t_MAT);
 
@@ -1870,14 +1870,13 @@ ZM_inv(GEN M, GEN dM)
     if (signe(dM) < 0) negate = 1;
     dM = gen_1;
   }
+  init_modular(&S);
   av2 = avma;
   H = NULL;
-  d = init_modular(&p);
-  for(;;)
+  while ((p = u_forprime_next(&S)))
   {
     ulong dMp;
     GEN Mp;
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
     Mp = ZM_to_Flm(M,p);
     if (dM == gen_1)
       Hp = Flm_inv_sp(Mp, NULL, p);
@@ -1915,6 +1914,7 @@ ZM_inv(GEN M, GEN dM)
       gerepileall(av2, 2, &H, &q);
     }
   }
+  if (!p) pari_err_OVERFLOW("ZM_inv [ran out of primes]");
   if (DEBUGLEVEL>5) err_printf("ZM_inv done\n");
   if (negate)
     return gerepileupto(av, ZM_neg(H));
@@ -2282,12 +2282,11 @@ static void indexrank_all(long m, long n, long r, GEN d, GEN *prow, GEN *pcol);
 GEN
 ZM_pivots(GEN M0, long *rr)
 {
-  ulong mod_p;
-  byteptr bp;
   GEN d, dbest = NULL;
   long m, n, i, imax, rmin, rbest, zc;
   int beenthere = 0;
   pari_sp av, av0 = avma;
+  forprime_t S;
 
   rbest = n = lg(M0)-1;
   if (n == 0) { *rr = 0; return NULL; }
@@ -2296,7 +2295,7 @@ ZM_pivots(GEN M0, long *rr)
 
   m = nbrows(M0);
   rmin = (m < n-zc) ? n-m : zc;
-  bp = init_modular(&mod_p);
+  init_modular(&S);
   imax = (n < (1<<4))? 1: (n>>3); /* heuristic */
 
   for(;;)
@@ -2305,8 +2304,9 @@ ZM_pivots(GEN M0, long *rr)
     long rk;
     for (av = avma, i = 0;; avma = av, i++)
     {
-      NEXT_PRIME_VIADIFF_CHECK(mod_p, bp);
-      d = Flm_gauss_pivot(ZM_to_Flm(M0, mod_p), mod_p, rr);
+      ulong p = u_forprime_next(&S);
+      if (!p) pari_err_OVERFLOW("ZM_pivots [ran out of primes]");
+      d = Flm_gauss_pivot(ZM_to_Flm(M0, p), p, rr);
       if (*rr == rmin) goto END; /* maximal rank, return */
       if (*rr < rbest) { /* save best r so far */
         rbest = *rr;
@@ -3258,7 +3258,7 @@ ZM_det_i(GEN M, long n)
   pari_sp av = avma, av2;
   long i;
   ulong p, compp, Dp = 1;
-  byteptr d;
+  forprime_t S;
   GEN D, h, q, v, comp;
   if (n == 1) return icopy(gcoeff(M,1,1));
   if (n == 2) return ZM_det2(M);
@@ -3266,14 +3266,15 @@ ZM_det_i(GEN M, long n)
   h = RgM_Hadamard(M);
   if (!signe(h)) { avma = av; return gen_0; }
   h = sqrti(h);
-  for (q = gen_1, d = init_modular(&p); cmpii(q, h) <= 0; )
+  init_modular(&S);
+  for (q = gen_1; cmpii(q, h) <= 0; )
   {
-    av2 = avma;
-    Dp = Flm_det(ZM_to_Flm(M, p), p);
+    p = u_forprime_next(&S);
+    if (!p) pari_err_OVERFLOW("ZM_det [ran out of primes]");
+    av2 = avma; Dp = Flm_det(ZM_to_Flm(M, p), p);
     avma = av2;
     if (Dp) break;
     q = muliu(q, p);
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   if (!Dp) { avma = av; return gen_0; }
   if (n <= DIXON_THRESHOLD)
@@ -3301,7 +3302,8 @@ ZM_det_i(GEN M, long n)
   q = utoipos(p);
   while (cmpii(q, h) <= 0)
   {
-    NEXT_PRIME_VIADIFF_CHECK(p,d);
+    p = u_forprime_next(&S);
+    if (!p) pari_err_OVERFLOW("ZM_det [ran out of primes]");
     Dp = umodiu(D, p);
     if (!Dp) continue;
     av2 = avma;
