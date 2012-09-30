@@ -1087,7 +1087,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
 }
 
 static int
-cmpGsGs(GEN a, GEN b) { return (long)a - (long)b; }
+cmpGuGu(GEN a, GEN b) { return (ulong)a < (ulong)b? -1: (a == b? 0: 1); }
 
 /* p > 2 */
 static GEN
@@ -1470,7 +1470,7 @@ F2x_factcantor_i(GEN f, long flag)
   if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
-  return flag ? sort_factor(y, (void*)cmpGsGs, cmp_nodata)
+  return flag ? sort_factor(y, (void*)cmpGuGu, cmp_nodata)
               : sort_factor_pol(y, cmp_small);
 }
 GEN
@@ -1593,7 +1593,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
   if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
-  return flag ? sort_factor(y, (void*)cmpGsGs, cmp_nodata)
+  return flag ? sort_factor(y, (void*)cmpGuGu, cmp_nodata)
               : sort_factor_pol(y, cmp_small);
 }
 GEN
@@ -1707,7 +1707,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t, E);
-  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+  return flag ? sort_factor(y, (void*)&cmpGuGu, cmp_nodata)
               : sort_factor_pol(y, cmpii);
 }
 GEN
@@ -2164,7 +2164,7 @@ F2x_Berlekamp_i(GEN f, long flag)
   if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t,E);
-  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+  return flag ? sort_factor(y, (void*)&cmpGuGu, cmp_nodata)
               : sort_factor_pol(y, cmp_small);
 }
 
@@ -2237,7 +2237,7 @@ Flx_Berlekamp_i(GEN f, ulong p, long flag)
   if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t,E);
-  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+  return flag ? sort_factor(y, (void*)&cmpGuGu, cmp_nodata)
               : sort_factor_pol(y, cmp_small);
 }
 
@@ -2312,7 +2312,7 @@ FpX_Berlekamp_i(GEN f, GEN pp, long flag)
   if (flag == 2) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2(t,E);
-  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+  return flag ? sort_factor(y, (void*)&cmpGuGu, cmp_nodata)
               : sort_factor_pol(y, cmpii);
 }
 GEN
