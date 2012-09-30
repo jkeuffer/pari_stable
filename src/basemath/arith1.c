@@ -1171,34 +1171,37 @@ Z_isanypower_nosmalldiv(GEN *px)
   *px = x; return k;
 }
 
+static ulong tinyprimes[] = {
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
+  73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
+  157, 163, 167, 173, 179, 181, 191, 193, 197, 199
+};
+
 /* disregard the sign of x, caller will take care of x < 0 */
 static long
 Z_isanypower_aux(GEN x, GEN *pty)
 {
   long ex, v, i, j, l, k;
   GEN y, fa, P, E, Pe, Ee;
-  byteptr d = diffptr;
-  ulong mask, p = 0, e = 0;
+  ulong mask, e = 0;
 
   if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
 
-  x = absi(x); /* Z_lvalrem_stop assigns to x */
-  k = 1;
+  k = l = 1;
   P = cgetg(26 + 1, t_VECSMALL);
   E = cgetg(26 + 1, t_VECSMALL);
+  x = absi(x); /* Z_lvalrem_stop assigns to x */
   /* trial division */
-  for(l = 1;;)
+  for(i = 0; i < 26; i++)
   {
+    ulong p = tinyprimes[i];
     int stop;
-    NEXT_PRIME_VIADIFF(p,d);
-    if (p > 102) break;
-
     v = Z_lvalrem_stop(x, p, &stop);
     if (v)
     {
       P[l] = p;
       E[l] = v; l++;
-      e = cgcd(e, v); if (e == 1) goto END;
+      e = ugcd(e, v); if (e == 1) goto END;
     }
     if (stop) {
       if (equali1(x)) k = e;
@@ -1239,7 +1242,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
     Ee = gel(fa,2);
     for (i = 1; i < le; i++)
     {
-      p = Pe[i];
+      ulong p = Pe[i];
       for (j = 0; j < Ee[i]; j++)
       {
         if (!is_kth_power(x, p, &y)) break;
@@ -1323,15 +1326,14 @@ long
 isprimepower(GEN n, GEN *pt)
 {
   pari_sp av = avma;
-  long v;
-  ulong p;
-  byteptr d;
+  long i, v;
 
   if (typ(n) != t_INT) pari_err_TYPE("isprimepower", n);
   if (signe(n) <= 0) return 0;
 
   if (lgefint(n) == 3)
   {
+    ulong p;
     v = uisprimepower(n[2], &p);
     if (v)
     {
@@ -1340,12 +1342,9 @@ isprimepower(GEN n, GEN *pt)
     }
     return 0;
   }
-  p = 0;
-  d = diffptr;
-  for (;;)
+  for (i = 0; i < 26; i++)
   {
-    NEXT_PRIME_VIADIFF(p, d);
-    if (p >= 103) break;
+    ulong p = tinyprimes[i];
     v = Z_lvalrem(n, p, &n);
     if (v)
     {
@@ -1367,6 +1366,7 @@ uisprimepower(ulong n, ulong *pp)
 { /* We must have CUTOFF^11 >= ULONG_MAX and CUTOFF^3 < ULONG_MAX.
    * Tests suggest that 200-300 is the best range for 64-bit platforms. */
   const ulong CUTOFF = 200UL;
+  const long TINYCUTOFF = 46;  /* tinyprimes[45] = 199 */
   const ulong CUTOFF3 = CUTOFF*CUTOFF*CUTOFF;
 #ifdef LONG_IS_64BIT
   /* primes preceeding the appropriate root of ULONG_MAX. */
@@ -1382,9 +1382,8 @@ uisprimepower(ulong n, ulong *pp)
   const ulong ROOT5 = 83;
   const ulong ROOT4 = 251;
 #endif
-  ulong p, mask;
-  byteptr d;
-  long v;
+  ulong mask;
+  long v, i;
   int e;
   if (n < 2) return 0;
   if (!odd(n)) {
@@ -1392,13 +1391,9 @@ uisprimepower(ulong n, ulong *pp)
     *pp = 2; return vals(n);
   }
   if (n < 8) { *pp = n; return 1; } /* 3,5,7 */
-
-  p = 2;
-  d = diffptr + 1;
-  for (;;)
+  for (i = 1/*skip p=2*/; i < TINYCUTOFF; i++)
   {
-    NEXT_PRIME_VIADIFF(p, d);
-    if (p >= CUTOFF) break;
+    ulong p = tinyprimes[i];
     if (n % p == 0)
     {
       v = u_lvalrem(n, p, &n);
