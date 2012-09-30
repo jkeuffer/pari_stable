@@ -340,7 +340,7 @@ CG 95- isprimepower() function
 BA 98- GP function digits
    99- GP default 'sopath' [ rewritten from initial patch by GTo ]
 LGr100- allow polylog(n, t_SER) around a != 0
-BA 101- PARI functions ZX_shifti, ZX_remi2n
+BA 101- PARI functions ZX_shifti, ZX_remi2n, ZXV_remi2n
    102- PARI functions cxexp1, mpsincos1
 BA 103- GP function ellfromj
    103- GP function forcomposite
@@ -353,6 +353,8 @@ BA 107- PARI functions RgX_splitting(), Flx_splitting()
    109- PARI function stack_sprintf()
    110- PARI function RgX_is_QX()
 BA 111- PARI functions retmkmat2,retmkcol2,mkmat2,mkcol2,mkcols,mkcol2s et al.
+BA 112- PARI functions ZXV_dotproduct(), FlxV_red()
+BA 113- PARI function gen_ZpX_Newton()
 
   Removed
     1- dropped DOS support

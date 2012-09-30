@@ -655,3 +655,18 @@ ZXV_remi2n(GEN y, long N)
   for(i=1; i<l; i++) gel(z,i) = ZX_remi2n(gel(y,i), N);
   return z;
 }
+GEN
+ZXV_dotproduct(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  long i, lx = lg(x);
+  GEN c;
+  if (lx == 1) return pol_0(varn(x));
+  c = ZX_mul(gel(x,1), gel(y,1));
+  for (i = 2; i < lx; i++)
+  {
+    GEN t = ZX_mul(gel(x,i), gel(y,i));
+    if (signe(t)) c = ZX_add(c, t);
+  }
+  return gerepileupto(av, c);
+}
