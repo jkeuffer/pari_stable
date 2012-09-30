@@ -1363,7 +1363,7 @@ InitPrimesQuad(GEN bnr, ulong N0, LISTray *R)
   while ( (p = u_forprime_next(&T)) )
   {
     prime[2] = p;
-    switch (krois(dk, p))
+    switch (kroiu(dk, p))
     {
     case -1: /* inert */
       if (condZ % p == 0) deg0(R,p); else deg2(R,p);
@@ -2900,7 +2900,7 @@ init_pq(GEN D, struct gpq_data *T)
         pari_warn(warner,"possibly suboptimal (p,q) for D = %Ps", D);
       break;
     }
-    if (krois(D, q) < 0) continue; /* inert */
+    if (kroiu(D, q) < 0) continue; /* inert */
     Q = redimag(primeform_u(D, q));
     if (is_pm1(gel(Q,1))) continue; /* Q | q is principal */
 

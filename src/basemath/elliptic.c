@@ -2854,7 +2854,7 @@ anellsmall(GEN e, long n0)
     if (an[p] != LONG_MAX) continue; /* p not prime */
 
     if (!umodiu(D,p)) /* bad reduction, p | D */
-      switch (tab[p&3] * krois(c6,p)) /* (-c6/p) */
+      switch (tab[p&3] * kroiu(c6,p)) /* (-c6/p) */
       {
         case -1: /* non deployee */
           for (m=p; m<=n; m+=p)

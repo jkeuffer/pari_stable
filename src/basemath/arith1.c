@@ -1571,6 +1571,19 @@ krois(GEN x, long y)
   }
   return krouu_s(umodiu(x, yu), yu, s);
 }
+/* assume y != 0 */
+long
+kroiu(GEN x, ulong y)
+{
+  long s = 1, r = vals(y);
+  if (r)
+  {
+    if (!mpodd(x)) return 0;
+    if (odd(r) && gome(x)) s = -s;
+    y >>= r;
+  }
+  return krouu_s(umodiu(x, y), y, s);
+}
 
 long
 krosi(long x, GEN y)
@@ -3991,7 +4004,7 @@ classno(GEN x)
   nforms = 0;
   while ( (p = u_forprime_next(&S)) )
   {
-    long d, k = krois(D,p);
+    long d, k = kroiu(D,p);
     pari_sp av3;
     if (!k) continue;
     if (k > 0)
@@ -4095,7 +4108,7 @@ classno2(GEN x)
   {
     for (i=1; i<=n; i++)
     {
-      k = krois(D,i); if (!k) continue;
+      k = kroiu(D,i); if (!k) continue;
       p2 = mulir(sqru(i), p4);
       p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
       p5 = addrr(divru(mulrr(p1,p5),i), eint1(p2,prec));
@@ -4108,7 +4121,7 @@ classno2(GEN x)
     p1 = gdiv(p1,Pi);
     for (i=1; i<=n; i++)
     {
-      k = krois(D,i); if (!k) continue;
+      k = kroiu(D,i); if (!k) continue;
       p2 = mulir(sqru(i), p4);
       p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
       p5 = addrr(p5, divrr(divru(p1,i), mpexp(p2)));

@@ -311,7 +311,7 @@ check_prime_quad(GRHcheck_t *S, long np, GEN D)
     GRHprime_t *pr = S->primes + i;
     NEXT_PRIME_VIADIFF(p, delta);
     pr->logp = log(p);
-    s = krois(D,p);
+    s = kroiu(D,p);
     pr->dec = (GEN)s;
   }
   S->nprimes = np;
@@ -368,7 +368,7 @@ nthidealquad(GEN D, long n)
   while (n > 0)
   {
     NEXT_PRIME_VIADIFF(p, delta);
-    if (!is_bad(D, (ulong)p) && krois(D, p) >= 0) n--;
+    if (!is_bad(D, (ulong)p) && kroiu(D, p) >= 0) n--;
   }
   return p;
 }

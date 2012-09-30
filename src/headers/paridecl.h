@@ -961,6 +961,7 @@ long    hilbertii(GEN x, GEN y, GEN p);
 long    ispower(GEN x, GEN k, GEN *pty);
 long    isprimepower(GEN x, GEN *pty);
 long    krois(GEN x, long y);
+long    kroiu(GEN x, ulong y);
 long    kronecker(GEN x, GEN y);
 long    krosi(long s, GEN x);
 long    kross(long x, long y);
