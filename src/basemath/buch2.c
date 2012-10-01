@@ -513,15 +513,10 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P)
   GEN index;
   long i, p;
   if (S->nprimes >= np) return;
-  if (S->nprimes)
-    p = uprime(S->nprimes);
-  else
-    p = 0;
+  p = S->nprimes? last_prime(S): 0;
   if (S->maxprimes <= np)
   {
-    do
-      S->maxprimes *= 2;
-    while (S->maxprimes <= np);
+    do S->maxprimes *= 2; while (S->maxprimes <= np);
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
@@ -533,6 +528,7 @@ check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P)
     GRHprime_t *pr = S->primes + i;
     GEN dec, fs, ns;
     NEXT_PRIME_VIADIFF_CHECK(p, delta);
+    pr->p = p;
     pr->logp = log(p);
     if (umodiu(index, p))
     { /* p does not divide index */
@@ -573,14 +569,13 @@ compute_invres(GRHcheck_t *S)
   pari_sp av = avma;
   GEN invres = real_1(DEFAULTPREC);
   GRHprime_t *pr = S->primes;
-  byteptr delta = diffptr;
-  long i = S->nprimes, p = 0, LIMC = uprime(i+1) - 1;
+  long i = S->nprimes, LIMC = last_prime(S)+diffptr[i]-1; /* nextprime(p+1)-1*/
   double llimc = log(LIMC);
-  for (i = S->nprimes; i > 0; pr++, i--)
+  for (; i > 0; pr++, i--)
   {
     GEN dec, a = NULL, b = NULL, fs, ns;
     long j, k, limp = llimc/pr->logp;
-    NEXT_PRIME_VIADIFF(p, delta);
+    ulong p = pr->p;
     dec = pr->dec;
     fs = gel(dec, 1); ns = gel(dec, 2);
     k = lg(fs);
@@ -615,16 +610,17 @@ static long
 nthideal(GRHcheck_t *S, GEN nf, long n)
 {
   pari_sp av = avma;
-  byteptr delta = diffptr + 1;
   GEN P = nf_get_pol(nf), vecN = const_vecsmall(n, LONG_MAX);
-  long i, j, k, l, p = 2, res, N = poldegree(P, -1);
+  long i, j, k, l, res, N = poldegree(P, -1);
   for (i = 0; ; i++)
   {
     GRHprime_t *pr;
     GEN ns, fs;
+    ulong p;
     check_prime_dec(S, i+1, nf, P);
     pr = S->primes + i;
     fs = gel(pr->dec, 1);
+    p = pr->p;
     if (fs[1] == N) goto INERT;
     ns = gel(pr->dec, 2);
     j = lg(fs);
@@ -641,7 +637,6 @@ nthideal(GRHcheck_t *S, GEN nf, long n)
       while (l <= k) vecN[l++] = sNp;
     }
 INERT:
-    NEXT_PRIME_VIADIFF(p, delta);
     if (p > vecN[n]) break;
   }
   res = vecN[n];
@@ -734,7 +729,7 @@ GRHchk(GEN nf, GEN P, GRHcheck_t *S, long LIMC)
   ulong p;
   check_prime_dec(S, np, nf, P);
   p = 0; delta = diffptr;
-  for (i = 0; i <= np; i++)
+  for (i = 0; i < np; i++)
   {
     GRHprime_t *pr = S->primes+i;
     GEN dec = pr->dec, fs = gel(dec, 1);

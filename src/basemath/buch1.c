@@ -285,6 +285,12 @@ clearhash(long **hash)
   }
 }
 
+/* last prime stored */
+ulong
+last_prime(GRHcheck_t *S) { return (S->primes + S->nprimes-1)->p; }
+
+/* cache data for all primes up to the np-th prime.
+ * Assume that only primes < 436273291 are needed [first gap in diffptr]*/
 static void
 check_prime_quad(GRHcheck_t *S, long np, GEN D)
 {
@@ -293,23 +299,19 @@ check_prime_quad(GRHcheck_t *S, long np, GEN D)
   pari_sp av = avma;
 
   if (S->nprimes >= np) return;
-  if (S->nprimes)
-    p = uprime(S->nprimes);
-  else
-    p = 0;
+  p = S->nprimes? last_prime(S): 0;
   if (S->maxprimes <= np)
   {
-    do
-      S->maxprimes *= 2;
-    while (S->maxprimes <= np);
+    do S->maxprimes *= 2; while (S->maxprimes <= np);
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
-  for (i = S->nprimes, delta = diffptr + i; i <= np; i++)
+  for (i = S->nprimes, delta = diffptr + i; i < np; i++)
   {
     long s;
     GRHprime_t *pr = S->primes + i;
     NEXT_PRIME_VIADIFF(p, delta);
+    pr->p = p;
     pr->logp = log(p);
     s = kroiu(D,p);
     pr->dec = (GEN)s;
@@ -322,17 +324,16 @@ static GEN
 compute_invresquad(GRHcheck_t *S)
 {
   pari_sp av = avma;
-  GEN invres = dbltor(1.);
+  GEN invres = real_1(DEFAULTPREC);
   GRHprime_t *pr = S->primes;
-  byteptr delta = diffptr;
-  long i = S->nprimes, p = 0, LIMC = uprime(i+1) - 1;
+  long i = S->nprimes, LIMC = last_prime(S)+diffptr[i]-1; /* nextprime(p+1)-1*/
   double limp = log(LIMC) / 2;
-  for (i = S->nprimes; i > 0; pr++, i--)
+  for (; i > 0; pr++, i--)
   {
     long s = (long)pr->dec;
-    NEXT_PRIME_VIADIFF(p, delta);
     if (s)
     {
+      ulong p = pr->p;
       if (s>0 || pr->logp <= limp)
         /* Both p and P contribute */
         invres = mulur(p - s, divru(invres, p));
@@ -378,16 +379,13 @@ quadGRHchk(GEN D, GRHcheck_t *S, long LIMC)
 {
   long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
-  byteptr delta;
-  ulong p;
   check_prime_quad(S, np, D);
-  p = 0; delta = diffptr;
-  for (i = 0; i <= np; i++)
+  for (i = 0; i < np; i++)
   {
     GRHprime_t *pr = S->primes+i;
+    ulong p = pr->p;
     long M;
     double logNP, q, A, B;
-    NEXT_PRIME_VIADIFF(p, delta);
     if ((long)pr->dec < 0)
     {
       logNP = 2 * pr->logp;
@@ -415,9 +413,8 @@ static void
 FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
 {
   GEN D = B->QFR->D;
-  long i, p;
+  long i;
   pari_sp av;
-  byteptr d = diffptr;
   GRHprime_t *pr;
 
   check_prime_quad(S, uprimepi((ulong)C2), D);
@@ -426,11 +423,10 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
   B->FB    = cgetg(C2+1, t_VECSMALL);
   av = avma;
   B->KC = 0; i = 0;
-  maxprime_check((ulong)C2);
   B->badprim = gen_1;
-  for (p = 0;; pr++) /* p <= C2 */
+  for (;; pr++) /* p <= C2 */
   {
-    NEXT_PRIME_VIADIFF(p, d);
+    ulong p = pr->p;
     if (!B->KC && p > C1) B->KC = i;
     if (p > C2) break;
     switch ((long)pr->dec)
