@@ -610,3 +610,33 @@ ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
     if (mask == 1) return gerepileupto(av, a);
   }
 }
+
+/***********************************************************************/
+/**                                                                   **/
+/**                 Generic quadratic hensel lift over Zp[X]          **/
+/**                                                                   **/
+/***********************************************************************/
+
+GEN
+gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
+                      GEN eval(void *E, GEN f, GEN q),
+                      GEN invd(void *E, GEN V, GEN v, long M))
+{
+  pari_sp ltop = avma, av, st_lim;
+  long N = 1, N2, M;
+  av = avma; st_lim = stack_lim(av, 1);
+  long mask = quadratic_prec_mask(n);
+  while (mask > 1)
+  {
+    GEN q, q2, v, V;
+    N2 = N; N <<= 1; M = N-N2;
+    if (mask&1UL) N--;
+    mask >>= 1; q = powiu(p,N); q2 = powiu(p, N2);
+    v = eval(E, x, q);
+    V = ZX_Z_divexact(gel(v,1), q2);
+    x = FpX_add(x, ZX_Z_mul(invd(E, V, v, M), q2), q);
+    if (low_stack(st_lim, stack_lim(av, 1)))
+      x = gerepileupto(av, x);
+  }
+  return gerepileupto(ltop, x);
+}
