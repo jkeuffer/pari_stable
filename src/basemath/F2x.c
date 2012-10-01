@@ -121,7 +121,7 @@ Flx_to_F2x(GEN x)
     {
       j=0; k++; z[k]=0;
     }
-    if (x[i])
+    if (x[i]&1UL)
       z[k]|=1UL<<j;
   }
   return F2x_renormalize(z,l);
