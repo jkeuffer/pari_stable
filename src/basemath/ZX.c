@@ -256,15 +256,6 @@ ZX_remi2n(GEN y, long n)
 }
 
 GEN
-ZXV_Z_mul(GEN y, GEN x)
-{
-  long i, l;
-  GEN z = cgetg_copy(y, &l);
-  for(i=1; i<l; i++) gel(z,i) = ZX_Z_mul(gel(y,i), x);
-  return z;
-}
-
-GEN
 zx_to_ZX(GEN z)
 {
   long i, l = lg(z);
@@ -292,16 +283,6 @@ ZX_equal(GEN V, GEN W)
   if (lg(W) != l || V[1] != W[1]) return 0;
   for (i = 2; i < l; i++)
     if (!equalii(gel(V,i), gel(W,i))) return 0;
-  return 1;
-}
-
-int
-ZXV_equal(GEN V, GEN W)
-{
-  long l = lg(V);
-  if (l!=lg(W)) return 0;
-  while (--l > 0)
-    if (!ZX_equal(gel(V,l), gel(W,l))) return 0;
   return 1;
 }
 
@@ -639,4 +620,29 @@ ZX_mod_Xn_1(GEN T, ulong n)
     if (++j == l) j = 2;
   }
   return normalizepol_lg(S, l);
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                                ZXV                              */
+/*                                                                 */
+/*******************************************************************/
+
+int
+ZXV_equal(GEN V, GEN W)
+{
+  long l = lg(V);
+  if (l!=lg(W)) return 0;
+  while (--l > 0)
+    if (!ZX_equal(gel(V,l), gel(W,l))) return 0;
+  return 1;
+}
+
+GEN
+ZXV_Z_mul(GEN y, GEN x)
+{
+  long i, l;
+  GEN z = cgetg_copy(y, &l);
+  for(i=1; i<l; i++) gel(z,i) = ZX_Z_mul(gel(y,i), x);
+  return z;
 }
