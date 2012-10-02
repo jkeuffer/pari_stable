@@ -1029,31 +1029,27 @@ Flx_invBarrett(GEN T, ulong p)
   return gerepileuptoleaf(ltop, r);
 }
 
-/* Compute x mod T where lg(x)<=2*lg(T)-2
- * and mg is the Barrett inverse of T.
- */
-GEN
-Flx_rem_Barrett(GEN x, GEN mg, GEN T, ulong p)
+/* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
+ * and mg is the Barrett inverse of T. */
+static GEN
+Flx_rem_Barrettspec(GEN x, long l, GEN mg, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;
-  long l  = lgpol(x);
   long lt = degpol(T); /*We discard the leading term*/
   long ld, lm, lT, lmg;
-  if (l<=lt)
-    return Flx_copy(x);
   (void)new_chunk(lt+2);
   ld = l-lt;
   lm = minss(ld, lgpol(mg));
   lT  = Flx_lgrenormalizespec(T+2,lt);
   lmg = Flx_lgrenormalizespec(mg+2,lm);
-  z = Flx_recipspec(x+2+lt,ld,ld);             /* z = rec(x)      lz<=ld*/
+  z = Flx_recipspec(x+lt,ld,ld);               /* z = rec(x)      lz<=ld*/
   z = Flx_mulspec(z+2,mg+2,p,lgpol(z),lmg);    /* z = rec(x) * mg lz<=ld+lm*/
   z = Flx_recipspec(z+2,minss(ld,lgpol(z)),ld);/* z = rec (rec(x) * mg) lz<=ld*/
   z = Flx_mulspec(z+2,T+2,p,lgpol(z),lT);      /* z *= pol        lz<=ld+lt*/
   avma=ltop;
-  z = Flx_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z       lz<=lt */
-  z[1]=x[1];
+  z = Flx_subspec(x,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z       lz<=lt */
+  z[1] = x[1];
   return z;
 }
 
@@ -1126,11 +1122,41 @@ Flx_rem_basecase(GEN x, GEN y, ulong p)
 }
 
 GEN
+Flx_rem_Barrett(GEN x, GEN mg, GEN T, ulong p)
+{
+  pari_sp av;
+  long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
+  GEN r;
+  if (l <= lt)
+    return Flx_copy(x);
+  if (lt <= 1)
+    return Flx_rem_basecase(x,T,p);
+  if (l <= lm)
+  {
+    r = Flx_rem_Barrettspec(x+2,l,mg,T,p);
+    r[1] = x[1]; return r;
+  }
+  r = Flx_copy(x); av = avma;
+  while (l>lt)
+  {
+    long i, lz, lu = minss(l,lm);
+    GEN rp = r+2+l-lu;
+    GEN z = Flx_rem_Barrettspec(rp,lu,mg,T,p);
+    lz = lgpol(z);
+    for(i=0; i<lz; i++)
+      gel(rp,i) = gel(z,2+i);
+    l -= lu-lz;
+  }
+  r[1] = x[1]; avma = av;
+  return Flx_renormalize(r, l+2);
+}
+
+GEN
 Flx_rem(GEN x, GEN y, ulong p)
 {
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return Flx_copy(x);
-  if (d+3 < Flx_REM_BARRETT_LIMIT || d>dy-2)
+  if (d+3 < Flx_REM_BARRETT_LIMIT)
     return Flx_rem_basecase(x,y,p);
   else
   {
