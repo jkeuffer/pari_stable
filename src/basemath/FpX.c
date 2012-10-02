@@ -1201,18 +1201,15 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
   }
   else
   {
-    long lx = lgpol(x), lT = lgpol(T);
+    long lx, lT = lgpol(T);
     D.T = T;
     D.p = p;
     if (s < 0) x = FpXQ_inv(x,T,p);
+    lx = lgpol(x);
     if (lT+2>FpX_POW_BARRETT_LIMIT)
     {
       D.mg  = FpX_invBarrett(T,p);
-      if (lx>=lT)
-      {
-        if (lx<2*lT-2) x = FpX_rem_Barrett(x,D.mg,T,p);
-        else x = FpX_rem(x,T,p);
-      }
+      if (lx>=lT) x = FpX_rem_Barrett(x,D.mg,T,p);
       y = gen_pow(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
     }
     else

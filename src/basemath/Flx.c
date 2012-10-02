@@ -1993,20 +1993,25 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   pari_sp av = avma;
   struct _Flxq D;
   GEN y;
-  long s = signe(n);
+  long s = signe(n), lx, lT = lg(T);
   if (!s) return pol1_Flx(T[1]);
   if (s < 0)
     x = Flxq_inv(x,T,p);
   if (is_pm1(n)) return s < 0 ? x : Flx_copy(x);
   D.T = T;
   D.p = p;
-  if (lg(T) >= Flx_POW_BARRETT_LIMIT)
+  lx = lg(x);
+  if (lT >= Flx_POW_BARRETT_LIMIT)
   {
     D.mg  = Flx_invBarrett(T,p);
+    if (lx >= lT) x = Flx_rem_Barrett(x,D.mg,T,p);
     y = gen_pow(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
   }
   else
+  {
+    if (lx >= lT) x = Flx_rem(x,T,p);
     y = gen_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
+  }
   return gerepileuptoleaf(av, y);
 }
 
