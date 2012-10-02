@@ -976,27 +976,50 @@ FpX_invBarrett(GEN T, GEN p)
   return gerepileupto(ltop, r);
 }
 
-/* Compute x mod T where degpol(x)<=2*(degpol(T)-1) i.e. lgpol(x)<2*lgpol(T)-2
+/* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
  * and mg is the Barrett inverse of T. */
 static GEN
-FpX_rem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p)
+FpX_rem_Barrettspec(GEN x, long l, GEN mg, GEN T, GEN p)
 {
   GEN z;
-  long l  = lgpol(x);
   long lt = degpol(T); /*We discard the leading term*/
   long ld, lm, lT, lmg;
-  if (l<=lt) return ZX_copy(x);
   ld = l-lt;
   lm = minss(ld, lgpol(mg));
   lT  = ZX_lgrenormalizespec(T+2,lt);
   lmg = ZX_lgrenormalizespec(mg+2,lm);
-  z = FpX_recipspec(x+2+lt,ld,ld);              /* z = rec(x)     lz<=ld*/
+  z = FpX_recipspec(x+lt,ld,ld);              /* z = rec(x)     lz<=ld*/
   z = FpX_mulspec(z+2,mg+2,p,lgpol(z),lmg);    /* z = rec(x) * mg lz<=ld+lm*/
   z = FpX_recipspec(z+2,minss(ld,lgpol(z)),ld);/* z = rec (rec(x) * mg) lz<=ld*/
   z = FpX_mulspec(z+2,T+2,p,lgpol(z),lT);      /* z *= pol        lz<=ld+lt*/
-  z = FpX_subspec(x+2,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z   lz<=lt */
-  z[1] = x[1]; return z;
+  z = FpX_subspec(x,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z   lz<=lt */
+  return z;
 }
+
+static GEN
+FpX_rem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p)
+{
+  long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
+  GEN r;
+  if (l <= lt)
+    return ZX_copy(x);
+  if (lt <= 1)
+    return FpX_divrem(x,T,p,ONLY_REM);
+  r = l>lm ? shallowcopy(x): x;
+  while (l>lm)
+  {
+    GEN z = FpX_rem_Barrettspec(r+2+l-lm,lm,mg,T,p);
+    long i, lz = lgpol(z);
+    for(i=0; i<lz; i++) gel(r+2+l-lm,i) = gel(z,2+i);
+    l = l-lm+lz;
+  }
+  if (l > lt)
+    r = FpX_rem_Barrettspec(r+2,l,mg,T,p);
+  else
+    { setlg(r, l+2); r = ZX_copy(r); }
+  r[1] = x[1]; return r;
+}
+
 GEN
 FpX_rem_Barrett(GEN x, GEN mg, GEN T, GEN p)
 {
@@ -1009,7 +1032,7 @@ FpX_rem(GEN x, GEN y, GEN p)
 {
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return FpX_red(x,p);
-  if (d+3 < FpX_REM_BARRETT_LIMIT || d>dy-2)
+  if (d+3 < FpX_REM_BARRETT_LIMIT)
     return FpX_divrem(x,y,p,ONLY_REM);
   else
   {
