@@ -1330,6 +1330,8 @@ GEN gen_powers(GEN x, long l, int use_sqr, void *E, GEN (*sqr)(void*,GEN),
                                       GEN (*mul)(void*,GEN,GEN), GEN (*one)(void*));
 GEN gen_powu(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
                                       GEN (*mul)(void*,GEN,GEN));
+GEN gen_powu_i(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
+                                     GEN (*mul)(void*,GEN,GEN));
 
 /* bibli1.c */
 
