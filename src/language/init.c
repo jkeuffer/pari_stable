@@ -1506,12 +1506,9 @@ gcopy_avma(GEN x, pari_sp *AVMA)
     case t_INT:
       *AVMA = (pari_sp)icopy_avma(x, *AVMA);
       return (GEN)*AVMA;
-    case t_REAL:
-    case t_STR:
-    case t_VECSMALL:
-      y = cgetg_copy_avma(x, &lx, AVMA);
-      for (i=1; i<lx; i++) y[i] = x[i];
-      break;
+    case t_REAL: case t_STR: case t_VECSMALL:
+      *AVMA = (pari_sp)leafcopy_avma(x, *AVMA);
+      return (GEN)*AVMA;
 
     /* one more special case */
     case t_LIST:
@@ -1540,14 +1537,9 @@ gcopy_av0(GEN x, pari_sp *AVMA)
       if (!signe(x)) return NULL; /* special marker */
       *AVMA = (pari_sp)icopy_avma(x, *AVMA);
       return (GEN)*AVMA;
-    case t_REAL:
-    case t_STR:
-    case t_VECSMALL:
-    /* one more special case */
-    case t_LIST:
-      y = cgetg_copy_avma(x, &lx, AVMA);
-      for (i=1; i<lx; i++) y[i] = x[i];
-      break;
+    case t_REAL: case t_STR: case t_VECSMALL: case t_LIST:
+      *AVMA = (pari_sp)leafcopy_avma(x, *AVMA);
+      return (GEN)*AVMA;
     default:
       y = cgetg_copy_avma(x, &lx, AVMA);
       if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
@@ -1581,12 +1573,9 @@ gcopy_av0_canon(GEN x, pari_sp *AVMA)
       if (!signe(x)) return NULL; /* special marker */
       *AVMA = (pari_sp)icopy_avma_canon(x, *AVMA);
       return (GEN)*AVMA;
-    case t_REAL:
-    case t_STR:
-    case t_VECSMALL:
-      y = cgetg_copy_avma(x, &lx, AVMA);
-      for (i=1; i<lx; i++) y[i] = x[i];
-      break;
+    case t_REAL: case t_STR: case t_VECSMALL:
+      *AVMA = (pari_sp)leafcopy_avma(x, *AVMA);
+      return (GEN)*AVMA;
 
     /* one more special case */
     case t_LIST:

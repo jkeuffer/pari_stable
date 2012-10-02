@@ -964,6 +964,16 @@ icopy_avma(GEN x, pari_sp av)
   q[0] = evaltyp(t_INT)|evallg(lq);
   return q;
 }
+/* copy leaf x as if we had avma = av */
+INLINE GEN
+leafcopy_avma(GEN x, pari_sp av)
+{
+  long lx = lg(x);
+  GEN q = ((GEN)av) - lx;
+  while (--lx > 0) q[lx] = x[lx];
+  q[0] = x[0] & (~CLONEBIT);
+  return q;
+}
 INLINE GEN
 gerepileuptoleaf(pari_sp av, GEN x)
 {
@@ -1004,8 +1014,22 @@ gerepileupto(pari_sp av, GEN x)
 INLINE GEN
 gerepilecopy(pari_sp av, GEN x)
 {
-  GENbin *p = copy_bin(x);
-  avma = av; return bin_copy(p);
+  if (is_recursive_t(typ(x)))
+  {
+    GENbin *p = copy_bin(x);
+    avma = av; return bin_copy(p);
+  }
+  else
+  {
+    avma = av;
+    if (x < (GEN)av) {
+      if (x < (GEN)bot) new_chunk(lg(x));
+      x = leafcopy_avma(x, av);
+      avma = (pari_sp)x;
+    } else
+      x = leafcopy(x);
+    return x;
+  }
 }
 
 /* Takes an array of pointers to GENs, of length n. Copies all

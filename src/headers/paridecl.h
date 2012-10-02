@@ -3070,6 +3070,7 @@ INLINE long   itos_or_0(GEN x);
 INLINE ulong  itou(GEN x);
 INLINE ulong  itou_or_0(GEN x);
 INLINE GEN    leafcopy(GEN x);
+INLINE GEN    leafcopy_avma(GEN x, pari_sp av);
 INLINE double maxdd(double x, double y);
 INLINE long   maxss(long x, long y);
 INLINE long   maxuu(ulong x, ulong y);

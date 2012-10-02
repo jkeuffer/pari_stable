@@ -1813,6 +1813,12 @@ This function also works on recursive types, copying them as if they were leaves
 i.e.~making a shallow copy in that case: the components of the copy point to the
 same data as the component of the source; see also \kbd{shallowcopy}.
 
+\fun{GEN}{leafcopy_avma}{GEN x, pari_sp av} analogous to \kbd{gcopy\_avma}
+but simpler: assume $x$ is a leaf and return a copy allocated as if
+initially we had \kbd{avma} equal to \kbd{av}. There is no need to pass a
+pointer and update the value of the second argument: the new (fictitious)
+\kbd{avma} is just the return value (typecast to \kbd{pari\_sp}).
+
 \subsec{Conversions}
 
 \fun{GEN}{itor}{GEN x, long prec} converts the \typ{INT}~\kbd{x} to a

@@ -227,6 +227,7 @@ HC 78- reimplement incgam()
    84- modified "Hit Return to Continue" message so that it becomes a comment
        when copy-pasted
    85- rnf_fix_pol() takes an extra argument, the calling function's name
+   86- fast gerepilecopy() for leaves
 
   Added
     1- mathnf for matrices over K[X] [#41]
