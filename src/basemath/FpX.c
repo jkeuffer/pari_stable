@@ -1253,8 +1253,10 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   FpX_muldata D;
   int use_sqr = (degpol(x)<<1)>=degpol(T);
   if (l>2 && lgefint(p) == 3) {
+    pari_sp av = avma;
     long pp = p[2];
-    return FlxV_to_ZXV(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
+    GEN z = FlxV_to_ZXV(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
+    return gerepileupto(av, z);
   }
   D.T = T; D.p = p;
   if (l>2 && lg(T)>FpX_POW_BARRETT_LIMIT)
@@ -1283,7 +1285,16 @@ GEN
 FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
 {
   FpX_muldata D;
-  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  int use_sqr;
+  if (lgefint(p) == 3)
+  {
+    pari_sp av = avma;
+    long pp = p[2];
+    GEN Qp = ZX_to_Flx(Q, pp), Tp = ZX_to_Flx(T,pp);
+    GEN z = Flx_to_ZX(Flx_Flxq_eval(Qp, ZX_to_Flx(x, pp), Tp, pp));
+    return gerepileupto(av, z);
+  }
+  use_sqr = (degpol(x)<<1) >= degpol(T);
   D.T=T; D.p=p;
   return gen_RgX_bkeval(Q,x,use_sqr,(void*)&D,&FpXQ_algebra);
 }
