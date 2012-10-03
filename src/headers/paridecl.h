@@ -663,6 +663,7 @@ long    ZX_val(GEN x);
 long    ZX_valrem(GEN x, GEN *Z);
 GEN     ZXV_Z_mul(GEN y, GEN x);
 int     ZXV_equal(GEN V, GEN W);
+GEN     ZXV_remi2n(GEN x, long n);
 long    ZXY_max_lg(GEN x);
 GEN     scalar_ZX(GEN x, long v);
 GEN     scalar_ZX_shallow(GEN x, long v);

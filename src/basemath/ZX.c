@@ -646,3 +646,12 @@ ZXV_Z_mul(GEN y, GEN x)
   for(i=1; i<l; i++) gel(z,i) = ZX_Z_mul(gel(y,i), x);
   return z;
 }
+
+GEN
+ZXV_remi2n(GEN y, long N)
+{
+  long i, l;
+  GEN z = cgetg_copy(y, &l);
+  for(i=1; i<l; i++) gel(z,i) = ZX_remi2n(gel(y,i), N);
+  return z;
+}
