@@ -5953,21 +5953,16 @@ algorithm. Use \tet{image} instead.
 
 \section{Integral, rational and generic polynomial arithmetic}
 
-\subsec{\kbd{ZX}, \kbd{QX}}
-
-\fun{void}{RgX_check_QX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
-raise an error if it is not a \kbd{QX} ($s$ should point to the name of the
-caller).
+\subsec{\kbd{ZX}}
 
 \fun{void}{RgX_check_ZX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
 raise an error if it is not a \kbd{ZX} ($s$ should point to the name of the
 caller).
 
-\fun{void}{RgX_check_ZXY}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
-raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
-($s$ should point to the name of the caller).
-
 \fun{GEN}{ZX_copy}{GEN x,GEN p} returns a copy of \kbd{x}.
+
+\fun{long}{ZX_max_lg}{GEN x} returns the effective length of the longest
+component in $x$.
 
 \fun{GEN}{scalar_ZX}{GEN x, long v} returns the constant \kbd{ZX} in variable
 $v$ equal to the \typ{INT} $x$.
@@ -5984,9 +5979,6 @@ and $0$ otherwise.
 
 \fun{int}{ZX_equal1}{GEN x} returns $1$ if the \kbd{ZX} is equal to $1$
 and $0$ otherwise.
-
-\fun{GEN}{ZXV_equal}{GEN x,GEN y} returns $1$ if the two vectors of \kbd{ZX}
-are equal and $0$ otherwise.
 
 \fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
@@ -6016,9 +6008,6 @@ are exact.
 \fun{GEN}{ZX_remi2n}{GEN x, long n} reduces all coefficients of \kbd{x} to $n$ bits,
 using \tet{remi2n}.
 
-\fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x}
-by the integer \kbd{y}.
-
 \fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}.
 
 \fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
@@ -6038,18 +6027,6 @@ $\sum_{i = 0}^{\kbd{na-1}} \kbd{a}[i] X^i$. Return its square (as a true
 division of $x$ mod $y$. Assume that $x$, $y$ are two \kbd{ZX} and that
 $y$ is monic.
 
-\fun{GEN}{ZXQ_mul}{GEN x,GEN y,GEN T} returns $x*y$ mod $T$, assuming
-that all inputs are \kbd{ZX}s and that $T$ is monic.
-
-\fun{GEN}{ZXQ_sqr}{GEN x,GEN T} returns $x^2$ mod $T$, assuming
-that all inputs are \kbd{ZX}s and that $T$ is monic.
-
-\fun{long}{ZX_valrem}{GEN P, GEN *z} as \kbd{RgX\_valrem}, but assumes
-\kbd{P} has \typ{INT} coefficients.
-
-\fun{long}{ZX_val}{GEN P} as \kbd{RgX\_val}, but assumes \kbd{P} has \typ{INT}
-coefficients.
-
 \fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{ZX} $x$ and $y$.
 Not memory-clean, but suitable for \kbd{gerepileupto}.
 
@@ -6061,7 +6038,11 @@ multiple of $x/d$. If $x$ and $y$ are both monic, then $d$ is monic and
 
 \fun{GEN}{ZX_content}{GEN x} returns the content of the \kbd{ZX} $x$.
 
-\fun{GEN}{QX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{QX} $x$ and $y$.
+\fun{long}{ZX_val}{GEN P} as \kbd{RgX\_val}, but assumes \kbd{P} has \typ{INT}
+coefficients.
+
+\fun{long}{ZX_valrem}{GEN P, GEN *z} as \kbd{RgX\_valrem}, but assumes
+\kbd{P} has \typ{INT} coefficients.
 
 \fun{GEN}{ZX_to_monic}{GEN q GEN *L} given $q$ a non-zero \kbd{ZX},
 returns a monic integral polynomial $Q$ such that $Q(x) = C q(x/L)$, for some
@@ -6100,33 +6081,19 @@ such that $h \mid P(0)$, returns $P(hx)/h$. Not memory clean.
 \fun{GEN}{ZX_graeffe}{GEN p} returns the Graeffe transform of $p$, i.e. the
 \kbd{ZX} $q$ such that $p(x)p(-x) = q(x^2)$.
 
-\fun{long}{ZX_max_lg}{GEN x} returns the effective length of the longest
-component in $x$.
-
-\fun{long}{ZXY_max_lg}{GEN x} returns the effective length of the longest
-component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
-
-\fun{GEN}{ZXQ_charpoly}{GEN A, GEN T, long v}: let \kbd{T} and \kbd{A} be
-\kbd{ZX}s, returns the characteristic polynomial of \kbd{Mod(A, T)}.
-More generally, \kbd{A} is allowed to be a \kbd{QX}, hence possibly has
-rational coefficients, \emph{assuming} the result is a \kbd{ZX}, i.e.~the
-algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
-
 \fun{GEN}{ZX_deriv}{GEN x} returns the derivative of \kbd{x}.
+
+\fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
+\kbd{ZX}~\kbd{A} and \kbd{B}.
 
 \fun{GEN}{ZX_disc}{GEN T} returns the discriminant of the \kbd{ZX}
 \kbd{T}.
 
-\fun{GEN}{QX_disc}{GEN T} returns the discriminant of the \kbd{QX}
-\kbd{T}.
-
-\fun{int}{ZX_is_squarefree}{GEN T} returns $1$ if the
-\kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
-
 \fun{GEN}{ZX_factor}{GEN T} returns the factorization of the primitive part
 of \kbd{T} over $\Q[X]$ (the content is lost).
 
-\fun{GEN}{QX_factor}{GEN T} as \kbd{ZX\_factor}.
+\fun{int}{ZX_is_squarefree}{GEN T} returns $1$ if the
+\kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
 
 \fun{long}{ZX_is_irred}{GEN T} returns 1 it \kbd{T} is irreducible, and
 0 otherwise.
@@ -6136,11 +6103,71 @@ with the $e_1 < e_2 < \cdots$ all distinct and the $T_i$ pairwise coprime.
 Return the vector of the $T_i$, and set \kbd{*E} to the vector of the $e_i$,
 as a \typ{VECSMALL}.
 
-\fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
-\kbd{ZX}~\kbd{A} and \kbd{B}.
+\subsec{\kbd{ZXQ}}
+
+\fun{GEN}{ZXQ_mul}{GEN x,GEN y,GEN T} returns $x*y$ mod $T$, assuming
+that all inputs are \kbd{ZX}s and that $T$ is monic.
+
+\fun{GEN}{ZXQ_sqr}{GEN x,GEN T} returns $x^2$ mod $T$, assuming
+that all inputs are \kbd{ZX}s and that $T$ is monic.
+
+\fun{GEN}{ZXQ_charpoly}{GEN A, GEN T, long v}: let \kbd{T} and \kbd{A} be
+\kbd{ZX}s, returns the characteristic polynomial of \kbd{Mod(A, T)}.
+More generally, \kbd{A} is allowed to be a \kbd{QX}, hence possibly has
+rational coefficients, \emph{assuming} the result is a \kbd{ZX}, i.e.~the
+algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
+
+\fun{GEN}{ZX_ZXY_resultant}{GEN A, GEN B}
+under the assumption that \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and
+$R = \text{Res}_Y(A, B) \in \Z[X]$, returns the resultant $R$.
+
+\fun{GEN}{ZX_compositum_disjoint}{GEN A, GEN B} given two irreducible \kbd{ZX}
+defining linearly disjoint extensions, returns a \kbd{ZX} defining their
+compositum.
+
+\fun{GEN}{ZX_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
+assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
+\text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$
+as in \kbd{ZY\_ZXY\_resultant}. Otherwise, \kbd{lambda} must point to
+some integer, e.g. $0$ which is used as a seed. The function then finds a
+small $\lambda \in \Z$ (starting from \kbd{*lambda}) such that
+$R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
+\kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
+
+\subsec{\kbd{ZXV}}
+
+\fun{GEN}{ZXV_equal}{GEN x,GEN y} returns $1$ if the two vectors of \kbd{ZX}
+are equal and $0$ otherwise.
+
+\fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x}
+by the integer \kbd{y}.
+
+\subsec{\kbd{ZXY}}
+
+\fun{void}{RgX_check_ZXY}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
+raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
+($s$ should point to the name of the caller).
+
+\fun{long}{ZXY_max_lg}{GEN x} returns the effective length of the longest
+component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
+
+\subsec{\kbd{QX}}
+
+\fun{void}{RgX_check_QX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
+raise an error if it is not a \kbd{QX} ($s$ should point to the name of the
+caller).
+
+\fun{GEN}{QX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{QX} $x$ and $y$.
+
+\fun{GEN}{QX_disc}{GEN T} returns the discriminant of the \kbd{QX}
+\kbd{T}.
+
+\fun{GEN}{QX_factor}{GEN T} as \kbd{ZX\_factor}.
 
 \fun{GEN}{QX_resultant}{GEN A, GEN B} returns the resultant of the
 \kbd{QX}~\kbd{A} and \kbd{B}.
+
+\subsec{\kbd{QXQ}}
 
 \fun{GEN}{QXQ_norm}{GEN A, GEN B} $A$ being a \kbd{QX} and $B$ being a
 \kbd{ZX}, returns the norm of the algebraic number $A \mod B$, using a
@@ -6161,35 +6188,6 @@ ensure that $B$ is a \kbd{ZX}, one may replace it by \kbd{Q\_primpart(B)}
 If the result is not known to be an integer, you must use \tet{QXQ_norm}
 instead, which is slower.
 
-\fun{GEN}{ZX_ZXY_resultant}{GEN A, GEN B}
-under the assumption that \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and
-$R = \text{Res}_Y(A, B) \in \Z[X]$, returns the resultant $R$.
-
-\fun{GEN}{ZX_compositum_disjoint}{GEN A, GEN B} given two irreducible \kbd{ZX}
-defining linearly disjoint extensions, returns a \kbd{ZX} defining their
-compositum.
-
-\fun{GEN}{ZX_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
-assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
-\text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$
-as in \kbd{ZY\_ZXY\_resultant}. Otherwise, \kbd{lambda} must point to
-some integer, e.g. $0$ which is used as a seed. The function then finds a
-small $\lambda \in \Z$ (starting from \kbd{*lambda}) such that
-$R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
-\kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
-
-\fun{GEN}{nfgcd}{GEN P, GEN Q, GEN T, GEN den} given $P$ and $Q$ in
-$\Z[X,Y]$, $T$ monic irreducible in $\Z[Y]$, returns the primitive $d$ in
-$\Z[X,Y]$ which is a gcd of $P$, $Q$ in $K[X]$, where $K$ is the number field
-$\Q[Y]/(T)$. If not \kbd{NULL}, \kbd{den} is a multiple of the integral
-denominator of the (monic) gcd of $P,Q$ in $K[X]$.
-
-\fun{GEN}{nfgcd_all}{GEN P, GEN Q, GEN T, GEN den, GEN *Pnew} as \kbd{nfgcd}.
-If \kbd{Pnew} is not \kbd{NULL}, set \kbd{*Pnew} to a non-zero integer
-multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
-\kbd{*Pnew} is exactly $P/d$. Not memory clean if the gcd is $1$
-(in that case \kbd{*Pnew} is set to $P$).
-
 \fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of $A$ modulo $B$
 where $A$ is a \kbd{QX} and $B$ is a \kbd{ZX}. Should you need this for
 a \kbd{QX} $B$, just use
@@ -6208,6 +6206,18 @@ polynomial to which \kbd{Q\_remove\_denom} can be applied is fine.
 
 \fun{GEN}{QXQ_reverse}{GEN f, GEN T} as \kbd{RgXQ\_reverse}, assuming $f$
 is a \kbd{QX}.
+
+\fun{GEN}{nfgcd}{GEN P, GEN Q, GEN T, GEN den} given $P$ and $Q$ in
+$\Z[X,Y]$, $T$ monic irreducible in $\Z[Y]$, returns the primitive $d$ in
+$\Z[X,Y]$ which is a gcd of $P$, $Q$ in $K[X]$, where $K$ is the number field
+$\Q[Y]/(T)$. If not \kbd{NULL}, \kbd{den} is a multiple of the integral
+denominator of the (monic) gcd of $P,Q$ in $K[X]$.
+
+\fun{GEN}{nfgcd_all}{GEN P, GEN Q, GEN T, GEN den, GEN *Pnew} as \kbd{nfgcd}.
+If \kbd{Pnew} is not \kbd{NULL}, set \kbd{*Pnew} to a non-zero integer
+multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
+\kbd{*Pnew} is exactly $P/d$. Not memory clean if the gcd is $1$
+(in that case \kbd{*Pnew} is set to $P$).
 
 \subsec{\kbd{zx}}
 
