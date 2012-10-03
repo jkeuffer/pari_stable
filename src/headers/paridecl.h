@@ -2444,6 +2444,7 @@ extern const char *paricfg_version;
 extern const char *paricfg_buildinfo;
 extern const long  paricfg_version_code;
 extern const char *paricfg_vcsversion;
+extern const char *paricfg_compiledate;
 
 /* part.c */
 

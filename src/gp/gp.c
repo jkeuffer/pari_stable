@@ -837,12 +837,13 @@ print_version(void)
 {
   pari_sp av = avma;
   char *buf, *ver = what_cc();
+  const char *date = paricfg_compiledate;
 
   center(paricfg_version);
   center(paricfg_buildinfo);
-  buf = stack_malloc(strlen(__DATE__) +  32 + (ver? strlen(ver): 0));
-  if (ver) (void)sprintf(buf, "compiled: %s, %s", __DATE__, ver);
-  else     (void)sprintf(buf, "compiled: %s", __DATE__);
+  buf = stack_malloc(strlen(date) +  32 + (ver? strlen(ver): 0));
+  if (ver) (void)sprintf(buf, "compiled: %s, %s", date, ver);
+  else     (void)sprintf(buf, "compiled: %s", date);
   center(buf);
   ver = what_readline();
   buf = stack_malloc(strlen(ver) + 64);
