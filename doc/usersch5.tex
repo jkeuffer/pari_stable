@@ -4372,8 +4372,6 @@ form $Q(X^d)$, return $Q$.
 
 \fun{GEN}{Flx_inflate}{GEN P, long d} returns $P(X^d)$.
 
-\fun{GEN}{FlxV_Flc_mul}{GEN V, GEN W, ulong p}, as \kbd{FpXV\_FpC\_mul}.
-
 \fun{int}{Flx_is_squarefree}{GEN z, ulong p}
 
 \fun{int}{Flx_is_irred}{GEN f, ulong p}, as \kbd{FpX\_is\_irred}.
@@ -4401,6 +4399,12 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{Flv_roots_to_pol}{GEN a, ulong p, long sv} as
 \kbd{FpV\_roots\_to\_pol} returning an \kbd{Flx} in variable $v$.
+
+\subsec{\kbd{FlxV}} See \kbd{FpXV} operations.
+
+\fun{GEN}{FlxV_Flc_mul}{GEN V, GEN W, ulong p}, as \kbd{FpXV\_FpC\_mul}.
+
+\fun{GEN}{FlxV_red}{GEN V, ulong p} reduces each components with \kbd{Flx\_red}.
 
 \subsec{\kbd{Flxq}} See \kbd{FpXQ} operations.
 

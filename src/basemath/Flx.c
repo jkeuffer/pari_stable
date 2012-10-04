@@ -2783,6 +2783,16 @@ FlxV_to_Flm(GEN v, long n)
   return y;
 }
 
+GEN
+FlxV_red(GEN z, ulong p)
+{
+  GEN res;
+  long i, l = lg(z);
+  res = cgetg(l,t_VEC);
+  for(i=1;i<l;i++) gel(res,i) = Flx_red(gel(z,i),p);
+  return res;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                               FlxX                                **/
