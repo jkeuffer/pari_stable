@@ -58,6 +58,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
   do { GEN _v = cgetg(3, t_COL);\
        gel(_v,1) = (x);\
        gel(_v,2) = (y); return _v; } while(0)
+#define retmkcol3(x,y,z)\
+  do { GEN _v = cgetg(4, t_COL);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z); return _v; } while(0)
+#define retmkcol4(x,y,z,t)\
+  do { GEN _v = cgetg(5, t_COL);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t); return _v; } while(0)
+#define retmkcol5(x,y,z,t,u)\
+  do { GEN _v = cgetg(6, t_COL);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t);\
+       gel(_v,5) = (u); return _v; } while(0)
 #define retmkmat(x)\
   do { GEN _v = cgetg(2, t_MAT);\
        gel(_v,1) = (x); return _v; } while(0)
@@ -65,6 +83,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
   do { GEN _v = cgetg(3, t_MAT);\
        gel(_v,1) = (x);\
        gel(_v,2) = (y); return _v; } while(0)
+#define retmkmat3(x,y,z)\
+  do { GEN _v = cgetg(4, t_MAT);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z); return _v; } while(0)
+#define retmkmat4(x,y,z,t)\
+  do { GEN _v = cgetg(5, t_MAT);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t); return _v; } while(0)
+#define retmkmat5(x,y,z,t,u)\
+  do { GEN _v = cgetg(6, t_MAT);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (t);\
+       gel(_v,5) = (u); return _v; } while(0)
 
 INLINE GEN
 mkintmod(GEN x, GEN y) { retmkintmod(x,y); }
@@ -148,12 +184,24 @@ mkcol(GEN x) { retmkcol(x); }
 INLINE GEN
 mkcol2(GEN x, GEN y) { retmkcol2(x,y); }
 INLINE GEN
+mkcol3(GEN x, GEN y, GEN z) { retmkcol3(x,y,z); }
+INLINE GEN
+mkcol4(GEN x, GEN y, GEN z, GEN t) { retmkcol4(x,y,z,t); }
+INLINE GEN
+mkcol5(GEN x, GEN y, GEN z, GEN t, GEN u) { retmkcol5(x,y,z,t,u); }
+INLINE GEN
 mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = gcopy(x); return v; }
 /* mat */
 INLINE GEN
 mkmat(GEN x) { retmkmat(x); }
 INLINE GEN
 mkmat2(GEN x, GEN y) { retmkmat2(x,y); }
+INLINE GEN
+mkmat3(GEN x, GEN y, GEN z) { retmkmat3(x,y,z); }
+INLINE GEN
+mkmat4(GEN x, GEN y, GEN z, GEN t) { retmkmat4(x,y,z,t); }
+INLINE GEN
+mkmat5(GEN x, GEN y, GEN z, GEN t, GEN u) { retmkmat5(x,y,z,t,u); }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
 INLINE GEN

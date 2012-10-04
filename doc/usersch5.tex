@@ -7006,6 +7006,15 @@ or same priority, with $(x,y) = 1$.
 \fun{GEN}{mkcol2}{GEN x, GEN y} creates a 2-dimensional \typ{COL} equal to
 \kbd{[x,y]}.
 
+\fun{GEN}{mkcol3}{GEN x, GEN y, GEN z} creates a 3-dimensional \typ{COL}
+equal to \kbd{[x,y,z]}.
+
+\fun{GEN}{mkcol4}{GEN x, GEN y, GEN z, GEN t} creates a 4-dimensional \typ{COL}
+equal to \kbd{[x,y,z,t]}.
+
+\fun{GEN}{mkcol5}{GEN a1, GEN a2, GEN a3, GEN a4, GEN a5} creates the
+5-dimensional \typ{COL} equal to $[a_1,a_2,a_3,a_4,a_5]$.
+
 \fun{GEN}{mkintmod}{GEN x, GEN y} creates the \typ{INTMOD} \kbd{Mod(x, y)}.
 The inputs must be \typ{INT}s satisfying $0 \leq x < y$.
 
@@ -7018,6 +7027,15 @@ the \typ{POL} $y$. $x$ may be a scalar.
 
 \fun{GEN}{mkmat2}{GEN x, GEN y} creates a 2-column \typ{MAT} with columns
 $x$, $y$ (\typ{COL}s of the same length).
+
+\fun{GEN}{mkmat3}{GEN x, GEN y, GEN z} creates a 2-column \typ{MAT} with columns
+$x$, $y$, $z$ (\typ{COL}s of the same length).
+
+\fun{GEN}{mkmat4}{GEN x, GEN y, GEN z, GEN t} creates a 2-column \typ{MAT} with columns
+$x$, $y$, $z$, $t$ (\typ{COL}s of the same length).
+
+\fun{GEN}{mkmat5}{GEN x, GEN y, GEN z, GEN t, GEN u} creates a 2-column \typ{MAT} with columns
+$x$, $y$, $z$, $t$, $u$ (\typ{COL}s of the same length).
 
 \fun{GEN}{mkvec}{GEN x} creates a 1-dimensional \typ{VEC} containing \kbd{x}.
 
@@ -7080,6 +7098,15 @@ returns the $1$-dimensional \typ{COL} \kbd{[x]~}.
 \fun{GEN}{retmkcol2}{GEN x, GEN y}
 returns the $2$-dimensional \typ{COL} \kbd{[x,y]~}.
 
+\fun{GEN}{retmkcol3}{GEN x, GEN y, GEN z}
+returns the $3$-dimensional \typ{COL} \kbd{[x,y,z]~}.
+
+\fun{GEN}{retmkcol4}{GEN x, GEN y, GEN z, GEN t}
+returns the $4$-dimensional \typ{COL} \kbd{[x,y,z,t]~}.
+
+\fun{GEN}{retmkcol5}{GEN x, GEN y, GEN z, GEN t, GEN u}
+returns the $5$-dimensional \typ{COL} \kbd{[x,y,z,t,u]~}.
+
 \fun{GEN}{retconst_col}{long n, GEN x}
 returns the $n$-dimensional \typ{COL} whose entries are constant and all
 equal to $x$.
@@ -7089,6 +7116,15 @@ returns the $1$-column \typ{MAT} with colum \kbd{x}.
 
 \fun{GEN}{retmkmat2}{GEN x, GEN y}
 returns the $2$-column \typ{MAT} with colums \kbd{x}, \kbd{y}.
+
+\fun{GEN}{retmkmat3}{GEN x, GEN y, GEN z}
+returns the $3$-dimensional \typ{MAT} \kbd{[x,y,z]}.
+
+\fun{GEN}{retmkmat4}{GEN x, GEN y, GEN z, GEN t}
+returns the $4$-dimensional \typ{MAT} \kbd{[x,y,z,t]}.
+
+\fun{GEN}{retmkmat5}{GEN x, GEN y, GEN z, GEN t, GEN u}
+returns the $5$-dimensional \typ{MAT} \kbd{[x,y,z,t,u]}.
 
 \fun{GEN}{retmkintmod}{GEN x, GEN y}
 returns the \typ{INTMOD} \kbd{Mod(x, y)}.
