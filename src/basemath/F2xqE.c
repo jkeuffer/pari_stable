@@ -444,6 +444,37 @@ F2xqE_tatepairing(GEN P, GEN Q, GEN m, GEN a2, GEN T)
 /**                                                                   **/
 /***********************************************************************/
 
+static GEN
+Z2x_rshift(GEN y, long x)
+{
+  GEN z;
+  long i, l;
+  if (!x) return pol0_Flx(y[1]);
+  z = cgetg_copy(y, &l); z[1] = y[1];
+  for(i=2; i<l; i++) z[i] = y[i]>>x;
+  return Flx_renormalize(z, l);
+}
+
+/* Solve the linear equation approximation in the Newton algorithm */
+
+static GEN
+gen_Z2x_Dixon(GEN F, GEN V, long N, void *E, GEN lin(void *E, GEN F, GEN d, long N), GEN invl(void *E, GEN d))
+{
+  pari_sp av = avma;
+  long N2, M;
+  GEN VN2, V2, VM, bil;
+  ulong q = 1UL<<N;
+  if (N == 1) return invl(E, V);
+  V = Flx_red(V, q);
+  N2 = (N + 1)>>1; M = N - N2;
+  F = FlxV_red(F, q);
+  VN2 = gen_Z2x_Dixon(F, V, N2, E, lin, invl);
+  bil = lin(E, F, VN2, N);
+  V2 = Z2x_rshift(Flx_sub(V, bil, q), N2);
+  VM = gen_Z2x_Dixon(F, V2, M, E, lin, invl);
+  return gerepileupto(av, Flx_add(VN2, Flx_Fl_mul(VM, 1UL<<N2, q), q));
+}
+
 /* Solve F(X) = V mod 2^N
    F(Xn) = V [mod 2^n]
    Vm = (V-F(Xn))/(2^n)
@@ -454,25 +485,30 @@ F2xqE_tatepairing(GEN P, GEN Q, GEN m, GEN a2, GEN T)
 static GEN
 gen_Z2X_Dixon(GEN F, GEN V, long N, void *E,
                      GEN lin(void *E, GEN F, GEN d, long N),
-                     GEN invl(void *E, GEN d))
+                     GEN lins(void *E, GEN F, GEN d, long N),
+                     GEN invls(void *E, GEN d))
 {
   pari_sp av = avma;
   long n, m;
   GEN Xn, Xm, FXn, Vm;
+  if (N<BITS_IN_LONG)
+  {
+    ulong q = 1UL<<N;
+    return Flx_to_ZX(gen_Z2x_Dixon(ZXV_to_FlxV(F,q), ZX_to_Flx(V,q),N,E,lins,invls));
+  }
   V = ZX_remi2n(V, N);
-  if (N == 1) return invl(E, V);
   n = (N + 1)>>1; m = N - n;
   F = ZXV_remi2n(F, N);
-  Xn = gen_Z2X_Dixon(F, V, n, E, lin, invl);
+  Xn = gen_Z2X_Dixon(F, V, n, E, lin, lins, invls);
   FXn = lin(E, F, Xn, N);
   Vm = ZX_shifti(ZX_sub(V, FXn), -n);
-  Xm = gen_Z2X_Dixon(F, Vm, m, E, lin, invl);
+  Xm = gen_Z2X_Dixon(F, Vm, m, E, lin, lins, invls);
   return gerepileupto(av, ZX_remi2n(ZX_add(Xn, ZX_shifti(Xm, n)), N));
 }
 
 /* H -> H mod 2*/
 
-static GEN _can_invl(void *E, GEN V) {(void) E; return V; }
+static GEN _can_invls(void *E, GEN V) {(void) E; return V; }
 
 /* H -> H-(f0*H0-f1*H1) */
 
@@ -484,6 +520,15 @@ static GEN _can_lin(void *E, GEN F, GEN V, long N)
   RgX_even_odd(V, &d0, &d1);
   z =  ZX_sub(V, ZX_sub(ZX_mul(gel(F,1), d0), ZX_mul(gel(F,2), d1)));
   return gerepileupto(av, ZX_remi2n(z, N));
+}
+
+static GEN _can_lins(void *E, GEN F, GEN V, long N)
+{
+  GEN D=Flx_splitting(V, 2), z;
+  ulong q = 1UL<<N;
+  (void) E;
+  z = Flx_sub(Flx_mul(gel(F,1), gel(D,1), q), Flx_mul(gel(F,2), gel(D,2), q), q);
+  return Flx_sub(V, z, q);
 }
 
 /* P -> P-(P0^2-X*P1^2) */
@@ -506,7 +551,7 @@ _can_invd(void *E, GEN V, GEN v, long M)
   GEN F;
   (void) E;
   F = mkvec2(ZX_shifti(gel(v,2),1), ZX_shifti(RgX_shift(gel(v,3),1),1));
-  return gen_Z2X_Dixon(F, V, M, NULL, _can_lin, _can_invl);
+  return gen_Z2X_Dixon(F, V, M, NULL, _can_lin, _can_lins, _can_invls);
 }
 
 /* Lift P to Q such that Q(x^2)=Q(x)*Q(-x) mod 2^n
@@ -522,6 +567,12 @@ Z2XQ_frob(GEN x, GEN B, GEN T, GEN q)
   return FpX_rem_Barrett(RgX_inflate(x, 2), B, T, q);
 }
 
+static GEN
+Z2xq_frob(GEN x, GEN B, GEN T, ulong q)
+{
+  return Flx_rem_Barrett(Flx_inflate(x, 2), B, T, q);
+}
+
 struct _frob_lift
 {
   GEN B, T, sqx;
@@ -529,11 +580,11 @@ struct _frob_lift
 
 /* H -> S^-1(H) mod 2 */
 
-static GEN _frob_invl(void *E, GEN V)
+static GEN _frob_invls(void *E, GEN V)
 {
   struct _frob_lift *F = (struct _frob_lift*) E;
   GEN sqx = F->sqx;
-  return F2x_to_ZX(F2xq_sqrt_fast(ZX_to_F2x(V), gel(sqx,1), gel(sqx,2)));
+  return F2x_to_Flx(F2xq_sqrt_fast(Flx_to_F2x(V), gel(sqx,1), gel(sqx,2)));
 }
 
 /* H -> f1*S(H) + f2*H */
@@ -546,6 +597,16 @@ static GEN _frob_lin(void *E, GEN F, GEN x2, long N)
   GEN lin = ZX_add(ZX_mul(gel(F,1), y2), ZX_mul(gel(F,2), x2));
   (void) E;
   return FpX_rem_Barrett(ZX_remi2n(lin, N), B, T, q);
+}
+
+static GEN _frob_lins(void *E, GEN F, GEN x2, long N)
+{
+  GEN B = gel(F,3), T = gel(F,4);
+  ulong q = 1UL<<N;
+  GEN y2  = Z2xq_frob(x2, B, T, q);
+  GEN lin = Flx_add(Flx_mul(gel(F,1), y2,q), Flx_mul(gel(F,2), x2,q),q);
+  (void) E;
+  return Flx_rem_Barrett(lin, B, T, q);
 }
 
 /* X -> P(X,S(X)) */
@@ -579,7 +640,7 @@ _lift_invd(void *E, GEN V, GEN v, long M)
   Dx = FpX_rem_Barrett(ZX_remi2n(Dx, M), BM, TM, qM);
   Dy = FpX_rem_Barrett(ZX_remi2n(Dy, M), BM, TM, qM);
   r = mkvec4(Dy, Dx, BM, TM);
-  return gen_Z2X_Dixon(r, V, M, E, _frob_lin, _frob_invl);
+  return gen_Z2X_Dixon(r, V, M, E, _frob_lin, _frob_lins, _frob_invls);
 }
 
 /*
