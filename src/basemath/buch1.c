@@ -410,14 +410,14 @@ quadGRHchk(GEN D, GRHcheck_t *S, long LIMC)
 
 /* create B->FB, B->numFB; set B->badprim. Return L(kro_D, 1) */
 static void
-FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
+FBquad(struct buch_quad *B, ulong C2, ulong C1, GRHcheck_t *S)
 {
   GEN D = B->QFR->D;
   long i;
   pari_sp av;
   GRHprime_t *pr;
 
-  check_prime_quad(S, uprimepi((ulong)C2), D);
+  check_prime_quad(S, uprimepi(C2), D);
   pr = S->primes;
   B->numFB = cgetg(C2+1, t_VECSMALL);
   B->FB    = cgetg(C2+1, t_VECSMALL);
@@ -433,7 +433,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
     {
       case -1: break; /* inert */
       case  0: /* ramified */
-        if (is_bad(D, (ulong)p)) { B->badprim = muliu(B->badprim, p); break; }
+        if (is_bad(D, p)) { B->badprim = muliu(B->badprim, p); break; }
         /* fall through */
       default:  /* split */
         i++; B->numFB[p] = i; B->FB[i] = p; break;

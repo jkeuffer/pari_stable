@@ -610,7 +610,8 @@ static long
 nthideal(GRHcheck_t *S, GEN nf, long n)
 {
   pari_sp av = avma;
-  GEN P = nf_get_pol(nf), vecN = const_vecsmall(n, LONG_MAX);
+  GEN P = nf_get_pol(nf);
+  ulong *vecN = (ulong*)const_vecsmall(n, LONG_MAX);
   long i, j, k, l, res, N = poldegree(P, -1);
   for (i = 0; ; i++)
   {
@@ -627,9 +628,8 @@ nthideal(GRHcheck_t *S, GEN nf, long n)
     while (--j > 0)
     {
       GEN Np = powuu(p, fs[j]);
-      long sNp;
-      if (is_bigint(Np)) continue;
-      sNp = itos(Np);
+      ulong sNp = (ulong)Np[2];
+      if (lgefint(Np) > 3) continue;
       for (k = 1; k <= n; k++) if (vecN[k] > sNp) break;
       if (k > n) continue;
       for (l = k+ns[j]; l <= n; l++) vecN[l] = vecN[l-ns[j]];
