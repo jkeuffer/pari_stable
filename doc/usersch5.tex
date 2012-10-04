@@ -6164,6 +6164,9 @@ raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
 \fun{long}{ZXY_max_lg}{GEN x} returns the effective length of the longest
 component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
 
+\fun{GEN}{ZXX_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all integer divisions
+are exact.
+
 \subsec{\kbd{QX}}
 
 \fun{void}{RgX_check_QX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
