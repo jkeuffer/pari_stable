@@ -1979,10 +1979,10 @@ Flxq_powu(GEN x, ulong n, GEN T, ulong p)
   if (lg(T) >= Flx_POW_BARRETT_LIMIT)
   {
     D.mg  = Flx_invBarrett(T,p);
-    y = gen_powu(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
+    y = gen_powu_i(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
   }
   else
-    y = gen_powu(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
+    y = gen_powu_i(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
   return gerepileuptoleaf(av, y);
 }
 
@@ -2005,12 +2005,12 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   {
     D.mg  = Flx_invBarrett(T,p);
     if (lx >= lT) x = Flx_rem_Barrett(x,D.mg,T,p);
-    y = gen_pow(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
+    y = gen_pow_i(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
   }
   else
   {
     if (lx >= lT) x = Flx_rem(x,T,p);
-    y = gen_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
+    y = gen_pow_i(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
   }
   return gerepileuptoleaf(av, y);
 }
@@ -2689,7 +2689,11 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     }
     if (i == j) break;
   }
-  if (!po) g = gerepilecopy(av0, g);
+  if (!po)
+  {
+    avma = (pari_sp)g;
+    g = gerepileuptoleaf(av0, g);
+  }
   else {
     *po = mkvec2(subis(powuu(p,f), 1), o);
     gerepileall(av0, 2, &g, po);

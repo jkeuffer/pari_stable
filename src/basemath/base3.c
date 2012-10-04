@@ -607,7 +607,7 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   D.nf = nf;
   D.p = p;
   D.I = I;
-  y = leftright_pow_fold(col_ei(N, I), n, (void*)&D, &sqr_mod, &ei_msqr_mod);
+  y = gen_pow_fold(col_ei(N, I), n, (void*)&D, &sqr_mod, &ei_msqr_mod);
   return gerepileupto(av,y);
 }
 

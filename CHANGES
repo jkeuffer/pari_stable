@@ -228,6 +228,8 @@ HC 78- reimplement incgam()
        when copy-pasted
    85- rnf_fix_pol() takes an extra argument, the calling function's name
    86- fast gerepilecopy() for leaves
+   87- rename leftright_pow_fold -> gen_pow_fold, leftright_pow_fold_i
+       -> gen_pow_fold_i
 
   Added
     1- mathnf for matrices over K[X] [#41]

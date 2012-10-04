@@ -15,6 +15,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define leftright_pow_fold gen_pow_fold
+#define leftright_pow_u_fold gen_powu_fold
 #define subell ellsub
 #define addell elladd
 #define powell ellmul

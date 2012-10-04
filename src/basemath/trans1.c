@@ -624,21 +624,20 @@ GEN
 rpowuu(ulong a, ulong n, long prec)
 {
   pari_sp av;
-  GEN y;
+  GEN y, z;
   sr_muldata D;
 
   if (a == 1) return real_1(prec);
   if (a == 2) return real2n(n, prec);
   if (n == 1) return utor(a, prec);
+  z = cgetr(prec);
   av = avma;
   D.sqr   = &sqri;
   D.mulug = &mului;
   D.prec = prec;
   D.a = (long)a;
-  y = leftright_pow_u_fold(utoipos(a), n, (void*)&D, &_rpowuu_sqr,
-                                                     &_rpowuu_msqr);
-  if (typ(y) == t_INT) y = itor(y, prec);
-  return gerepileuptoleaf(av, y);
+  y = gen_powu_fold_i(utoipos(a), n, (void*)&D, &_rpowuu_sqr, &_rpowuu_msqr);
+  mpaff(y, z); avma = av; return z;
 }
 
 GEN

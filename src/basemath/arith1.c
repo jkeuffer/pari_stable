@@ -1901,7 +1901,7 @@ sqrt_Cipolla(GEN a, GEN p)
 
   /* compute (t+X)^((p-1)/2) =: u+vX */
   u = utoipos(t);
-  y = leftright_pow_fold(mkvec2(u, gen_1), pov2, mkvec4(a,p,n,u),
+  y = gen_pow_fold(mkvec2(u, gen_1), pov2, mkvec4(a,p,n,u),
                          sqrt_Cipolla_sqr, sqrt_Cipolla_msqr);
   u = gel(y,1);
   v = gel(y,2);
@@ -2347,7 +2347,7 @@ Fp_powu(GEN A, ulong k, GEN N)
   /* TODO: Move this out of here and use for general modular computations */
   use_montgomery = Fp_select_red(&A, k, N, lN, &D);
   if (base_is_2)
-    A = leftright_pow_u_fold(A, k, (void*)&D, &_sqr, &_m2sqr);
+    A = gen_powu_fold(A, k, (void*)&D, &_sqr, &_m2sqr);
   else
     A = gen_powu(A, k, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
@@ -2435,7 +2435,7 @@ Fp_pow(GEN A, GEN K, GEN N)
   /* TODO: Move this out of here and use for general modular computations */
   use_montgomery = Fp_select_red(&y, 0UL, N, lN, &D);
   if (base_is_2)
-    y = leftright_pow_fold(y, K, (void*)&D, &_sqr, &_m2sqr);
+    y = gen_pow_fold(y, K, (void*)&D, &_sqr, &_m2sqr);
   else
     y = gen_pow(y, K, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)

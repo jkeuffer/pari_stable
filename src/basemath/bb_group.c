@@ -166,20 +166,98 @@ gen_powu(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
 }
 
 GEN
-gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
-                               GEN (*mul)(void*,GEN,GEN))
+gen_pow_i(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+                                 GEN (*mul)(void*,GEN,GEN))
 {
-  pari_sp av;
   long l, e;
-  if (lgefint(n)==3) return gen_powu(x,(ulong)n[2],E,sqr,mul);
-  av = avma;
+  if (lgefint(n)==3) return gen_powu_i(x,(ulong)n[2],E,sqr,mul);
   l = expi(n);
   if      (l<=64)  e = 3;
   else if (l<=160) e = 4;
   else if (l<=384) e = 5;
   else if (l<=896) e = 6;
   else             e = 7;
-  return gerepilecopy(av, sliding_window_pow(x, n, e, E, sqr, mul));
+  return sliding_window_pow(x, n, e, E, sqr, mul);
+}
+
+GEN
+gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+                               GEN (*mul)(void*,GEN,GEN))
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, gen_pow_i(x,n,E,sqr,mul));
+}
+
+/* assume n > 0. Compute x^n using left-right binary powering */
+GEN
+gen_powu_fold_i(GEN x, ulong n, void *E, GEN  (*sqr)(void*,GEN),
+                                         GEN (*msqr)(void*,GEN))
+{
+  GEN y;
+  long m, j;
+  pari_sp av = avma, lim = stack_lim(av, 1);
+
+  if (n == 1) return gcopy(x);
+  m = (long)n; j = 1+bfffo(m);
+  y = x;
+
+  /* normalize, i.e set highest bit to 1 (we know m != 0) */
+  m<<=j; j = BITS_IN_LONG-j;
+  /* first bit is now implicit */
+  for (; j; m<<=1,j--)
+  {
+    if (m < 0) y = msqr(E,y); /* first bit set: multiply by base */
+    else y = sqr(E,y);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
+      y = gerepilecopy(av, y);
+    }
+  }
+  return y;
+}
+GEN
+gen_powu_fold(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
+                                       GEN (*msqr)(void*,GEN))
+{
+  pari_sp av = avma;
+  if (n == 1) return gcopy(x);
+  return gerepilecopy(av, gen_powu_fold_i(x,n,E,sqr,msqr));
+}
+
+/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
+GEN
+gen_pow_fold(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+                                    GEN (*msqr)(void*,GEN))
+{
+  long ln = lgefint(n);
+  if (ln == 3) return gen_powu_fold(x, n[2], E, sqr, msqr);
+  else
+  {
+    GEN nd = int_MSW(n), y = x;
+    long i, m = *nd, j = 1+bfffo((ulong)m);
+    pari_sp av = avma, lim = stack_lim(av, 1);
+
+    /* normalize, i.e set highest bit to 1 (we know m != 0) */
+    m<<=j; j = BITS_IN_LONG-j;
+    /* first bit is now implicit */
+    for (i=ln-2;;)
+    {
+      for (; j; m<<=1,j--)
+      {
+        if (m < 0) y = msqr(E,y); /* first bit set: multiply by base */
+        else y = sqr(E,y);
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
+          y = gerepilecopy(av, y);
+        }
+      }
+      if (--i == 0) return gerepilecopy(av, y);
+      nd=int_precW(nd);
+      m = *nd; j = BITS_IN_LONG;
+    }
+  }
 }
 
 GEN

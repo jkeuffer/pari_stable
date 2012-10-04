@@ -2637,7 +2637,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   D.h = h;
   D.T = T;
   D.p = p;
-  y = leftright_pow_fold(NULL, n, (void*)&D, &_sqr, &_msqr);
+  y = gen_pow_fold(NULL, n, (void*)&D, &_sqr, &_msqr);
   return gerepilecopy(av, y);
 }
 

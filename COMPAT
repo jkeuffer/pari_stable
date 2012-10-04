@@ -39,6 +39,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - powell, addell, subell renamed to ellpow, elladd, ellsub.
   - last tow arguments of FpX_factorff and FpX_rootsff have been swapped.
   - rnf_fix_pol() takes an extra argument, the calling function's name
+  - rename leftright_pow_fold -> gen_pow_fold, leftright_pow_fold_i
+       -> gen_pow_fold_i
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -1325,14 +1325,15 @@ GEN gen_order(GEN x, GEN o, void *E, const struct bb_group *grp);
 GEN gen_select_order(GEN o, void *E, const struct bb_group *grp);
 
 GEN gen_plog(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp);
-GEN gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
-                                   GEN (*mul)(void*,GEN,GEN));
+GEN gen_pow(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN));
+GEN gen_pow_i(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN));
 GEN gen_powers(GEN x, long l, int use_sqr, void *E, GEN (*sqr)(void*,GEN),
                                       GEN (*mul)(void*,GEN,GEN), GEN (*one)(void*));
 GEN gen_powu(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
                                       GEN (*mul)(void*,GEN,GEN));
 GEN gen_powu_i(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
                                      GEN (*mul)(void*,GEN,GEN));
+GEN gen_powu_fold_i(GEN x, ulong n, void *E, GEN  (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
 
 /* bibli1.c */
 
@@ -2620,8 +2621,8 @@ GEN     glcm(GEN x, GEN y);
 GEN     glcm0(GEN x, GEN y);
 GEN     gp_factor0(GEN x, GEN flag);
 GEN     idealfactorback(GEN nf, GEN L, GEN e, int red);
-GEN     leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
-GEN     leftright_pow_u_fold(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
+GEN     gen_pow_fold(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
+GEN     gen_powu_fold(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
 GEN     newtonpoly(GEN x, GEN p);
 GEN     nffactorback(GEN nf, GEN L, GEN e);
 GEN     nfrootsQ(GEN x);
