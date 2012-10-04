@@ -651,6 +651,7 @@ long    ZX_max_lg(GEN x);
 GEN     ZX_mod_Xn_1(GEN T, ulong n);
 GEN     ZX_mul(GEN x, GEN y);
 GEN     ZX_mulspec(GEN a, GEN b, long na, long nb);
+GEN     ZX_mulu(GEN y, ulong x);
 GEN     ZX_neg(GEN x);
 GEN     ZX_rem(GEN x, GEN y);
 GEN     ZX_remi2n(GEN y, long n);

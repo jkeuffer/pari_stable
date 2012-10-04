@@ -340,7 +340,7 @@ CG 95- isprimepower() function
 BA 98- GP function digits
    99- GP default 'sopath' [ rewritten from initial patch by GTo ]
 LGr100- allow polylog(n, t_SER) around a != 0
-BA 101- PARI functions ZX_shifti, ZX_remi2n, ZXV_remi2n
+BA 101- PARI functions ZX_shifti, ZX_remi2n, ZXV_remi2n, ZX_mulu
    102- PARI functions cxexp1, mpsincos1
 BA 103- GP function ellfromj
    103- GP function forcomposite
