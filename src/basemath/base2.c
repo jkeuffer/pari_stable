@@ -676,7 +676,7 @@ nfdisc0(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN dK; _nfbasis(x, flag, fa, NULL, &dK);
-  return gerepilecopy(av, dK);
+  dK = icopy_avma(dK, av); avma = (pari_sp)dK; return dK;
 }
 GEN
 nfdisc(GEN x) { return nfdisc0(x, 0, NULL); }

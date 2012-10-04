@@ -227,11 +227,11 @@ gen_powu_fold(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
 
 /* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
 GEN
-gen_pow_fold(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
-                                    GEN (*msqr)(void*,GEN))
+gen_pow_fold_i(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+                                      GEN (*msqr)(void*,GEN))
 {
   long ln = lgefint(n);
-  if (ln == 3) return gen_powu_fold(x, n[2], E, sqr, msqr);
+  if (ln == 3) return gen_powu_fold_i(x, n[2], E, sqr, msqr);
   else
   {
     GEN nd = int_MSW(n), y = x;
@@ -253,11 +253,18 @@ gen_pow_fold(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
           y = gerepilecopy(av, y);
         }
       }
-      if (--i == 0) return gerepilecopy(av, y);
+      if (--i == 0) return y;
       nd=int_precW(nd);
       m = *nd; j = BITS_IN_LONG;
     }
   }
+}
+GEN
+gen_pow_fold(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+                                    GEN (*msqr)(void*,GEN))
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, gen_pow_fold_i(x,n,E,sqr,msqr));
 }
 
 GEN

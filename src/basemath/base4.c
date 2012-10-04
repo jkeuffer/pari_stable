@@ -379,12 +379,18 @@ mat_ideal_two_elt(GEN nf, GEN x)
   if (N == 2) return mkvec2copy(gcoeff(x,1,1), gel(x,2));
 
   y = cgetg(3,t_VEC); av = avma;
-  x = Q_primitive_part(x, &cx);
+  cx = Q_content(x);
   xZ = gcoeff(x,1,1);
-  if (is_pm1(xZ))
+  if (gequal(xZ, cx)) /* x = (cx) */
   {
-    gel(y,1) = cx? gerepilecopy(av,cx): gen_1;
+    gel(y,1) = cx;
     gel(y,2) = scalarcol_shallow(gen_0, N); return y;
+  }
+  if (equali1(cx)) cx = NULL;
+  else
+  {
+    x = Q_div_to_int(x, cx);
+    xZ = gcoeff(x,1,1);
   }
   if (N < 6)
     a = get_random_a(nf, x, xZ);

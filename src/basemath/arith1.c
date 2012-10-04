@@ -2325,6 +2325,7 @@ Fp_powu(GEN A, ulong k, GEN N)
   long lN = lgefint(N);
   int base_is_2, use_montgomery;
   muldata  D;
+  pari_sp av;
 
   if (lN == 3) {
     ulong n = (ulong)N[2];
@@ -2345,17 +2346,18 @@ Fp_powu(GEN A, ulong k, GEN N)
   }
 
   /* TODO: Move this out of here and use for general modular computations */
+  av = avma;
   use_montgomery = Fp_select_red(&A, k, N, lN, &D);
   if (base_is_2)
-    A = gen_powu_fold(A, k, (void*)&D, &_sqr, &_m2sqr);
+    A = gen_powu_fold_i(A, k, (void*)&D, &_sqr, &_m2sqr);
   else
-    A = gen_powu(A, k, (void*)&D, &_sqr, &_mul);
+    A = gen_powu_i(A, k, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
     A = _montred(&D, A);
     if (cmpii(A,N) >= 0) A = subii(A,N);
   }
-  return A;
+  return gerepileuptoint(av, A);
 }
 GEN
 Fp_pows(GEN A, long k, GEN N)
@@ -2435,9 +2437,9 @@ Fp_pow(GEN A, GEN K, GEN N)
   /* TODO: Move this out of here and use for general modular computations */
   use_montgomery = Fp_select_red(&y, 0UL, N, lN, &D);
   if (base_is_2)
-    y = gen_pow_fold(y, K, (void*)&D, &_sqr, &_m2sqr);
+    y = gen_pow_fold_i(y, K, (void*)&D, &_sqr, &_m2sqr);
   else
-    y = gen_pow(y, K, (void*)&D, &_sqr, &_mul);
+    y = gen_pow_i(y, K, (void*)&D, &_sqr, &_mul);
   if (use_montgomery)
   {
     y = _montred(&D,y);
