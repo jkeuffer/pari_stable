@@ -627,9 +627,8 @@ nthideal(GRHcheck_t *S, GEN nf, long n)
     j = lg(fs);
     while (--j > 0)
     {
-      GEN Np = powuu(p, fs[j]);
-      ulong sNp = (ulong)Np[2];
-      if (lgefint(Np) > 3) continue;
+      ulong sNp = upowuu(p, fs[j]);
+      if (!sNp) continue;
       for (k = 1; k <= n; k++) if (vecN[k] > sNp) break;
       if (k > n) continue;
       for (l = k+ns[j]; l <= n; l++) vecN[l] = vecN[l-ns[j]];

@@ -529,68 +529,173 @@ powiu_sign(GEN a, ulong N, long s)
 
   if (lgefint(a) == 3)
   { /* easy if |a| < 3 */
-    if (a[2] == 1) return (s>0)? gen_1: gen_m1;
-    if (a[2] == 2) { a = int2u(N); setsigne(a,s); return a; }
+    ulong q = a[2];
+    if (q == 1) return (s>0)? gen_1: gen_m1;
+    if (q == 2) { a = int2u(N); setsigne(a,s); return a; }
+    q = upowuu(q, N);
+    if (q) return s>0? utoipos(q): utoineg(q);
   }
-  if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
-  if (N == 2) return sqri(a);
+  if (N <= 2) {
+    if (N == 2) return sqri(a);
+    a = icopy(a); setsigne(a,s); return a;
+  }
   av = avma;
   y = gen_powu_i(a, N, NULL, &_sqri, &_muli);
   setsigne(y,s); return gerepileuptoint(av, y);
 }
-/* a^N */
+/* a^n */
 GEN
-powiu(GEN a, ulong N)
+powiu(GEN a, ulong n)
 {
   long s;
-  if (!N) return gen_1;
+  if (!n) return gen_1;
   s = signe(a);
   if (!s) return gen_0;
-  return powiu_sign(a, N, (s < 0 && odd(N))? -1: 1);
+  return powiu_sign(a, n, (s < 0 && odd(n))? -1: 1);
 }
 GEN
-powis(GEN x, long n)
+powis(GEN a, long n)
 {
-  long sx, s;
+  long s;
   GEN t, y;
-  if (!n) return gen_1;
-  sx = signe(x);
-  if (!sx) {
-    if (n < 0) pari_err_INV("powis",gen_0);
-    return gen_0;
-  }
-  s = (sx < 0 && odd(n))? -1: 1;
-  if (n > 0) return powiu_sign(x, n, s);
-  t = (s > 0)? gen_1: gen_m1;
-  if (is_pm1(x)) return t;
-  /* n < 0, |x| > 1 */
+  if (n >= 0) return powiu(a, n);
+  s = signe(a);
+  if (!s) pari_err_INV("powis",gen_0);
+  t = (s < 0 && odd(n))? gen_m1: gen_1;
+  if (is_pm1(a)) return t;
+  /* n < 0, |a| > 1 */
   y = cgetg(3,t_FRAC);
   gel(y,1) = t;
-  gel(y,2) = powiu_sign(x, -n, 1); /* force denominator > 0 */
+  gel(y,2) = powiu_sign(a, -n, 1); /* force denominator > 0 */
   return y;
 }
 GEN
 powuu(ulong p, ulong N)
 {
+  pari_sp av = avma;
   long P[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
-  if (!N) return gen_1;
+  ulong pN;
+  GEN y;
+  if (N <= 2)
+  {
+    if (N == 2) return sqru(p);
+    if (N == 1) return utoipos(p);
+    return gen_1;
+  }
   if (!p) return gen_0;
-  if (N == 1) return utoipos(p);
-  if (N == 2) return sqru(p);
-  P[2] = p;
-  return powiu_sign(P, N, 1);
+  pN = upowuu(p, N);
+  if (pN) return utoipos(pN);
+  if (p == 2) return int2u(N);
+  P[2] = p; av = avma;
+  y = gen_powu_i(P, N, NULL, &_sqri, &_muli);
+  return gerepileuptoint(av, y);
 }
 
-/* assume p^k is SMALL */
+/* return 0 if overflow */
+static ulong
+usqru(ulong p) { return p & HIGHMASK? 0: p*p; }
 ulong
 upowuu(ulong p, ulong k)
 {
-  ulong i, pk;
+#ifdef LONG_IS_64BIT
+  const ulong CUTOFF3 = 2642245;
+  const ulong CUTOFF4 = 65535;
+  const ulong CUTOFF5 = 7131;
+  const ulong CUTOFF6 = 1625;
+  const ulong CUTOFF7 = 565;
+  const ulong CUTOFF8 = 255;
+  const ulong CUTOFF9 = 138;
+  const ulong CUTOFF10 = 84;
+  const ulong CUTOFF11 = 56;
+  const ulong CUTOFF12 = 40;
+  const ulong CUTOFF13 = 30;
+  const ulong CUTOFF14 = 23;
+  const ulong CUTOFF15 = 19;
+  const ulong CUTOFF16 = 15;
+  const ulong CUTOFF17 = 13;
+  const ulong CUTOFF18 = 11;
+  const ulong CUTOFF19 = 10;
+  const ulong CUTOFF20 =  9;
+#else
+  const ulong CUTOFF3 = 1625;
+  const ulong CUTOFF4 =  255;
+  const ulong CUTOFF5 =   84;
+  const ulong CUTOFF6 =   40;
+  const ulong CUTOFF7 =   23;
+  const ulong CUTOFF8 =   15;
+  const ulong CUTOFF9 =   11;
+  const ulong CUTOFF10 =   9;
+  const ulong CUTOFF11 =   7;
+  const ulong CUTOFF12 =   6;
+  const ulong CUTOFF13 =   5;
+  const ulong CUTOFF14 =   4;
+  const ulong CUTOFF15 =   4;
+  const ulong CUTOFF16 =   3;
+  const ulong CUTOFF17 =   3;
+  const ulong CUTOFF18 =   3;
+  const ulong CUTOFF19 =   3;
+  const ulong CUTOFF20 =   3;
+#endif
 
-  if (!k) return 1;
-  if (p == 2) return 1UL<<k;
-  pk = p; for (i=2; i<=k; i++) pk *= p;
-  return pk;
+  if (p <= 2)
+  {
+    if (p < 2) return p;
+    return k < BITS_IN_LONG? 1UL<<k: 0;
+  }
+  switch(k)
+  {
+    ulong p2, p3, p4, p5, p8;
+    case 0:  return 1;
+    case 1:  return p;
+    case 2:  return usqru(p);
+    case 3:  if (p > CUTOFF3) return 0; return p*p*p;
+    case 4:  if (p > CUTOFF4) return 0; p2=p*p; return p2*p2;
+    case 5:  if (p > CUTOFF5) return 0; p2=p*p; return p2*p2*p;
+    case 6:  if (p > CUTOFF6) return 0; p2=p*p; return p2*p2*p2;
+    case 7:  if (p > CUTOFF7) return 0; p2=p*p; return p2*p2*p2*p;
+    case 8:  if (p > CUTOFF8) return 0; p2=p*p; p4=p2*p2; return p4*p4;
+    case 9:  if (p > CUTOFF9) return 0; p2=p*p; p4=p2*p2; return p4*p4*p;
+    case 10: if (p > CUTOFF10)return 0; p2=p*p; p4=p2*p2; return p4*p4*p2;
+    case 11: if (p > CUTOFF11)return 0; p2=p*p; p4=p2*p2; return p4*p4*p2*p;
+    case 12: if (p > CUTOFF12)return 0; p2=p*p; p4=p2*p2; return p4*p4*p4;
+    case 13: if (p > CUTOFF13)return 0; p2=p*p; p4=p2*p2; return p4*p4*p4*p;
+    case 14: if (p > CUTOFF14)return 0; p2=p*p; p4=p2*p2; return p4*p4*p4*p2;
+    case 15: if (p > CUTOFF15)return 0;
+      p2=p*p; p3=p2*p; p5=p3*p2; return p5*p5*p5;
+    case 16: if (p > CUTOFF16)return 0;
+      p2=p*p; p4=p2*p2; p8=p4*p4; return p8*p8;
+    case 17: if (p > CUTOFF17)return 0;
+      p2=p*p; p4=p2*p2; p8=p4*p4; return p*p8*p8;
+    case 18: if (p > CUTOFF18)return 0;
+      p2=p*p; p4=p2*p2; p8=p4*p4; return p2*p8*p8;
+    case 19: if (p > CUTOFF19)return 0;
+      p2=p*p; p4=p2*p2; p8=p4*p4; return p*p2*p8*p8;
+    case 20: if (p > CUTOFF20)return 0;
+      p2=p*p; p4=p2*p2; p8=p4*p4; return p4*p8*p8;
+  }
+#ifdef LONG_IS_64BIT
+  switch(p)
+  {
+    case 3: if (k > 40) return 0;
+      break;
+    case 4: if (k > 31) return 0;
+      return 1UL<<(2*k);
+    case 5: if (k > 27) return 0;
+      break;
+    case 6: if (k > 24) return 0;
+      break;
+    case 7: if (k > 22) return 0;
+      break;
+    default: return 0;
+  }
+  /* no overflow */
+  {
+    ulong q = upowuu(p, k >> 1);
+    q *= q ;
+    return odd(k)? q*p: q;
+  }
+#endif
+  return 0;
 }
 
 typedef struct {

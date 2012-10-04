@@ -231,6 +231,7 @@ HC 78- reimplement incgam()
    86- fast gerepilecopy() for leaves
    87- rename leftright_pow_fold -> gen_pow_fold, leftright_pow_fold_i
        -> gen_pow_fold_i
+   88- upowuu now returns 0 on overflow
 
   Added
     1- mathnf for matrices over K[X] [#41]

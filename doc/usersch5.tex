@@ -2558,8 +2558,8 @@ returns $x^{n/d}$ (always a \typ{REAL}, even if $n = 0$).
 \fun{GEN}{powIs}{long n} returns $I^n\in\{1,I,-1,-I\}$ (\typ{INT} for even $n$,
 \typ{COMPLEX} otherwise).
 
-\fun{ulong}{upowuu}{ulong x, ulong n}, returns $x^n$ modulo $2^\B$. This is
-meant to be used for tiny $n$, where in fact $x^n$ fits into an \kbd{ulong}.
+\fun{ulong}{upowuu}{ulong x, ulong n}, returns $x^n$ when $< 2^\B$, and $0$
+otherwise (overflow).
 
 \fun{GEN}{sqrtremi}{GEN N, GEN *r}, returns the integer square root $S$ of
 the non-negative \typ{INT}~\kbd{N} (rounded towards 0) and puts the remainder
