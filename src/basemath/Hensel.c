@@ -624,8 +624,8 @@ gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
 {
   pari_sp ltop = avma, av, st_lim;
   long N = 1, N2, M;
-  av = avma; st_lim = stack_lim(av, 1);
   long mask = quadratic_prec_mask(n);
+  av = avma; st_lim = stack_lim(av, 1);
   while (mask > 1)
   {
     GEN q, q2, v, V;
