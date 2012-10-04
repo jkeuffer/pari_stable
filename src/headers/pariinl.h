@@ -190,6 +190,14 @@ mkcol4(GEN x, GEN y, GEN z, GEN t) { retmkcol4(x,y,z,t); }
 INLINE GEN
 mkcol5(GEN x, GEN y, GEN z, GEN t, GEN u) { retmkcol5(x,y,z,t,u); }
 INLINE GEN
+mkcols(long x) { retmkcol(stoi(x)); }
+INLINE GEN
+mkcol2s(long x, long y) { retmkcol2(stoi(x),stoi(y)); }
+INLINE GEN
+mkcol3s(long x, long y, long z) { retmkcol3(stoi(x),stoi(y),stoi(z)); }
+INLINE GEN
+mkcol4s(long x, long y, long z, long t) { retmkcol4(stoi(x),stoi(y),stoi(z),stoi(t)); }
+INLINE GEN
 mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = gcopy(x); return v; }
 /* mat */
 INLINE GEN

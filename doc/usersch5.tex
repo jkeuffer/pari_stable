@@ -6945,6 +6945,18 @@ lower or same priority, with $(x,y) = 1$.
 \fun{GEN}{mkvec2copy}{GEN x, GEN y} creates a 2-dimensional \typ{VEC} equal
 to \kbd{[x,y]}.
 
+\fun{GEN}{mkcols}{long x} creates a 1-dimensional \typ{COL}
+containing \kbd{stoi(x)}.
+
+\fun{GEN}{mkcol2s}{long x, long y} creates a 2-dimensional \typ{COL}
+containing \kbd{[stoi(x), stoi(y)]~}.
+
+\fun{GEN}{mkcol3s}{long x, long y, long z} creates a 3-dimensional \typ{COL}
+containing \kbd{[stoi(x), stoi(y), stoi(z)]~}.
+
+\fun{GEN}{mkcol4s}{long x, long y, long z, long t} creates a 4-dimensional \typ{COL}
+containing \kbd{[stoi(x), stoi(y), stoi(z), stoi(t)]~}.
+
 \fun{GEN}{mkvecs}{long x} creates a 1-dimensional \typ{VEC}
 containing \kbd{stoi(x)}.
 

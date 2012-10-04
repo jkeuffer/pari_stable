@@ -352,6 +352,7 @@ BA 107- PARI functions RgX_splitting(), Flx_splitting()
         PARI functions err_get_num(), err_get_compo(), pari_err_last()
    109- PARI function stack_sprintf()
    110- PARI function RgX_is_QX()
+BA 111- PARI functions retmkmat2,retmkcol2,mkmat2,mkcol2,mkcols,mkcol2s et al.
 
   Removed
     1- dropped DOS support
