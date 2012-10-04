@@ -1399,8 +1399,8 @@ static void
 InitPrimes(GEN bnr, ulong N0, LISTray *R)
 {
   GEN bnf = bnr_get_bnf(bnr), cond = gel(bnr_get_mod(bnr), 1);
-  long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
-  GEN tmpray, tabpr, prime, pr, nf = bnf_get_nf(bnf);
+  long p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
+  GEN tmpray, tabpr, prime, nf = bnf_get_nf(bnf);
   forprime_t T;
 
   R->condZ = condZ; l = PiBound(N0) * N;
@@ -1417,9 +1417,9 @@ InitPrimes(GEN bnr, ulong N0, LISTray *R)
     tabpr = idealprimedec(nf, prime);
     for (j = 1; j < lg(tabpr); j++)
     {
-      pr  = gel(tabpr,j);
-      np = itos_or_0( pr_norm(pr) );
-      if (!np || np > (long)N0) break;
+      GEN pr  = gel(tabpr,j);
+      ulong np = upowuu(p, pr_get_f(pr));
+      if (!np || np > N0) break;
       if (condZ % p == 0 && idealval(nf, cond, pr))
       {
         gel(tmpray,j) = NULL; continue;

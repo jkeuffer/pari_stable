@@ -38,38 +38,34 @@ dirzetak0(GEN nf, ulong N)
   while ( (p = u_forprime_next(&S)) )
   {
     avma = av2;
-    court[2] = p;
-    if (umodiu(index, p)) /* court does not divide index */
+    if (umodiu(index, p)) /* p does not divide index */
     {
       vect = gel(Flx_degfact(ZX_to_Flx(T,p), p),1);
       lx = lg(vect);
     }
     else
     {
-      GEN P = idealprimedec(nf,court);
+      GEN P;
+      court[2] = p; P = idealprimedec(nf,court);
       lx = lg(P); vect = cgetg(lx,t_VECSMALL);
       for (i=1; i<lx; i++) vect[i] = pr_get_f(gel(P,i));
     }
     if (p <= SQRTN)
       for (i=1; i<lx; i++)
       {
-        GEN NP = powiu(court, vect[i]); /* Norm P[i] */
-        ulong qn, q;
-
-        if (cmpiu(NP, N) > 0) break;
-        qn = q = (ulong)NP[2];
+        ulong qn, q = upowuu(p, vect[i]); /* Norm P[i] */
+        if (!q || q > N) break;
         memcpy(c2 + 2, c + 2, (N-1)*sizeof(long));
         /* c2[i] <- c[i] + sum_{k = 1}^{v_q(i)} c[i/q^k] for all i <= N */
-        while (qn <= (ulong)N)
+        for (qn = q; qn <= N; qn *= q)
         {
-          ulong k, k2; /* k2 = k*qn */
-          LOCAL_HIREMAINDER;
-          for (k = N/qn, k2 = k*qn; k > 0; k--, k2 -=qn) c2[k2] += c[k];
-          qn = mulll(qn, q); if (hiremainder) break;
+          ulong k0 = N/qn, k, k2; /* k2 = k*qn */
+          for (k = k0, k2 = k*qn; k > 0; k--, k2 -=qn) c2[k2] += c[k];
+          if (q > k0) break; /* <=> q*qn > N */
         }
         swap(c, c2);
       }
-    else /* p > sqrt(N): much simpler */
+    else /* p > sqrt(N): simpler */
       for (i=1; i<lx; i++)
       {
         ulong k, k2; /* k2 = k*p */

@@ -1891,7 +1891,7 @@ get_discray(disc_data *D, GEN V, GEN z, long N)
     GEN pr = gel(P,k), p = pr_get_p(pr);
     long e, ep = E[k], f = pr_get_f(pr);
     long S = 0, norm = N, Npr, clhss;
-    Npr = itos(powiu(p,f));
+    Npr = upowuu(p[2],f);
     for (e=1; e<=ep; e++)
     {
       GEN fad;
@@ -2105,17 +2105,17 @@ decodemodule(GEN nf, GEN fa)
  *
  * + otherwise [m,N,R1,D] */
 GEN
-discrayabslistarch(GEN bnf, GEN arch, long bound)
+discrayabslistarch(GEN bnf, GEN arch, ulong bound)
 {
-  byteptr dif = diffptr + 1;
   int allarch = (arch==NULL), flbou = 0;
   long degk, i, j, k, sqbou, l, nba, nbarch, ii, r1, c;
   pari_sp av0 = avma,  av,  av1,  lim;
-  GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY;
+  GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY, empty;
   GEN res, embunit, h, Ray, discall, idealrel, idealrelinit, fadkabs;
+  forprime_t S;
 
-  if (bound <= 0)
-    pari_err_DOMAIN("Discrayabslist","bound","<=",gen_0,stoi(bound));
+  if (bound == 0)
+    pari_err_DOMAIN("discrayabslistarch","bound","==",gen_0,utoi(bound));
   res = discall = NULL; /* -Wall */
 
   bnf = checkbnf(bnf);
@@ -2138,21 +2138,22 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     for (nba=0,i=1; i<=r1; i++) if (signe(gel(arch,i))) nba++;
   }
 
+  empty = cgetg(1,t_VEC);
   /* what follows was rewritten from Ideallist */
-  p = utoipos(2);
+  p = cgetipos(3);
+  u_forprime_init(&S, 2, bound);
   av = avma; lim = stack_lim(av,1);
   sqbou = (long)sqrt((double)bound) + 1;
   Z = bigcgetvec(bound);
-  for (i=2; i<=bound; i++) bigel(Z,i) = cgetg(1,t_VEC);
+  for (i=2; i<=(long)bound; i++) bigel(Z,i) = empty;
   embunit = zlog_units(nf, U, sgnU, bidp);
   bigel(Z,1) = mkvec(zsimp(bidp,embunit));
   if (DEBUGLEVEL>1) err_printf("Starting zidealstarunits computations\n");
-  maxprime_check((ulong)bound);
   /* The goal is to compute Ray (lists of bnrclassno). Z contains "zsimps",
    * simplified bid, from which bnrclassno is easy to compute.
    * Once p > sqbou, delete Z[i] for i > sqbou and compute directly Ray */
   Ray = Z;
-  while (p[2] <= bound)
+  while ((p[2] = u_forprime_next(&S)))
   {
     if (!flbou && p[2] > sqbou)
     {
@@ -2161,7 +2162,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       if (DEBUGLEVEL>1) err_printf("\nStarting bnrclassno computations\n");
       Z = gerepilecopy(av,Z); av1 = avma;
       Ray = bigcgetvec(bound);
-      for (i=1; i<=bound; i++)
+      for (i=1; i<=(long)bound; i++)
         bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
       Ray = gerepilecopy(av1,Ray);
       z = bigcgetvec(sqbou);
@@ -2172,19 +2173,21 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     for (j=1; j<lg(fa); j++)
     {
       GEN pr = gel(fa,j);
-      long prcode, q, f = pr_get_f(pr), Q = itos_or_0(powiu(p,f));
-      if (!Q || Q > bound) continue;
+      long prcode, f = pr_get_f(pr);
+      ulong q, Q = upowuu(p[2], f);
+      if (!Q || Q > bound) break;
 
       /* p, f-1, j-1 as a single integer in "base degk" (f,j <= degk)*/
       prcode = (p[2]*degk + f-1)*degk + j-1;
       q = Q; ideal = pr;
       for (l=1;; l++) /* Q <= bound */
       {
+        ulong iQ;
         bidp = Idealstar(nf,ideal, nf_INIT);
         embunit = zlog_units_noarch(nf, U, bidp);
-        for (i=Q; i<=bound; i+=Q)
+        for (iQ = Q, i = 1; iQ <= bound; iQ += Q, i++)
         {
-          GEN pz, p2, p1 = bigel(Z,i/Q);
+          GEN pz, p2, p1 = bigel(Z,i);
           long lz = lg(p1);
           if (lz == 1) continue;
 
@@ -2194,17 +2197,17 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
             GEN z = gel(p1,k), v = gmael(z,1,1); /* primes in zsimp's fact. */
             long lv = lg(v);
             /* If z has a power of pr in its modulus, skip it */
-            if (Q != i && lv > 1 && v[lv-1] == prcode) break;
+            if (i != 1 && lv > 1 && v[lv-1] == prcode) break;
             gel(p2,++c) = zsimpjoin(z,bidp,embunit,prcode,l);
           }
 
           setlg(p2, c+1);
-          pz = bigel(Ray,i);
+          pz = bigel(Ray,iQ);
           if (flbou) p2 = bnrclassnointernarch(p2,h,matarchunit);
           if (lg(pz) > 1) p2 = shallowconcat(pz,p2);
-          bigel(Ray,i) = p2;
+          bigel(Ray,iQ) = p2;
         }
-        Q = itos_or_0( mulss(Q, q) );
+        Q = itou_or_0( muluu(Q, q) );
         if (!Q || Q > bound) break;
 
         ideal = idealmul(nf,ideal,pr);
@@ -2215,7 +2218,6 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       if(DEBUGMEM>1) pari_warn(warnmem,"[1]: discrayabslistarch");
       gerepileall(av, flbou? 2: 1, &Z, &Ray);
     }
-    NEXT_PRIME_VIADIFF(p[2], dif);
   }
   if (!flbou) /* occurs iff bound = 1,2,4 */
   {
@@ -2237,7 +2239,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   idealrelinit = trivial_fact();
   av1 = avma; lim = stack_lim(av1,1);
   Disc = bigcgetvec(bound);
-  for (i=1; i<=bound; i++) bigel(Disc,i) = cgetg(1,t_VEC);
+  for (i=1; i<=bound; i++) bigel(Disc,i) = empty;
   for (ii=1; ii<=bound; ii++)
   {
     GEN sous, sousdisc;
@@ -2271,7 +2273,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
           long e, ep = E[k], pf = P[k] / degk, f = (pf%degk) + 1;
           long S = 0, normi = i, Npr, clhss;
           p = utoipos(pf / degk);
-          Npr = itos(powiu(p,f));
+          Npr = upowuu(p[2],f);
           for (e=1; e<=ep; e++)
           {
             GEN fad;
@@ -2309,7 +2311,7 @@ STORE:  gel(discall,karch+1) = res;
   return gerepilecopy(av0, Disc);
 }
 GEN
-discrayabslistlong(GEN bnf, long bound) {
+discrayabslistlong(GEN bnf, ulong bound) {
   GEN nf = checknf(bnf);
   long r1 = nf_get_r1(nf);
   return discrayabslistarch(bnf,zerovec(r1),bound);

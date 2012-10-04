@@ -2090,7 +2090,8 @@ Ideallist(GEN bnf, ulong bound, long flag)
     for (j=1; j<lg(fa); j++)
     {
       GEN pr = gel(fa,j), z2;
-      ulong q, iQ, Q = itou_or_0(pr_norm(pr));
+      long f = pr_get_f(pr);
+      ulong q, Q = upowuu(p[2], f);
       if (!Q || Q > bound) break;
 
       z2 = leafcopy(z);
@@ -2098,6 +2099,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
       ID.pr = ID.prL = pr;
       for (l=1; Q <= bound; l++, Q *= q) /* add pr^l */
       {
+        ulong iQ;
         ID.L = utoipos(l);
         if (big_id) {
           if (l > 1) ID.prL = idealpow(nf,pr,ID.L);
