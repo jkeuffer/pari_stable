@@ -1598,8 +1598,8 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 {
   GEN nfpol = nf_get_pol(nf), bad = mulii(nf_get_disc(nf), nf_get_index(nf));
   long maxf, nfdeg = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
-  byteptr pt = diffptr;
-  ulong pp = 0;
+  ulong pp;
+  forprime_t S;
   pari_timer ti_pr;
 
   if (DEBUGLEVEL>3) timer_start(&ti_pr);
@@ -1610,8 +1610,9 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   *Tp = NULL;
 
   maxf = get_maxf(nfdeg);
+  (void)u_forprime_init(&S, 2, ULONG_MAX);
   /* select pr such that pol has the smallest number of factors, ct attempts */
-  for (;;)
+  while ((pp = u_forprime_next(&S)))
   {
     GEN aT, apr, ap, amodpr, red, r, fa = NULL;
     long anbf;
@@ -1619,7 +1620,6 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     pari_sp av2 = avma;
 
     /* first step : select prime of high inertia degree */
-    NEXT_PRIME_VIADIFF_CHECK(pp, pt);
     if (! umodiu(bad,pp)) continue;
     if (*lt) { ltp = umodiu(*lt, pp); if (!ltp) continue; }
     r = get_good_factor(nfpol, pp, maxf);
@@ -1666,8 +1666,10 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     if (DEBUGLEVEL>3)
       err_printf("%3ld %s at prime\n  %Ps\nTime: %ld\n",
                  anbf, fl == FACTORS?"factors": "roots", apr, timer_delay(&ti_pr));
-    if (--ct <= 0) return nbf;
+    if (--ct <= 0) break;
   }
+  if (!nbf) pari_err_OVERFLOW("nf_pick_prime [ran out of primes]");
+  return nbf;
 }
 
 /* assume lt(T) is a t_INT and T square free */
@@ -1900,18 +1902,18 @@ nf_pick_prime_for_units(GEN nf, prklift_t *P)
 {
   GEN nfpol = nf_get_pol(nf), bad = mulii(nf_get_disc(nf), nf_get_index(nf));
   GEN aT, amodpr, apr, ap = NULL, r = NULL;
-  long maxf, nfdeg = degpol(nfpol);
-  byteptr pt = diffptr;
-  ulong pp = 0;
+  long nfdeg = degpol(nfpol), maxf = get_maxf(nfdeg);
+  ulong pp;
+  forprime_t S;
 
-  maxf = get_maxf(nfdeg);
-  for (;;)
+  (void)u_forprime_init(&S, 2, ULONG_MAX);
+  while ( (pp = u_forprime_next(&S)) )
   {
-    NEXT_PRIME_VIADIFF_CHECK(pp, pt);
     if (! umodiu(bad,pp)) continue;
     r = get_good_factor(nfpol, pp, maxf);
     if (r) break;
   }
+  if (!r) pari_err_OVERFLOW("nf_pick_prime [ran out of primes]");
   ap = utoipos(pp);
   apr = primedec_apply_kummer(nf, Flx_to_ZX(r), 1, ap);
   amodpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
@@ -1968,21 +1970,23 @@ nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P)
 static long
 guess_roots(GEN nf)
 {
-  long c = 0, nfdegree = nf_get_degree(nf), l;
+  long c = 0, nfdegree = nf_get_degree(nf), B = nfdegree + 20, l;
   ulong p = 2;
-  byteptr pt = diffptr+1;
-  GEN T = nf_get_pol(nf), nbroots = NULL;
-  pari_sp av = avma;
+  GEN T = nf_get_pol(nf), D = nf_get_disc(nf), index = nf_get_index(nf);
+  GEN nbroots = NULL;
+  forprime_t S;
+  pari_sp av;
 
-  /* result must be stationnary (counter c) for at least nfdegree+20 loops */
-  for (l=1;; l++)
+  (void)u_forprime_init(&S, 3, ULONG_MAX);
+  av = avma;
+  /* result must be stationnary (counter c) for at least B loops */
+  for (l=1; (p = u_forprime_next(&S)); l++)
   {
-    GEN old, Tp, F, pf_1;
+    GEN old, F, pf_1, Tp;
     long i, nb, gcdf = 0;
 
-    NEXT_PRIME_VIADIFF_CHECK(p,pt);
-    Tp = ZX_to_Flx(T,p);
-    if (!Flx_is_squarefree(Tp, p)) continue;
+    if (!umodiu(D,p) || !umodiu(index,p)) continue;
+    Tp = ZX_to_Flx(T,p); /* squarefree */
     F = Flx_nbfact_by_degree(Tp, &nb, p);
     /* the gcd of the p^f - 1 is p^(gcd of the f's) - 1 */
     for (i = 1; i <= nfdegree; i++)
@@ -1997,10 +2001,11 @@ guess_roots(GEN nf)
       err_printf("p=%ld; gcf(f(P/p))=%ld; nbroots | %Ps",p, gcdf, nbroots);
     /* if same result go on else reset the stop counter [c] */
     if (old && equalii(nbroots,old))
-    { if (!is_bigint(nbroots) && ++c > nfdegree + 20) break; }
+    { if (!is_bigint(nbroots) && ++c > B) break; }
     else
       c = 0;
   }
+  if (!nbroots) pari_err_OVERFLOW("guess_roots [ran out of primes]");
   if (DEBUGLEVEL>5) err_printf("%ld loops\n",l);
   avma = av; return itos(nbroots);
 }
