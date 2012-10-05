@@ -42,6 +42,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename leftright_pow_fold -> gen_pow_fold, leftright_pow_fold_i
        -> gen_pow_fold_i
   - upowuu(x,n) now returns 0 on overflow. Used to return x^n mod 2^BITS_IN_LONG
+  - rename RgX_check_ZXY -> RgX_check_ZXX, ZXY_max_lg -> to ZXX_max_lg
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -379,7 +379,7 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
   pari_sp av = avma;
 
   if (typ(pol) != t_POL) pari_err_TYPE("polhensellift",pol);
-  RgX_check_ZXY(pol, "polhensellift");
+  RgX_check_ZXX(pol, "polhensellift");
   if (!is_vec_t(typ(L)) || lg(L) < 3) pari_err_TYPE("polhensellift",L);
   t = typ(p);
   if (t == t_VEC) /* [p, T] */
@@ -397,7 +397,7 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
   {
     if (typ(gel(L,i)) != t_POL)
       gel(L,i) = scalar_ZX_shallow(gel(L,i), varn(pol));
-    RgX_check_ZXY(gel(L,i), "polhensellift");
+    RgX_check_ZXX(gel(L,i), "polhensellift");
   }
   return gerepilecopy(av, ZpX_liftfact(pol, L, T, p, N, powiu(p,N)));
 }

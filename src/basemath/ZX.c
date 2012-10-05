@@ -28,7 +28,7 @@ void
 RgX_check_ZX(GEN x, const char *s)
 { if (!RgX_is_ZX(x)) pari_err_TYPE(stack_strcat(s," [not in Z[X]]"), x); }
 void
-RgX_check_ZXY(GEN x, const char *s)
+RgX_check_ZXX(GEN x, const char *s)
 {
   long k = lg(x)-1;
   for ( ; k>1; k--) {
@@ -43,7 +43,7 @@ RgX_check_ZXY(GEN x, const char *s)
 }
 
 long
-ZXY_max_lg(GEN x)
+ZXX_max_lg(GEN x)
 {
   long i, prec = 0, lx = lg(x);
   for (i=2; i<lx; i++)

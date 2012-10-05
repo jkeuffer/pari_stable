@@ -635,7 +635,7 @@ GEN     nm_Z_mul(GEN X, GEN c);
 
 void    RgX_check_QX(GEN x, const char *s);
 void    RgX_check_ZX(GEN x, const char *s);
-void    RgX_check_ZXY(GEN x, const char *s);
+void    RgX_check_ZXX(GEN x, const char *s);
 GEN     Z_ZX_sub(GEN x, GEN y);
 GEN     ZX_Z_add(GEN y,GEN x);
 GEN     ZX_Z_add_shallow(GEN y, GEN x);
@@ -667,8 +667,8 @@ GEN     ZXV_Z_mul(GEN y, GEN x);
 GEN     ZXV_dotproduct(GEN V, GEN W);
 int     ZXV_equal(GEN V, GEN W);
 GEN     ZXV_remi2n(GEN x, long n);
-long    ZXY_max_lg(GEN x);
 GEN     ZXX_Z_divexact(GEN y, GEN x);
+long    ZXX_max_lg(GEN x);
 GEN     scalar_ZX(GEN x, long v);
 GEN     scalar_ZX_shallow(GEN x, long v);
 GEN     zx_to_ZX(GEN z);

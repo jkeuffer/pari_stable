@@ -715,7 +715,7 @@ nf_root_bounds(GEN P, GEN T)
   T = get_nfpol(T, &nf);
 
   P = Q_primpart(P);
-  prec = ZXY_max_lg(P) + 1;
+  prec = ZXX_max_lg(P) + 1;
   l = lg(P);
   if (nf && nf_get_prec(nf) >= prec)
     R = nf_get_roots(nf);

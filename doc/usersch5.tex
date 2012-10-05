@@ -6155,13 +6155,13 @@ coefficients of \kbd{x}.
 \fun{GEN}{ZXV_dotproduct}{GEN x,GEN y} as \kbd{RgV\_dotproduct} assuming $x$
 and $y$ have \kbd{ZX} entries.
 
-\subsec{\kbd{ZXY}}
+\subsec{\kbd{ZXX}}
 
-\fun{void}{RgX_check_ZXY}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
+\fun{void}{RgX_check_ZXX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
 raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
 ($s$ should point to the name of the caller).
 
-\fun{long}{ZXY_max_lg}{GEN x} returns the effective length of the longest
+\fun{long}{ZXX_max_lg}{GEN x} returns the effective length of the longest
 component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
 
 \fun{GEN}{ZXX_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all integer divisions
