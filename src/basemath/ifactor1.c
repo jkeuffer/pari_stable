@@ -4124,6 +4124,28 @@ sumdivk(GEN n, long k)
   return gerepileupto(av,m);
 }
 
+long
+Z_issmooth(GEN m, ulong lim)
+{
+  pari_sp av=avma;
+  ulong p = 2;
+  byteptr d = diffptr+1;
+  m = icopy(m);
+  for(;;)
+  {
+    if (!*d) break;
+    if (!umodiu(m,p))
+    {
+      int stop;
+      Z_lvalrem_stop(m, p, &stop);
+      if (stop) { avma = av; return cmpiu(m,lim)<=0; }
+    }
+    NEXT_PRIME_VIADIFF(p,d);
+    if (p > lim) break;
+  }
+  avma = av; return 0;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**       COMPUTING THE MATRIX OF PRIME DIVISORS AND EXPONENTS        **/
