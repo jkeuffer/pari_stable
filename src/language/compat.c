@@ -202,6 +202,7 @@ entree oldfonctions[]={
 {"_~",0,(void*)gtrans,13,"G","_~"},
 {"O",0,(void*)ggrando,7,"GD1,L,","O(a^b): p-adic or power series zero with precision given by b."},
 {"O(_^_)",0,(void*)ggrando,7,"GD1,L,","O(a^b): p-adic or power series zero with precision given by b."},
+{"Str",0,(void*)Str,2,"s*","Str({x}*): concatenates its (string) argument into a single string."},
 {"abs",1,(void*)gabs,3,"Gp","abs(x)=absolute value (or modulus) of x."},
 {"acos",1,(void*)gacos,3,"Gp","acos(x)=inverse cosine of x."},
 {"acosh",1,(void*)gach,3,"Gp","acosh(x)=inverse hyperbolic cosine of x."},
