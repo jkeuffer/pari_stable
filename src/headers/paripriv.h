@@ -502,9 +502,9 @@ GEN     qfbforms(GEN D);
 /* buch2.c */
 
 typedef struct GRHprime_t { ulong p; double logp; GEN dec; } GRHprime_t;
-typedef struct GRHcheck_t { double cD, cN; GRHprime_t *primes; long nprimes, maxprimes; } GRHcheck_t;
+typedef struct GRHcheck_t { double cD, cN; GRHprime_t *primes; long nprimes, maxprimes, limp; forprime_t P; } GRHcheck_t;
 void    init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD);
-ulong   last_prime(GRHcheck_t *S);
+ulong   GRH_last_prime(GRHcheck_t *S);
 int     GRHok(GRHcheck_t *S, double L, double SA, double SB);
 GEN     check_and_build_matal(GEN bnf);
 GEN     extract_full_lattice(GEN x);

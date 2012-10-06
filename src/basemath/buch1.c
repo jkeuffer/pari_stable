@@ -285,38 +285,51 @@ clearhash(long **hash)
   }
 }
 
+/* Rosser-Schoenfeld upper bound pi(x) <= x/log x * (1 + 3 / (2log x)), x>1 */
+double
+RSpibound(double x)
+{
+  double L;
+  if (x < 2) return 0;
+  L = 1/log(x);
+  return x*L*(1 + 1.5*L);
+}
+
 /* last prime stored */
 ulong
-last_prime(GRHcheck_t *S) { return (S->primes + S->nprimes-1)->p; }
-
-/* cache data for all primes up to the np-th prime.
- * Assume that only primes < 436273291 are needed [first gap in diffptr]*/
-static void
-check_prime_quad(GRHcheck_t *S, long np, GEN D)
+GRH_last_prime(GRHcheck_t *S) { return (S->primes + S->nprimes-1)->p; }
+/* ensure that S->primes can hold at least nb primes */
+void
+GRH_ensure(GRHcheck_t *S, long nb)
 {
-  long p, i;
-  byteptr delta;
-  pari_sp av = avma;
-
-  if (S->nprimes >= np) return;
-  p = S->nprimes? last_prime(S): 0;
-  if (S->maxprimes <= np)
+  if (S->maxprimes <= nb)
   {
-    do S->maxprimes *= 2; while (S->maxprimes <= np);
+    do S->maxprimes *= 2; while (S->maxprimes <= nb);
     S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
                                           S->maxprimes*sizeof(*S->primes));
   }
-  for (i = S->nprimes, delta = diffptr + i; i < np; i++)
+}
+/* cache data for all primes up to the LIM */
+static void
+cache_prime_quad(GRHcheck_t *S, long LIM, GEN D)
+{
+  GRHprime_t *pr;
+  double nb;
+  pari_sp av = avma;
+
+  if (S->limp >= LIM) return;
+  nb = RSpibound((double)LIM); /* #{p <= LIM} <= nb */
+  GRH_ensure(S, nb+1); /* room for one extra prime */
+  for (pr = S->primes + S->nprimes;;)
   {
-    long s;
-    GRHprime_t *pr = S->primes + i;
-    NEXT_PRIME_VIADIFF(p, delta);
+    ulong p = u_forprime_next(&(S->P));
     pr->p = p;
-    pr->logp = log(p);
-    s = kroiu(D,p);
-    pr->dec = (GEN)s;
+    pr->logp = log((double)p);
+    pr->dec = (GEN)kroiu(D,p);
+    S->nprimes++;
+    pr++;
+    if (p >= LIM) break; /* store up to nextprime(LIM) included */
   }
-  S->nprimes = np;
   avma = av;
 }
 
@@ -326,7 +339,7 @@ compute_invresquad(GRHcheck_t *S)
   pari_sp av = avma;
   GEN invres = real_1(DEFAULTPREC);
   GRHprime_t *pr = S->primes;
-  long i = S->nprimes, LIMC = last_prime(S)+diffptr[i]-1; /* nextprime(p+1)-1*/
+  long i = S->nprimes, LIMC = GRH_last_prime(S)+diffptr[i]-1; /* nextprime(p+1)-1*/
   double limp = log(LIMC) / 2;
   for (; i > 0; pr++, i--)
   {
@@ -361,31 +374,35 @@ is_bad(GEN D, ulong p)
   avma = av; return r;
 }
 
+/* returns the n-th suitable ideal for the factorbase */
 static long
 nthidealquad(GEN D, long n)
 {
-  byteptr delta = diffptr;
-  long p = 0;
+  pari_sp av = avma;
+  forprime_t S;
+  ulong p;
+  (void)u_forprime_init(&S, 2, ULONG_MAX);
   while (n > 0)
   {
-    NEXT_PRIME_VIADIFF(p, delta);
-    if (!is_bad(D, (ulong)p) && kroiu(D, p) >= 0) n--;
+    p = u_forprime_next(&S);
+    if (!is_bad(D, p) && kroiu(D, p) >= 0) n--;
   }
-  return p;
+  avma = av; return p;
 }
 
 static int
 quadGRHchk(GEN D, GRHcheck_t *S, long LIMC)
 {
-  long i, np = uprimepi(LIMC);
+  long i;
   double logC = log(LIMC), SA = 0, SB = 0;
-  check_prime_quad(S, np, D);
-  for (i = 0; i < np; i++)
+  cache_prime_quad(S, LIMC, D);
+  for (i = 0;; i++)
   {
     GRHprime_t *pr = S->primes+i;
     ulong p = pr->p;
     long M;
     double logNP, q, A, B;
+    if (p > LIMC) break;
     if ((long)pr->dec < 0)
     {
       logNP = 2 * pr->logp;
@@ -417,7 +434,7 @@ FBquad(struct buch_quad *B, ulong C2, ulong C1, GRHcheck_t *S)
   pari_sp av;
   GRHprime_t *pr;
 
-  check_prime_quad(S, uprimepi(C2), D);
+  cache_prime_quad(S, C2, D);
   pr = S->primes;
   B->numFB = cgetg(C2+1, t_VECSMALL);
   B->FB    = cgetg(C2+1, t_VECSMALL);
@@ -998,8 +1015,8 @@ Buchquad(GEN D, double cbach, double cbach2, long prec)
   init_GRHcheck(&GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
   high = low = LIMC0 = maxss((long)(cbach2*LOGD2), 1);
   LIMCMAX = (long)(6.*LOGD2);
-  /* XXX 25 and 200 below to ensure a good enough approximation of residue */
-  check_prime_quad(&GRHcheck, expi(D) < 16 ? 25 : 200, D);
+  /* 97/1223 below to ensure a good enough approximation of residue */
+  cache_prime_quad(&GRHcheck, expi(D) < 16 ? 97: 1223, D);
   while (!quadGRHchk(D, &GRHcheck, high))
   {
     low = high;
