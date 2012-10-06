@@ -2082,7 +2082,6 @@ Ideallist(GEN bnf, ulong bound, long flag)
   p = cgetipos(3);
   u_forprime_init(&S, 2, bound);
   av = avma; lim = stack_lim(av,1);
-  maxprime_check(bound);
   while ((p[2] = u_forprime_next(&S)))
   {
     if (DEBUGLEVEL>1) { err_printf("%ld ",p[2]); err_flush(); }
