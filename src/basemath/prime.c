@@ -1011,39 +1011,29 @@ primepi_upper_bound(double x)
 }
 
 GEN
-primes(long m)
+primes(long n)
 {
-  byteptr p = diffptr;
-  ulong prime = 0;
-  long n = m;
-  GEN y, z;
-
-  if (n < 0)  pari_err_DOMAIN("primes", "dimension", "<", gen_0, stoi(m));
-  z = y = cgetg(n+1,t_VEC);
-  while (n--)
-  {
-    NEXT_PRIME_VIADIFF(prime,p);
-    if (!*p) pari_err_Dusart(m);
-    gel(++z, 0) = utoipos(prime);
-  }
+  forprime_t S;
+  long i;
+  GEN y;
+  if (n <= 0) return cgetg(1, t_VEC);
+  y = cgetg(n+1, t_VEC);
+  (void)new_chunk(3*n); /*HACK*/
+  u_forprime_init(&S, 2, ULONG_MAX);
+  avma = (pari_sp)y;
+  for (i = 1; i <= n; i++) gel(y, i) = utoipos( u_forprime_next(&S) );
   return y;
 }
 GEN
-primes_zv(long m)
+primes_zv(long n)
 {
-  byteptr p = diffptr;
-  ulong prime = 0;
-  long n = (m < 0)? 0: m;
-  GEN y, z;
-
-  z = y = cgetg(n+1,t_VECSMALL);
-  while (n--)
-  {
-    NEXT_PRIME_VIADIFF(prime,p);
-    if (!*p) pari_err_Dusart(m);
-    *++z = prime;
-  }
-  return y;
+  forprime_t S;
+  long i;
+  GEN y;
+  if (n <= 0) return cgetg(1, t_VECSMALL);
+  y = cgetg(n+1,t_VECSMALL);
+  for (i = 1; i <= n; i++) y[i] =  u_forprime_next(&S);
+  avma = (pari_sp)y; return y;
 }
 
 /***********************************************************************/
