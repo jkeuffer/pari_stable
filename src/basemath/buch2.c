@@ -553,7 +553,7 @@ cache_prime_dec(GRHcheck_t *S, long LIM, GEN nf)
   double nb;
 
   if (S->limp >= LIM) return;
-  nb = RSpibound((double)LIM); /* #{p <= LIM} <= nb */
+  nb = primepi_upper_bound((double)LIM); /* #{p <= LIM} <= nb */
   GRH_ensure(S, nb+1); /* room for one extra prime */
   P = nf_get_pol(nf);
   index = nf_get_index(nf);

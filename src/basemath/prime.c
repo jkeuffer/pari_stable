@@ -997,6 +997,19 @@ primepi(GEN x)
   avma = av; return utoi(uprimepi(itou(N)));
 }
 
+/* pi(x) <= x/log x * (1 + 3 / (2log x)), x>1 [ Rosser-Schoenefeld ]
+ * pi(x) <= x/(log x - 1.11), x >= 4 [ Panaitopol ]*/
+double
+primepi_upper_bound(double x)
+{
+  if (x < 4) {
+    if (x >= 3) return 2;
+    if (x >= 2) return 1;
+    return 0;
+  }
+  return x / (log(x) - 1.11);
+}
+
 GEN
 primes(long m)
 {

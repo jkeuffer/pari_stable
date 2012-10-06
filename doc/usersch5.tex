@@ -2762,6 +2762,9 @@ $0$ otherwise.
 
 \fun{ulong}{uprimepi}{ulong n}, returns the number of primes $p\leq n$.
 
+\fun{double}{primepi_upper_bound}{double x} return a quick upper bound for
+$\pi(x)$, using $\pi(x) < x / (\log x - 1.11)$ for $x\geq 4$.
+
 \fun{ulong}{unextprime}{ulong n}, returns the smallest prime $\geq n$. Return
 $0$ if it cannot be represented as an \kbd{ulong} (bigger than $2^{64} - 59$
 or $2^{32} - 5$ depending on the word size).

@@ -285,16 +285,6 @@ clearhash(long **hash)
   }
 }
 
-/* Rosser-Schoenfeld upper bound pi(x) <= x/log x * (1 + 3 / (2log x)), x>1 */
-double
-RSpibound(double x)
-{
-  double L;
-  if (x < 2) return 0;
-  L = 1/log(x);
-  return x*L*(1 + 1.5*L);
-}
-
 /* last prime stored */
 ulong
 GRH_last_prime(GRHcheck_t *S) { return (S->primes + S->nprimes-1)->p; }
@@ -317,7 +307,7 @@ cache_prime_quad(GRHcheck_t *S, long LIM, GEN D)
   double nb;
 
   if (S->limp >= LIM) return;
-  nb = RSpibound((double)LIM); /* #{p <= LIM} <= nb */
+  nb = primepi_upper_bound((double)LIM); /* #{p <= LIM} <= nb */
   GRH_ensure(S, nb+1); /* room for one extra prime */
   for (pr = S->primes + S->nprimes;;)
   {

@@ -507,7 +507,6 @@ void    init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD);
 void    GRH_ensure(GRHcheck_t *S, long nb);
 ulong   GRH_last_prime(GRHcheck_t *S);
 int     GRHok(GRHcheck_t *S, double L, double SA, double SB);
-double  RSpibound(double x);
 GEN     check_and_build_matal(GEN bnf);
 GEN     extract_full_lattice(GEN x);
 GEN     init_red_mod_units(GEN bnf, long prec);

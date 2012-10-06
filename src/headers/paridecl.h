@@ -2777,6 +2777,7 @@ long    ispseudoprime(GEN x, long flag);
 long    millerrabin(GEN n, long k);
 GEN     prime(long n);
 GEN     primepi(GEN x);
+double  primepi_upper_bound(double x);
 GEN     primes(long n);
 GEN     primes_zv(long m);
 GEN     randomprime(GEN N);
