@@ -1312,17 +1312,15 @@ void
 testprimes(GEN bnf, GEN BOUND)
 {
   pari_sp av0 = avma, av;
-  ulong p, pmax, bound, boundp = itou_or_0(BOUND);
+  ulong pmax;
+  GEN Vbase, fb, p, nf = bnf_get_nf(bnf), dK = nf_get_disc(nf);
+  forprime_t S;
   FACT *fact;
-  GEN nf = bnf_get_nf(bnf), f = nf_get_index(nf), dK = nf_get_disc(nf);
-  GEN Vbase, fb, gp;
-  byteptr d = diffptr + 1;
   FB_t F;
 
-  bound = maxprime();
-  if (boundp && boundp < bound) bound = boundp;
-
-  if (!is_pm1(f))
+  if (is_bigint(BOUND))
+    pari_warn(warner,"Zimmert's bound is large (%Ps), certification will take a long time", BOUND);
+  if (!is_pm1(nf_get_index(nf)))
   {
     GEN D = nf_get_diff(nf), L;
     if (DEBUGLEVEL>1) err_printf("**** Testing Different = %Ps\n",D);
@@ -1335,15 +1333,19 @@ testprimes(GEN bnf, GEN BOUND)
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, nf_get_degree(nf));
   fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
-
-  /* loop up to min(maxprime, BOUND) */
-  for (av=avma, p=2; p < bound; avma=av)
+  forprime_init(&S, gen_2, BOUND);
+  av = avma;
+  while (( p = forprime_next(&S) ))
   {
-    GEN vP = idealprimedec(bnf, utoipos(p));
-    long i, l = lg(vP);
-    if (DEBUGLEVEL>1) err_printf("*** p = %lu\n",p);
+    GEN vP;
+    long i, l;
+
+    avma = av;
+    vP = idealprimedec(bnf, p);
+    l = lg(vP);
+    if (DEBUGLEVEL>1) err_printf("*** p = %Ps\n",p);
     /* loop through all P | p if ramified, all but one otherwise */
-    if (umodiu(dK,p)) l--;
+    if (!dvdii(dK,p)) l--;
     for (i=1; i<l; i++)
     {
       GEN P = gel(vP,i);
@@ -1354,37 +1356,9 @@ testprimes(GEN bnf, GEN BOUND)
         if (DEBUGLEVEL>1) err_printf("    Norm(P) > Zimmert bound\n");
         break;
       }
-      if (p <= pmax && (k = tablesearch(fb, P, &cmp_prime_ideal)))
+      if (cmpiu(p, pmax) <= 0 && (k = tablesearch(fb, P, &cmp_prime_ideal)))
       { if (DEBUGLEVEL>1) err_printf("    #%ld in factor base\n",k); }
       else if (DEBUGLEVEL>1)
-        err_printf("    is %Ps\n", isprincipal(bnf,P));
-      else /* faster: don't compute result */
-        (void)SPLIT(&F, nf, idealhnf_two(nf,P), Vbase, fact);
-    }
-    NEXT_PRIME_VIADIFF(p, d);
-  }
-  if (boundp == bound) { avma = av0; return; }
-
-  /* finish looping up to BOUND */
-  pari_warn(warner,"Zimmert's bound is large (%Pd), certification will take a long time", BOUND);
-  gp = utoipos(bound);
-  for (av=avma;; gp = gerepileuptoint(av, nextprime(addis(gp,1))))
-  {
-    GEN vP = idealprimedec(bnf, gp);
-    long i, l = lg(vP);
-    if (DEBUGLEVEL>1) err_printf("*** p = %Pu\n",gp);
-    /* loop through all P | p if ramified, all but one otherwise */
-    if (!dvdii(dK,gp)) l--;
-    for (i=1; i<l; i++)
-    {
-      GEN P = gel(vP,i);
-      if (DEBUGLEVEL>1) err_printf("  Testing P = %Ps\n",P);
-      if (cmpii(pr_norm(P), BOUND) >= 0)
-      {
-        if (DEBUGLEVEL>1) err_printf("    Norm(P) > Zimmert bound\n");
-        break;
-      }
-      if (DEBUGLEVEL>1)
         err_printf("    is %Ps\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
         (void)SPLIT(&F, nf, idealhnf_two(nf,P), Vbase, fact);
