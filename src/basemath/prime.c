@@ -835,10 +835,12 @@ static struct {
 };
 static const int prime_table_len = sizeof(prime_table)/sizeof(prime_table[0]);
 
+#if 0
 /* use something close to Dusart's bound */
 static void
 pari_err_Dusart(long m)
 { pari_err_MAXPRIME((ulong)(m*( log((double)m*log((double)m))-0.948 ))); }
+#endif
 /* find prime closest to n in prime_table. */
 void
 prime_table_closest_p(ulong n, byteptr *pd, ulong *pp, ulong *pn)
@@ -861,8 +863,19 @@ prime_table_closest_p(ulong n, byteptr *pd, ulong *pp, ulong *pn)
   *pp = prime_table[i].p;
   *pd = diffptr+prime_table[i].off;
 }
+
+/* return the n-th successor of prime p > 2 */
+static GEN
+prime_successor(ulong p, ulong n)
+{
+  forprime_t S;
+  long i;
+  forprime_init(&S, utoipos(p+1), NULL);
+  for (i = 1; i < n; i++) (void)forprime_next(&S);
+  return forprime_next(&S);
+}
 /* find the N-th prime */
-void
+static GEN
 prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
 {
   byteptr d;
@@ -871,7 +884,6 @@ prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
   for (i = 1; i < prime_table_len; i++)
   {
     n = prime_table[i].n;
-    if (prime_table[i].p > maxp) { i--; break; }
     if (n > N)
     {
       ulong u = N - prime_table[i-1].n;
@@ -882,6 +894,13 @@ prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
   if (i == prime_table_len) i = prime_table_len - 1;
   p = prime_table[i].p;
   n = prime_table[i].n;
+  if (n > N && p > maxp)
+  {
+    i--;
+    p = prime_table[i].p;
+    n = prime_table[i].n;
+  }
+  /* if beyond prime table, then n <= N */
   d = diffptr + prime_table[i].off;
   if (n > N)
   {
@@ -891,27 +910,43 @@ prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
   else if (n < N)
   {
     n = N-n;
+    if (p > maxp) return prime_successor(p, n);
     do {
-      if (!*d) pari_err_Dusart(N);
+      if (!*d) return prime_successor(p, n);
       n--; NEXT_PRIME_VIADIFF(p,d);
     } while (n) ;
   }
   *pp = p;
-  *pd = d;
+  *pd = d; return NULL; /* OK */
 }
 
-/* assume all primes up to 59359 are precomputed */
 ulong
 uprime(long N)
 {
+  pari_sp av = avma;
   byteptr d;
   ulong p;
+  GEN P;
   if (N <= 0) pari_err_DOMAIN("prime", "n", "<=",gen_0, stoi(N));
-  prime_table_find_n(N, &d, &p);
-  return p;
+  P = prime_table_find_n(N, &d, &p);
+  avma = av;
+  if (!P) return p; /* found in prime table */
+  if (lgefint(P) != 3) pari_err_OVERFLOW("uprime");
+  return P[2];
 }
 GEN
-prime(long n) { return utoipos(uprime(n)); }
+prime(long N)
+{
+  pari_sp av = avma;
+  byteptr d;
+  ulong p;
+  GEN P;
+  if (N <= 0) pari_err_DOMAIN("prime", "n", "<=",gen_0, stoi(N));
+  P = prime_table_find_n(N, &d, &p);
+  avma = av;
+  if (!P) return utoipos(p); /* found in prime table */
+  return icopy(P);
+}
 
 /* random b-bit prime */
 GEN
