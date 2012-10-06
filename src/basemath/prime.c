@@ -1067,6 +1067,7 @@ primes_zv(long n)
   GEN y;
   if (n <= 0) return cgetg(1, t_VECSMALL);
   y = cgetg(n+1,t_VECSMALL);
+  u_forprime_init(&S, 2, ULONG_MAX);
   for (i = 1; i <= n; i++) y[i] =  u_forprime_next(&S);
   avma = (pari_sp)y; return y;
 }
