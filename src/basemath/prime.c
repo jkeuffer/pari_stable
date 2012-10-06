@@ -842,15 +842,13 @@ pari_err_Dusart(long m)
 { pari_err_MAXPRIME((ulong)(m*( log((double)m*log((double)m))-0.948 ))); }
 #endif
 /* find prime closest to n in prime_table. */
-void
-prime_table_closest_p(ulong n, byteptr *pd, ulong *pp, ulong *pn)
+static long
+prime_table_closest_p(ulong n)
 {
-  ulong maxp = maxprime();
   long i;
   for (i = 1; i < prime_table_len; i++)
   {
     ulong p = prime_table[i].p;
-    if (p > maxp) { i--; break; }
     if (p > n)
     {
       ulong u = n - prime_table[i-1].p;
@@ -859,9 +857,7 @@ prime_table_closest_p(ulong n, byteptr *pd, ulong *pp, ulong *pn)
     }
   }
   if (i == prime_table_len) i = prime_table_len - 1;
-  *pn = prime_table[i].n;
-  *pp = prime_table[i].p;
-  *pd = diffptr+prime_table[i].off;
+  return i;
 }
 
 /* return the n-th successor of prime p > 2 */
@@ -996,11 +992,20 @@ void
 prime_table_next_p(ulong a, byteptr *pd, ulong *pp, ulong *pn)
 {
   byteptr d;
-  ulong p, n;
-  prime_table_closest_p(a, &d, &p, &n);
+  ulong p, n, maxp = maxprime();
+  long i = prime_table_closest_p(a);
+  p = prime_table[i].p;
+  if (p > a && p > maxp)
+  {
+    i--;
+    p = prime_table[i].p;
+  }
+  /* if beyond prime table, then p <= a */
+  n = prime_table[i].n;
+  d = diffptr+prime_table[i].off;
   if (p < a)
   {
-    if (a > maxprime()) pari_err_MAXPRIME(a);
+    if (a > maxp) pari_err_MAXPRIME(a);
     do { n++; NEXT_PRIME_VIADIFF(p,d); } while (p < a);
   }
   else if (p != a)
@@ -1016,9 +1021,26 @@ prime_table_next_p(ulong a, byteptr *pd, ulong *pp, ulong *pn)
 ulong
 uprimepi(ulong a)
 {
-  byteptr d;
-  ulong p, n;
-  prime_table_next_p(a, &d, &p, &n);
+  ulong p, n, maxp = maxprime();
+  if (a <= maxp)
+  {
+    byteptr d;
+    prime_table_next_p(a, &d, &p, &n);
+  }
+  else
+  {
+    long i = prime_table_closest_p(a);
+    forprime_t S;
+    p = prime_table[i].p;
+    if (p > maxp)
+    {
+      i--;
+      p = prime_table[i].p;
+    }
+    n = prime_table[i].n;
+    (void)u_forprime_init(&S, p+1, a);
+    for (; p; n++) p = u_forprime_next(&S);
+  }
   return p == a? n: n-1;
 }
 
@@ -1026,10 +1048,23 @@ GEN
 primepi(GEN x)
 {
   pari_sp av = avma;
-  GEN N = typ(x) == t_INT? x: gfloor(x);
+  GEN pp, nn, N = typ(x) == t_INT? x: gfloor(x);
+  forprime_t S;
+  ulong n, p;
+  long i;
   if (typ(N) != t_INT) pari_err_TYPE("primepi",N);
   if (signe(N) <= 0) return gen_0;
-  avma = av; return utoi(uprimepi(itou(N)));
+  avma = av;
+  if (lgefint(N) == 3) return utoi(uprimepi(N[2]));
+  new_chunk(lg(N)); /*HACK*/
+  i = prime_table_len-1;
+  p = prime_table[i].p;
+  n = prime_table[i].n;
+  (void)forprime_init(&S, utoipos(p+1), NULL);
+  nn = setloop(utoipos(n));
+  pp = gen_0;
+  for (; pp; incloop(nn)) pp = forprime_next(&S);
+  avma = av; return icopy(nn);
 }
 
 /* pi(x) <= x/log x * (1 + 3 / (2log x)), x>1 [ Rosser-Schoenefeld ]

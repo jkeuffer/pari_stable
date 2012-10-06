@@ -7,4 +7,4 @@ Doc: the $n^{\text{th}}$ prime number
  \bprog
  ? prime(10^9)
  %1 = 22801763489
- @eprog
+ @eprog\noindent Uses checkpointing and a naive $O(n)$ algorithm.
