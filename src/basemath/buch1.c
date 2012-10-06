@@ -315,7 +315,6 @@ cache_prime_quad(GRHcheck_t *S, long LIM, GEN D)
 {
   GRHprime_t *pr;
   double nb;
-  pari_sp av = avma;
 
   if (S->limp >= LIM) return;
   nb = RSpibound((double)LIM); /* #{p <= LIM} <= nb */
@@ -328,9 +327,9 @@ cache_prime_quad(GRHcheck_t *S, long LIM, GEN D)
     pr->dec = (GEN)kroiu(D,p);
     S->nprimes++;
     pr++;
-    if (p >= LIM) break; /* store up to nextprime(LIM) included */
+    /* store up to nextprime(LIM) included */
+    if (p >= LIM) { S->limp = p; break; }
   }
-  avma = av;
 }
 
 static GEN
@@ -393,8 +392,9 @@ nthidealquad(GEN D, long n)
 static int
 quadGRHchk(GEN D, GRHcheck_t *S, long LIMC)
 {
-  long i;
   double logC = log(LIMC), SA = 0, SB = 0;
+  long i;
+
   cache_prime_quad(S, LIMC, D);
   for (i = 0;; i++)
   {

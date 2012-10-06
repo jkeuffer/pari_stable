@@ -508,61 +508,66 @@ GRHok(GRHcheck_t *S, double L, double SA, double SB)
   return (S->cD + (S->cN + 2*SB) / L - 2*SA < -1e-8);
 }
 
-static void
-check_prime_dec(GRHcheck_t *S, long np, GEN nf, GEN P)
+static GEN
+get_fs(GEN nf, GEN P, GEN index, ulong p)
 {
-  byteptr delta = diffptr;
-  GEN index;
-  long i, p;
-  if (S->nprimes >= np) return;
-  p = S->nprimes? GRH_last_prime(S): 0;
-  if (S->maxprimes <= np)
-  {
-    do S->maxprimes *= 2; while (S->maxprimes <= np);
-    S->primes = (GRHprime_t*)pari_realloc((void*)S->primes,
-                                          S->maxprimes*sizeof(*S->primes));
+  long j, k, f, n, l;
+  GEN fs, ns, dec = cgetg(3, t_MAT);
+
+  (void)new_chunk((degpol(P)+1)<<1); /*HACK*/
+  if (umodiu(index, p))
+  { /* p does not divide index */
+    GEN F = Flx_degfact(ZX_to_Flx(P,p), p);
+    fs = gel(F,1); l = lg(fs);
+    ns = gel(F,2); /*to be overwritten*/
   }
-  index = nf_get_index(nf);
-  for (i = S->nprimes, delta = diffptr + i; i <= np; i++)
+  else
   {
-    pari_sp av = avma;
-    long j, k, f, n, l;
-    GRHprime_t *pr = S->primes + i;
-    GEN dec, fs, ns;
-    NEXT_PRIME_VIADIFF_CHECK(p, delta);
-    pr->p = p;
-    pr->logp = log(p);
-    if (umodiu(index, p))
-    { /* p does not divide index */
-      dec = Flx_degfact(ZX_to_Flx(P,p), p);
-      fs = gel(dec,1);
-      ns = gel(dec,2);
-      l = lg(fs);
-    }
+    GEN F = idealprimedec(nf, utoipos(p));
+    l = lg(F);
+    fs = cgetg(l, t_VECSMALL);
+    for (j = 1; j < l; j++) fs[j] = pr_get_f(gel(F,j));
+    ns = cgetg(l, t_VECSMALL);
+  }
+  f = fs[1]; n = 1;
+  for (j = 2, k = 1; j < l; j++)
+    if (fs[j] == f)
+      n++;
     else
     {
-      GEN dec0 = idealprimedec(nf, utoipos(p));
-      l = lg(dec0);
-      dec = cgetg(3, t_MAT);
-      gel(dec, 1) = fs = cgetg(l, t_VECSMALL);
-      for (j = 1; j < l; j++) fs[j] = pr_get_f(gel(dec0,j));
-      gel(dec, 2) = ns = cgetg(l, t_VECSMALL);
+      ns[k] = n; fs[k] = f; k++;
+      f = fs[j]; n = 1;
     }
-    f = fs[1]; n = 1;
-    for (j = 2, k = 1; j < l; j++)
-      if (fs[j] == f)
-        n++;
-      else
-      {
-        ns[k] = n; fs[k] = f; k++;
-        f = fs[j]; n = 1;
-      }
-    ns[k] = n; fs[k] = f; k++;
-    setlg(fs, k);
-    setlg(ns, k);
-    pr->dec = gerepilecopy(av, dec);
+  ns[k] = n; fs[k] = f; k++;
+  avma = (pari_sp)dec;
+  setlg(fs, k); gel(dec,1) = leafcopy(fs);
+  setlg(ns, k); gel(dec,2) = leafcopy(ns); return dec;
+}
+
+/* cache data for all rational primes up to the LIM */
+static void
+cache_prime_dec(GRHcheck_t *S, long LIM, GEN nf)
+{
+  GRHprime_t *pr;
+  GEN index, P;
+  double nb;
+
+  if (S->limp >= LIM) return;
+  nb = RSpibound((double)LIM); /* #{p <= LIM} <= nb */
+  GRH_ensure(S, nb+1); /* room for one extra prime */
+  P = nf_get_pol(nf);
+  index = nf_get_index(nf);
+  for (pr = S->primes + S->nprimes;;)
+  {
+    ulong p = u_forprime_next(&(S->P));
+    pr->p = p;
+    pr->logp = log((double)p);
+    pr->dec = get_fs(nf, P, index, p);
+    S->nprimes++;
+    pr++;
+    /* store up to nextprime(LIM) included */
+    if (p >= LIM) { S->limp = p; break; }
   }
-  S->nprimes = np;
 }
 
 static GEN
@@ -585,8 +590,7 @@ compute_invres(GRHcheck_t *S)
     {
       long f, nb;
       GEN nor;
-      f = fs[j];
-      if (f > limp) continue;
+      f = fs[j]; if (f > limp) continue;
       nb = ns[j];
       nor = powuu(p, f);
       if (a)
@@ -613,36 +617,37 @@ nthideal(GRHcheck_t *S, GEN nf, long n)
 {
   pari_sp av = avma;
   GEN P = nf_get_pol(nf);
-  ulong *vecN = (ulong*)const_vecsmall(n, LONG_MAX);
-  long i, j, k, l, res, N = poldegree(P, -1);
+  ulong p = 0, *vecN = (ulong*)const_vecsmall(n, LONG_MAX);
+  long i, res, N = poldegree(P, -1);
   for (i = 0; ; i++)
   {
     GRHprime_t *pr;
-    GEN ns, fs;
-    ulong p;
-    check_prime_dec(S, i+1, nf, P);
+    GEN fs;
+    cache_prime_dec(S, p+1, nf);
     pr = S->primes + i;
     fs = gel(pr->dec, 1);
     p = pr->p;
-    if (fs[1] == N) goto INERT;
-    ns = gel(pr->dec, 2);
-    j = lg(fs);
-    while (--j > 0)
+    if (fs[1] != N)
     {
-      ulong sNp = upowuu(p, fs[j]);
-      if (!sNp) continue;
-      for (k = 1; k <= n; k++) if (vecN[k] > sNp) break;
-      if (k > n) continue;
-      for (l = k+ns[j]; l <= n; l++) vecN[l] = vecN[l-ns[j]];
-      for (l = 0; l < ns[j] && k+l <= n; l++) vecN[k+l] = sNp;
-      while (l <= k) vecN[l++] = sNp;
+      GEN ns = gel(pr->dec, 2);
+      long k, l, j = lg(fs);
+      while (--j > 0)
+      {
+        ulong NP = upowuu(p, fs[j]);
+        long nf;
+        if (!NP) continue;
+        for (k = 1; k <= n; k++) if (vecN[k] > NP) break;
+        if (k > n) continue;
+        /* vecN[k] <= NP */
+        nf = ns[j]; /*#{primes of norme NP} = nf, insert them here*/
+        for (l = k+nf; l <= n; l++) vecN[l] = vecN[l-nf];
+        for (l = 0; l < nf && k+l <= n; l++) vecN[k+l] = NP;
+        while (l <= k) vecN[l++] = NP;
+      }
     }
-INERT:
     if (p > vecN[n]) break;
   }
-  res = vecN[n];
-  avma = av;
-  return res;
+  res = vecN[n]; avma = av; return res;
 }
 
 
@@ -653,16 +658,14 @@ INERT:
  * Return prod_{p<=C2} (1-1/p) / prod_{Norm(P)<=C2} (1-1/Norm(P)),
  * close to residue of zeta_K at 1 = 2^r1 (2pi)^r2 h R / (w D) */
 static void
-FBgen(FB_t *F, GEN nf, long N, long C1, long C2, GRHcheck_t *S)
+FBgen(FB_t *F, GEN nf, long N, ulong C1, ulong C2, GRHcheck_t *S)
 {
-  byteptr delta = diffptr;
-  long i, p, ip;
   GRHprime_t *pr;
+  long i, ip;
   GEN prim;
   const double L = log((double)C2 + 0.5);
 
-  maxprime_check((ulong)C2);
-  check_prime_dec(S, uprimepi((ulong)C2), nf, nf_get_pol(nf));
+  cache_prime_dec(S, C2, nf);
   pr = S->primes;
   F->sfb_chg = 0;
   F->FB  = cgetg(C2+1, t_VECSMALL);
@@ -672,13 +675,13 @@ FBgen(FB_t *F, GEN nf, long N, long C1, long C2, GRHcheck_t *S)
   prim = icopy(gen_1);
   i = ip = 0;
   F->KC = F->KCZ = 0;
-  for (p = 0;; pr++) /* p <= C2 */
+  for (;; pr++) /* p <= C2 */
   {
+    ulong p = pr->p;
     pari_sp av = avma;
     long k, l, m;
     GEN LP, nb, f;
 
-    NEXT_PRIME_VIADIFF(p, delta);
     if (!F->KC && p > C1) { F->KCZ = i; F->KC = ip; }
     if (p > C2) break;
 
@@ -722,26 +725,28 @@ FBgen(FB_t *F, GEN nf, long N, long C1, long C2, GRHcheck_t *S)
 }
 
 static int
-GRHchk(GEN nf, GEN P, GRHcheck_t *S, long LIMC)
+GRHchk(GEN nf, GRHcheck_t *S, long LIMC)
 {
-  long i, np = uprimepi(LIMC);
   double logC = log(LIMC), SA = 0, SB = 0;
-  byteptr delta;
-  ulong p;
-  check_prime_dec(S, np, nf, P);
-  p = 0; delta = diffptr;
-  for (i = 0; i < np; i++)
+  long i;
+
+  cache_prime_dec(S, LIMC, nf);
+  for (i = 0;; i++)
   {
     GRHprime_t *pr = S->primes+i;
-    GEN dec = pr->dec, fs = gel(dec, 1);
-    double logCslogp = logC/pr->logp;
-    long j = lg(fs), lim = (long)logCslogp;
-    NEXT_PRIME_VIADIFF(p, delta);
-    while (--j)
+    ulong p = pr->p;
+    GEN dec, fs, ns;
+    double logCslogp;
+    long j;
+
+    if (p > LIMC) break;
+    dec = pr->dec; fs = gel(dec, 1); ns = gel(dec,2);
+    logCslogp = logC/pr->logp;
+    for (j = 1; j < lg(fs); j++)
     {
       long f = fs[j], M, nb;
       double logNP, q, A, B;
-      if (f > lim) continue;
+      if (f > logCslogp) break;
       logNP = f * pr->logp;
       q = 1/sqrt(upowuu(p, f));
       A = logNP * q; B = logNP * A; M = (long)(logCslogp/f);
@@ -751,7 +756,7 @@ GRHchk(GEN nf, GEN P, GRHcheck_t *S, long LIMC)
         A *= (1 - pow(q, M)) * inv1_q;
         B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
       }
-      nb = coeff(dec, j, 2);
+      nb = ns[j];
       SA += nb * A;
       SB += nb * B;
     }
@@ -3809,9 +3814,9 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   init_GRHcheck(&GRHcheck, N, R1, LOGD);
   high = low = LIMC0 = maxss((long)(cbach2*LOGD2), 1);
   LIMCMAX = (long)(12.*LOGD2);
-  /* XXX 25 and 200 below to ensure a good enough approximation of residue */
-  check_prime_dec(&GRHcheck, expi(D) < 16 ? 25 : 200, nf, P);
-  while (!GRHchk(nf, P, &GRHcheck, high))
+  /* 97/1223 below to ensure a good enough approximation of residue */
+  cache_prime_dec(&GRHcheck, expi(D) < 16 ? 97: 1223, nf);
+  while (!GRHchk(nf, &GRHcheck, high))
   {
     low = high;
     high *= 2;
@@ -3819,12 +3824,12 @@ Buchall_param(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long
   while (high - low > 1)
   {
     long test = (low+high)/2;
-    if (GRHchk(nf, P, &GRHcheck, test))
+    if (GRHchk(nf, &GRHcheck, test))
       high = test;
     else
       low = test;
   }
-  if (high == LIMC0+1 && GRHchk(nf, P, &GRHcheck, LIMC0))
+  if (high == LIMC0+1 && GRHchk(nf, &GRHcheck, LIMC0))
     LIMC2 = LIMC0;
   else
     LIMC2 = high;
