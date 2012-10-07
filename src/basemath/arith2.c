@@ -988,7 +988,6 @@ digits_dacsmall(GEN x, ulong B, long l, ulong* z)
   avma = av;
 }
 
-/* convert integer --> base 10^9 [not memory clean] */
 GEN
 digits(GEN x, GEN B)
 {
@@ -1010,14 +1009,12 @@ digits(GEN x, GEN B)
   {
     z = zerovec(lz);
     digits_dac(x,B,lz,(GEN*)(z+1));
-    digits_dac(x,B,lz,(GEN*)(z+1));
     return gerepilecopy(av,z);
   }
   else
   {
     ulong b = B[2];
     z = const_vecsmall(lz,0);
-    digits_dacsmall(x,b,lz,(ulong*)(z+1));
     digits_dacsmall(x,b,lz,(ulong*)(z+1));
     return gerepileupto(av,vecsmall_to_vec(z));
   }
