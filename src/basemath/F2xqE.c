@@ -673,7 +673,7 @@ Z2XQ_log(GEN a, GEN T, long e)
   GEN bdi= ZpXQ_invlift(bd,pol_1(varn(T)),T,gen_2,e-1);
   GEN b  = ZX_shifti(FpXQ_mul(bn,bdi,T,int2n(e-1)),k);/*b=0 [2^k] (e+k-1)*/
   GEN pe = int2n(e+k-1), s;
-  long l = (e>>1)/k;
+  long l = (e-3)/(2*(k+1));
   GEN pol = cgetg(l+3,t_POL);
   pol[1] = evalsigne(1)|evalvarn(0);
   for(i=0; i<=l; i++)
