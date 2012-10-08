@@ -235,6 +235,10 @@ HC 78- reimplement incgam()
    89- primes(n) no longer needs precomputed primes
    90- prime(n) no longer needs precomputed primes
    91- primepi(n) no longer needs precomputed primes
+   92- removed 3s delay when recompiling PARI after modifying a header
+       [ Was there to avoid problems on slightly out-of-synch NFS fileserver
+       host. Had become an annoyance on fast multicore servers, esp. when
+       bisecting to find a broken commit. ]
 
   Added
     1- mathnf for matrices over K[X] [#41]

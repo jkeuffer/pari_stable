@@ -347,10 +347,13 @@ cleanall: cleanobj cleantune cleantest cleandesc
 clean: cleanall
 
 
-# sleep 3 to avoid problems with NFS and slightly out of synch
-# fileserver/host. We are recompiling everything anyway.
+# Use this version to avoid problems with NFS and slightly out of synch
+# fileserver/host. We are recompiling everything anyway. Not on by default:
+# 3s is slower than the whole compilation on our development server :-)
+# .headers: $HEADERS
+#	@sleep 3; touch \$@
 .headers: $HEADERS
-	@sleep 3; touch \$@
+	@touch \$@
 
 install-nodata: install-lib-$dft install-include install-bin install-man install-misc install-doc install-examples install-cfg
 
