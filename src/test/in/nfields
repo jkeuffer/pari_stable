@@ -1,4 +1,4 @@
-default(realprecision,38);
+default(realprecision,154); Pi; default(realprecision,38);
 dobnf(T,flag=0,tech=[])= setrand(1); my(K = bnfinit(T,flag,tech)); [K.cyc,K.fu];
 \e
 \\ Initialisations diverses
@@ -25,8 +25,6 @@ dobnf(x^4+24*x^2+585*x+1791,,[0.1,0.1])
 bnrconductor(bnf,[[25,13;0,1],[1,1]])
 bnrconductorofchar(bnr,[2])
 \\ bnfdecodemodule(bnf,
-\\ bnfisintnorm
-\\ bnfisnorm
 bnfisprincipal(bnf,[5,1;0,1],0)
 bnfisprincipal(bnf,[5,1;0,1])
 bnfisunit(bnf,Mod(3405*x-27466,x^2-x-57))
@@ -137,31 +135,22 @@ setrand(1);poltschirnhaus(x^5-x-1)
 \\ rnfalgtobasis
 p=x^5-5*x+y; aa=rnfpseudobasis(nf2,p)
 rnfbasis(bnf2,aa)
-\\ rnfbasis
 \\ rnfcharpoly
-\\ rnfdedekind
 \\ rnfdet
 rnfdisc(nf2,p)
 \\ rnfeltabstorel
-\\ rnfeltdown
 \\ rnfeltreltoabs
-\\ rnfeltup
 rnfequation(nf2,p)
 rnfequation(nf2,p,1)
 rnfhnfbasis(bnf2,aa)
 \\ rnfidealabstorel
 \\ rnfidealdown
 \\ rnfidealhnf
-\\ rnfidealmul
 \\ rnfidealnormabs
 \\ rnfidealnormrel
 \\ rnfidealreltoabs
 \\ rnfidealtwoelt
-\\ rnfidealup
 rnfisfree(bnf2,aa)
-\\ rnfisnorm
-\\ rnflllgram
-\\ rnfpolred
 rnfsteinitz(nf2,aa)
 \\
 nfz=zetakinit(x^2-2);

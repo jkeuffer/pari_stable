@@ -9,7 +9,7 @@ gettime; +3
 5\/3
 5%3
 5^3
-\precision=57
+\precision=154
 pi
 \precision=38
 o(x^12)
@@ -29,7 +29,6 @@ agm(1,2)
 agm(1+o(7^5),8+o(7^5))
 algdep(2*cos(2*pi/13),6)
 algdep2(2*cos(2*pi/13),6,15)
-\\allocatemem(3000000)
 akell(acurve,1000000007)
 nfpol=x^5-5*x^3+5*x+25
 nf=initalg(nfpol)
@@ -151,7 +150,6 @@ divisors(8!)
 divres(345,123)
 divres(x^7-1,x^5+1)
 divsum(8!,x,x)
-\\draw([0,0,0])
 postdraw([0,0,0])
 \\ E
 eigen([1,2,3;4,5,6;7,8,9])
@@ -199,12 +197,8 @@ gauss(hilbert(10),[1,2,3,4,5,6,7,8,9,0]~)
 gaussmodulo([2,3;5,4],[7,11]~,[1,4]~)
 gaussmodulo2([2,3;5,4],[7,11]~,[1,4]~)
 gcd(12345678,87654321)
-getheap()
 getrand()
-getstack()
-\\gettime()isattheend
 globalred(acurve)
-getstack()
 \\ H
 hclassno(2000003)
 hell(acurve,apoint)
@@ -408,9 +402,6 @@ pf(-44,3)
 phi(257^2)
 pi
 plot(x=-5,5,sin(x))
-\\ploth(x=-5,5,sin(x))
-\\ploth2(t=0,2*pi,[sin(5*t),sin(7*t)])
-\\plothraw(vector(100,k,k),vector(100,k,k*k/100))
 pnqn([2,6,10,14,18,22,26])
 pnqn([1,1,1,1,1,1,1,1;1,1,1,1,1,1,1,1])
 point(0,225,334)
@@ -432,7 +423,6 @@ polylogp(5,0.5)
 poly([1,2,3,4,5],x)
 polyrev([1,2,3,4,5],x)
 polzag(6,3)
-\\draw([0,20,20])
 postdraw([0,20,20])
 postploth(x=-5,5,sin(x))
 postploth2(t=0,2*pi,[sin(5*t),sin(7*t)])
@@ -556,7 +546,6 @@ sqrt(13+o(127^12))
 srgcd(x^10-1,x^15-1)
 move(0,100,100);string(0,pi)
 move(0,200,200);string(0,"(0,0)")
-\\draw([0,10,10])
 postdraw([0,10,10])
 apol=0.3+legendre(10)
 sturm(apol)

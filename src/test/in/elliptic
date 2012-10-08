@@ -1,4 +1,4 @@
-default(realprecision,38);
+default(realprecision,154); Pi; default(realprecision,38);
 \e
 gettime; ellinit([-1,0])
 ellinit([-17,0],1)
