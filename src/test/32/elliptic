@@ -155,6 +155,6 @@ q^101)
 ? precision(cmcurve)
 38
 ? getheap
-[62, 4851]
+[62, 4862]
 ? print("Total time spent: ",gettime);
-Total time spent: 12
+Total time spent: 16
