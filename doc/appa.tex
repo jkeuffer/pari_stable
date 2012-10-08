@@ -104,6 +104,11 @@ If you are using GMP, tune it first, then PARI. Make sure you tune PARI on
 the machine that will actually run your computations. Do not use a heavily
 loaded machine for tunings.
 
+You may speed up the compilation by using a parallel make:
+\bprog
+  env MAKE="make -j4" Configure --tune
+@eprog
+
 \kbd{--graphic=}\var{lib}: enables a particular graphic library.
 The default is \kbd{X11} on most platforms, but PARI can use
 \kbd{Qt}, \kbd{fltk}, or \kbd{win32} (GDI).

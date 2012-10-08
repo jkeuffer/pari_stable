@@ -239,6 +239,8 @@ HC 78- reimplement incgam()
        [ Was there to avoid problems on slightly out-of-synch NFS fileserver
        host. Had become an annoyance on fast multicore servers, esp. when
        bisecting to find a broken commit. ]
+   93- improve Configure --tune + let tune -t/-tt/-ttt print more and more
+       verbose messages [ old 'tune -t' corresponds to current 'tune -tt' ]
 
   Added
     1- mathnf for matrices over K[X] [#41]

@@ -455,6 +455,7 @@ Test(tune_param *param)
   int since_positive, since_change, thresh, new_thresh;
   speed_param s;
   long save_var_disable = -1;
+  pari_timer T;
 
   if (param->kernel == AVOID) { print_define(param->name, -1); return; }
 
@@ -471,7 +472,10 @@ Test(tune_param *param)
   dftmod(&s);
   ndat = since_positive = since_change = thresh = 0;
   if (option_trace >= 1)
+  {
+    timer_start(&T);
     diag("\nSetting %s... (default %ld)\n", param->name, *(param->var));
+  }
   if (option_trace >= 2)
   {
     diag("              algorithm-A  algorithm-B   ratio  possible\n");
@@ -535,6 +539,8 @@ Test(tune_param *param)
     }
   }
   thresh = dat[analyze_dat(1)].size;
+  if (option_trace >= 1)
+    diag("Total time: %gs\n", (double)timer_delay(&T)/1000.);
   print_define(param->name, thresh);
   *(param->var) = thresh; /* set to optimal value for next tests */
   if (param->var_disable) *(param->var_disable) = save_var_disable;
@@ -542,8 +548,15 @@ Test(tune_param *param)
 
 void error(char **argv) {
   long i;
-  diag("usage: tune [-t] [-s step_factor] [-p mod] [-u unittime] var1 var2 ...\n");
-  diag("Tunable variables: (omitting variable indices tunes everybody)\n");
+  diag("This is the PARI/GP tuning utility. Usage: tune [OPTION] var1 var2...\n");
+  diag("Options:\n");
+  diag("  -t:     verbose output\n");
+  diag("  -tt:    very verbose output\n");
+  diag("  -ttt:   output everything\n");
+  diag("  -s xxx: set step factor between successive sizes to xxx (default 0.01)\n");
+  diag("  -p xxx: set Flx modulus to xxx (default 27449)\n");
+  diag("  -u xxx: set speed_unittime to xxx (default 1e-4s)\n");
+  diag("Tunable variables (omitting variable indices tunes everybody):\n");
   for (i = 0; i < (long)numberof(param); i++)
     diag("  %2ld: %-25s (default %4ld)\n", i, param[i].name, *(param[i].var));
   exit(1);
@@ -570,7 +583,10 @@ main(int argc, char **argv)
     char *s = argv[i];
     if (*s == '-') {
       switch(*++s) {
-        case 't': option_trace += 2; break;
+        case 't': option_trace++;
+          while (*++s == 't') option_trace++;
+          break;
+
         case 'p':
           if (!*++s)
           {
