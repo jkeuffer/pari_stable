@@ -411,7 +411,7 @@ diag(const char *format, ...)
 }
 void
 print_define(const char *name, long value)
-{ printf("#define __%-25s  %5ld\n\n", name, value); }
+{ printf("#define __%-25s  %5ld\n", name, value); }
 
 long
 analyze_dat(int final)
@@ -471,7 +471,7 @@ Test(tune_param *param)
   dftmod(&s);
   ndat = since_positive = since_change = thresh = 0;
   if (option_trace >= 1)
-    diag("Setting %s... (default %ld)\n", param->name, *(param->var));
+    diag("\nSetting %s... (default %ld)\n", param->name, *(param->var));
   if (option_trace >= 2)
   {
     diag("              algorithm-A  algorithm-B   ratio  possible\n");
