@@ -461,27 +461,27 @@ thus have different weights.
 (Very experimental)
 
 \fun{GEN}{gen_ZpX_Newton}{GEN x, GEN p, long n, void *E,
-                          GEN eval(void *E, GEN f, GEN q),
-                          GEN invd(void *E, GEN V, GEN v, long N)}
+                          GEN eval(void *E, GEN a, GEN q),
+                          GEN invd(void *E, GEN b, GEN v, long N)}
 
-Let $x$ be an element of $\Z_p[X]$ seen as a free  $\Z_p$-module,
-and $f$ some differentiable function over $\Z_p[X]$ such that $f(x) \equiv 0 \pmod{p}$.
-Return $y$ such that $f(y) \equiv 0\pmod{p^n}$, assuming the following holds
-for all $a$, $b$ in $\Z_p[X]$ and $M\leq N$, $v$ being a vector of element of
-$\Z_p[X]$ and $w$ an element of $\Z_p[X]$, $df_a$ denoting the differential of $f$
-at $a$.
+Let $x$ be an element of $\Z_p[X]$ seen as a free  $\Z_p$-module, and $f$
+some differentiable function over $\Z_p[X]$ such that $f(x) \equiv 0
+\pmod{p}$. Return $y$ such that $f(y) \equiv 0\pmod{p^n}$, assuming the
+following holds for all $a, b\in \Z_p[X]$ and $M\leq N$:
 
-\item $v = eval(E,a,p^N)$
+\item $v = \kbd{eval}(E,a,p^N)$ is a vector of elements of $\Z_p[X]$,
 
-\item $v[1] \equiv f(a) \pmod{p^N}$
+\item $w = \kbd{invd}(E,b,v,M)$ is an element in $\Z_p[X]$,
 
-\item $w = invd(E,b,v,M)$
+\item $v[1] \equiv f(a) \pmod{p^N\Z_p[X]}$,
 
-\item $df_a(w) \equiv b \pmod{p^M}$
+\item $df_a(w) \equiv b \pmod{p^M\Z_p[X]}$
 
-It is frequent that some data useful to compute the differential appear as a
-subproduct of computing the function. The use of the vector $v$ allow
-\kbd{eval} to provide them to \kbd{invd}.
+\noindent and $df_a$ denotes the differential of $f$ at $a$. Motivation:
+\kbd{eval} allows to evaluate $f$ and \kbd{invd} allows to invert its
+differential. Frequently, data useful to compute the differential appear as a
+subproduct of computing the function. The vector $v$ allows \kbd{eval} to
+provide these to \kbd{invd}.
 
 \section{Public functions useless outside of GP context}
 
