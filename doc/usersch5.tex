@@ -4922,8 +4922,9 @@ of \typ{INT}s which are the roots of $f$ mod $p^e$. This is a very important
 special case of \kbd{rootpadic}.
 
 \fun{GEN}{ZpX_liftroot}{GEN f, GEN a, GEN p, long e} $f$ a \kbd{ZX} with
-leading term prime to $p$, and $a$ a simple root mod $p$. Return a \typ{INT}
-which are the root of $f$ mod $p^e$ congruent to $a$ mod $p$.
+leading term prime to $p$, and $a$ a root mod $p$ such that
+$v_p(f'(a))=0$.  Return a \typ{INT} which are the root of $f$ mod $p^e$
+congruent to $a$ mod $p$.
 
 \fun{GEN}{ZpX_liftroots}{GEN f, GEN S, GEN q, long e} $f$ a \kbd{ZX} with
 leading term prime to $p$, and $S$ a vector of simple roots mod $p$. Return a
@@ -4932,7 +4933,12 @@ $S[i]$ mod $p$.
 
 \fun{GEN}{ZpXQX_liftroot}{GEN f, GEN a, GEN T, GEN p, long e} as
 \tet{ZpX_liftroot}, but $f$ is now a polynomial in $\Z[X,Y]$ and we find
-roots in the unramified extension of $\Q_p$ with residue field $\F_p[Y]/(T)$.
+a root in the unramified extension of $\Q_p$ with residue field $\F_p[Y]/(T)$,
+assuming $v_p(f(a))>0$ and $v_p(f'(a))=0$.
+
+\fun{GEN}{ZpXQX_liftroot_vald}{GEN f, GEN a, long v, GEN T, GEN p, long e} as
+\tet{ZpXQX_liftroot}, when $v$ is the valuation of the content of $f'$ and it
+is required that $v_p(f(a))>v$ and $v_p(f'(a))=v$.
 
 \fun{GEN}{ZpX_liftfact}{GEN A, GEN B, GEN T, GEN p, long e, GEN pe} is
 the routine underlying \tet{polhensellift}. Here, $p$ is prime, $T(Y)$

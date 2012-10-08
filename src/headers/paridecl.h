@@ -2562,6 +2562,7 @@ GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
 GEN     ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e);
 GEN     ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e);
 GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
+GEN     ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e);
 GEN     gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
                               GEN eval(void *E, GEN f, GEN q),
                               GEN invd(void *E, GEN V, GEN v, long M));

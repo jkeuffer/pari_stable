@@ -434,29 +434,47 @@ ZpX_liftroot(GEN f, GEN a, GEN p, long e)
     W = Fp_sub(shifti(W,1), Fp_mul(Fp_sqr(W,q), FpX_eval(ZX_deriv(fr),a,q), q), q);
   }
 }
-GEN
-ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
-{
-  pari_sp av = avma;
-  GEN q = p, fr, W;
-  ulong mask;
 
+GEN
+ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e)
+{
+  pari_sp av = avma, av2, lim;
+  GEN pv = p, q = p, W, df, Tq, fr, dfr;
+  ulong mask;
+  long k=1;
   a = Fq_red(a, T, q);
-  if (e == 1) return a;
-  mask = quadratic_prec_mask(e);
-  fr = FpXQX_red(f, T, q);
-  W = Fq_inv(FqX_eval(RgX_deriv(fr), a, T, q), T, q); /* 1/f'(a) mod (T,p) */
-  for(;;)
+  if (e <= v+1) return a;
+  df = RgX_deriv(f);
+  if (v) { pv = powiu(p,v); q = mulii(pv,p); df = ZXX_Z_divexact(df, pv); }
+  mask = quadratic_prec_mask(e-v);
+  Tq = FpX_red(T, q); dfr = FpXQX_red(df, Tq, p);
+  W = Fq_inv(FqX_eval(dfr, a, Tq, p), Tq, p); /* 1/f'(a) mod (T,p) */
+  av2 = avma; lim = stack_lim(av2, 2);
+  for (;;)
   {
-    q = sqri(q);
-    if (mask & 1) q = diviiexact(q, p);
+    GEN fa;
+    k <<= 1;
+    if (mask & 1) k--;
     mask >>= 1;
-    fr = FpXQX_red(f,T,q);
-    a = Fq_sub(a, Fq_mul(W, FqX_eval(fr, a, T,q), T,q), T,q);
+    q = powiu(p, v+k); Tq = FpX_red(T, q); fr = FpXQX_red(f, Tq, q);
+    fa = FqX_eval(fr, a, Tq, q);
+    if (v) fa = typ(fa)==t_INT? diviiexact(fa,pv): ZX_Z_divexact(fa, pv);
+    a = Fq_sub(a, Fq_mul(W, fa, Tq,q), Tq,q);
     if (mask == 1) return gerepileupto(av, a);
-    W = Fq_sub(gmul2n(W,1), Fq_mul(Fq_sqr(W,T,q), FqX_eval(RgX_deriv(fr),a,T,q), T, q), T,q);
+    if (v) { q = powiu(p, k); Tq = FpX_red(T, q); }
+    dfr = FpXQX_red(df, Tq, q);
+    W = Fq_sub(gmul2n(W,1), Fq_mul(Fq_sqr(W,Tq,q), FqX_eval(dfr,a,Tq,q), Tq, q), Tq,q);
+    if (low_stack(lim, stack_lim(av2,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZpXQX_liftroot, k = %ld/%ld", k+1,e);
+      gerepileall(av2, 2, &a, &W);
+    }
   }
 }
+
+GEN
+ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e) { return ZpXQX_liftroot_vald(f,a,0,T,p,e); }
+
 /* Apply ZpX_liftroot to all roots in S and trace trick.
  * Elements of S must be distinct simple roots mod p for all p|q. */
 GEN
