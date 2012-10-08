@@ -460,6 +460,23 @@ thus have different weights.
 
 (Very experimental)
 
+\fun{GEN}{gen_ZpX_Dixon}{GEN F, GEN V, GEN p, long N, void *E,
+                            GEN lin(void *E, GEN F, GEN z, GEN q),
+                            GEN invl(void *E, GEN z)}
+
+Let $F$ be a \typ{VEC} of \kbd{ZpX} being the coefficients of some abstract
+linear mapping $f$ over $\Z_p[X]$ seen as a free $\Z_p$-module, and let $V$ be
+an element of $\Z_p[X]$.  Return $y\in\Z_p[X]$ such that $f(y)=V\pmod{p^N}$
+assuming the following holds for $n\leq N$:
+
+\item $\kbd{lin}(E, \kbd{FpX\_red}(F, p^n), z, p^n) \equiv f(z) \pmod{p^n}$
+
+\item $f(\kbd{invl}(E, z)) \equiv z \pmod{p}$
+
+The rationale for the argument $F$ being that it allows \kbd{gen\_ZpX\_Dixon}
+to reduce it to the required $p$-adic precision.
+
+
 \fun{GEN}{gen_ZpX_Newton}{GEN x, GEN p, long n, void *E,
                           GEN eval(void *E, GEN a, GEN q),
                           GEN invd(void *E, GEN b, GEN v, long N)}
@@ -481,7 +498,8 @@ following holds for all $a, b\in \Z_p[X]$ and $M\leq N$:
 \kbd{eval} allows to evaluate $f$ and \kbd{invd} allows to invert its
 differential. Frequently, data useful to compute the differential appear as a
 subproduct of computing the function. The vector $v$ allows \kbd{eval} to
-provide these to \kbd{invd}.
+provide these to \kbd{invd}. The implementation of \kbd{invd} will generally
+involves the use of the function \kbd{gen\_ZpX\_Dixon}.
 
 \section{Public functions useless outside of GP context}
 

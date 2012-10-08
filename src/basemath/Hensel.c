@@ -636,6 +636,27 @@ ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
 /***********************************************************************/
 
 GEN
+gen_ZpX_Dixon(GEN F, GEN V, GEN p, long N, void *E,
+                            GEN lin(void *E, GEN F, GEN d, GEN q),
+                            GEN invl(void *E, GEN d))
+{
+  pari_sp av = avma;
+  long N2, M;
+  GEN VN2, V2, VM, bil;
+  GEN q = powiu(p, N), q2;
+  V = FpX_red(V, q);
+  if (N == 1) return invl(E, V);
+  N2 = (N + 1)>>1; M = N - N2;
+  F = FpXV_red(F, q);
+  VN2 = gen_ZpX_Dixon(F, V, p, N2, E, lin, invl);
+  bil = lin(E, F, VN2, q);
+  q2 = powiu(p, N2);
+  V2 = ZX_Z_divexact(ZX_sub(V, bil), q2);
+  VM = gen_ZpX_Dixon(F, V2, p, M, E, lin, invl);
+  return gerepileupto(av, FpX_red(ZX_add(VN2, ZX_Z_mul(VM, q2)), q));
+}
+
+GEN
 gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
                       GEN eval(void *E, GEN f, GEN q),
                       GEN invd(void *E, GEN V, GEN v, long M))
