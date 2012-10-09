@@ -217,18 +217,9 @@ mpqs_FB_ctor(mpqs_handle_t *h)
   fbl = (((long)fbp) + 64) & ~0x3FL;
   /* and put the actual array there */
   h->FB = (mpqs_FB_entry_t *)fbl;
-#ifdef MPQS_DEBUG_VERBOSE
-  err_printf("MPQS DEBUG: FB chunk allocated @0x%p\n", (void *)fbp);
-  err_printf("MPQS DEBUG: FB aligned to 0x%p\n", (void *)fbl);
-#endif
 
   iahl = (((long)iahp) + 64) & ~0x3FL;
   h->inv_A_H = (mpqs_inv_A_H_t *)iahl;
-#ifdef MPQS_DEBUG_VERBOSE
-  err_printf("MPQS DEBUG: inv_A_H chunk allocated @0x%p\n", (void *)iahp);
-  err_printf("MPQS DEBUG: inv_A_H aligned to 0x%p\n", (void *)iahl);
-#endif
-
   return (mpqs_FB_entry_t *)fbl;
 }
 
@@ -240,22 +231,10 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
   long size = (h->M << 1) + 1;
   mpqs_int32_t size_of_FB = h->size_of_FB;
 
-  h->sieve_array =
-    (unsigned char *) pari_malloc(size * sizeof(unsigned char));
-#ifdef MPQS_DEBUG_VERBOSE
-  err_printf("MPQS DEBUG: sieve_array allocated @0x%p\n",
-             (void *)h->sieve_array);
-#endif
-  h->sieve_array_end =
-    h->sieve_array + size - 2;
+  h->sieve_array = (unsigned char *) pari_malloc(size * sizeof(unsigned char));
+  h->sieve_array_end = h->sieve_array + size - 2;
   h->sieve_array_end[1] = 255; /* sentinel */
-
-  h->candidates =
-    (long *) pari_malloc(MPQS_CANDIDATE_ARRAY_SIZE * sizeof(long));
-#ifdef MPQS_DEBUG_VERBOSE
-  err_printf("MPQS DEBUG: candidates table allocated @0x%p\n",
-             (void *)h->candidates);
-#endif
+  h->candidates = (long *)pari_malloc(MPQS_CANDIDATE_ARRAY_SIZE * sizeof(long));
 
   /* Room needed for string representation of a relation - worst case:
    * + leading " 1 1"
@@ -455,7 +434,7 @@ mpqs_count_primes(void)
   return (p - mpqs_diffptr - gaps);
 }
 
-/* Create a factor base of size primes p_i such that legendre(k*N, p_i) != -1
+/* Create a factor base of 'size' primes p_i such that legendre(k*N, p_i) != -1
  * We could have shifted subscripts down from their historical arrangement,
  * but this seems too risky for the tiny potential gain in memory economy.
  * The real constraint is that the subscripts of anything which later shows
@@ -474,8 +453,9 @@ mpqs_count_primes(void)
  * FB[size_of_FB+1] is the last prime p_i.
  * FB[size_of_FB+2] is a sentinel to simplify some of our loops.
  * Thus we allocate size_of_FB+3 slots for FB.
+ *
  * If a prime factor of N is found during the construction, it is returned
- * in f, otherwise f = 0  (such a factor necessarily fits into a C long).
+ * in f, otherwise f = 0.
  * We use PARI's normal diffptr array if it's large enough, or otherwise
  * our own because we don't want to pull out PARI's array under our caller
  * if someone was in the middle of using it while calling us. (But note
@@ -489,9 +469,9 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
 {
   ulong p = 0;
   mpqs_int32_t size = h->size_of_FB;
-  long i, kr /* , *FB */;
+  long i, kr;
   mpqs_uint32_t k = h->_k->k;
-  mpqs_FB_entry_t *FB;          /* for ease of reference */
+  mpqs_FB_entry_t *FB;
   byteptr primes_ptr;
 
   FB = mpqs_FB_ctor(h);
@@ -539,31 +519,23 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   {
     primes_ptr = mpqs_iterate_primes(&p, primes_ptr);
 
-    if ((p > k) || (k%p != 0))
+    if (p > k || k % p)
     {
       ulong kN_mod_p = umodiu(h->kN, p);
       kr = krouu(kN_mod_p, p);
       if (kr != -1)
       {
-        if (kr == 0)
-        {
-          if (MPQS_DEBUGLEVEL >= 7)
-            err_printf(",%lu...] Wait a second --\n", p);
-          *f = p;
-          return FB;
-        }
+        if (kr == 0) { *f = p; return FB; }
         if (MPQS_DEBUGLEVEL >= 7) err_printf(",%lu", p);
         FB[i].fbe_p = (mpqs_uint32_t) p;
         FB[i].fbe_flags = MPQS_FBE_CLEAR;
         /* dyadic logarithm of p; single precision suffices */
         FB[i].fbe_flogp = (float) log2((double)p);
-        /* cannot yet fill in fbe_logval because the scaling multiplier for
-         * it depends on the largest prime in FB, which we're still in the
-         * process of finding here! */
+        /* cannot yet fill in fbe_logval because the scaling multiplier
+         * depends on the largest prime in FB, as yet unknown */
 
-        /* x_i such that x_i^2 = (kN % p_i) mod p_i */
-        FB[i++].fbe_sqrt_kN =
-          (mpqs_uint32_t) Fl_sqrt(kN_mod_p, p);
+        /* x such that x^2 = kN (mod p_i) */
+        FB[i++].fbe_sqrt_kN = (mpqs_uint32_t)Fl_sqrt(kN_mod_p, p);
       }
     }
   }
@@ -595,10 +567,8 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   for (i = h->index0_FB; FB[i].fbe_p != 0; i++)
     if (FB[i].fbe_p >= h->pmin_index1) break;
   h->index1_FB = i;
-  /* assert: with our parameters this will never fall of the end of the FB */
-
-  *f = 0;
-  return FB;
+  /* with our parameters this will never fall of the end of the FB */
+  *f = 0; return FB;
 }
 
 /*********************************************************************/
