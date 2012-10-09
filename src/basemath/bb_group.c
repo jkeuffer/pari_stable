@@ -69,7 +69,7 @@ sliding_window_powu(GEN x, ulong n, long e, void *E, GEN (*sqr)(void*,GEN),
     {
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_powu");
+        if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_powu (%ld)", l);
         z = gerepilecopy(av, z);
       }
       if (n&(1UL<<l)) break;
@@ -108,7 +108,7 @@ sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
     {
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_pow");
+        if (DEBUGMEM>1) pari_warn(warnmem,"sliding_window_pow (%ld)", l);
         z = gerepilecopy(av, z);
       }
       if (int_bit(n,l)) break;
@@ -136,7 +136,7 @@ leftright_binary_powu(GEN x, long n, void *E, GEN (*sqr)(void*,GEN),
     if (m < 0) y = mul(E,y,x); /* first bit set: multiply by base */
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"leftright_powu");
+      if (DEBUGMEM>1) pari_warn(warnmem,"leftright_powu (%ld)", j);
       y = gerepilecopy(av, y);
     }
   }
@@ -210,7 +210,7 @@ gen_powu_fold_i(GEN x, ulong n, void *E, GEN  (*sqr)(void*,GEN),
     else y = sqr(E,y);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
+      if (DEBUGMEM>1) pari_warn(warnmem,"gen_powu_fold (%ld)", j);
       y = gerepilecopy(av, y);
     }
   }
@@ -249,7 +249,7 @@ gen_pow_fold_i(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
         else y = sqr(E,y);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
+          if (DEBUGMEM>1) pari_warn(warnmem,"gen_pow_fold (%ld)", j);
           y = gerepilecopy(av, y);
         }
       }
