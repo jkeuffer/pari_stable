@@ -325,7 +325,7 @@ typedef struct mpqs_handle {
   long lp_bound;                /* cutoff for Large Primes */
   long digit_size_N;
   long digit_size_kN;
-  mpqs_multiplier_t _k;         /* multiplier k and associated quantities */
+  const mpqs_multiplier_t *_k;  /* multiplier k and associated quantities */
   double tolerance;             /* controls the tightness of the sieve */
   double dkN;                   /* - double prec. approximation of kN */
   double l2sqrtkN;              /* ~log2(sqrt(kN)) */

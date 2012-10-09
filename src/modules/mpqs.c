@@ -142,7 +142,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
   h->tolerance        = P->tolerance;
   h->lp_scale         = P->lp_scale;
   /* make room for prime factors of k if any: */
-  h->size_of_FB       = P->size_of_FB + h->_k.omega_k;
+  h->size_of_FB       = P->size_of_FB + h->_k->omega_k;
   /* for the purpose of Gauss elimination etc., prime factors of k behave
    * like real FB primes, so take them into account when setting the goal: */
   h->target_no_rels   = (h->size_of_FB >= 200 ?
@@ -153,7 +153,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
   h->no_B             = 1UL << (P->omega_A - 1);
   h->pmin_index1      = P->pmin_index1;
   /* certain subscripts into h->FB should also be offset by omega_k: */
-  h->index0_FB        = 3 + h->_k.omega_k;
+  h->index0_FB        = 3 + h->_k->omega_k;
   /* following are converted from % to parts per thousand: */
   h->first_sort_point = 10 * P->first_sort_point;
   h->sort_pt_interval = 10 * P->sort_pt_interval;
@@ -372,44 +372,61 @@ mpqs_iterate_primes(ulong *p, byteptr primes_ptr)
 
 /* fill in the best-guess multiplier k for N. We force kN = 1 mod 4.
  * Caller should proceed to fill in kN */
-static void
+static ulong
 mpqs_find_k(mpqs_handle_t *h)
 {
-  pari_sp av = avma;
-  const mpqs_multiplier_t *cand_k;
-  long best_i = -1 /* never best */, k, N_mod_4 = mod4(h->N);
+  const pari_sp av = avma;
+  const long N_mod_8 = mod8(h->N), N_mod_4 = N_mod_8 & 3;
+  forprime_t S;
+  struct {
+    const mpqs_multiplier_t *_k;
+    long np; /* number of primes in factorbase so far for this k */
+    double value; /* the larger, the better */
+  } cache[MPQS_POSSIBLE_MULTIPLIERS];
+  long i, j, nbk = MPQS_POSSIBLE_MULTIPLIERS;
   ulong p;
-  GEN kN;
-  double best_value = -1000. /* essentially -infinity */, value, dp;
-  long i, j;
-  byteptr primes_ptr;
 
-  for (i = 0; i < MPQS_POSSIBLE_MULTIPLIERS; i++)
+  for (i = j = 0; i < sizeof(cand_multipliers)/sizeof(mpqs_multiplier_t); i++)
   {
-    cand_k = &cand_multipliers[i];
-    k = cand_k->k;
-    if ((k & 3) == N_mod_4) /* kN = 1 (mod 4) */
-    {
-      value = -0.7 * log2 ((double) k);
-      kN = muliu(h->N, k);
-      if (mod8(kN) == 1) value += 1.38629;
-
-      j = 0; p = 0;
-      primes_ptr = diffptr; /* that's PARI's, not our private one */
-      while (j <= MPQS_MULTIPLIER_SEARCH_DEPTH)
-      {
-        primes_ptr = mpqs_iterate_primes(&p, primes_ptr);
-        if (krouu(umodiu(kN, p), p) == 1)
-        {
-          j++;
-          dp = log2((double) p) / p;
-          value += (k % p == 0) ? dp : 2 * dp;
-        }
-      }
-      if (value > best_value) { best_value = value; best_i = i; }
-    }
+    const mpqs_multiplier_t *cand_k = &cand_multipliers[i];
+    long k = cand_k->k;
+    double v;
+    if ((k & 3) != N_mod_4) continue; /* want kN = 1 (mod 4) */
+    v = -0.35 * log2((double)k);
+    if ((k & 7) == N_mod_8) v += LOG2; /* kN = 1 (mod 8) */
+    cache[j].np = 0;
+    cache[j]._k = cand_k;
+    cache[j].value = v;
+    if (++j == nbk) break; /* enough */
   }
-  avma = av; h->_k = cand_multipliers[best_i];
+  nbk = j;
+  u_forprime_init(&S, 2, ULONG_MAX);
+  while ( (p = u_forprime_next(&S)) )
+  {
+    ulong Np = umodiu(h->N, p);
+    long kroNp, seen = 0;
+    if (!Np) return p;
+    kroNp = krouu(Np, p);
+    for (i = 0; i < nbk; i++)
+    {
+      if (cache[i].np > MPQS_MULTIPLIER_SEARCH_DEPTH) continue;
+      seen++;
+      if (krouu(cache[i]._k->k % p, p) == kroNp) /* kronecker(k*N, p)=1 */
+      {
+        cache[i].value += log2((double) p)/p;
+        cache[i].np++;
+      }
+    }
+    if (!seen) break; /* we're gone through SEARCH_DEPTH primes for all k */
+  }
+  if (!p) pari_err_OVERFLOW("mpqs_find_k [ran out of primes]");
+  {
+    long best_i = 0;
+    double v = cache[0].value;
+    for (i = 1; i < nbk; i++)
+      if (cache[i].value > v) { best_i = i; v = cache[i].value; }
+    h->_k = cache[best_i]._k; avma = av; return 0;
+  }
 }
 
 /******************************/
@@ -451,7 +468,7 @@ mpqs_count_primes(void)
  * FB[1] is not explicitly used but stands for -1.
  * FB[2] contains 2 (always).
  * Before we are called, the size_of_FB field in the handle will already have
- * been adjusted by _k.omega_k, so there's room for the primes dividing k,
+ * been adjusted by _k->omega_k, so there's room for the primes dividing k,
  * which when present will occupy FB[3] and following.
  * The "real" odd FB primes begin at FB[h->index0_FB].
  * FB[size_of_FB+1] is the last prime p_i.
@@ -473,7 +490,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   ulong p = 0;
   mpqs_int32_t size = h->size_of_FB;
   long i, kr /* , *FB */;
-  mpqs_uint32_t k = h->_k.k;
+  mpqs_uint32_t k = h->_k->k;
   mpqs_FB_entry_t *FB;          /* for ease of reference */
   byteptr primes_ptr;
 
@@ -505,10 +522,10 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   primes_ptr = mpqs_diffptr;
   primes_ptr = mpqs_iterate_primes(&p, primes_ptr); /* move past 2 */
 
-  /* the first loop executes h->_k.omega_k = 0, 1, or 2 times */
+  /* the first loop executes h->_k->omega_k = 0, 1, or 2 times */
   for (i = 3; i < h->index0_FB; i++)
   {
-    mpqs_uint32_t kp = (ulong)h->_k.kp[i-3];
+    mpqs_uint32_t kp = (ulong)h->_k->kp[i-3];
     if (MPQS_DEBUGLEVEL >= 7) err_printf(",<%lu>", (ulong)kp);
     FB[i].fbe_p = kp;
     /* we *could* flag divisors of k here, but so far I see no need,
@@ -2855,10 +2872,11 @@ mpqs_i(mpqs_handle_t *handle)
     err_printf("MPQS: factoring number of %ld decimal digits\n",
                handle->digit_size_N);
 
-  mpqs_find_k(handle);
+  p = mpqs_find_k(handle);
+  if (p) { avma = av; return utoipos(p); }
   if (DEBUGLEVEL >= 5) err_printf("MPQS: found multiplier %ld for N\n",
-                                  handle->_k.k);
-  handle->kN = muliu(N, handle->_k.k);
+                                  handle->_k->k);
+  handle->kN = muliu(N, handle->_k->k);
 
   if (!mpqs_set_parameters(handle))
   {
@@ -2875,12 +2893,7 @@ mpqs_i(mpqs_handle_t *handle)
   if (DEBUGLEVEL >= 5)
     err_printf("MPQS: creating factor base and allocating arrays...\n");
   FB = mpqs_create_FB(handle, &p);
-  if (p)
-  {
-    if (DEBUGLEVEL >= 4)
-      err_printf("\nMPQS: found factor = %ld whilst creating factor base\n", p);
-    avma = av; return utoipos(p);
-  }
+  if (p) { avma = av; return utoipos(p); }
   mpqs_sieve_array_ctor(handle);
   mpqs_poly_ctor(handle);
 
