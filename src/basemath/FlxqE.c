@@ -909,12 +909,19 @@ F3xq_ellcard(GEN a2, GEN a6, GEN T)
     return utoi(F3xq_ellcard_naive(a2, a6, T));
   else
   {
-    GEN q1 = addis(powuu(3, degpol(T)), 1);
+    GEN q1 = addis(powuu(3, degpol(T)), 1), t;
     GEN a = Flxq_div(a6,Flxq_powu(a2,3,T,3),T,3);
-    GEN P = Flxq_minpoly(a,T,3);
-    if (degpol(P) <= 2)
-      return utoi(F3xq_ellcard_naive(a2, a6, T));
-    GEN t  = F3xq_elltrace_Harley(a, T);
+    if (Flx_equal1(Flxq_powu(a, 8, T, 3)))
+    {
+      GEN P = Flxq_minpoly(a,T,3);
+      long dP = degpol(P); /* dP <= 2 */
+      ulong q = upowuu(3,dP);
+      GEN A2 = pol1_Flx(P[1]), A6 = Flx_rem(polx_Flx(P[1]), P, 3);
+      long tP = q + 1 - F3xq_ellcard_naive(A2, A6, P);
+      t = elltrace_extension(stoi(tP), n/dP, utoi(q));
+      if (umodiu(t, 3)!=1) t = negi(t);
+    }
+    else t = F3xq_elltrace_Harley(a, T);
     return Flx_equal1(a2) || Flxq_issquare(a2,T,3) ? subii(q1,t): addii(q1,t);
   }
 }

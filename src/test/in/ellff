@@ -55,7 +55,7 @@ check(a)=
   for(a=1,8,
     g = ffprimroot(ffgen(ffinit(2,a),'t));
     for(i=0,2^a-2, check(g^i)));
-  for(a=1,5,
+  for(a=1,6,
     g = ffprimroot(ffgen(ffinit(3,a),'t));
     for(i=0,3^a-2, check(g^i)));
 }

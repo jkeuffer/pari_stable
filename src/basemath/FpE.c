@@ -1454,11 +1454,21 @@ FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 }
 
 GEN
+elltrace_extension(GEN t, long n, GEN q)
+{
+  pari_sp av = avma;
+  GEN v = RgX_to_RgV(RgXQ_powu(pol_x(0), n, mkpoln(3,gen_1,negi(t),q)),2);
+  GEN te = addii(shifti(gel(v,1),1), mulii(t,gel(v,2)));
+  return gerepileuptoint(av, te);
+}
+
+GEN
 Fp_ffellcard(GEN a4, GEN a6, GEN q, long n, GEN p)
 {
-  GEN nap = subii(Fp_ellcard(a4,a6,p),addis(p,1));
-  GEN v = RgX_to_RgV(RgXQ_powu(pol_x(0),n,mkpoln(3,gen_1,nap,p)),2);
-  return subii(addis(q,1),subii(shifti(gel(v,1),1),mulii(nap,gel(v,2))));
+  pari_sp av = avma;
+  GEN ap = subii(addis(p, 1), Fp_ellcard(a4, a6, p));
+  GEN te = subii(addis(q, 1), elltrace_extension(ap, n, q));
+  return gerepileuptoint(av, te);
 }
 
 GEN

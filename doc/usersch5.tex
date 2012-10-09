@@ -5213,7 +5213,7 @@ an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
 \fun{GEN}{Fly_to_FlxY}{GEN a, long sv} convert coefficients of \kbd{a} to
 constant \kbd{Flx} in variable $v$.
 
-\subsubsec{Miscellaneous involving F2}
+\subsubsec{Miscellaneous involving \kbd{F2x}}
 
 \fun{GEN}{F2x_to_F2v}{GEN x, long n} converts from \kbd{F2x} to \kbd{F2v}
 with \kbd{n} components (assumed larger than the number of coefficients of
@@ -5227,6 +5227,13 @@ vector of polynomials with \typ{INT} coefficients (repeated calls to
 to get an \kbd{F2m} with \kbd{n} rows.
 
 \section{Arithmetic on elliptic curve over a finite field in simple form}
+
+\subsec{Helper functions}
+
+\fun{GEN}{elltrace_extension}{GEN t, long n, GEN q} Let $E$ some elliptic curve
+over $\F_q$ such that the trace of the Frobenius is $t$, returns the trace of
+the Frobenius over $\F_q^n$.
+
 \subsec{Elliptic curves over $\F_p$, $p>3$}
 
 Let $p$ a prime number and $E$ the elliptic curve given by the equation
