@@ -633,6 +633,7 @@ ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
 static GEN
 ZpXQ_log_to_ath(GEN x, long k, GEN T, GEN p, long e, GEN pe)
 {
+  pari_sp av = avma;
   long vT = varn(T);
   GEN bn, bdi;
   GEN bd = ZX_Z_add(x, gen_1);
@@ -646,7 +647,7 @@ ZpXQ_log_to_ath(GEN x, long k, GEN T, GEN p, long e, GEN pe)
     bn = ZX_Z_divexact(ZX_Z_sub(x, gen_1),powiu(p,k));
     bdi= ZpXQ_invlift(bd, scalarpol(Fp_inv(gen_2,p),vT), T, p, e);
   }
-  return FpXQ_mul(bn, bdi, T, pe);
+  return gerepileupto(av, FpXQ_mul(bn, bdi, T, pe));
 }
 
 /* Assume p odd, a = 1 [p], return log(a) */

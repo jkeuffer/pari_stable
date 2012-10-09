@@ -632,15 +632,19 @@ GEN getc2(GEN X, GEN A60, GEN A61, GEN T, GEN q, long N)
 GEN
 liftcurve(GEN J, GEN T, GEN p, long N)
 {
+  pari_sp av = avma;
   GEN P = mkpoln(3,ZX_mulu(J,27),ZX_shifti(J,2),utoi(256));
-  return ZpXQX_liftroot(P,FpX_neg(FpXQ_inv(J,T,p),p),T,p,N);
+  GEN r = ZpXQX_liftroot(P,FpX_neg(FpXQ_inv(J,T,p),p),T,p,N);
+  return gerepileupto(av, r);
 }
 
 GEN
 liftX(GEN a6, GEN A6,GEN V,GEN T,GEN p, long N)
 {
+  pari_sp av = avma;
   GEN P = mkpoln(5,p,utoi(4),gen_0,ZX_mulu(A6,12),ZX_shifti(A6,2));
-  return ZpXQX_liftroot_vald(P,FpX_neg(F3xq_cubroot(a6,V,gel(V,3)),p),1,T,p,N);
+  GEN a = FpX_neg(F3xq_cubroot(a6,V,gel(V,3)),p);
+  return gerepileupto(av, ZpXQX_liftroot_vald(P,a,1,T,p,N));
 }
 
 /* Assume a = 1 [p], return the square root of the norm */
@@ -657,7 +661,7 @@ ZpXQ_sqrtnorm(GEN a, GEN T, GEN p, long e)
 static GEN
 F3xq_elltrace_Harley(GEN a6, GEN T)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   pari_timer ti;
   long n = degpol(T), N =(n+4)/2;
   GEN a12 = ss(52734375,45), a13 = ss(421875,30), a14 = stoi(36864000);
@@ -673,6 +677,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   GEN J1,J0,A60,A61,X, sqx, V;
   timer_start(&ti);
   T2 = F3x_canonlift(T,N);
+  av2 = avma;
   if (DEBUGLEVEL) timer_printf(&ti,"Teich");
   B = FpX_invBarrett(T2, q);
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
@@ -687,7 +692,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   if (DEBUGLEVEL) timer_printf(&ti,"liftcurve");
   X = liftX(Flxq_powu(a6,3,T,3),A60,V,T2,p,N);
   if (DEBUGLEVEL) timer_printf(&ti,"X");
-  c2 = getc2(X,A60,A61,T2,q,N);
+  c2 = gerepileupto(av2, getc2(X,A60,A61,T2,q,N));
   if (DEBUGLEVEL) timer_printf(&ti,"c2");
   t = Fp_center(ZpXQ_sqrtnorm(c2,T2,p,N),q,shifti(q,-1));
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
