@@ -328,27 +328,6 @@ mpqs_handle_dtor(mpqs_handle_t *h)
 /**                        FACTOR BASE SETUP                        **/
 /**                                                                 **/
 /*********************************************************************/
-
-/* our own pointer to PARI's or to our own prime diffs table.
- * NB the latter is never freed, unless we need to replace it with
- * an even larger one. */
-static THREAD byteptr mpqs_diffptr = NULL;
-static THREAD long mpqs_prime_count = 0;
-static THREAD int mpqs_use_our_diffptr = 0;
-
-/* return next prime larger than p, using *primes_ptr on the diffptr table
- * first and pari's other wits after that */
-static byteptr
-mpqs_iterate_primes(ulong *p, byteptr primes_ptr)
-{
-  ulong prime = *p;
-  if (*primes_ptr)
-    NEXT_PRIME_VIADIFF(prime,primes_ptr);
-  else
-    prime = unextprime(prime+1);
-  *p = prime; return primes_ptr;
-}
-
 /* fill in the best-guess multiplier k for N. We force kN = 1 mod 4.
  * Caller should proceed to fill in kN */
 static ulong
@@ -409,31 +388,6 @@ mpqs_find_k(mpqs_handle_t *h)
 }
 
 /******************************/
-
-/* guesstimate up to what size we're going to need precomputed small primes */
-static long
-mpqs_find_maxprime(long size)
-{
-  double x;
-
-  if (size < 16000) return 176000;
-  x  = log((double)size);
-  x += log(x) - 0.9427;
-  return (long)(x * size);
-}
-
-/* return the number of primes in mpqs_diffptr */
-static long
-mpqs_count_primes(void)
-{
-  byteptr p = mpqs_diffptr;
-  long gaps = 0;
-
-  for ( ; *p; p++)
-    if (*p == DIFFPTR_SKIP) gaps++;
-  return (p - mpqs_diffptr - gaps);
-}
-
 /* Create a factor base of 'size' primes p_i such that legendre(k*N, p_i) != -1
  * We could have shifted subscripts down from their historical arrangement,
  * but this seems too risky for the tiny potential gain in memory economy.
@@ -467,40 +421,20 @@ mpqs_count_primes(void)
 static mpqs_FB_entry_t *
 mpqs_create_FB(mpqs_handle_t *h, ulong *f)
 {
-  ulong p = 0;
+  const pari_sp av = avma;
   mpqs_int32_t size = h->size_of_FB;
-  long i, kr;
+  long i;
   mpqs_uint32_t k = h->_k->k;
   mpqs_FB_entry_t *FB;
-  byteptr primes_ptr;
+  forprime_t S;
 
   FB = mpqs_FB_ctor(h);
-
-  /* tentatively pick up PARI's current differences-of-small-primes array
-   * unless we already have our own */
-  if (!mpqs_use_our_diffptr) mpqs_diffptr = diffptr;
-
-  if ((mpqs_prime_count? mpqs_prime_count: mpqs_count_primes()) < 3 * size)
-  {
-    /* not large enough - must use our own then */
-    long newsize = 3 * mpqs_find_maxprime(size);
-    if (mpqs_use_our_diffptr) pari_free((void *) mpqs_diffptr);
-    if (DEBUGLEVEL >= 2)
-      err_printf("MPQS: precomputing auxiliary primes up to %ld\n", newsize);
-    /* the following three assignments must happen in this order, to
-     * safeguard against corruption when we are being interrupted at
-     * the wrong moment: */
-    mpqs_diffptr = initprimes(newsize);
-    mpqs_use_our_diffptr = 1;   /* and will remain true forever */
-    mpqs_prime_count = mpqs_count_primes(); /* count once and remember */
-  }
 
   if (MPQS_DEBUGLEVEL >= 7) err_printf("MPQS: FB [-1,2");
   FB[2].fbe_p = 2;
   /* the fbe_logval and the fbe_sqrt_kN for 2 are never used */
   FB[2].fbe_flags = MPQS_FBE_CLEAR;
-  primes_ptr = mpqs_diffptr;
-  primes_ptr = mpqs_iterate_primes(&p, primes_ptr); /* move past 2 */
+  (void)u_forprime_init(&S, 3, ULONG_MAX);
 
   /* the first loop executes h->_k->omega_k = 0, 1, or 2 times */
   for (i = 3; i < h->index0_FB; i++)
@@ -517,12 +451,11 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   /* now i == h->index0_FB */
   while (i < size + 2)
   {
-    primes_ptr = mpqs_iterate_primes(&p, primes_ptr);
-
+    ulong p = u_forprime_next(&S);
     if (p > k || k % p)
     {
       ulong kN_mod_p = umodiu(h->kN, p);
-      kr = krouu(kN_mod_p, p);
+      long kr = krouu(kN_mod_p, p);
       if (kr != -1)
       {
         if (kr == 0) { *f = p; return FB; }
@@ -539,6 +472,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
       }
     }
   }
+  avma = av;
 
   if (MPQS_DEBUGLEVEL >= 7) err_printf("]\n");
 
