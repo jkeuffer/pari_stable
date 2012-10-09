@@ -629,6 +629,58 @@ ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
   }
 }
 
+/* Compute (x-1)/(x+1)/p^k */
+static GEN
+ZpXQ_log_to_ath(GEN x, long k, GEN T, GEN p, long e, GEN pe)
+{
+  long vT = varn(T);
+  GEN bn, bdi;
+  GEN bd = ZX_Z_add(x, gen_1);
+  if (equaliu(p,2)) /*For p=2, we need to simplify by 2*/
+  {
+    bn = ZX_shifti(x,-(k+1));
+    bdi= ZpXQ_invlift(ZX_shifti(bd ,-1), pol_1(vT), T, p, e);
+  }
+  else
+  {
+    bn = ZX_Z_divexact(ZX_Z_sub(x, gen_1),powiu(p,k));
+    bdi= ZpXQ_invlift(bd, scalarpol(Fp_inv(gen_2,p),vT), T, p, e);
+  }
+  return FpXQ_mul(bn, bdi, T, pe);
+}
+
+/* Assume p odd, a = 1 [p], return log(a) */
+GEN
+ZpXQ_log(GEN a, GEN T, GEN p, long N)
+{
+  pari_sp av = avma;
+  long is2 = equaliu(p,2);
+  long k = (long) pow((double)(N>>1), 1./3);
+  GEN ak = FpXQ_pow(a, powiu(p,k), T, powiu(p,N+k));
+  long e = is2 ? N-1: N;
+  GEN pe = powiu(p,e), s;
+  GEN b = ZpXQ_log_to_ath(ak, k, T, p, e, pe);
+  long i, l = (e-2)/(2*(k+is2));
+  ulong pp = is2 ? 0: itou_or_0(p);
+  GEN pol= cgetg(l+3,t_POL);
+  pol[1] = evalsigne(1)|evalvarn(0);
+  for(i=0; i<=l; i++)
+  {
+    GEN g;
+    ulong z = 2*i+1;
+    if (pp)
+    {
+      long w = u_lvalrem(z, pp, &z);
+      g = powuu(pp,2*i*k-w);
+    }
+    else g = powiu(p,2*i*k);
+    gel(pol,i+2) = Fp_div(g, utoi(z),pe);
+  }
+  s = FpX_FpXQ_eval(pol, FpXQ_sqr(b, T, pe), T,  pe);
+  s = ZX_shifti(FpXQ_mul(b, s, T, pe), 1);
+  return gerepileupto(av, is2? s: FpX_red(s, pe));
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                 Generic quadratic hensel lift over Zp[X]          **/

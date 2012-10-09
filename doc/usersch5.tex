@@ -5031,6 +5031,10 @@ computes resultants for a sequence of increasing $p$-adic accuracies
 result. It is very inefficient when the resultant is $0$, but otherwise
 usually more efficient than computations using a priori bounds.
 
+\fun{GEN}{ZpXQ_log}{GEN a, GEN T, GEN p, long e} $T$ being a \kbd{ZpX} irreducible modulo $p$,
+return the logarithm of $a$ in $\Z_p[X]/(T)$ to precision $e$, assuming that
+$a\equiv 1 \pmod{p\Z_p[X]}$ if $p$ odd or $a\equiv 1 \pmod{4\Z_2[X]}$ if $p=2$.
+
 \subsec{Conversions involving single precision objects}
 
 \subsubsec{To single precision}

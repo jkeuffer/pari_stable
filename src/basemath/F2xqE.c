@@ -661,34 +661,13 @@ solve_AGM_eqn(GEN x0, long n, GEN B, GEN T, GEN sqx)
   return gen_ZpX_Newton(x0, gen_2, n, &F, _lift_iter, _lift_invd);
 }
 
-/* Assume a = 1 [4], return log(a) */
-static GEN
-Z2XQ_log(GEN a, GEN T, long e)
-{
-  pari_sp av = avma;
-  long i,k= (long) pow((double)(e>>1),1./3);
-  GEN ak = FpXQ_pow(a, int2n(k), T, int2n(e+k));/*ak=1 [2^(k+1)] (e+k)*/
-  GEN bn = ZX_shifti(ak,-(k+1));
-  GEN bd = ZX_shifti(ZX_Z_add(ak, gen_1),-1);
-  GEN bdi= ZpXQ_invlift(bd,pol_1(varn(T)),T,gen_2,e-1);
-  GEN b  = ZX_shifti(FpXQ_mul(bn,bdi,T,int2n(e-1)),k);/*b=0 [2^k] (e+k-1)*/
-  GEN pe = int2n(e+k-1), s;
-  long l = (e-3)/(2*(k+1));
-  GEN pol = cgetg(l+3,t_POL);
-  pol[1] = evalsigne(1)|evalvarn(0);
-  for(i=0; i<=l; i++)
-    gel(pol,i+2) = Fp_inv(utoi(2*i+1),pe);
-  s = FpXQ_mul(b,FpX_FpXQ_eval(pol,FpXQ_sqr(b,T,pe),T,pe),T,pe);
-  return gerepileupto(av, ZX_shifti(s,1-k));
-}
-
 /* Assume a = 1 [4] */
 static GEN
 Z2XQ_invnorm(GEN a, GEN T, long e)
 {
   GEN pe = int2n(e), s;
   if (degpol(a)==0) return Fp_inv(Fp_powu(gel(a,2),degpol(T),pe),pe);
-  s = Fp_neg(FpXQ_trace(Z2XQ_log(a, T, e), T, pe), pe);
+  s = Fp_neg(FpXQ_trace(ZpXQ_log(a, T, gen_2, e), T, pe), pe);
   return modii(gel(Qp_exp(cvtop(s, gen_2, e-2)),4),pe);
 }
 

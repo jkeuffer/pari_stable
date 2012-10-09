@@ -250,6 +250,7 @@ GEN     pol1_FlxX(long v, long sv);
 GEN     random_Flx(long d1, long v, ulong p);
 
 /* FlxqE.c */
+
 GEN     Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p);
 GEN     Flxq_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, ulong p);
 GEN     Flxq_ellgroup(GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m);
@@ -2560,6 +2561,7 @@ GEN     ZpX_liftfact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
 GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
 GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
 GEN     ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e);
+GEN     ZpXQ_log(GEN a, GEN T, GEN p, long N);
 GEN     ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e);
 GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
 GEN     ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e);
