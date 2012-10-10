@@ -486,7 +486,7 @@ static GEN _can_lin(void *E, GEN F, GEN V, GEN q)
   return FpX_sub(V,ZXV_dotproduct(v, F), q);
 }
 
-GEN
+static GEN
 _can_iter(void *E, GEN f, GEN q)
 {
   GEN h = RgX_splitting(f,3);
@@ -501,7 +501,7 @@ _can_iter(void *E, GEN f, GEN q)
   return mkvecn(7,y,h1s,h2s,h3s,h12,h13,h23);
 }
 
-GEN
+static GEN
 _can_invd(void *E, GEN V, GEN v, long M)
 {
   GEN h1s=gel(v,2), h2s=gel(v,3), h3s=gel(v,4);
@@ -517,7 +517,7 @@ static GEN
 F3x_canonlift(GEN P, long n)
 { return gen_ZpX_Newton(Flx_to_ZX(P),utoi(3), n, NULL, _can_iter, _can_invd); }
 
-GEN
+static GEN
 Z3XQ_frob(GEN x, GEN B, GEN T, GEN p)
 {
   return FpX_rem_Barrett(RgX_inflate(x, 3), B, T, p);
@@ -555,8 +555,8 @@ static GEN _lift_lin(void *E, GEN F, GEN x2, GEN q)
   return gerepileupto(av, FpX_rem_Barrett(lin, B, T, q));
 }
 
-GEN
-FpM_FpX_bilinear(GEN P, GEN Y, GEN X, GEN p)
+static GEN
+FpM_FpXV_bilinear(GEN P, GEN Y, GEN X, GEN p)
 {
    pari_sp av = avma;
    GEN s =  ZX_mul(FpXV_FpC_mul(X,gel(P,1),p),gel(Y,1));
@@ -567,9 +567,9 @@ FpM_FpX_bilinear(GEN P, GEN Y, GEN X, GEN p)
 }
 
 static GEN
-substmod(GEN P, GEN X, GEN Y, GEN B,GEN T, GEN p)
+FpM_FpXQV_bilinear(GEN P, GEN X, GEN Y, GEN B,GEN T, GEN p)
 {
-  return FpX_rem_Barrett(FpM_FpX_bilinear(P,X,Y,p),B,T,p);
+  return FpX_rem_Barrett(FpM_FpXV_bilinear(P,X,Y,p),B,T,p);
 }
 
 struct _lift_iso
@@ -587,7 +587,7 @@ _lift_iter(void *E, GEN x2, GEN q)
   GEN y2 = Z3XQ_frob(x2, BN, TN, q);
   GEN xp = FpXQ_powers(x2, 3, TN, q);
   GEN yp = FpXQ_powers(y2, 3, TN, q);
-  GEN V  = FpM_FpX_bilinear(d->phi,xp,yp,q);
+  GEN V  = FpM_FpXV_bilinear(d->phi,xp,yp,q);
   V = ZX_add(V,ZX_add(ZX_sqr(gel(xp,3)),ZX_sqr(gel(yp,3))));
   V = FpX_rem_Barrett(V,BN,TN,q);
   return mkvec3(V,xp,yp);
@@ -601,8 +601,8 @@ _lift_invd(void *E, GEN V, GEN v, long M)
   GEN qM = powuu(3,M), BM = FpX_red(d->B, qM), TM = FpX_red(d->T, qM);
   GEN xp = FpXV_red(gel(v,2), qM);
   GEN yp = FpXV_red(gel(v,3), qM);
-  GEN Dx = substmod(d->phix, xp, yp, BM, TM, qM);
-  GEN Dy = substmod(d->phix, yp, xp, BM, TM, qM);
+  GEN Dx = FpM_FpXQV_bilinear(d->phix, xp, yp, BM, TM, qM);
+  GEN Dy = FpM_FpXQV_bilinear(d->phix, yp, xp, BM, TM, qM);
   GEN F = mkvec4(Dy, Dx, BM, TM);
   e.ai = Flxq_inv(ZX_to_Flx(Dy,3),gel(d->sqx,3),3);
   e.sqx = d->sqx;
@@ -617,7 +617,8 @@ lift_isogeny(GEN phi, GEN phix, GEN x0, long n, GEN B, GEN T, GEN sqx)
   return gen_ZpX_Newton(x0,utoi(3), n,(void*)&d, _lift_iter, _lift_invd);
 }
 
-GEN getc2(GEN X, GEN A60, GEN A61, GEN T, GEN q, long N)
+static GEN
+getc2(GEN X, GEN A60, GEN A61, GEN T, GEN q, long N)
 {
   GEN p = utoi(3);
   GEN X2 = FpXQ_sqr(X,T,q), X3 = FpXQ_mul(X,X2,T,q);
@@ -629,7 +630,7 @@ GEN getc2(GEN X, GEN A60, GEN A61, GEN T, GEN q, long N)
   return FpXQ_mul(P,ZpXQ_invlift(Q,FpXQ_inv(FpX_red(Q,p),T,p),T,p,N),T,q);
 }
 
-GEN
+static GEN
 liftcurve(GEN J, GEN T, GEN p, long N)
 {
   pari_sp av = avma;
@@ -638,7 +639,7 @@ liftcurve(GEN J, GEN T, GEN p, long N)
   return gerepileupto(av, r);
 }
 
-GEN
+static GEN
 liftX(GEN a6, GEN A6,GEN V,GEN T,GEN p, long N)
 {
   pari_sp av = avma;
@@ -906,7 +907,7 @@ Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
   return gerepileuptoint(av, twistp? h: subii(shifti(q1p,1),h));
 }
 
-GEN
+static GEN
 F3xq_ellcard(GEN a2, GEN a6, GEN T)
 {
   long n = degpol(T);
