@@ -937,22 +937,24 @@ stirling(long n, long m, long flag)
 GEN
 numtoperm(long n, GEN x)
 {
-  pari_sp av;
+  pari_sp av, lim;
   ulong i, r;
   GEN v;
 
   if (n < 0) pari_err_DOMAIN("numtoperm", "n", "<", gen_0, stoi(n));
   if (typ(x) != t_INT) pari_err_TYPE("numtoperm",x);
-  v = cgetg(n+1, t_VEC);
-  v[1] = 1; av = avma;
+  v = cgetg(n+1, t_VEC); if (n==0) return v;
+  v[n] = 1; av = avma; lim = stack_lim(av,2);
   if (signe(x) <= 0) x = modii(x, mpfact(n));
-  for (r=2; r<=(ulong)n; r++)
+  for (r=n-1; r>=1; r--)
   {
     ulong a;
-    x = diviu_rem(x, r,&a);
-    for (i=r; i>=a+2; i--) v[i] = v[i-1];
-    v[i] = r;
-    if ((r & 0x1f) == 0) x = gerepileuptoint(av, x);
+    x = diviu_rem(x, n+1-r,&a);
+    for (i=r+1; i<=n; i++)
+      if(v[i]>a) v[i]++;
+    v[r] = a+1;
+    if (low_stack(lim, stack_lim(av,2)))
+      x = gerepileuptoint(av, x);
   }
   avma = av;
   for (i=1; i<=(ulong)n; i++) gel(v,i) = utoipos(v[i]);
@@ -960,30 +962,31 @@ numtoperm(long n, GEN x)
 }
 
 GEN
-permtonum(GEN x)
+permtonum(GEN p)
 {
-  long lx=lg(x)-1, n=lx, last, ind, tx = typ(x);
-  pari_sp av=avma;
-  GEN ary,res;
+  long n = lg(p)-1, i, r;
+  pari_sp av = avma, av2, lim;
+  GEN v, x;
 
-  if (!is_vec_t(tx)) pari_err_TYPE("permtonum",x);
-  ary = cgetg(lx+1,t_VECSMALL);
-  for (ind=1; ind<=lx; ind++)
+  if (!is_vec_t(typ(p))) pari_err_TYPE("permtonum",p);
+  v = cgetg(n+1,t_VECSMALL);
+  for (i=1; i<=n; i++)
   {
-    res = gel(++x, 0);
-    if (typ(res) != t_INT) pari_err_TYPE("permtonum",res);
-    ary[ind] = itos(res);
+    GEN pi = gel(p, i);
+    if (typ(pi) != t_INT) pari_err_TYPE("permtonum",pi);
+    v[i] = itos(pi);
   }
-  ary++; res = gen_0;
-  for (last=lx; last>0; last--)
+  x = gen_0; av2 = avma; lim = stack_lim(av2,2);
+  for (i=1; i<=n; i++)
   {
-    lx--; ind = lx;
-    while (ind>0 && ary[ind] != last) ind--;
-    res = addis(muliu(res,last), ind);
-    while (ind++ < lx) ary[ind-1] = ary[ind];
+    long vi = v[i];
+    x = i==1 ? stoi(v[1]-1): addiu(mulis(x,n+1-i),vi-1);
+    for (r=i+1; r<=n; r++)
+      if (v[r]>vi) v[r]--;
+    if (low_stack(lim, stack_lim(av,2)))
+      x = gerepileuptoint(av2, x);
   }
-  if (!signe(res)) res = mpfact(n);
-  return gerepileuptoint(av, res);
+  return gerepileuptoint(av, x);
 }
 
 /*******************************************************************/

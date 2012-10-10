@@ -1951,9 +1951,9 @@ qfi(2, -1, 9)
 ? perf([2,0,1;0,2,1;1,1,2])
 6
 ? permutation(7,1035)
-[4, 7, 1, 6, 3, 5, 2]
+[2, 4, 6, 1, 5, 7, 3]
 ? permutation2num([4,7,1,6,3,5,2])
-1035
+2781
 ? pf(-44,3)
 qfi(3, 2, 4)
 ? phi(257^2)
@@ -2573,4 +2573,4 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [616, 96912]
 ? print("Total time spent: ",gettime);
-Total time spent: 172
+Total time spent: 210

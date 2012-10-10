@@ -310,6 +310,7 @@ BA 97- zv_cmp0 renamed to zv_equal0
   109- removed the mechanism allowing prime gaps larger than 255 in the
        prime table: as a result it now limited to 436273290, allowing fast
        primes up to 1.9 10^17
+BA110- permtonum/numtoperm now use the standard lexicographic numbering
 
   Added
     1- mathnf for matrices over K[X] [#41]
