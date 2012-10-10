@@ -498,6 +498,7 @@ _can_iter(void *E, GEN f, GEN q)
   GEN h3c = ZX_mul(gel(h,3), h3s);
   GEN th = ZX_mul(ZX_sub(h2s,ZX_mulu(h13,3)),gel(h,2));
   GEN y = FpX_sub(f,ZX_add(RgX_shift(h3c,2),ZX_add(RgX_shift(th,1),h1c)),q);
+  (void) E;
   return mkvecn(7,y,h1s,h2s,h3s,h12,h13,h23);
 }
 
