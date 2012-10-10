@@ -546,7 +546,7 @@ get_fs(GEN nf, GEN P, GEN index, ulong p)
 
 /* cache data for all rational primes up to the LIM */
 static void
-cache_prime_dec(GRHcheck_t *S, long LIM, GEN nf)
+cache_prime_dec(GRHcheck_t *S, ulong LIM, GEN nf)
 {
   GRHprime_t *pr;
   GEN index, P;
@@ -725,9 +725,9 @@ FBgen(FB_t *F, GEN nf, long N, ulong C1, ulong C2, GRHcheck_t *S)
 }
 
 static int
-GRHchk(GEN nf, GRHcheck_t *S, long LIMC)
+GRHchk(GEN nf, GRHcheck_t *S, ulong LIMC)
 {
-  double logC = log(LIMC), SA = 0, SB = 0;
+  double logC = log((ulong)LIMC), SA = 0, SB = 0;
   long i;
 
   cache_prime_dec(S, LIMC, nf);

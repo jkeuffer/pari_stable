@@ -301,7 +301,7 @@ GRH_ensure(GRHcheck_t *S, long nb)
 }
 /* cache data for all primes up to the LIM */
 static void
-cache_prime_quad(GRHcheck_t *S, long LIM, GEN D)
+cache_prime_quad(GRHcheck_t *S, ulong LIM, GEN D)
 {
   GRHprime_t *pr;
   double nb;
@@ -380,9 +380,9 @@ nthidealquad(GEN D, long n)
 }
 
 static int
-quadGRHchk(GEN D, GRHcheck_t *S, long LIMC)
+quadGRHchk(GEN D, GRHcheck_t *S, ulong LIMC)
 {
-  double logC = log(LIMC), SA = 0, SB = 0;
+  double logC = log((double)LIMC), SA = 0, SB = 0;
   long i;
 
   cache_prime_quad(S, LIMC, D);

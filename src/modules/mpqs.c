@@ -341,8 +341,7 @@ mpqs_find_k(mpqs_handle_t *h)
     long np; /* number of primes in factorbase so far for this k */
     double value; /* the larger, the better */
   } cache[MPQS_POSSIBLE_MULTIPLIERS];
-  long i, j, nbk = MPQS_POSSIBLE_MULTIPLIERS;
-  ulong p;
+  ulong p, i, j, nbk = MPQS_POSSIBLE_MULTIPLIERS;
 
   for (i = j = 0; i < sizeof(cand_multipliers)/sizeof(mpqs_multiplier_t); i++)
   {

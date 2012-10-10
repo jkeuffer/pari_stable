@@ -1953,8 +1953,8 @@ discrayabslist(GEN bnf, GEN L)
  * in a unique huge vector V. */
 static const int SHLGVINT = 15;
 static const long LGVINT = 1L << 15;
-INLINE long vext0(long i) { return ((i-1)>>SHLGVINT) + 1; }
-INLINE long vext1(long i) { return i & (LGVINT-1); }
+INLINE long vext0(ulong i) { return ((i-1)>>SHLGVINT) + 1; }
+INLINE long vext1(ulong i) { return i & (LGVINT-1); }
 #define bigel(v,i) gmael((v), vext0(i), vext1(i))
 
 /* allocate an extended vector (t_VEC of t_VEC) for N _true_ components */
@@ -2108,10 +2108,11 @@ GEN
 discrayabslistarch(GEN bnf, GEN arch, ulong bound)
 {
   int allarch = (arch==NULL), flbou = 0;
-  long degk, i, j, k, sqbou, l, nba, nbarch, ii, r1, c;
+  long degk, j, k, l, nba, nbarch, r1, c;
   pari_sp av0 = avma,  av,  av1,  lim;
   GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY, empty;
   GEN res, embunit, h, Ray, discall, idealrel, idealrelinit, fadkabs;
+  ulong i, ii, sqbou;
   forprime_t S;
 
   if (bound == 0)
@@ -2135,7 +2136,7 @@ discrayabslistarch(GEN bnf, GEN arch, ulong bound)
     nba = r1;
   } else {
     matarchunit = NULL;
-    for (nba=0,i=1; i<=r1; i++) if (signe(gel(arch,i))) nba++;
+    for (nba=0,k=1; k<=r1; k++) if (signe(gel(arch,k))) nba++;
   }
 
   empty = cgetg(1,t_VEC);
@@ -2143,9 +2144,9 @@ discrayabslistarch(GEN bnf, GEN arch, ulong bound)
   p = cgetipos(3);
   u_forprime_init(&S, 2, bound);
   av = avma; lim = stack_lim(av,1);
-  sqbou = (long)sqrt((double)bound) + 1;
+  sqbou = (ulong)sqrt((double)bound) + 1;
   Z = bigcgetvec(bound);
-  for (i=2; i<=(long)bound; i++) bigel(Z,i) = empty;
+  for (i=2; i<=bound; i++) bigel(Z,i) = empty;
   embunit = zlog_units(nf, U, sgnU, bidp);
   bigel(Z,1) = mkvec(zsimp(bidp,embunit));
   if (DEBUGLEVEL>1) err_printf("Starting zidealstarunits computations\n");
@@ -2155,14 +2156,14 @@ discrayabslistarch(GEN bnf, GEN arch, ulong bound)
   Ray = Z;
   while ((p[2] = u_forprime_next(&S)))
   {
-    if (!flbou && p[2] > sqbou)
+    if (!flbou && (ulong)p[2] > sqbou)
     {
       GEN z;
       flbou = 1;
       if (DEBUGLEVEL>1) err_printf("\nStarting bnrclassno computations\n");
       Z = gerepilecopy(av,Z); av1 = avma;
       Ray = bigcgetvec(bound);
-      for (i=1; i<=(long)bound; i++)
+      for (i=1; i<=bound; i++)
         bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
       Ray = gerepilecopy(av1,Ray);
       z = bigcgetvec(sqbou);
@@ -2270,12 +2271,13 @@ discrayabslistarch(GEN bnf, GEN arch, ulong bound)
         idealrel = idealrelinit;
         for (k=1; k<lP; k++) /* cf get_discray */
         {
-          long e, ep = E[k], pf = P[k] / degk, f = (pf%degk) + 1;
-          long S = 0, normi = i, Npr, clhss;
+          long e, ep = E[k], pf = P[k] / degk, f = (pf%degk) + 1, S = 0;
+          ulong normi = i, Npr;
           p = utoipos(pf / degk);
           Npr = upowuu(p[2],f);
           for (e=1; e<=ep; e++)
           {
+            long clhss;
             GEN fad;
             if (e < ep) { E[k] = ep-e; fad = Fa; }
             else fad = factorsplice(Fa, k);

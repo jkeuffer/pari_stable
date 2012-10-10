@@ -865,7 +865,7 @@ static GEN
 prime_successor(ulong p, ulong n)
 {
   forprime_t S;
-  long i;
+  ulong i;
   forprime_init(&S, utoipos(p+1), NULL);
   for (i = 1; i < n; i++) (void)forprime_next(&S);
   return forprime_next(&S);
