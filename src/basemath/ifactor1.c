@@ -3409,6 +3409,7 @@ tridiv_bound(GEN n)
   return 1UL<<19; /* Rho is generally faster above this */
 }
 
+/* return a value <= (48 << 10) = 49152 < primelinit */
 static ulong
 utridiv_bound(ulong n)
 {
@@ -3481,7 +3482,6 @@ factoru(ulong n)
   while (p <= 661)
   {
     int stop;
-    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = u_lvalrem_stop(&n, p, &stop);
     if (v) {
@@ -3499,7 +3499,6 @@ factoru(ulong n)
   while (p < lim)
   {
     int stop;
-    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = u_lvalrem_stop(&n, p, &stop);
     if (v) {
@@ -3562,7 +3561,6 @@ moebiusu(ulong n)
   while (p <= 661)
   {
     int stop;
-    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = u_lvalrem_stop(&n, p, &stop);
     if (v) {
@@ -3577,7 +3575,6 @@ moebiusu(ulong n)
   while (p < lim)
   {
     int stop;
-    if (!*d) break;
     NEXT_PRIME_VIADIFF(p,d);
     v = u_lvalrem_stop(&n, p, &stop);
     if (v) {
