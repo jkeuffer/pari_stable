@@ -126,7 +126,7 @@ Doc: general factorization function, where $x$ is a
  The irreducible factors are sorted by increasing degree.
  See also \tet{nffactor}.
 Variant: This function should only be used by the \kbd{gp} interface. Use
- directly \fun{GEN}{factor}{GEN x} or \fun{GEN}{boundfact}{GEN x, long lim}.
+ directly \fun{GEN}{factor}{GEN x} or \fun{GEN}{boundfact}{GEN x, ulong lim}.
  The obsolete function \fun{GEN}{factor0}{GEN x, long lim} is kept for
  backward compatibility.
 
