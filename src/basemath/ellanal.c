@@ -90,20 +90,23 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
 {
   long i, j, lp = bg->lp;
   GEN bndov2 = shifti(bg->bnd, -1);
-  pari_sp av = avma;
-  GEN sum = gcopy(sum0), p;
+  pari_sp av = avma, av2;
+  GEN sum, p;
+  forprime_t S;
+  (void)forprime_init(&S, utoipos(bg->p[lp]+1), bg->bnd);
+  av2 = avma;
   if(DEBUGLEVEL)
     err_printf("1st stage, using recursion for p <= %ld\n", bg->p[lp]);
+  sum = gcopy(sum0);
   for (i = 1; i <= lp; i++)
   {
     ulong pp = bg->p[i];
     long ap = bg->ap[i];
     gen_BG_add(E, fun, bg, &sum, utoipos(pp), i, stoi(ap), gen_1);
-    sum = gerepileupto(av, sum);
+    sum = gerepileupto(av2, sum);
   }
-  p = nextprime(utoipos(bg->p[lp]+1));
   if (DEBUGLEVEL) err_printf("2nd stage, looping for p <= %Ps\n", bndov2);
-  for (  ; cmpii(p, bndov2)<=0; p = nextprime(addis(p,1)))
+  while ( (p = forprime_next(&S)) )
   {
     long jmax;
     GEN ap = ellap(bg->E, p);
@@ -120,15 +123,16 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
       n = muliu(p, j);
       fun(E, &sum, n, a, j);
     }
-    gerepileall(av, 2, &sum, &p);
+    sum = gerepilecopy(av2, sum);
+    if (absi_cmp(p, bndov2) >= 0) break;
   }
   if (DEBUGLEVEL) err_printf("3nd stage, looping for p <= %Ps\n", bg->bnd);
-  for (  ; cmpii(p, bg->bnd)<=0; p = nextprime(addis(p,1)))
+  while ( (p = forprime_next(&S)) )
   {
-    GEN a = ellap(bg->E, p);
-    if (!signe(a)) continue;
-    fun(E, &sum, p, a, 0);
-    gerepileall(av, 2, &p, &sum);
+    GEN ap = ellap(bg->E, p);
+    if (!signe(ap)) continue;
+    fun(E, &sum, p, ap, 0);
+    sum = gerepilecopy(av2, sum);
   }
   return gerepileupto(av, sum);
 }
