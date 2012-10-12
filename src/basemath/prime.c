@@ -1067,17 +1067,26 @@ primepi(GEN x)
   avma = av; return icopy(nn);
 }
 
-/* pi(x) <= x/log x * (1 + 3 / (2log x)), x>1 [ Rosser-Schoenefeld ]
- * pi(x) <= x/(log x - 1.11), x >= 4 [ Panaitopol ]*/
+/* pi(x) <= x/log x * (1 + 1 /log x + 2.51/log^2 x)), x>=355991 [ Dusart ]
+ * pi(x) <= x/(log x - 1.1), x >= 60184 [ Dusart ]
+ * ? M = 0; for(x = 4, 60184, M = max(M, log(x) - x/primepi(x))); M
+ * %1 = 1.1119625213904091133964707910302542917
+ * */
 double
 primepi_upper_bound(double x)
 {
+  if (x >= 355991)
+  {
+    double L = 1/log(x);
+    return x * L * (1 + L + 2.51*L*L);
+  }
+  if (x >= 60184) return x / (log(x) - 1.1);
   if (x < 4) {
     if (x >= 3) return 2;
     if (x >= 2) return 1;
     return 0;
   }
-  return x / (log(x) - 1.11);
+  return x / (log(x) - 1.111963);
 }
 
 GEN
