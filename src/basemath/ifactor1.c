@@ -215,11 +215,6 @@ precprime(GEN n)
   return gerepileuptoint(av, n);
 }
 
-GEN
-gnextprime(GEN n) { return map_proto_G(nextprime,n); }
-GEN
-gprecprime(GEN n) { return map_proto_G(precprime,n); }
-
 /* Find next single-word prime strictly larger than p.
  * If **d is non-NULL (somewhere in a diffptr), this is p + *(*d)++.
  * Otherwise imitate nextprime().
@@ -3595,9 +3590,6 @@ moebiusu(ulong n)
   }
 }
 
-GEN
-gmoebius(GEN n) { return map_proto_lG(moebius,n); }
-
 long
 moebius(GEN n)
 {
@@ -3753,8 +3745,6 @@ core(GEN n)
   return gerepileuptoint(av, mulii(m, ifac_core(n)));
 }
 
-GEN
-gissquarefree(GEN x) { return map_proto_lG(issquarefree,x); }
 long
 uissquarefree_fact(GEN f)
 {
@@ -3797,8 +3787,6 @@ issquarefree(GEN x)
   }
 }
 
-GEN
-gomega(GEN n) { return map_proto_lG(omega,n); }
 long
 omega(GEN n)
 {
@@ -3840,8 +3828,6 @@ omega(GEN n)
   avma = av; return nb;
 }
 
-GEN
-gbigomega(GEN n) { return map_proto_lG(bigomega,n); }
 long
 bigomega(GEN n)
 {
@@ -3880,9 +3866,6 @@ bigomega(GEN n)
   nb += ifac_bigomega(n);
   avma = av; return nb;
 }
-
-GEN
-geulerphi(GEN n) { return map_proto_G(eulerphi,n); }
 
 /* assume f = factoru(n), possibly with 0 exponents. Return phi(n) */
 ulong
@@ -3962,9 +3945,7 @@ eulerphi(GEN n)
 }
 
 GEN
-gnumbdiv(GEN n) { return map_proto_G(numbdiv,n); }
-GEN
-numbdiv(GEN n)
+numdiv(GEN n)
 {
   byteptr d = diffptr+1;
   pari_sp av = avma;
@@ -3972,7 +3953,7 @@ numbdiv(GEN n)
   long i, l, v;
   ulong p, lim;
 
-  chk_arith(n,"numbdiv"); if (is_pm1(n)) return gen_1;
+  chk_arith(n,"numdiv"); if (is_pm1(n)) return gen_1;
   v = vali(n); n = shifti(n,-v); setabssign(n);
   m = utoipos(v+1);
   if (is_pm1(n)) return gerepileuptoint(av,m);
@@ -4008,8 +3989,6 @@ numbdiv(GEN n)
   return gerepileuptoint(av,m);
 }
 
-GEN
-gsumdiv(GEN n) { return map_proto_G(sumdiv,n); }
 GEN
 sumdiv(GEN n)
 {
@@ -4062,8 +4041,6 @@ end:
 }
 
 GEN
-gsumdivk(GEN n, long k) { return map_proto_GL(sumdivk,n,k); }
-GEN
 sumdivk(GEN n, long k)
 {
   byteptr d = diffptr+1;
@@ -4072,7 +4049,7 @@ sumdivk(GEN n, long k)
   ulong p, lim;
   long i, l, k1, v;
 
-  if (!k) return numbdiv(n);
+  if (!k) return numdiv(n);
   if (k == 1) return sumdiv(n);
   chk_arith(n,"sumdivk"); if (is_pm1(n)) return gen_1;
   k1 = k; n1 = n;

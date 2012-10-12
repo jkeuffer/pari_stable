@@ -1391,7 +1391,7 @@ BD_iscyclo(GEN f)
   /* f = product of Phi_n, n = 2 mod 4 */
   if (ZX_equal(f1, fn)) return 2*BD_odd_iscyclo(fn);
 
-  if (gissquareall(f1, &f2) == gen_1)
+  if (issquareall(f1, &f2))
   {
     GEN lt = leading_term(f2);
     long c;

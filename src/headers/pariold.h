@@ -15,6 +15,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define geulerphi eulerphi
+#define numbdiv numdiv
+#define gnumbdiv numdiv
+#define gsumdivk sumdivk
+#define gnextprime nextprime
+#define gprecprime precprime
 #define leftright_pow_fold gen_pow_fold
 #define leftright_pow_u_fold gen_powu_fold
 #define subell ellsub
@@ -60,7 +66,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define nfdiscf0(x) nfdisc0(x)
 #define discf(x) nfdisc(x)
 #define discsr(x) poldisc0((x),-1)
-#define isfundamental Z_isfundamental
 #define factorpadic4 factorpadic
 #define smith2 smithall
 #define gsmith2 gsmithall

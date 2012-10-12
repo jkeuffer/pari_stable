@@ -899,22 +899,16 @@ RgX_is_irred(GEN x)
   int r = RgX_is_irred_i(x);
   avma = av; return r;
 }
-GEN
-gisirreducible(GEN x)
+long
+isirreducible(GEN x)
 {
-  long l, i;
-  GEN y;
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: return gen_0;
-    case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &l);
-      for (i=1; i<l; i++) gel(y,i) = gisirreducible(gel(x,i));
-      return y;
-    case t_POL: return RgX_is_irred(x)? gen_1: gen_0;
-    default: pari_err_TYPE("gisirreducible",x);
-             return NULL;
+    case t_INT: case t_REAL: case t_FRAC: return 0;
+    case t_POL: return RgX_is_irred(x);
   }
+  pari_err_TYPE("isirreducible",x);
+  return 0;
 }
 
 /*******************************************************************/

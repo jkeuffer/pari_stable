@@ -1,14 +1,8 @@
 Function: moebius
 Section: number_theoretical
-C-Name: gmoebius
-Prototype: G
+C-Name: moebius
+Prototype: lG
 Help: moebius(x): Moebius function of x.
 Description:
  (int):small      moebius($1)
- (gen):gen        gmoebius($1)
 Doc: \idx{Moebius} $\mu$-function of $|x|$. $x$ must be of type integer.
- The function accepts vector/matrices arguments, and is then applied
- componentwise.
-Variant: For a \typ{INT} $x$, the variant
- \fun{long}{moebius}{GEN n} is generally easier to use.
-

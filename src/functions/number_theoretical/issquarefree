@@ -1,14 +1,9 @@
 Function: issquarefree
 Section: number_theoretical
-C-Name: gissquarefree
-Prototype: G
+C-Name: issquarefree
+Prototype: lG
 Help: issquarefree(x): true(1) if x is squarefree, false(0) if not.
 Description:
- (int):bool       issquarefree($1)
- (gen):gen        gissquarefree($1)
+ (gen):bool       issquarefree($1)
 Doc: true (1) if $x$ is squarefree, false (0) if not. Here $x$ can be an
  integer or a polynomial.
- The function accepts vector/matrices arguments, and is then applied
- componentwise.
-Variant: For scalar arguments $x$ (\typ{INT} or \typ{POL}), the function
- \fun{long}{issquarefree}{GEN x} is easier to use.

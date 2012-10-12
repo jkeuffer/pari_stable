@@ -1,11 +1,10 @@
 Function: bigomega
 Section: number_theoretical
-C-Name: gbigomega
-Prototype: G
+C-Name: bigomega
+Prototype: lG
 Help: bigomega(x): number of prime divisors of x, counted with multiplicity.
 Description:
- (int):small      bigomega($1)
- (gen):gen        gbigomega($1)
+ (gen):small      bigomega($1)
 Doc: number of prime divisors of the integer $|x|$ counted with
  multiplicity:
  \bprog
@@ -20,8 +19,3 @@ Doc: number of prime divisors of the integer $|x|$ counted with
  ? omega(392)
  %3 = 2;  \\ without multiplicity
  @eprog
- The function accepts vector/matrices arguments, and is then applied
- componentwise.
-Variant: For a \typ{INT} $x$, the variant
- \fun{long}{bigomega}{GEN n} is generally easier to use.
-

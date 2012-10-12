@@ -27,13 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*                 GENERATOR of (Z/mZ)*                           */
 /*                                                                */
 /******************************************************************/
-
-GEN
-znprimroot0(GEN m)
-{
-  return map_proto_G(znprimroot,m);
-}
-
 int
 is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
 {
@@ -608,11 +601,16 @@ polissquareall(GEN x, GEN *pt)
   a = gel(x,2);
   switch (typ(a))
   {
-    case t_INT: y =  Z_issquareall(a,&b)? gen_1: gen_0; break;
-    case t_POL: y = polissquareall(a,&b)? gen_1: gen_0; break;
-    default: y = gissquare(a); b = NULL; break;
+    case t_INT:
+      if (!Z_issquareall(a,&b)) { avma = av; return 0; }
+      break;
+    case t_POL:
+      if (!polissquareall(a,&b)) { avma = av; return 0; }
+      break;
+    default:
+      if (!issquare(a)) { avma = av; return 0; }
+      b = NULL; break;
   }
-  if (y == gen_0) { avma = av; return 0; }
   if (!l) {
     if (!pt) { avma = av; return 1; }
     if (!b) b = gsqrt(a,DEFAULTPREC);
@@ -629,12 +627,12 @@ polissquareall(GEN x, GEN *pt)
     if (pt) {
       y = cgetg((lx+3) / 2, t_POL);
       for (i = 2; i < lx; i+=2)
-        if (!gissquareall(gel(x,i), &gel(y, (i+2)>>1))) { avma = av; return 0; }
+        if (!issquareall(gel(x,i), &gel(y, (i+2)>>1))) { avma = av; return 0; }
       y[1] = evalsigne(1) | evalvarn(varn(x));
       goto END;
     } else {
       for (i = 2; i < lx; i+=2)
-        if (!gissquare(gel(x,i))) { avma = av; return 0; }
+        if (!issquare(gel(x,i))) { avma = av; return 0; }
       avma = av; return 1;
     }
   }
@@ -655,58 +653,39 @@ END:
   return 1;
 }
 
-GEN
-gissquareall(GEN x, GEN *pt)
+long
+issquareall(GEN x, GEN *pt)
 {
   long l, tx = typ(x);
   GEN F;
   pari_sp av;
 
-  if (!pt) return gissquare(x);
-  if (is_matvec_t(tx))
-  {
-    GEN t, y, z;
-    long i;
-    l = lg(x);
-    y = cgetg(l,tx);
-    z = cgetg(l,tx);
-    for (i=1; i<l; i++)
-    {
-      GEN p = gen_0;
-      t = gissquareall(gel(x,i),&p);
-      gel(y,i) = t;
-      gel(z,i) = p;
-    }
-    *pt = z; return y;
-  }
+  if (!pt) return issquare(x);
   switch(tx)
   {
-    case t_INT: l = Z_issquareall(x, pt); break;
+    case t_INT: return Z_issquareall(x, pt);
     case t_FRAC: av = avma;
       F = cgetg(3, t_FRAC);
-      l = Z_issquareall(gel(x,1), &gel(F,1));
-      if (l) l = Z_issquareall(gel(x,2), &gel(F,2));
-      if (!l) { avma = av; break; }
-      *pt = F; break;
+      if (   !Z_issquareall(gel(x,1), &gel(F,1))
+          || !Z_issquareall(gel(x,2), &gel(F,2))) { avma = av; return 0; }
+      *pt = F; return 1;
 
-    case t_POL: l = polissquareall(x,pt); break;
+    case t_POL: return polissquareall(x,pt);
     case t_RFRAC: av = avma;
       F = cgetg(3, t_RFRAC);
-      l = (gissquareall(gel(x,1), &gel(F,1)) != gen_0);
-      if (l) l = polissquareall(gel(x,2), &gel(F,2));
-      if (!l) { avma = av; break; }
-      *pt = F; break;
+      if (   !issquareall(gel(x,1), &gel(F,1))
+          || !polissquareall(gel(x,2), &gel(F,2))) { avma = av; return 0; }
+      *pt = F; return 1;
 
     case t_REAL: case t_COMPLEX: case t_PADIC: case t_SER:
-      F = gissquare(x);
-      if (F == gen_1) *pt = gsqrt(x, DEFAULTPREC);
-      return F;
+      if (!issquare(x)) return 0;
+      *pt = gsqrt(x, DEFAULTPREC); return 1;
 
     case t_INTMOD:
     {
       GEN L, P, E, q = gel(x,1), a = gel(x,2);
       long i;
-      if (!signe(a)) { *pt = gcopy(x); return gen_1; }
+      if (!signe(a)) { *pt = gcopy(x); return 1; }
       av = avma;
       L = Z_factor(q);
       P = gel(L,1); l = lg(P);
@@ -717,27 +696,26 @@ gissquareall(GEN x, GEN *pt)
         GEN p = gel(P,i), t, b;
         long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
         if (v >= e) { gel(L, i) = mkintmod(gen_0, powiu(p, e)); continue; }
-        if (odd(v)) { avma = av; return gen_0; }
+        if (odd(v)) { avma = av; return 0; }
         t = cvtop(b, gel(P,i), e - v);
-        if (gissquare(t) != gen_1) { avma = av; return gen_0; }
+        if (!issquare(t)) { avma = av; return 0; }
         t = gtrunc(Qp_sqrt(t));
         if (v) t = mulii(t, powiu(p, v>>1));
         gel(L,i) = mkintmod(t, powiu(p, e));
       }
       *pt = gerepileupto(av, chinese1_coprime_Z(L));
-      return gen_1;
+      return 1;
     }
 
-    case t_FFELT: return FF_issquareall(x, pt)? gen_1: gen_0;
+    case t_FFELT: return FF_issquareall(x, pt);
 
-    default: pari_err_TYPE("gissquareall",x);
-      return NULL; /* not reached */
   }
-  return l? gen_1: gen_0;
+  pari_err_TYPE("issquareall",x);
+  return 0; /* not reached */
 }
 
-GEN
-gissquare(GEN x)
+long
+issquare(GEN x)
 {
   pari_sp av;
   GEN p1,a,p;
@@ -746,16 +724,16 @@ gissquare(GEN x)
   switch(typ(x))
   {
     case t_INT:
-      return Z_issquare(x)? gen_1: gen_0;
+      return Z_issquare(x);
 
     case t_REAL:
-      return (signe(x)>=0)? gen_1: gen_0;
+      return (signe(x)>=0);
 
     case t_INTMOD:
     {
       GEN b, q;
       long w;
-      a = gel(x,2); if (!signe(a)) return gen_1;
+      a = gel(x,2); if (!signe(a)) return 1;
       av = avma;
       q = gel(x,1); v = vali(q);
       if (v) /* > 0 */
@@ -764,19 +742,19 @@ gissquare(GEN x)
         w = vali(a); dv = v - w;
         if (dv > 0)
         {
-          if (w & 1) { avma = av; return gen_0; }
+          if (w & 1) { avma = av; return 0; }
           if (dv >= 2)
           {
             b = w? shifti(a,-w): a;
             if ((dv>=3 && mod8(b) != 1) ||
-                (dv==2 && mod4(b) != 1)) { avma = av; return gen_0; }
+                (dv==2 && mod4(b) != 1)) { avma = av; return 0; }
           }
         }
         q = shifti(q, -v);
       }
       /* q is now odd */
       i = kronecker(a,q);
-      if (i < 0) { avma = av; return gen_0; }
+      if (i < 0) { avma = av; return 0; }
       if (i==0)
       {
         GEN d = gcdii(a,q);
@@ -786,60 +764,55 @@ gissquare(GEN x)
           v = Z_pvalrem(a,gel(p,i),&p1);
           w = Z_pvalrem(q,gel(p,i), &q);
           if (v < w && (v&1 || kronecker(p1,gel(p,i)) == -1))
-            { avma = av; return gen_0; }
+            { avma = av; return 0; }
         }
         a = modii(a, q);
-        if (kronecker(a,q) == -1) { avma = av; return gen_0; }
+        if (kronecker(a,q) == -1) { avma = av; return 0; }
       }
       /* kro(a,q) = 1, q odd: need to factor q and check all p|q
        * (can't use product formula in case v_p(q) is even for some p) */
       p = gel(Z_factor(q),1); l = lg(p);
       for (i=1; i<l; i++)
-        if (kronecker(a,gel(p,i)) == -1) { avma = av; return gen_0; }
-      return gen_1;
+        if (kronecker(a,gel(p,i)) == -1) { avma = av; return 0; }
+      return 1;
     }
 
     case t_FRAC:
-      av=avma; l=Z_issquare(mulii(gel(x,1),gel(x,2)));
-      avma=av; return l? gen_1: gen_0;
+      return Z_issquare(gel(x,1)) && Z_issquare(gel(x,2));
 
-    case t_FFELT: return FF_issquareall(x, NULL)? gen_1: gen_0;
+    case t_FFELT: return FF_issquareall(x, NULL);
 
     case t_COMPLEX:
-      return gen_1;
+      return 1;
 
     case t_PADIC:
-      a = gel(x,4); if (!signe(a)) return gen_1;
-      if (valp(x)&1) return gen_0;
+      a = gel(x,4); if (!signe(a)) return 1;
+      if (valp(x)&1) return 0;
       p = gel(x,2);
-      if (!equaliu(p, 2))
-        return (kronecker(a,p)== -1)? gen_0: gen_1;
+      if (!equaliu(p, 2)) return (kronecker(a,p) != -1);
 
       v = precp(x); /* here p=2, a is odd */
       if ((v>=3 && mod8(a) != 1 ) ||
-          (v==2 && mod4(a) != 1)) return gen_0;
-      return gen_1;
+          (v==2 && mod4(a) != 1)) return 0;
+      return 1;
 
     case t_POL:
-      return polissquareall(x,NULL)? gen_1: gen_0;
+      return polissquareall(x,NULL);
 
     case t_SER:
-      if (!signe(x)) return gen_1;
-      if (valp(x)&1) return gen_0;
-      return gissquare(gel(x,2));
+      if (!signe(x)) return 1;
+      if (valp(x)&1) return 0;
+      return issquare(gel(x,2));
 
     case t_RFRAC:
-      av = avma; a = gissquare(gmul(gel(x,1),gel(x,2)));
-      avma = av; return a;
-
-    case t_VEC: case t_COL: case t_MAT:
-      p1 = cgetg_copy(x, &l);
-      for (i=1; i<l; i++) gel(p1,i) = gissquare(gel(x,i));
-      return p1;
+      av = avma; i = issquare(gmul(gel(x,1),gel(x,2)));
+      avma = av; return i;
   }
-  pari_err_TYPE("gissquare",x);
-  return NULL; /* not reached */
+  pari_err_TYPE("issquare",x);
+  return 0; /* not reached */
 }
+GEN gissquare(GEN x) { return issquare(x)? gen_1: gen_0; }
+GEN gissquareall(GEN x, GEN *pt) { return issquareall(x,pt)? gen_1: gen_0; }
 
 long
 ispolygonal(GEN x, GEN S, GEN *N)
@@ -1490,9 +1463,6 @@ krouu_s(ulong x, ulong y, long s)
   }
   return (y1 == 1)? s: 0;
 }
-
-GEN
-gkronecker(GEN x, GEN y) { return map_proto_lGG(kronecker,x,y); }
 
 long
 kronecker(GEN x, GEN y)
@@ -3009,13 +2979,11 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
 /**                    FUNDAMENTAL DISCRIMINANTS                    **/
 /**                                                                 **/
 /*********************************************************************/
-static long
-isfund(GEN x) {
+long
+isfundamental(GEN x) {
   if (typ(x) != t_INT) pari_err_TYPE("isfundamental",x);
   return Z_isfundamental(x);
 }
-GEN
-gisfundamental(GEN x) { return map_proto_lG(isfund,x); }
 
 /* x fundamental ? */
 long

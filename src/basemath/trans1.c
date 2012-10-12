@@ -1350,8 +1350,7 @@ sqrt_ser(GEN b, long prec)
   if (e & 1)
     pari_err_DOMAIN("sqrtn", "valuation", "!=", mkintmod(gen_0, gen_2), x);
   a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
-  if (gissquareall(gel(a,2), &gel(x,2)) == gen_0)
-    gel(x,2) = gsqrt(gel(a,2), prec);
+  if (!issquareall(gel(a,2), &gel(x,2))) gel(x,2) = gsqrt(gel(a,2), prec);
   for (j = 3; j < lx; j++) gel(x,j) = gen_0;
   setlg(x,3);
   mask = quadratic_prec_mask(lx - 2);

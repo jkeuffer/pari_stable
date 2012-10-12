@@ -917,7 +917,7 @@ ellordinate_i(GEN e, GEN x, long prec)
       if (!Z_issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
       break;
     case t_FRAC:
-      if (gissquareall(D,&d) == gen_0) { avma = av; return cgetg(1,t_VEC); }
+      if (!issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
       break;
     case t_FFELT:
       if (!FF_issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }

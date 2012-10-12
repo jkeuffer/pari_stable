@@ -1128,7 +1128,7 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   if (!signe(da)) pari_err_IRREDPOL("nfisincl",a);
   db = nfb? nf_get_disc(nfb): ZX_disc(b);
   if (!signe(db)) pari_err_IRREDPOL("nfisincl",a);
-  if (fliso) return (gissquare(gdiv(da,db)) == gen_1);
+  if (fliso) return issquare(gdiv(da,db));
 
   if (odd(q) && signe(da) != signe(db)) return 0;
   fa = Z_factor_limit(absi(da), 0);

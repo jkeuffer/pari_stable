@@ -1,14 +1,9 @@
 Function: eulerphi
 Section: number_theoretical
-C-Name: geulerphi
+C-Name: eulerphi
 Prototype: G
 Help: eulerphi(x): Euler's totient function of x.
 Description:
- (int):int        eulerphi($1)
- (gen):gen        geulerphi($1)
-Doc: Euler's $\phi$ (totient)\sidx{Euler totient function} function of $|x|$,
- in other words $|(\Z/x\Z)^*|$. Normally, $x$ must be of type integer, but
- the function accepts vector/matrices arguments, and is then applied
- componentwise.
-Variant: For a \typ{INT} $x$, the variant
- \fun{GEN}{eulerphi}{GEN n} is also available.
+ (gen):int        eulerphi($1)
+Doc: Euler's $\phi$ (totient)\sidx{Euler totient function} function of the
+ integer $|x|$, in other words $|(\Z/x\Z)^*|$.

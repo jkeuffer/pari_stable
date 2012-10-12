@@ -1,11 +1,10 @@
 Function: omega
 Section: number_theoretical
-C-Name: gomega
-Prototype: G
+C-Name: omega
+Prototype: lG
 Help: omega(x): number of distinct prime divisors of x.
 Description:
- (int):small      omega($1)
- (gen):gen        gomega($1)
+ (gen):small      omega($1)
 Doc: number of distinct prime divisors of $|x|$. $x$ must be of type integer.
  \bprog
  ? factor(392)
@@ -19,7 +18,3 @@ Doc: number of distinct prime divisors of $|x|$. $x$ must be of type integer.
  ? bigomega(392)
  %3 = 5;  \\ = 3+2, with multiplicity
  @eprog
- The function accepts vector/matrices arguments, and is then applied
- componentwise.
-Variant: For a \typ{INT} $x$, the variant
- \fun{long}{omega}{GEN n} is generally easier to use.

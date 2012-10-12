@@ -1,7 +1,7 @@
 Function: polisirreducible
 Section: polynomials
-C-Name: gisirreducible
-Prototype: G
+C-Name: isirreducible
+Prototype: lG
 Help: polisirreducible(pol): true(1) if pol is an irreducible non-constant
  polynomial, false(0) if pol is reducible or constant.
 Doc: \var{pol} being a polynomial (univariate in the present version \vers),
