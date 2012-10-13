@@ -3,8 +3,6 @@ Section: number_theoretical
 C-Name: omega
 Prototype: lG
 Help: omega(x): number of distinct prime divisors of x.
-Description:
- (gen):small      omega($1)
 Doc: number of distinct prime divisors of $|x|$. $x$ must be of type integer.
  \bprog
  ? factor(392)

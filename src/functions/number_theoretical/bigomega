@@ -3,8 +3,6 @@ Section: number_theoretical
 C-Name: bigomega
 Prototype: lG
 Help: bigomega(x): number of prime divisors of x, counted with multiplicity.
-Description:
- (gen):small      bigomega($1)
 Doc: number of prime divisors of the integer $|x|$ counted with
  multiplicity:
  \bprog
