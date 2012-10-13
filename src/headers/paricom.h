@@ -43,22 +43,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 extern THREAD jmp_buf *iferr_env;
 extern const long CATCH_ALL;
 
-#define pari_CATCH(err) {         \
-  jmp_buf *__iferr_old=iferr_env; \
+#define pari_CATCH2(var,err) {         \
+  jmp_buf *var=iferr_env;    \
   jmp_buf __env;             \
   iferr_env = &__env;        \
   if (setjmp(*iferr_env))    \
   {                          \
     GEN __iferr_data = pari_err_last(); \
-    iferr_env = __iferr_old; \
+    iferr_env = var; \
     if (err!=CATCH_ALL && err_get_num(__iferr_data) != err) \
       pari_err(0, __iferr_data);
 
+#define pari_CATCH2_reset(var) (iferr_env = var)
+#define pari_ENDCATCH2(var) iferr_env = var; } }
+
+#define pari_CATCH(err) pari_CATCH2(__iferr_old,err)
 #define pari_RETRY } iferr_env = &__env; {
 #define pari_TRY } else {
-#define pari_CATCH_reset() (iferr_env = __iferr_old)
-
-#define pari_ENDCATCH iferr_env = __iferr_old; } }
+#define pari_CATCH_reset() pari_CATCH2_reset(__iferr_old)
+#define pari_ENDCATCH pari_ENDCATCH2(__iferr_old)
 
 extern const double LOG2, LOG10_2, LOG2_10;
 #ifndef  PI

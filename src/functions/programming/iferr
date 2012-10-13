@@ -1,13 +1,22 @@
 Function: _iferr_CATCH
 Class: gp2c_internal
 Description:
-  ()          pari_CATCH(CATCH_ALL)
-  (errtyp)    pari_CATCH($1)
+  (0)               pari_CATCH(CATCH_ALL)
+  (small)           pari_CATCH2(__iferr_old$1, CATCH_ALL)
+  (0,errtyp)        pari_CATCH($2)
+  (small,errtyp)    pari_CATCH2(__iferr_old$1, $2)
+
+Function: _iferr_ENDCATCH
+Class: gp2c_internal
+Description:
+  (0)        pari_ENDCATCH
+  (small)    pari_ENDCATCH2(__iferr_old$1)
 
 Function: _iferr_CATCH_reset
 Class: gp2c_internal
 Description:
-  ():void  pari_CATCH_reset()
+  (0):void      pari_CATCH_reset()
+  (small):void  pari_CATCH2_reset(__iferr_old$1)
 
 Function: _iferr_error
 Class: gp2c_internal
