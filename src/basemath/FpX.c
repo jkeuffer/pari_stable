@@ -817,7 +817,8 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
-/* invert all elements of x mod p using Barrett's trick. Not stack-clean. */
+/* invert all elements of x mod p using Montgomery's multi-inverse trick.
+ * Not stack-clean. */
 GEN
 FpV_inv(GEN x, GEN p)
 {
