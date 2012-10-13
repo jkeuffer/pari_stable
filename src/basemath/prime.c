@@ -872,7 +872,7 @@ prime_successor(ulong p, ulong n)
 }
 /* find the N-th prime */
 static GEN
-prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
+prime_table_find_n(ulong N)
 {
   byteptr d;
   ulong n, p, maxp = maxprime();
@@ -912,36 +912,28 @@ prime_table_find_n(ulong N, byteptr *pd, ulong *pp)
       n--; NEXT_PRIME_VIADIFF(p,d);
     } while (n) ;
   }
-  *pp = p;
-  *pd = d; return NULL; /* OK */
+  return utoipos(p);
 }
 
 ulong
 uprime(long N)
 {
   pari_sp av = avma;
-  byteptr d;
-  ulong p;
-  GEN P;
+  GEN p;
   if (N <= 0) pari_err_DOMAIN("prime", "n", "<=",gen_0, stoi(N));
-  P = prime_table_find_n(N, &d, &p);
-  avma = av;
-  if (!P) return p; /* found in prime table */
-  if (lgefint(P) != 3) pari_err_OVERFLOW("uprime");
-  return P[2];
+  p = prime_table_find_n(N);
+  if (lgefint(p) != 3) pari_err_OVERFLOW("uprime");
+  avma = av; return p[2];
 }
 GEN
 prime(long N)
 {
   pari_sp av = avma;
-  byteptr d;
-  ulong p;
-  GEN P;
+  GEN p;
   if (N <= 0) pari_err_DOMAIN("prime", "n", "<=",gen_0, stoi(N));
-  P = prime_table_find_n(N, &d, &p);
-  avma = av;
-  if (!P) return utoipos(p); /* found in prime table */
-  return icopy(P);
+  new_chunk(4); /*HACK*/
+  p = prime_table_find_n(N);
+  avma = av; return icopy(p);
 }
 
 /* random b-bit prime */
