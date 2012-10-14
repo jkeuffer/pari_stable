@@ -444,8 +444,7 @@ ecm_elladd2(GEN N, GEN *gl, long nbc,
   {
     pari_sp av2 = avma;
     GEN Px = X4[j], Py = Y4[j], Qx = X5[j], Qy = Y5[j];
-    GEN z = mulii(*gl,W[i]); /*1/(Px-Qx)*/
-    i--;
+    GEN z = mulii(*gl,W[--i]); /*1/(Px-Qx)*/
     FpE_add_i(N,z, Px,Py, Qx,Qy, X6+j,Y6+j);
     avma = av2; *gl = modii(mulii(*gl, A[i]), N);
   }
@@ -484,7 +483,7 @@ elldouble(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2)
   {
     pari_sp av2;
     GEN v, w, L, z = i? mulii(*gl,W[i]): *gl;
-
+    if (i) *gl = modii(mulii(*gl, Y1[i]), N);
     av2 = avma;
     L = modii(mulii(addsi(1, mului(3, Fp_sqr(X1[i],N))), z), N);
     if (signe(L)) /* half of zero is still zero */
@@ -493,8 +492,7 @@ elldouble(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2)
     w = modii(subii(mulii(L, subii(X1[i], v)), Y1[i]), N);
     affii(v, X2[i]);
     affii(w, Y2[i]);
-    if (!i) break;
-    avma = av2; *gl = modii(mulii(*gl, Y1[i]), N);
+    avma = av2;
   }
   avma = av; return 0;
 }
@@ -551,7 +549,7 @@ ellmult(GEN N, GEN *gl, long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
     case 1: /* rules 2 and 4 */
       if ( (res = ecm_elladd(N, gl, nbc, A, B, B)) ) return res;
       if ( (res = elldouble(N, gl, nbc, A, A)) ) return res;
-      d = (d>>1) - e; break;
+      d = (d-e)>>1; break;
     case 3: /* rule 5 */
       if ( (res = elldouble(N, gl, nbc, A, A)) ) return res;
       d >>= 1; break;
@@ -560,7 +558,7 @@ ellmult(GEN N, GEN *gl, long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
       if ( (res = ecm_elladd(N, gl, nbc, T, A, A)) ) return res;
       if ( (res = ecm_elladd(N, gl, nbc, A, B, B)) ) return res;
       d = d/3 - e; break;
-    case 2:
+    case 2: /* rule 3 */
       if ( (res = ecm_elladd(N, gl, nbc, A, B, B)) ) return res;
       d -= e; break;
     case 5: /* rule 7 */
