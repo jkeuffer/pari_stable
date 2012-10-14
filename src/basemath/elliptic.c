@@ -4362,13 +4362,13 @@ ellffinit(GEN x, GEN fg, long flag)
   if(!is_reg) pari_warn(warner,"curve is singular");
   if (typ(fg)==t_INTMOD) fg=gel(fg,1);
   if (typ(fg)==t_FFELT)
-    G = FF_ellinit(E,fg,&e,&N,&m);
+    G = FF_ellinit(E,fg,&e,&N,&m,flag);
   else if (typ(fg)!=t_INT)
   { pari_err_TYPE("ellffinit",fg); return NULL; /*NOTREACHED*/ }
   else if (cmpiu(fg,3)<=0) /* ell_to_a4a6_bc does not handle p<=3 */
   {
     fg = p_to_FF(fg,0);
-    G = FF_ellinit(E,fg,&e,&N,&m);
+    G = FF_ellinit(E,fg,&e,&N,&m, flag);
   }
   else
   {
@@ -4378,7 +4378,7 @@ ellffinit(GEN x, GEN fg, long flag)
       gel(E,i) = Fp_to_mod(Rg_to_Fp(gel(E,i),p),p);
     e = ell_to_a4a6_bc(E, p);
     N = ellcard_ram(E, p);
-    G = Fp_ellgroup(gel(e,1),gel(e,2),N,p,&m);
+    G = flag==2 ? mkvec(N): Fp_ellgroup(gel(e,1),gel(e,2),N,p,&m);
   }
   d1 = lg(G)>1 ? gel(G,1): gen_1;
   gel(E,14) = fg;

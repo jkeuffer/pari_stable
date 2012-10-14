@@ -8,7 +8,8 @@ Help: ellffinit(x,g,{flag=0}): x being a vector suitable for ellinit, and g a
  E(K) where K is the definition field of g. The element g can also be a prime
  number, in which case K=Fp. This structure can be used wherever a small
  ell is allowed; it contains the group structure. If flag=0 (defaut) the
- group order is fully factored; otherwise not.
+ group order is fully factored; otherwise not. If flag=2, the group is assumed
+ to be cyclic.
 Doc:
  $x$ being a vector suitable for \tet{ellinit}, and $g$ a finite field element,
  return an \tet{ellff} structure suitable for computation in the group $E(K)$ where
@@ -16,7 +17,8 @@ Doc:
  in which case $K=\F_p$. This structure can be used in functions that expect a
  small \kbd{ell}. It contains the group structure as a product of cyclic
  groups. By default ($\fl = 0$), the group order is fully factored, which can
- be slow.
+ be slow. If $\fl =2 $, the group is assumed to be cyclic.
+
  \bprog
  ? a=ffgen(ffinit(101,3),'a);
  ? E=ellffinit([1,a^3],a);

@@ -960,7 +960,7 @@ F2xq_ell_to_a4a6(GEN E, GEN T)
 }
 
 GEN
-FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m)
+FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m, long flag)
 {
   GEN T,p,e,N,G;
   ulong pp;
@@ -971,21 +971,21 @@ FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m)
   case t_FF_FpXQ:
     e = FpXQ_ell_to_a4a6(E,T,p);
     N = FpXQ_ellcard(gel(e,1),gel(e,2),T,p);
-    G = FpXQ_ellgroup(gel(e,1),gel(e,2),N,T,p,pt_m);
+    G = flag==2? mkvec(N):FpXQ_ellgroup(gel(e,1),gel(e,2),N,T,p,pt_m);
     for(i=1;i<=13;i++)
       gel(E,i) = mkFF_i(fg,Rg_to_FpXQ(gel(E,i),T,p));
     break;
   case t_FF_F2xq:
     e = F2xq_ell_to_a4a6(E,T);
     N = F2xq_ellcard(gel(e,1),gel(e,2),T);
-    G = F2xq_ellgroup(gel(e,1),gel(e,2),N,T,pt_m);
+    G = flag==2? mkvec(N): F2xq_ellgroup(gel(e,1),gel(e,2),N,T,pt_m);
     for(i=1;i<=13;i++)
       gel(E,i) = mkFF_i(fg,Rg_to_F2xq(gel(E,i),T));
     break;
   default:
     e = Flxq_ell_to_a4a6(E,T,pp);
     N = Flxq_ellcard(gel(e,1),gel(e,2),T,pp);
-    G = Flxq_ellgroup(gel(e,1),gel(e,2),N,T,pp,pt_m);
+    G = flag==2? mkvec(N): Flxq_ellgroup(gel(e,1),gel(e,2),N,T,pp,pt_m);
     for(i=1;i<=13;i++)
       gel(E,i) = mkFF_i(fg,Rg_to_Flxq(gel(E,i),T,pp));
     break;

@@ -229,7 +229,7 @@ GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);
 /* Finite field */
 
 enum { t_FF_FpXQ = 0, t_FF_Flxq = 1, t_FF_F2xq = 2 };
-GEN     FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m);
+GEN     FF_ellinit(GEN E, GEN fg, GEN *pt_e, GEN *pt_N, GEN *pt_m, long flag);
 
 /* for Buchall_param */
 enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI };
