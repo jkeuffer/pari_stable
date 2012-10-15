@@ -384,7 +384,8 @@ ecm_elladd0(GEN N, GEN *gl, long nbc, long nbc1,
   if (!invmod(W[nbc], N, gl))
   {
     if (!equalii(N,*gl)) return 2;
-    ZV_aff(2*nbc, X2,X3);
+    ZV_aff(nbc, X2,X3);
+    if (Y3) ZV_aff(nbc, Y2,Y3);
     avma = av; return 1;
   }
 
@@ -435,8 +436,8 @@ ecm_elladd2(GEN N, GEN *gl, long nbc,
   if (!invmod(W[2*nbc], N, gl))
   {
     if (!equalii(N,*gl)) return 2;
-    ZV_aff(2*nbc, X2,X3);
-    ZV_aff(2*nbc, X5,X6);
+    ZV_aff(2*nbc, X2,X3); /* hack: 2*nbc => copy Y2->Y3 */
+    ZV_aff(2*nbc, X5,X6); /* also copy Y5->Y6 */
     avma = av; return 1;
   }
 
@@ -476,7 +477,7 @@ elldouble(GEN N, GEN *gl, long nbc, GEN *X1, GEN *X2)
   if (!invmod(W[nbc], N, gl))
   {
     if (!equalii(N,*gl)) return 2;
-    ZV_aff(2*nbc,X1,X2);
+    ZV_aff(2*nbc,X1,X2); /* also copies Y1->Y2 */
     avma = av; return 1;
   }
   while (i--) /* nbc times */
