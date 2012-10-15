@@ -3906,7 +3906,6 @@ elltors_divpol(GEN E)
   GEN T2 = NULL, p, P, Q, v;
   long v2, r2, B;
 
-  checkell_real(E);
   v = ellintegralmodel(E);
   if (v) E = _coordch(E,v);
 
