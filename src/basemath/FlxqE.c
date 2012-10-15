@@ -671,7 +671,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
 {
   pari_sp av = avma, av2;
   pari_timer ti;
-  long n = degpol(T), N =(n+4)/2;
+  long n = degpol(T), N = (n+4)/2, m = 2*n/3;
   GEN a12 = ss(52734375,45), a13 = ss(421875,30), a14 = stoi(36864000);
   GEN a23 = ss(135806625,16), a24 = stoi(-1069956), a34 = stoi(2232);
   GEN phi = mkmat4( mkcol4(gen_0,a12,a13,a14),
@@ -681,7 +681,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   GEN phix = mkmat4(gel(phi,2),ZC_z_mul(gel(phi,3),2),
                     ZC_z_mul(gel(phi,4),3),mkcol4s(4,0,0,0));
   GEN q = powuu(3, N), p =utoi(3);
-  GEN T2, B, j, c2, t;
+  GEN T2, B, Xm, j, c2, t;
   GEN J1,J0,A60,A61,X, sqx, V;
   timer_start(&ti);
   T2 = F3x_canonlift(T,N);
@@ -689,8 +689,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   if (DEBUGLEVEL) timer_printf(&ti,"Teich");
   B = FpX_invBarrett(T2, q);
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
-  long m = 2*n/3;
-  GEN Xm = FpX_rem_Barrett(RgX_inflate(pol_x(varn(T)),3*m),B,T2,q);
+  Xm = FpX_rem_Barrett(RgX_inflate(pol_x(varn(T)), 3*m), B, T2, q);
   j = Flx_neg(Flxq_inv(a6,T,3),3);
   sqx = Flxq_pow(polx_Flx(T[1]),powuu(3,n-1),T, 3);
   V = mkvec3(sqx,Flxq_sqr(sqx,T,3),T);
