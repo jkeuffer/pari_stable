@@ -261,6 +261,13 @@ static double speed_Flx_extgcd(speed_param *s)
 static double speed_FpX_inv(speed_param *s)
 { TIME_FUN(FpX_invBarrett(s->x, s->p)); }
 
+static double speed_FpX_divrem(speed_param *s)
+{
+  GEN r;
+  GEN x = rand_NFpX((degpol(s->x)-1)*2);
+  TIME_FUN(FpX_divrem(x, s->x, s->p, &r));
+}
+
 static double speed_FpX_rem(speed_param *s)
 {
   GEN x = rand_NFpX((degpol(s->x)-1)*2);
@@ -325,6 +332,7 @@ static tune_param param[] = {
 {0,  var(Flx_GCD_LIMIT),           t_Flx,10,0, speed_Flx_gcd,0.1},
 {0,  var(Flx_EXTGCD_LIMIT),        t_Flx,10,0, speed_Flx_extgcd},
 {0,  var(FpX_INVBARRETT_LIMIT), t_NFpX,10,0, speed_FpX_inv,0.05},
+{0,  var(FpX_DIVREM_BARRETT_LIMIT),t_NFpX,10,0, speed_FpX_divrem,0.05},
 {0,  var(FpX_REM_BARRETT_LIMIT),t_NFpX,10,0, speed_FpX_rem,0.05},
 {0,  var(FpX_POW_BARRETT_LIMIT),t_NFpX,10,0, speed_FpXQ_pow},
 {0,  var(FpX_HALFGCD_LIMIT),       t_FpX,10,0, speed_FpX_halfgcd},

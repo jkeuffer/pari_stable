@@ -25,6 +25,7 @@ extern long Flx_HALFGCD_LIMIT;
 extern long Flx_GCD_LIMIT;
 extern long Flx_EXTGCD_LIMIT;
 extern long FpX_INVBARRETT_LIMIT;
+extern long FpX_DIVREM_BARRETT_LIMIT;
 extern long FpX_REM_BARRETT_LIMIT;
 extern long FpX_POW_BARRETT_LIMIT;
 extern long FpX_HALFGCD_LIMIT;
@@ -66,9 +67,10 @@ extern long RgX_MUL_LIMIT;
 #  define Flx_HALFGCD_LIMIT        __Flx_HALFGCD_LIMIT
 #  define Flx_GCD_LIMIT            __Flx_GCD_LIMIT
 #  define Flx_EXTGCD_LIMIT         __Flx_EXTGCD_LIMIT
-#  define FpX_INVBARRETT_LIMIT  __FpX_INVBARRETT_LIMIT
-#  define FpX_REM_BARRETT_LIMIT __FpX_REM_BARRETT_LIMIT
-#  define FpX_POW_BARRETT_LIMIT __FpX_POW_BARRETT_LIMIT
+#  define FpX_INVBARRETT_LIMIT     __FpX_INVBARRETT_LIMIT
+#  define FpX_DIVREM_BARRETT_LIMIT __FpX_DIVREM_BARRETT_LIMIT
+#  define FpX_REM_BARRETT_LIMIT    __FpX_REM_BARRETT_LIMIT
+#  define FpX_POW_BARRETT_LIMIT    __FpX_POW_BARRETT_LIMIT
 #  define FpX_HALFGCD_LIMIT        __FpX_HALFGCD_LIMIT
 #  define FpX_GCD_LIMIT            __FpX_GCD_LIMIT
 #  define FpX_EXTGCD_LIMIT         __FpX_EXTGCD_LIMIT

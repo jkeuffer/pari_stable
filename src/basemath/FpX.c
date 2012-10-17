@@ -266,8 +266,8 @@ FpX_Fp_mul_to_monic(GEN y,GEN x,GEN p)
   gel(z,l-1) = gen_1; return z;
 }
 
-GEN
-FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
+static GEN
+FpX_divrem_basecase(GEN x, GEN y, GEN p, GEN *pr)
 {
   long vx, dx, dy, dz, i, j, sx, lr;
   pari_sp av0, av;
@@ -980,52 +980,123 @@ FpX_invBarrett(GEN T, GEN p)
 /* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
  * and mg is the Barrett inverse of T. */
 static GEN
-FpX_rem_Barrettspec(GEN x, long l, GEN mg, GEN T, GEN p)
+FpX_divrem_Barrettspec(GEN x, long l, GEN mg, GEN T, GEN p, GEN *pr)
 {
-  GEN z;
+  GEN q, r;
   long lt = degpol(T); /*We discard the leading term*/
   long ld, lm, lT, lmg;
   ld = l-lt;
   lm = minss(ld, lgpol(mg));
   lT  = ZX_lgrenormalizespec(T+2,lt);
   lmg = ZX_lgrenormalizespec(mg+2,lm);
-  z = FpX_recipspec(x+lt,ld,ld);              /* z = rec(x)     lz<=ld*/
-  z = FpX_mulspec(z+2,mg+2,p,lgpol(z),lmg);    /* z = rec(x) * mg lz<=ld+lm*/
-  z = FpX_recipspec(z+2,minss(ld,lgpol(z)),ld);/* z = rec (rec(x) * mg) lz<=ld*/
-  z = FpX_mulspec(z+2,T+2,p,lgpol(z),lT);      /* z *= pol        lz<=ld+lt*/
-  z = FpX_subspec(x,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z   lz<=lt */
-  return z;
+  q = FpX_recipspec(x+lt,ld,ld);              /* q = rec(x)     lq<=ld*/
+  q = FpX_mulspec(q+2,mg+2,p,lgpol(q),lmg);    /* q = rec(x) * mg lq<=ld+lm*/
+  q = FpX_recipspec(q+2,minss(ld,lgpol(q)),ld);/* q = rec (rec(x) * mg) lq<=ld*/
+  if (!pr) return q;
+  r = FpX_mulspec(q+2,T+2,p,lgpol(q),lT);      /* r = q*pol        lr<=ld+lt*/
+  r = FpX_subspec(x,r+2,p,lt,minss(lt,lgpol(r)));/* r = x - r   lr<=lt */
+  if (pr == ONLY_REM) return r;
+  *pr = r; return q;
 }
 
 static GEN
-FpX_rem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p)
+FpX_divrem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p, GEN *pr)
 {
   long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
-  GEN r;
+  GEN q = NULL, r;
+  long i;
   if (l <= lt)
-    return ZX_copy(x);
+  {
+    if (pr == ONLY_REM) return ZX_copy(x);
+    if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
+    if (pr) *pr =  ZX_copy(x);
+    return pol_0(varn(T));
+  }
   if (lt <= 1)
-    return FpX_divrem(x,T,p,ONLY_REM);
+    return FpX_divrem_basecase(x,T,p,pr);
+  if (pr != ONLY_REM && l>lm)
+  {
+    q = cgetg(l-lt+2, t_POL);
+    for (i=0;i<l-lt;i++) gel(q+2,i) = gen_0;
+  }
   r = l>lm ? shallowcopy(x): x;
   while (l>lm)
   {
-    GEN z = FpX_rem_Barrettspec(r+2+l-lm,lm,mg,T,p);
-    long i, lz = lgpol(z);
-    for(i=0; i<lz; i++) gel(r+2+l-lm,i) = gel(z,2+i);
+    GEN zr, zq = FpX_divrem_Barrettspec(r+2+l-lm,lm,mg,T,p,&zr);
+    long lz = lgpol(zr);
+    if (pr != ONLY_REM)
+    {
+      long lq = lgpol(zq);
+      for(i=0; i<lq; i++) gel(q+2+l-lm,i) = gel(zq,2+i);
+    }
+    for(i=0; i<lz; i++) gel(r+2+l-lm,i) = gel(zr,2+i);
     l = l-lm+lz;
   }
-  if (l > lt)
-    r = FpX_rem_Barrettspec(r+2,l,mg,T,p);
-  else
+  if (pr != ONLY_REM)
+  {
+    if (l > lt)
+    {
+      GEN zq = FpX_divrem_Barrettspec(r+2,l,mg,T,p,&r);
+      if (!q) q = zq;
+      else
+      {
+        long lq = lgpol(zq);
+        for(i=0; i<lq; i++) gel(q+2,i) = gel(zq,2+i);
+      }
+    }
+    else
     { setlg(r, l+2); r = ZX_copy(r); }
-  r[1] = x[1]; return r;
+  }
+  else
+  {
+    if (l > lt)
+      (void) FpX_divrem_Barrettspec(r+2,l,mg,T,p,&r);
+    else
+    { setlg(r, l+2); r = ZX_copy(r); }
+    r[1] = x[1]; return FpX_renormalize(r, lg(r));
+  }
+  if (pr) { r[1] = x[1]; r = FpX_renormalize(r, lg(r)); }
+  q[1] = x[1]; q = FpX_renormalize(q, lg(q));
+  if (pr == ONLY_DIVIDES) return signe(r)? NULL: q;
+  if (pr) *pr = r;
+  return q;
+}
+
+GEN
+FpX_divrem_Barrett(GEN x, GEN B, GEN T, GEN p, GEN *pr)
+{
+  pari_sp av = avma;
+  GEN q1 = FpX_divrem_Barrett_noGC(x,B,T,p,pr);
+  if (!q1) {avma=av; return NULL;}
+  if (!pr || pr==ONLY_REM || pr==ONLY_DIVIDES) return gerepilecopy(av, q1);
+  gerepileall(av,2,&q1,pr);
+  return q1;
+}
+
+GEN
+FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
+{
+  long dy = degpol(y), dx = degpol(x), d = dx-dy;
+  if (pr==ONLY_REM) return FpX_rem(x, y, p);
+  if (d+3 < FpX_DIVREM_BARRETT_LIMIT)
+    return FpX_divrem_basecase(x,y,p,pr);
+  else
+  {
+    pari_sp av=avma;
+    GEN mg = FpX_invBarrett(y, p);
+    GEN q1 = FpX_divrem_Barrett_noGC(x,mg,y,p,pr);
+    if (!q1) {avma=av; return NULL;}
+    if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, q1);
+    gerepileall(av,2,&q1,pr);
+    return q1;
+  }
 }
 
 GEN
 FpX_rem_Barrett(GEN x, GEN mg, GEN T, GEN p)
 {
   pari_sp av = avma;
-  return gerepileupto(av, FpX_rem_Barrett_noGC(x,mg,T,p));
+  return gerepileupto(av, FpX_divrem_Barrett_noGC(x,mg,T,p,ONLY_REM));
 }
 
 GEN
@@ -1034,12 +1105,12 @@ FpX_rem(GEN x, GEN y, GEN p)
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return FpX_red(x,p);
   if (d+3 < FpX_REM_BARRETT_LIMIT)
-    return FpX_divrem(x,y,p,ONLY_REM);
+    return FpX_divrem_basecase(x,y,p,ONLY_REM);
   else
   {
     pari_sp av=avma;
     GEN mg = FpX_invBarrett(y, p);
-    return gerepileupto(av, FpX_rem_Barrett_noGC(x, mg, y, p));
+    return gerepileupto(av, FpX_divrem_Barrett_noGC(x, mg, y, p, ONLY_REM));
   }
 }
 
@@ -1106,7 +1177,7 @@ FpXQ_mul_mg(GEN x,GEN y,GEN mg,GEN T,GEN p)
   pari_sp av = avma;
   GEN z = FpX_mul(x,y,p);
   if (lg(T) > lg(z)) return z;
-  return gerepileupto(av, FpX_rem_Barrett_noGC(z, mg, T, p));
+  return gerepileupto(av, FpX_divrem_Barrett_noGC(z, mg, T, p, ONLY_REM));
 }
 
 /* Square of y in Z/pZ[X]/(T), as t_VECSMALL. */
@@ -1116,7 +1187,7 @@ FpXQ_sqr_mg(GEN y,GEN mg,GEN T,GEN p)
   pari_sp av = avma;
   GEN z = FpX_sqr(y,p);
   if (lg(T) > lg(z)) return z;
-  return gerepileupto(av, FpX_rem_Barrett_noGC(z, mg, T, p));
+  return gerepileupto(av, FpX_divrem_Barrett_noGC(z, mg, T, p, ONLY_REM));
 }
 
 typedef struct {
