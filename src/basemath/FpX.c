@@ -1179,7 +1179,7 @@ _FpXQ_red(void *data, GEN x)
   return FpX_red(x,D->p);
 }
 
-static struct bb_algebra FpXQ_algebra = { _FpXQ_red,_FpXQ_add,_FpXQ_smul, _FpXQ_mul,_FpXQ_sqr,_FpXQ_one,_FpXQ_zero};
+static struct bb_algebra FpXQ_algebra = { _FpXQ_red,_FpXQ_add,_FpXQ_smul, _mul_Barrett,_sqr_Barrett,_FpXQ_one,_FpXQ_zero};
 
 /* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
 GEN
@@ -1278,7 +1278,7 @@ GEN
 FpX_FpXQV_eval(GEN Q, GEN x, GEN T, GEN p)
 {
   FpX_muldata D;
-  D.T=T; D.p=p;
+  D.T=T; D.p=p; D.mg = FpX_invBarrett(T,p);
   return gen_RgX_bkeval_powers(Q,x,(void*)&D,&FpXQ_algebra);
 }
 
@@ -1296,7 +1296,7 @@ FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
     return gerepileupto(av, z);
   }
   use_sqr = (degpol(x)<<1) >= degpol(T);
-  D.T=T; D.p=p;
+  D.T=T; D.p=p; D.mg = FpX_invBarrett(T,p);
   return gen_RgX_bkeval(Q,x,use_sqr,(void*)&D,&FpXQ_algebra);
 }
 
