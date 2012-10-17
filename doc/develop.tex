@@ -412,7 +412,6 @@ struct bb_algebra
 {
   GEN (*red)(void *E, GEN x);
   GEN (*add)(void *E, GEN x, GEN y);
-  GEN (*smul)(void *E, GEN x, GEN y);
   GEN (*mul)(void *E, GEN x, GEN y);
   GEN (*sqr)(void *E, GEN x);
   GEN (*one)(void *E);
@@ -427,8 +426,6 @@ Note that, in contrast of black box group, elements can have non canonical forms
 
 \kbd{add(E,x,y)} returns the sum $x+y$.
 
-\kbd{smul(E,x,a)} $a$ being an element of the base field, returns $a\*x$.
-
 \kbd{mul(E,x,y)} returns the product $x\*y$.
 
 \kbd{sqr(E,x)} returns the square $x^2$.
@@ -441,12 +438,18 @@ An algebra is thus described by a \kbd{struct bb\_algebra} as above and auxiliar
 data typecast to \kbd{void*}. The following functions operate on black box
 algebra:
 
-\fun{GEN}{gen_RgX_bkeval}{GEN P, GEN x, int use_sqr, void *E, const struct bb_field *ff}
-$P$ being a \typ{POL} with coefficients in the base field, and $x$ an element of the
-black box algebra, returns $P(x)$. The flag \kbd{use\_sqr} has the same meaning as for
+\fun{GEN}{gen_bkeval}{GEN P, long d, GEN x, int use_sqr, void *E,
+          const struct bb_field *ff, GEN cmul(void *E, GEN P, long a, GEN x)}
+$x$ being an element of the black box algebra, and $P$ some black box
+polynomial of degree $d$ over the base field,  returns $P(x)$. The function
+\kbd{cmul(E,P,a,y)} must return the coefficient of degree $a$ of $P$ multiplied
+by $y$.
+
+The flag \kbd{use\_sqr} has the same meaning as for
 \kbd{gen\_powers}. This implement an algorithm of Brent and Kung (1978).
 
-\fun{GEN}{gen_RgX_bkeval_powers}{GEN P, GEN V, void *E, const struct bb_field *ff}
+\fun{GEN}{gen_bkeval_powers}{GEN P, long d, GEN V, void *E, const struct bb_field *ff,
+                                      GEN cmul(void *E, GEN P, long a, GEN x)}
 as \kbd{gen\_RgX\_bkeval} assuming $V$ was output by \kbd{gen\_powers(x, l, E, ff)}
 for some $l\geq 1$. For optimal performance, $l$ should be computed by
 \kbd{brent\_kung\_optpow}.

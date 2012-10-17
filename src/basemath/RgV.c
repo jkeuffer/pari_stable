@@ -405,7 +405,7 @@ static GEN
 _RgM_add(void *E, GEN x, GEN y) { (void)E; return RgM_add(x, y); }
 
 static GEN
-_RgM_smul(void *E, GEN x, GEN y) { (void)E; return RgM_Rg_mul(x,y); }
+_RgM_cmul(void *E, GEN P, long a, GEN x) { (void)E; return RgM_Rg_mul(x,gel(P,a+2)); }
 
 static GEN
 _RgM_sqr(void *E, GEN x) { (void) E; return RgM_sqr(x); }
@@ -422,7 +422,7 @@ _RgM_zero(void *E) { long *n = (long*) E; return zeromat(*n,*n); }
 static GEN
 _RgM_red(void *E, GEN x) { (void)E; return x; }
 
-static struct bb_algebra RgM_algebra = { _RgM_red,_RgM_add,_RgM_smul,_RgM_mul,_RgM_sqr,_RgM_one,_RgM_zero };
+static struct bb_algebra RgM_algebra = { _RgM_red,_RgM_add,_RgM_mul,_RgM_sqr,_RgM_one,_RgM_zero };
 
 /* generates the list of powers of x of degree 0,1,2,...,l*/
 GEN
@@ -436,14 +436,14 @@ GEN
 RgX_RgMV_eval(GEN Q, GEN x)
 {
   long n = lg(x)>1 ? lg(gel(x,1))-1:0;
-  return gen_RgX_bkeval_powers(Q,x,(void*)&n,&RgM_algebra);
+  return gen_bkeval_powers(Q,degpol(Q),x,(void*)&n,&RgM_algebra,&_RgM_cmul);
 }
 
 GEN
 RgX_RgM_eval(GEN Q, GEN x)
 {
   long n = lg(x)-1;
-  return gen_RgX_bkeval(Q,x,1,(void*)&n,&RgM_algebra);
+  return gen_bkeval(Q,degpol(Q),x,1,(void*)&n,&RgM_algebra,&_RgM_cmul);
 }
 
 GEN

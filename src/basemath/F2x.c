@@ -743,26 +743,38 @@ F2xq_div(GEN x,GEN y,GEN T)
 }
 
 static GEN
-_F2xq_sqr(void *data, GEN x)
-{
-  GEN pol = (GEN) data;
-  return F2xq_sqr(x, pol);
-}
+_F2xq_red(void *E, GEN x)
+{ return F2x_rem(x, (GEN)E); }
+static GEN
+_F2xq_add(void *E, GEN x, GEN y)
+{ (void)E; return F2x_add(x,y); }
 
 static GEN
-_F2xq_mul(void *data, GEN x, GEN y)
+_F2xq_cmul(void *E, GEN P, long a, GEN x)
 {
-  GEN pol = (GEN) data;
-  return F2xq_mul(x,y, pol);
+  GEN pol = (GEN) E;
+  return F2x_coeff(P,a) ? x: pol0_F2x(pol[1]);
 }
+static GEN
+_F2xq_sqr(void *E, GEN x)
+{ return F2xq_sqr(x, (GEN) E); }
 
 static GEN
-_F2xq_one(void *data)
+_F2xq_mul(void *E, GEN x, GEN y)
+{ return F2xq_mul(x,y, (GEN) E); }
+
+static GEN
+_F2xq_one(void *E)
 {
-  GEN pol = (GEN) data;
+  GEN pol = (GEN) E;
   return pol1_F2x(pol[1]);
 }
-
+static GEN
+_F2xq_zero(void *E)
+{
+  GEN pol = (GEN) E;
+  return pol0_F2x(pol[1]);
+}
 
 GEN
 F2xq_pow(GEN x, GEN n, GEN pol)
@@ -793,69 +805,21 @@ F2xq_matrix_pow(GEN y, long n, long m, GEN P)
   return F2xV_to_F2m(F2xq_powers(y,m-1,P),n);
 }
 
-static GEN
-F2xq_eval_powers(GEN P, GEN V, long a, long n)
-{
-  pari_sp av = avma, lim = stack_lim(av,2);
-  long i;
-  GEN z = F2x_coeff(P,a) ? pol1_F2x(P[1]): pol0_F2x(P[1]);
-  for (i=1; i<=n; i++)
-    if (F2x_coeff(P,a+i))
-    {
-      z = F2x_add(z, gel(V,i+1));
-      if (low_stack(lim,stack_lim(av,2)))
-      {
-        if (DEBUGMEM>1) pari_warn(warnmem,"F2xq_eval_powers (i = %ld)",i);
-        z = gerepileuptoleaf(av, z);
-      }
-    }
-  return z;
-}
+static struct bb_algebra F2xq_algebra = { _F2xq_red,_F2xq_add,_F2xq_mul,_F2xq_sqr,_F2xq_one,_F2xq_zero};
 
 GEN
-F2x_F2xqV_eval(GEN P, GEN V, GEN T)
+F2x_F2xqV_eval(GEN Q, GEN x, GEN T)
 {
-  pari_sp av = avma, btop;
-  long l = lg(V)-1, d = F2x_degree(P);
-  GEN z, u;
-
-  if (d < 0) return pol0_F2x(T[1]);
-  if (d < l)
-  {
-    z = F2xq_eval_powers(P,V,0,d);
-    return gerepileuptoleaf(av, z);
-  }
-  if (l<=1) pari_err_DOMAIN("F2x_F2xqV_eval", "#powers", "<=", gen_1, V);
-  d -= l;
-  btop = avma;
-  z = F2xq_eval_powers(P,V,d+1,l-1);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    u = F2xq_eval_powers(P,V,d+1,l-2);
-    z = F2x_add(u, F2xq_mul(z,gel(V,l),T));
-    z = gerepileuptoleaf(btop, z);
-  }
-  u = F2xq_eval_powers(P,V,0,d);
-  z = F2x_add(u, F2xq_mul(z,gel(V,d+2),T));
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("F2x_F2xqV_eval: %ld F2xq_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileuptoleaf(av, z);
+  long d = F2x_degree(Q);
+  return gen_bkeval_powers(Q,d,x,(void*)T,&F2xq_algebra,_F2xq_cmul);
 }
 
 GEN
 F2x_F2xq_eval(GEN Q, GEN x, GEN T)
 {
-  pari_sp av = avma;
-  GEN z;
-  long d = F2x_degree(Q), rtd;
-  if (d < 0) return pol0_F2x(Q[1]);
-  rtd = (long) sqrt((double)d);
-  z = F2x_F2xqV_eval(Q, F2xq_powers(x,rtd,T), T);
-  return gerepileupto(av, z);
+  long d = F2x_degree(Q);
+  int use_sqr = (F2x_degree(x)<<1) >= F2x_degree(T);
+  return gen_bkeval(Q, d, x, use_sqr, (void*)T, &F2xq_algebra, _F2xq_cmul);
 }
 
 static GEN

@@ -1963,6 +1963,14 @@ _mul_Barrett(void *data, GEN x, GEN y)
 }
 
 static GEN
+_Flxq_red(void *E, GEN x)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  return Flx_rem(x, s->T, s->p); }
+static GEN
+_Flxq_add(void *E, GEN x, GEN y)
+{ struct _Flxq *s = (struct _Flxq *)E;
+  return Flx_add(x,y,s->p); }
+static GEN
 _Flxq_sqr(void *data, GEN x)
 {
   struct _Flxq *D = (struct _Flxq*)data;
@@ -1979,6 +1987,18 @@ _Flxq_one(void *data)
 {
   struct _Flxq *D = (struct _Flxq*)data;
   return pol1_Flx(D->T[1]);
+}
+static GEN
+_Flxq_zero(void *data)
+{
+  struct _Flxq *D = (struct _Flxq*)data;
+  return pol0_Flx(D->T[1]);
+}
+static GEN
+_Flxq_cmul(void *data, GEN P, long a, GEN x)
+{
+  struct _Flxq *D = (struct _Flxq*)data;
+  return Flx_Fl_mul(x, P[a+2], D->p);
 }
 
 /* n-Power of x in Z/pZ[X]/(T), as t_VECSMALL. */
@@ -2084,59 +2104,23 @@ Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
   return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
 }
 
-static GEN
-Flxq_eval_powers(GEN P, GEN V, long a, long n, ulong p)
-{
-  GEN z = Fl_to_Flx(P[2+a], P[1]);
-  long i;
-  for (i=1; i<=n; i++) z = Flx_add(z, Flx_Fl_mul(gel(V,i+1),P[2+a+i], p), p);
-  return z;
-}
+static struct bb_algebra Flxq_algebra = { _Flxq_red,_Flxq_add,_mul_Barrett,_sqr_Barrett,_Flxq_one,_Flxq_zero};
 
 GEN
-Flx_FlxqV_eval(GEN P, GEN V, GEN T, ulong p)
+Flx_FlxqV_eval(GEN Q, GEN x, GEN T, ulong p)
 {
-  pari_sp av = avma, btop;
-  long l = lg(V)-1, d = degpol(P);
-  GEN z, u;
-
-  if (d < 0) return pol0_Flx(T[1]);
-  if (d < l)
-  {
-    z = Flxq_eval_powers(P,V,0,d,p);
-    return gerepileupto(av, z);
-  }
-  if (l<=1) pari_err_DOMAIN("Flx_FlxqV_eval", "#powers", "<=", gen_1, V);
-  d -= l;
-  btop = avma;
-  z = Flxq_eval_powers(P,V,d+1,l-1,p);
-  while (d >= l-1)
-  {
-    d -= l-1;
-    u = Flxq_eval_powers(P,V,d+1,l-2,p);
-    z = Flx_add(u, Flxq_mul(z,gel(V,l),T,p), p);
-    z = gerepileupto(btop, z);
-  }
-  u = Flxq_eval_powers(P,V,0,d,p);
-  z = Flx_add(u, Flxq_mul(z,gel(V,d+2),T,p), p);
-  if (DEBUGLEVEL>=8)
-  {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
-    err_printf("Flx_FlxqV_eval: %ld Flxq_mul [%ld]\n", cnt, l-1);
-  }
-  return gerepileupto(av, z);
+  struct _Flxq D;
+  D.T=T; D.p=p; D.mg = Flx_invBarrett(T,p);
+  return gen_bkeval_powers(Q,degpol(Q),x,(void*)&D,&Flxq_algebra,_Flxq_cmul);
 }
 
 GEN
 Flx_Flxq_eval(GEN Q, GEN x, GEN T, ulong p)
 {
-  pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd;
-  if (d < 0) return pol0_Flx(Q[1]);
-  rtd = (long) sqrt((double)d);
-  z = Flx_FlxqV_eval(Q, Flxq_powers(x,rtd,T,p), T,p);
-  return gerepileupto(av, z);
+  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  struct _Flxq D;
+  D.T=T; D.p=p; D.mg = Flx_invBarrett(T,p);
+  return gen_bkeval(Q,degpol(Q),x,use_sqr,(void*)&D,&Flxq_algebra,_Flxq_cmul);
 }
 
 /* assume T irreducible mod p */
@@ -2719,16 +2703,6 @@ gener_Flxq(GEN T, ulong p, GEN *po)
   }
   return g;
 }
-
-static GEN
-_Flxq_red(void *E, GEN x)
-{ struct _Flxq *s = (struct _Flxq *)E;
-  return Flx_rem(x, s->T, s->p); }
-
-static GEN
-_Flxq_add(void *E, GEN x, GEN y)
-{ struct _Flxq *s = (struct _Flxq *)E;
-  return Flx_add(x,y,s->p); }
 
 static GEN
 _Flxq_neg(void *E, GEN x)
@@ -3587,9 +3561,9 @@ _FlxqXQ_add(void *data, GEN x, GEN y) {
   return FlxX_add(x,y, d->p);
 }
 static GEN
-_FlxqXQ_smul(void *data, GEN x, GEN y) {
+_FlxqXQ_cmul(void *data, GEN P, long a, GEN x) {
   FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
-  return FlxY_Flx_mul(x,y, d->p);
+  return FlxY_Flx_mul(x,gel(P,a+2), d->p);
 }
 static GEN
 _FlxqXQ_red(void *data, GEN x) {
@@ -3619,7 +3593,7 @@ _FlxqXQ_zero(void *data) {
   return pol_0(varn(d->S));
 }
 
-static struct bb_algebra FlxqXQ_algebra = { _FlxqXQ_red,_FlxqXQ_add,_FlxqXQ_smul,_FlxqXQ_mul,_FlxqXQ_sqr,_FlxqXQ_one,_FlxqXQ_zero };
+static struct bb_algebra FlxqXQ_algebra = { _FlxqXQ_red,_FlxqXQ_add,_FlxqXQ_mul,_FlxqXQ_sqr,_FlxqXQ_one,_FlxqXQ_zero };
 
 /* x over Fq, return lift(x^n) mod S */
 GEN
@@ -3662,7 +3636,8 @@ FlxqX_FlxqXQV_eval(GEN P, GEN V, GEN S, GEN T, ulong p)
   FlxqXQ_muldata D;
   D.mg = FlxqX_invBarrett(S,T,p);
   D.S=S; D.T=T; D.p=p;
-  return gen_RgX_bkeval_powers(P,V,(void*)&D,&FlxqXQ_algebra);
+  return gen_bkeval_powers(P, degpol(P), V, (void*)&D, &FlxqXQ_algebra,
+                                                   _FlxqXQ_cmul);
 }
 
 GEN
@@ -3672,7 +3647,8 @@ FlxqX_FlxqXQ_eval(GEN Q, GEN x, GEN S, GEN T, ulong p)
   int use_sqr = (degpol(x)<<1) >= degpol(T);
   D.mg = FlxqX_invBarrett(S,T,p);
   D.S=S; D.T=T; D.p=p;
-  return gen_RgX_bkeval(Q,x,use_sqr,(void*)&D,&FlxqXQ_algebra);
+  return gen_bkeval(Q, degpol(Q), x, use_sqr, (void*)&D, &FlxqXQ_algebra,
+                                                    _FlxqXQ_cmul);
 }
 
 static GEN

@@ -40,14 +40,15 @@ brent_kung_optpow(long d, long n, long m)
 }
 
 static GEN
-gen_RgXQ_eval_powers(GEN P, GEN V, long a, long n, void *E, struct bb_algebra *ff)
+gen_RgXQ_eval_powers(GEN P, GEN V, long a, long n, void *E, struct bb_algebra *ff,
+                                           GEN cmul(void *E, GEN P, long a, GEN x))
 {
   pari_sp av = avma, lim=stack_lim(av,2);
   long i;
-  GEN z = ff->smul(E,ff->one(E),gel(P,2+a));
+  GEN z = cmul(E,P,a,ff->one(E));
   for (i=1; i<=n; i++)
   {
-    z = ff->add(E, z, ff->smul(E, gel(V,i+1),gel(P,2+a+i)));
+    z = ff->add(E, z, cmul(E,P,a+i,gel(V,i+1)));
     if (low_stack(lim, stack_lim(av,2)))
       z = gerepileupto(av, z);
   }
@@ -60,45 +61,48 @@ gen_RgXQ_eval_powers(GEN P, GEN V, long a, long n, void *E, struct bb_algebra *f
  * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
  * by brent_kung_optpow */
 GEN
-gen_RgX_bkeval_powers(GEN P, GEN V, void *E, struct bb_algebra *ff)
+gen_bkeval_powers(GEN P, long d, GEN V, void *E, struct bb_algebra *ff,
+                                     GEN cmul(void *E, GEN P, long a, GEN x))
 {
   pari_sp av = avma, lim;
-  long l = lg(V)-1, d = degpol(P);
+  long l = lg(V)-1;
   GEN z, u;
 
   if (d < 0) return ff->zero(E);
-  if (d < l) return gerepileupto(av, gen_RgXQ_eval_powers(P,V,0,d,E,ff));
+  if (d < l) return gerepileupto(av, gen_RgXQ_eval_powers(P,V,0,d,E,ff,cmul));
   if (l<2) pari_err_DOMAIN("gen_RgX_bkeval_powers", "#powers", "<",gen_2,V);
   d -= l;
-  z = gen_RgXQ_eval_powers(P,V,d+1,l-1,E,ff);
+  z = gen_RgXQ_eval_powers(P,V,d+1,l-1,E,ff,cmul);
   lim = stack_lim(av,2);
   while (d >= l-1)
   {
     d -= l-1;
-    u = gen_RgXQ_eval_powers(P,V,d+1,l-2,E,ff);
+    u = gen_RgXQ_eval_powers(P,V,d+1,l-2,E,ff,cmul);
     z = ff->add(E,u, ff->mul(E,z,gel(V,l)));
     if (low_stack(lim, stack_lim(av,2)))
       z = gerepileupto(av, z);
   }
-  u = gen_RgXQ_eval_powers(P,V,0,d,E,ff);
+  u = gen_RgXQ_eval_powers(P,V,0,d,E,ff,cmul);
   z = ff->add(E,u, ff->mul(E,z,gel(V,d+2)));
   if (DEBUGLEVEL>=8)
   {
-    long cnt = 1 + (degpol(P) - l) / (l-1);
+    long cnt = 1 + (d - l) / (l-1);
     err_printf("RgX_RgXQV_eval: %ld RgXQ_mul [%ld]\n", cnt, l-1);
   }
   return gerepileupto(av, ff->red(E,z));
 }
 
 GEN
-gen_RgX_bkeval(GEN Q, GEN x, int use_sqr, void *E, struct bb_algebra *ff)
+gen_bkeval(GEN Q, long d, GEN x, int use_sqr, void *E, struct bb_algebra *ff,
+                                      GEN cmul(void *E, GEN P, long a, GEN x))
 {
   pari_sp av = avma;
-  GEN z;
-  long d = degpol(Q), rtd;
+  GEN z, V;
+  long rtd;
   if (d < 0) return ff->zero(E);
   rtd = (long) sqrt((double)d);
-  z = gen_RgX_bkeval_powers(Q, gen_powers(x,rtd,use_sqr,E,ff->sqr,ff->mul,ff->one), E, ff);
+  V = gen_powers(x,rtd,use_sqr,E,ff->sqr,ff->mul,ff->one);
+  z = gen_bkeval_powers(Q, d, V, E, ff, cmul);
   return gerepileupto(av, z);
 }
 
@@ -1689,7 +1693,7 @@ _sqr(void *data, GEN x) { return RgXQ_sqr(x, (GEN)data); }
 static GEN
 _mul(void *data, GEN x, GEN y) { return RgXQ_mul(x,y, (GEN)data); }
 static GEN
-_smul(void *data, GEN x, GEN y) { (void)data; return RgX_Rg_mul(x,y); }
+_cmul(void *data, GEN P, long a, GEN x) { (void)data; return RgX_Rg_mul(x,gel(P,a+2)); }
 static GEN
 _one(void *data) { return pol_1(varn((GEN)data)); }
 static GEN
@@ -1697,19 +1701,19 @@ _zero(void *data) { return pol_0(varn((GEN)data)); }
 static GEN
 _red(void *data, GEN x) { (void)data; return gcopy(x); }
 
-static struct bb_algebra RgXQ_algebra = { _red,_add,_smul, _mul,_sqr,_one,_zero };
+static struct bb_algebra RgXQ_algebra = { _red,_add,_mul,_sqr,_one,_zero };
 
 GEN
 RgX_RgXQV_eval(GEN Q, GEN x, GEN T)
 {
-  return gen_RgX_bkeval_powers(Q,x,(void*)T,&RgXQ_algebra);
+  return gen_bkeval_powers(Q,degpol(Q),x,(void*)T,&RgXQ_algebra,_cmul);
 }
 
 GEN
 RgX_RgXQ_eval(GEN Q, GEN x, GEN T)
 {
   int use_sqr = (degpol(x)<<1) >= degpol(T);
-  return gen_RgX_bkeval(Q,x,use_sqr,(void*)T,&RgXQ_algebra);
+  return gen_bkeval(Q,degpol(Q),x,use_sqr,(void*)T,&RgXQ_algebra,_cmul);
 }
 
 /* x,T in Rg[X], n in N, compute lift(x^n mod T)) */

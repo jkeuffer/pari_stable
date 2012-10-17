@@ -560,9 +560,10 @@ GEN     Rg_RgX_sub(GEN x, GEN y);
 GEN     ZX_unscale(GEN P, GEN h);
 GEN     ZX_unscale_div(GEN P, GEN h);
 long    brent_kung_optpow(long d, long n, long m);
-GEN     gen_RgX_bkeval(GEN Q, GEN x, int use_sqr, void *E, struct bb_algebra *ff);
-GEN     gen_RgX_bkeval_powers(GEN P, GEN V, void *E, struct bb_algebra *ff);
-
+GEN     gen_bkeval(GEN Q, long d, GEN x, int use_sqr, void *E,
+          struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
+GEN     gen_bkeval_powers(GEN P, long d, GEN V, void *E,
+          struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
 /* ZV.c */
 
 GEN     ZC_ZV_mul(GEN x, GEN y);
