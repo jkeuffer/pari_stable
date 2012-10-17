@@ -665,10 +665,17 @@ solve_AGM_eqn(GEN x0, long n, GEN B, GEN T, GEN sqx)
 static GEN
 Z2XQ_invnorm(GEN a, GEN T, long e)
 {
+  pari_timer ti;
   GEN pe = int2n(e), s;
   if (degpol(a)==0) return Fp_inv(Fp_powu(gel(a,2),degpol(T),pe),pe);
-  s = Fp_neg(FpXQ_trace(ZpXQ_log(a, T, gen_2, e), T, pe), pe);
-  return modii(gel(Qp_exp(cvtop(s, gen_2, e-2)),4),pe);
+  if (DEBUGLEVEL>=3) timer_start(&ti);
+  s = ZpXQ_log(a, T, gen_2, e);
+  if (DEBUGLEVEL>=3) timer_printf(&ti,"Z2XQ_log");
+  s = Fp_neg(FpXQ_trace(s, T, pe), pe);
+  if (DEBUGLEVEL>=3) timer_printf(&ti,"FpXQ_trace");
+  s = modii(gel(Qp_exp(cvtop(s, gen_2, e-2)),4),pe);
+  if (DEBUGLEVEL>=3) timer_printf(&ti,"Qp_exp");
+  return s;
 }
 
 /* Assume a2==0, so 4|E(F_p): if t^4 = a6 then (t,t^2) is of order 4

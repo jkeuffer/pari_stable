@@ -655,15 +655,20 @@ GEN
 ZpXQ_log(GEN a, GEN T, GEN p, long N)
 {
   pari_sp av = avma;
+  pari_timer ti;
   long is2 = equaliu(p,2);
   long k = (long) pow((double)(N>>1), 1./3);
-  GEN ak = FpXQ_pow(a, powiu(p,k), T, powiu(p,N+k));
+  GEN ak, s, b, pol;
   long e = is2 ? N-1: N;
-  GEN pe = powiu(p,e), s;
-  GEN b = ZpXQ_log_to_ath(ak, k, T, p, e, pe);
   long i, l = (e-2)/(2*(k+is2));
   ulong pp = is2 ? 0: itou_or_0(p);
-  GEN pol= cgetg(l+3,t_POL);
+  GEN pe = powiu(p,e);
+  if( DEBUGLEVEL>=3) timer_start(&ti);
+  ak = FpXQ_pow(a, powiu(p,k), T, powiu(p,N+k));
+  if( DEBUGLEVEL>=3) timer_printf(&ti,"FpXQ_pow(%ld)",k);
+  b = ZpXQ_log_to_ath(ak, k, T, p, e, pe);
+  if( DEBUGLEVEL>=3) timer_printf(&ti,"ZpXQ_log_to_ath");
+  pol= cgetg(l+3,t_POL);
   pol[1] = evalsigne(1)|evalvarn(0);
   for(i=0; i<=l; i++)
   {
@@ -677,7 +682,9 @@ ZpXQ_log(GEN a, GEN T, GEN p, long N)
     else g = powiu(p,2*i*k);
     gel(pol,i+2) = Fp_div(g, utoi(z),pe);
   }
+  if( DEBUGLEVEL>=3) timer_printf(&ti,"pol(%ld)",l);
   s = FpX_FpXQ_eval(pol, FpXQ_sqr(b, T, pe), T,  pe);
+  if( DEBUGLEVEL>=3) timer_printf(&ti,"FpX_FpXQ_eval");
   s = ZX_shifti(FpXQ_mul(b, s, T, pe), 1);
   return gerepileupto(av, is2? s: FpX_red(s, pe));
 }
