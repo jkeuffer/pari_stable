@@ -1523,9 +1523,11 @@ GEN
 FpXQ_trace(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
+  long n = degpol(T)-1;
   GEN z = FpX_mul(x, FpX_deriv(T, p), p);
-  z = FpX_div(RgX_shift_shallow(z, 1), T, p);
-  return gerepileuptoint(av, constant_term(z));
+  z = FpX_rem(z, T, p);
+  if (degpol(z)<n) { avma = av; return gen_0; }
+  return gerepileuptoint(av, Fp_div(gel(z,2+n), gel(T,3+n),p));
 }
 
 GEN

@@ -839,11 +839,11 @@ F2xq_trace(GEN x, GEN T)
 {
   pari_sp av = avma;
   ulong t;
+  long n = F2x_degree(T)-1;
   GEN z = F2x_mul(x, F2x_deriv(T));
-  z = F2x_div(F2x_shift(z, 1), T);
-  t = lgpol(z)?F2x_coeff(z,0):0;
-  avma=av;
-  return t;
+  z = F2x_rem(z, T);
+  t = F2x_degree(z)<n ? 0 : 1;
+  avma = av; return t;
 }
 
 GEN

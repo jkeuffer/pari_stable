@@ -2587,9 +2587,10 @@ Flxq_trace(GEN x, GEN T, ulong p)
 {
   pari_sp av = avma;
   ulong t;
+  long n = degpol(T)-1;
   GEN z = Flx_mul(x, Flx_deriv(T, p), p);
-  z = Flx_div(Flx_shift(z, 1), T, p);
-  t = lgpol(z)?z[2]:0;
+  z = Flx_rem(z, T, p);
+  t = degpol(z)<n ? 0 : Fl_div(z[2+n],T[3+n],p);
   avma=av;
   return t;
 }
