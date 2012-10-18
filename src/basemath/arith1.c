@@ -3332,53 +3332,61 @@ contfrac0(GEN x, GEN b, long nmax)
 }
 
 GEN
-pnqn(GEN x)
+contfracpnqn(GEN x, long n)
 {
   pari_sp av = avma;
-  long i, lx, tx = typ(x);
-  GEN p0, p1, q0, q1, a, p2, q2;
+  long i, lx = lg(x);
+  GEN M,A,B, p0,p1, q0,q1;
 
-  if (! is_matvec_t(tx)) pari_err_TYPE("pnqn",x);
-  lx = lg(x); if (lx == 1) return matid(2);
   p0 = gen_1; q0 = gen_0;
-  if (tx != t_MAT)
+  if (lx == 1)
   {
-    p1 = gel(x,1); q1 = gen_1;
-    for (i=2; i<lx; i++)
-    {
-      a = gel(x,i);
-      p2 = gadd(gmul(a,p1),p0); p0=p1; p1=p2;
-      q2 = gadd(gmul(a,q1),q0); q0=q1; q1=q2;
-    }
+    if (! is_matvec_t(typ(x))) pari_err_TYPE("pnqn",x);
+    if (n == 0) retmkmat(mkcol2(p0, q0));
+    return matid(2);
   }
-  else
+  switch(typ(x))
   {
-    long ly = lgcols(x);
-    if (ly==2)
-    {
-      p1 = gcoeff(x,1,1); q1 = gen_1;
-      for (i=2; i<lx; i++)
+    case t_VEC: case t_COL: A = x; B = NULL; break;
+    case t_MAT:
+      switch(lgcols(x))
       {
-        a = gcoeff(x,1,i);
-        p2 = gadd(gmul(a,p1),p0); p0=p1; p1=p2;
-        q2 = gadd(gmul(a,q1),q0); q0=q1; q1=q2;
+        case 2: A = row(x,1); B = NULL; break;
+        case 3: A = row(x,2); B = row(x,1); break;
+        default: pari_err_DIM("pnqn [ nbrows != 1,2 ]");
+                 return NULL; /*not reached*/
       }
-    }
-    else
-    {
-      if (ly != 3) pari_err_DIM("pnqn [ nbrows != 1,2 ]");
-      p1 = gcoeff(x,2,1); q1 = gcoeff(x,1,1);
-      for (i=2; i<lx; i++)
-      {
-        GEN b = gcoeff(x,1,i);
-        a = gcoeff(x,2,i);
-        p2 = gadd(gmul(a,p1),gmul(b,p0)); p0=p1; p1=p2;
-        q2 = gadd(gmul(a,q1),gmul(b,q0)); q0=q1; q1=q2;
-      }
-    }
+      break;
+    default: pari_err_TYPE("pnqn",x);
+      return NULL; /*not reached*/
   }
-  return gerepilecopy(av, mkmat2(mkcol2(p1,q1), mkcol2(p0,q0)));
+  if (n >= 0)
+  {
+    if (n == 0) { avma = av; retmkmat(mkcol2(p0, q0)); }
+    lx = minss(lx, n+1);
+  }
+  M = cgetg(lx+1, t_MAT);
+  p1 = gel(A,1);
+  q1 = B? gel(B,1): gen_1;
+  gel(M,1) = mkcol2(p0,q0);
+  gel(M,2) = mkcol2(p1,q1);
+  for (i=2; i<lx; i++)
+  {
+    GEN a = gel(A,i), p2,q2;
+    if (B) {
+      GEN b = gel(B,i);
+      p0 = gmul(b,p0);
+      q0 = gmul(b,q0);
+    }
+    p2 = gadd(gmul(a,p1),p0); p0=p1; p1=p2;
+    q2 = gadd(gmul(a,q1),q0); q0=q1; q1=q2;
+    gel(M,i+1) = mkcol2(p1,q1);
+  }
+  if (n < 0) M = mkmat2(gel(M,lx), gel(M,lx-1));
+  return gerepilecopy(av, M);
 }
+GEN
+pnqn(GEN x) { return contfracpnqn(x,-1); }
 
 /* write Mod(x,N) as a/b, gcd(a,b) = 1, b <= B (no condition if B = NULL) */
 static GEN

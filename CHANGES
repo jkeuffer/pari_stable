@@ -367,6 +367,8 @@ BA 107- PARI functions RgX_splitting(), Flx_splitting()
 BA 111- PARI functions retmkmat2,retmkcol2,mkmat2,mkcol2,mkcols,mkcol2s et al.
 BA 112- PARI functions ZXV_dotproduct(), FlxV_red(), ZXX_Z_divexact()
 BA 113- PARI function gen_ZpX_Newton()
+   114- optional argument to contfracpnqn: return all convergents up to
+        p_n/q_n, not only the last 2.
 
   Removed
     1- dropped DOS support
