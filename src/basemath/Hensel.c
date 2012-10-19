@@ -657,11 +657,12 @@ ZpXQ_log(GEN a, GEN T, GEN p, long N)
   pari_sp av = avma;
   pari_timer ti;
   long is2 = equaliu(p,2);
-  long k = (long) pow((double)(N>>1), 1./3);
+  ulong pp = is2 ? 0: itou_or_0(p);
+  double lp = is2 ? 1: pp ? log2(pp): expi(p);
+  long k = maxss(1 , (long) .5+pow((double)(N>>1)/(lp*lp), 1./3));
   GEN ak, s, b, pol;
   long e = is2 ? N-1: N;
   long i, l = (e-2)/(2*(k+is2));
-  ulong pp = is2 ? 0: itou_or_0(p);
   GEN pe = powiu(p,e);
   if( DEBUGLEVEL>=3) timer_start(&ti);
   ak = FpXQ_pow(a, powiu(p,k), T, powiu(p,N+k));
