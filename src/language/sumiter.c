@@ -236,7 +236,7 @@ u_forprime_set_prime_table(forprime_t *T, ulong a)
 int
 u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
 {
-  ulong maxp;
+  ulong maxp, maxp2;
   if (a > b || b < 2)
   {
     T->strategy = 1; /* paranoia */
@@ -266,7 +266,9 @@ u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
   else
     u_forprime_set_prime_table(T, a);
 
-  if (q != 1 || T->b - maxp < maxp / expu(b)) /* not worth sieving */
+  maxp2 = (maxp & HIGHMASK)? 0 : maxp*maxp;
+  if (q != 1 || (maxp2 && maxp2 <= a)
+             || T->b - maxss(a,maxp) < maxp / expu(b)) /* not worth sieving */
   { if (!T->strategy) T->strategy = 3; }
   else
   {
@@ -275,15 +277,12 @@ u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
 #else
     const ulong UPRIME_MAX = 4294967291UL;
 #endif
-    pari_sp av = avma;
-    GEN B = sqru(maxp);
     ulong sieveb;
     if (b > UPRIME_MAX) b = UPRIME_MAX;
-    if (lgefint(B) == 3)
-      sieveb = minuu(B[2], b);
-    else
+    if (!maxp2) /* maxp^2 > ULONG_MAX */
       sieveb = b;
-    avma = av;
+    else
+      sieveb = minuu(maxp2, b);
     if (!T->strategy) T->strategy = 2;
     if (!odd(sieveb)) sieveb--;
     sieve_init(T, maxuu(maxp+2, a), sieveb);
