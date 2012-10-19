@@ -3276,10 +3276,14 @@ lift0(GEN x, long v)
     case t_PADIC:
       return gtrunc(x);
 
-    case t_POL: case t_SER:
+    case t_POL:
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
-      return y;
+      return normalizepol_lg(y,lx);
+    case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
+      return normalize(y);
     case t_COMPLEX: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
