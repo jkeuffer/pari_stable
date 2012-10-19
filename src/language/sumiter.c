@@ -268,7 +268,7 @@ u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
 
   maxp2 = (maxp & HIGHMASK)? 0 : maxp*maxp;
   if (q != 1 || (maxp2 && maxp2 <= a)
-             || T->b - maxss(a,maxp) < maxp / expu(b)) /* not worth sieving */
+             || T->b - maxuu(a,maxp) < maxp / expu(b)) /* not worth sieving */
   { if (!T->strategy) T->strategy = 3; }
   else
   {
