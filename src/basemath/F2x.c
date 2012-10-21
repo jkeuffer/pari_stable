@@ -458,6 +458,7 @@ F2x_addshiftip(GEN x, GEN y, ulong d)
       x[i+dl] ^= y[i];
 }
 
+#if 0
 /* assume d>=0 */
 static GEN
 F2x_shift(GEN y, ulong d)
@@ -482,6 +483,7 @@ F2x_shift(GEN y, ulong d)
       x[i+dl] = y[i];
   return F2x_renormalize(x,lx);
 }
+#endif
 
 /* separate from F2x_divrem for maximal speed. */
 GEN
