@@ -115,9 +115,8 @@ BA 90- printf() did not flush output
    95- thue((x^4+1)^2, 4) -> no solution
 BA 96- idealramgroups() and idealfrobenius() did not accept a bnf
    97- using new operators with default(compatible,3) caused a crash
-BA 98- rename RgX_check_ZXY -> RgX_check_ZXX, ZXY_max_lg -> to ZXX_max_lg
-   99- rare corruption in ECM [#1240] factorint(,1) => SEGV
-  100- add missing call to normalize() in lift(t_POL/t_SER) [#1359]
+   98- rare corruption in ECM [#1240] factorint(,1) => SEGV
+   99- add missing call to normalize() in lift(t_POL/t_SER) [#1359]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -245,6 +244,7 @@ HC 78- reimplement incgam()
        verbose messages [ old 'tune -t' corresponds to current 'tune -tt' ]
    94- arithmetic functions no longer accept vector / matrix arguments [ to
     later allow passing factorization matrices ]: use apply()
+BA 95- rename RgX_check_ZXY -> RgX_check_ZXX, ZXY_max_lg -> to ZXX_max_lg
 
   Added
     1- mathnf for matrices over K[X] [#41]
