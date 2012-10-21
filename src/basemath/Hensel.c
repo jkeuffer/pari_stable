@@ -587,24 +587,26 @@ GEN
 ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e)
 {
   pari_sp av = avma;
-  GEN q = p, n_1, w;
+  GEN q = p, n_1, w, Tq, ap;
   ulong mask;
 
   a = Fq_red(a, T, q);
   if (e == 1) return a;
   n_1 = subis(n,1);
-  mask = quadratic_prec_mask(e);
-  w = Fq_inv(Fq_mul(n, Fq_pow(a, n_1, T,q), T,q), T,q);
+  mask = quadratic_prec_mask(e); Tq = FpX_red(T,q);
+  ap = Fq_mul(n, Fq_pow(a, n_1, Tq,q), Tq,q);
+  w = Fq_inv(ap, Tq, q);
   for(;;)
   {
     q = sqri(q);
     if (mask & 1) q = diviiexact(q, p);
-    mask >>= 1;
+    mask >>= 1; Tq = FpX_red(T,q);
     /* a -= w (a^n - b) */
-    a = Fq_sub(a, Fq_mul(w, Fq_sub(Fq_pow(a, n, T,q), b, T,q), T,q), T,q);
+    a = Fq_sub(a, Fq_mul(w, Fq_sub(Fq_pow(a, n, Tq,q), b, Tq,q), Tq,q), Tq,q);
     if (mask == 1) return gerepileupto(av, a);
     /* w += w - w^2 n a^(n-1)*/
-    w = Fq_sub(gmul2n(w,1), Fq_mul(Fq_sqr(w,T,q), Fq_mul(n, Fq_pow(a,n_1,T, q), T,q), T,q), T,q);
+    ap = Fq_mul(n, Fq_pow(a,n_1,Tq, q), Tq,q);
+    w = Fq_sub(gmul2n(w,1), Fq_mul(Fq_sqr(w,Tq,q), ap, Tq, q), T,q);
   }
 }
 
@@ -613,7 +615,7 @@ GEN
 ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
 {
   pari_sp av = avma;
-  GEN q = p;
+  GEN q = p, Tq;
   ulong mask;
 
   a = FpX_red(a, q);
@@ -623,8 +625,8 @@ ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
   {
     q = sqri(q);
     if (mask & 1) q = diviiexact(q, p);
-    mask >>= 1;
-    a = FpXQ_mul(a, Fp_FpX_sub(gen_2, FpXQ_mul(a, FpX_red(b, q) , T, q), q), T,q);
+    mask >>= 1; Tq = FpX_red(T,q);
+    a = FpXQ_mul(a, Fp_FpX_sub(gen_2, FpXQ_mul(a, FpX_red(b, q) , Tq, q), q), Tq,q);
     if (mask == 1) return gerepileupto(av, a);
   }
 }
