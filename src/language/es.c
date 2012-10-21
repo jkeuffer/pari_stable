@@ -4666,7 +4666,7 @@ pari_tmp_dir(void)
 #endif
   s = env_ok("GPTMPDIR"); if (s) return s;
   s = env_ok("TMPDIR"); if (s) return s;
-#ifdef __EMX__
+#if defined(_WIN32) || defined(__EMX__)
   s = env_ok("TMP"); if (s) return s;
   s = env_ok("TEMP"); if (s) return s;
 #endif
