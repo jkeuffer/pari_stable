@@ -691,7 +691,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
   Xm = FpX_rem_Barrett(RgX_inflate(pol_x(varn(T)), 3*m), B, T2, q);
   j = Flx_neg(Flxq_inv(a6,T,3),3);
-  sqx = Flxq_pow(polx_Flx(T[1]),powuu(3,n-1),T, 3);
+  sqx = Flxq_autpow(Flxq_powu(polx_Flx(T[1]), 3, T, 3),n-1,T,3);
   V = mkvec3(sqx,Flxq_sqr(sqx,T,3),T);
   J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, m, B,T2,V);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");

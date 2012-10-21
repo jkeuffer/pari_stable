@@ -369,7 +369,8 @@ BA 111- PARI functions retmkmat2,retmkcol2,mkmat2,mkcol2,mkcols,mkcol2s et al.
 BA 112- PARI functions ZXV_dotproduct(), FlxV_red(), ZXX_Z_divexact()
 BA 113- PARI function gen_ZpX_Newton()
    114- optional argument to contfracpnqn: return all convergents up to
-        p_n/q_n, not only the last 2.
+        p_n/q_n, not only the last 2
+BA 115- PARI function Flxq_autpow, F2xq_autpow, F2xq_sqrt_fast
 
   Removed
     1- dropped DOS support

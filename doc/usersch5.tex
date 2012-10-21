@@ -4434,6 +4434,10 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{Flxq_matrix_pow}{GEN x, long m, long n, GEN T, ulong p},
 see \kbd{FpXQ\_matrix\_pow}.
 
+\fun{GEN}{Flxq_autpow}{GEN a, long n, GEN T, ulong p} computes $\sigma^n(X)$
+assuming $a=\sigma(X)$ where $\sigma$ is an automorphism of the algebra
+$\F_l[X]/T(X)$.
+
 \fun{GEN}{Flxq_ffisom_inv}{GEN S, GEN T, ulong p}, as \kbd{FpXQ\_ffisom\_inv}.
 
 \fun{GEN}{Flx_Flxq_eval}{GEN f, GEN x, GEN T, ulong p} returns

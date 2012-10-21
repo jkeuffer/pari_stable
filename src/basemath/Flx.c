@@ -2573,6 +2573,27 @@ Flxq_sqrt(GEN a, GEN T, ulong p)
   return Flxq_sqrtn(a, gen_2, T, p, NULL);
 }
 
+static GEN
+Flxq_autpow_sqr(void *E, GEN x)
+{
+  struct _Flxq *D = (struct _Flxq*)E;
+  return Flx_Flxq_eval(x, x, D->T, D->p);
+}
+static GEN
+Flxq_autpow_mul(void *E, GEN x, GEN y)
+{
+  struct _Flxq *D = (struct _Flxq*)E;
+  return Flx_Flxq_eval(x, y, D->T, D->p);
+}
+
+GEN
+Flxq_autpow(GEN x, long n, GEN T, ulong p)
+{
+  struct _Flxq D;
+  D.T=T; D.p=p;
+  return gen_powu(x,n,(void*)&D,Flxq_autpow_sqr,Flxq_autpow_mul);
+}
+
 ulong
 Flxq_norm(GEN x, GEN T, ulong p)
 {

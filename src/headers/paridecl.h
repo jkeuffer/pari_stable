@@ -195,6 +195,7 @@ GEN     FlxY_Flx_div(GEN x, GEN y, ulong p);
 GEN     FlxY_Flx_mul(GEN x, GEN y, ulong p);
 GEN     FlxY_evalx(GEN Q, ulong x, ulong p);
 GEN     FlxYqQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
+GEN     Flxq_autpow(GEN x, long n, GEN T, ulong p);
 GEN     Flxq_charpoly(GEN x, GEN T, ulong p);
 GEN     Flxq_conjvec(GEN x, GEN T, ulong p);
 GEN     Flxq_div(GEN x, GEN y, GEN T, ulong p);
