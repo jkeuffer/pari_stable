@@ -435,14 +435,14 @@ NEXT_CHUNK:
       ulong p = T->a + (n<<4);
       long i = 0;
       T->pos = n;
-      if (!(mask &  1) && p   <= T->sieveb) T->cache[i++] = p;
-      if (!(mask &  2) && p+2 <= T->sieveb) T->cache[i++] = p+2;
-      if (!(mask &  4) && p+4 <= T->sieveb) T->cache[i++] = p+4;
-      if (!(mask &  8) && p+6 <= T->sieveb) T->cache[i++] = p+6;
-      if (!(mask & 16) && p+8 <= T->sieveb) T->cache[i++] = p+8;
-      if (!(mask & 32) && p+10<= T->sieveb) T->cache[i++] = p+10;
-      if (!(mask & 64) && p+12<= T->sieveb) T->cache[i++] = p+12;
-      if (!(mask &128) && p+14<= T->sieveb) T->cache[i++] = p+14;
+      if (!(mask &  1) && p <= T->sieveb) T->cache[i++] = p;
+      if (!(mask &  2) && p <= T->sieveb-2) T->cache[i++] = p+2;
+      if (!(mask &  4) && p <= T->sieveb-4) T->cache[i++] = p+4;
+      if (!(mask &  8) && p <= T->sieveb-6) T->cache[i++] = p+6;
+      if (!(mask & 16) && p <= T->sieveb-8) T->cache[i++] = p+8;
+      if (!(mask & 32) && p <= T->sieveb-10) T->cache[i++] = p+10;
+      if (!(mask & 64) && p <= T->sieveb-12) T->cache[i++] = p+12;
+      if (!(mask &128) && p <= T->sieveb-14) T->cache[i++] = p+14;
       if (i)
       {
         T->cache[i] = 0;
@@ -459,8 +459,8 @@ NEXT_CHUNK:
         T->a |= 1; /* first time; ensure odd */
       else
         T->a = (T->end + 2) | 1;
-      T->end = T->a + T->chunk;
-      if (T->end > T->sieveb) T->end = T->sieveb;
+      T->end = T->a + T->chunk; /* may overflow */
+      if (T->end < T->a || T->end > T->sieveb) T->end = T->sieveb;
       /* end and a are odd; sieve[k] contains the a + 8*2k + (0,2,...,14).
        * The largest k is (end-a) >> 4 */
       T->pos = 0;
