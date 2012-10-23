@@ -371,6 +371,7 @@ BA 113- PARI function gen_ZpX_Newton()
    114- optional argument to contfracpnqn: return all convergents up to
         p_n/q_n, not only the last 2
 BA 115- PARI function Flxq_autpow, F2xq_autpow, F2xq_sqrt_fast
+BA 116- PARI function FpX_divrem_Barrett and unconditional FpX_rem_Barrett
 
   Removed
     1- dropped DOS support

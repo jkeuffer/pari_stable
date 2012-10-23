@@ -3718,9 +3718,12 @@ copy. If not, the inverse remains uncollected on the stack.
 $M$ of $T$ defined by $M(x)\*x^n\*T(1/x)\equiv 1\pmod{x^{n-1}}$ where $n$ is
 the degree of $T$.
 
-\fun{GEN}{FpX_rem_Barrett}{GEN x, GEN mg, GEN T, GEN p}, returns
-\kbd{x} modulo \kbd{T}, assuming that $\deg x\leq 2\*(\deg{T} - 1)$ where
-\kbd{mg} is the Barrett inverse of \kbd{T}.
+\fun{GEN}{FpX_rem_Barrett}{GEN x, GEN B, GEN T, GEN p}, returns
+\kbd{x} modulo \kbd{T}, where \kbd{B} is the Barrett inverse of \kbd{T}.
+
+\fun{GEN}{FpX_divrem_Barrett}{GEN x, GEN B, GEN T, GEN p, GEN *pr},
+identical to \kbd{FpX\_divrem} except that \kbd{B} must be the Barrett inverse
+of \kbd{T}.
 
 \fun{GEN}{FpX_rescale}{GEN P, GEN h, GEN p} returns $h^{\deg(P)} P(x/h)$.
 \kbd{P} is an \kbd{FpX} and \kbd{h} is a non-zero \kbd{Fp} (the routine would
