@@ -558,6 +558,7 @@ GEN     RgX_to_RgV(GEN x, long N);
 GEN     RgX_translate(GEN P, GEN c);
 GEN     RgX_unscale(GEN P, GEN h);
 GEN     Rg_RgX_sub(GEN x, GEN y);
+GEN     ZX_translate(GEN P, GEN c);
 GEN     ZX_unscale(GEN P, GEN h);
 GEN     ZX_unscale_div(GEN P, GEN h);
 long    brent_kung_optpow(long d, long n, long m);

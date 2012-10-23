@@ -350,6 +350,57 @@ RgX_translate(GEN P, GEN c)
   }
   return gerepilecopy(av, Q);
 }
+
+/* return P(X + c) using destructive Horner, optimize for c = 1,-1 */
+GEN
+ZX_translate(GEN P, GEN c)
+{
+  pari_sp av = avma, lim;
+  GEN Q, *R;
+  long i, k, n;
+
+  if (!signe(P) || !signe(c)) return gcopy(P);
+  Q = leafcopy(P);
+  R = (GEN*)(Q+2); n = degpol(P);
+  lim = stack_lim(av, 2);
+  if (equali1(c))
+  {
+    for (i=1; i<=n; i++)
+    {
+      for (k=n-i; k<n; k++) R[k] = addii(R[k], R[k+1]);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) pari_warn(warnmem,"ZX_translate(1), i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
+  }
+  else if (equalim1(c))
+  {
+    for (i=1; i<=n; i++)
+    {
+      for (k=n-i; k<n; k++) R[k] = subii(R[k], R[k+1]);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) pari_warn(warnmem,"ZX_translate(-1), i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
+  }
+  else
+  {
+    for (i=1; i<=n; i++)
+    {
+      for (k=n-i; k<n; k++) R[k] = addii(R[k], mulii(c, R[k+1]));
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if(DEBUGMEM>1) pari_warn(warnmem,"ZX_translate, i = %ld/%ld", i,n);
+        Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
+  }
+  return gerepilecopy(av, Q);
+}
 /* return lift( P(X + c) ) using Horner, c in R[y]/(T) */
 GEN
 RgXQX_translate(GEN P, GEN c, GEN T)

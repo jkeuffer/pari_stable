@@ -6101,6 +6101,9 @@ smaller coefficients.
 \kbd{P} is a \kbd{ZX} and \kbd{h} is a non-zero integer. (Leaves small
 objects on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
 
+\fun{GEN}{ZX_translate}{GEN P, GEN c} assume $P$ is a \kbd{ZX} and $c$ an
+integer. Returns $P(X + c)$ (optimized for $c = \pm 1$).
+
 \fun{GEN}{ZX_unscale}{GEN P, GEN h} given a \kbd{ZX} $P$ and a \typ{INT} $h$,
 returns $P(hx)$. Not memory clean.
 
