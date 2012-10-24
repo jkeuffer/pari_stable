@@ -3572,7 +3572,7 @@ and \kbd{y}
 \subsec{\kbd{FlxqV}, \kbd{FlxqM}} See \kbd{FqV}, \kbd{FqM} operations.
 
 \fun{GEN}{FlxqV_dotproduct}{GEN x, GEN y, GEN T, ulong p} as
-\kbd{FpV_dotproduct}.
+\kbd{FpV\_dotproduct}.
 
 \fun{GEN}{FlxM_Flx_add_shallow}{GEN x, GEN y, ulong p} as
 \kbd{RgM\_Rg\_add\_shallow}.
@@ -4927,6 +4927,10 @@ mod $4$).
 $p$ be a prime \typ{INT} and $a,b$ be \kbd{FpXQ}s (modulo $T$) such that $a\*b
 \equiv 1 \mod (p,T)$.  Returns an \kbd{FpXQ} $A$ such that
 $A\*b \equiv 1 \mod (p^e, T)$.  Special case of \tet{ZpXQ_liftroot}.
+
+\fun{GEN}{ZpXQ_invlift}{GEN b, GEN T, GEN p, long e} let
+$p$ be a prime \typ{INT} and $b$ be a \kbd{FpXQ}s(modulo $T$).
+Returns an \kbd{FpXQ} $A$ such that $A\*b \equiv 1 \mod (p^e, T)$.
 
 \fun{GEN}{ZpXQ_sqrtnlift}{GEN b, GEN n, GEN a, GEN T, GEN p, long e} let
 $n,p$ be \typ{INT}s, with $n,p > 1$ and $p$ coprime to $n$, and $a,b$

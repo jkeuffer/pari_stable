@@ -631,6 +631,20 @@ ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
   }
 }
 
+GEN
+ZpXQ_inv(GEN a, GEN T, GEN p, long e)
+{
+  pari_sp av=avma;
+  GEN ai;
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    ai = Flx_to_ZX(Flxq_inv(ZX_to_Flx(a,pp),ZX_to_Flx(T,pp),pp));
+  } else
+    ai = FpXQ_inv(FpX_red(a,p),FpX_red(T,p),p);
+  return gerepileupto(av, ZpXQ_invlift(a, ai, T, p, e));
+}
+
 /* Compute (x-1)/(x+1)/p^k */
 static GEN
 ZpXQ_log_to_ath(GEN x, long k, GEN T, GEN p, long e, GEN pe)

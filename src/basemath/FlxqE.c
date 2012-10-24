@@ -628,7 +628,7 @@ getc2(GEN X, GEN A60, GEN A61, GEN T, GEN q, long N)
   GEN Q1 = ZX_Z_add(ZX_mulu(A61,27),gen_2);
   GEN Q2 = ZX_Z_add(ZX_add(ZX_mulu(X2,90),ZX_mulu(X,60)),gen_1);
   GEN Q = FpXQ_mul(Q1,Q2,T,q);
-  return FpXQ_mul(P,ZpXQ_invlift(Q,FpXQ_inv(FpX_red(Q,p),T,p),T,p,N),T,q);
+  return FpXQ_mul(P,ZpXQ_inv(Q,T,p,N),T,q);
 }
 
 static GEN
