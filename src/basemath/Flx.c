@@ -2568,6 +2568,32 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
 }
 
 GEN
+Flxq_lroot_fast(GEN a, GEN sqx, GEN T, long p)
+{
+  pari_sp av=avma;
+  GEN A = Flx_splitting(a,p);
+  return gerepileuptoleaf(av, FlxqV_dotproduct(A,sqx,T,p));
+}
+
+GEN
+Flxq_lroot(GEN a, GEN T, long p)
+{
+  pari_sp av=avma;
+  long n = degpol(T), d = degpol(a);
+  GEN sqx,V;
+  if (n==1) return leafcopy(a);
+  if (n==2) return Flxq_powu(a, p, T, p);
+  sqx = Flxq_autpow(Flxq_powu(polx_Flx(T[1]), p, T, p), n-1, T, p);
+  if (d==1 && a[2]==0 && a[3]==1) return gerepileuptoleaf(av, sqx);
+  if (d>=p)
+  {
+    V = Flxq_powers(sqx,p-1,T,p);
+    return gerepileuptoleaf(av, Flxq_lroot_fast(a,V,T,p));
+  } else
+    return gerepileuptoleaf(av, Flx_Flxq_eval(a,sqx,T,p));
+}
+
+GEN
 Flxq_sqrt(GEN a, GEN T, ulong p)
 {
   return Flxq_sqrtn(a, gen_2, T, p, NULL);
@@ -2806,6 +2832,18 @@ FlxV_red(GEN z, ulong p)
   res = cgetg(l,t_VEC);
   for(i=1;i<l;i++) gel(res,i) = Flx_red(gel(z,i),p);
   return res;
+}
+
+GEN
+FlxqV_dotproduct(GEN x, GEN y, GEN T, ulong p)
+{
+  long i, lx = lg(x);
+  pari_sp av;
+  GEN c;
+  if (lx == 1) return gen_0;
+  av = avma; c = Flx_mul(gel(x,1),gel(y,1), p);
+  for (i=2; i<lx; i++) c = Flx_add(c, Flx_mul(gel(x,i),gel(y,i), p), p);
+  return gerepileuptoleaf(av, Flx_rem(c,T,p));
 }
 
 /***********************************************************************/

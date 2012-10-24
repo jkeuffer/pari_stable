@@ -2920,9 +2920,10 @@ are left on stack, besides the $N$ in the result.
 modulo \kbd{m} is invertible, else return $0$ and set
 $\kbd{g} = \gcd(\kbd{a},\kbd{m})$.
 
-\fun{GEN}{Fp_log}{GEN a, GEN g, GEN ord, GEN p} Let $g$ such that $g^ord=1
-\pmod{p}$. Return an integer $e$ such that $a^e=g \pmod{p}$. If $e$ does not
-exist, the result is currently undefined.
+\fun{GEN}{Fp_log}{GEN a, GEN g, GEN ord, GEN p} Let $g$ such that
+$g^ord \equiv 1 \pmod{p}$. Return an integer $e$ such that
+$a^e \equiv g \pmod{p}$. If $e$ does not exist, the result is currently
+undefined.
 
 \fun{GEN}{Fp_order}{GEN a, GEN N, GEN p} returns the order of the
 \typ{Fp} \kbd{a}. If \kbd{N} is non-\kbd{NULL}, it is assumed that \kbd{N}
@@ -3569,6 +3570,9 @@ and \kbd{y}
 (destroys~\kbd{x}).
 
 \subsec{\kbd{FlxqV}, \kbd{FlxqM}} See \kbd{FqV}, \kbd{FqM} operations.
+
+\fun{GEN}{FlxqV_dotproduct}{GEN x, GEN y, GEN T, ulong p} as
+\kbd{FpV_dotproduct}.
 
 \fun{GEN}{FlxM_Flx_add_shallow}{GEN x, GEN y, ulong p} as
 \kbd{RgM\_Rg\_add\_shallow}.
@@ -4472,7 +4476,14 @@ a primitive \kbd{n}-th root of $1$. Assumes that \kbd{T} is irreducible mod
 \kbd{p}.
 
 \fun{GEN}{Flxq_sqrt}{GEN x, GEN T, ulong p} returns a square root of \kbd{x}.
-+Return \kbd{NULL} if \kbd{x} is not a square.
+Return \kbd{NULL} if \kbd{x} is not a square.
+
+\fun{GEN}{Flxq_lroot}{GEN a, GEN T, ulong p} returns $x$ such that $x^p = a$.
+
+\fun{GEN}{Flxq_lroot_fast}{GEN a, GEN V, GEN T, ulong p} assuming that
+\kbd{V=Flxq\_powers(s,p-1,T,p)} where $s(x)^p \equiv x\pmod{T(x),p}$,
+returns $b$ such that $b^p=a$. Only useful if $p$ is less than the degree of
+$T$.
 
 \fun{GEN}{Flxq_charpoly}{GEN x, GEN T, ulong p} returns the characteristic
 polynomial of \kbd{x}
@@ -4702,8 +4713,8 @@ assuming it exists.
 
 \fun{GEN}{F2xq_sqrt}{GEN a, GEN T}
 
-\fun{GEN}{F2xq_sqrt_fast}{GEN a, GEN s, GEN T} assuming that $s^2=x\pmod{T(x)}$,
-computes $b=a(s)\pmod{T}$ so that $b^2=a$.
+\fun{GEN}{F2xq_sqrt_fast}{GEN a, GEN s, GEN T} assuming that
+$s^2 \equiv x\pmod{T(x)}$, computes $b \equiv a(s)\pmod{T}$ so that $b^2=a$.
 
 \fun{GEN}{F2xq_sqrtn}{GEN a, GEN n, GEN T, GEN *zeta}
 
