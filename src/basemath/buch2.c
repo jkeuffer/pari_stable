@@ -2731,7 +2731,8 @@ be_honest(FB_t *F, GEN nf, GEN auts, FACT *fact)
         avma = av2;
         if (++nbtest > maxtry_HONEST)
         {
-          pari_warn(warner,"be_honest() failure on prime %Ps\n", P[j]);
+          if (DEBUGLEVEL)
+            pari_warn(warner,"be_honest() failure on prime %Ps\n", P[j]);
           return 0;
         }
         ideal = ideal0;
