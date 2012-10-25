@@ -676,7 +676,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
                     ZC_z_mul(gel(phi,4),3),mkcol4s(4,0,0,0));
   GEN q = powuu(3, N), p =utoi(3);
   GEN T2, B, Xm, j, c2, t;
-  GEN J1,J0,A60,A61,X, sqx;
+  GEN J1,A60,A61,X, sqx;
   timer_start(&ti);
   T2 = F3x_canonlift(T,N);
   av2 = avma;
@@ -688,9 +688,8 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, 3), 2, T, 3);
   J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, m, B,T2,sqx,T);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
-  J0 = Z3XQ_frob(J1,Xm,m,B,T2,q);
-  A60 = liftcurve(J0,T2,p,N);
   A61 = liftcurve(J1,T2,p,N);
+  A60 = Z3XQ_frob(A61,Xm,m,B,T2,q);
   if (DEBUGLEVEL) timer_printf(&ti,"liftcurve");
   X = liftX(Flxq_powu(a6,3,T,3),A60,sqx,T,T2,p,N);
   if (DEBUGLEVEL) timer_printf(&ti,"X");
