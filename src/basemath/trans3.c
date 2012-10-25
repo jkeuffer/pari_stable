@@ -3005,21 +3005,15 @@ thetanullk(GEN q, long k, long prec)
   return gerepileupto(av, gmul(p1, y));
 }
 
-/* [d^i theta/dz^i(q, 0), i = 1, 3, .., 2*k - 1] */
-GEN
-vecthetanullk(GEN q, long k, long prec)
+static GEN
+vecthetanullk_loop(GEN q, long k, long prec)
 {
-  long i, l, n;
-  pari_sp av = avma;
-  GEN p1, ps, qn, y, ps2;
+  GEN ps, qn = gen_1, ps2 = gsqr(q), y = const_vec(k, gen_1);
+  pari_sp av = avma, lim = stack_lim(av,2);
+  const long bit = prec2nbits(prec);
+  long i, n;
 
-  l = precision(q); if (l) prec = l;
-  q = check_unit_disc("vecthetanullk", q, prec);
-
-  qn = gen_1;
-  ps2 = gsqr(q);
   ps = gneg_i(ps2);
-  y = const_vec(k, gen_1);
   for (n = 3;; n += 2)
   {
     GEN t = NULL/*-Wall*/, P = utoipos(n), N2 = sqru(n);
@@ -3030,9 +3024,45 @@ vecthetanullk(GEN q, long k, long prec)
       t = gmul(qn, P); gel(y,i) = gadd(gel(y,i), t);
       P = mulii(P, N2);
     }
-    if (gexpo(t) < -prec2nbits(prec)) break;
+    if (gexpo(t) < -bit) return y;
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"vecthetanullk_loop, n = %ld",n);
+      gerepileall(av, 3, &qn, &ps, &y);
+    }
   }
+}
+/* [d^i theta/dz^i(q, 0), i = 1, 3, .., 2*k - 1] */
+GEN
+vecthetanullk(GEN q, long k, long prec)
+{
+  long i, l = precision(q);
+  pari_sp av = avma;
+  GEN p1, y;
+
+  if (l) prec = l;
+  q = check_unit_disc("vecthetanullk", q, prec);
+  y = vecthetanullk_loop(q, k, prec);
+
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
+  for (i = 2; i <= k; i+=2) gel(y,i) = gneg_i(gel(y,i));
+  return gerepileupto(av, gmul(p1, y));
+}
+/* [d^i theta/dz^i(q, 0), i = 1, 3, .., 2*k - 1], q = exp(2iPi tau) */
+GEN
+vecthetanullk_tau(GEN tau, long k, long prec)
+{
+  long i, l = precision(tau);
+  pari_sp av = avma;
+  GEN p1, q4, y;
+
+  if (l) prec = l;
+  if (typ(tau) != t_COMPLEX || gsigne(gel(tau,2)) <= 0)
+    pari_err_DOMAIN("vecthetanullk_tau", "imag(tau)", "<=", gen_0, tau);
+
+  q4 = expIxy(Pi2n(-1, prec), tau, prec); /* q^(1/4) */
+  y = vecthetanullk_loop(gsqr(gsqr(q4)), k, prec);
+  p1 = gmul2n(q4,1);
   for (i = 2; i <= k; i+=2) gel(y,i) = gneg_i(gel(y,i));
   return gerepileupto(av, gmul(p1, y));
 }

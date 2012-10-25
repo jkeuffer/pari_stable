@@ -1488,12 +1488,19 @@ check_periods(GEN w)
 static GEN
 PiI2div(GEN x, long prec) { return gdiv(Pi2n(1, prec), mulcxmI(x)); }
 /* exp(I x y), more efficient for x in R, y pure imaginary */
-static GEN
+GEN
 expIxy(GEN x, GEN y, long prec) { return gexp(gmul(x, mulcxI(y)), prec); }
 
 static GEN
 check_real(GEN q)
 { return (typ(q) == t_COMPLEX && gequal0(gel(q,2)))? gel(q,1): q; }
+
+static GEN
+trueE2(GEN tau, long prec)
+{
+  GEN v = vecthetanullk_tau(gmul2n(tau,-1), 3, prec);
+  return gneg(gdiv(gel(v,2), gel(v,1))); /* -theta^(3) / theta^(1) */
+}
 
 /* Return E_k(tau). Slow if tau is not in standard fundamental domain */
 static GEN
@@ -1503,6 +1510,7 @@ trueE(GEN tau, long k, long prec)
   GEN p1, q, y, qn;
   long n = 1;
 
+  if (k == 2) return trueE2(tau, prec);
   q = expIxy(Pi2n(1, prec), tau, prec);
   q = check_real(q);
   y = gen_0;
@@ -1580,7 +1588,7 @@ elleta(GEN om, long prec)
 
   if (!get_periods(om, &T)) pari_err_TYPE("elleta",om);
   pi = mppi(prec);
-  E2 = trueE(T.Tau, 2, prec); /* E_2(Tau) */
+  E2 = trueE2(T.Tau, prec); /* E_2(Tau) */
   if (signe(T.c))
   {
     GEN u = gdiv(T.w2, T.W2);
