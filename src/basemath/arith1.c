@@ -1834,7 +1834,7 @@ sqrt_Cipolla_sqr(void *data, GEN y)
   v = subii(sqri(addii(v,u)), addii(u2,v2));
   u = addii(u2, mulii(v2,n));
   /* NOT mkvec2: must be gerepileupto-able */
-  retmkvec2(modii(v,p), modii(u,p));
+  retmkvec2(modii(u,p), modii(v,p));
 }
 /* compute (t+X) y^2 */
 static GEN
@@ -1847,7 +1847,7 @@ sqrt_Cipolla_msqr(void *data, GEN y)
   u = subii(mului(t,d2), mulii(b,addii(u,d)));
   v = subii(d2, mulii(b,v));
   /* NOT mkvec2: must be gerepileupto-able */
-  retmkvec2(modii(v,p), modii(u,p));
+  retmkvec2(modii(u,p), modii(v,p));
 }
 /* assume a reduced mod p [ otherwise correct but inefficient ] */
 static GEN

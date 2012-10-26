@@ -70,3 +70,5 @@ factorff(x^12 + t*x^10 + x^6 + (t+1)*x^2 + 1)
 polrootsff(x^2 - x - ffgen((v^2+1) * Mod(1,3)))
 \\ #1350
 polrootsff(2*x+1,2,y)
+sqrt(Mod(-1,4296540161))
+sqrt(Mod(-1,18446744073944432641))

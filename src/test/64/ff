@@ -138,5 +138,9 @@ x^58 + x^57 + x^56 + x^52 + x^51 + x^49 + x^46 + x^45 + x^42 + x^39 + x^36 +
 []~
 ? polrootsff(2*x+1,2,y)
 []~
+? sqrt(Mod(-1,4296540161))
+Mod(1086811600, 4296540161)
+? sqrt(Mod(-1,18446744073944432641))
+Mod(6687681666819568403, 18446744073944432641)
 ? print("Total time spent: ",gettime);
-Total time spent: 1100
+Total time spent: 1188
