@@ -610,41 +610,6 @@ ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e)
   }
 }
 
-/* Same as ZpXQX_liftroot for the polynomial b*X-1 */
-GEN
-ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e)
-{
-  pari_sp av = avma;
-  GEN q = p, Tq;
-  ulong mask;
-
-  a = FpX_red(a, q);
-  if (e == 1) return a;
-  mask = quadratic_prec_mask(e);
-  for(;;)
-  {
-    q = sqri(q);
-    if (mask & 1) q = diviiexact(q, p);
-    mask >>= 1; Tq = FpX_red(T,q);
-    a = FpXQ_mul(a, Fp_FpX_sub(gen_2, FpXQ_mul(a, FpX_red(b, q) , Tq, q), q), Tq,q);
-    if (mask == 1) return gerepileupto(av, a);
-  }
-}
-
-GEN
-ZpXQ_inv(GEN a, GEN T, GEN p, long e)
-{
-  pari_sp av=avma;
-  GEN ai;
-  if (lgefint(p)==3)
-  {
-    ulong pp = p[2];
-    ai = Flx_to_ZX(Flxq_inv(ZX_to_Flx(a,pp),ZX_to_Flx(T,pp),pp));
-  } else
-    ai = FpXQ_inv(FpX_red(a,p),FpX_red(T,p),p);
-  return gerepileupto(av, ZpXQ_invlift(a, ai, T, p, e));
-}
-
 /* Compute (x-1)/(x+1)/p^k */
 static GEN
 ZpXQ_log_to_ath(GEN x, long k, GEN T, GEN p, long e, GEN pe)
@@ -755,4 +720,49 @@ gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
       x = gerepileupto(av, x);
   }
   return gerepileupto(ltop, x);
+}
+
+struct _ZpXQ_inv
+{
+  GEN T, a, p;
+};
+
+static GEN
+_inv_invd(void *E, GEN V, GEN v, long M)
+{
+  struct _ZpXQ_inv *d = (struct _ZpXQ_inv *) E;
+  GEN q = powiu(d->p, M);
+  GEN Tq = FpX_red(d->T, q);
+  return FpXQ_mul(V, gel(v,2), Tq, q);
+}
+
+static GEN
+_inv_eval(void *E, GEN x, GEN q)
+{
+  struct _ZpXQ_inv *d = (struct _ZpXQ_inv *) E;
+  GEN Tq = FpX_red(d->T, q);
+  GEN f = FpX_Fp_sub(FpXQ_mul(x, FpX_red(d->a, q), Tq, q), gen_1, q);
+  return mkvec2(f, x);
+}
+
+GEN
+ZpXQ_invlift(GEN a, GEN x, GEN T, GEN p, long e)
+{
+  struct _ZpXQ_inv d;
+  d.a = a; d.T = T; d.p = p;
+  return gen_ZpX_Newton(x, p, e, &d, _inv_eval, _inv_invd);
+}
+
+GEN
+ZpXQ_inv(GEN a, GEN T, GEN p, long e)
+{
+  pari_sp av=avma;
+  GEN ai;
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    ai = Flx_to_ZX(Flxq_inv(ZX_to_Flx(a,pp),ZX_to_Flx(T,pp),pp));
+  } else
+    ai = FpXQ_inv(FpX_red(a,p),FpX_red(T,p),p);
+  return gerepileupto(av, ZpXQ_invlift(a, ai, T, p, e));
 }
