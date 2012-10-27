@@ -5280,6 +5280,9 @@ generators of the group $E(\F_p)$ with the base change \kbd{ch} (see
 \kbd{FpE\_changepoint}), where $D$ and $m$ are as returned by
 \kbd{Fp\_ellgroup}.
 
+\fun{GEN}{Fp_elldivpol}{GEN a4, GEN a6, long n, GEN p} returns the $n$-division
+polynomial of the elliptic curve $E$.
+
 \subsec{\kbd{FpE}}
 
 \fun{GEN}{FpE_add}{GEN P, GEN Q, GEN a4, GEN p} returns the sum $P+Q$
@@ -5466,6 +5469,12 @@ which is assumed to be of order $N$ and set $*pt_m=m$.
 Returns generators of the group $E(\F_p[X]/(T))$ with the base change \kbd{ch}
 (see \kbd{FpXQE\_changepoint}), where $D$ and $m$ are as returned by
 \kbd{FpXQ\_ellgroup}.
+
+\fun{GEN}{FpXQ_elldivpol}{GEN a4, GEN a6, long n, GEN T, GEN p} returns the $n$-division
+polynomial of the elliptic curve $E$.
+
+\fun{GEN}{Fq_elldivpolmod}{GEN a4, GEN a6, long n, GEN h, GEN T, GEN p} returns the $n$-division
+polynomial of the elliptic curve $E$ modulo the polynomial $h$.
 
 \subsec{\kbd{FpXQE}}
 

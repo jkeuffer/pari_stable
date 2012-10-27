@@ -276,6 +276,7 @@ GEN     random_FlxqE(GEN a4, GEN a6, GEN T, ulong p);
 /* FpE.c */
 
 GEN     Fp_ellcard(GEN a4, GEN a6, GEN p);
+GEN     Fp_elldivpol(GEN a4, GEN a6, long n, GEN p);
 GEN     Fp_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p);
 GEN     Fp_ellgroup(GEN a4, GEN a6, GEN N, GEN p, GEN *pt_m);
 GEN     Fp_ffellcard(GEN a4, GEN a6, GEN q, long n, GEN p);
@@ -292,6 +293,7 @@ GEN     FpE_to_mod(GEN P, GEN p);
 GEN     FpE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
 GEN     FpE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN p);
 GEN     FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p);
+GEN     FpXQ_elldivpol(GEN a4, GEN a6, long n, GEN T, GEN p);
 GEN     FpXQ_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p);
 GEN     FpXQ_ellgroup(GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m);
 GEN     FpXQE_add(GEN P, GEN Q, GEN a4, GEN T, GEN p);
@@ -305,6 +307,7 @@ GEN     FpXQE_order(GEN z, GEN o, GEN a4, GEN T, GEN p);
 GEN     FpXQE_sub(GEN P, GEN Q, GEN a4, GEN T, GEN p);
 GEN     FpXQE_tatepairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
 GEN     FpXQE_weilpairing(GEN t, GEN s, GEN m, GEN a4, GEN T, GEN p);
+GEN     Fq_elldivpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, GEN p);
 GEN     RgE_to_FpE(GEN x, GEN p);
 GEN     RgE_to_FpXQE(GEN x, GEN T, GEN p);
 const struct bb_group * get_FpE_group(void **E, GEN a4, GEN a6, GEN p);

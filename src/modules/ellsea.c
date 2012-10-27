@@ -153,68 +153,6 @@ find_coeff(GEN a4, GEN a6, GEN T, GEN p, long precS)
   return res;
 }
 
-/*Computes the n-division polynomial modulo the polynomial h \in Fq[x] */
-static GEN
-a4a6_divpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, GEN p)
-{
-  pari_sp ltop = avma;
-  GEN f, f2, ff, rhs, inv2y, a42, res;
-  long N, m, l;
-  if (n <= 2) return n==1 ?gen_1: gen_2;
-  N = maxss(5, (n+1)/2 + 3);
-  f  = cgetg(N+1, t_VEC);
-  f2 = cgetg(N+1, t_VEC); /*f2[m]=f[m]^2 */
-  ff = cgetg(N+1, t_VEC); /*ff[m]=f[m]*f[m-2] */
-  rhs = FqX_rem(mkpoln(4, gen_1, gen_0, a4, a6), h, T, p);
-  inv2y = FqXQ_inv(FqX_mulu(rhs, 2, T, p), h, T, p);
-  gel(f, 2) = scalarpol(gen_2,0);
-  gel(f2, 2) = FqX_mulu(rhs, 4, T, p);
-  a42 = Fq_sqr(a4, T, p);
-  gel(f, 3) = FqX_rem(mkpoln(5, utoi(3), gen_0, Fq_mulu(a4, 6, T, p),
-                        Fq_mulu(a6, 12, T, p), Fq_neg(a42, T, p)), h, T, p);
-  if (n == 3) return gerepileupto(ltop, gel(f, 3));
-  gel(f, 4) = FqX_rem(FqX_mulu(mkpoln(7, gen_1, gen_0,
-    Fq_mulu(a4, 5, T, p), Fq_mulu(a6, 20, T, p),
-    Fq_Fp_mul(a42,stoi(-5), T, p), Fq_Fp_mul(Fq_mul(a4, a6, T, p), stoi(-4), T, p),
-    Fq_sub(Fq_Fp_mul(Fq_sqr(a6, T, p), stoi(-8), T, p), Fq_mul(a4,a42, T, p), T, p)),
-                                  4, T, p), h, T, p);
-  if (n == 4) return gerepileupto(ltop, gel(f, 4));
-  gel(f2, 3) = FqXQ_sqr(gel(f, 3), h, T, p);
-  gel(ff, 3) = gel(f, 3);
-  gel(ff, 4) = FqX_mulu(FqXQ_mul(rhs, gel(f, 4), h, T, p), 2, T, p);
-  gel(f, 5)  = FqX_sub(FqXQ_mul(gel(ff, 4), gel(f2, 2), h, T, p),
-                      FqXQ_mul(gel(ff, 3), gel(f2, 3), h, T, p), T, p);
-  if (n == 5) return gerepileupto(ltop, gel(f, 5));
-  gel(f2, 4) = FqXQ_mul(rhs, FqXQ_sqr(gel(f, 4), h, T, p), h, T, p);
-  gel(f2, 5) = FqXQ_sqr(gel(f, 5), h, T, p);
-  gel(ff, 5) = FqXQ_mul(gel(f, 3), gel(f, 5), h, T, p);
-  l = ((n/2) + 2)/2;
-  for (m = 3; m <= l; m++)
-  {
-    gel(f, 2*m) = FqXQ_mul(
-                      FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m-1), h, T, p),
-                              FqXQ_mul(gel(ff, m), gel(f2, m+1), h, T, p), T, p),
-                      inv2y, h, T, p);
-    gel(f2, 2*m) = FqXQ_mul(rhs, FqXQ_sqr(gel(f, 2*m), h, T, p), h, T, p);
-    gel(ff, 2*m) = FqXQ_mul(rhs,
-                            FqXQ_mul(gel(f, 2*m), gel(f, 2*m-2), h, T, p), h, T, p);
-    gel(f, 2*m+1) = FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m), h, T, p),
-                            FqXQ_mul(gel(ff, m+1), gel(f2, m+1), h, T, p), T, p);
-    gel(f2, 2*m+1) = FqXQ_sqr(gel(f, 2*m+1), h, T, p);
-    gel(ff, 2*m+1) = FqXQ_mul(gel(f, 2*m+1), gel(f, 2*m-1), h, T, p);
-  }
-  m = n/2;
-  if (n&1L)
-    res = FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m), h, T, p),
-                  FqXQ_mul(gel(ff, m+1), gel(f2, m+1), h, T, p), T, p);
-  else
-    res = FqXQ_mul(
-               FqX_sub(FqXQ_mul(gel(ff, m+2), gel(f2, m-1), h, T, p),
-                       FqXQ_mul(gel(ff, m), gel(f2, m+1), h, T, p), T, p),
-               inv2y, h, T, p);
-  return gerepileupto(ltop, res);
-}
-
 /* Given power series s1 and s2, finds a polynomial P such that s2 = P(s1) */
 static GEN
 find_transformation(GEN s2, GEN s1)
@@ -686,7 +624,7 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
     /*check that the kernel kpoly is the good one */
     kpoly2 = FqX_sqr(kpoly, T, p);
     h = lift(lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2)))));
-    if (signe(a4a6_divpolmod(Eba4, Eba6, ell, h, T, p)))
+    if (signe(Fq_elldivpolmod(Eba4, Eba6, ell, h, T, p)))
     {
       GEN Ic = gdiv(gsubst(num_iso, vx, Ib), gsqr(gsubst(kpoly, vx, Ib)));
       GEN kpoly_new = lift(lift(numer(gsubst(gtmp, vx, Ic))));
