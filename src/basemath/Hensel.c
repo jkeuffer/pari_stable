@@ -582,33 +582,6 @@ Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e)
   }
   return gerepileuptoint(ltop,a);
 }
-/* Same as ZpXQX_liftroot for the polynomial X^n-b */
-GEN
-ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e)
-{
-  pari_sp av = avma;
-  GEN q = p, n_1, w, Tq, ap;
-  ulong mask;
-
-  a = Fq_red(a, T, q);
-  if (e == 1) return a;
-  n_1 = subis(n,1);
-  mask = quadratic_prec_mask(e); Tq = FpX_red(T,q);
-  ap = Fq_mul(n, Fq_pow(a, n_1, Tq,q), Tq,q);
-  w = Fq_inv(ap, Tq, q);
-  for(;;)
-  {
-    q = sqri(q);
-    if (mask & 1) q = diviiexact(q, p);
-    mask >>= 1; Tq = FpX_red(T,q);
-    /* a -= w (a^n - b) */
-    a = Fq_sub(a, Fq_mul(w, Fq_sub(Fq_pow(a, n, Tq,q), b, Tq,q), Tq,q), Tq,q);
-    if (mask == 1) return gerepileupto(av, a);
-    /* w += w - w^2 n a^(n-1)*/
-    ap = Fq_mul(n, Fq_pow(a,n_1,Tq, q), Tq,q);
-    w = Fq_sub(gmul2n(w,1), Fq_mul(Fq_sqr(w,Tq,q), ap, Tq, q), T,q);
-  }
-}
 
 /* Compute (x-1)/(x+1)/p^k */
 static GEN
@@ -730,7 +703,7 @@ gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
 
 struct _ZpXQ_inv
 {
-  GEN T, a, p;
+  GEN T, a, p ,n;
 };
 
 static GEN
@@ -771,4 +744,36 @@ ZpXQ_inv(GEN a, GEN T, GEN p, long e)
   } else
     ai = FpXQ_inv(FpX_red(a,p),FpX_red(T,p),p);
   return gerepileupto(av, ZpXQ_invlift(a, ai, T, p, e));
+}
+
+struct _ZpXQ_sqrtn
+{
+  GEN T, a, p, n, ai;
+};
+
+static GEN
+_sqrtn_invd(void *E, GEN V, GEN v, long M)
+{
+  struct _ZpXQ_sqrtn *d = (struct _ZpXQ_sqrtn *) E;
+  GEN q = powiu(d->p, M);
+  GEN Tq = FpX_red(d->T, q), aiq = FpX_red(d->ai, q);
+  return FpXQ_mul(FpXQ_mul(V, gel(v,2), Tq, q), aiq, Tq, q);
+}
+
+static GEN
+_sqrtn_eval(void *E, GEN x, GEN q)
+{
+  struct _ZpXQ_sqrtn *d = (struct _ZpXQ_sqrtn *) E;
+  GEN Tq = FpX_red(d->T, q);
+  GEN f = FpX_sub(FpXQ_pow(x, d->n, Tq, q), d->a, q);
+  return mkvec2(f, x);
+}
+
+GEN
+ZpXQ_sqrtnlift(GEN a, GEN n, GEN x, GEN T, GEN p, long e)
+{
+  struct _ZpXQ_sqrtn d;
+  d.a = a; d.T = T; d.p = p; d.n = n;
+  d.ai = ZpXQ_inv(ZX_Z_mul(a, n),T,p,(e+1)>>1);
+  return gen_ZpX_Newton(x, p, e, &d, _sqrtn_eval, _sqrtn_invd);
 }
