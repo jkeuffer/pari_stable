@@ -772,16 +772,16 @@ WildlyRamifiedCase(KRASNER_t *data)
 
 /* return the minimal polynomial (mod pr) of a generator of (F_p^f)^x with variable v */
 static GEN
-CycloPol(KRASNER_t *data)
+CycloPol(KRASNER_t *d)
 {
   GEN T, z;
   /* v - primroot(p) */
-  if (data->f == 1) return deg1pol_shallow(gen_1, Fp_neg(pgener_Fp(data->p), data->pr), data->v);
-
-  T = init_Fq(data->p, data->f, data->v);
-  z = gener_FpXQ(T, data->p, NULL);
-  z = ZpXQ_sqrtnlift(gen_1, data->qm1, z, T, data->p, data->r);
-  return FpX_red(ZXQ_charpoly(z, T, data->v), data->pr);
+  if (d->f == 1)
+    return deg1pol_shallow(gen_1, Fp_neg(pgener_Fp(d->p), d->pr), d->v);
+  T = init_Fq(d->p, d->f, d->v);
+  z = gener_FpXQ(T, d->p, NULL);
+  z = ZpXQ_sqrtnlift(scalarpol(gen_1,varn(T)), d->qm1, z, T, d->p, d->r);
+  return FpX_red(ZXQ_charpoly(z, T, d->v), d->pr);
 }
 
 /* return [ p^1, p^2, ..., p^c ] */
