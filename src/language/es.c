@@ -397,7 +397,7 @@ _puts_log(const char *s)
   if (logstyle != logstyle_color)
     while ( (p = strchr(s, esc)) )
     { /* skip ANSI color escape sequence */
-      fwrite(s, 1, p-s-1, f);
+      if ( p!=s ) fwrite(s, 1, p-s, f);
       s = strchr(p, 'm');
       if (!s) return;
       s++;
