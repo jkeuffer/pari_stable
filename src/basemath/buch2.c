@@ -1640,7 +1640,7 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
 static GEN
 isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
 {
-  long i,lW,lB,e,c, prec = *ptprec;
+  long i,nW,nB,e,c, prec = *ptprec;
   GEN Q,xar,Wex,Bex,U,p1,gen,cyc,xc,ex,d,col,A;
   GEN W    = gel(bnf,1);
   GEN B    = gel(bnf,2);
@@ -1665,12 +1665,12 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
 
   fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
   xar = split_ideal(nf, &F, x, Vbase, L, fact);
-  lW = lg(W)-1; Wex = const_vecsmall(lW, 0);
-  lB = lg(B)-1; Bex = const_vecsmall(lB, 0);
+  nW = lg(W)-1; Wex = const_vecsmall(nW, 0);
+  nB = lg(B)-1; Bex = const_vecsmall(nB, 0);
   for (i=1; i<=fact[0].pr; i++)
   {
     long k = fact[i].pr;
-    long l = k - lW;
+    long l = k - nW;
     if (l <= 0) Wex[k] = fact[i].ex;
     else        Bex[l] = fact[i].ex;
   }
@@ -1680,11 +1680,21 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
    * since g_W B + g_B = [C_B] */
   if (xar)
   {
-    A = ZC_sub(ZM_zc_mul(B,Bex), zc_to_ZC(Wex));
-    Bex = zv_neg(Bex);
+    if (!nB) /*treat specially B = matrix(n,0): PARI can't represent it*/
+      A = zc_to_ZC(zv_neg(Wex));
+    else
+    {
+      A = ZC_sub(ZM_zc_mul(B,Bex), zc_to_ZC(Wex));
+      Bex = zv_neg(Bex);
+    }
   }
   else
-    A = ZC_sub(zc_to_ZC(Wex), ZM_zc_mul(B,Bex));
+  {
+    if (!nB)
+      A = zc_to_ZC(Wex);
+    else
+      A = ZC_sub(zc_to_ZC(Wex), ZM_zc_mul(B,Bex));
+  }
   Q = ZM_ZC_mul(U, A);
   for (i=1; i<=c; i++)
     gel(Q,i) = truedvmdii(gel(Q,i), gel(cyc,i), (GEN*)(ex+i));
@@ -1697,8 +1707,8 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
   { /* g A = G Ur A + [ga]A, Ur A = D Q + R as above (R = ex)
            = G R + [GD]Q + [ga]A */
     GEN ga = gel(clg2,2), GD = gel(clg2,3);
-    if (lB) col = act_arch(Bex, WB_C + lW); else col = zerovec(1); /* nf=Q ! */
-    if (lW) col = gadd(col, act_arch(A, ga));
+    if (nB) col = act_arch(Bex, WB_C + nW); else col = triv_arch(nf);
+    if (nW) col = gadd(col, act_arch(A, ga));
     if (c)  col = gadd(col, act_arch(Q, GD));
   }
   if (xar)
