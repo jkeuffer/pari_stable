@@ -546,10 +546,10 @@ _can_iter(void *E, GEN f2, GEN q)
 /* H -> H-(2*P0*H0-2*X*P1*H1) */
 
 static GEN
-_can_invd(void *E, GEN V, GEN v, long M)
+_can_invd(void *E, GEN V, GEN v, GEN q, long M)
 {
   GEN F;
-  (void) E;
+  (void)E; (void)q;
   F = mkvec2(ZX_shifti(gel(v,2),1), ZX_shifti(RgX_shift(gel(v,3),1),1));
   return gen_Z2X_Dixon(F, V, M, NULL, _can_lin, _can_lins, _can_invls);
 }
@@ -627,11 +627,10 @@ _lift_iter(void *E, GEN x2, GEN q)
 /* H -> Dx*H+Dy*S(H) */
 
 static GEN
-_lift_invd(void *E, GEN V, GEN v, long M)
+_lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
 {
   struct _frob_lift *F = (struct _frob_lift*) E;
   GEN BM = ZX_remi2n(F->B, M), TM = ZX_remi2n(F->T, M);
-  GEN qM = int2n(M);
   GEN x2 = gel(v,2), y2 = gel(v,3), s = gel(v,4), r;
   GEN Dx = ZX_add(ZX_mul(ZX_Z_add(ZX_shifti(y2, 4), gen_2), s),
                          ZX_shifti(y2, 2));

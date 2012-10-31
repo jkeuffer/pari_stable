@@ -649,49 +649,61 @@ ZpXQ_log(GEN a, GEN T, GEN p, long N)
 /**                 Generic quadratic hensel lift over Zp[X]          **/
 /**                                                                   **/
 /***********************************************************************/
-
+/* q = p^N */
 GEN
-gen_ZpX_Dixon(GEN F, GEN V, GEN p, long N, void *E,
+gen_ZpX_Dixon(GEN F, GEN V, GEN q, GEN p, long N, void *E,
                             GEN lin(void *E, GEN F, GEN d, GEN q),
                             GEN invl(void *E, GEN d))
 {
   pari_sp av = avma;
   long N2, M;
   GEN VN2, V2, VM, bil;
-  GEN q = powiu(p, N), q2;
+  GEN q2, qM;
   V = FpX_red(V, q);
   if (N == 1) return invl(E, V);
   N2 = (N + 1)>>1; M = N - N2;
   F = FpXV_red(F, q);
-  VN2 = gen_ZpX_Dixon(F, V, p, N2, E, lin, invl);
+  qM = powiu(p, M);
+  q2 = M == N2? qM: mulii(qM, p);
+  /* q2 = p^N2, qM = p^M, q = q2 * qM */
+  VN2 = gen_ZpX_Dixon(F, V, q2, p, N2, E, lin, invl);
   bil = lin(E, F, VN2, q);
-  q2 = powiu(p, N2);
   V2 = ZX_Z_divexact(ZX_sub(V, bil), q2);
-  VM = gen_ZpX_Dixon(F, V2, p, M, E, lin, invl);
+  VM = gen_ZpX_Dixon(F, V2, qM, p, M, E, lin, invl);
   return gerepileupto(av, FpX_red(ZX_add(VN2, ZX_Z_mul(VM, q2)), q));
 }
 
 GEN
 gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
                       GEN eval(void *E, GEN f, GEN q),
-                      GEN invd(void *E, GEN V, GEN v, long M))
+                      GEN invd(void *E, GEN V, GEN v, GEN q, long M))
 {
   pari_sp ltop = avma, av, st_lim;
   long N = 1, N2, M;
-  long mask = quadratic_prec_mask(n);
+  long mask;
   GEN q = p;
+  if (n == 1) return gcopy(x);
+  mask = quadratic_prec_mask(n);
   av = avma; st_lim = stack_lim(av, 1);
   while (mask > 1)
   {
-    GEN q2, v, V;
-    N2 = N; N <<= 1; M = N-N2;
-    q2 = q; q = sqri(q);
-    if (mask&1UL) { N--; q = diviiexact(q,p); }
-    /* q2 = p^N2, q = p^N */
+    GEN qM, q2, v, V;
+    N2 = N; N <<= 1;
+    q2 = q;
+    if (mask&1UL) { /* can never happen when q2 = p */
+      N--; M = N2-1;
+      qM = diviiexact(q2,p); /* > 1 */
+      q = mulii(qM,q2);
+    } else {
+      M = N2;
+      qM = q2;
+      q = sqri(q2);
+    }
+    /* q2 = p^N2, qM = p^M, q = p^N = q2 * qM */
     mask >>= 1;
     v = eval(E, x, q);
     V = ZX_Z_divexact(gel(v,1), q2);
-    x = FpX_sub(x, ZX_Z_mul(invd(E, V, v, M), q2), q);
+    x = FpX_sub(x, ZX_Z_mul(invd(E, V, v, qM, M), q2), q);
     if (low_stack(st_lim, stack_lim(av, 1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"gen_ZpX_Newton");
@@ -707,11 +719,11 @@ struct _ZpXQ_inv
 };
 
 static GEN
-_inv_invd(void *E, GEN V, GEN v, long M)
+_inv_invd(void *E, GEN V, GEN v, GEN q, long M/*unused*/)
 {
   struct _ZpXQ_inv *d = (struct _ZpXQ_inv *) E;
-  GEN q = powiu(d->p, M);
   GEN Tq = FpX_red(d->T, q);
+  (void)M;
   return FpXQ_mul(V, gel(v,2), Tq, q);
 }
 
@@ -752,10 +764,9 @@ struct _ZpXQ_sqrtn
 };
 
 static GEN
-_sqrtn_invd(void *E, GEN V, GEN v, long M)
+_sqrtn_invd(void *E, GEN V, GEN v, GEN q, long M)
 {
   struct _ZpXQ_sqrtn *d = (struct _ZpXQ_sqrtn *) E;
-  GEN q = powiu(d->p, M);
   GEN Tq = FpX_red(d->T, q), aiq = FpX_red(d->ai, q);
   return FpXQ_mul(FpXQ_mul(V, gel(v,2), Tq, q), aiq, Tq, q);
 }

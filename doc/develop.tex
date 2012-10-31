@@ -463,14 +463,14 @@ thus have different weights.
 
 (Very experimental)
 
-\fun{GEN}{gen_ZpX_Dixon}{GEN F, GEN V, GEN p, long N, void *E,
+\fun{GEN}{gen_ZpX_Dixon}{GEN F, GEN V, GEN q, GEN p, long N, void *E,
                             GEN lin(void *E, GEN F, GEN z, GEN q),
                             GEN invl(void *E, GEN z)}
 
 Let $F$ be a \typ{VEC} of \kbd{ZpX} being the coefficients of some abstract
-linear mapping $f$ over $\Z_p[X]$ seen as a free $\Z_p$-module, and let $V$ be
-an element of $\Z_p[X]$.  Return $y\in\Z_p[X]$ such that $f(y)=V\pmod{p^N}$
-assuming the following holds for $n\leq N$:
+linear mapping $f$ over $\Z_p[X]$ seen as a free $\Z_p$-module, let $V$ be
+an element of $\Z_p[X]$ and let $q = p^N$.  Return $y\in\Z_p[X]$ such that
+$f(y)=V\pmod{p^N}$ assuming the following holds for $n\leq N$:
 
 \item $\kbd{lin}(E, \kbd{FpX\_red}(F, p^n), z, p^n) \equiv f(z) \pmod{p^n}$
 
@@ -482,7 +482,7 @@ to reduce it to the required $p$-adic precision.
 
 \fun{GEN}{gen_ZpX_Newton}{GEN x, GEN p, long n, void *E,
                           GEN eval(void *E, GEN a, GEN q),
-                          GEN invd(void *E, GEN b, GEN v, long N)}
+                          GEN invd(void *E, GEN b, GEN v, GEN q, long N)}
 
 Let $x$ be an element of $\Z_p[X]$ seen as a free  $\Z_p$-module, and $f$
 some differentiable function over $\Z_p[X]$ such that $f(x) \equiv 0
@@ -491,7 +491,7 @@ following holds for all $a, b\in \Z_p[X]$ and $M\leq N$:
 
 \item $v = \kbd{eval}(E,a,p^N)$ is a vector of elements of $\Z_p[X]$,
 
-\item $w = \kbd{invd}(E,b,v,M)$ is an element in $\Z_p[X]$,
+\item $w = \kbd{invd}(E,b,v,p^M,M)$ is an element in $\Z_p[X]$,
 
 \item $v[1] \equiv f(a) \pmod{p^N\Z_p[X]}$,
 

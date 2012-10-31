@@ -503,14 +503,14 @@ _can_iter(void *E, GEN f, GEN q)
 }
 
 static GEN
-_can_invd(void *E, GEN V, GEN v, long M)
+_can_invd(void *E, GEN V, GEN v, GEN qM, long M)
 {
   GEN h1s=gel(v,2), h2s=gel(v,3), h3s=gel(v,4);
   GEN h12=gel(v,5), h13=gel(v,6), h23=gel(v,7);
   GEN F = mkvec3(ZX_sub(h1s,RgX_shift(h23,1)),RgX_shift(ZX_sub(h2s,h13),1),
                  ZX_sub(RgX_shift(h3s,2),RgX_shift(h12,1)));
   (void)E;
-  return gen_ZpX_Dixon(ZXV_Z_mul(F, utoi(3)), V, utoi(3), M, NULL,
+  return gen_ZpX_Dixon(ZXV_Z_mul(F, utoi(3)), V, qM, utoi(3), M, NULL,
                                                  _can_lin, _can_invl);
 }
 
@@ -593,11 +593,10 @@ _lift_iter(void *E, GEN x2, GEN q)
 }
 
 static GEN
-_lift_invd(void *E, GEN V, GEN v, long M)
+_lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
 {
   struct _lift_iso *d = (struct _lift_iso *) E;
   struct _lift_lin e;
-  GEN qM = powuu(3,M);
   GEN BM = FpX_red(d->B, qM), TM = FpX_red(d->T, qM), XM = FpX_red(d->Xm, qM);
   GEN xp = FpXV_red(gel(v,2), qM);
   GEN yp = FpXV_red(gel(v,3), qM);
@@ -606,7 +605,7 @@ _lift_invd(void *E, GEN V, GEN v, long M)
   GEN F = mkvec5(Dy, Dx, BM, TM, XM);
   e.ai = Flxq_inv(ZX_to_Flx(Dy,3),d->T3,3);
   e.sqx = d->sqx; e.T3 = d->T3; e.m = d->m;
-  return gen_ZpX_Dixon(F,V,utoi(3),M,(void*) &e, _lift_lin, _lift_invl);
+  return gen_ZpX_Dixon(F, V, qM, utoi(3),M,(void*) &e, _lift_lin, _lift_invl);
 }
 
 static GEN
