@@ -3115,20 +3115,21 @@ thetanullk(GEN q, long k, long prec)
   return gerepileupto(av, gmul(p1, y));
 }
 
+/* q2 = q^2 */
 static GEN
-vecthetanullk_loop(GEN q, long k, long prec)
+vecthetanullk_loop(GEN q2, long k, long prec)
 {
-  GEN ps, qn = gen_1, ps2 = gsqr(q), y = const_vec(k, gen_1);
+  GEN ps, qn = gen_1, y = const_vec(k, gen_1);
   pari_sp av = avma, lim = stack_lim(av,2);
   const long bit = prec2nbits(prec);
   long i, n;
 
-  ps = gneg_i(ps2);
+  ps = gneg_i(q2);
   for (n = 3;; n += 2)
   {
     GEN t = NULL/*-Wall*/, P = utoipos(n), N2 = sqru(n);
     qn = gmul(qn,ps);
-    ps = gmul(ps,ps2);
+    ps = gmul(ps,q2);
     for (i = 1; i <= k; i++)
     {
       t = gmul(qn, P); gel(y,i) = gadd(gel(y,i), t);
@@ -3152,7 +3153,7 @@ vecthetanullk(GEN q, long k, long prec)
 
   if (l) prec = l;
   q = check_unit_disc("vecthetanullk", q, prec);
-  y = vecthetanullk_loop(q, k, prec);
+  y = vecthetanullk_loop(gsqr(q), k, prec);
 
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
   for (i = 2; i <= k; i+=2) gel(y,i) = gneg_i(gel(y,i));
@@ -3171,8 +3172,21 @@ vecthetanullk_tau(GEN tau, long k, long prec)
     pari_err_DOMAIN("vecthetanullk_tau", "imag(tau)", "<=", gen_0, tau);
 
   q4 = expIxy(Pi2n(-1, prec), tau, prec); /* q^(1/4) */
-  y = vecthetanullk_loop(gsqr(gsqr(q4)), k, prec);
+  y = vecthetanullk_loop(gpowgs(q4,8), k, prec);
   p1 = gmul2n(q4,1);
   for (i = 2; i <= k; i+=2) gel(y,i) = gneg_i(gel(y,i));
   return gerepileupto(av, gmul(p1, y));
+}
+
+/* -theta^(3)(tau/2) / theta^(1)(tau/2). Assume that Im tau > 0 */
+GEN
+trueE2(GEN tau, long prec)
+{
+  long l = precision(tau);
+  pari_sp av = avma;
+  GEN q2, y;
+  if (l) prec = l;
+  q2 = expIxy(Pi2n(1, prec), tau, prec);
+  y = vecthetanullk_loop(q2, 3, prec);
+  return gerepileupto(av, gdiv(gel(y,2), gel(y,1)));
 }

@@ -1632,6 +1632,7 @@ GEN     ellneg(GEN e, GEN z);
 GEN     ellomega_real(GEN x, long prec);
 GEN     ellorder(GEN e, GEN p, GEN o);
 GEN     ellordinate(GEN e, GEN x, long prec);
+GEN     ellperiods(GEN w, long flag, long prec);
 GEN     ellrandom(GEN e);
 long    ellrootno(GEN e, GEN p);
 long    ellrootno_global(GEN e, GEN N);
