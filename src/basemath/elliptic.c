@@ -3728,8 +3728,10 @@ torsbound(GEN e)
 {
   GEN D = ell_get_disc(e);
   pari_sp av = avma, av2;
-  long m, b, bold, nb = expi(D) >> 3;
+  long m, b, bold, nb;
   forprime_t S;
+  if (typ(D) != t_INT) pari_err_TYPE("elltors [not an ell]",e);
+  nb = expi(D) >> 3;
   /* nb = number of primes to try ~ 1 prime every 8 bits in D */
   b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
   m = 0;
