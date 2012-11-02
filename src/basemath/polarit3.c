@@ -1936,7 +1936,7 @@ Kronecker_to_mod(GEN z, GEN T)
 GEN
 mod_to_Kronecker(GEN P, GEN Q)
 {
-  long i, k, lx = lg(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
+  long i, k, lx = lg(P), lQ = lg(Q), N = ((lQ-3)<<1) + 1, vQ = varn(Q);
   GEN y = cgetg((N-2)*(lx-2) + 2, t_POL);
 
   for (k=i=2; i<lx; i++)
@@ -1951,6 +1951,8 @@ mod_to_Kronecker(GEN P, GEN Q)
     else
     {
       long l = lg(c);
+      if (l >= lQ)
+        pari_err_BUG("mod_to_Kronecker, P is not reduced mod Q");
       for (j=2; j < l; j++) gel(y,k++) = gel(c,j);
     }
     if (i == lx-1) break;
