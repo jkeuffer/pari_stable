@@ -772,6 +772,7 @@ _sqrtn_invd(void *E, GEN V, GEN v, GEN q, long M)
 {
   struct _ZpXQ_sqrtn *d = (struct _ZpXQ_sqrtn *) E;
   GEN Tq = FpX_red(d->T, q), aiq = FpX_red(d->ai, q);
+  (void)M;
   return FpXQ_mul(FpXQ_mul(V, gel(v,2), Tq, q), aiq, Tq, q);
 }
 
