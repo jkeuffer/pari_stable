@@ -236,6 +236,7 @@ GEN     FlxqX_gcd(GEN P, GEN Q, GEN T, ulong p);
 GEN     FlxqX_invBarrett(GEN T, GEN Q, ulong p);
 GEN     FlxqX_mul(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_normalize(GEN z, GEN T, ulong p);
+GEN     FlxqX_pow(GEN V, long n, GEN T, ulong p);
 GEN     FlxqX_red(GEN z, GEN T, ulong p);
 GEN     FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 GEN     FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p);

@@ -3729,6 +3729,18 @@ static GEN _FlxqX_mul(void *data,GEN a,GEN b)
   struct _FlxqX *d=(struct _FlxqX*)data;
   return FlxqX_mul(a,b,d->T,d->p);
 }
+static GEN _FlxqX_sqr(void *data,GEN a)
+{
+  struct _FlxqX *d=(struct _FlxqX*)data;
+  return FlxqX_sqr(a,d->T,d->p);
+}
+
+GEN
+FlxqX_pow(GEN V, long n, GEN T, ulong p)
+{
+  struct _FlxqX d; d.p=p; d.T=T;
+  return gen_powu(V, n, (void*)&d, &_FlxqX_sqr, &_FlxqX_mul);
+}
 
 GEN
 FlxqXV_prod(GEN V, GEN T, ulong p)

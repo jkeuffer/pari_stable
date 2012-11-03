@@ -4788,6 +4788,10 @@ form of $P$, this function returns $Q\in \Z[X,t]$ such that $Q$ is congruent to
 $P(X,t)$ mod $(p, T(X))$, $\deg_X Q < n$, and all coefficients are in $[0,p[$.
 Not stack-clean. Note that $t$ need not be the same variable as $Y$!
 
+\fun{GEN}{FlxqX_red}{GEN z, GEN T, ulong p}
+
+\fun{GEN}{FlxqX_normalize}{GEN z, GEN T, ulong p}
+
 \fun{GEN}{FlxqX_mul}{GEN x, GEN y, GEN T, ulong p}
 
 \fun{GEN}{FlxqX_Flxq_mul}{GEN P, GEN U, GEN T, ulong p}
@@ -4796,11 +4800,9 @@ Not stack-clean. Note that $t$ need not be the same variable as $Y$!
 returns $P*U$ assuming the result is monic of the same degree as $P$ (in
 particular $U\neq 0$).
 
-\fun{GEN}{FlxqX_red}{GEN z, GEN T, ulong p}
-
-\fun{GEN}{FlxqX_normalize}{GEN z, GEN T, ulong p}
-
 \fun{GEN}{FlxqX_sqr}{GEN x, GEN T, ulong p}
+
+\fun{GEN}{FlxqX_pow}{GEN x, long n, GEN T, ulong p}
 
 \fun{GEN}{FlxqX_divrem}{GEN x, GEN y, GEN T, ulong p, GEN *pr}
 
