@@ -439,35 +439,39 @@ GEN
 ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e)
 {
   pari_sp av = avma, av2, lim;
-  GEN pv = p, q = p, W, df, Tq, fr, dfr;
+  GEN pv = p, q, qv, W, df, Tq, fr, dfr;
   ulong mask;
-  long k=1;
-  a = Fq_red(a, T, q);
+  a = Fq_red(a, T, p);
   if (e <= v+1) return a;
   df = RgX_deriv(f);
-  if (v) { pv = powiu(p,v); q = mulii(pv,p); df = ZXX_Z_divexact(df, pv); }
+  if (v) { pv = powiu(p,v); qv = mulii(pv,p); df = ZXX_Z_divexact(df, pv); }
+  else qv = p;
   mask = quadratic_prec_mask(e-v);
-  Tq = FpX_red(T, q); dfr = FpXQX_red(df, Tq, p);
+  Tq = FpX_red(T, qv); dfr = FpXQX_red(df, Tq, p);
   W = Fq_inv(FqX_eval(dfr, a, Tq, p), Tq, p); /* 1/f'(a) mod (T,p) */
+  q = p;
   av2 = avma; lim = stack_lim(av2, 2);
   for (;;)
   {
-    GEN fa;
-    k <<= 1;
-    if (mask & 1) k--;
+    GEN u, fa, qv, q2v, q2, Tq2;
+    q2 = q; q = sqri(q);
+    if (mask & 1) q = diviiexact(q,p);
     mask >>= 1;
-    q = powiu(p, v+k); Tq = FpX_red(T, q); fr = FpXQX_red(f, Tq, q);
-    fa = FqX_eval(fr, a, Tq, q);
-    if (v) fa = typ(fa)==t_INT? diviiexact(fa,pv): ZX_Z_divexact(fa, pv);
-    a = Fq_sub(a, Fq_mul(W, fa, Tq,q), Tq,q);
+    if (v) { qv = mulii(q, pv); q2v = mulii(q2, pv); }
+    else { qv = q; q2v = q2; }
+    Tq2 = FpX_red(T, q2v); Tq = FpX_red(T, qv);
+    fr = FpXQX_red(f, Tq, qv);
+    fa = FqX_eval(fr, a, Tq, qv);
+    fa = typ(fa)==t_INT? diviiexact(fa,q2v): ZX_Z_divexact(fa, q2v);
+    a = Fq_sub(a, ZX_Z_mul(Fq_mul(W, fa, Tq2, q2v), q2), Tq, qv);
     if (mask == 1) return gerepileupto(av, a);
-    if (v) { q = powiu(p, k); Tq = FpX_red(T, q); }
     dfr = FpXQX_red(df, Tq, q);
-    W = Fq_sub(gmul2n(W,1), Fq_mul(Fq_sqr(W,Tq,q), FqX_eval(dfr,a,Tq,q), Tq, q), Tq,q);
+    u = ZX_Z_divexact(FpX_Fp_sub(Fq_mul(W,FqX_eval(dfr,a,Tq,q),Tq,q),gen_1,q),q2);
+    W = Fq_sub(W,ZX_Z_mul(Fq_mul(u,W,Tq2,q2),q2),Tq,q);
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"ZpXQX_liftroot, k = %ld/%ld", k+1,e);
-      gerepileall(av2, 2, &a, &W);
+      if(DEBUGMEM>1) pari_warn(warnmem,"ZpXQX_liftroot, e = %ld", e);
+      gerepileall(av2, 3, &a, &W, &q);
     }
   }
 }
