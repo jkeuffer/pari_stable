@@ -52,7 +52,7 @@ can be used under \kbd{gp} or independently.
 
 \section{Compiling the library and the \kbd{gp} calculator}
 
-\subsec{Basic configuration:} Type
+\subsec{Basic configuration} Type
 
 \kbd{./Configure}
 
@@ -67,9 +67,9 @@ package for a Linux distribution, you may want to use
 
 \kbd{./Configure --prefix=/usr}
 
-This phase extracts some files and creates a directory
-\kbd{O}\var{osname}\kbd{-}\var{arch} where the
-object files and executables will be built (\var{build directory}). The
+This phase extracts some files and creates a \var{build directory}, names
+\kbd{O}\var{osname}\kbd{-}\var{arch}, where the
+object files and executables will be built. The
 \var{osname} and \var{arch} components depends on your architecture and
 operating system, thus you can build PARI/GP for several different machines
 from the same source tree (the builds are independent and can be done
@@ -83,7 +83,7 @@ and the \kbd{perl} and \kbd{gunzip} (or \kbd{zcat}) binaries.
 If anything should have been found and was not, consider that \kbd{Configure}
 failed and follow the instructions in section~3.
 
-\subsec{Advanced configuration:}
+\subsec{Advanced configuration}
 \kbd{Configure} accepts many other flags, and you may use any number of them
 to build quite a complicated configuration command. See \kbd{Configure
 --help} for a complete list. In particular, there are sets of flags related
@@ -119,13 +119,11 @@ PARI can use \kbd{getrusage}, \kbd{clock\_gettime}, \kbd{times} or
 \kbd{ftime} as timing functions. (Not all timing functions are available on
 all platforms.) The three first functions give timings in terms of CPU usage
 of the current task, approximating the complexity of the algorithm. The last
-one, \kbd{ftime}, gives timings in terms of absolute (wall-clock) time which
-can be important in case of parallelism. Moreover, the \kbd{clock\_gettime}
-function is more precise, but much slower (at the time of this writing), than
-\kbd{getrusage} or \kbd{times}.
+one, \kbd{ftime}, gives timings in terms of absolute (wall-clock) time.
+Moreover, the \kbd{clock\_gettime} function is more precise, but much slower
+(at the time of this writing), than \kbd{getrusage} or \kbd{times}.
 
-
-\subsec{Compilation:} To compile the \kbd{gp} binary and build the
+\subsec{Compilation} To compile the \kbd{gp} binary and build the
 documentation, type
 
 \kbd{make all}
@@ -140,7 +138,7 @@ directory that \kbd{Configure} created and doing a parallel make here, for
 instance \kbd{make -j4} with GNU make. It should even work from the toplevel
 directory.
 
-\subsec{Basic tests:}
+\subsec{Basic tests}
 
 To test the binary, type \kbd{make bench}. This will build a static
 executable (the default, built by \kbd{make gp} is probably dynamic) and
@@ -155,11 +153,11 @@ the expected results. Have a look and decide for yourself if something is
 amiss. If it looks like a bug in the Pari system, we would appreciate a
 report (see the last section).
 
-\subsec{Cross-compiling:}
+\subsec{Cross-compiling}
 
-When cross-compiling, you can set the environment variable \kbd{RUNTEST} to a program
-that is able to run the target binaries (e.g. an emulator). It will be used for both
-the \kbd{Configure} tests and \kbd{make bench}.
+When cross-compiling, you can set the environment variable \kbd{RUNTEST} to a
+program that is able to run the target binaries, e.g. an emulator. It will be
+used for both the \kbd{Configure} tests and \kbd{make bench}.
 
 \section{Troubleshooting and fine tuning}
 In case the default \kbd{Configure} run fails miserably, try
@@ -171,7 +169,7 @@ of them, and default answers are provided. If you accept all default answers,
 \kbd{Configure} will fail just the same, so be wary. In any case, we would
 appreciate a bug report (see the last section).
 
-\subsec{Installation directories:} The precise default destinations are as
+\subsec{Installation directories} The precise default destinations are as
 follows: the \kbd{gp} binary, the scripts \kbd{gphelp} and \kbd{tex2mail} go
 to \kbd{\$prefix/bin}. The pari library goes to \kbd{\$prefix/lib} and
 include files to \kbd{\$prefix/include/pari}. Other system-dependent data go
@@ -190,7 +188,7 @@ sample GP scripts and C code, extra packages like \kbd{elldata} or
 (manual pages), \kbd{--datadir} (other architecture-independent data), and
 finally \kbd{--sysdatadir} (other architecture-dependent data).
 
-\subsec{Environment variables:} \kbd{Configure} lets the following environment
+\subsec{Environment variables} \kbd{Configure} lets the following environment
 variable override the defaults if set:
 
 \kbd{CC}: C compiler.
@@ -255,35 +253,36 @@ a special purpose binary, you can \kbd{cd} to the \kbd{.dbg} or \kbd{.prf}
 directory and type \kbd{make gp} there. You can also invoke \kbd{make gp.dbg}
 or \kbd{make gp.prf} directly from the toplevel.
 
-\subsec{Multiprecision kernel:} The kernel can be fully specified via the
-\kbd{--kernel=\emph{fqkn}} switch. The PARI kernel is build from two kernels,
-called level 0 (L0, operation on words) and level 1 (L1, operation on
-multi-precision integer and real).
+\subsec{Multiprecision kernel} The kernel can be specified via the
 
-\noindent Available kernels:
+\kbd{--kernel=\emph{fully\_qualified\_kernel\_name}}
 
-L0: \kbd{auto}, \kbd{none} and
+\noindent switch. The PARI kernel consists of two levels: Level 0 (operation
+on words) and Level 1 (operation on multi-precision integers and reals),
+which can take the following values.
+
+Level 0: \kbd{auto} (as detected), \kbd{none} (portable C) or
+one of the assembler micro-kernels
 \bprog
-  alpha hppa hppa64 ia64 ix86 x86_64 m68k ppc ppc64
+  alpha
+  hppa hppa64
+  ia64
+  ix86 x86_64
+  m68k
+  ppc ppc64
   sparcv7 sparcv8_micro sparcv8_super
 @eprog
 
-L1: \kbd{auto}, \kbd{none} and \kbd{gmp}
+Level 1: \kbd{auto} (as detected), \kbd{none} (native code only), or \kbd{gmp}
 
-\noindent \kbd{auto} means to use the auto-detected value. L0=\kbd{none} means
-to use the portable C kernel (no assembler), L1=\kbd{none} means to use the
-PARI L1 kernel.
+\noindent$\bullet$ A fully qualified kernel name is of the form
+\kbd{\var{Level0}-\var{Level1}}, the default value being \kbd{auto-auto}.
 
-\noindent$\bullet$ A fully qualified kernel name \emph{fqkn} is of the form
-\kbd{$L_0$-$L_1$}.
+\noindent$\bullet$ A \emph{name} not containing a dash '\kbd{-}' is an alias
+for a fully qualified kernel name. An alias stands for
+\kbd{\emph{name}-none}, but \kbd{gmp} stands for \kbd{auto-gmp}.
 
-\noindent$\bullet$ A \emph{name} not containing a dash '\kbd{-}' is an alias.
-An alias stands for \kbd{\emph{name}-none}, but \kbd{gmp} stands for
-\kbd{auto-gmp}.
-
-\noindent$\bullet$ The default kernel is \kbd{auto-auto}.
-
-\subsec{Problems related to readline:}
+\subsec{Problems related to readline}
 \kbd{Configure} does not try very hard to find the \kbd{readline} library and
 include files. If they are not in a standard place, it will not find them.
 You can invoke \kbd{Configure} with one of the following arguments:
@@ -306,10 +305,10 @@ missing libncurses.so, in which case, you have to install the
 \kbd{readline-devel} without \kbd{ncurses-devel}, which is a bug in
 their package dependency handling).
 
-$\bullet$ on OS X.4: Tiger comes equipped with a fake \kbd{readline},
-which is not sufficient for our purpose. As a result, gp is built
-without readline support. Since \kbd{readline} is not trivial to install
-in this environment, a step by step solution can be found in the PARI
+$\bullet$ on OS X.4 or higher: these systems comes equipped with a fake
+\kbd{readline}, which is not sufficient for our purpose. As a result, gp is
+built without readline support. Since \kbd{readline} is not trivial to
+install in this environment, a step by step solution can be found in the PARI
 FAQ, see
 \bprog
   http://pari.math.u-bordeaux.fr/
@@ -317,7 +316,7 @@ FAQ, see
 
 \subsec{Testing}
 
-\subsubsec{Known problems:} if \kbd{BUG} shows up in \kbd{make bench}
+\subsubsec{Known problems} if \kbd{BUG} shows up in \kbd{make bench}
 
 $\bullet$ \kbd{program}: the GP function \kbd{install} may not be available on
 your platform, triggering an error message (``not yet available for this
@@ -404,7 +403,7 @@ They are also harder to upgrade: you will have to recompile them all instead
 of just installing the new dynamic library. On the other hand, there is no
 risk of breaking them by installing a new pari library.
 
-\subsec{Extra packages:} The following optional packages endow PARI with some
+\subsec{Extra packages} The following optional packages endow PARI with some
 extra capabilities:
 
 $\bullet$ \kbd{elldata}: This package contains the elliptic curves in
@@ -432,7 +431,7 @@ Copy the archive in the PARI toplevel directory, then extract its
 contents; these will go to \kbd{data/\emph{pack}/}. Typing \kbd{make
 install} installs all such packages.
 
-\subsec{The \kbd{GPRC} file:} Copy the file \kbd{misc/gprc.dft} (or
+\subsec{The \kbd{GPRC} file} Copy the file \kbd{misc/gprc.dft} (or
 \kbd{gprc.dos} if you are using \kbd{GP.EXE}) to \kbd{\$HOME/.gprc}. Modify
 it to your liking. For instance, if you are not using an ANSI terminal,
 remove control characters from the \kbd{prompt} variable. You can also
@@ -453,7 +452,7 @@ current \kbd{misc/gprc.dft}.
 
 \section{Getting Started}
 
-\subsec{Printable Documentation:} Building gp with \kbd{make all} also builds
+\subsec{Printable Documentation} Building gp with \kbd{make all} also builds
 its documentation. You can also type directly \kbd{make doc}. In any case,
 you need a working (plain) \TeX\ installation.
 
@@ -475,7 +474,7 @@ documents in PDF format, which may be more convenient for online browsing
 \noindent All these documents are available online from PARI home page
 (see the last section).
 
-\subsec{C programming:} Once all libraries and include files are installed,
+\subsec{C programming} Once all libraries and include files are installed,
 you can link your C programs to the PARI library. A sample makefile
 \kbd{examples/Makefile} is provided to illustrate the use of the various
 libraries. Type \kbd{make all} in the \kbd{examples} directory to see how
@@ -494,13 +493,13 @@ or look at your system documentation to see how to indicate at linking
 time where the required DLLs may be found! (E.g.~on Windows, you will
 need to move \kbd{libpari.dll} somewhere in your \kbd{PATH}.)
 
-\subsec{GP scripts:} Several complete sample GP programs are also given in
+\subsec{GP scripts} Several complete sample GP programs are also given in
 the \kbd{examples} directory, for example Shanks's SQUFOF factoring method,
 the Pollard rho factoring method, the Lucas-Lehmer primality test for
 Mersenne numbers and a simple general class group and fundamental unit
 algorithm. See the file \kbd{examples/EXPLAIN} for some explanations.
 
-\subsec{The PARI Community:} PARI's home page at the address
+\subsec{The PARI Community} PARI's home page at the address
 \bprog
   http://pari.math.u-bordeaux.fr/
 @eprog\noindent
@@ -525,9 +524,10 @@ should be directed there. Instructions and archives can be consulted at
 $\bullet$ \kbd{pari-announce} (\emph{read-only}): to announce major version
 changes. You cannot write to this one, but you should probably subscribe.
 
-$\bullet$ \kbd{pari-dev}: for everything related to the development
-of PARI, including suggestions, technical questions, bug reports or patch
-submissions. (The BTS forwards the mail it receives to this list.)
+$\bullet$ \kbd{pari-dev}: for everything related to the development of PARI,
+including suggestions, technical questions or patch submissions. Bug reports
+can be discussed here, but as a rule it is better to submit them directly
+to the BTS.
 
  $\bullet$ \kbd{pari-users}: for everything else.
 
