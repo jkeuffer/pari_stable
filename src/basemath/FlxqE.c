@@ -640,12 +640,12 @@ liftcurve(GEN J, GEN T, GEN p, long N)
 }
 
 static GEN
-liftX(GEN a6, GEN A6,GEN V,GEN T3, GEN T,GEN p, long N)
+liftX(GEN a6, GEN A6, GEN T, GEN p, long N)
 {
   pari_sp av = avma;
   GEN P = mkpoln(5,p,utoi(4),gen_0,ZX_mulu(A6,12),ZX_shifti(A6,2));
-  GEN a = Flx_neg(Flxq_lroot_fast(a6,V,T3,3),3);
-  return gerepileupto(av, ZpXQX_liftroot_vald(P,Flx_to_ZX(a),1,T,p,N));
+  GEN a = Flx_to_ZX(Flx_neg(a6,3));
+  return gerepileupto(av, ZpXQX_liftroot_vald(P,a,1,T,p,N));
 }
 
 /* Assume a = 1 [p], return the square root of the norm */
@@ -690,7 +690,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   A61 = liftcurve(J1,T2,p,N);
   A60 = Z3XQ_frob(A61,Xm,m,B,T2,q);
   if (DEBUGLEVEL) timer_printf(&ti,"liftcurve");
-  X = liftX(Flxq_powu(a6,3,T,3),A60,sqx,T,T2,p,N);
+  X = liftX(a6,A60,T2,p,N);
   if (DEBUGLEVEL) timer_printf(&ti,"X");
   c2 = gerepileupto(av2, getc2(X,A60,A61,T2,q,N));
   if (DEBUGLEVEL) timer_printf(&ti,"c2");
