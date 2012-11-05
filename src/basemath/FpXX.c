@@ -24,6 +24,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*                                                                 */
 /*******************************************************************/
 /*Polynomials whose coefficients are either polynomials or integers*/
+
+static GEN
+ZXX_copy(GEN a) { return gcopy(a); }
+
 GEN
 FpXX_red(GEN z, GEN p)
 {
@@ -81,6 +85,26 @@ FpXX_sub(GEN x, GEN y, GEN p)
     for (   ; i<ly; i++) gel(z,i) = Fq_neg(gel(y,i), NULL, p);
   }
   return FpXX_renormalize(z, lz);
+}
+
+static GEN
+FpXX_subspec(GEN x, GEN y, GEN p, long nx, long ny)
+{
+  long i,lz;
+  GEN z;
+  if (ny <= nx)
+  {
+    lz = nx+2; z = cgetg(lz, t_POL)+2;
+    for (i=0; i<ny; i++) gel(z,i) = Fq_sub(gel(x,i), gel(y,i), NULL, p);
+    for (   ; i<nx; i++) gel(z,i) = gcopy(gel(x,i));
+  }
+  else
+  {
+    lz = ny+2; z = cgetg(lz, t_POL)+2;
+    for (i=0; i<nx; i++) gel(z,i) = Fq_sub(gel(x,i), gel(y,i), NULL, p);
+    for (   ; i<ny; i++) gel(z,i) = Fq_neg(gel(y,i), NULL, p);
+  }
+  return FpXX_renormalize(z-2, lz);
 }
 
 GEN
@@ -170,6 +194,17 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
   return gerepileupto(av, z);
 }
 
+static GEN
+FpXQX_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
+{
+  pari_sp av = avma;
+  GEN z, kx, ky;
+  kx = mod_to_Kronecker_spec(x,lx,T);
+  ky = mod_to_Kronecker_spec(y,ly,T);
+  z = Kronecker_to_FpXQX(ZX_mul(ky,kx), T, p);
+  return gerepileupto(av, z);
+}
+
 GEN
 FpXQX_sqr(GEN x, GEN T, GEN p)
 {
@@ -193,8 +228,8 @@ FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
 }
 
 /* x and y in Z[Y][X]. Assume T irreducible mod p */
-GEN
-FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
+static GEN
+FpXQX_divrem_basecase(GEN x, GEN y, GEN T, GEN p, GEN *pr)
 {
   long vx, dx, dy, dz, i, j, sx, lr;
   pari_sp av0, av, tetpil;
@@ -361,6 +396,266 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
   return d;
 }
+
+/***********************************************************************/
+/**                                                                   **/
+/**                       Barrett reduction                           **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* Return new lgpol */
+static long
+ZXX_lgrenormalizespec(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>=0; i--)
+    if (signe(gel(x,i))) break;
+  return i+1;
+}
+
+static GEN
+FpXQX_invBarrett_basecase(GEN S, GEN T, GEN p)
+{
+  long i, l=lg(S)-1, lr = l-1, k;
+  GEN r=cgetg(lr, t_POL); r[1]=S[1];
+  gel(r,2) = gen_1;
+  for (i=3; i<lr; i++)
+  {
+    pari_sp av = avma;
+    GEN u = gel(S,l-i+2);
+    for (k=3; k<i; k++)
+      u = Fq_add(u, Fq_mul(gel(S,l-i+k), gel(r,k), NULL, p), NULL, p);
+    gel(r,i) = gerepileupto(av, Fq_red(Fq_neg(u, NULL, p), T, p));
+  }
+  return FpXQX_renormalize(r,lr);
+}
+
+INLINE GEN
+FpXQX_recipspec(GEN x, long l, long n)
+{
+  return RgX_recipspec_shallow(x, l, n);
+}
+
+static GEN
+FpXQX_invBarrett_Newton(GEN S, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  long nold, lx, lz, lq, l = degpol(S), i, lQ;
+  GEN q, y, z, x = cgetg(l+2, t_POL) + 2;
+  ulong mask = quadratic_prec_mask(l-2); /* assume l > 2 */
+  for (i=0;i<l;i++) gel(x,i) = gen_0;
+  q = RgX_recipspec_shallow(S+2,l+1,l+1); lQ = lgpol(q); q+=2;
+  /* We work on _spec_ FpX's, all the l[xzq] below are lgpol's */
+
+  /* initialize */
+  gel(x,0) = Fq_inv(gel(q,0), T, p);
+  if (lQ>1 && signe(gel(q,1)))
+  {
+    GEN u = gel(q, 1);
+    if (!gequal1(gel(x,0))) u = Fq_mul(u, Fq_sqr(gel(x,0), T, p), T, p);
+    gel(x,1) = Fq_neg(u, T, p); lx = 2;
+  }
+  else
+    lx = 1;
+  nold = 1;
+  for (; mask > 1; )
+  { /* set x -= x(x*q - 1) + O(t^(nnew + 1)), knowing x*q = 1 + O(t^(nold+1)) */
+    long i, lnew, nnew = nold << 1;
+
+    if (mask & 1) nnew--;
+    mask >>= 1;
+
+    lnew = nnew + 1;
+    lq = ZXX_lgrenormalizespec(q, minss(lQ,lnew));
+    z = FpXQX_mulspec(x, q, T, p, lx, lq); /* FIXME: high product */
+    lz = lgpol(z); if (lz > lnew) lz = lnew;
+    z += 2;
+    /* subtract 1 [=>first nold words are 0]: renormalize so that z(0) != 0 */
+    for (i = nold; i < lz; i++) if (signe(gel(z,i))) break;
+    nold = nnew;
+    if (i >= lz) continue; /* z-1 = 0(t^(nnew + 1)) */
+
+    /* z + i represents (x*q - 1) / t^i */
+    lz = ZXX_lgrenormalizespec (z+i, lz-i);
+    z = FpXQX_mulspec(x, z+i, T, p, lx, lz); /* FIXME: low product */
+    lz = lgpol(z); z += 2;
+    if (lz > lnew-i) lz = ZXX_lgrenormalizespec(z, lnew-i);
+
+    lx = lz+ i;
+    y  = x + i; /* x -= z * t^i, in place */
+    for (i = 0; i < lz; i++) gel(y,i) = Fq_neg(gel(z,i), T, p);
+  }
+  x -= 2; setlg(x, lx + 2); x[1] = S[1];
+  return gerepilecopy(av, x);
+}
+
+const long FpXQX_INVBARRETT_LIMIT = 5;
+const long FpXQX_DIVREM_BARRETT_LIMIT = 5;
+const long FpXQX_REM_BARRETT_LIMIT = 3;
+
+/* 1/polrecip(T)+O(x^(deg(T)-1)) */
+GEN
+FpXQX_invBarrett(GEN S, GEN T, GEN p)
+{
+  pari_sp ltop = avma;
+  long l = lg(S);
+  GEN r;
+  if (l<5) return pol_0(varn(S));
+  if (l<=FpXQX_INVBARRETT_LIMIT)
+  {
+    GEN c = gel(S,l-1), ci=gen_1;
+    if (!gequal1(c))
+    {
+      ci = Fq_inv(c, T, p);
+      S = FqX_Fq_mul(S, ci, T, p);
+      r = FpXQX_invBarrett_basecase(S, T, p);
+      r = FqX_Fq_mul(r, ci, T, p);
+    } else
+      r = FpXQX_invBarrett_basecase(S, T, p);
+  }
+  else
+    r = FpXQX_invBarrett_Newton(S, T, p);
+  return gerepileupto(ltop, r);
+}
+
+/* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
+ * and mg is the Barrett inverse of T. */
+static GEN
+FpXQX_divrem_Barrettspec(GEN x, long l, GEN mg, GEN S, GEN T, GEN p, GEN *pr)
+{
+  GEN q, r;
+  long lt = degpol(S); /*We discard the leading term*/
+  long ld, lm, lT, lmg;
+  ld = l-lt;
+  lm = minss(ld, lgpol(mg));
+  lT  = ZXX_lgrenormalizespec(S+2,lt);
+  lmg = ZXX_lgrenormalizespec(mg+2,lm);
+  q = FpXQX_recipspec(x+lt,ld,ld);                 /* q = rec(x)     lq<=ld*/
+  q = FpXQX_mulspec(q+2,mg+2,T,p,lgpol(q),lmg);    /* q = rec(x) * mg lq<=ld+lm*/
+  q = FpXQX_recipspec(q+2,minss(ld,lgpol(q)),ld);  /* q = rec (rec(x) * mg) lq<=ld*/
+  if (!pr) return q;
+  r = FpXQX_mulspec(q+2,S+2,T,p,lgpol(q),lT);      /* r = q*pol        lr<=ld+lt*/
+  r = FpXX_subspec(x,r+2,p,lt,minss(lt,lgpol(r))); /* r = x - r   lr<=lt */
+  if (pr == ONLY_REM) return r;
+  *pr = r; return q;
+}
+
+static GEN
+FpXQX_divrem_Barrett_noGC(GEN x, GEN mg, GEN S, GEN T, GEN p, GEN *pr)
+{
+  long l = lgpol(x), lt = degpol(S), lm = 2*lt-1;
+  GEN q = NULL, r;
+  long i;
+  if (l <= lt)
+  {
+    if (pr == ONLY_REM) return ZXX_copy(x);
+    if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
+    if (pr) *pr =  ZXX_copy(x);
+    return pol_0(varn(x));
+  }
+  if (lt <= 1)
+    return FpXQX_divrem_basecase(x,S,T,p,pr);
+  if (pr != ONLY_REM && l>lm)
+  {
+    q = cgetg(l-lt+2, t_POL);
+    for (i=0;i<l-lt;i++) gel(q+2,i) = gen_0;
+  }
+  r = l>lm ? shallowcopy(x): x;
+  while (l>lm)
+  {
+    GEN zr, zq = FpXQX_divrem_Barrettspec(r+2+l-lm,lm,mg,S,T,p,&zr);
+    long lz = lgpol(zr);
+    if (pr != ONLY_REM)
+    {
+      long lq = lgpol(zq);
+      for(i=0; i<lq; i++) gel(q+2+l-lm,i) = gel(zq,2+i);
+    }
+    for(i=0; i<lz; i++) gel(r+2+l-lm,i) = gel(zr,2+i);
+    l = l-lm+lz;
+  }
+  if (pr != ONLY_REM)
+  {
+    if (l > lt)
+    {
+      GEN zq = FpXQX_divrem_Barrettspec(r+2,l,mg,S,T,p,&r);
+      if (!q) q = zq;
+      else
+      {
+        long lq = lgpol(zq);
+        for(i=0; i<lq; i++) gel(q+2,i) = gel(zq,2+i);
+      }
+    }
+    else
+    { setlg(r, l+2); r = ZXX_copy(r); }
+  }
+  else
+  {
+    if (l > lt)
+      (void) FpXQX_divrem_Barrettspec(r+2,l,mg,S,T,p,&r);
+    else
+    { setlg(r, l+2); r = ZXX_copy(r); }
+    r[1] = x[1]; return FpXQX_renormalize(r, lg(r));
+  }
+  if (pr) { r[1] = x[1]; r = FpXQX_renormalize(r, lg(r)); }
+  q[1] = x[1]; q = FpXQX_renormalize(q, lg(q));
+  if (pr == ONLY_DIVIDES) return signe(r)? NULL: q;
+  if (pr) *pr = r;
+  return q;
+}
+
+GEN
+FpXQX_divrem_Barrett(GEN x, GEN B, GEN S, GEN T, GEN p, GEN *pr)
+{
+  pari_sp av = avma;
+  GEN q = FpXQX_divrem_Barrett_noGC(x,B,S,T,p,pr);
+  if (!q) {avma=av; return NULL;}
+  if (!pr || pr==ONLY_REM || pr==ONLY_DIVIDES) return gerepilecopy(av, q);
+  gerepileall(av,2,&q,pr);
+  return q;
+}
+
+GEN
+FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
+{
+  long dy = degpol(y), dx = degpol(x), d = dx-dy;
+  if (pr==ONLY_REM) return FpXQX_rem(x, y, T, p);
+  if (d+3 < FpXQX_DIVREM_BARRETT_LIMIT)
+    return FpXQX_divrem_basecase(x,y,T,p,pr);
+  else
+  {
+    pari_sp av=avma;
+    GEN mg = FpXQX_invBarrett(y, T, p);
+    GEN q = FpXQX_divrem_Barrett_noGC(x,mg,y,T,p,pr);
+    if (!q) {avma=av; return NULL;}
+    if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, q);
+    gerepileall(av,2,&q,pr);
+    return q;
+  }
+}
+
+GEN
+FpXQX_rem_Barrett(GEN x, GEN mg, GEN S, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, FpXQX_divrem_Barrett_noGC(x,mg,S, T, p, ONLY_REM));
+}
+
+GEN
+FpXQX_rem(GEN x, GEN y, GEN T, GEN p)
+{
+  long dy = degpol(y), dx = degpol(x), d = dx-dy;
+  if (d < 0) return FpXQX_red(x, T, p);
+  if (d+3 < FpXQX_REM_BARRETT_LIMIT)
+    return FpXQX_divrem_basecase(x,y, T, p, ONLY_REM);
+  else
+  {
+    pari_sp av=avma;
+    GEN mg = FpXQX_invBarrett(y, T, p);
+    GEN r = FpXQX_divrem_Barrett_noGC(x, mg, y, T, p, ONLY_REM);
+    return gerepileupto(av, r);
+  }
+}
+
 struct _FpXQX { GEN T,p; };
 static GEN _FpXQX_mul(void *data, GEN a,GEN b)
 {
@@ -566,7 +861,7 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   long s = signe(n);
   if (!s) return pol_1(varn(x));
   if (is_pm1(n)) /* +/- 1 */
-    return (s < 0)? FpXQXQ_inv(x,S,T,p): gcopy(x);
+    return (s < 0)? FpXQXQ_inv(x,S,T,p): ZXX_copy(x);
   if (lgefint(p) == 3)
   {
     ulong pp = p[2];

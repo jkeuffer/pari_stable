@@ -1397,12 +1397,12 @@ Kronecker_to_mod(GEN z, GEN T)
  * mod Q or RgY of degree < n.
  * Lift the P_i which are t_POLMOD, then return subst(P( Y^(2n-1) ), Y,X) */
 GEN
-mod_to_Kronecker(GEN P, GEN Q)
+mod_to_Kronecker_spec(GEN P, long lP, GEN Q)
 {
-  long i, k, lx = lg(P), lQ = lg(Q), N = ((lQ-3)<<1) + 1, vQ = varn(Q);
-  GEN y = cgetg((N-2)*(lx-2) + 2, t_POL);
+  long i, k, lQ = lg(Q), N = ((lQ-3)<<1) + 1, vQ = varn(Q);
+  GEN y = cgetg((N-2)*lP + 2, t_POL) + 2;
 
-  for (k=i=2; i<lx; i++)
+  for (k=i=0; i<lP; i++)
   {
     GEN c = gel(P,i);
     long j, tc = typ(c);
@@ -1418,10 +1418,16 @@ mod_to_Kronecker(GEN P, GEN Q)
         pari_err_BUG("mod_to_Kronecker, P is not reduced mod Q");
       for (j=2; j < l; j++) gel(y,k++) = gel(c,j);
     }
-    if (i == lx-1) break;
+    if (i == lP-1) break;
     for (   ; j < N; j++) gel(y,k++) = gen_0;
   }
-  y[1] = P[1]; setlg(y, k); return y;
+  y-=2; setlg(y, k+2); return y;
+}
+GEN
+mod_to_Kronecker(GEN P, GEN Q)
+{
+  GEN z = mod_to_Kronecker_spec(P+2, lgpol(P), Q);
+  setvarn(z,varn(P)); return z;
 }
 
 /*******************************************************************/

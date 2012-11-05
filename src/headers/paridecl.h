@@ -398,10 +398,14 @@ GEN     random_FpX(long d, long v, GEN p);
 
 GEN     FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p);
 GEN     FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr);
+GEN     FpXQX_divrem_Barrett(GEN x, GEN B, GEN S, GEN T, GEN p, GEN *pr);
 GEN     FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv);
 GEN     FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p);
+GEN     FpXQX_invBarrett(GEN S, GEN T, GEN p);
 GEN     FpXQX_mul(GEN x, GEN y, GEN T, GEN p);
 GEN     FpXQX_red(GEN z, GEN T, GEN p);
+GEN     FpXQX_rem(GEN x, GEN S, GEN T, GEN p);
+GEN     FpXQX_rem_Barrett(GEN x, GEN mg, GEN S, GEN T, GEN p);
 GEN     FpXQX_sqr(GEN x, GEN T, GEN p);
 GEN     FpXQXQ_div(GEN x,GEN y,GEN S, GEN T,GEN p);
 GEN     FpXQXQ_inv(GEN x, GEN S, GEN T,GEN p);
@@ -2790,6 +2794,7 @@ GEN     Kronecker_to_mod(GEN z, GEN pol);
 GEN     init_Fq(GEN p, long n, long v);
 GEN     pol_x_powers(long N, long v);
 GEN     mod_to_Kronecker(GEN P, GEN Q);
+GEN     mod_to_Kronecker_spec(GEN P, long lP, GEN Q);
 
 /* prime.c */
 
@@ -3353,7 +3358,6 @@ INLINE GEN    Flxq_add(GEN x,GEN y,GEN T,ulong p);
 INLINE GEN    Flxq_sub(GEN x,GEN y,GEN T,ulong p);
 
 INLINE GEN    FpXQX_div(GEN x, GEN y, GEN T, GEN p);
-INLINE GEN    FpXQX_rem(GEN x, GEN y, GEN T, GEN p);
 INLINE GEN    FlxqX_div(GEN x, GEN y, GEN T, ulong p);
 INLINE GEN    FlxqX_rem(GEN x, GEN y, GEN T, ulong p);
 
