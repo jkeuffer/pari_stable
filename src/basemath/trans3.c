@@ -98,9 +98,9 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (flz0) return gerepileupto(av, p2);
       L = HALF_E * gtodouble(gabs(gtofp(z,LOWDEFAULTPREC),prec));
       precnew = prec;
-      if (L >= 1.0) precnew += nbits2extraprec((long)(L/(HALF_E*LOG2) + BITS_IN_LONG));
-      if (issmall(n,&ki))
-      {
+      if (L >= 1.0)
+        precnew += nbits2extraprec((long)(L/(HALF_E*LOG2) + BITS_IN_LONG));
+      if (issmall(n,&ki)) {
         k = labs(ki);
         n = utoi(k);
       } else {
@@ -162,12 +162,13 @@ _jbesselh(long k, GEN z, long prec)
   return p1;
 }
 
+/* J_{n+1/2}(z) */
 GEN
 jbesselh(GEN n, GEN z, long prec)
 {
-  long gz, k, l, linit, i, lz;
+  long k, i, lz;
   pari_sp av;
-  GEN res, y, p1;
+  GEN y;
 
   if (typ(n)!=t_INT) pari_err_TYPE("jbesselh",n);
   k = itos(n);
@@ -177,6 +178,9 @@ jbesselh(GEN n, GEN z, long prec)
   {
     case t_INT: case t_FRAC: case t_QUAD:
     case t_REAL: case t_COMPLEX:
+    {
+      long bits, precnew, gz, pr;
+      GEN p1;
       if (gequal0(z))
       {
         av = avma;
@@ -185,18 +189,20 @@ jbesselh(GEN n, GEN z, long prec)
         return gerepileupto(av, gmul2n(p1,2*k));
       }
       gz = gexpo(z);
-      linit = precision(z); if (!linit) linit = prec;
-      res = cgetc(linit);
+      if ( (pr = precision(z)) ) prec = pr;
+      y = cgetc(prec);
+      bits = -2*k*gz - BITS_IN_LONG;
       av = avma;
-      if (gz>=0) l = linit;
-      else l = linit + nbits2extraprec(-2*k*gz - BITS_IN_LONG);
-      if (l>prec) prec = l;
-      prec += nbits2extraprec(-gz);
-      if (prec < LOWDEFAULTPREC) prec = LOWDEFAULTPREC;
-      z = gadd(z, real_0(prec));
-      if (typ(z) == t_COMPLEX) gel(z,2) = gadd(gel(z,2), real_0(prec));
+      if (bits <= 0)
+        precnew = prec;
+      else
+      {
+        precnew = prec + nbits2extraprec(bits);
+        if (pr) z = gtofp(z, precnew);
+      }
       p1 = gmul(_jbesselh(k,z,prec), gsqrt(gdiv(z,Pi2n(-1,prec)),prec));
-      avma = av; return affc_fixlg(p1, res);
+      avma = av; return affc_fixlg(p1, y);
+    }
 
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(z, &lz);
@@ -214,13 +220,18 @@ jbesselh(GEN n, GEN z, long prec)
 
     case t_PADIC: pari_err_IMPL("p-adic jbesselh function");
     default:
+    {
+      GEN p1, v;
       av = avma; if (!(y = toser_i(z))) break;
       if (gequal0(y)) return gerepileupto(av, gpowgs(y,k));
       if (valp(y) < 0) pari_err_DOMAIN("besseljh","valuation", "<", gen_0, y);
       y = gprec(y, lg(y)-2 + (2*k+1)*valp(y));
       p1 = gdiv(_jbesselh(k,y,prec),gpowgs(y,k));
-      for (i=1; i<=k; i++) p1 = gmulgs(p1,2*i+1);
+      v = cgetg(k+1, t_VECSMALL);
+      for (i=1; i<=k; i++) v[i] = 2*i+1;
+      p1 = gmul(p1, zv_prod_Z(v));
       return gerepilecopy(av,p1);
+    }
   }
   pari_err_TYPE("besseljh",z);
   return NULL; /* not reached */
