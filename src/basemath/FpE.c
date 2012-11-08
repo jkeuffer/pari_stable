@@ -1536,44 +1536,55 @@ FpXQ_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN T, GEN p)
 /**                                                                   **/
 /***********************************************************************/
 
+struct divpol_red
+{
+  GEN h, T, p;
+};
 
 INLINE GEN
-_red(GEN x, GEN h, GEN T, GEN p)
-{ return h ? FqX_rem(x,h,T,p): gcopy(x); }
+_red(GEN x, struct divpol_red *r)
+{ return r->h ? FqX_rem(x,r->h,r->T,r->p): gcopy(x); }
 
 INLINE GEN
-_rsqr(GEN x, GEN h, GEN T, GEN p)
-{ return h ? FqXQ_sqr(x,h,T,p): FqX_sqr(x,T,p); }
+_rsqr(GEN x, struct divpol_red *r)
+{
+  GEN h=r->h, T=r->T, p=r->p;
+  return h ? FqXQ_sqr(x,h,T,p): FqX_sqr(x,T,p);
+}
 
 INLINE GEN
-_rmul(GEN x, GEN y, GEN h, GEN T, GEN p)
-{ return h ? FqXQ_mul(x,y,h,T,p): FqX_mul(x,y,T,p); }
+_rmul(GEN x, GEN y, struct divpol_red *r)
+{
+  GEN h=r->h, T=r->T, p=r->p;
+  return h ? FqXQ_mul(x,y,h,T,p): FqX_mul(x,y,T,p);
+}
 
-static GEN divpol(GEN t, GEN a4, GEN a6, GEN r2, long n, GEN h, GEN T, GEN p);
+static GEN divpol(GEN t, GEN a4, GEN a6, GEN r2, long n, struct divpol_red *r);
 
 static GEN
-divpol_f2(GEN t, GEN a4, GEN a6, GEN r2, long n, GEN h, GEN T, GEN p)
+divpol_f2(GEN t, GEN a4, GEN a6, GEN r2, long n, struct divpol_red *r)
 {
   if (gmael(t,2,n)) return gmael(t,2,n);
   if (n<=2) return scalarpol(gen_1,0);
-  gmael(t,2,n) = _rsqr(divpol(t,a4,a6,r2,n,h,T,p),h,T,p);
+  gmael(t,2,n) = _rsqr(divpol(t,a4,a6,r2,n,r),r);
   return gmael(t,2,n);
 }
 
 static GEN
-divpol_ff(GEN t, GEN a4, GEN a6, GEN r2, long n, GEN h, GEN T, GEN p)
+divpol_ff(GEN t, GEN a4, GEN a6, GEN r2, long n, struct divpol_red *r)
 {
   if(gmael(t,3,n)) return gmael(t,3,n);
-  if (n<=4) return divpol(t,a4,a6,r2,n,h,T,p);
-  gmael(t,3,n) = _rmul(divpol(t,a4,a6,r2,n,h,T,p), divpol(t,a4,a6,r2,n-2,h,T,p) ,h,T,p);
+  if (n<=4) return divpol(t,a4,a6,r2,n,r);
+  gmael(t,3,n) = _rmul(divpol(t,a4,a6,r2,n,r), divpol(t,a4,a6,r2,n-2,r),r);
   return gmael(t,3,n);
 }
 
 static GEN
-divpol(GEN t, GEN a4, GEN a6, GEN r2, long n, GEN h, GEN T, GEN p)
+divpol(GEN t, GEN a4, GEN a6, GEN r2, long n, struct divpol_red *r)
 {
   long m = n/2;
   GEN res;
+  GEN T=r->T, p=r->p;
   if (gmael(t,1,n)) return gmael(t,1,n);
   switch(n)
   {
@@ -1583,7 +1594,7 @@ divpol(GEN t, GEN a4, GEN a6, GEN r2, long n, GEN h, GEN T, GEN p)
     break;
   case 3:
     res = _red(mkpoln(5, utoi(3), gen_0, Fq_mulu(a4, 6, T, p),
-          Fq_mulu(a6, 12, T, p), Fq_neg(Fq_sqr(a4, T, p), T, p)), h, T, p);
+          Fq_mulu(a6, 12, T, p), Fq_neg(Fq_sqr(a4, T, p), T, p)), r);
     break;
   case 4:
     {
@@ -1592,26 +1603,26 @@ divpol(GEN t, GEN a4, GEN a6, GEN r2, long n, GEN h, GEN T, GEN p)
               Fq_mulu(a6, 20, T, p), Fq_Fp_mul(a42,stoi(-5), T, p),
               Fq_Fp_mul(Fq_mul(a4, a6, T, p), stoi(-4), T, p),
               Fq_sub(Fq_Fp_mul(Fq_sqr(a6, T, p), stoi(-8), T, p),
-                Fq_mul(a4,a42, T, p), T, p)), 2, T, p), h, T, p);
+                Fq_mul(a4,a42, T, p), T, p)), 2, T, p), r);
     }
     break;
   default:
     if (odd(n))
       if (odd(m))
-        res = FqX_sub(_rmul(divpol_ff(t,a4,a6,r2,m+2,h,T,p),
-              divpol_f2(t,a4,a6,r2,m,h,T,p), h, T, p),
-            _rmul(r2,  _rmul(divpol_ff(t,a4,a6,r2,m+1,h,T,p),
-                divpol_f2(t,a4,a6,r2,m+1,h,T,p), h, T, p), h, T, p), T, p);
+        res = FqX_sub(_rmul(divpol_ff(t,a4,a6,r2,m+2,r),
+              divpol_f2(t,a4,a6,r2,m,r), r),
+            _rmul(r2,  _rmul(divpol_ff(t,a4,a6,r2,m+1,r),
+                divpol_f2(t,a4,a6,r2,m+1,r), r), r), T, p);
       else
-        res = FqX_sub(_rmul(r2, _rmul(divpol_ff(t,a4,a6,r2,m+2,h,T,p),
-                divpol_f2(t,a4,a6,r2,m,h,T,p), h, T, p), h, T, p),
-            _rmul(divpol_ff(t,a4,a6,r2,m+1,h,T,p),
-              divpol_f2(t,a4,a6,r2,m+1,h,T,p), h, T, p), T, p);
+        res = FqX_sub(_rmul(r2, _rmul(divpol_ff(t,a4,a6,r2,m+2,r),
+                divpol_f2(t,a4,a6,r2,m,r), r), r),
+            _rmul(divpol_ff(t,a4,a6,r2,m+1,r),
+              divpol_f2(t,a4,a6,r2,m+1,r), r), T, p);
     else
-      res = FqX_sub(_rmul(divpol_ff(t,a4,a6,r2,m+2,h,T,p),
-            divpol_f2(t,a4,a6,r2,m-1,h,T,p), h, T, p),
-          _rmul(divpol_ff(t,a4,a6,r2,m,h,T,p),
-            divpol_f2(t,a4,a6,r2,m+1,h,T,p), h, T, p), T, p);
+      res = FqX_sub(_rmul(divpol_ff(t,a4,a6,r2,m+2,r),
+            divpol_f2(t,a4,a6,r2,m-1,r), r),
+          _rmul(divpol_ff(t,a4,a6,r2,m,r),
+            divpol_f2(t,a4,a6,r2,m+1,r), r), T, p);
   }
   gmael(t,1,n) = res;
   return res;
@@ -1621,13 +1632,16 @@ divpol(GEN t, GEN a4, GEN a6, GEN r2, long n, GEN h, GEN T, GEN p)
 GEN
 Fq_elldivpolmod(GEN a4, GEN a6, long n, GEN h, GEN T, GEN p)
 {
+  struct divpol_red r;
   pari_sp ltop = avma;
   GEN t, rhs, r2;
   if (n <= 2) return scalarpol(gen_1,0);
+  r.h=h; r.T=T;
+  r.p=p;
   t  = mkvec3(const_vec(n, NULL),const_vec(n, NULL),const_vec(n, NULL));
-  rhs = FqX_mulu(_red(mkpoln(4, gen_1, gen_0, a4, a6), h, T, p), 4, T, p);
-  r2 = _rsqr(rhs,h,T,p);
-  return gerepilecopy(ltop, divpol(t,a4,a6,r2,n,h,T,p));
+  rhs = FqX_mulu(_red(mkpoln(4, gen_1, gen_0, a4, a6), &r), 4, T, p);
+  r2 = _rsqr(rhs,&r);
+  return gerepilecopy(ltop, divpol(t,a4,a6,r2,n,&r));
 }
 
 GEN
