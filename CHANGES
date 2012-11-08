@@ -403,6 +403,7 @@ BA 126- PARI functions FpXT_red, FlxT_red, ZXT_to_FlxT, ZXT_remi2n
 BA 127- Support for preconditionned reduction in FpXQ/Flxq
    128- PARI functions padic_to_Q, padic_to_Q_shallow, QpV_to_QV, Q_pvalrem,
         ZX_Zp_root, Zp_appr, Fp_muls, retmkfrac
+BA 129- Add safegel et al. for GP2C -C option
 
   Removed
     1- dropped DOS support

@@ -11,6 +11,15 @@ Description:
  (gen,small):gen:copy           gel($1, $2)
  (gen,small,small):gen:copy     gcoeff($1, $2, $3)
 
+Function: _safecoeff
+Class: symbolic_operators
+Help: safe version of x[a], x[,a] and x[a,b]. Must be lvalues.
+Description:
+ (vecsmall,small):small         *safeel($1, $2)
+ (list,small):gen:copy          *safelistel($1, $2)
+ (gen,small):gen:copy           *safegel($1, $2)
+ (gen,small,small):gen:copy     *safegcoeff($1, $2, $3)
+
 Function: _[_,]
 Class: symbolic_operators
 Help: x[y,]: y-th row of x.

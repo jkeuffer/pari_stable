@@ -255,6 +255,44 @@ check_array_index(long c, long l)
   if (c >= l) pari_err_DOMAIN("component", "index", ">", stoi(l-1), stoi(c));
 }
 
+GEN*
+safegel(GEN x, long l)
+{
+  if (!is_matvec_t(typ(x)))
+    pari_err_TYPE("safegel",x);
+  check_array_index(l, lg(x));
+  return &(gel(x,l));
+}
+
+GEN*
+safelistel(GEN x, long l)
+{
+  GEN d;
+  if (typ(x)!=t_LIST)
+    pari_err_TYPE("safelistel",x);
+  d = list_data(x);
+  check_array_index(l, lg(d));
+  return &(gel(d,l));
+}
+
+long*
+safeel(GEN x, long l)
+{
+  if (typ(x)!=t_VECSMALL)
+    pari_err_TYPE("safeel",x);
+  check_array_index(l, lg(x));
+  return &(x[l]);
+}
+
+GEN*
+safegcoeff(GEN x, long a, long b)
+{
+  if (typ(x)!=t_MAT) pari_err_TYPE("safegcoeff", x);
+  check_array_index(b, lg(x));
+  check_array_index(a, lg(gel(x,b)));
+  return &(gcoeff(x,a,b));
+}
+
 typedef struct matcomp
 {
   GEN *ptcell;

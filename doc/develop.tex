@@ -677,5 +677,22 @@ the latter means that the timing is weighted by a factor $n/1000$. (This was
 introduced a long time ago, when the \kbd{nfields} bench was so much slower
 than the others that it hid slowdowns elsewhere.)
 
+\section{Functions for GP2C}
+
+\subsec{Functions for safe access to components}
+
+Theses function returns the adress of the requested component after checking
+it is actually valid. This is used by GP2C -C.
+
+\fun{GEN*}{safegel}{GEN x, long l}, safe version of \kbd{gel(x,l)} for \typ{VEC},
+\typ{COL} and \typ{MAT}.
+
+\fun{long*}{safeel}{GEN x, long l}, safe version of \kbd{x[l]} for \typ{VECSMALL}.
+
+\fun{GEN*}{safelistel}{GEN x, long l} safe access to \typ{LIST} component.
+
+\fun{GEN*}{safegcoeff}{GEN x, long a, long b} safe version of
+\kbd{gcoeff(x,a, b)} for \typ{MAT}.
+
 \vfill\eject
 \input index\end
