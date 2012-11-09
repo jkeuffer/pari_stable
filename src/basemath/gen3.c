@@ -2519,24 +2519,25 @@ _gtopoly(GEN x, long v, int reverse)
   switch(tx)
   {
     case t_POL:
-      if (varncmp(varn(x), v) < 0)
-        pari_err(e_PRIORITY,"gtopoly", x, "<", v);
+      if (varncmp(varn(x), v) < 0) pari_err(e_PRIORITY,"gtopoly", x, "<", v);
       y=gcopy(x); break;
     case t_SER:
-      if (varncmp(varn(x), v) < 0)
-        pari_err(e_PRIORITY,"gtopoly", x, "<", v);
+      if (varncmp(varn(x), v) < 0) pari_err(e_PRIORITY,"gtopoly", x, "<", v);
       y = ser2rfrac(x);
       if (typ(y) != t_POL)
         pari_err_DOMAIN("gtopoly", "valuation", "<", gen_0, x);
       break;
     case t_RFRAC:
-      if (varncmp(varn(gel(x,2)), v) < 0)
-        pari_err(e_PRIORITY,"gtopoly", x, "<", v);
-      y=gdeuc(gel(x,1),gel(x,2)); break;
+    {
+      GEN a = gel(x,1), b = gel(x,2);
+      long vb = varn(b);
+      if (varncmp(vb, v) < 0) pari_err(e_PRIORITY,"gtopoly", x, "<", v);
+      if (typ(a) != t_POL || varn(a) != vb) return zeropol(v);
+      y = RgX_div(a,b); break;
+    }
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); if (tx == t_QFR) lx--;
-      if (varncmp(gvar(x), v) <= 0)
-        pari_err(e_PRIORITY,"gtopoly", x, "<=", v);
+      if (varncmp(gvar(x), v) <= 0) pari_err(e_PRIORITY,"gtopoly", x, "<=", v);
       if (reverse)
       { /* cf normalizepol_lg */
         for (i = lx-1; i>0; i--)
