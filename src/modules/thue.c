@@ -798,9 +798,10 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     for (;;)
     {
       GEN oldBx = Bx, kappa = utoipos(10);
+      const long cfMAX = 10;
       long cf;
 
-      for (cf = 0; cf < 10; cf++, kappa = muliu(kappa,10))
+      for (cf = 0; cf < cfMAX; cf++, kappa = muliu(kappa,10))
       {
         int res = LLL_1stPass(&B0, kappa, BS, &Bx);
         if (res) break;
@@ -808,7 +809,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       }
 
       /* FIXME: TO BE COMPLETED */
-      if (!step && cf == 10)
+      if (!step && cf == cfMAX)
       { /* Semirational or totally rational case */
         GEN Q, ep, q, l0, denbound;
 
