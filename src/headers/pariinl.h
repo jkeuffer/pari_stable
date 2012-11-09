@@ -1228,7 +1228,13 @@ absfrac(GEN x)
   gel(y,2) = icopy(gel(x,2)); return y;
 }
 INLINE GEN
+absfrac_shallow(GEN x)
+{ return signe(gel(x,1))>0? x: mkfrac(negi(gel(x,1)), gel(x,2)); }
+INLINE GEN
 Q_abs(GEN x) { return (typ(x) == t_INT)? absi(x): absfrac(x); }
+INLINE GEN
+Q_abs_shallow(GEN x)
+{ return (typ(x) == t_INT)? absi_shallow(x): absfrac_shallow(x); }
 
 /* Force z to be of type real/complex with floating point components */
 INLINE GEN

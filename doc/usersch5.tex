@@ -2096,6 +2096,15 @@ to \op\ are as follows. The result is of the same type as~\kbd{x}.
 
 \fun{GEN}{sqri}{GEN x}, \fun{GEN}{sqrr}{GEN x}, \fun{GEN}{mpsqr}{GEN x}
 
+\fun{GEN}{absi_shallow}{GEN x} $x$ being a \typ{INT}, returns a shallow copy of
+$|x|$, in particular returns $x$ itself when $x \geq 0$, and \kbd{negi($x$)}
+otherwise.
+
+\fun{GEN}{mpabs_shallow}{GEN x} $x$ being a \typ{INT} or a \typ{REAL}, returns
+a shallow copy of $|x|$, in particular returns $x$ itself when $x \geq 0$, and
+\kbd{mpneg($x$)} otherwise.
+
+
 \noindent Some miscellaneous routines:
 
 \fun{GEN}{sqrs}{long x} returns $x^2$.
@@ -7723,6 +7732,10 @@ of the \typ{INT} or \typ{FRAC}~\kbd{x}.
 \fun{GEN}{Q_abs}{GEN x} absolute value of the \typ{INT} or
 \typ{FRAC}~\kbd{x}.
 
+\fun{GEN}{Q_abs_shallow}{GEN x} $x$ being a \typ{INT} or a \typ{FRAC}, returns
+a shallow copy of $|x|$, in particular returns $x$ itself when $x \geq 0$, and
+\kbd{gneg($x$)} otherwise.
+
 \fun{GEN}{Q_gcd}{GEN x, GEN y} gcd of the \typ{INT} or \typ{FRAC}~\kbd{x}
 and~\kbd{y}.
 \smallskip
@@ -8034,6 +8047,10 @@ entries.
 \section{Fractions}
 
 \fun{GEN}{absfrac}{GEN x} returns the absolute value of the \typ{FRAC} $x$.
+
+\fun{GEN}{absfrac_shallow}{GEN x} $x$ being a \typ{FRAC}, returns a shallow
+copy of $|x|$, in particular returns $x$ itself when $x \geq 0$, and
+\kbd{gneg($x$)} otherwise.
 
 \fun{GEN}{sqrfrac}{GEN x} returns the square of the \typ{FRAC} $x$.
 

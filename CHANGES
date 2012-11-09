@@ -377,6 +377,8 @@ BA 116- PARI functions FpX_divrem_Barrett and unconditional FpX_rem_Barrett
 BA 117- PARI functions F2xq_sqrt_fast, Flxq_lroot, Flxq_lroot_fast
 BA 118- PARI functions FlxqV_dotproduct, FlxV_red
 BA 119- PARI functions ZpXQ_inv, ZpXQ_invlift, ZpXQ_log
+   120- PARI functions absi_shallow, mpabs_shallow, absfrac_shallow,
+        Q_abs_shallow
 
   Removed
     1- dropped DOS support

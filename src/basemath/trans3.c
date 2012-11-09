@@ -2840,12 +2840,113 @@ double_eta_quotient(GEN a, GEN w, GEN D, long p, long q, GEN pq, GEN sqrtD)
   return gmul(z, exp_IPiQ(t, prec));
 }
 
+typedef struct { GEN u; long v, t; } cxanalyze_t;
+
+/* typ(x) = t_INT, t_FRAC or t_REAL */
+INLINE GEN
+R_abs_shallow(GEN x)
+{ return (typ(x) == t_FRAC)? absfrac_shallow(x): mpabs_shallow(x); }
+
+/* Check whether a t_COMPLEX or t_INT z != 0 can be written as
+ * z = u * 2^(v/2) * exp(I Pi/4 t), u > 0, v = 0,1 and -3 <= t <= 4.
+ * Allow z t_INT to simplify handling of eta_correction() output */
+static int
+cxanalyze(cxanalyze_t *T, GEN z)
+{
+  GEN a, b;
+  long ta, tb;
+
+  T->v = 0;
+  if (typ(z) == t_INT)
+  {
+    T->u = absi_shallow(z);
+    T->t = signe(z) < 0? 4: 0;
+    return 1;
+  }
+  a = gel(z,1); ta = typ(a);
+  b = gel(z,2); tb = typ(b);
+
+  T->t = 0;
+  if (ta == t_INT && !signe(a))
+  {
+    T->u = R_abs_shallow(b);
+    T->t = gsigne(b) < 0? -2: 2;
+    return 1;
+  }
+  if (tb == t_INT && !signe(b))
+  {
+    T->u = R_abs_shallow(a);
+    T->t = gsigne(a) < 0? 4: 0;
+    return 1;
+  }
+  if (ta != tb || ta == t_REAL) { T->u = z; return 0; }
+  /* a,b both non zero, both t_INT or t_FRAC */
+  if (ta == t_INT)
+  {
+    if (!absi_equal(a, b)) return 0;
+    T->u = absi_shallow(a);
+    T->v = 1;
+    if (signe(a) == signe(b))
+    { T->t = signe(a) < 0? -3: 1; }
+    else
+    { T->t = signe(a) < 0? 3: -1; }
+  }
+  else
+  {
+    if (!absi_equal(gel(a,2), gel(b,2)) || !absi_equal(gel(a,1),gel(b,1)))
+      return 0;
+    T->u = absfrac_shallow(a);
+    T->v = 1;
+    a = gel(a,1);
+    b = gel(b,1);
+    if (signe(a) == signe(b))
+    { T->t = signe(a) < 0? -3: 1; }
+    else
+    { T->t = signe(a) < 0? 3: -1; }
+  }
+  return 1;
+}
+
+/* z * sqrt(st_b) / sqrt(st_a) exp(I Pi (t + t0)). Assume that
+ * sqrt2 = gsqrt(gen_2, prec) or NULL */
+static GEN
+apply_eta_correction(GEN z, GEN st_a, GEN st_b, GEN t0, GEN sqrt2, long prec)
+{
+  GEN t, s_a = gel(st_a, 1), s_b = gel(st_b, 1);
+  cxanalyze_t Ta, Tb;
+  int ca, cb;
+
+  t = gsub(gel(st_b,2), gel(st_a,2));
+  if (t0 != gen_0) t = gadd(t, t0);
+  ca = cxanalyze(&Ta, s_a);
+  cb = cxanalyze(&Tb, s_b);
+  if (ca || cb)
+  { /* compute sqrt(s_b) / sqrt(s_a) in a more efficient way:
+     * sb = ub sqrt(2)^vb exp(i Pi/4 tb) */
+    GEN u = gdiv(Tb.u,Ta.u);
+    switch(Tb.v - Ta.v)
+    {
+      case -1: u = gmul2n(u,-1); /* fall through: write 1/sqrt2 = sqrt2/2 */
+      case 1: u = gmul(u, sqrt2? sqrt2: sqrtr_abs(real2n(1, prec)));
+    }
+    if (!isint1(u)) z = gmul(z, gsqrt(u, prec));
+    t = gadd(t, gmul2n(stoi(Tb.t - Ta.t), -3));
+  }
+  else
+  {
+    z = gmul(z, gsqrt(s_b, prec));
+    z = gdiv(z, gsqrt(s_a, prec));
+  }
+  return gmul(z, exp_IPiQ(t, prec));
+}
+
 /* sqrt(2) eta(2x) / eta(x) */
 GEN
 weberf2(GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
+  GEN z, sqrt2, a,b, Ua,Ub, st_a,st_b;
+
   x = upper_half(x, &prec);
   a = redtausl2(x, &Ua);
   b = redtausl2(gmul2n(x,1), &Ub);
@@ -2853,13 +2954,11 @@ weberf2(GEN x, long prec)
     z = gen_1;
   else
     z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
-  st_a = eta_correction(a, Ua, 1); s_a = gel(st_a, 1);
-  st_b = eta_correction(b, Ub, 1); s_b = gel(st_b, 1);
-  t = gsub(gel(st_b,2), gel(st_a,2));
-  z = gmul(z, exp_IPiQ(t, prec));
-  if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
-  if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
-  return gerepileupto(av, gmul(z, sqrtr(real2n(1, prec))));
+  st_a = eta_correction(a, Ua, 1);
+  st_b = eta_correction(b, Ub, 1);
+  sqrt2 = sqrtr_abs(real2n(1, prec));
+  z = apply_eta_correction(z, st_a, st_b, gen_0, sqrt2, prec);
+  return gerepileupto(av, gmul(z, sqrt2));
 }
 
 /* eta(x/2) / eta(x) */
@@ -2867,7 +2966,8 @@ GEN
 weberf1(GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
+  GEN z, a,b, Ua,Ub, st_a,st_b;
+
   x = upper_half(x, &prec);
   a = redtausl2(x, &Ua);
   b = redtausl2(gmul2n(x,-1), &Ub);
@@ -2875,12 +2975,9 @@ weberf1(GEN x, long prec)
     z = gen_1;
   else
     z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
-  st_a = eta_correction(a, Ua, 1); s_a = gel(st_a, 1);
-  st_b = eta_correction(b, Ub, 1); s_b = gel(st_b, 1);
-  t = gsub(gel(st_b,2), gel(st_a,2));
-  z = gmul(z, exp_IPiQ(t, prec));
-  if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
-  if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
+  st_a = eta_correction(a, Ua, 1);
+  st_b = eta_correction(b, Ub, 1);
+  z = apply_eta_correction(z, st_a, st_b, gen_0, NULL, prec);
   return gerepileupto(av, z);
 }
 /* e(-1/24) * eta((x+1)/2) / eta(x) */
@@ -2888,7 +2985,7 @@ GEN
 weberf(GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN z, t, a,b, Ua,Ub, s_a, s_b, st_a,st_b;
+  GEN z, t0, a,b, Ua,Ub, st_a,st_b;
   x = upper_half(x, &prec);
   a = redtausl2(x, &Ua);
   b = redtausl2(gmul2n(gaddgs(x,1),-1), &Ub);
@@ -2896,13 +2993,15 @@ weberf(GEN x, long prec)
     z = gen_1;
   else
     z = gdiv(eta_reduced(b,prec), eta_reduced(a,prec));
-  st_a = eta_correction(a, Ua, 1); s_a = gel(st_a, 1);
-  st_b = eta_correction(b, Ub, 1); s_b = gel(st_b, 1);
-  t = gsub(gsub(gel(st_b,2), gel(st_a,2)), mkfrac(gen_1, utoipos(24)));
-  z = gmul(z, exp_IPiQ(t, prec));
-  if (s_b != gen_1) z = gmul(z, gsqrt(s_b, prec));
-  if (s_a != gen_1) z = gdiv(z, gsqrt(s_a, prec));
-  return gerepileupto(av, z);
+  st_a = eta_correction(a, Ua, 1);
+  st_b = eta_correction(b, Ub, 1);
+  t0 = mkfrac(gen_m1, utoipos(24));
+  z = apply_eta_correction(z, st_a, st_b, t0, NULL, prec);
+  if (typ(z) == t_COMPLEX && isexactzero(real_i(a)))
+    z = gerepilecopy(av, gel(z,1));
+  else
+    z = gerepileupto(av, z);
+  return z;
 }
 GEN
 weber0(GEN x, long flag,long prec)

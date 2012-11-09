@@ -206,7 +206,10 @@ INLINE GEN mpcopy(GEN x) { return leafcopy(x); }
 
 INLINE GEN
 mpabs(GEN x) { GEN y = leafcopy(x); setabssign(y); return y; }
+INLINE GEN
+mpabs_shallow(GEN x) { return signe(x) < 0? mpabs(x): x; }
 INLINE GEN absi(GEN x) { return mpabs(x); }
+INLINE GEN absi_shallow(GEN x) { return signe(x) < 0? negi(x): x; }
 INLINE GEN absr(GEN x) { return mpabs(x); }
 
 INLINE GEN
