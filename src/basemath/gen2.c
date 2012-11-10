@@ -1690,13 +1690,13 @@ gneg(GEN x)
       break;
 
     case t_POLMOD: y=cgetg(3,t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = gneg(gel(x,2)); break;
 
     case t_RFRAC:
       y = cgetg(3, t_RFRAC);
       gel(y,1) = gneg(gel(x,1));
-      gel(y,2) = gcopy(gel(x,2)); break;
+      gel(y,2) = RgX_copy(gel(x,2)); break;
 
     case t_PADIC:
       if (!signe(gel(x,4))) return gcopy(x);
@@ -1852,8 +1852,8 @@ gabs(GEN x, long prec)
       return gerepileuptoleaf(av, gabs(quadtofp(x, prec), prec));
 
     case t_POL:
-      lx = lg(x); if (lx<=2) return gcopy(x);
-      return is_negative(gel(x,lx-1))? gneg(x): gcopy(x);
+      lx = lg(x); if (lx<=2) return RgX_copy(x);
+      return is_negative(gel(x,lx-1))? gneg(x): RgX_copy(x);
 
     case t_SER:
      if (!signe(x)) pari_err_DOMAIN("abs", "argument", "=", gen_0, x);

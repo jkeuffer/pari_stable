@@ -272,7 +272,7 @@ gred_rfrac_simple(GEN n, GEN d)
     } else {
       GEN y = cgetg(3,t_RFRAC);
       gel(y,1) = gcopy(n);
-      gel(y,2) = gcopy(d); return y;
+      gel(y,2) = RgX_copy(d); return y;
     }
   }
 
@@ -306,7 +306,7 @@ fix_rfrac(GEN x, long d)
   if (d > 0) {
     gel(z, 1) = (typ(N)==t_POL && varn(N)==varn(D))? RgX_shift(N,d)
                                                    : monomialcopy(N,d,varn(D));
-    gel(z, 2) = gcopy(D);
+    gel(z, 2) = RgX_copy(D);
   } else {
     gel(z, 1) = gcopy(N);
     gel(z, 2) = RgX_shift(D, -d);
@@ -403,8 +403,8 @@ quad_polmod_conj(GEN x, GEN y)
 {
   GEN z, u, v, a, b;
   pari_sp av;
-  if (typ(x) != t_POL || varn(x) != varn(y) || degpol(x) <= 0)
-    return gcopy(x);
+  if (typ(x) != t_POL) return gcopy(x);
+  if (varn(x) != varn(y) || degpol(x) <= 0) return RgX_copy(x);
   a = gel(y,4); u = gel(x,3); /*Mod(ux + v, ax^2 + bx + c)*/
   b = gel(y,3); v = gel(x,2);
   z = cgetg(4, t_POL); z[1] = x[1]; av = avma;
@@ -434,7 +434,10 @@ gconj(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: case t_PADIC:
+    case t_INT: case t_REAL:
+      return mpcopy(x);
+
+    case t_INTMOD: case t_FRAC: case t_PADIC:
       return gcopy(x);
 
     case t_COMPLEX:
@@ -465,10 +468,10 @@ gconj(GEN x)
     {
       GEN y, X = gel(x,1);
       long d = degpol(X);
-      if (d < 2) return gcopy(x);
+      if (d < 2) return RgX_copy(x);
       if (d == 2) {
         y = cgetg(3, t_POLMOD);
-        gel(y,1) = gcopy(X);
+        gel(y,1) = RgX_copy(X);
         gel(y,2) = quad_polmod_conj(gel(x,2), X); return y;
       }
     }
@@ -682,9 +685,9 @@ addsub_polmod(GEN X, GEN Y, GEN x, GEN y, GEN(*op)(GEN,GEN))
     gel(z,2) = gerepileupto(av, gmod(op(x, y), gel(z,1))); return z;
   }
   if (varncmp(vx, vy) < 0)
-  { gel(z,1) = gcopy(X); gel(T,1) = Y; gel(T,2) = y; y = T; }
+  { gel(z,1) = RgX_copy(X); gel(T,1) = Y; gel(T,2) = y; y = T; }
   else
-  { gel(z,1) = gcopy(Y); gel(T,1) = X; gel(T,2) = x; x = T; }
+  { gel(z,1) = RgX_copy(Y); gel(T,1) = X; gel(T,2) = x; x = T; }
   gel(z,2) = op(x, y); return z;
 }
 /* Mod(y, Y) +/- x,  x scalar or polynomial in same var and reduced degree */
@@ -692,7 +695,7 @@ static GEN
 addsub_polmod_scal(GEN Y, GEN y, GEN x, GEN(*op)(GEN,GEN))
 {
   GEN z = cgetg(3,t_POLMOD);
-  gel(z,1) = gcopy(Y);
+  gel(z,1) = RgX_copy(Y);
   gel(z,2) = op(y, x); return z;
 }
 
@@ -1383,7 +1386,7 @@ static GEN
 mul_polmod_scal(GEN Y, GEN y, GEN x)
 {
   GEN z = cgetg(3,t_POLMOD);
-  gel(z,1) = gcopy(Y);
+  gel(z,1) = RgX_copy(Y);
   gel(z,2) = gmul(x,y); return z;
 }
 
@@ -1433,7 +1436,7 @@ mul_polmod_same(GEN T, GEN x, GEN y)
 {
   GEN z = cgetg(3,t_POLMOD), a;
   long v = varn(T), lx = lg(x), ly = lg(y);
-  gel(z,1) = gcopy(T);
+  gel(z,1) = RgX_copy(T);
   /* x * y mod T optimised */
   if (typ(x) != t_POL || varn(x) != v || lx <= 3
    || typ(y) != t_POL || varn(y) != v || ly <= 3)
@@ -1470,7 +1473,7 @@ static GEN
 sqr_polmod(GEN T, GEN x)
 {
   GEN a, z = cgetg(3,t_POLMOD);
-  gel(z,1) = gcopy(T);
+  gel(z,1) = RgX_copy(T);
   if (typ(x) != t_POL || varn(x) != varn(T) || lg(x) <= 3)
     a = gsqr(x);
   else
@@ -1511,9 +1514,9 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
     return z;
   }
   if (varncmp(vx, vy) < 0)
-  { gel(z,1) = gcopy(X); gel(T,1) = Y; gel(T,2) = y; y = T; }
+  { gel(z,1) = RgX_copy(X); gel(T,1) = Y; gel(T,2) = y; y = T; }
   else
-  { gel(z,1) = gcopy(Y); gel(T,1) = X; gel(T,2) = x; x = T; }
+  { gel(z,1) = RgX_copy(Y); gel(T,1) = X; gel(T,2) = x; x = T; }
   gel(z,2) = gmul(x, y); return z;
 }
 
@@ -1663,7 +1666,7 @@ mulqq(GEN x, GEN y) {
   pari_sp av, tetpil;
   if (!ZX_equal(P, gel(y,1))) pari_err_OP("*",x,y);
 
-  gel(z,1) = gcopy(P); av = avma;
+  gel(z,1) = ZX_copy(P); av = avma;
   p2 = gmul(gel(x,2),gel(y,2));
   p3 = gmul(gel(x,3),gel(y,3));
   p1 = gmul(gneg_i(c),p3);
@@ -2127,7 +2130,7 @@ gsqr(GEN x)
 
     case t_QUAD: z = cgetg(4,t_QUAD);
       p1 = gel(x,1);
-      gel(z,1) = gcopy(p1); av = avma;
+      gel(z,1) = ZX_copy(p1); av = avma;
       p2 = gsqr(gel(x,2));
       p3 = gsqr(gel(x,3));
       p4 = gmul(gneg_i(gel(p1,2)),p3);
@@ -2346,7 +2349,7 @@ div_polmod_same(GEN T, GEN x, GEN y)
 {
   long v = varn(T);
   GEN a, z = cgetg(3, t_POLMOD);
-  gel(z,1) = gcopy(T);
+  gel(z,1) = RgX_copy(T);
   if (typ(y) != t_POL || varn(y) != v || lg(y) <= 3)
     a = gdiv(x, y);
   else if (typ(x) != t_POL || varn(x) != v || lg(x) <= 3)
@@ -2731,7 +2734,7 @@ gdiv(GEN x, GEN y)
     if (vx != vy) {
       if (varncmp(vx, vy) > 0) return div_scal_T(x, y, ty);
       z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(X);
+      gel(z,1) = RgX_copy(X);
       gel(z,2) = gdiv(gel(x,2), y); return z;
     }
     /* y is POL, SER or RFRAC */
@@ -2853,7 +2856,7 @@ gmulsg(long s, GEN y)
       gel(z,3) = gmulsg(s,gel(y,3)); return z;
 
     case t_POLMOD: z = cgetg(3, t_POLMOD);
-      gel(z,1) = gcopy(gel(y,1));
+      gel(z,1) = RgX_copy(gel(y,1));
       gel(z,2) = gmulsg(s,gel(y,2)); return z;
 
     case t_POL:
@@ -2951,7 +2954,7 @@ gdivgs(GEN x, long s)
       gel(z,3) = gdivgs(gel(x,3),s); return z;
 
     case t_POLMOD: z = cgetg(3, t_POLMOD);
-      gel(z,1) = gcopy(gel(x,1));
+      gel(z,1) = RgX_copy(gel(x,1));
       gel(z,2) = gdivgs(gel(x,2),s); return z;
 
     case t_RFRAC:
@@ -3051,7 +3054,7 @@ gmul2n(GEN x, long n)
       gel(z,3) = gmul2n(gel(x,3),n); return z;
 
     case t_POLMOD: z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(gel(x,1));
+      gel(z,1) = RgX_copy(gel(x,1));
       gel(z,2) = gmul2n(gel(x,2),n); return z;
 
     case t_POL:
@@ -3130,7 +3133,7 @@ static GEN
 inv_polmod(GEN T, GEN x)
 {
   GEN z = cgetg(3,t_POLMOD), a;
-  gel(z,1) = gcopy(T);
+  gel(z,1) = RgX_copy(T);
   if (typ(x) != t_POL || varn(x) != varn(T) || lg(x) <= 3)
     a = ginv(x);
   else
@@ -3226,14 +3229,14 @@ ginv(GEN x)
       n = simplify_shallow(n);
       if (typ(n) != t_POL || varn(n) != varn(d))
       {
-        if (gequal1(n)) { avma = av; return gcopy(d); }
+        if (gequal1(n)) { avma = av; return RgX_copy(d); }
         ltop = avma;
         z = RgX_Rg_div(d,n);
       } else {
         ltop = avma;
         z = cgetg(3,t_RFRAC);
-        gel(z,1) = gcopy(d);
-        gel(z,2) = gcopy(n);
+        gel(z,1) = RgX_copy(d);
+        gel(z,2) = RgX_copy(n);
       }
       stackdummy(av, ltop);
       return z;

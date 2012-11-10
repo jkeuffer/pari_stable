@@ -4091,7 +4091,7 @@ START:
         if (lg(W) > 2 && squash_index % (lg(W) - 1))
         {
           long j, l = lg(W) - 1;
-          F.L_jid = gcopy(F.perm);
+          F.L_jid = leafcopy(F.perm);
           for (j = 1; j <= l; j++)
             F.L_jid[j] = F.perm[1 + (j + squash_index - 1) % l];
         }

@@ -308,7 +308,7 @@ RgX_translate(GEN P, GEN c)
   GEN Q, *R;
   long i, k, n;
 
-  if (!signe(P) || gequal0(c)) return gcopy(P);
+  if (!signe(P) || gequal0(c)) return RgX_copy(P);
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
@@ -359,7 +359,7 @@ ZX_translate(GEN P, GEN c)
   GEN Q, *R;
   long i, k, n;
 
-  if (!signe(P) || !signe(c)) return gcopy(P);
+  if (!signe(P) || !signe(c)) return ZX_copy(P);
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
@@ -409,7 +409,7 @@ RgXQX_translate(GEN P, GEN c, GEN T)
   GEN Q, *R;
   long i, k, n;
 
-  if (!signe(P) || gequal0(c)) return gcopy(P);
+  if (!signe(P) || gequal0(c)) return RgX_copy(P);
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
@@ -442,14 +442,13 @@ RgXQ_to_mod(GEN x, GEN T)
   long d;
   switch(typ(x))
   {
-    case t_INT: case t_FRAC:
-      return gcopy(x);
-
+    case t_INT:  return icopy(x);
+    case t_FRAC: return gcopy(x);
     default:
       d = degpol(x);
       if (d < 0) return gen_0;
       if (d == 0) return gcopy(gel(x,2));
-      return mkpolmod(gcopy(x), T);
+      return mkpolmod(RgX_copy(x), T);
   }
 }
 /* T a ZX, z lifted from (Q[Y]/(T(Y)))[X], apply RgXQ_to_mod to all coeffs.
@@ -634,7 +633,7 @@ RgX_shift(GEN a, long n)
 {
   long i, l = lg(a);
   GEN  b;
-  if (l == 2 || !n) return gcopy(a);
+  if (l == 2 || !n) return RgX_copy(a);
   l += n;
   if (n < 0)
   {
@@ -1007,7 +1006,7 @@ addmulXncopy(GEN x, GEN y, long d)
   GEN xd, yd, zd;
   long a, lz, nx, ny;
 
-  if (!signe(x)) return gcopy(y);
+  if (!signe(x)) return RgX_copy(y);
   nx = lgpol(x);
   ny = lgpol(y);
   zd = (GEN)avma;
@@ -1182,7 +1181,7 @@ RgX_Rg_divexact(GEN x, GEN y) {
   long i, lx;
   GEN z;
   if (typ(y) == t_INT && is_pm1(y))
-    return signe(y) < 0 ? RgX_neg(x): gcopy(x);
+    return signe(y) < 0 ? RgX_neg(x): RgX_copy(x);
   z = cgetg_copy(x, &lx); z[1] = x[1];
   for (i=2; i<lx; i++) gel(z,i) = gdivexact(gel(x,i),y);
   return z;
@@ -1255,10 +1254,10 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   dx = degpol(x);
   if (dx < dy)
   {
-    if (pr == ONLY_REM) return gcopy(x);
+    if (pr == ONLY_REM) return RgX_copy(x);
     if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
     z = pol_0(varn(x));
-    if (pr) *pr = gcopy(x);
+    if (pr) *pr = RgX_copy(x);
     return z;
   }
 
@@ -1428,7 +1427,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
       if (pr == ONLY_REM) return pol_0(vx);
       *pr = pol_0(vx);
     }
-    if (gequal1(lead)) return gcopy(x);
+    if (gequal1(lead)) return RgX_copy(x);
     av0 = avma; x = gmul(x, ginvmod(lead,T)); tetpil = avma;
     return gerepile(av0,tetpil,RgXQX_red(x,T));
   }
@@ -1567,7 +1566,7 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   /* if monic, no point in using pseudo-division */
   if (gequal1(y_lead)) return T? RgXQX_rem(x, y, T): RgX_rem(x, y);
   dx = degpol(x);
-  if (dx < dy) return gcopy(x);
+  if (dx < dy) return RgX_copy(x);
   (void)new_chunk(2);
   x = RgX_recip_shallow(x)+2;
   y = RgX_recip_shallow(y)+2;
@@ -1635,7 +1634,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   dy = degpol(y); y_lead = gel(y,dy+2);
   if (gequal1(y_lead)) return T? RgXQX_divrem(x,y, T, ptr): RgX_divrem(x,y, ptr);
   dx = degpol(x);
-  if (dx < dy) { *ptr = gcopy(x); return pol_0(varn(x)); }
+  if (dx < dy) { *ptr = RgX_copy(x); return pol_0(varn(x)); }
   (void)new_chunk(2);
   x = RgX_recip_shallow(x)+2;
   y = RgX_recip_shallow(y)+2;
@@ -1775,7 +1774,7 @@ RgXQ_powu(GEN x, ulong n, GEN T)
   GEN y;
 
   if (!n) return pol_1(varn(x));
-  if (n == 1) return gcopy(x);
+  if (n == 1) return RgX_copy(x);
   av = avma;
   y = gen_powu(x, n, (void*)T, &_sqr, &_mul);
   return gerepileupto(av, y);
@@ -1790,7 +1789,7 @@ RgXQ_pow(GEN x, GEN n, GEN T)
 
   if (!s) return pol_1(varn(x));
   if (is_pm1(n) == 1)
-    return (s < 0)? RgXQ_inv(x, T): gcopy(x);
+    return (s < 0)? RgXQ_inv(x, T): RgX_copy(x);
   av = avma;
   if (s < 0) x = RgXQ_inv(x, T);
   y = gen_pow(x, n, (void*)T, &_sqr, &_mul);
@@ -1860,7 +1859,7 @@ RgX_even_odd(GEN p, GEN *pe, GEN *po)
   long n = degpol(p), v = varn(p), n0, n1, i;
   GEN p0, p1;
 
-  if (n <= 0) { *pe = gcopy(p); *po = zeropol(v); return; }
+  if (n <= 0) { *pe = RgX_copy(p); *po = zeropol(v); return; }
 
   n0 = (n>>1)+1; n1 = n+1 - n0; /* n1 <= n0 <= n1+1 */
   p0 = cgetg(n0+2, t_POL); p0[1] = evalvarn(v)|evalsigne(1);

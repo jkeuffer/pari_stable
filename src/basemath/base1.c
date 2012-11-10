@@ -2261,7 +2261,7 @@ ordred(GEN x)
 
   if (typ(x) != t_POL) pari_err_TYPE("ordred",x);
   if (!gequal1(leading_term(x))) pari_err_IMPL("ordred");
-  if (!signe(x)) return gcopy(x);
+  if (!signe(x)) return RgX_copy(x);
   y = mkvec2(x, matid(degpol(x)));
   return gerepileupto(av, Polred(y, 0, NULL));
 }

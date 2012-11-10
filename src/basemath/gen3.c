@@ -728,7 +728,7 @@ gmodulsg(long x, GEN y)
       gel(z,2) = modsi(x,y); return z;
 
     case t_POL: z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(y);
+      gel(z,1) = RgX_copy(y);
       gel(z,2) = stoi(x); return z;
   }
   pari_err_TYPE2("%",stoi(x),y); return NULL; /* not reached */
@@ -778,11 +778,11 @@ gmodulo(GEN x,GEN y)
           gel(z,2) = gen_0;
         else if (vx > vy)
           gel(z,2) = (lg(y) > 3)? gcopy(x): gen_0;
-        gel(z,1) = gcopy(y);
+        gel(z,1) = RgX_copy(y);
         return z;
       }
 
-      gel(z,1) = gcopy(y);
+      gel(z,1) = RgX_copy(y);
       if (is_const_t(tx))
       {
         gel(z,2) = (lg(y) > 3)? gcopy(x): gmod(x,y);
@@ -1316,7 +1316,8 @@ gsubst(GEN x, long v, GEN y)
         return ty == t_MAT? scalarmat(gen_0,ly-1): gen_0;
 
       vx = varn(x);
-      if (varncmp(vx, v) > 0) return ty == t_MAT? scalarmat(x,ly-1): gcopy(x);
+      if (varncmp(vx, v) > 0)
+        return ty == t_MAT? scalarmat(x,ly-1): RgX_copy(x);
       if (varncmp(vx, v) < 0)
       {
         av = avma; z = cgetg(lx, t_POL); z[1] = x[1];
@@ -1327,7 +1328,8 @@ gsubst(GEN x, long v, GEN y)
 
     case t_SER:
       vx = varn(x);
-      if (varncmp(vx, v) > 0) return (ty==t_MAT)? scalarmat(x,ly-1): gcopy(x);
+      if (varncmp(vx, v) > 0)
+        return (ty==t_MAT)? scalarmat(x,ly-1): gcopy(x);
       ex = valp(x);
       if (varncmp(vx, v) < 0)
       {
@@ -1576,7 +1578,7 @@ deriv(GEN x, long v)
     case t_POLMOD:
       if (varncmp(v, varn(x[1]))) return gen_0;
       y = cgetg(3,t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = deriv(gel(x,2),v); return y;
 
     case t_POL:
@@ -1803,7 +1805,7 @@ RgX_integ(GEN x)
 {
   long i, lx = lg(x);
   GEN y;
-  if (lx == 2) return gcopy(x);
+  if (lx == 2) return RgX_copy(x);
   y = cgetg(lx+1, t_POL); y[1] = x[1]; gel(y,2) = gen_0;
   for (i=3; i<=lx; i++) gel(y,i) = gdivgs(gel(x,i-1),i-2);
   return y;
@@ -1827,7 +1829,7 @@ integ(GEN x, long v)
     if (tx == t_POLMOD && varncmp(v, varn(x[1])) > 0)
     {
       y = cgetg(3,t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = integ(gel(x,2),v); return y;
     }
     if (gequal0(x)) return gen_0;
@@ -1929,7 +1931,7 @@ gfloor(GEN x)
   switch(typ(x))
   {
     case t_INT: return icopy(x);
-    case t_POL: return gcopy(x);
+    case t_POL: return RgX_copy(x);
     case t_REAL: return floorr(x);
     case t_FRAC: return truedivii(gel(x,1),gel(x,2));
     case t_RFRAC: return gdeuc(gel(x,1),gel(x,2));
@@ -1969,7 +1971,7 @@ gceil(GEN x)
   switch(typ(x))
   {
     case t_INT: return icopy(x);
-    case t_POL: return gcopy(x);
+    case t_POL: return RgX_copy(x);
     case t_REAL: return ceilr(x);
     case t_FRAC:
       av = avma; y = dvmdii(gel(x,1),gel(x,2),&p1);
@@ -2046,7 +2048,7 @@ ground(GEN x)
     case t_REAL: return roundr(x);
     case t_FRAC: return diviiround(gel(x,1), gel(x,2));
     case t_POLMOD: y=cgetg(3,t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = ground(gel(x,2)); return y;
 
     case t_COMPLEX:
@@ -2123,7 +2125,7 @@ grndtoi(GEN x, long *e)
       return y;
 
     case t_POLMOD: y = cgetg(3,t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = grndtoi(gel(x,2), e); return y;
 
     case t_POL:
@@ -2344,7 +2346,7 @@ gtrunc(GEN x)
       gel(y,2) = powiu(gel(x,2),-v);
       return y;
 
-    case t_POL: return gcopy(x);
+    case t_POL: return RgX_copy(x);
     case t_RFRAC:
       return gdeuc(gel(x,1),gel(x,2));
 
@@ -2519,7 +2521,7 @@ _gtopoly(GEN x, long v, int reverse)
   {
     case t_POL:
       if (varncmp(varn(x), v) < 0) pari_err_PRIORITY("gtopoly", x, "<", v);
-      y=gcopy(x); break;
+      y = RgX_copy(x); break;
     case t_SER:
       if (varncmp(varn(x), v) < 0) pari_err_PRIORITY("gtopoly", x, "<", v);
       y = ser2rfrac(x);
@@ -2985,7 +2987,7 @@ gtovecsmall(GEN x)
       for (i=1; i<=l; i++) V[i] = (long)s[i];
       return V;
     }
-    case t_VECSMALL: return gcopy(x);
+    case t_VECSMALL: return leafcopy(x);
     case t_LIST:
       x = list_data(x);
       if (!x) return cgetg(1, t_VECSMALL);
@@ -3174,7 +3176,7 @@ denom(GEN x)
       return denom(gel(x,2));
 
     case t_RFRAC:
-      return gcopy(gel(x,2));
+      return RgX_copy(gel(x,2));
 
     case t_POL:
       return pol_1(varn(x));
@@ -3201,8 +3203,11 @@ numer(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_INTMOD: case t_FFELT:
-    case t_PADIC: case t_POL: case t_SER:
+    case t_INT: case t_REAL:
+      return mpcopy(x);
+    case t_POL:
+      return RgX_copy(x);
+    case t_INTMOD: case t_FFELT: case t_PADIC: case t_SER:
       return gcopy(x);
 
     case t_FRAC:
@@ -3465,7 +3470,10 @@ greal(GEN x)
 {
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC:
+    case t_INT: case t_REAL:
+      return mpcopy(x);
+
+    case t_FRAC:
       return gcopy(x);
 
     case t_COMPLEX:
@@ -3602,7 +3610,7 @@ geval_gp(GEN x, GEN t)
     case t_POL:
       lx=lg(x); if (lx==2) return gen_0;
       z = fetch_var_value(varn(x),t);
-      if (!z) return gcopy(x);
+      if (!z) return RgX_copy(x);
       av = avma; y = geval_gp(gel(x,lx-1),t);
       for (i=lx-2; i>1; i--)
         y = gadd(geval_gp(gel(x,i),t), gmul(z,y));

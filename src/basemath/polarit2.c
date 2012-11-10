@@ -1211,7 +1211,7 @@ ggcd(GEN x, GEN y)
     {
       GEN T = gel(x,1);
       z = cgetg(3,t_POLMOD);
-      T = RgX_equal_var(T,gel(y,1))? gcopy(T): RgX_gcd(T, gel(y,1));
+      T = RgX_equal_var(T,gel(y,1))? RgX_copy(T): RgX_gcd(T, gel(y,1));
       gel(z,1) = T;
       if (degpol(T) <= 0) gel(z,2) = gen_0;
       else
@@ -1225,14 +1225,14 @@ ggcd(GEN x, GEN y)
       }
       return z;
     }
-    vx = varn(x[1]);
+    vx = varn(gel(x,1));
     switch(ty)
     {
       case t_POL:
         vy = varn(y);
         if (varncmp(vy,vx) < 0) return cont_gcd_gen(y, x);
         z = cgetg(3,t_POLMOD);
-        gel(z,1) = gcopy(gel(x,1));
+        gel(z,1) = RgX_copy(gel(x,1));
         av = avma; p1 = ggcd(gel(x,1),gel(x,2));
         gel(z,2) = gerepileupto(av, ggcd(p1,y));
         return z;
@@ -1261,8 +1261,8 @@ ggcd(GEN x, GEN y)
         case t_POL:
           if (vx != vy)
           {
-            if (!signe(y)) return gcopy(x);
-            if (!signe(x)) return gcopy(y);
+            if (!signe(y)) return RgX_copy(x);
+            if (!signe(x)) return RgX_copy(y);
             return gen_1;
           }
           return RgX_gcd(x,y);
@@ -1406,7 +1406,7 @@ RgX_gcd_simple(GEN x, GEN y)
     if (pol_approx0(r, x, exact))
     {
       avma = av1;
-      if (y == yorig) return gcopy(y);
+      if (y == yorig) return RgX_copy(y);
       y = normalizepol_approx(y, lg(y));
       if (lg(y) == 3) { avma = av; return pol_1(varn(x)); }
       return gerepileupto(av,y);
@@ -1680,7 +1680,7 @@ Q_muli_to_int(GEN x, GEN d)
 
     case t_POLMOD:
       y = cgetg(3, t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = Q_muli_to_int(gel(x,2), d);
       return y;
   }
@@ -1720,7 +1720,7 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
 
     case t_POLMOD:
       y = cgetg(3, t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = Q_divmuli_to_int(gel(x,2), d,n);
       return y;
   }
@@ -1752,7 +1752,7 @@ Q_divi_to_int(GEN x, GEN d)
 
     case t_POLMOD:
       y = cgetg(3, t_POLMOD);
-      gel(y,1) = gcopy(gel(x,1));
+      gel(y,1) = RgX_copy(gel(x,1));
       gel(y,2) = Q_divi_to_int(gel(x,2), d);
       return y;
   }
@@ -2127,7 +2127,7 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
   if (bmax < 0) pari_err_DOMAIN("ratlift", "bmax", "<", gen_0, stoi(bmax));
   if (!signe(T)) {
     if (degpol(x) <= amax) {
-      *P = gcopy(x);
+      *P = RgX_copy(x);
       *Q = pol_1(varn(x));
       return 1;
     }
@@ -2627,8 +2627,8 @@ RgX_gcd(GEN x, GEN y)
   GEN d, g, h, p1, p2, u, v;
   int simple = 0, rational = 1;
 
-  if (!signe(y)) return gcopy(x);
-  if (!signe(x)) return gcopy(y);
+  if (!signe(y)) return RgX_copy(x);
+  if (!signe(x)) return RgX_copy(y);
   if (RgX_is_monomial(x)) return gcdmonome(x,y);
   if (RgX_is_monomial(y)) return gcdmonome(y,x);
   if (isinexactall(x,&simple,&rational) || isinexactall(y,&simple,&rational))
@@ -2918,14 +2918,14 @@ RgXQ_inv(GEN x, GEN y)
   return gerepileupto(av, d);
 }
 
-/*Assume vx is a polynomial and y is not */
+/*Assume x is a polynomial and y is not */
 static GEN
 scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
 {
-  long vx=varn(x);
+  long vx = varn(x);
   int xis0 = signe(x)==0, yis0 = gequal0(y);
   if (xis0 && yis0) { *U = *V = pol_0(vx); return pol_0(vx); }
-  if (yis0) { *U=pol_1(vx); *V = pol_0(vx); return gcopy(x);}
+  if (yis0) { *U=pol_1(vx); *V = pol_0(vx); return RgX_copy(x);}
   *U=pol_0(vx); *V= ginv(y); return pol_1(vx);
 }
 /* Assume x==0, y!=0 */

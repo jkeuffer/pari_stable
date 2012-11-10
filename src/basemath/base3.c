@@ -690,13 +690,13 @@ basistoalg(GEN nf, GEN x)
       T = nf_get_pol(nf);
       if (varn(T) != varn(x)) pari_err_VAR("basistoalg",x,T);
       z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(T);
+      gel(z,1) = ZX_copy(T);
       gel(z,2) = RgX_rem(x, T); return z;
     case t_INT:
     case t_FRAC:
       T = nf_get_pol(nf);
       z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(T);
+      gel(z,1) = ZX_copy(T);
       gel(z,2) = gcopy(x); return z;
     default:
       pari_err_TYPE("basistoalg",x);
@@ -841,7 +841,7 @@ rnfbasistoalg(GEN rnf,GEN x)
 {
   long lx, i;
   pari_sp av = avma;
-  GEN z, nf;
+  GEN z, nf, T;
 
   checkrnf(rnf);
   switch(typ(x))
@@ -850,7 +850,8 @@ rnfbasistoalg(GEN rnf,GEN x)
       z = cgetg_copy(x, &lx); nf = gel(rnf,10);
       for (i=1; i<lx; i++) gel(z,i) = nf_to_scalar_or_alg(nf, gel(x,i));
       z = RgV_RgC_mul(gmael(rnf,7,1), z);
-      return gerepileupto(av, gmodulo(z,gel(rnf,1)));
+      T = gel(rnf,1);
+      return gerepileupto(av, gmodulo(z,T));
 
     case t_MAT:
       z = cgetg_copy(x, &lx);
@@ -858,13 +859,15 @@ rnfbasistoalg(GEN rnf,GEN x)
       return z;
 
     case t_POLMOD:
-      if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
-        pari_err_MODULUS("rnfbasistoalg", gel(rnf,1),gel(x,1));
+      T = gel(rnf,1);
+      if (!RgX_equal_var(T,gel(x,1)))
+        pari_err_MODULUS("rnfbasistoalg", T,gel(x,1));
       return gcopy(x);
 
     default: z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(gel(rnf,1));
-      gel(z,2) = gtopoly(x, varn(rnf[1])); return z;
+      T = gel(rnf,1);
+      gel(z,1) = RgX_copy(T);
+      gel(z,2) = gtopoly(x, varn(T)); return z;
   }
 }
 

@@ -1132,7 +1132,8 @@ FqX_translate(GEN P, GEN c, GEN T, GEN p)
   GEN Q, *R;
   long i, k, n;
 
-  if (!signe(P) || !signe(c)) return gcopy(P); /* signe works for t_(INT|POL) */
+  /* signe works for t_(INT|POL) */
+  if (!signe(P) || !signe(c)) return RgX_copy(P);
   Q = leafcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
@@ -1917,7 +1918,7 @@ Kronecker_to_mod(GEN z, GEN T)
   t[1] = T[1];
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
   x[1] = z[1];
-  T = gcopy(T);
+  T = RgX_copy(T);
   for (i=2; i<lx+2; i++, z+= N-2)
   {
     for (j=2; j<N; j++) gel(t,j) = gel(z,j);
