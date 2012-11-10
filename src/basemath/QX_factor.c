@@ -959,8 +959,8 @@ ZX_DDF(GEN x)
 GEN
 ZX_squff(GEN f, GEN *ex)
 {
-  GEN T, V, W, P, e;
-  long i, k, dW, n, val;
+  GEN T, V, P, e;
+  long i, k, n, val;
 
   if (signe(leading_term(f)) < 0) f = gneg_i(f);
   val = ZX_valrem(f, &f);
@@ -971,11 +971,23 @@ ZX_squff(GEN f, GEN *ex)
   T = ZX_gcd_all(f, ZX_deriv(f), &V);
   for (k=i=1;; k++)
   {
-    W = ZX_gcd_all(T,V, &T); dW = degpol(W);
+    pari_sp av = avma;
+    GEN W = ZX_gcd_all(T,V, &T);
+    long dW = degpol(W);
     /* W = prod P^e, e > k; V = prod P^e, e >= k */
-    if (dW != degpol(V)) { gel(P,i) = Q_primpart(RgX_div(V,W)); e[i] = k; i++; }
-    if (dW <= 0) break;
-    V = W;
+    if (dW == degpol(V)) /* V | T */
+    {
+      GEN U;
+      while ( (U = ZX_divides(T, V)) ) { k++; T = U; }
+      T = gerepileupto(av, T);
+    }
+    else
+    {
+      gel(P,i) = Q_primpart(RgX_div(V,W));
+      e[i] = k; i++;
+      if (dW <= 0) break;
+      V = W;
+    }
   }
   if (val) { gel(P,i) = pol_x(varn(f)); e[i] = val; i++;}
   setlg(P,i);
