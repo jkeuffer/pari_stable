@@ -605,28 +605,21 @@ StructureOmega(KRASNER_t *data, GEN *pnbpol)
   GEN nbpol, O = cgetg(data->e + 1, t_VEC);
   long i;
 
-  nbpol = gen_1;
-  for (i = 0; i < data->e; i++)
+  /* i = 0 */
+  gel(O, 1) = mkvecsmall2(1, 0);
+  nbpol = mulii(data->qm1, powiu(data->q, data->c - 1));
+  for (i = 1; i < data->e; i++)
   {
     long v_start, zero = 0;
-    GEN nbcf;
-    if (i == 0)
-    {
-      v_start = 1;
-      nbcf = mulii(data->qm1, powiu(data->q, data->c - 1));
-    }
+    GEN nbcf, p1;
+    v_start = function_l(data->p, data->a, data->b, i);
+    p1 = powiu(data->q, data->c - v_start);
+    if (i == data->b)
+      nbcf = mulii(p1, data->qm1);
     else
     {
-      GEN p1;
-      v_start = function_l(data->p, data->a, data->b, i);
-      p1 = powiu(data->q, data->c - v_start);
-      if (i == data->b)
-        nbcf = mulii(p1, data->qm1);
-      else
-      {
-        nbcf = mulii(p1, data->q);
-        zero = 1;
-      }
+      nbcf = mulii(p1, data->q);
+      zero = 1;
     }
     gel(O, i+1) = mkvecsmall2(v_start, zero);
     nbpol = mulii(nbpol, nbcf);
@@ -802,8 +795,8 @@ get_pk(KRASNER_t *data)
 static GEN
 GetRamifiedPol(GEN p, GEN efj, long v, long flag)
 {
-  long e = efj[1], f = efj[2], j = efj[3];
-  GEN pols;
+  long e = efj[1], f = efj[2], j = efj[3], i, l;
+  GEN L, pols;
   KRASNER_t data;
   pari_sp av = avma;
 
@@ -835,40 +828,36 @@ GetRamifiedPol(GEN p, GEN efj, long v, long flag)
   data.roottable = NULL;
   if (j)
   {
-    GEN npol = powiu(data.q, e+1);
-    if (lgefint(data.p) == 3 && expi(npol) < 19)
+    if (lgefint(data.q) == 3)
     {
-      long i, l = itou(npol);
-      data.roottable = cgetg(l+1, t_VEC);
-      for (i = 1; i <= l; i++) gel(data.roottable, i) = NULL;
+      ulong npol = upowuu(data.q[2], e+1);
+      if (npol && npol < (1<<19)) data.roottable = const_vec(npol, NULL);
     }
     data.pk = get_pk(&data);
-    pols = WildlyRamifiedCase(&data);
+    L = WildlyRamifiedCase(&data);
   }
   else
-    pols = TamelyRamifiedCase(&data);
+    L = TamelyRamifiedCase(&data);
 
+  pols = cgetg_copy(L, &l);
   if (flag == 1)
   {
-    long i, l;
-    GEN p1 = cgetg_copy(pols, &l);
+    GEN E = utoipos(e), F = utoipos(f), D = utoi(f*(e+j-1));
     for (i = 1; i < l; i++)
-      gel(p1, i) = mkvec5(gcopy(gmael2(pols, i, 1)),
-                          utoipos(e),
-                          utoipos(f),
-                          utoi(f*(e+j-1)),
-                          gcopy(gmael2(pols, i, 2)));
-    pols = gerepileupto(av, p1);
+    {
+      GEN T = gel(L,i);
+      gel(pols, i) = mkvec5(ZX_copy(gel(T, 1)), E,F,D, icopy(gel(T, 2)));
+    }
   }
   else
   {
-    long i, l;
-    GEN p1 = cgetg_copy(pols, &l);
     for (i = 1; i < l; i++)
-      gel(p1, i) = gcopy(gmael2(pols, i, 1));
-    pols = gerepilecopy(av, p1);
+    {
+      GEN T = gel(L,i);
+      gel(pols, i) = ZX_copy(gel(T,1));
+    }
   }
-  return pols;
+  return gerepileupto(av, pols);
 }
 
 static GEN
