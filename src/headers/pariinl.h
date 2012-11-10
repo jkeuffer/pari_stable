@@ -1768,6 +1768,14 @@ INLINE GEN
 ZXQ_sqr(GEN x, GEN T) { return ZX_rem(ZX_sqr(x), T); }
 
 INLINE GEN
+RgX_copy(GEN x)
+{
+  long lx, i;
+  GEN y = cgetg_copy(x, &lx); y[1] = x[1];
+  for (i = 2; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
+  return y;
+}
+INLINE GEN
 RgX_div(GEN x, GEN y) { return RgX_divrem(x,y,NULL); }
 INLINE GEN
 RgX_rem(GEN x, GEN y) { return RgX_divrem(x,y,ONLY_REM); }

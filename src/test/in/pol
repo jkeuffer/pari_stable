@@ -1,1 +1,7 @@
-Pol(1/x)
+o = [Mod(0,3),1/x, (x^2+1)/x, [1,2,3], Qfb(1,2,4), Qfb(1,2,-4), x+2*x^2+O(x^4)];
+{
+  for (i=1,#o,
+    my (v = o[i]);
+    print(Pol(v), " ", Polrev(v));
+  )
+}

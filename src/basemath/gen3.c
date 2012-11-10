@@ -2511,18 +2511,17 @@ deg1pol_shallow(GEN x1, GEN x0,long v)
 static GEN
 _gtopoly(GEN x, long v, int reverse)
 {
-  long tx = typ(x), lx, i, j;
+  long tx = typ(x);
   GEN y;
 
   if (v<0) v = 0;
-  if (is_scalar_t(tx)) return scalarpol(x,v);
   switch(tx)
   {
     case t_POL:
-      if (varncmp(varn(x), v) < 0) pari_err(e_PRIORITY,"gtopoly", x, "<", v);
+      if (varncmp(varn(x), v) < 0) pari_err_PRIORITY("gtopoly", x, "<", v);
       y=gcopy(x); break;
     case t_SER:
-      if (varncmp(varn(x), v) < 0) pari_err(e_PRIORITY,"gtopoly", x, "<", v);
+      if (varncmp(varn(x), v) < 0) pari_err_PRIORITY("gtopoly", x, "<", v);
       y = ser2rfrac(x);
       if (typ(y) != t_POL)
         pari_err_DOMAIN("gtopoly", "valuation", "<", gen_0, x);
@@ -2531,53 +2530,31 @@ _gtopoly(GEN x, long v, int reverse)
     {
       GEN a = gel(x,1), b = gel(x,2);
       long vb = varn(b);
-      if (varncmp(vb, v) < 0) pari_err(e_PRIORITY,"gtopoly", x, "<", v);
+      if (varncmp(vb, v) < 0) pari_err_PRIORITY("gtopoly", x, "<", v);
       if (typ(a) != t_POL || varn(a) != vb) return zeropol(v);
       y = RgX_div(a,b); break;
     }
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); if (tx == t_QFR) lx--;
-      if (varncmp(gvar(x), v) <= 0) pari_err(e_PRIORITY,"gtopoly", x, "<=", v);
-      if (reverse)
-      { /* cf normalizepol_lg */
-        for (i = lx-1; i>0; i--)
-          if (! isrationalzero(gel(x,i))) break;
-        if (i == 0) return zeropol(v);
-        /* not a rational 0, to be kept iff all other coeffs are exact 0s */
-        y = gel(x,i);
-        for (; i>0; i--)
-          if (! isexactzero(gel(x,i))) break;
-        if (i == 0) return scalarpol(y, v);
-
-        for (j = i; j>0; j--)
-          if (! gequal0(gel(x,j))) break;
-        i += 2;
-        y = cgetg(i,t_POL);
-        y[1] = evalvarn(v) | evalsigne((j == 0)? 0: 1);
-        for (j=2; j<i; j++) gel(y,j) = gcopy(gel(x,j-1));
-        return y;
+    {
+      long j, k, lx = lg(x);
+      GEN z;
+      if (tx == t_QFR) lx--;
+      if (varncmp(gvar(x), v) <= 0) pari_err_PRIORITY("gtopoly", x, "<=", v);
+      y = cgetg(lx+1, t_POL);
+      y[1] = evalvarn(v);
+      if (reverse) {
+        x--;
+        for (j=2; j<=lx; j++) gel(y,j) = gel(x,j);
+      } else {
+        for (j=2, k=lx; k>=2; j++) gel(y,j) = gel(x,--k);
       }
-      else
-      {
-        for (i = 1; i<lx; i++)
-          if (! isrationalzero(gel(x,i))) break;
-        if (i == lx) return zeropol(v);
-        /* not a rational 0, to be kept iff all other coeffs are exact 0s */
-        y = gel(x,i);
-        for (; i<lx; i++)
-          if (! isexactzero(gel(x,i))) break;
-        if (i == lx) return scalarpol(y, v);
-
-        for (j = i; j<lx; j++)
-          if (! gequal0(gel(x,j))) break;
-        i = lx-i+2;
-        y = cgetg(i, t_POL);
-        y[1] = evalvarn(v) | evalsigne((j == lx)? 0: 1);
-        for (j=2; j<i; j++) gel(y,j) = gcopy(gel(x,--lx));
-        return y;
-      }
-      break;
-    default: pari_err_TYPE("gtopoly",x);
+      z = RgX_copy(normalizepol_lg(y,lx+1));
+      settyp(y, t_VECSMALL);/* left on stack */
+      return z;
+    }
+    default:
+      if (is_scalar_t(tx)) return scalarpol(x,v);
+      pari_err_TYPE("gtopoly",x);
       return NULL; /* not reached */
   }
   setvarn(y,v); return y;
