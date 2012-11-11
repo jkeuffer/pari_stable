@@ -216,13 +216,14 @@ precprime(GEN n)
 }
 
 /* Find next single-word prime strictly larger than p.
- * If **d is non-NULL (somewhere in a diffptr), this is p + *(*d)++.
- * Otherwise imitate nextprime().
- * *rcn = NPRC or the correct residue class for the current p;  we'll use this
+ * If **d is non-NULL (somewhere in a diffptr), this is p + *(*d)++;
+ * otherwise imitate nextprime().
+ * *rcn = NPRC or the correct residue class for the current p; we'll use this
  * to track the current prime residue class mod 210 once we're out of range of
  * the diffptr table, and we'll update it before that if it isn't NPRC.
+ *
  * *q is incremented whenever q!=NULL and we wrap from 209 mod 210 to
- * 1 mod 210;  this makes sense
+ * 1 mod 210
  * k =  second argument for MR_Jaeschke(). --GN1998Aug22 */
 ulong
 snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
@@ -234,6 +235,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     long d1 = 0;
 
     NEXT_PRIME_VIADIFF(d1,dd);
+    /* d1 = nextprime(p+1) - p */
     if (*rcn != NPRC)
     {
       long rcn0 = *rcn;
@@ -244,8 +246,8 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
       }
       if (d1 < 0)
       {
-        err_printf("snextpr: %lu != prc210_rp[%ld] mod 210\n", p, rcn0);
-        pari_err_BUG("[caller of] snextpr");
+        char *s=stack_sprintf("snextpr: %lu!=prc210_rp[%ld] mod 210\n",p,rcn0);
+        pari_err_BUG(s);
       }
     }
     NEXT_PRIME_VIADIFF(p,*d);
@@ -257,8 +259,8 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     *rcn = prc210_no[(p % 210) >> 1];
     if (*rcn == NPRC)
     {
-      err_printf("snextpr: %lu should have been prime but isn\'t\n", p);
-      pari_err_BUG("[caller of] snextpr");
+      char *s = stack_sprintf("snextpr: %lu should have been prime\n", p);
+      pari_err_BUG(s);
     }
   }
   /* look for the next one */
@@ -267,12 +269,8 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
   while (!Fl_MR_Jaeschke(n, k))
   {
     n += prc210_d1[*rcn];
+    if (n <= 11) pari_err_OVERFLOW("snextpr");
     if (++*rcn > 47) { *rcn = 0; if (q) (*q)++; }
-    if (n <= 11)                /* wraparound mod 2^BITS_IN_LONG */
-    {
-      err_printf("snextpr: integer wraparound after prime %lu\n", p);
-      pari_err_BUG("[caller of] snextpr");
-    }
   }
   return n;
 }
@@ -688,7 +686,7 @@ static const long MR_Jaeschke_k2 = 1; /* B2 phase, not foolproof, 2xfaster */
 GEN
 ellfacteur(GEN N, int insist)
 {
-  const ulong TB1[] = { /* table revised, cf. below 1998Aug15 --GN */
+  const ulong TB1[] = {
     142,172,208,252,305,370,450,545,661,801,972,1180,1430,
     1735,2100,2550,3090,3745,4540,5505,6675,8090,9810,11900,
     14420,17490,21200,25700,31160,37780UL,45810UL,55550UL,67350UL,
@@ -707,12 +705,11 @@ ellfacteur(GEN N, int insist)
     /* Someone can extend this table when the hardware gets faster */
 #endif
     };
-  const ulong TB1_for_stage[] = { /* table revised 1998Aug11 --GN.
-    * Start a little below the optimal B1 for finding factors which would just
-    * have been missed by pollardbrent(), and escalate gradually, changing
-    * curves to give good coverage of the small factor ranges. Entries grow
-    * faster than what Paul says would be optimal but a table instead of a 2D
-    * array keeps the code simple */
+  const ulong TB1_for_stage[] = {
+   /* Start below the optimal B1 for finding factors which would just have been
+    * missed by pollardbrent(), and escalate, changing curves to give good
+    * coverage of the small factor ranges. Entries grow faster than what would
+    * be optimal but a table instead of a 2D array keeps the code simple */
     500,520,560,620,700,800,900,1000,1150,1300,1450,1600,1800,2000,
     2200,2450,2700,2950,3250,3600,4000,4400,4850,5300,5800,6400,
     7100,7850,8700,9600,10600,11700,12900,14200,15700,17300,
@@ -731,8 +728,8 @@ ellfacteur(GEN N, int insist)
   pari_timer T;
   int rflag;
 
-  /* determine where we'll start, how long we'll persist, and how many
-   * curves we'll use in parallel */
+  /* Determine where to start, how long to persist, and how many curves to
+   * use in parallel */
   if (insist)
   {
 #ifdef LONG_IS_64BIT
@@ -761,7 +758,7 @@ ellfacteur(GEN N, int insist)
     if (dsn < 0) /* < 140 bits: decline the task */
     {
 #ifdef __EMX__
-      /* ... unless DOS/EMX: MPQS's disk access is abysmally slow ... */
+      /* unless DOS/EMX: MPQS's disk access is abysmally slow */
       dsn = 0; rep = 20; nbc = 8;
 #else
       if (DEBUGLEVEL >= 4)
@@ -782,9 +779,9 @@ ellfacteur(GEN N, int insist)
 #endif
     }
 
-    /* it is convenient to use disjoint sets of curves for non-insist and insist
-     * phases; moreover, repeated calls acting on factors of the same original
-     * number should try to use fresh curves. The following achieves this */
+    /* Use disjoint sets of curves for non-insist and insist phases; moreover,
+     * repeated calls acting on factors of the same original number should try
+     * to use fresh curves. The following achieves this */
     a = 1 + (nbcmax<<3)*(size & 0xf);
   }
   if (dsn > dsnmax) dsn = dsnmax;
@@ -818,8 +815,6 @@ ellfacteur(GEN N, int insist)
    * in the XH range, 4 curves at a time. Some of the cells reserved here for
    * the XB range will never be used, instead, we'll warp the pointers to
    * connect to (read-only) GENs in the X/XD range */
-
-  /* ECM MAIN LOOP */
   for(;;)
   {
     byteptr d0, d = diffptr;
@@ -1039,23 +1034,24 @@ ellfacteur(GEN N, int insist)
       gl = gen_1; av1 = avma;
       /* scratchspace for prod (x_i-x_j) */
       avtmp = (pari_sp)new_chunk(8 * lgefint(N));
-      /* the correct entry in XB to use depends on bstp and on where we are
-       * on the helix.  As we skip from prime to prime, bstp will be incre-
-       * mented by snextpr() each time we wrap around through residue class
-       * number 0 (1 mod 210),  but the baby step should not be taken until
-       * rcn>=rcn0  (i.e. until we pass again the residue class of p0).
+      /* The correct entry in XB to use depends on bstp and on where we are
+       * on the helix. As we skip from prime to prime, bstp is incremented
+       * by snextpr each time we wrap around through residue class number 0
+       * (1 mod 210), but the baby step should not be taken until rcn>=rcn0,
+       * i.e. until we pass again the residue class of p0.
+       *
        * The correct signed multiplier is thus k = bstp - (rcn < rcn0),
-       * and the offset from XB is four times (|k| - 1).  When k0, we may
-       * ignore the current prime  (if it had led to a factorization, this
+       * and the offset from XB is four times (|k| - 1).  When k=0, we ignore
+       * the current prime: if it had led to a factorization, this
        * would have been noted during the last giant step, or -- when we
-       * first get here -- whilst initializing the helix).  When k > gss,
+       * first get here -- whilst initializing the helix.  When k > gss,
        * we must do a giant step and bump bstp back by -2*gss.
+       *
        * The gcd of the product of X coord differences against N is taken just
        * before we do a giant step. */
       while (p < B2)
       {/* loop over probable primes p0 < p <= nextprime(B2), inserting giant
         * steps as necessary */
-        ulong p2 = p; /* save current p for diagnostics */
         /* get next probable prime */
         p = snextpr(p, &d, &rcn, &bstp, MR_Jaeschke_k2);
         /* work out the corresponding baby-step multiplier */
@@ -1064,19 +1060,16 @@ ellfacteur(GEN N, int insist)
         if (k > gss)
         { /* take gcd */
           gl = gcdii(gl, N);
-          if (!is_pm1(gl) && !equalii(gl, N)) { p = p2; goto fin; }
+          if (!is_pm1(gl) && !equalii(gl, N)) goto fin;
           gl = gen_1; avma = av1;
           while (k > gss)
           { /* giant step */
             if (DEBUGLEVEL >= 7) err_printf("\t(giant step at p = %lu)\n", p);
-            if (ecm_elladd0(N, &gl, 64, 4,
-                        XG + i, YG + i,
+            if (ecm_elladd0(N, &gl, 64, 4, XG + i, YG + i,
                         Xh, Yh, Xh, Yh) > 1) goto fin;
-            if (ecm_elladd0(N, &gl, 64, 4,
-                        XG + i, YG + i,
+            if (ecm_elladd0(N, &gl, 64, 4, XG + i, YG + i,
                         Xh + 64, Yh + 64, Xh + 64, Yh + 64) > 1) goto fin;
-            if (ecm_elladd0(N, &gl, 64, 4,
-                        XG + i, YG + i,
+            if (ecm_elladd0(N, &gl, 64, 4, XG + i, YG + i,
                         Xh + 128, Yh + 128, Xh + 128, Yh + 128) > 1) goto fin;
             bstp -= (gss << 1);
             k = bstp - (rcn < rcn0? 1: 0); /* recompute multiplier */
