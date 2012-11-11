@@ -2574,13 +2574,7 @@ scalarser(GEN x, long v, long prec)
   long i, l;
   GEN y;
 
-  if (isrationalzero(x)) return zeroser(v,0);
-  if (isexactzero(x))
-  {
-    y = cgetg(3, t_SER);
-    y[1] = evalsigne(0) | _evalvalp(0) | evalvarn(v);
-    gel(y,2) = gcopy(x); return y;
-  }
+  if (isrationalzero(x)) return zeroser(v, prec);
   l = prec + 2; y = cgetg(l, t_SER);
   y[1] = evalsigne(gequal0(x)? 0: 1) | _evalvalp(0) | evalvarn(v);
   gel(y,2) = gcopy(x); for (i=3; i<l; i++) gel(y,i) = gen_0;
@@ -2638,7 +2632,7 @@ toser_i(GEN x)
 GEN
 gtoser(GEN x, long v, long prec)
 {
-  long tx=typ(x), lx, i, j, l;
+  long tx=typ(x), i, j, l;
   pari_sp av;
   GEN y;
 
@@ -2655,51 +2649,31 @@ gtoser(GEN x, long v, long prec)
   switch(tx)
   {
     case t_POL:
-      if (varncmp(varn(x), v) < 0) pari_err(e_PRIORITY,"gtoser", x, "<", v);
+      if (varncmp(varn(x), v) < 0) pari_err_PRIORITY("gtoser", x, "<", v);
       y = poltoser(x, v, prec); l = lg(y);
       for (i=2; i<l; i++)
         if (gel(y,i) != gen_0) gel(y,i) = gcopy(gel(y,i));
       break;
 
     case t_RFRAC:
-      if (varncmp(varn(gel(x,2)), v) < 0)
-        pari_err(e_PRIORITY,"gtoser", x, "<", v);
+      if (varncmp(varn(gel(x,2)), v) < 0) pari_err_PRIORITY("gtoser",x,"<",v);
       av = avma;
       return gerepileupto(av, rfractoser(x, v, prec));
 
+    case t_VECSMALL: x = zv_to_ZV(x);/*fall through*/
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
-      if (varncmp(gvar(x), v) <= 0)
-        pari_err(e_PRIORITY,"gtoser", x, "<=", v);
-      lx = lg(x); if (tx == t_QFR) lx--;
-      /* see normalize() */
-      for (i=1; i < lx; i++)
-        if (!isrationalzero(gel(x,i))) break;
-      if (i == lx) return zeroser(v, lx-1);
-      y = gel(x,i);
-      for (; i<lx; i++)
-        if (!isexactzero(gel(x,i))) break;
-      if (i == lx)
-      {
-        GEN z = cgetg(3, t_SER);
-        z[1] = evalsigne(0) | evalvalp(lx-1) | evalvarn(v);
-        gel(z,2) = gcopy(y); return z;
-      }
-
-      lx -= i-2; x += i-2;
-      y = cgetg(lx,t_SER);
-      y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
-      for (j=2; j<lx; j++) gel(y,j) = gcopy(gel(x,j));
-      break;
-    case t_VECSMALL:
-      lx = lg(x);
-      for (i=1; i < lx; i++)
-        if (x[i]) break;
-      if (i == lx) return zeroser(v, lx-1);
-      lx -= i-2; x += i-2;
-      y = cgetg(lx,t_SER);
-      y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
-      for (j=2; j<lx; j++) gel(y,j) = stoi(x[j]);
-      break;
+    {
+      GEN z;
+      long lx = lg(x); if (tx == t_QFR) lx--;
+      if (varncmp(gvar(x), v) <= 0) pari_err_PRIORITY("gtoser", x, "<=", v);
+      y = cgetg(lx+1, t_SER);
+      y[1] = evalvarn(v)|evalvalp(0);
+      x--;
+      for (j=2; j<=lx; j++) gel(y,j) = gel(x,j);
+      z = gcopy(normalize(y));
+      settyp(y, t_VECSMALL);/* left on stack */
+      return z;
+    }
 
     default: pari_err_TYPE("gtoser",x);
       return NULL; /* not reached */
