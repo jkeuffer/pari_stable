@@ -55,7 +55,7 @@ ZX_divides_i(GEN x, GEN y, GEN B)
     gel(z,i-dy) = p1;
   }
   av = avma;
-  for (;; i--)
+  for (; i >= 0; i--)
   {
     p1 = gel(x,i);
     /* we always enter this loop at least once */
@@ -63,7 +63,6 @@ ZX_divides_i(GEN x, GEN y, GEN B)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
     if (signe(p1)) return NULL;
     avma = av;
-    if (!i) break;
   }
   return z - 2;
 }
@@ -978,6 +977,7 @@ ZX_squff(GEN f, GEN *ex)
     if (dW == degpol(V)) /* V | T */
     {
       GEN U;
+      if (!dW) { avma = av; break; }
       while ( (U = ZX_divides(T, V)) ) { k++; T = U; }
       T = gerepileupto(av, T);
     }
@@ -985,7 +985,7 @@ ZX_squff(GEN f, GEN *ex)
     {
       gel(P,i) = Q_primpart(RgX_div(V,W));
       e[i] = k; i++;
-      if (dW <= 0) break;
+      if (!dW) break;
       V = W;
     }
   }
