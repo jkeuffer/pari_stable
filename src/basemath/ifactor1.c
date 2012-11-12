@@ -3365,16 +3365,27 @@ ifac_moebiusu(GEN n)
   }
 }
 
+INLINE ulong
+u_forprime_next_fast(forprime_t *T)
+{
+  if (*(T->d))
+  {
+    NEXT_PRIME_VIADIFF(T->p, T->d);
+    return T->p > T->b ? 0: T->p;
+  }
+  return u_forprime_next(T);
+}
+
 /* Factor n and output [p,e] where
  * p, e are vecsmall with n = prod{p[i]^e[i]} */
 GEN
 factoru(ulong n)
 {
   GEN f, E, E2, P, P2;
-  byteptr d = diffptr+1;
   pari_sp av;
-  ulong p, lim;
+  ulong p;
   long v, i, oldi;
+  forprime_t S;
 
   if (n == 0) retmkvec2(mkvecsmall(0), mkvecsmall(1));
   if (n == 1) return trivial_fact();
@@ -3388,32 +3399,20 @@ factoru(ulong n)
   f = cgetg(3,t_VEC); av = avma;
   /* enough room to store <= 15 primes and exponents (OK if n < 2^64) */
   (void)new_chunk((15 + 1)*2);
+  u_forprime_init(&S, 3, utridiv_bound(n));
   P = cgetg(16, t_VECSMALL);
   E = cgetg(16, t_VECSMALL);
   if (v) { P[1] = 2; E[1] = v; i = 2; } else i = 1;
-  lim = utridiv_bound(n);
-  p = 2;
-  while (p <= 661)
-  {
-    int stop;
-    NEXT_PRIME_VIADIFF(p,d);
-    v = u_lvalrem_stop(&n, p, &stop);
-    if (v) {
-      P[i] = p;
-      E[i] = v; i++;
-    }
-    if (stop) {
-      if (n != 1) { P[i] = n; E[i] = 1; i++; }
-      goto END;
-    }
-  }
-  /* tiny integers without small factors are often primes */
   oldi = i;
-  if (uisprime_661(n)) { P[i] = n; E[i] = 1; i++; goto END; }
-  while (p < lim)
+  while ( (p = u_forprime_next_fast(&S)) )
   {
     int stop;
-    NEXT_PRIME_VIADIFF(p,d);
+    /* tiny integers without small factors are often primes */
+    if (p == 673)
+    {
+      oldi = i;
+      if (uisprime_661(n)) { P[i] = n; E[i] = 1; i++; goto END; }
+    }
     v = u_lvalrem_stop(&n, p, &stop);
     if (v) {
       P[i] = p;
@@ -3424,7 +3423,7 @@ factoru(ulong n)
       goto END;
     }
   }
-  if (i != oldi && uisprime_661(n)) { P[i] = n; E[i] = 1; i++; }
+  if (oldi != i && uisprime_661(n)) { P[i] = n; E[i] = 1; i++; }
   else
   {
     GEN perm;
@@ -3451,9 +3450,10 @@ chk_arith(GEN n, const char *f) {
 long
 moebiusu(ulong n)
 {
-  byteptr d = diffptr+1;
-  ulong p, lim;
+  pari_sp av;
+  ulong p;
   long s, v, test_prime;
+  forprime_t S;
 
   switch(n)
   {
@@ -3470,38 +3470,30 @@ moebiusu(ulong n)
     n >>= 1;
     s = -1;
   }
-  lim = utridiv_bound(n);
-  p = 2;
-  while (p <= 661)
-  {
-    int stop;
-    NEXT_PRIME_VIADIFF(p,d);
-    v = u_lvalrem_stop(&n, p, &stop);
-    if (v) {
-      if (v > 1) return 0;
-      s = -s;
-    }
-    if (stop) return n == 1? s: -s;
-  }
-  /* tiny integers without small factors are often primes */
+  av = avma;
+  u_forprime_init(&S, 3, utridiv_bound(n));
   test_prime = 0;
-  if (uisprime_661(n)) return -s;
-  while (p < lim)
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    NEXT_PRIME_VIADIFF(p,d);
+    /* tiny integers without small factors are often primes */
+    if (p == 673)
+    {
+      test_prime = 0;
+      if (uisprime_661(n)) { avma = av; return -s; }
+    }
     v = u_lvalrem_stop(&n, p, &stop);
     if (v) {
-      if (v > 1) return 0;
+      if (v > 1) { avma = av; return 0; }
       test_prime = 1;
       s = -s;
     }
-    if (stop) return n == 1? s: -s;
+    if (stop) { avma = av; return n == 1? s: -s; }
   }
+  avma = av;
   if (test_prime && uisprime_661(n)) return -s;
   else
   {
-    pari_sp av = avma;
     long t = ifac_moebiusu(utoipos(n));
     avma = av;
     if (t == 0) return 0;
@@ -3512,10 +3504,10 @@ moebiusu(ulong n)
 long
 moebius(GEN n)
 {
-  byteptr d = diffptr+1; /* point at 3 - 2 */
   pari_sp av = avma;
-  ulong p, lim;
+  ulong p;
   long i, l, s, v;
+  forprime_t S;
 
   chk_arith(n,"moebius");
   if (lgefint(n) == 3) return moebiusu(n[2]);
@@ -3523,13 +3515,10 @@ moebius(GEN n)
   if (p == 2) { s = -1; n = shifti(n, -1); } else { s = 1; n = icopy(n); }
   setabssign(n);
 
-  lim = tridiv_bound(n);
-  p = 2;
-  while (p < lim)
+  u_forprime_init(&S, 3, tridiv_bound(n));
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v > 1) { avma = av; return 0; }
     if (v) s = -s;
@@ -3555,23 +3544,20 @@ moebius(GEN n)
 long
 ispowerful(GEN n)
 {
-  byteptr d = diffptr+1; /* point at 3 - 2 */
   pari_sp av = avma;
-  ulong p, lim;
+  ulong p;
   long i, l, v;
+  forprime_t S;
 
   if (typ(n) != t_INT) pari_err_TYPE("ispowerful",n);
   if (!signe(n) || is_pm1(n)) return 1;
 
   if (mod4(n) == 2) return 0;
   n = shifti(n, -vali(n)); setabssign(n);
-  lim = tridiv_bound(n);
-  p = 2;
-  while (p < lim)
+  u_forprime_init(&S, 3, tridiv_bound(n));
+  while ((p = u_forprime_next(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v)
     {
@@ -3617,11 +3603,11 @@ coreu(ulong n)
 GEN
 core(GEN n)
 {
-  byteptr d = diffptr;
   pari_sp av = avma;
   GEN m;
-  ulong p, lim;
+  ulong p;
   long i, l, v;
+  forprime_t S;
 
   if (typ(n) != t_INT) pari_err_TYPE("core",n);
   switch(lgefint(n))
@@ -3634,13 +3620,10 @@ core(GEN n)
 
   m = signe(n) < 0? gen_m1: gen_1;
   n = absi(n);
-  lim = tridiv_bound(n);
-  p = 0;
-  while (p < lim)
+  u_forprime_init(&S, 2, tridiv_bound(n));
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v)
     {
@@ -3709,24 +3692,20 @@ issquarefree(GEN x)
 long
 omega(GEN n)
 {
-  byteptr d = diffptr+1;
   pari_sp av = avma;
   long i, l, nb, v;
-  ulong p, lim;
+  ulong p;
+  forprime_t S;
 
   chk_arith(n,"omega"); if (is_pm1(n)) return 0;
   v = vali(n); nb = v ? 1 : 0;
   n = shifti(n, -v);
   if (is_pm1(n)) return nb;
   setabssign(n);
-
-  lim = tridiv_bound(n);
-  p = 2;
-  while (p < lim)
+  u_forprime_init(&S, 3, tridiv_bound(n));
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) nb++;
     if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
@@ -3750,23 +3729,20 @@ omega(GEN n)
 long
 bigomega(GEN n)
 {
-  byteptr d=diffptr+1;
   pari_sp av = avma;
-  ulong p, lim;
+  ulong p;
   long i, l, nb, v;
+  forprime_t S;
 
   chk_arith(n,"bigomega"); if (is_pm1(n)) return 0;
   nb = v = vali(n); n = shifti(n, -v);
   if (is_pm1(n)) { avma = av; return nb; }
   setabssign(n);
 
-  lim = tridiv_bound(n);
-  p = 2;
-  while (p < lim)
+  u_forprime_init(&S, 3, tridiv_bound(n));
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     nb += v;
     if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
@@ -3817,11 +3793,11 @@ eulerphiu(ulong n)
 GEN
 eulerphi(GEN n)
 {
-  byteptr d = diffptr+1;
   pari_sp av = avma;
   GEN m;
-  ulong p, lim;
+  ulong p;
   long i, l, v;
+  forprime_t T;
 
   chk_arith(n,"eulerphi");
   if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
@@ -3829,13 +3805,10 @@ eulerphi(GEN n)
   m = v > 1 ? int2n(v-1) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim = tridiv_bound(n);
-  p = 2;
-  while (p < lim)
+  u_forprime_init(&T, 3, tridiv_bound(n));
+  while ( (p = u_forprime_next_fast(&T)) )
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) {
       m = muliu(m, p-1);
@@ -3866,24 +3839,21 @@ eulerphi(GEN n)
 GEN
 numdiv(GEN n)
 {
-  byteptr d = diffptr+1;
   pari_sp av = avma;
   GEN m;
   long i, l, v;
-  ulong p, lim;
+  ulong p;
+  forprime_t S;
 
   chk_arith(n,"numdiv"); if (is_pm1(n)) return gen_1;
   v = vali(n); n = shifti(n,-v); setabssign(n);
   m = utoipos(v+1);
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim = tridiv_bound(n);
-  p = 2;
-  while (p < lim)
+  u_forprime_init(&S, 3, tridiv_bound(n));
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) m = muliu(m, v+1);
     if (stop)
@@ -3911,24 +3881,22 @@ numdiv(GEN n)
 GEN
 sumdiv(GEN n)
 {
-  byteptr d = diffptr+1;
   pari_sp av = avma, av2, limit;
   GEN m;
-  ulong p, lim;
+  ulong p;
   long i, l, v;
+  forprime_t S;
 
   chk_arith(n,"sumdiv"); if (is_pm1(n)) return gen_1;
   v = vali(n); n = shifti(n,-v); setabssign(n);
   m = v ? addsi(-1, int2n(v+1)) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim = tridiv_bound(n);
-  p = 2; av2 = avma; limit = stack_lim(av2,3);
-  while (p < lim)
+  u_forprime_init(&S, 3, tridiv_bound(n));
+  av2 = avma; limit = stack_lim(av2,3);
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) m = u_euler_sumdiv(m, p, v);
     if (low_stack(limit, stack_lim(av2,3)))
@@ -3962,11 +3930,11 @@ end:
 GEN
 sumdivk(GEN n, long k)
 {
-  byteptr d = diffptr+1;
   pari_sp av = avma, av2, limit;
   GEN n1, m;
-  ulong p, lim;
+  ulong p;
   long i, l, k1, v;
+  forprime_t S;
 
   if (!k) return numdiv(n);
   if (k == 1) return sumdiv(n);
@@ -3979,13 +3947,11 @@ sumdivk(GEN n, long k)
   while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;
 
-  lim = tridiv_bound(n);
-  p = 2; av2 = avma; limit = stack_lim(av2,3);
-  while (p < lim)
+  u_forprime_init(&S, 3, tridiv_bound(n));
+  av2 = avma; limit = stack_lim(av2,3);
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) m = u_euler_sumdivk(m, p, v, k);
     if (low_stack(limit, stack_lim(av2,3)))
@@ -4022,19 +3988,17 @@ Z_issmooth(GEN m, ulong lim)
 {
   pari_sp av=avma;
   ulong p = 2;
-  byteptr d = diffptr+1;
+  forprime_t S;
   m = icopy(m);
-  for(;;)
+  u_forprime_init(&S, 2, lim);
+  while ((p = u_forprime_next_fast(&S)))
   {
-    if (!*d) break;
     if (!umodiu(m,p))
     {
       int stop;
       Z_lvalrem_stop(m, p, &stop);
       if (stop) { avma = av; return cmpiu(m,lim)<=0; }
     }
-    NEXT_PRIME_VIADIFF(p,d);
-    if (p > lim) break;
   }
   avma = av; return 0;
 }
