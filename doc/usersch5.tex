@@ -4522,7 +4522,13 @@ its factorization.
 
 \fun{GEN}{FlxX_sub}{GEN P, GEN Q, ulong p}
 
-\fun{GEN}{FlxY_Flx_mul}{GEN x, GEN y, ulong p}
+\fun{GEN}{FlxX_Fl_mul}{GEN x, ulong y, ulong p}
+
+\fun{GEN}{FlxX_neg}{GEN x, ulong p}
+
+\fun{GEN}{FlxX_Flx_add}{GEN y, GEN x, ulong p}
+
+\fun{GEN}{FlxX_Flx_mul}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{FlxY_Flx_div}{GEN x, GEN y, ulong p} divides the coefficients of $x$
 by $y$ using \kbd{Flx\_div}.

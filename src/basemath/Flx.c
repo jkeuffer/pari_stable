@@ -3021,6 +3021,40 @@ FlxX_add(GEN x, GEN y, ulong p)
   return FlxX_renormalize(z, lz);
 }
 
+GEN
+FlxX_Flx_add(GEN y, GEN x, ulong p)
+{
+  long i, lz = lg(y);
+  GEN z;
+  if (signe(y) == 0) return scalarpol(x, varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = Flx_add(gel(y,2), x, p);
+  if (lz == 3) z = FlxX_renormalize(z,lz);
+  else
+    for(i=3;i<lz;i++) gel(z,i) = Flx_copy(gel(y,i));
+  return z;
+}
+
+GEN
+FlxX_neg(GEN x, ulong p)
+{
+  long i, lx=lg(x);
+  GEN z = cgetg(lx, t_POL);
+  z[1]=x[1];
+  for (i=2; i<lx; i++) gel(z,i) = Flx_neg(gel(x,i), p);
+  return z;
+}
+
+GEN
+FlxX_Fl_mul(GEN x, ulong y, ulong p)
+{
+  long i, lx=lg(x);
+  GEN z = cgetg(lx, t_POL);
+  z[1]=x[1];
+  for (i=2; i<lx; i++) gel(z,i) = Flx_Fl_mul(gel(x,i), y, p);
+  return FlxX_renormalize(z, lx);
+}
+
 static GEN
 FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
@@ -3068,7 +3102,7 @@ FlxX_sub(GEN x, GEN y, ulong p)
 }
 
 GEN
-FlxY_Flx_mul(GEN P, GEN U, ulong p)
+FlxX_Flx_mul(GEN P, GEN U, ulong p)
 {
   long i, lP = lg(P);
   GEN res = cgetg(lP,t_POL);
@@ -3623,7 +3657,7 @@ _FlxqXQ_add(void *data, GEN x, GEN y) {
 static GEN
 _FlxqXQ_cmul(void *data, GEN P, long a, GEN x) {
   FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
-  return FlxY_Flx_mul(x,gel(P,a+2), d->p);
+  return FlxX_Flx_mul(x,gel(P,a+2), d->p);
 }
 static GEN
 _FlxqXQ_red(void *data, GEN x) {

@@ -379,6 +379,7 @@ BA 118- PARI functions FlxqV_dotproduct, FlxV_red
 BA 119- PARI functions ZpXQ_inv, ZpXQ_invlift, ZpXQ_log
    120- PARI functions absi_shallow, mpabs_shallow, absfrac_shallow,
         Q_abs_shallow
+BA 121- PARI functions FlxX_Flx_add, FlxX_Fl_mul, FlxX_Flx_mul, FlxX_neg
 
   Removed
     1- dropped DOS support
