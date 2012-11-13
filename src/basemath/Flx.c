@@ -3629,6 +3629,11 @@ FlxqXQ_inv(GEN x, GEN S, GEN T,ulong p)
   return gerepileupto(av, U);
 }
 
+GEN
+FlxqXQ_div(GEN x, GEN y, GEN S, GEN T, ulong p) {
+  return FlxqXQ_mul(x, FlxqXQ_inv(y,S,T,p),S,T,p);
+}
+
 static GEN
 FlxqXQ_mul_mg(GEN x,GEN y,GEN mg, GEN S, GEN T,ulong p)
 {
