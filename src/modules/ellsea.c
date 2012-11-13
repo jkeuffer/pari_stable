@@ -45,6 +45,9 @@ pari_close_seadata(void) { if (modular_eqn) gunclone(modular_eqn); }
 static int
 FqX_equal(GEN x, GEN y) { return gequal(x,y); }
 
+static int
+FlxX_equal(GEN x, GEN y) { return gequal(x,y); }
+
 static char *
 seadata_filename(ulong ell)
 { return pari_sprintf("%s/seadata/sea%ld", pari_datadir, ell); }
@@ -219,14 +222,9 @@ Fq_ellj(GEN a4, GEN a6, GEN T, GEN p)
 
 struct eigen_ellinit
 {
-  GEN a4;
-  GEN h;
-  GEN T;
-  GEN p;
-  GEN RHS;
-  GEN DRHS;
-  GEN X12;
-  GEN Gr;
+  GEN a4, h, T, p;
+  GEN RHS, DRHS, X12, Gr, nGr,O;
+  ulong pp;
 };
 
 static void
@@ -241,17 +239,49 @@ init_eigen(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN T, GEN p)
   GEN X12 = mkvec2(C, FqX_Fq_add(D, gen_m1, T, p));
   GEN q = T ? powiu(p, degpol(T)) : p;
   GEN Gr = FqXQ_pow(RHS, shifti(q, -1), h, T, p);
-  gerepileall(ltop, 4, &RHS, &DRHS, &X12, &Gr);
+  GEN nGr = FqX_neg(Gr, T, p);
+  gerepileall(ltop, 5, &RHS, &DRHS, &X12, &Gr, &nGr);
   Edat->a4    = gcopy(a4);
   Edat->h     = gcopy(h);
   Edat->T     = T;
   Edat->p     = p;
+  Edat->pp    = 0;
   Edat->RHS   = RHS;
   Edat->DRHS  = DRHS;
   Edat->X12   = X12;
   Edat->Gr    = Gr;
+  Edat->nGr   = nGr;
+  Edat->O     = mkvec2(pol_x(0), pol_1(0));
 }
 
+static void
+init_eigenu(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN T, ulong p)
+{
+  pari_sp ltop = avma;
+  GEN g1 = pol1_Flx(T[1]), g0 = pol0_Flx(T[1]);
+  GEN RHS  = FlxqX_rem(mkpoln(4, g1, g0, a4, a6), h, T, p);
+  GEN DRHS = FlxqX_rem(mkpoln(3, Fl_to_Flx(3, T[1]), g0, a4), h, T, p);
+  GEN lambda = FlxqXQ_div(DRHS, FlxX_Fl_mul(RHS, 4, p), h, T, p);
+  GEN C = FlxX_sub(FlxqXQ_mul(lambda, DRHS, h, T, p), monomial(Fl_to_Flx(2,T[1]),1,0), p);
+  GEN D = FlxqXQ_mul(FlxX_Fl_mul(lambda, 2, p),FlxX_sub(pol_x(0), C, p), h, T, p);
+  GEN X12 = mkvec2(C, FlxX_Flx_add(D, Fl_to_Flx(p-1,T[1]), p));
+  GEN q = powuu(p, degpol(T));
+  GEN Gr = FlxqXQ_pow(RHS, shifti(q, -1), h, T, p);
+  GEN nGr = FlxX_neg(Gr, p);
+  GEN O = mkvec2(monomial(g1,1,0), monomial(g1,0,0));
+  gerepileall(ltop, 6, &RHS, &DRHS, &X12, &Gr, &nGr, &O);
+  Edat->a4    = gcopy(a4);
+  Edat->h     = gcopy(h);
+  Edat->T     = T;
+  Edat->p     = NULL;
+  Edat->pp    = p;
+  Edat->RHS   = RHS;
+  Edat->DRHS  = DRHS;
+  Edat->X12   = X12;
+  Edat->Gr    = Gr;
+  Edat->nGr   = nGr;
+  Edat->O     = O;
+}
 static GEN
 eigen_elldbl(void *E, GEN P)
 {
@@ -295,11 +325,64 @@ eigen_elladd(void *E, GEN P, GEN Q)
     if (FqX_equal(Py, Qy))
       return eigen_elldbl(E, P);
     else
-      return mkvec(gen_0);
+      return ellinf();
   }
   lambda = FqXQ_div(FqX_sub(Py, Qy, T, p), FqX_sub(Px, Qx, T, p), h, T, p);
   C = FqX_sub(FqX_sub(FqXQ_mul(FqXQ_sqr(lambda, h, T, p), Edat->RHS, h, T, p), Px, T, p), Qx, T, p);
   D = FqX_sub(FqXQ_mul(lambda, FqX_sub(Px, C, T, p), h, T, p), Py, T, p);
+  return gerepilecopy(ltop, mkvec2(C,D));
+}
+
+static GEN
+eigenu_elldbl(void *E, GEN P)
+{
+  pari_sp ltop = avma;
+  struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
+  GEN T = Edat->T, h = Edat->h, x, y;
+  ulong p = Edat->pp;
+  if (ell_is_inf(P)) return gcopy(P);
+  x = gel(P,1), y = gel(P,2);
+  if (FlxX_equal(x, monomial(pol1_Flx(T[1]),1,0)) && FlxX_equal(y, monomial(pol1_Flx(T[1]),0,0)))
+    return Edat->X12;
+  else
+  {
+    GEN t1 = FlxX_Flx_add(FlxX_Fl_mul(FlxqXQ_sqr(x,h,T,p),3,p), Edat->a4, p);
+    GEN t2 = FlxqXQ_mul(FlxX_Fl_mul(y, 2, p), Edat->RHS, h, T, p);
+    GEN lambda = FlxqXQ_div(t1, t2, h, T, p);
+    GEN C = FlxX_sub(FlxqXQ_mul(FlxqXQ_sqr(lambda, h, T, p), Edat->RHS, h, T, p),
+                    FlxX_Fl_mul(x, 2, p), p);
+    GEN D = FlxX_sub(FlxqXQ_mul(lambda, FlxX_sub(x, C, p), h, T, p), y, p);
+    return gerepilecopy(ltop, mkvec2(C,D));
+  }
+}
+
+/* Returns the addition of [P[1], P[2]*Y] and of [Q[1], Q[2]*Y]
+ * Computations are done modulo Y^2 - (X^3 + a4X + a6)
+ * An inversion is equivalent to 4M, so that this function requires about 7M
+ * which is the same as with the method using ell-division polynomials
+ * Working in mixed projective coordinates would require 11M */
+static GEN
+eigenu_elladd(void *E, GEN P, GEN Q)
+{
+  pari_sp ltop = avma;
+  struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
+  GEN Px, Py, Qx, Qy;
+  GEN T = Edat->T, h = Edat->h, lambda, C, D;
+  ulong p = Edat->pp;
+  if (ell_is_inf(P)) return gcopy(Q);
+  if (ell_is_inf(Q)) return gcopy(P);
+  Px = gel(P,1); Py = gel(P,2);
+  Qx = gel(Q,1); Qy = gel(Q,2);
+  if (FlxX_equal(Px, Qx))
+  {
+    if (FlxX_equal(Py, Qy))
+      return eigenu_elldbl(E, P);
+    else
+      return ellinf();
+  }
+  lambda = FlxqXQ_div(FlxX_sub(Py, Qy, p), FlxX_sub(Px, Qx, p), h, T, p);
+  C = FlxX_sub(FlxX_sub(FlxqXQ_mul(FlxqXQ_sqr(lambda, h, T, p), Edat->RHS, h, T, p), Px, p), Qx, p);
+  D = FlxX_sub(FlxqXQ_mul(lambda, FlxX_sub(Px, C, p), h, T, p), Py, p);
   return gerepilecopy(ltop, mkvec2(C,D));
 }
 
@@ -309,7 +392,10 @@ eigen_ellmulu(struct eigen_ellinit *E, GEN z, ulong n)
   pari_sp av = avma;
   if (!n || ell_is_inf(z)) return mkvec(gen_0);
   if (n == 1) return gcopy(z);
-  return gerepileupto(av, gen_powu(z, n, E, &eigen_elldbl, &eigen_elladd));
+  if (E->pp)
+    return gerepileupto(av, gen_powu(z, n, E, &eigenu_elldbl, &eigenu_elladd));
+  else
+    return gerepileupto(av, gen_powu(z, n, E, &eigen_elldbl, &eigen_elladd));
 }
 
 /*Finds the eigenvalue of the Frobenius given E, ell odd prime, h factor of the
@@ -319,12 +405,16 @@ static ulong
 find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN T, GEN p, GEN tr)
 {
   pari_sp ltop = avma;
-  GEN BP, Dr, nGr;
+  GEN BP, Dr;
   ulong t;
   struct eigen_ellinit Edat;
-  init_eigen(&Edat, a4, a6, h, T, p);
-  nGr = FqX_neg(Edat.Gr, T, p);
-  Dr = BP = mkvec2(pol_x(0), pol_1(0));
+  ulong pp = T ?itou_or_0(p): 0;
+  if (pp)
+    init_eigenu(&Edat, ZX_to_Flx(a4,pp), ZX_to_Flx(a6,pp),
+                       ZXX_to_FlxX(h,pp,varn(T)), ZX_to_Flx(T,pp), pp);
+  else
+    init_eigen(&Edat, a4, a6, h, T, p);
+  Dr = BP = Edat.O;
   /*[0,Gr], BP, Dr are not points on the curve. */
   /*To obtain the corresponding points, multiply the y-coordinates by Y */
   if (!tr || lg(tr)==1)
@@ -332,11 +422,12 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN T, GEN p, GEN tr)
     pari_sp btop = avma;
     for (t = 1; t <= (ell>>1); t++)
     {
-      if (FqX_equal(gel(Dr,2), Edat.Gr)) { avma = ltop; return t; }
-      if (FqX_equal(gel(Dr,2), nGr))     { avma = ltop; return ell-t; }
-      Dr = gerepileupto(btop, eigen_elladd((void*)&Edat, Dr, BP));
+      if (gequal(gel(Dr,2), Edat.Gr))  { avma = ltop; return t; }
+      if (gequal(gel(Dr,2), Edat.nGr)) { avma = ltop; return ell-t; }
+      Dr = pp ? eigenu_elladd(&Edat, Dr, BP): eigen_elladd(&Edat, Dr, BP);
+      Dr = gerepileupto(btop, Dr);
     }
-    pari_err_BUG("find_eigen_value_power");
+    pari_err_BUG("find_eigen_value");
     return 0; /* NOT REACHED */
   }
   else
@@ -344,7 +435,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN T, GEN p, GEN tr)
     t = Fl_div(tr[1], 2, ell);
     if (t < (ell>>1)) t = ell - t;
     Dr = eigen_ellmulu(&Edat, BP, t);
-    if (!FqX_equal(gel(Dr,2), Edat.Gr)) t = ell - t;
+    if (!gequal(gel(Dr,2), Edat.Gr)) t = ell - t;
     avma = ltop; return t;
   }
 }
@@ -357,24 +448,28 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
   pari_sp ltop = avma;
   pari_sp btop, st_lim;
   struct eigen_ellinit Edat;
-  GEN P, BP, Dr, Gr, negGr;
+  GEN BP, Dr, Gr, nGr;
   /*[0,Gr], BP, Dr are not points on the curve. */
   /*To obtain the corresponding points, multiply the y-coordinates by Y */
   ulong t, ellk1 = upowuu(ell, k-1), ellk = ell*ellk1;
-  init_eigen(&Edat, a4, a6, h, T, p);
-  P = mkvec2(pol_x(0), pol_1(0));
-  BP = eigen_ellmulu(&Edat, P, ellk1);
-  Dr = eigen_ellmulu(&Edat, P, lambda);
-  Gr = Edat.Gr;
-  negGr = FqX_neg(Edat.Gr, T, p);
+  ulong pp = T ?itou_or_0(p): 0;
+  if (pp)
+    init_eigenu(&Edat, ZX_to_Flx(a4,pp), ZX_to_Flx(a6,pp),
+        ZXX_to_FlxX(h,pp,varn(T)), ZX_to_Flx(T,pp), pp);
+  else
+    init_eigen(&Edat, a4, a6, h, T, p);
+  BP = eigen_ellmulu(&Edat, Edat.O, ellk1);
+  Dr = eigen_ellmulu(&Edat, Edat.O, lambda);
+  Gr = Edat.Gr; nGr = Edat.nGr;
 
   btop = avma; st_lim = stack_lim(btop, 1);
   for (t = 0; t < ellk; t += ellk1)
   {
-    if (FqX_equal(gel(Dr,2), Gr)) { avma = ltop; return t+lambda; }
-    if (FqX_equal(gel(Dr,2), negGr)) { avma = ltop; return ellk-(t+lambda); }
-    Dr = eigen_elladd((void*)&Edat, Dr, BP);
-    if (low_stack(st_lim, stack_lim(btop, 1))) Dr = gerepileupto(btop, Dr);
+    if (gequal(gel(Dr,2), Gr))  { avma = ltop; return t+lambda; }
+    if (gequal(gel(Dr,2), nGr)) { avma = ltop; return ellk-(t+lambda); }
+    Dr = pp ? eigenu_elladd(&Edat, Dr, BP): eigen_elladd(&Edat, Dr, BP);
+    if (low_stack(st_lim, stack_lim(btop, 1)))
+      Dr = gerepileupto(btop, Dr);
   }
   pari_err_BUG("find_eigen_value_power");
   return 0; /* NOT REACHED */
