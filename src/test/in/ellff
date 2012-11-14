@@ -60,3 +60,36 @@ check(a)=
     g = ffprimroot(ffgen(ffinit(3,a),'t));
     for(i=0,3^a-2, check(g^i)));
 }
+
+checkt(p,n,v,B=1000)=
+{
+  my(a=ffgen(ffinit(p,n),'a));
+  for(i=1,B,
+    my(E,N,b);
+    until(b,b=random(a));
+    E=ellffinit(if(f==0,[0,b],f==1,[b,0],[b^2,b^3]),a,2);
+    N=ellcard(E);
+    if(#ellmul(E,random(E),N)>1,error(i,":",b)));
+}
+checkt(7,5,0);
+checkt(7,6,0);
+checkt(11,5,0);
+checkt(11,6,0);
+checkt(7,5,1);
+checkt(7,6,1);
+checkt(13,5,1);
+checkt(13,6,1);
+checkt(11,6,2);
+checkt(13,5,2);
+checkt(18446744073709551667,2,0,10);
+checkt(18446744073709551667,3,0,10);
+checkt(18446744073709551667,2,1,10);
+checkt(18446744073709551667,3,1,10);
+checkt(18446744073709551667,2,2,10);
+checkt(18446744073709551667,3,2,10);
+checkt(18446744073709551629,2,0,10);
+checkt(18446744073709551629,3,0,10);
+checkt(18446744073709551629,2,1,10);
+checkt(18446744073709551629,3,1,10);
+checkt(18446744073709551629,2,2,10);
+checkt(18446744073709551629,3,2,10);

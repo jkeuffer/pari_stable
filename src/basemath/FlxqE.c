@@ -932,15 +932,97 @@ F3xq_ellcard(GEN a2, GEN a6, GEN T)
 }
 
 GEN
+Flxq_ellj(GEN a4, GEN a6, GEN T, ulong p)
+{
+  pari_sp av=avma;
+  GEN E4 = Flx_Fl_mul(a4, Fl_inv(Fl_neg(3, p), p), p);
+  GEN E6 = Flx_Fl_mul(a6, p>>1, p);
+  GEN E42 = Flxq_sqr(E4, T, p);
+  GEN E43 = Flxq_mul(E4, E42, T, p);
+  GEN E62 = Flx_sqr(E6, p);
+  GEN delta = Flx_Fl_mul(Flx_rem(Flx_sub(E43, E62, p), T, p), Fl_inv(1728UL%p, p), p);
+  return gerepileuptoleaf(av, Flxq_div(E43, delta, T, p));
+}
+
+static GEN
+Flxq_ellcardj(GEN a4, GEN a6, ulong j, GEN T, GEN q, ulong p, long n)
+{
+  GEN q1 = addis(q,1);
+  if (j==0)
+  {
+    ulong w;
+    GEN W, t, N;
+    if (umodiu(q,6)!=1) return q1;
+    N = Fp_ffellcard(gen_0,gen_1,q,n,utoi(p));
+    t = subii(q1, N);
+    W = Flxq_pow(a6,diviuexact(shifti(q,-1), 3),T,p);
+    if (degpol(W)>0) /*p=5 mod 6*/
+      return Flx_equal1(Flxq_powu(W,3,T,p)) ? addii(q1,shifti(t,-1)):
+                                              subii(q1,shifti(t,-1));
+    w = W[2];
+    if (w==1)   return N;
+    if (w==p-1) return addii(q1,t);
+    else /*p=1 mod 6*/
+    {
+      GEN u = shifti(t,-1), v = sqrtint(diviuexact(subii(q,sqri(u)),3));
+      GEN a = addii(u,v), b = shifti(v,1);
+      if (Fl_powu(w,3,p)==1)
+      {
+        if (Fl_add(umodiu(a,p),Fl_mul(w,umodiu(b,p),p),p)==0)
+          return subii(q1,subii(shifti(b,1),a));
+        else
+          return addii(q1,addii(a,b));
+      }
+      else
+      {
+        if (Fl_sub(umodiu(a,p),Fl_mul(w,umodiu(b,p),p),p)==0)
+          return subii(q1,subii(a,shifti(b,1)));
+        else
+          return subii(q1,addii(a,b));
+      }
+    }
+  } else if (j==1728%p)
+  {
+    ulong w;
+    GEN W, N, t;
+    if (mod4(q)==3) return q1;
+    W = Flxq_pow(a4,shifti(q,-2),T,p);
+    if (degpol(W)>0) return q1; /*p=3 mod 4*/
+    w = W[2];
+    N = Fp_ffellcard(gen_1,gen_0,q,n,utoi(p));
+    if(w==1) return N;
+    t = subii(q1, N);
+    if(w==p-1) return addii(q1, t);
+    else /*p=1 mod 4*/
+    {
+      GEN u = shifti(t,-1), v = sqrtint(subii(q,sqri(u)));
+      if (Fl_add(umodiu(u,p),Fl_mul(w,umodiu(v,p),p),p)==0)
+        return subii(q1,shifti(v,1));
+      else
+        return addii(q1,shifti(v,1));
+    }
+  } else
+  {
+    ulong g = Fl_div(j, Fl_sub(1728%p, j, p), p);
+    GEN l = Flxq_div(Flx_Fl_mul(a6,3,p),Flx_Fl_mul(a4,2,p),T,p);
+    GEN N = Fp_ffellcard(utoi(Fl_mul(g,3,p)),utoi(Fl_mul(g,2,p)),q,n,utoi(p));
+    if (Flxq_issquare(l,T,p)) return N;
+    return subii(shifti(q1,1),N);
+  }
+}
+
+GEN
 Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
   long n = degpol(T);
-  GEN r, q = powuu(p,  n);
+  GEN J, r, q = powuu(p,  n);
   if (typ(a4)==t_VEC)
     r = F3xq_ellcard(gel(a4,1), a6, T);
   else if (degpol(a4)<=0 && degpol(a6)<=0)
     r = Fp_ffellcard(utoi(Flx_eval(a4,0,p)),utoi(Flx_eval(a6,0,p)),q,n,utoi(p));
+  else if (degpol(J=Flxq_ellj(a4,a6,T,p))<=0)
+    r = Flxq_ellcardj(a4,a6,lgpol(J)?J[2]:0,T,q,p,n);
   else if (cmpis(q,100)<0)
     r = utoi(Flxq_ellcard_naive(a4, a6, T, p));
   else if (expi(q)<=62)

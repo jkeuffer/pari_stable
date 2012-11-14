@@ -1002,6 +1002,14 @@ Fp_ellj_nodiv(GEN a4, GEN a6, GEN p)
   return mkvec2(Fp_mulu(a43, 1728, p), Fp_add(a43, Fp_mulu(Fp_sqr(a6, p), 27, p), p));
 }
 
+GEN
+Fp_ellj(GEN a4, GEN a6, GEN p)
+{
+  pari_sp av=avma;
+  GEN z = Fp_ellj_nodiv(a4, a6, p);
+  return gerepileuptoint(av,Fp_div(gel(z,1),gel(z,2),p));
+}
+
 static GEN /* Only compute a mod p, so assume p>=17 */
 Fp_ellcard_CM(GEN a4, GEN a6, GEN p)
 {
@@ -1453,6 +1461,24 @@ FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
   return num? num: pol_1(varn(T));
 }
 
+/***********************************************************************/
+/**                                                                   **/
+/**                           Point counting                          **/
+/**                                                                   **/
+/***********************************************************************/
+
+GEN
+FpXQ_ellj(GEN a4, GEN a6, GEN T, GEN p)
+{
+  pari_sp av=avma;
+  GEN E4 = FpX_Fp_mul(a4, Fp_inv(stoi(-3), p), p);
+  GEN E6 = FpX_Fp_mul(a6, shifti(p,-1), p);
+  GEN E42 = FpXQ_sqr(E4, T, p);
+  GEN E43 = FpXQ_mul(E4, E42, T, p);
+  GEN E62 = FpX_sqr(E6, p);
+  GEN delta = FpX_Fp_mul(FpX_rem(FpX_sub(E43, E62, p), T, p), Fp_inv(modsi(1728,p), p), p);
+  return gerepileuptoleaf(av, FpXQ_div(E43, delta, T, p));
+}
 GEN
 elltrace_extension(GEN t, long n, GEN q)
 {
@@ -1467,8 +1493,73 @@ Fp_ffellcard(GEN a4, GEN a6, GEN q, long n, GEN p)
 {
   pari_sp av = avma;
   GEN ap = subii(addis(p, 1), Fp_ellcard(a4, a6, p));
-  GEN te = subii(addis(q, 1), elltrace_extension(ap, n, p));
-  return gerepileuptoint(av, te);
+  GEN te = elltrace_extension(ap, n, p);
+  return gerepileuptoint(av, subii(addis(q, 1), te));
+}
+
+static GEN
+FpXQ_ellcardj(GEN a4, GEN a6, GEN j, GEN T, GEN q, GEN p, long n)
+{
+  GEN q1 = addis(q,1);
+  if (signe(j)==0)
+  {
+    GEN W, w, t, N;
+    if (umodiu(q,6)!=1) return q1;
+    N = Fp_ffellcard(gen_0,gen_1,q,n,p);
+    t = subii(q1, N);
+    W = FpXQ_pow(a6,diviuexact(shifti(q,-1), 3),T,p);
+    if (degpol(W)>0) /*p=5 mod 6*/
+      return ZX_equal1(FpXQ_powu(W,3,T,p)) ? addii(q1,shifti(t,-1)):
+                                             subii(q1,shifti(t,-1));
+    w = gel(W,2);
+    if (equali1(w))  return N;
+    if (equalim1(w)) return addii(q1,t);
+    else /*p=1 mod 6*/
+    {
+      GEN u = shifti(t,-1), v = sqrtint(diviuexact(subii(q,sqri(u)),3));
+      GEN a = addii(u,v), b = shifti(v,1);
+      if (equali1(Fp_powu(w,3,p)))
+      {
+        if (signe(Fp_add(modii(a,p),Fp_mul(w,modii(b,p),p),p))==0)
+          return subii(q1,subii(shifti(b,1),a));
+        else
+          return addii(q1,addii(a,b));
+      }
+      else
+      {
+        if (signe(Fp_sub(modii(a,p),Fp_mul(w,modii(b,p),p),p))==0)
+          return subii(q1,subii(a,shifti(b,1)));
+        else
+          return subii(q1,addii(a,b));
+      }
+    }
+  } else if (equalii(j,modsi(1728,p)))
+  {
+    GEN w, W, N, t;
+    if (mod4(q)==3) return q1;
+    W = FpXQ_pow(a4,shifti(q,-2),T,p);
+    if (degpol(W)>0) return q1; /*p=3 mod 4*/
+    w = gel(W,2);
+    N = Fp_ffellcard(gen_1,gen_0,q,n,p);
+    if (equali1(w)) return N;
+    t = subii(q1, N);
+    if (equalim1(w)) return addii(q1, t);
+    else /*p=1 mod 4*/
+    {
+      GEN u = shifti(t,-1), v = sqrtint(subii(q,sqri(u)));
+      if (signe(Fp_add(modii(u,p),Fp_mul(w,modii(v,p),p),p))==0)
+        return subii(q1,shifti(v,1));
+      else
+        return addii(q1,shifti(v,1));
+    }
+  } else
+  {
+    GEN g = Fp_div(j, Fp_sub(utoi(1728), j, p), p);
+    GEN l = FpXQ_div(FpX_mulu(a6,3,p),FpX_mulu(a4,2,p),T,p);
+    GEN N = Fp_ffellcard(Fp_mulu(g,3,p),Fp_mulu(g,2,p),q,n,p);
+    if (FpXQ_issquare(l,T,p)) return N;
+    return subii(shifti(q1,1),N);
+  }
 }
 
 GEN
@@ -1476,9 +1567,11 @@ FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
 {
   pari_sp av = avma;
   long n = degpol(T);
-  GEN q = powiu(p, n), r;
+  GEN q = powiu(p, n), r, J;
   if (degpol(a4)<=0 && degpol(a6)<=0)
     r = Fp_ffellcard(constant_term(a4),constant_term(a6),q,n,p);
+  else if (degpol(J=FpXQ_ellj(a4,a6,T,p))<=0)
+    r = FpXQ_ellcardj(a4,a6,constant_term(J),T,q,p,n);
   else if (lgefint(p)==3 && expi(q)<=62)
   {
     ulong pp = p[2];
