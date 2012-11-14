@@ -687,7 +687,7 @@ alloc_cache(void)
 }
 
 static Cache **
-calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
+calcglobs(Red *R, ulong t, long *plpC, long *pltab, GEN *pP)
 {
   GEN fat, P, E, PE;
   long lv, i, k, b;
@@ -704,7 +704,7 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   P = gel(fat,1);
   E = gel(fat,2);
   PE= gel(fat,3);
-  lv = vecsmall_max(PE); /* max(p^e, p^e | t) */
+  *plpC = lv = vecsmall_max(PE); /* max(p^e, p^e | t) */
   pC = (Cache**)stack_malloc((lv+1)*sizeof(Cache*));
   pC[1] = alloc_cache(); /* to be used as temp in step5() */
   for (i = 2; i <= lv; i++) pC[i] = NULL;
@@ -881,7 +881,7 @@ _res(long a, long b) { return b? mkvec2s(a, b): mkvecs(a); }
 
 /* return 1 [OK so far] or <= 0 [not a prime] */
 static GEN
-step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
+step5(Cache **pC, Red *R, long p, GEN et, ulong ltab, long lpC)
 {
   pari_sp av;
   ulong q;
@@ -896,7 +896,7 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
     if (umodiu(R->N,q) == 0) return _res(1,p);
     k = u_lval(q-1, p);
     pk = upowuu(p,k);
-    if (pk < lg(pC) && pC[pk]) {
+    if (pk <= lpC && pC[pk]) {
       C = pC[pk];
       Cp = pC[p];
     } else {
@@ -942,7 +942,7 @@ static GEN
 aprcl(GEN N)
 {
   GEN et, fat, flaglp, faet;
-  long i, j, l, ltab, lfat;
+  long i, j, l, ltab, lfat, lpC;
   ulong t;
   Red R;
   Cache **pC;
@@ -962,7 +962,7 @@ aprcl(GEN N)
 
   R.N = N;
   R.N2= shifti(N, -1);
-  pC = calcglobs(&R, t, &ltab, &fat);
+  pC = calcglobs(&R, t, &lpC, &ltab, &fat);
   if (!pC) return _res(1,0);
   lfat = lg(fat);
   flaglp = cgetg(lfat, t_VECSMALL);
@@ -1006,7 +1006,7 @@ aprcl(GEN N)
     pari_sp av = avma;
     long p = fat[i];
     GEN r;
-    if (flaglp[i] && (r = step5(pC, &R, p, et, ltab))) return r;
+    if (flaglp[i] && (r = step5(pC, &R, p, et, ltab, lpC))) return r;
     avma = av;
   }
   if (DEBUGLEVEL>2)
