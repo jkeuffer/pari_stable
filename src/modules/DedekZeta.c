@@ -118,7 +118,8 @@ zeta_get_N0(GEN C,  GEN limx)
   long e;
   pari_sp av = avma;
   GEN z = gcvtoi(gdiv(C, limx), &e); /* avoid truncation error */
-  if (e >= 0 || is_bigint(z)) pari_err_OVERFLOW("zeta_get_N0");
+  if (e >= 0 || is_bigint(z))
+    pari_err_OVERFLOW("zeta_get_N0 [need too many primes]");
   if (DEBUGLEVEL>1) err_printf("\ninitzeta: N0 = %Ps\n", z);
   avma = av; return itos(z);
 }

@@ -48,3 +48,9 @@ Doc: let \var{bnr} be the number field data output by \kbd{bnrinit(,,1)} and
  the set of infinite places of $K$ together with the finite prime $2$. Note
  that the ray class group modulo $2$ is in fact the class group, so
  \kbd{bnrL1(bnr2,0)} returns the same answer as \kbd{bnrL1(bnr,0)}.
+
+ This function will fail with the message
+ \bprog
+  *** bnrL1: overflow in zeta_get_N0 [need too many primes].
+ @eprog\noindent if the approximate functional equation requires us to sum
+ too many terms (if the discriminant of $K$ is too large).
