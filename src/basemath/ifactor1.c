@@ -3553,8 +3553,9 @@ ispowerful(GEN n)
   if (!signe(n)) return 1;
 
   if (mod4(n) == 2) return 0;
-  n = shifti(n, -vali(n)); setabssign(n);
+  n = shifti(n, -vali(n));
   if (is_pm1(n)) return 1;
+  setabssign(n);
   u_forprime_init(&S, 3, tridiv_bound(n));
   while ((p = u_forprime_next_fast(&S)))
   {
