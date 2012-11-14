@@ -3556,7 +3556,7 @@ ispowerful(GEN n)
   n = shifti(n, -vali(n)); setabssign(n);
   if (is_pm1(n)) return 1;
   u_forprime_init(&S, 3, tridiv_bound(n));
-  while ((p = u_forprime_next(&S)))
+  while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
     v = Z_lvalrem_stop(n, p, &stop);
