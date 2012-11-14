@@ -53,3 +53,4 @@ for (k = 1, #v,
 }
 
 isprimepower(541^121)
+ispowerful(4)

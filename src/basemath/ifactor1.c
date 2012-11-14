@@ -3550,10 +3550,11 @@ ispowerful(GEN n)
   forprime_t S;
 
   if (typ(n) != t_INT) pari_err_TYPE("ispowerful",n);
-  if (!signe(n) || is_pm1(n)) return 1;
+  if (!signe(n)) return 1;
 
   if (mod4(n) == 2) return 0;
   n = shifti(n, -vali(n)); setabssign(n);
+  if (is_pm1(n)) return 1;
   u_forprime_init(&S, 3, tridiv_bound(n));
   while ((p = u_forprime_next(&S)))
   {
