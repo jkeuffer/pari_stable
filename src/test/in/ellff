@@ -40,6 +40,7 @@ E.disc
 P=random(E);Q=random(E);
 R=elladd(E,P,Q);
 elladd(E,ellsub(E,R,P),ellneg(E,Q))
+N=ellcard(E);ellpow(E,P,N)
 
 check(a)=
 {

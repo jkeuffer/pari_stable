@@ -1467,7 +1467,7 @@ Fp_ffellcard(GEN a4, GEN a6, GEN q, long n, GEN p)
 {
   pari_sp av = avma;
   GEN ap = subii(addis(p, 1), Fp_ellcard(a4, a6, p));
-  GEN te = subii(addis(q, 1), elltrace_extension(ap, n, q));
+  GEN te = subii(addis(q, 1), elltrace_extension(ap, n, p));
   return gerepileuptoint(av, te);
 }
 
