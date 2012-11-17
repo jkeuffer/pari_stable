@@ -2613,8 +2613,9 @@ listput(GEN L, GEN x, long index)
     l++;
   } else
     gunclone_deep( gel(z, index) );
-  z[0] = evaltyp(t_VEC) | evallg(l);
-  return gel(z,index) = gclone(x);
+  gel(z,index) = gclone(x);
+  z[0] = evaltyp(t_VEC) | evallg(l); /*must be after gel(z,index) is set*/
+  return gel(z,index);
 }
 
 GEN

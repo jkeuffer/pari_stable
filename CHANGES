@@ -117,6 +117,7 @@ BA 96- idealramgroups() and idealfrobenius() did not accept a bnf
    97- using new operators with default(compatible,3) caused a crash
    98- rare corruption in ECM [#1240] factorint(,1) => SEGV
    99- add missing call to normalize() in lift(t_POL/t_SER) [#1359]
+BA 100- listput was not SIGINT safe
 
   Changed
     1- mathnf: swapped flag 3 and 5.
