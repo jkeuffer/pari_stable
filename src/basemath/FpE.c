@@ -1470,15 +1470,21 @@ FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 GEN
 FpXQ_ellj(GEN a4, GEN a6, GEN T, GEN p)
 {
-  pari_sp av=avma;
-  GEN E4 = FpX_Fp_mul(a4, Fp_inv(stoi(-3), p), p);
-  GEN E6 = FpX_Fp_mul(a6, shifti(p,-1), p);
-  GEN E42 = FpXQ_sqr(E4, T, p);
-  GEN E43 = FpXQ_mul(E4, E42, T, p);
-  GEN E62 = FpX_sqr(E6, p);
-  GEN delta = FpX_Fp_mul(FpX_rem(FpX_sub(E43, E62, p), T, p), Fp_inv(modsi(1728,p), p), p);
-  return gerepileuptoleaf(av, FpXQ_div(E43, delta, T, p));
+  if (equaliu(p,3)) return pol_0(varn(T));
+  else
+  {
+    pari_sp av=avma;
+    GEN E4 = FpX_Fp_mul(a4, Fp_inv(stoi(-3), p), p);
+    GEN E6 = FpX_Fp_mul(a6, shifti(p,-1), p);
+    GEN E42 = FpXQ_sqr(E4, T, p);
+    GEN E43 = FpXQ_mul(E4, E42, T, p);
+    GEN E62 = FpX_sqr(E6, p);
+    GEN delta = FpX_Fp_mul(FpX_rem(FpX_sub(E43, E62, p), T, p),
+                            Fp_inv(modsi(1728,p), p), p);
+    return gerepileuptoleaf(av, FpXQ_div(E43, delta, T, p));
+  }
 }
+
 GEN
 elltrace_extension(GEN t, long n, GEN q)
 {
@@ -1570,13 +1576,13 @@ FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
   GEN q = powiu(p, n), r, J;
   if (degpol(a4)<=0 && degpol(a6)<=0)
     r = Fp_ffellcard(constant_term(a4),constant_term(a6),q,n,p);
-  else if (degpol(J=FpXQ_ellj(a4,a6,T,p))<=0)
-    r = FpXQ_ellcardj(a4,a6,constant_term(J),T,q,p,n);
-  else if (lgefint(p)==3 && expi(q)<=62)
+  else if (lgefint(p)==3)
   {
     ulong pp = p[2];
     r =  Flxq_ellcard(ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZX_to_Flx(T,pp),pp);
   }
+  else if (degpol(J=FpXQ_ellj(a4,a6,T,p))<=0)
+    r = FpXQ_ellcardj(a4,a6,constant_term(J),T,q,p,n);
   else
   {
     r = Fq_ellcard_SEA(a4, a6, q, T, p, 0);
