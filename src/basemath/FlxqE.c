@@ -935,20 +935,30 @@ GEN
 Flxq_ellj(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av=avma;
-  GEN E4 = Flx_Fl_mul(a4, Fl_inv(Fl_neg(3, p), p), p);
-  GEN E6 = Flx_Fl_mul(a6, p>>1, p);
-  GEN E42 = Flxq_sqr(E4, T, p);
-  GEN E43 = Flxq_mul(E4, E42, T, p);
-  GEN E62 = Flx_sqr(E6, p);
-  GEN delta = Flx_Fl_mul(Flx_rem(Flx_sub(E43, E62, p), T, p), Fl_inv(1728UL%p, p), p);
-  return gerepileuptoleaf(av, Flxq_div(E43, delta, T, p));
+  if (p==3)
+  {
+    GEN J;
+    if (typ(a4)!=t_VEC) return pol0_Flx(T[1]);
+    J = Flxq_div(Flxq_powu(gel(a4,1),3, T, p),Flx_neg(a6,p), T, p);
+    return gerepileuptoleaf(av, J);
+  }
+  else
+  {
+    GEN E4 = Flx_Fl_mul(a4, Fl_inv(Fl_neg(3, p), p), p);
+    GEN E6 = Flx_Fl_mul(a6, p>>1, p);
+    GEN E42 = Flxq_sqr(E4, T, p);
+    GEN E43 = Flxq_mul(E4, E42, T, p);
+    GEN E62 = Flx_sqr(E6, p);
+    GEN delta = Flx_Fl_mul(Flx_rem(Flx_sub(E43, E62, p), T, p), Fl_inv(1728UL%p, p), p);
+    return gerepileuptoleaf(av, Flxq_div(E43, delta, T, p));
+  }
 }
 
 static GEN
 Flxq_ellcardj(GEN a4, GEN a6, ulong j, GEN T, GEN q, ulong p, long n)
 {
   GEN q1 = addis(q,1);
-  if (j==0)
+  if (j==0 && p!=3)
   {
     ulong w;
     GEN W, t, N;

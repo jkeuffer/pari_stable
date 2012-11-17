@@ -71,6 +71,12 @@ checkt(p,n,v,B=1000)=
     N=ellcard(E);
     if(#ellmul(E,random(E),N)>1,error(i,":",b)));
 }
+checkt(3,5,0);
+checkt(3,6,0);
+checkt(3,5,1);
+checkt(3,6,1);
+checkt(3,5,2);
+checkt(3,6,2);
 checkt(7,5,0);
 checkt(7,6,0);
 checkt(11,5,0);
