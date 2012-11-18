@@ -1517,9 +1517,9 @@ FpXQ_ellcardj(GEN a4, GEN a6, GEN j, GEN T, GEN q, GEN p, long n)
     if (degpol(W)>0) /*p=5 mod 6*/
       return ZX_equal1(FpXQ_powu(W,3,T,p)) ? addii(q1,shifti(t,-1)):
                                              subii(q1,shifti(t,-1));
-    w = gel(W,2);
+    w = modii(gel(W,2),p);
     if (equali1(w))  return N;
-    if (equalim1(w)) return addii(q1,t);
+    if (equalii(w,subiu(p,1))) return addii(q1,t);
     else /*p=1 mod 6*/
     {
       GEN u = shifti(t,-1), v = sqrtint(diviuexact(subii(q,sqri(u)),3));
@@ -1545,11 +1545,11 @@ FpXQ_ellcardj(GEN a4, GEN a6, GEN j, GEN T, GEN q, GEN p, long n)
     if (mod4(q)==3) return q1;
     W = FpXQ_pow(a4,shifti(q,-2),T,p);
     if (degpol(W)>0) return q1; /*p=3 mod 4*/
-    w = gel(W,2);
+    w = modii(gel(W,2),p);
     N = Fp_ffellcard(gen_1,gen_0,q,n,p);
     if (equali1(w)) return N;
     t = subii(q1, N);
-    if (equalim1(w)) return addii(q1, t);
+    if (equalii(w,subiu(p,1))) return addii(q1,t);
     else /*p=1 mod 4*/
     {
       GEN u = shifti(t,-1), v = sqrtint(subii(q,sqri(u)));

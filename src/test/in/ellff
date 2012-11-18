@@ -61,15 +61,16 @@ check(a)=
     for(i=0,3^a-2, check(g^i)));
 }
 
-checkt(p,n,v,B=1000)=
+checkt(p,n,f,B=100)=
 {
   my(a=ffgen(ffinit(p,n),'a));
   for(i=1,B,
     my(E,N,b);
     until(b,b=random(a));
-    E=ellffinit(if(f==0,[0,b],f==1,[b,0],[b^2,b^3]),a,2);
-    N=ellcard(E);
-    if(#ellmul(E,random(E),N)>1,error(i,":",b)));
+    E=ellinit(if(f==0,[0,b],f==1,[b,0],[b^2,b^3]));
+    if(#E==0,next);
+    N=ellcard(ellffinit(E,a,2));
+    if(#ellmul(E,random(E),N)>1,error([p,n,f],b)));
 }
 checkt(3,5,0);
 checkt(3,6,0);
