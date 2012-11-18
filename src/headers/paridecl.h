@@ -3398,6 +3398,7 @@ INLINE GEN    Flv_copy(GEN x);
 INLINE int    Flx_equal1(GEN x);
 INLINE GEN    Flx_copy(GEN x);
 INLINE GEN    Flx_div(GEN x, GEN y, ulong p);
+INLINE GEN    Flx_mulu(GEN x, ulong a, ulong p);
 INLINE GEN    FpV_FpC_mul(GEN x, GEN y, GEN p);
 INLINE GEN    FpXQX_renormalize(GEN x, long lx);
 INLINE GEN    FpXX_renormalize(GEN x, long lx);

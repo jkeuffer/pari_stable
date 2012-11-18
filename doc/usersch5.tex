@@ -4290,6 +4290,9 @@ non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
 \fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
 
+\fun{GEN}{Flx_mulu}{GEN y, ulong x, ulong p} as \kbd{Flx\_Fl\_mul} but do not assume
+that $x<p$.
+
 \fun{GEN}{Flx_Fl_mul_to_monic}{GEN y, ulong x, ulong p} returns $y*x$
 assuming the result is monic of the same degree as $y$ (in particular $x\neq
 0$).

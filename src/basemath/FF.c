@@ -919,9 +919,9 @@ Flxq_ell_to_a4a6(GEN E, GEN T, ulong p)
   b2 = Rg_to_Flxq(ell_get_b2(E),T,p);
   c4 = Rg_to_Flxq(ell_get_c4(E),T,p);
   c6 = Rg_to_Flxq(ell_get_c6(E),T,p);
-  retmkvec3(Flx_neg(Flx_Fl_mul(c4, 27%p, p), p), Flx_neg(Flx_Fl_mul(c6, 54%p, p), p),
-            mkvec4(Fl_to_Flx(6%p,T[1]),Flx_Fl_mul(b2,3%p,p),
-                   Flx_Fl_mul(a1,3%p,p),Flx_Fl_mul(a3,108%p,p)));
+  retmkvec3(Flx_neg(Flx_mulu(c4, 27, p), p), Flx_neg(Flx_mulu(c6, 54, p), p),
+            mkvec4(Fl_to_Flx(6%p,T[1]),Flx_mulu(b2,3,p),
+                   Flx_mulu(a1,3,p),Flx_mulu(a3,108,p)));
 }
 
 static GEN

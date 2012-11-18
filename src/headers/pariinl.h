@@ -1536,6 +1536,9 @@ Fp_div(GEN a, GEN b, GEN m)
   avma = av; return modii(p,m);
 }
 
+INLINE GEN
+Flx_mulu(GEN x, ulong a, ulong p) { return Flx_Fl_mul(x,a%p,p); }
+
 /*******************************************************************/
 /*                                                                 */
 /*                        ADDMULII / SUBMULII                      */
