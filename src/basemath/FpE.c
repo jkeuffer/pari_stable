@@ -999,7 +999,8 @@ static GEN
 Fp_ellj_nodiv(GEN a4, GEN a6, GEN p)
 {
   GEN a43 = Fp_mulu(Fp_powu(a4, 3, p), 4, p);
-  return mkvec2(Fp_mulu(a43, 1728, p), Fp_add(a43, Fp_mulu(Fp_sqr(a6, p), 27, p), p));
+  GEN a62 = Fp_mulu(Fp_sqr(a6, p), 27, p);
+  return mkvec2(Fp_mulu(a43, 1728, p), Fp_add(a43, a62, p));
 }
 
 GEN
@@ -1474,14 +1475,11 @@ FpXQ_ellj(GEN a4, GEN a6, GEN T, GEN p)
   else
   {
     pari_sp av=avma;
-    GEN E4 = FpX_Fp_mul(a4, Fp_inv(stoi(-3), p), p);
-    GEN E6 = FpX_Fp_mul(a6, shifti(p,-1), p);
-    GEN E42 = FpXQ_sqr(E4, T, p);
-    GEN E43 = FpXQ_mul(E4, E42, T, p);
-    GEN E62 = FpX_sqr(E6, p);
-    GEN delta = FpX_Fp_mul(FpX_rem(FpX_sub(E43, E62, p), T, p),
-                            Fp_inv(modsi(1728,p), p), p);
-    return gerepileuptoleaf(av, FpXQ_div(E43, delta, T, p));
+    GEN a43 = FpXQ_mul(a4,FpXQ_sqr(a4,T,p),T,p);
+    GEN a62 = FpXQ_sqr(a6,T,p);
+    GEN num = FpX_mulu(a43,6912,p);
+    GEN den = FpX_add(FpX_mulu(a43,4,p),FpX_mulu(a62,27,p),p);
+    return gerepileuptoleaf(av, FpXQ_div(num, den, T, p));
   }
 }
 
