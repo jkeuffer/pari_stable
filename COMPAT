@@ -27,6 +27,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - binary(0) now return []
   - arithmetic functions no longer accept vector / matrix arguments [ to
     later allow passing factorization matrices ]: use apply()
+  - ellsigma: removed flags 3 and 4 [ inefficient algorithm using the product
+    formula ]
 
 * Specific to the PARI library:
 ===============================

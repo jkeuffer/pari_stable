@@ -1923,11 +1923,13 @@ ellzeta(GEN w, GEN z, long prec0)
 GEN
 ellsigma(GEN w, GEN z, long flag, long prec0)
 {
-  long toadd, prec;
+  long toadd, prec, n;
   pari_sp av = avma, lim, av1;
-  GEN zinit, pi, pi2, q, u, y, y1, qn, uinv, et, etnew, uhalf;
-  int doprod = (flag >= 2), dolog = (flag & 1);
+  GEN zinit, pi, pi2, q, q8, qn2, qn, y, y1, uinv, et, etnew;
+  GEN u, uhalf, urn, urninv;
   ellred_t T;
+
+  if (flag < 0 || flag > 1) pari_err_FLAG("ellsigma");
 
   if (!z) z = pol_x(0);
   y = toser_i(z);
@@ -1936,7 +1938,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
     long vy = varn(y), v = valp(y);
     GEN P, Q;
     if (v <= 0) pari_err_IMPL("ellsigma(t_SER) away from 0");
-    if (dolog) pari_err_TYPE("log(ellsigma)",y);
+    if (flag) pari_err_TYPE("log(ellsigma)",y);
     if (gequal0(y)) { check_periods(w); avma = av; return zeroser(vy, -v); }
     P = ellwpseries0(w, vy, lg(y)-2, prec0);
     P = integ(gneg(P), vy); /* \zeta' = - \wp*/
@@ -1950,7 +1952,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   if (!get_periods(w, z, &T, prec0)) pari_err_TYPE("ellsigma",w);
   if (!T.Z)
   {
-    if (!dolog) return gen_0;
+    if (!flag) return gen_0;
     pari_err_DOMAIN("log(ellsigma)", "argument","=",gen_0,z);
   }
   prec = T.prec;
@@ -1960,54 +1962,29 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   toadd = (long)ceil(fabs( get_toadd(T.Z) ));
   uhalf = expIxy(pi, T.Z, prec); /* exp(i Pi Z) */
   u = gsqr(uhalf);
-  if (doprod) { /* use product */
-    GEN u1, v, invuhalf = ginv(uhalf);
-    q = expIxy(pi2, T.Tau, prec);
-    uinv = ginv(u);
-    u1 = gsub(uhalf,invuhalf);
-    v = gsubgs(gadd(uhalf,invuhalf), 2);
-    y = mulcxmI(gdiv(gmul(T.W2,u1), pi2));
-    av1 = avma; lim = stack_lim(av1,1); qn=q;
-    for(;;)
+  q8 = expIxy(gmul2n(pi2,-3), T.Tau, prec);
+  q = gpowgs(q8,8);
+  u = gneg_i(u); uinv = ginv(u);
+  y = gen_0;
+  av1 = avma; lim = stack_lim(av1,1);
+  qn = q; qn2 = gen_1;
+  urn = uhalf; urninv = ginv(uhalf);
+  for(n=0;;n++)
+  {
+    y = gadd(y,gmul(qn2,gsub(urn,urninv)));
+    qn2 = gmul(qn,qn2);
+    if (gexpo(qn2) + n*toadd <= - prec2nbits(prec) - 5) break;
+    qn  = gmul(q,qn);
+    urn = gmul(urn,u);
+    urninv = gmul(urninv,uinv);
+    if (low_stack(lim, stack_lim(av1,1)))
     {
-      GEN a = gsqr(gsubgs(qn, 1));
-      /* multiply by (q^n u - 1)(q^n/u - 1) / (q^n-1)^2 = (a - v q^n)/a */
-      y = gmul(y, gdiv(gsub(a,gmul(v,qn)), a));
-      qn = gmul(q,qn);
-      if (gexpo(qn) <= - prec2nbits(prec) - 5 - toadd) break;
-      if (low_stack(lim, stack_lim(av1,1)))
-      {
-        if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
-        gerepileall(av1,2, &y,&qn);
-      }
+      if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
+      gerepileall(av1,5, &y,&qn,&qn2,&urn,&urninv);
     }
-  } else { /* use sum */
-    GEN q8, qn2, urn, urninv;
-    long n;
-    q8 = expIxy(gmul2n(pi2,-3), T.Tau, prec);
-    q = gpowgs(q8,8);
-    u = gneg_i(u); uinv = ginv(u);
-    y = gen_0;
-    av1 = avma; lim = stack_lim(av1,1);
-    qn = q; qn2 = gen_1;
-    urn = uhalf; urninv = ginv(uhalf);
-    for(n=0;;n++)
-    {
-      y = gadd(y,gmul(qn2,gsub(urn,urninv)));
-      qn2 = gmul(qn,qn2);
-      if (gexpo(qn2) + n*toadd <= - prec2nbits(prec) - 5) break;
-      qn  = gmul(q,qn);
-      urn = gmul(urn,u);
-      urninv = gmul(urninv,uinv);
-      if (low_stack(lim, stack_lim(av1,1)))
-      {
-        if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
-        gerepileall(av1,5, &y,&qn,&qn2,&urn,&urninv);
-      }
-    }
-    y = gmul(gmul(y,q8),
-             gdiv(mulcxmI(T.W2), gmul(pi2,gpowgs(trueeta(T.Tau,prec),3))));
   }
+  y = gmul(gmul(y,q8),
+           gdiv(mulcxmI(T.W2), gmul(pi2,gpowgs(trueeta(T.Tau,prec),3))));
 
   et = _elleta(&T);
   etnew = eta_correction(&T, et);
@@ -2016,7 +1993,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
                            gmul2n(gadd(gmul(T.x,T.W1), gmul(T.y,T.W2)),-1)));
   if (mpodd(T.x) || mpodd(T.y)) etnew = gadd(etnew, mulcxI(pi));
   y1 = gadd(etnew, gmul2n(gmul(gmul(T.Z,zinit),gel(et,2)),-1));
-  if (dolog)
+  if (flag)
   {
     y = gadd(y1, glog(y,prec));
     if (T.some_q_is_real && T.some_z_is_real)

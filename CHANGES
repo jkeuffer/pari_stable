@@ -398,3 +398,5 @@ BA  6- [libpari] removed unusable functions dbg_close/dbg_release.
     7- [libpari] gisfundamental, gkronecker, gbigomega, geulerphi,
        gissquarefree, gmoebius, gnextprime, gnumbdiv, gomega, gprecprime,
        gsumdiv, gdumdivk, znprimroot0
+    8- ellsigma: flags 3 and 4 [ inefficient algorithm using the product
+       formula ]
