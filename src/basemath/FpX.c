@@ -219,7 +219,7 @@ Fp_FpX_sub(GEN x, GEN y, GEN p)
     z = cgetg(3, t_POL);
     x = (ly == 3)? Fp_sub(x, gel(y,2), p): modii(x, p);
     if (!signe(x)) { avma = (pari_sp)(z + 3); return pol_0(varn(y)); }
-    z[1] = y[1]; gel(z,2) = x; return z;
+    z[1] = evalsigne(1)|y[1]; gel(z,2) = x; return z;
   }
   z = cgetg(ly,t_POL);
   gel(z,2) = Fp_sub(x, gel(y,2), p);
