@@ -1361,8 +1361,11 @@ zell(GEN e, GEN z, long prec)
   return gerepileupto(av,t);
 }
 
+enum period_type { t_W, t_WETA, t_SMALLELL, t_ELL };
 /* normalization / argument reduction for ellptic functions */
 typedef struct {
+  enum period_type type;
+  GEN in; /* original input */
   GEN w1,w2,tau; /* original basis for L = <w1,w2> = w2 <1,tau> */
   GEN W1,W2,Tau; /* new basis for L = <W1,W2> = W2 <1,tau> */
   GEN a,b,c,d; /* t_INT; tau in F = h/Sl2, tau = g.t, g=[a,b;c,d] in SL(2,Z) */
@@ -1495,48 +1498,75 @@ eta_correction(ellred_t *T, GEN eta)
  * - [w1,w2]
  * - [[w1,w2],[eta1,eta2]]
  * - an ellinit structure */
-static int
-get_periods(GEN e, GEN z, ellred_t *T, long prec)
+static void
+compute_periods(ellred_t *T, GEN z, long prec)
 {
-  GEN w1, w2;
-  if (typ(e) != t_VEC) return 0;
+  GEN w1, w2, w, e;
   T->q_is_real = 0;
   T->some_q_is_real = 0;
-  switch(lg(e))
+  switch(T->type)
   {
-    case 14:
+    case t_SMALLELL:
     {
       long pr, p = prec;
       if (z && (pr = precision(z))) p = pr;
-      e = doellomega_real(e, p);
+      e = T->in;
+      w = doellomega_real(e, p);
       T->some_q_is_real = T->q_is_real = 1;
     } /* fall through */
-    case  3:
-      w1 = gel(e,1);
-      if (typ(w1) == t_VEC)
-      {
-        if (lg(w1) != 3) return 0;
-        e = w1; w1 = gel(e,1);
-      }
-      w2 = gel(e,2); break;
-    case 20:
-      if (!ell_is_real(e)) return 0;
-      w1 = gel(e,15); w2 = gel(e,16);
+    case  t_W:
+      w = T->in;
+      w1 = gel(w,1);
+      w2 = gel(w,2); break;
+    case  t_WETA:
+      w = gel(T->in,1);
+      w1 = gel(w,1);
+      w2 = gel(w,2); break;
+    case t_ELL:
+      e = T->in;
+      w1 = gel(e,15);
+      w2 = gel(e,16);
       T->some_q_is_real = 1; break;
-    default: return 0;
   }
   T->w1 = w1;
   T->w2 = w2;
   red_modSL2(T, prec);
   if (z) reduce_z(z, T);
+}
+static int
+check_periods(GEN e, ellred_t *T)
+{
+  GEN w1;
+  if (typ(e) != t_VEC) return 0;
+  T->in = e;
+  switch(lg(e))
+  {
+    case 14:
+      T->type = t_SMALLELL;
+      break;
+    case 20:
+      if (!ell_is_real(e)) return 0;
+      T->type = t_ELL;
+      break;
+    case 3:
+      w1 = gel(e,1);
+      if (typ(w1) != t_VEC)
+        T->type = t_W;
+      else
+      {
+        if (lg(w1) != 3) return 0;
+        T->type = t_WETA;
+      }
+      break;
+    default: return 0;
+  }
   return 1;
 }
-static void
-check_periods(GEN w)
+static int
+get_periods(GEN e, GEN z, ellred_t *T, long prec)
 {
-  ellred_t T;
-  if (lg(w) > 3) checksmallell(w);
-  if (!get_periods(w, NULL, &T, 0)) pari_err_TYPE("check_periods",w);
+  if (!check_periods(e, T)) return 0;
+  compute_periods(T, z, prec); return 1;
 }
 
 /* 2iPi/x, more efficient when x pure imaginary */
@@ -1794,6 +1824,21 @@ ellwpseries_aux(GEN c4, GEN c6, long v, long PRECDL)
   return res;
 }
 
+static void
+get_c4c6(ellred_t *T, GEN *c4, GEN *c6)
+{
+  switch(T->type)
+  {
+    case t_ELL: case t_SMALLELL:
+      *c4 = ell_get_c4(T->in);
+      *c6 = ell_get_c6(T->in);
+      break;
+    default:
+      *c4 = _elleisnum(T, 4);
+      *c6 = gneg(_elleisnum(T, 6));
+  }
+}
+
 GEN
 ellwpseries(GEN e, long v, long PRECDL)
 {
@@ -1804,13 +1849,10 @@ ellwpseries(GEN e, long v, long PRECDL)
 }
 
 static GEN
-ellwpseries0(GEN e, long v, long PRECDL, long prec)
+ellwpseries0(ellred_t *T, long v, long PRECDL)
 {
   GEN c4,c6;
-
-  if (lg(e) > 3) return ellwpseries(e, v, PRECDL);
-  c4 = elleisnum(e, 4, 0, prec);
-  c6 = elleisnum(e, 6, 0, prec); c6 = gneg(c6);
+  get_c4c6(T, &c4, &c6);
   return ellwpseries_aux(c4,c6,v,PRECDL);
 }
 
@@ -1821,6 +1863,7 @@ ellwp(GEN w, GEN z, long prec)
 GEN
 ellwp0(GEN w, GEN z, long flag, long prec)
 {
+  ellred_t T;
   GEN y;
   pari_sp av = avma;
 
@@ -1831,13 +1874,14 @@ ellwp0(GEN w, GEN z, long flag, long prec)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q;
+    if (!check_periods(w,&T)) pari_err_TYPE("ellwp",w);
     if (v <= 0) pari_err(e_IMPL,"ellwp(t_SER) away from 0");
     if (gequal0(y)) {
-      check_periods(w); avma = av;
+      avma = av;
       if (!flag) return zeroser(vy, -2*v);
       retmkvec2(zeroser(vy, -2*v), zeroser(vy, -3*v));
     }
-    P = ellwpseries0(w, vy, lg(y)-2, prec);
+    P = ellwpseries0(&T, vy, lg(y)-2);
     Q = gsubst(P, varn(P), y);
     if (!flag)
       return gerepileupto(av, Q);
@@ -1867,9 +1911,10 @@ ellzeta(GEN w, GEN z, long prec0)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q;
+    if (!check_periods(w,&T)) pari_err_TYPE("ellzeta",w);
     if (v <= 0) pari_err(e_IMPL,"ellzeta(t_SER) away from 0");
-    if (gequal0(y)) { check_periods(w); avma = av; return zeroser(vy, -v); }
-    P = ellwpseries0(w, vy, lg(y)-2, prec0);
+    if (gequal0(y)) { avma = av; return zeroser(vy, -v); }
+    P = ellwpseries0(&T, vy, lg(y)-2);
     P = integ(gneg(P), vy); /* \zeta' = - \wp*/
     Q = gsubst(P, varn(P), y);
     return gerepileupto(av, Q);
@@ -1937,10 +1982,11 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q;
+    if (!check_periods(w,&T)) pari_err_TYPE("ellsigma",w);
     if (v <= 0) pari_err_IMPL("ellsigma(t_SER) away from 0");
     if (flag) pari_err_TYPE("log(ellsigma)",y);
-    if (gequal0(y)) { check_periods(w); avma = av; return zeroser(vy, -v); }
-    P = ellwpseries0(w, vy, lg(y)-2, prec0);
+    if (gequal0(y)) { avma = av; return zeroser(vy, -v); }
+    P = ellwpseries0(&T, vy, lg(y)-2);
     P = integ(gneg(P), vy); /* \zeta' = - \wp*/
     /* (log \sigma)' = \zeta; remove log-singularity first */
     P = integ(gsub(P, monomial(gen_1,-1,vy)), vy);
