@@ -183,15 +183,41 @@ FpXQX_red(GEN z, GEN T, GEN p)
   return FpXQX_renormalize(res,l);
 }
 
-GEN
-FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
+static int
+ZXX_is_ZX_spec(GEN a,long na)
+{
+  long i;
+  for(i=0;i<na;i++)
+    if(typ(gel(a,i))!=t_INT) return 0;
+  return 1;
+}
+
+static int
+ZXX_is_ZX(GEN a) { return ZXX_is_ZX_spec(a+2,lgpol(a)); }
+
+static GEN
+FpXX_FpX_mulspec(GEN P, GEN U, GEN p, long lU)
+{
+  long i, lP =lg(P);
+  GEN res;
+  res = cgetg(lP, t_POL);
+  for(i=2; i<lP; i++)
+  {
+    GEN Pi = gel(P,i);
+    gel(res,i) = typ(Pi)==t_INT? FpX_Fp_mulspec(U, Pi, p, lU):
+                                 FpX_mulspec(U, Pi+2, p, lU, lgpol(Pi));
+}
+  return FpXQX_renormalize(res,lP);
+}
+
+static GEN
+FpXY_FpY_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
 {
   pari_sp av = avma;
-  GEN z, kx, ky;
-  kx = mod_to_Kronecker(x,T);
-  ky = mod_to_Kronecker(y,T);
-  z = Kronecker_to_FpXQX(ZX_mul(ky,kx), T, p);
-  return gerepileupto(av, z);
+  GEN z = RgXY_swapspec(x,degpol(T)-1,MAXVARN,lx);
+  z = FpXX_FpX_mulspec(z,y,p,ly);
+  z = RgXY_swapspec(z+2,lx+ly+3,varn(T),lgpol(z));
+  return gerepilecopy(av,z);
 }
 
 static GEN
@@ -199,6 +225,14 @@ FpXQX_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
 {
   pari_sp av = avma;
   GEN z, kx, ky;
+  if (ZXX_is_ZX_spec(y,ly))
+  {
+    if (ZXX_is_ZX_spec(x,lx))
+      return FpX_mulspec(x,y,p,lx,ly);
+    else
+      return FpXY_FpY_mulspec(x,y,T,p,lx,ly);
+  } else if (ZXX_is_ZX_spec(x,lx))
+      return FpXY_FpY_mulspec(y,x,T,p,ly,lx);
   kx = mod_to_Kronecker_spec(x,lx,T);
   ky = mod_to_Kronecker_spec(y,ly,T);
   z = Kronecker_to_FpXQX(ZX_mul(ky,kx), T, p);
@@ -206,10 +240,18 @@ FpXQX_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
 }
 
 GEN
+FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
+{
+  GEN z = FpXQX_mulspec(x+2,y+2,T,p,lgpol(x),lgpol(y));
+  setvarn(z,varn(x)); return z;
+}
+
+GEN
 FpXQX_sqr(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN z, kx;
+  if (ZXX_is_ZX(x)) return ZX_sqr(x);
   kx= mod_to_Kronecker(x,T);
   z = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
   return gerepileupto(av, z);
@@ -489,9 +531,9 @@ FpXQX_invBarrett_Newton(GEN S, GEN T, GEN p)
   return gerepilecopy(av, x);
 }
 
-const long FpXQX_INVBARRETT_LIMIT = 5;
-const long FpXQX_DIVREM_BARRETT_LIMIT = 5;
-const long FpXQX_REM_BARRETT_LIMIT = 3;
+const long FpXQX_INVBARRETT_LIMIT = 50;
+const long FpXQX_DIVREM_BARRETT_LIMIT = 50;
+const long FpXQX_REM_BARRETT_LIMIT = 50;
 
 /* 1/polrecip(T)+O(x^(deg(T)-1)) */
 GEN

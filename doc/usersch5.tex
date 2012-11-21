@@ -3639,9 +3639,12 @@ between $0$ and $p$ if this is the case for the components of $x$.
 \fun{GEN}{FpX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} returns $x - y$.
+\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} returns $x-y$.
 
-\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} returns $x y$.
+\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} returns $x\*y$.
+
+\fun{GEN}{FpX_mulspec}{GEN a, GEN b, GEN p, long na, long nb}
+see \kbd{ZX\_mulspec}
 
 \fun{GEN}{FpX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 
@@ -3714,6 +3717,8 @@ a \typ{INT} and $y$ an \kbd{FpX}.
 
 \fun{GEN}{FpX_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{FpX}~\kbd{x}
 by the \kbd{Fp}~\kbd{y}.
+
+\fun{GEN}{FpX_Fp_mulspec}{GEN x, GEN y, GEN p, long lx} see \kbd{ZX\_mulspec}
 
 \fun{GEN}{FpX_mulu}{GEN x, ulong y, GEN p} multiplies the \kbd{FpX}~\kbd{x}
 by \kbd{y}.
@@ -6910,9 +6915,13 @@ priorities: the above is an invalid object if $\kbd{varncmp(v, w)} \geq 0$.
 \kbd{RgX} (or constant) coefficients to a matrix with \kbd{N} rows.
 
 \fun{GEN}{RgXY_swap}{GEN P, long n, long w} converts the bivariate polynomial
-$\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} coefficients) to
+$\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} or scalar coefficients) to
 $P(\kbd{pol\_x[w]},u)$, assuming \kbd{n} is an upper bound for
 $\deg_v(\kbd{P})$.
+
+\fun{GEN}{RgXY_swapspec}{GEN C, long n, long w, long lP}
+as \kbd{RgXY\_swap} where the coefficients of $P$ are given by
+\kbd{gel(C,0),\dots,gel(C,lP-1)}.
 
 \fun{GEN}{RgX_to_ser}{GEN x, long l} applied to a \typ{POL}~\kbd{x}, creates
 a \emph{shallow} \typ{SER} of length~$l\geq 2$ starting with~\kbd{x}.

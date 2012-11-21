@@ -233,6 +233,10 @@ GEN
 FpX_mul(GEN x,GEN y,GEN p) { return FpX_red(ZX_mul(x, y), p); }
 
 GEN
+FpX_mulspec(GEN a, GEN b, GEN p, long na, long nb)
+{ return FpX_red(ZX_mulspec(a, b, na, nb), p); }
+
+GEN
 FpX_sqr(GEN x,GEN p) { return FpX_red(ZX_sqr(x), p); }
 
 GEN
@@ -247,15 +251,23 @@ FpX_mulu(GEN y, ulong x,GEN p)
 }
 
 GEN
-FpX_Fp_mul(GEN y,GEN x,GEN p)
+FpX_Fp_mulspec(GEN y,GEN x,GEN p,long ly)
 {
   GEN z;
-  long i, l;
-  if (!signe(x)) return pol_0(varn(y));
-  z = cgetg_copy(y, &l); z[1] = y[1];
-  for(i=2; i<l; i++) gel(z,i) = Fp_mul(gel(y,i), x, p);
-  return ZX_renormalize(z, l);
+  long i;
+  if (!signe(x)) return pol_0(0);
+  z = cgetg(ly+2,t_POL);
+  for(i=0; i<ly; i++) gel(z,i+2) = Fp_mul(gel(y,i), x, p);
+  return ZX_renormalize(z, ly+2);
 }
+
+GEN
+FpX_Fp_mul(GEN y,GEN x,GEN p)
+{
+  GEN z = FpX_Fp_mulspec(y+2,x,p,lgpol(y));
+  setvarn(z, varn(y)); return z;
+}
+
 GEN
 FpX_Fp_mul_to_monic(GEN y,GEN x,GEN p)
 {
@@ -891,12 +903,6 @@ INLINE GEN
 FpX_recipspec(GEN x, long l, long n)
 {
   return RgX_recipspec_shallow(x, l, n);
-}
-
-static GEN
-FpX_mulspec(GEN a, GEN b, GEN p, long na, long nb)
-{
-  return FpX_red(ZX_mulspec(a, b, na, nb), p);
 }
 
 static GEN
