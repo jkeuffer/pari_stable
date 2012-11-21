@@ -856,7 +856,7 @@ FqV_inv(GEN x, GEN T, GEN p)
 
 /***********************************************************************/
 /**                                                                   **/
-/**                  Barrett reduction                            **/
+/**                      Barrett reduction                            **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -959,7 +959,7 @@ FpX_invBarrett(GEN T, GEN p)
   pari_sp ltop = avma;
   long l = lg(T);
   GEN r;
-  if (l<5) return pol_0(T[1]);
+  if (l<5) return pol_0(varn(T));
   if (l<=FpX_INVBARRETT_LIMIT)
   {
     GEN c = gel(T,l-1), ci=gen_1;
