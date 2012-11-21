@@ -50,7 +50,7 @@ typedef struct
 {
   nflift_t *L;
   GEN nf;
-  GEN pol, polbase;
+  GEN pol, polbase; /* leading coeff is a t_INT */
   GEN fact;
   GEN pr;
   GEN Br, bound, ZC, BS_2;
@@ -269,8 +269,13 @@ static GEN
 RgX_int_normalize(GEN P)
 {
   GEN P0 = leading_term(P);
-  /* cater for t_POL (paranoia) */
-  if (typ(P0) == t_POL) P0 = gel(P0,2); /* non-0 constant */
+  /* cater for t_POL */
+  if (typ(P0) == t_POL)
+  {
+    P0 = gel(P0,2); /* non-0 constant */
+    P = shallowcopy(P);
+    gel(P,lg(P)-1) = P0; /* now leading term is a t_INT */
+  }
   if (is_pm1(P0)) return signe(P0) > 0? P: RgX_neg(P);
   return RgX_Rg_div(P, P0);
 }
@@ -1191,7 +1196,7 @@ ZqX(GEN P, GEN pk, GEN T, GEN proj)
 static GEN
 ZqX_normalize(GEN P, GEN lt, nflift_t *L)
 {
-  GEN R = lt? gmul(Fp_inv(lt, L->pk), P): P;
+  GEN R = lt? RgX_Rg_mul(P, Fp_inv(lt, L->pk)): P;
   return ZqX(R, L->pk, L->Tpk, L->ZqProj);
 }
 
@@ -1959,7 +1964,7 @@ nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P)
     nbf = Flx_nbroots(ZX_to_Flx(pol,p), p);
   }
   if (nbf != deg) return NULL; /* no roots in residue field */
-  z = nf_DDF_roots(pol, pol, nfpol, gen_1, init_fa, nbf, ROOTS_SPLIT, P->L);
+  z = nf_DDF_roots(pol, pol, nfpol, NULL, init_fa, nbf, ROOTS_SPLIT, P->L);
   if (lg(z) == 1) { avma = av; return NULL; } /* no roots */
   return gel(z,1);
 }

@@ -449,11 +449,22 @@ FqX_Fq_mul_to_monic(GEN P, GEN U, GEN T, GEN p)
 GEN
 FqX_normalize(GEN z, GEN T, GEN p)
 {
-  GEN p1;
+  GEN lc;
   if (!T) return FpX_normalize(z,p);
-  p1 = leading_term(z);
-  if (lg(z) == 2 || gequal1(p1)) return z;
-  return FqX_Fq_mul_to_monic(z, Fq_inv(p1,T,p), T,p);
+  if (lg(z) == 2) return z;
+  lc = leading_term(z);
+  if (typ(lc) == t_POL)
+  {
+    if (lg(lc) > 3) /* non-constant */
+      return FqX_Fq_mul_to_monic(z, Fq_inv(lc,T,p), T,p);
+    /* constant */
+    lc = gel(lc,2);
+    z = shallowcopy(z);
+    gel(z, lg(z)-1) = lc;
+  }
+  /* lc a t_INT */
+  if (equali1(lc)) return z;
+  return FqX_Fq_mul_to_monic(z, Fp_inv(lc,p), T,p);
 }
 
 GEN
