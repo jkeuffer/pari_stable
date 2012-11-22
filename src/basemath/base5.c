@@ -151,11 +151,11 @@ makenorms(GEN rnf)
 #define NORMS 2
 GEN
 check_and_build_nfabs(GEN rnf) {
-  return check_and_build_obj(rnf, NFABS, &makenfabs);
+  return obj_checkbuild(rnf, NFABS, &makenfabs);
 }
 GEN
 check_and_build_norms(GEN rnf) {
-  return check_and_build_obj(rnf, NORMS, &makenorms);
+  return obj_checkbuild(rnf, NORMS, &makenorms);
 }
 
 GEN
@@ -181,7 +181,7 @@ rnfinit(GEN nf, GEN pol)
   gel(rnf,9) = cgetg(1,t_VEC); /* dummy */
   gel(rnf,10) = nf;
   gel(rnf,11) = rnfequation2(nf,pol);
-  gel(rnf,12) = gen_0;
+  gel(rnf,12) = zerovec(2);
   return gerepilecopy(av, rnf);
 }
 

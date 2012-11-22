@@ -14,52 +14,6 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
-/********************************************************************/
-/**                                                                **/
-/**              INSERT PERMANENT OBJECT IN STRUCTURE              **/
-/**                                                                **/
-/********************************************************************/
-static const long OBJMAX = 2; /* maximum number of insertable objects */
-
-/* insert O in S [last position] */
-static void
-obj_insert(GEN S, GEN O, long K)
-{
-  long l = lg(S)-1;
-  GEN v = gel(S,l);
-  if (typ(v) != t_VEC)
-  {
-    GEN w = zerovec(OBJMAX); gel(w,K) = O;
-    gel(S,l) = gclone(w);
-  }
-  else
-    gel(v,K) = gclone(O);
-}
-
-static GEN
-get_extra_obj(GEN S, long K)
-{
-  GEN v = gel(S,lg(S)-1);
-  if (typ(v) == t_VEC)
-  {
-    GEN O = gel(v,K);
-    if (!isintzero(O)) return O;
-  }
-  return NULL;
-}
-
-GEN
-check_and_build_obj(GEN S, long tag, GEN (*build)(GEN))
-{
-  GEN O = get_extra_obj(S, tag);
-  if (!O)
-  {
-    pari_sp av = avma;
-    obj_insert(S, build(S), tag); avma = av;
-    O = get_extra_obj(S, tag);
-  }
-  return O;
-}
 /*******************************************************************/
 /*                                                                 */
 /*         CLASS GROUP AND REGULATOR (McCURLEY, BUCHMANN)          */
@@ -3185,11 +3139,11 @@ makematal(GEN bnf)
 #define CYCGEN 2
 GEN
 check_and_build_cycgen(GEN bnf) {
-  return check_and_build_obj(bnf, CYCGEN, &makecycgen);
+  return obj_checkbuild(bnf, CYCGEN, &makecycgen);
 }
 GEN
 check_and_build_matal(GEN bnf) {
-  return check_and_build_obj(bnf, MATAL, &makematal);
+  return obj_checkbuild(bnf, MATAL, &makematal);
 }
 
 static GEN
@@ -3331,7 +3285,7 @@ buchall_end(GEN nf,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,GEN Vbase)
   gel(z,7) = nf;
   gel(z,8) = res;
   gel(z,9) = clg2;
-  gel(z,10) = gen_0; /* dummy: we MUST have lg(bnf) != lg(nf) */
+  gel(z,10) = zerovec(2);
   return z;
 }
 

@@ -1799,6 +1799,38 @@ shiftaddress_canon(GEN x, long dec)
   }
 }
 
+/********************************************************************/
+/**                                                                **/
+/**                INSERT DYNAMIC OBJECT IN STRUCTURE              **/
+/**                                                                **/
+/********************************************************************/
+/* insert O in S [last position] at position K, return it */
+GEN
+obj_insert(GEN S, long K, GEN O)
+{
+  GEN v = gel(S, lg(S)-1);
+  if (typ(v) != t_VEC) pari_err_TYPE("obj_insert", S);
+  return gel(v,K) = gclone(O);
+}
+
+/* Does S [last position] contain data at position K ? Return it, or NULL */
+GEN
+obj_check(GEN S, long K)
+{
+  GEN O, v = gel(S, lg(S)-1);
+  if (typ(v) != t_VEC) pari_err_TYPE("obj_check", S);
+  O = gel(v,K); return isintzero(O)? NULL: O;
+}
+
+GEN
+obj_checkbuild(GEN S, long tag, GEN (*build)(GEN))
+{
+  GEN O = obj_check(S, tag);
+  if (!O)
+  { pari_sp av = avma; O = obj_insert(S, tag, build(S)); avma = av; }
+  return O;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                         STACK MANAGEMENT                        */
