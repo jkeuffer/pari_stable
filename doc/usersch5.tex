@@ -6412,11 +6412,17 @@ is defined, to the proper accuracy (e.g. \kbd{0}, \kbd{Mod(0,3)},
 \fun{int}{RgX_isscalar}{GEN x} return 1 if $x$ all the coefficients of
 $x$ of degree $> 0$ are $0$ (as per \kbd{gequal0}).
 
+\fun{int}{RgX_blocks}{GEN P, long n, long m} writes
+$P(X)=a_0(X)+X^n*a_1(X)*X^n+\ldots+X^{n*(m-1)}\*a_{m-1}(X)$,
+where the $a_i$ are polynomial of degree at most $n-1$
+(except possibly for the last one) and returns
+$[a_0(X),a_1(X),\ldots,a_{m-1}(X)]$.  This is a shallow function.
+
 \fun{void}{RgX_even_odd}{GEN p, GEN *pe, GEN *po} write $p(X) = E(X^2) +
 X O(X^2)$ and set \kbd{*pe = E}, \kbd{*po = O}.
 
-\fun{GEN}{RgX_splitting}{GEN p, long k} write
-$p(X)=a_0(X^k)+X\*a_1(X^k)+\ldots+X^{k-1}\*a_{k-1}(X^k)$ and return
+\fun{GEN}{RgX_splitting}{GEN P, long k} write
+$P(X)=a_0(X^k)+X\*a_1(X^k)+\ldots+X^{k-1}\*a_{k-1}(X^k)$ and return
 $[a_0(X),a_1(X),\ldots,a_{k-1}(X)]$.  This is a shallow function.
 
 \fun{GEN}{RgX_copy}{GEN x} returns (a deep copy of) $\kbd{x}$.

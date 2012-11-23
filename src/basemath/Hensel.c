@@ -654,6 +654,22 @@ ZpXQ_log(GEN a, GEN T, GEN p, long N)
 /**                                                                   **/
 /***********************************************************************/
 /* q = p^N */
+
+static GEN
+FpXT_red(GEN z, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++)
+  {
+    if (typ(gel(z,i))==t_POL)
+      gel(x,i) = FpX_red(gel(z,i), p);
+    else
+      gel(x,i) = FpXT_red(gel(z,i), p);
+  }
+  return x;
+}
+
 GEN
 gen_ZpX_Dixon(GEN F, GEN V, GEN q, GEN p, long N, void *E,
                             GEN lin(void *E, GEN F, GEN d, GEN q),
@@ -666,7 +682,7 @@ gen_ZpX_Dixon(GEN F, GEN V, GEN q, GEN p, long N, void *E,
   V = FpX_red(V, q);
   if (N == 1) return invl(E, V);
   N2 = (N + 1)>>1; M = N - N2;
-  F = FpXV_red(F, q);
+  F = FpXT_red(F, q);
   qM = powiu(p, M);
   q2 = M == N2? qM: mulii(qM, p);
   /* q2 = p^N2, qM = p^M, q = q2 * qM */

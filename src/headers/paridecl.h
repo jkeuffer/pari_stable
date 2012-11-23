@@ -575,6 +575,7 @@ GEN     RgX_Rg_divexact(GEN x, GEN y);
 GEN     RgX_Rg_mul(GEN y, GEN x);
 GEN     RgX_Rg_sub(GEN y, GEN x);
 GEN     RgX_add(GEN x, GEN y);
+GEN     RgX_blocks(GEN P, long n, long m);
 GEN     RgX_deflate(GEN x0, long d);
 GEN     RgX_deriv(GEN x);
 GEN     RgX_div_by_X_x(GEN a, GEN x, GEN *r);

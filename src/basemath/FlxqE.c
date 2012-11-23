@@ -519,27 +519,28 @@ F3x_canonlift(GEN P, long n)
 { return gen_ZpX_Newton(Flx_to_ZX(P),utoi(3), n, NULL, _can_iter, _can_invd); }
 
 static GEN
-Z3XQ_frob(GEN x, GEN Xm, long m, GEN B, GEN T, GEN p)
+ZpXQ_frob(GEN x, GEN Xm, GEN B, GEN T, GEN q, ulong p)
 {
-  GEN z1 = RgX_inflate(RgX_modXn_shallow(x,m),3);
-  GEN z2 = FpX_mul(Xm,RgX_inflate(RgX_shift(x,-m),3),p);
-  GEN z = FpX_add(z1, z2, p);
-  return FpX_rem_Barrett(z, B, T, p);
+  long n = degpol(T);
+  GEN V = RgX_blocks(RgX_inflate(x, p), n, p);
+  GEN W = ZXV_dotproduct(V, Xm);
+  return FpX_rem_Barrett(W, B, T, q);
 }
 
 struct _lift_lin
 {
-  GEN sqx, T3;
-  GEN ai;
-  long m;
+  ulong p;
+  GEN sqx, Tp;
+  GEN ai, Xm;
 };
 
 static GEN _lift_invl(void *E, GEN x)
 {
   struct _lift_lin *d = (struct _lift_lin *) E;
-  GEN T = d->T3;
-  GEN xai = Flxq_mul(ZX_to_Flx(x,3), d->ai, T, 3);
-  return Flx_to_ZX(Flxq_lroot_fast(xai, d->sqx, T, 3));
+  GEN T = d->Tp;
+  ulong p = d->p;
+  GEN xai = Flxq_mul(ZX_to_Flx(x, p), d->ai, T, p);
+  return Flx_to_ZX(Flxq_lroot_fast(xai, d->sqx, T, p));
 }
 
 static GEN _lift_lin(void *E, GEN F, GEN x2, GEN q)
@@ -547,7 +548,7 @@ static GEN _lift_lin(void *E, GEN F, GEN x2, GEN q)
   struct _lift_lin *d = (struct _lift_lin *) E;
   pari_sp av = avma;
   GEN B = gel(F,3), T = gel(F,4), Xm = gel(F,5);
-  GEN y2  = Z3XQ_frob(x2, Xm, d->m, B, T, q);
+  GEN y2  = ZpXQ_frob(x2, Xm, B, T, q, d->p);
   GEN lin = FpX_add(ZX_mul(gel(F,1), y2), ZX_mul(gel(F,2), x2), q);
   return gerepileupto(av, FpX_rem_Barrett(lin, B, T, q));
 }
@@ -573,21 +574,21 @@ struct _lift_iso
 {
   GEN phi,phix;
   GEN Xm,B,T;
-  long m;
-  GEN sqx;
-  GEN T3;
+  GEN sqx, Tp;
+  ulong p;
 };
 
 static GEN
 _lift_iter(void *E, GEN x2, GEN q)
 {
   struct _lift_iso *d = (struct _lift_iso *) E;
-  GEN BN = FpX_red(d->B, q), TN = FpX_red(d->T, q), XN = FpX_red(d->Xm, q);
-  GEN y2 = Z3XQ_frob(x2, XN, d->m, BN, TN, q);
-  GEN xp = FpXQ_powers(x2, 3, TN, q);
-  GEN yp = FpXQ_powers(y2, 3, TN, q);
+  ulong p = d->p, p1 = (p>>1)+2;
+  GEN BN = FpX_red(d->B, q), TN = FpX_red(d->T, q), XN = FpXV_red(d->Xm, q);
+  GEN y2 = ZpXQ_frob(x2, XN, BN, TN, q, p);
+  GEN xp = FpXQ_powers(x2, p, TN, q);
+  GEN yp = FpXQ_powers(y2, p, TN, q);
   GEN V  = FpM_FpXV_bilinear(d->phi,xp,yp,q);
-  V = ZX_add(V,ZX_add(ZX_sqr(gel(xp,3)),ZX_sqr(gel(yp,3))));
+  V = ZX_add(V,ZX_add(ZX_sqr(gel(xp,p1)),ZX_sqr(gel(yp,p1))));
   V = FpX_rem_Barrett(V,BN,TN,q);
   return mkvec3(V,xp,yp);
 }
@@ -597,24 +598,26 @@ _lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
 {
   struct _lift_iso *d = (struct _lift_iso *) E;
   struct _lift_lin e;
-  GEN BM = FpX_red(d->B, qM), TM = FpX_red(d->T, qM), XM = FpX_red(d->Xm, qM);
+  ulong p = d->p;
+  GEN BM = FpX_red(d->B, qM), TM = FpX_red(d->T, qM), XM = FpXV_red(d->Xm, qM);
   GEN xp = FpXV_red(gel(v,2), qM);
   GEN yp = FpXV_red(gel(v,3), qM);
   GEN Dx = FpM_FpXQV_bilinear(d->phix, xp, yp, BM, TM, qM);
   GEN Dy = FpM_FpXQV_bilinear(d->phix, yp, xp, BM, TM, qM);
   GEN F = mkvec5(Dy, Dx, BM, TM, XM);
-  e.ai = Flxq_inv(ZX_to_Flx(Dy,3),d->T3,3);
-  e.sqx = d->sqx; e.T3 = d->T3; e.m = d->m;
-  return gen_ZpX_Dixon(F, V, qM, utoi(3),M,(void*) &e, _lift_lin, _lift_invl);
+  e.ai = Flxq_inv(ZX_to_Flx(Dy,p),d->Tp,p);
+  e.sqx = d->sqx; e.Tp = d->Tp; e.p=p; e.Xm = XM;
+  return gen_ZpX_Dixon(F,V,qM,utoi(p),M,(void*) &e, _lift_lin, _lift_invl);
 }
 
 static GEN
-lift_isogeny(GEN phi, GEN phix, GEN x0, long n, GEN Xm, long m,
-                      GEN B, GEN T, GEN sqx, GEN T3)
+lift_isogeny(GEN phi, GEN phix, GEN x0, long n, GEN Xm,
+                      GEN B, GEN T, GEN sqx, GEN Tp, ulong p)
 {
   struct _lift_iso d;
-  d.phi=phi, d.phix=phix; d.Xm=Xm; d.m=m; d.B=B; d.T=T; d.sqx=sqx; d.T3=T3;
-  return gen_ZpX_Newton(x0,utoi(3), n,(void*)&d, _lift_iter, _lift_invd);
+  d.phi=phi, d.phix=phix; d.Xm=Xm; d.B=B; d.T=T;
+  d.sqx=sqx; d.Tp=Tp; d.p=p;
+  return gen_ZpX_Newton(x0,utoi(p), n,(void*)&d, _lift_iter, _lift_invd);
 }
 
 static GEN
@@ -664,7 +667,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
 {
   pari_sp av = avma, av2;
   pari_timer ti;
-  long n = degpol(T), N = (n+4)/2, m = 2*n/3;
+  long n = degpol(T), N = (n+4)/2;
   GEN a12 = ss(52734375,45), a13 = ss(421875,30), a14 = stoi(36864000);
   GEN a23 = ss(135806625,16), a24 = stoi(-1069956), a34 = stoi(2232);
   GEN phi = mkmat4( mkcol4(gen_0,a12,a13,a14),
@@ -682,13 +685,14 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   if (DEBUGLEVEL) timer_printf(&ti,"Teich");
   B = FpX_invBarrett(T2, q);
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
-  Xm = FpX_rem_Barrett(monomial(gen_1, 3*m, varn(T)), B, T2, q);
+  Xm = FpXQ_powers(monomial(gen_1,n,varn(T)),2,T2,q);
+  if (DEBUGLEVEL) timer_printf(&ti,"Xm");
   j = Flx_neg(Flxq_inv(a6,T,3),3);
   sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, 3), 2, T, 3);
-  J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, m, B,T2,sqx,T);
+  J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, B,T2,sqx,T,3);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
   A61 = liftcurve(J1,T2,p,N);
-  A60 = Z3XQ_frob(A61,Xm,m,B,T2,q);
+  A60 = ZpXQ_frob(A61,Xm,B,T2,q,3);
   if (DEBUGLEVEL) timer_printf(&ti,"liftcurve");
   X = liftX(a6,A60,T2,p,N);
   if (DEBUGLEVEL) timer_printf(&ti,"X");

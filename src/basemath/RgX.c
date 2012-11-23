@@ -1857,6 +1857,23 @@ RgXQ_norm(GEN x, GEN T)
   return gerepileupto(av, gdiv(y, gpowgs(L, dx)));
 }
 
+GEN
+RgX_blocks(GEN P, long n, long m)
+{
+  GEN z = cgetg(m+1,t_VEC);
+  long i,j, k=2, l = lg(P);
+  for(i=1; i<=m; i++)
+  {
+    GEN zi = cgetg(n+2,t_POL);
+    zi[1] = P[1];
+    gel(z,i) = zi;
+    for(j=2; j<n+2; j++)
+      gel(zi, j) = k==l ? gen_0 : gel(P,k++);
+    zi = ZX_renormalize(zi, n+2);
+  }
+  return z;
+}
+
 /* write p(X) = e(X^2) + Xo(X^2), shallow function */
 void
 RgX_even_odd(GEN p, GEN *pe, GEN *po)
