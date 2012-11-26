@@ -654,7 +654,7 @@ ZM_hnfremdiv(GEN x, GEN y, GEN *Q)
 /**                                                                **/
 /********************************************************************/
 int
-zv_cmp0(GEN V)
+zv_equal0(GEN V)
 {
   long l = lg(V);
   while (--l > 0)

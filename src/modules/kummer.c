@@ -68,13 +68,13 @@ static int
 ok_congruence(GEN X, ulong ell, long lW, GEN vecMsup)
 {
   long i, l;
-  if (zv_cmp0(X)) return 0;
+  if (zv_equal0(X)) return 0;
   l = lg(X);
   for (i=lW; i<l; i++)
     if (X[i] == 0) return 0;
   l = lg(vecMsup);
   for (i=1; i<l; i++)
-    if (zv_cmp0(Flm_Flc_mul(gel(vecMsup,i),X, ell))) return 0;
+    if (zv_equal0(Flm_Flc_mul(gel(vecMsup,i),X, ell))) return 0;
   return 1;
 }
 

@@ -674,7 +674,7 @@ GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
 GEN     zm_to_ZM(GEN z);
-int     zv_cmp0(GEN V);
+int     zv_equal0(GEN V);
 long    zv_content(GEN x);
 int     zv_equal(GEN V, GEN W);
 GEN     zv_neg(GEN x);

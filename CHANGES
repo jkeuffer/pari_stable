@@ -248,6 +248,7 @@ HC 78- reimplement incgam()
 BA 95- rename RgX_check_ZXY -> RgX_check_ZXX, ZXY_max_lg -> to ZXX_max_lg
    96- elleta() and elleisnum(e, 2) to use a theta series formula in
        O~(prec^(3/2)) instead of O~(prec^2).
+BA 97 zv_cmp0 renamed to zv_equal0
 
   Added
     1- mathnf for matrices over K[X] [#41]
