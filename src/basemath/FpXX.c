@@ -829,17 +829,12 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 
 GEN
 FpXQXQ_mul(GEN x, GEN y, GEN S, GEN T, GEN p) {
-  GEN kx = mod_to_Kronecker(x, T);
-  GEN ky = mod_to_Kronecker(y, T);
-  GEN t = Kronecker_to_FpXQX(ZX_mul(kx, ky), T, p);
-  return FpXQX_rem(t, S, T, p);
+  return FpXQX_rem(FpXQX_mul(x, y, T, p), S, T, p);
 }
 
 GEN
 FpXQXQ_sqr(GEN x, GEN S, GEN T, GEN p) {
-  GEN kx = mod_to_Kronecker(x, T);
-  GEN t = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
-  return FpXQX_rem(t, S, T, p);
+  return FpXQX_rem(FpXQX_sqr(x, T, p), S, T, p);
 }
 
 /* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
