@@ -4259,15 +4259,19 @@ map in $\F_p[X]/(P)$ (resp.~$\F_p[X]/(Q)$).
 inverse automorphism of \kbd{S}, in the same format, i.e.~an \kbd{FpX}~$H$
 such that $H(\kbd{S}) \equiv X$ modulo $(\kbd{T}, \kbd{p})$.
 
-\fun{long}{FpXQX_nbfact}{GEN u, GEN T, GEN p}.
-Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
+\fun{long}{FpXQX_nbfact}{GEN S, GEN T, GEN p} returns the number of irreductible
+factor of the polynomial $S$ over the finite field $\F_q$ defined by $T$ and $p$.
 
-\fun{long}{FqX_nbfact}{GEN u, GEN T, GEN p} as above but accept \kbd{T=NULL}.
+\fun{long}{FqX_nbfact}{GEN S, GEN T, GEN p} as above but accept \kbd{T=NULL}.
 
-\fun{long}{FpXQX_nbroots}{GEN f, GEN T, GEN p}
-Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
+\fun{long}{FpXQX_nbroots}{GEN S, GEN T, GEN p} returns the number of roots of the
+polynomial $S$ over the finite field $\F_q$ defined by $T$ and $p$.
 
-\fun{long}{FqX_nbroots}{GEN f, GEN T, GEN p} as above but accept \kbd{T=NULL}.
+\fun{long}{FqX_nbroots}{GEN S, GEN T, GEN p} as above but accept \kbd{T=NULL}.
+
+\fun{GEN}{FpXQX_Frobenius}{GEN S, GEN T, GEN p} returns
+$X^{q}\pmod{S(X)}$ over the finite field $\F_q$ defined by $T$ and $p$, thus
+$q=p^n$ where $n$ is the degree of $T$.
 
 \subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
 prime, to be given the the function arguments; an \kbd{Fl} is an \kbd{ulong}
@@ -4605,6 +4609,8 @@ GCD of $P$ and $Q$ if Euclid's algorithm succeeds and \kbd{NULL} otherwise. In
 particular, if $p$ is not prime or $T$ is not irreducible over $\F_p[X]$, the
 routine may still be used (but will fail if non-invertible leading terms
 occur).
+
+\fun{long}{FlxqX_Frobenius}{GEN f, GEN T, GEN p}, as \kbd{FpXQX\_Frobenius}
 
 \fun{long}{FlxqX_nbroots}{GEN f, GEN T, GEN p}, as \kbd{FpX\_nbroots}.
 

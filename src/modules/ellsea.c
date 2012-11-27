@@ -749,9 +749,7 @@ enum mod_type {MTpathological, MTAtkin, MTElkies, MTone_root, MTroots};
 static GEN
 Flxq_study_eqn(long ell, GEN mpoly, GEN T, ulong p, long *pt_dG, long *pt_r)
 {
-  GEN xp = Flxq_powu(polx_Flx(T[1]), p, T, p);
-  GEN Xp = FlxqXQ_pow(pol_x(0), utoi(p), mpoly, T, p);
-  GEN Xq = gel(FlxqXQV_autpow(mkvec2(xp,Xp), degpol(T), mpoly, T, p),2);
+  GEN Xq = FlxqX_Frobenius(mpoly, T, p);
   GEN G  = FlxqX_gcd(FlxX_sub(Xq, pol_x(0), p), mpoly, T, p);
   *pt_dG = degpol(G);
   if (!*pt_dG)
@@ -781,7 +779,7 @@ Fp_study_eqn(long ell, GEN q, GEN mpoly, GEN p, long *pt_dG, long *pt_r)
 }
 
 static GEN
-Fq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
+FpXQ_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
 {
   GEN G;
   if (lgefint(p)==3)
@@ -795,12 +793,12 @@ Fq_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
   }
   else
   {
-    GEN XP = FqXQ_pow(pol_x(0), q, mpoly, T, p);
-    G  = FqX_gcd(FqX_sub(XP, pol_x(0), T, p), mpoly, T, p);
+    GEN Xq = FpXQX_Frobenius(mpoly, T, p);
+    G  = FpXQX_gcd(FpXX_sub(Xq, pol_x(0), p), mpoly, T, p);
     *pt_dG = degpol(G);
     if (!*pt_dG)
     {
-      GEN L = FqXQ_matrix_pow(XP, ell+1, ell+1, mpoly, T, p);
+      GEN L = FpXQXQ_matrix_pow(Xq, ell+1, ell+1, mpoly, T, p);
       long s = ell + 1 - FqM_rank(RgM_Rg_add(L, gen_m1), T, p);
       *pt_r = (ell + 1)/s;
       return NULL;
@@ -821,8 +819,8 @@ study_modular_eqn(long ell, GEN mpoly, GEN q, GEN T, GEN p, enum mod_type *mt, l
   else
   {
     long dG;
-    g = T ? Fq_study_eqn(ell, q, mpoly, T, p, &dG, ptr_r)
-          : Fp_study_eqn(ell, q, mpoly, p, &dG, ptr_r);
+    g = T ? FpXQ_study_eqn(ell, q, mpoly, T, p, &dG, ptr_r)
+            : Fp_study_eqn(ell, q, mpoly, p, &dG, ptr_r);
     switch(dG)
     {
       case 0:  *mt = MTAtkin; break;
