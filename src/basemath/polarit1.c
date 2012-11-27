@@ -2911,8 +2911,6 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 /*                     FACTORIZATION IN F_q                        */
 /*                                                                 */
 /*******************************************************************/
-static GEN spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p);
-
 static GEN
 to_Fq(GEN x, GEN T, GEN p)
 {
@@ -2975,11 +2973,27 @@ to_FqC(GEN P, GEN T, GEN p, pari_sp av)
   return u;
 }
 
+static GEN
+FqX_Frobenius_powers(GEN S, GEN T, GEN p)
+{
+  long N = degpol(S), n =degpol(T);
+  GEN X = pol_x(varn(S));
+  GEN Xq = FpXQXQ_pow(X, powiu(p, n), S, T, p);
+  return FpXQXQ_powers(Xq, N-1, S, T, p);
+}
+
+static GEN
+FqX_Frobenius_eval(GEN x, GEN V, GEN S, GEN T, GEN p)
+{
+  return FpXQX_FpXQXQV_eval(x, V, S, T, p);
+}
+
 /* split into r factors of degree d */
 static void
 FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
 {
-  long l, v, is2, cnt, dt = degpol(*t), dT = degpol(T);
+  GEN u = *t;
+  long l, v, is2, cnt, dt = degpol(u), dT = degpol(T);
   pari_sp av;
   pari_timer ti;
   GEN w,w0;
@@ -2993,7 +3007,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     w = w0 = FqX_rand(dt,v, T,p);
     if (degpol(w) <= 0) continue;
     for (l=1; l<d; l++) /* sum_{0<i<d} w^(q^i), result in (F_q)^r */
-      w = RgX_add(w0, spec_FqXQ_pow(w, S, T, p));
+      w = RgX_add(w0, FqX_Frobenius_eval(w, S, u, T, p));
     w = FpXQX_red(w, T,p);
     if (is2)
     {
@@ -3073,65 +3087,6 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   gel(P,1) = u; return P;
 }
 
-/* assume n = deg(u) > 1, X over FqX */
-/* return S = [ X^q, X^2q, ... X^(n-1)q ] mod u (in Fq[X]) in Kronecker form */
-static GEN
-init_spec_FqXQ_pow(GEN X, GEN q, GEN u, GEN T, GEN p)
-{
-  long i, n = degpol(u);
-  GEN x, S = cgetg(n, t_VEC);
-
-  if (n == 1) return S;
-  x = FpXQXQ_pow(X, q, u, T, p);
-  gel(S,1) = x;
-  if ((degpol(x)<<1) < degpol(T)) {
-    for (i=2; i < n; i++)
-      gel(S,i) = FqX_rem(FqX_mul(gel(S,i-1), x, T,p), u, T,p);
-  } else {
-    for (i=2; i < n; i++)
-      gel(S,i) = (i&1)? FqX_rem(FqX_mul(gel(S,i-1), x, T,p), u, T,p)
-                      : FqX_rem(FqX_sqr(gel(S,i>>1), T,p), u, T,p);
-  }
-  for (i=1; i < n; i++) gel(S,i) = mod_to_Kronecker(gel(S,i), T);
-  return S;
-}
-
-/* compute x^q, x an FqX. S is as above (vector of FpX, Kronecker forms) */
-static GEN
-spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
-{
-  pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN x0 = x+2, z = gel(x0,0);
-  long i, dx = degpol(x);
-
-  for (i = 1; i <= dx; i++)
-  { /* NB: variables are inconsistant in there. Coefficients of x must be
-     * treated as if they had the same variable as S */
-    GEN d = gel(S,i), c = gel(x0,i);
-    if (!signe(c)) continue;
-    if (typ(c) == t_INT)
-    {
-      if (is_pm1(c)) { if (signe(c) < 0) d = FpX_neg(d,p); }
-      else d = FpX_Fp_mul(d, c, p);
-    }
-    else /* FpX */
-    {
-      if (!degpol(c)) d = FpX_Fp_mul(d, gel(c,2), p);
-      else d = FpX_mul(d, c, p);
-    }
-    z = typ(z)==t_INT? FpX_Fp_add(d, z, p)
-                     : FpX_add(d, z, p);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"spec_FqXQ_pow");
-      z = gerepileupto(av, z);
-    }
-  }
-  z[1] = x[1]; /* make sure variable number is sane */
-  z = Kronecker_to_FpXQX(z, T, p);
-  return gerepileupto(av, z);
-}
-
 static long
 isabsolutepol(GEN f)
 {
@@ -3157,9 +3112,9 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   if (N == 0) return 0;
   if (N == 1) return 1;
   v = X = pol_x(varn(u));
-  S = init_spec_FqXQ_pow(X, q, u, T, p);
+  S = FqX_Frobenius_powers(u, T, p);
   vectrunc_append(z, S);
-  v = spec_FqXQ_pow(v, S, T, p);
+  v = FqX_Frobenius_eval(v, S, u, T, p);
   g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
   dg = degpol(g);
   if (dg > 0) add(z, FqX_normalize(g,T,p), dg);
@@ -3176,11 +3131,11 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   *pz = z;
   if (N <= 1) return 1;
   v = X = pol_x(varn(u));
-  S = init_spec_FqXQ_pow(X, q, u, T, p);
+  S = FqX_Frobenius_powers(u, T, p);
   vectrunc_append(z, S);
   for (d=1; d <= N>>1; d++)
   {
-    v = spec_FqXQ_pow(v, S, T, p);
+    v = FqX_Frobenius_eval(v, S, u, T, p);
     g = FqX_gcd(FpXX_sub(v,X,p),u, T,p);
     dg = degpol(g); if (dg <= 0) continue;
     /* all factors of g have degree d */
@@ -3340,10 +3295,10 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
 
   if (N == 1) return 1;
   v = X = pol_x(varn(u));
-  S = init_spec_FqXQ_pow(X, q, u, T, p);
+  S = FqX_Frobenius_powers(u, T, p);
   for (d=1; d <= N>>1; d++)
   {
-    v = spec_FqXQ_pow(v, S, T, p);
+    v = FqX_Frobenius_eval(v, S, u, T, p);
     g = FqX_normalize(FqX_gcd(FpXX_sub(v,X,p),u, T,p),T,p);
     dg = degpol(g); if (dg <= 0) continue;
 
