@@ -2982,7 +2982,9 @@ FqX_Frobenius_powers(GEN S, GEN T, GEN p)
     ulong pp = p[2];
     GEN Tp = ZX_to_Flx(T,pp), Sp=ZXX_to_FlxX(S,pp,varn(T));
     GEN X = pol_x(varn(S));
-    GEN Xq = FlxqXQ_pow(X, powiu(p, n), Sp, Tp, pp);
+    GEN xp = Flxq_pow(polx_Flx(Tp[1]), p, Tp, pp);
+    GEN Xp = FlxqXQ_pow(X, p, Sp, Tp, pp);
+    GEN Xq = gel(FlxqXQV_autpow(mkvec2(xp,Xp), n, Sp, Tp, pp),2);
     return FlxqXQ_powers(Xq, N-1, Sp, Tp, pp);
   } else
   {
