@@ -396,6 +396,46 @@ GEN     Z_to_FpX(GEN a, GEN p, long v);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 GEN     random_FpX(long d, long v, GEN p);
 
+/* FpX_factor.c */
+
+GEN     F2x_factor(GEN f);
+int     F2x_is_irred(GEN f);
+void    F2xv_to_Flxv_inplace(GEN v);
+void    F2xv_to_ZXV_inplace(GEN v);
+int     Flx_is_irred(GEN f, ulong p);
+GEN     Flx_degfact(GEN f, ulong p);
+GEN     Flx_factor(GEN f, ulong p);
+long    Flx_nbfact(GEN z, ulong p);
+GEN     Flx_nbfact_by_degree(GEN z, long *nb, ulong p);
+long    Flx_nbroots(GEN f, ulong p);
+ulong   Flx_oneroot(GEN f, ulong p);
+GEN     Flx_roots(GEN f, ulong p);
+long    FlxqX_nbroots(GEN f, GEN T, ulong p);
+void    Flxv_to_ZXV_inplace(GEN v);
+GEN     FpX_degfact(GEN f, GEN p);
+int     FpX_is_irred(GEN f, GEN p);
+int     FpX_is_totally_split(GEN f, GEN p);
+GEN     FpX_factor(GEN f, GEN p);
+GEN     FpX_factorff(GEN P, GEN T, GEN p);
+long    FpX_nbfact(GEN f, GEN p);
+long    FpX_nbroots(GEN f, GEN p);
+GEN     FpX_oneroot(GEN f, GEN p);
+GEN     FpX_roots(GEN f, GEN p);
+GEN     FpX_rootsff(GEN P, GEN T, GEN p);
+long    FpXQX_nbfact(GEN u, GEN T, GEN p);
+long    FpXQX_nbroots(GEN f, GEN T, GEN p);
+GEN     FqX_deriv(GEN f, GEN T, GEN p);
+GEN     FqX_factor(GEN x, GEN T, GEN p);
+long    FqX_is_squarefree(GEN P, GEN T, GEN p);
+long    FqX_nbfact(GEN u, GEN T, GEN p);
+long    FqX_nbroots(GEN f, GEN T, GEN p);
+GEN     FqX_roots(GEN f, GEN T, GEN p);
+GEN     factcantor(GEN x, GEN p);
+GEN     factorff(GEN f, GEN p, GEN a);
+GEN     factormod0(GEN f, GEN p,long flag);
+GEN     polrootsff(GEN f, GEN p, GEN T);
+GEN     rootmod0(GEN f, GEN p,long flag);
+
 /* FpXX.c */
 
 GEN     FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p);
@@ -484,6 +524,39 @@ GEN     gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p);
 GEN     gen_ZpM_Dixon(void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e);
 GEN     zCs_to_ZC(GEN C, long nbrow);
 GEN     zMs_to_ZM(GEN M, long nbrow);
+
+/* Hensel.c */
+
+GEN     Zp_sqrtlift(GEN b, GEN a, GEN p, long e);
+GEN     Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e);
+GEN     ZpX_liftfact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
+GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
+GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
+GEN     ZpXQ_inv(GEN a, GEN T, GEN p, long e);
+GEN     ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e);
+GEN     ZpXQ_log(GEN a, GEN T, GEN p, long N);
+GEN     ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e);
+GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
+GEN     ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e);
+GEN     gen_ZpX_Dixon(GEN F, GEN V, GEN q, GEN p, long N, void *E,
+                             GEN lin(void *E, GEN F, GEN d, GEN q),
+                             GEN invl(void *E, GEN d));
+GEN     gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
+                              GEN eval(void *E, GEN f, GEN q),
+                              GEN invd(void *E, GEN V, GEN v, GEN q, long M));
+GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
+ulong   quadratic_prec_mask(long n);
+
+/* QX_factor.c */
+
+GEN     QX_factor(GEN x);
+GEN     ZX_factor(GEN x);
+long    ZX_is_irred(GEN x);
+GEN     ZX_squff(GEN f, GEN *ex);
+GEN     polcyclofactors(GEN f);
+long    poliscyclo(GEN f);
+long    poliscycloprod(GEN f);
+
 
 /* RgV.c */
 
@@ -2563,83 +2636,14 @@ long    vecvecsmall_search(GEN x, GEN y, long flag);
 
 /* polarit1.c */
 
-GEN     F2x_factor(GEN f);
-int     F2x_is_irred(GEN f);
-void    F2xv_to_Flxv_inplace(GEN v);
-void    F2xv_to_ZXV_inplace(GEN v);
-int     Flx_is_irred(GEN f, ulong p);
-GEN     Flx_degfact(GEN f, ulong p);
-GEN     Flx_factor(GEN f, ulong p);
-long    Flx_nbfact(GEN z, ulong p);
-GEN     Flx_nbfact_by_degree(GEN z, long *nb, ulong p);
-long    Flx_nbroots(GEN f, ulong p);
-ulong   Flx_oneroot(GEN f, ulong p);
-GEN     Flx_roots(GEN f, ulong p);
-long    FlxqX_nbroots(GEN f, GEN T, ulong p);
-void    Flxv_to_ZXV_inplace(GEN v);
-GEN     FpX_degfact(GEN f, GEN p);
-int     FpX_is_irred(GEN f, GEN p);
-int     FpX_is_totally_split(GEN f, GEN p);
-GEN     FpX_factor(GEN f, GEN p);
-GEN     FpX_factorff(GEN P, GEN T, GEN p);
-long    FpX_nbfact(GEN f, GEN p);
-long    FpX_nbroots(GEN f, GEN p);
-GEN     FpX_oneroot(GEN f, GEN p);
-GEN     FpX_roots(GEN f, GEN p);
-GEN     FpX_rootsff(GEN P, GEN T, GEN p);
-long    FpXQX_nbfact(GEN u, GEN T, GEN p);
-long    FpXQX_nbroots(GEN f, GEN T, GEN p);
-GEN     FqX_deriv(GEN f, GEN T, GEN p);
-GEN     FqX_factor(GEN x, GEN T, GEN p);
-long    FqX_is_squarefree(GEN P, GEN T, GEN p);
-long    FqX_nbfact(GEN u, GEN T, GEN p);
-long    FqX_nbroots(GEN f, GEN T, GEN p);
-GEN     FqX_roots(GEN f, GEN T, GEN p);
-GEN     factcantor(GEN x, GEN p);
-GEN     factorff(GEN f, GEN p, GEN a);
-GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic(GEN x, GEN p, long r);
 GEN     gdeuc(GEN x, GEN y);
 GEN     grem(GEN x, GEN y);
 GEN     padicappr(GEN f, GEN a);
 GEN     poldivrem(GEN x, GEN y, GEN *pr);
-GEN     polrootsff(GEN f, GEN p, GEN T);
-GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootpadic(GEN f, GEN p, long r);
 GEN     rootpadicfast(GEN f, GEN p, long e);
-
-/* Hensel.c */
-
-GEN     Zp_sqrtlift(GEN b, GEN a, GEN p, long e);
-GEN     Zp_sqrtnlift(GEN b, GEN n, GEN a, GEN p, long e);
-GEN     ZpX_liftfact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
-GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
-GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
-GEN     ZpXQ_inv(GEN a, GEN T, GEN p, long e);
-GEN     ZpXQ_invlift(GEN b, GEN a, GEN T, GEN p, long e);
-GEN     ZpXQ_log(GEN a, GEN T, GEN p, long N);
-GEN     ZpXQ_sqrtnlift(GEN b, GEN n, GEN a, GEN T, GEN p, long e);
-GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
-GEN     ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e);
-GEN     gen_ZpX_Dixon(GEN F, GEN V, GEN q, GEN p, long N, void *E,
-                             GEN lin(void *E, GEN F, GEN d, GEN q),
-                             GEN invl(void *E, GEN d));
-GEN     gen_ZpX_Newton(GEN x, GEN p, long n, void *E,
-                              GEN eval(void *E, GEN f, GEN q),
-                              GEN invd(void *E, GEN V, GEN v, GEN q, long M));
-GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
-ulong   quadratic_prec_mask(long n);
-
-/* QX_factor.c */
-
-GEN     QX_factor(GEN x);
-GEN     ZX_factor(GEN x);
-long    ZX_is_irred(GEN x);
-GEN     ZX_squff(GEN f, GEN *ex);
-GEN     polcyclofactors(GEN f);
-long    poliscyclo(GEN f);
-long    poliscycloprod(GEN f);
 
 /* polarit2.c */
 
