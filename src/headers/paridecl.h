@@ -399,6 +399,8 @@ GEN     random_FpX(long d, long v, GEN p);
 /* FpXX.c */
 
 GEN     FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p);
+GEN     FpXQX_FpXQXQV_eval(GEN P, GEN V, GEN S, GEN T, GEN p);
+GEN     FpXQX_FpXQXQ_eval(GEN P, GEN x, GEN S, GEN T, GEN p);
 GEN     FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr);
 GEN     FpXQX_divrem_Barrett(GEN x, GEN B, GEN S, GEN T, GEN p, GEN *pr);
 GEN     FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv);
@@ -419,6 +421,7 @@ GEN     FpXQXQ_powers(GEN x, long n, GEN S, GEN T, GEN p);
 GEN     FpXQXQ_sqr(GEN x, GEN S, GEN T, GEN p);
 GEN     FpXQXV_prod(GEN V, GEN Tp, GEN p);
 GEN     FpXX_Fp_mul(GEN x, GEN y, GEN p);
+GEN     FpXX_FpX_mul(GEN x, GEN y, GEN p);
 GEN     FpXX_add(GEN x, GEN y, GEN p);
 GEN     FpXX_mulu(GEN P, ulong u, GEN p);
 GEN     FpXX_neg(GEN x, GEN p);

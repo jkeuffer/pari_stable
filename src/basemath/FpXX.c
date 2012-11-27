@@ -196,26 +196,31 @@ static int
 ZXX_is_ZX(GEN a) { return ZXX_is_ZX_spec(a+2,lgpol(a)); }
 
 static GEN
-FpXX_FpX_mulspec(GEN P, GEN U, GEN p, long lU)
+FpXX_FpX_mulspec(GEN P, GEN U, GEN p, long v, long lU)
 {
   long i, lP =lg(P);
   GEN res;
-  res = cgetg(lP, t_POL);
+  res = cgetg(lP, t_POL); res[1] = P[1];
   for(i=2; i<lP; i++)
   {
     GEN Pi = gel(P,i);
     gel(res,i) = typ(Pi)==t_INT? FpX_Fp_mulspec(U, Pi, p, lU):
                                  FpX_mulspec(U, Pi+2, p, lU, lgpol(Pi));
-}
+    setvarn(gel(res,i),v);
+  }
   return FpXQX_renormalize(res,lP);
 }
+
+GEN
+FpXX_FpX_mul(GEN P, GEN U, GEN p)
+{ return FpXX_FpX_mulspec(P,U+2,p,varn(U),lgpol(U)); }
 
 static GEN
 FpXY_FpY_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
 {
   pari_sp av = avma;
   GEN z = RgXY_swapspec(x,degpol(T)-1,MAXVARN,lx);
-  z = FpXX_FpX_mulspec(z,y,p,ly);
+  z = FpXX_FpX_mulspec(z,y,p,MAXVARN,ly);
   z = RgXY_swapspec(z+2,lx+ly+3,varn(T),lgpol(z));
   return gerepilecopy(av,z);
 }
@@ -866,27 +871,51 @@ FpXQXQ_div(GEN x,GEN y,GEN S, GEN T,GEN p)
   return gerepileupto(av, FpXQXQ_mul(x, FpXQXQ_inv(y,S,T,p),S,T,p));
 }
 
-struct FpXQXQ_muldata
-{
-  GEN S, T, p;
-};
-
+typedef struct {
+  GEN T, S;
+  GEN p;
+} FpXQXQ_muldata;
+static GEN
+_FpXQXQ_add(void *data, GEN x, GEN y) {
+  FpXQXQ_muldata *d = (FpXQXQ_muldata*) data;
+  return FpXX_add(x,y, d->p);
+}
+static GEN
+_FpXQXQ_cmul(void *data, GEN P, long a, GEN x) {
+  FpXQXQ_muldata *d = (FpXQXQ_muldata*) data;
+  GEN y = gel(P,a+2);
+  return typ(y)==t_INT ? FpXX_Fp_mul(x,y, d->p):
+                         FpXX_FpX_mul(x,y,d->p);
+}
+static GEN
+_FpXQXQ_red(void *data, GEN x) {
+  FpXQXQ_muldata *d = (FpXQXQ_muldata*) data;
+  return FpXQX_red(x, d->T, d->p);
+}
 static GEN
 _FpXQXQ_mul(void *data, GEN x, GEN y) {
-  struct FpXQXQ_muldata *d = (struct FpXQXQ_muldata *) data;
-  return FpXQXQ_mul(x,y,d->S,d->T,d->p);
+  FpXQXQ_muldata *d = (FpXQXQ_muldata*) data;
+  return FpXQXQ_mul(x,y, d->S,d->T, d->p);
 }
 static GEN
 _FpXQXQ_sqr(void *data, GEN x) {
-  struct FpXQXQ_muldata *d = (struct FpXQXQ_muldata *) data;
-  return FpXQXQ_sqr(x,d->S,d->T,d->p);
+  FpXQXQ_muldata *d = (FpXQXQ_muldata*) data;
+  return FpXQXQ_sqr(x, d->S,d->T, d->p);
 }
 
 static GEN
 _FpXQXQ_one(void *data) {
-  struct FpXQXQ_muldata *d = (struct FpXQXQ_muldata *) data;
+  FpXQXQ_muldata *d = (FpXQXQ_muldata*) data;
   return pol_1(varn(d->S));
 }
+
+static GEN
+_FpXQXQ_zero(void *data) {
+  FpXQXQ_muldata *d = (FpXQXQ_muldata*) data;
+  return pol_0(varn(d->S));
+}
+
+static struct bb_algebra FpXQXQ_algebra = { _FpXQXQ_red,_FpXQXQ_add,_FpXQXQ_mul,_FpXQXQ_sqr,_FpXQXQ_one,_FpXQXQ_zero };
 
 /* x over Fq, return lift(x^n) mod S */
 GEN
@@ -894,7 +923,7 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   GEN y;
-  struct FpXQXQ_muldata D;
+  FpXQXQ_muldata D;
   long s = signe(n);
   if (!s) return pol_1(varn(x));
   if (is_pm1(n)) /* +/- 1 */
@@ -923,7 +952,7 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 GEN
 FpXQXQ_powers(GEN x, long l, GEN S, GEN T, GEN p)
 {
-  struct FpXQXQ_muldata D;
+  FpXQXQ_muldata D;
   int use_sqr = (degpol(x)<<1)>=degpol(T);
   D.S = S; D.T = T; D.p = p;
   return gen_powers(x, l, use_sqr, (void*)&D, &_FpXQXQ_sqr, &_FpXQXQ_mul,&_FpXQXQ_one);
@@ -933,4 +962,23 @@ GEN
 FpXQXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, GEN p)
 {
   return RgXV_to_RgM(FpXQXQ_powers(y,m-1,S,T,p),n);
+}
+
+GEN
+FpXQX_FpXQXQV_eval(GEN P, GEN V, GEN S, GEN T, GEN p)
+{
+  FpXQXQ_muldata D;
+  D.S=S; D.T=T; D.p=p;
+  return gen_bkeval_powers(P, degpol(P), V, (void*)&D, &FpXQXQ_algebra,
+                                                   _FpXQXQ_cmul);
+}
+
+GEN
+FpXQX_FpXQXQ_eval(GEN Q, GEN x, GEN S, GEN T, GEN p)
+{
+  FpXQXQ_muldata D;
+  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  D.S=S; D.T=T; D.p=p;
+  return gen_bkeval(Q, degpol(Q), x, use_sqr, (void*)&D, &FpXQXQ_algebra,
+                                                    _FpXQXQ_cmul);
 }

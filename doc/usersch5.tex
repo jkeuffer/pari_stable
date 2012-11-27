@@ -4035,6 +4035,9 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 \fun{GEN}{FpXX_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{FpXX}~\kbd{x}
 by the \kbd{Fp}~\kbd{y}.
 
+\fun{GEN}{FpXX_FpX_mul}{GEN x, GEN y, GEN p} multiplies the coefficients of the
+\kbd{FpXX}~\kbd{x} by the \kbd{FpX}~\kbd{y}.
+
 \fun{GEN}{FpXX_mulu}{GEN x, GEN y, GEN p} multiplies the \kbd{FpXX}~\kbd{x}
 by the scalar \kbd{y}.
 
@@ -4128,6 +4131,13 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 \fun{GEN}{FpXQX_gcd}{GEN x, GEN y, GEN T, GEN p}
 
 \fun{GEN}{FpXQX_extgcd}{GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv}
+
+\fun{GEN}{FpXQX_FpXQXQ_eval}{GEN f,GEN x,GEN S, GEN T,GEN p} returns
+$\kbd{f}(\kbd{x})$.
+
+\fun{GEN}{FpXQX_FpXQXQV_eval}{GEN f,GEN V,GEN S,GEN T,GEN p} returns
+$\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
+$\kbd{FpXQXQ\_powers}(\kbd{x}, n, \kbd{S}, \kbd{T}, \kbd{p})$.
 
 \fun{GEN}{FpXQXQ_div}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
 \kbd{S} being \kbd{FpXQX}s, returns $\kbd{x}*\kbd{y}^{-1}$ modulo \kbd{S}.
