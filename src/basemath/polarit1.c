@@ -2977,15 +2977,32 @@ static GEN
 FqX_Frobenius_powers(GEN S, GEN T, GEN p)
 {
   long N = degpol(S), n =degpol(T);
-  GEN X = pol_x(varn(S));
-  GEN Xq = FpXQXQ_pow(X, powiu(p, n), S, T, p);
-  return FpXQXQ_powers(Xq, N-1, S, T, p);
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    GEN Tp = ZX_to_Flx(T,pp), Sp=ZXX_to_FlxX(S,pp,varn(T));
+    GEN X = pol_x(varn(S));
+    GEN Xq = FlxqXQ_pow(X, powiu(p, n), Sp, Tp, pp);
+    return FlxqXQ_powers(Xq, N-1, Sp, Tp, pp);
+  } else
+  {
+    GEN X = pol_x(varn(S));
+    GEN Xq = FpXQXQ_pow(X, powiu(p, n), S, T, p);
+    return FpXQXQ_powers(Xq, N-1, S, T, p);
+  }
 }
 
 static GEN
 FqX_Frobenius_eval(GEN x, GEN V, GEN S, GEN T, GEN p)
 {
-  return FpXQX_FpXQXQV_eval(x, V, S, T, p);
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    GEN Tp = ZX_to_Flx(T,pp), Sp = ZXX_to_FlxX(S,pp,varn(T));
+    return FlxX_to_ZXX(FlxqX_FlxqXQV_eval(ZXX_to_FlxX(x,pp,varn(T)), V, Sp, Tp, pp));
+  }
+  else
+    return FpXQX_FpXQXQV_eval(x, V, S, T, p);
 }
 
 /* split into r factors of degree d */
