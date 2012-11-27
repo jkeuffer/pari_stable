@@ -1891,7 +1891,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     if (nb > 1 && degpol(gel(Ti,nb)) != d) { avma = ltop; return NULL; }
     if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) continue;
     if (DEBUGLEVEL >= 1) err_printf("GaloisConj: Trying p=%ld\n", gf->p);
-    Flxv_to_ZXV_inplace(Ti);
+    FlxV_to_ZXV_inplace(Ti);
     gf->fp = d;
     gf->Tmod = Ti; lbot = avma;
     frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);

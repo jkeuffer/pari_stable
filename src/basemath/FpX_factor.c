@@ -1301,19 +1301,19 @@ int
 F2x_is_irred(GEN f) { return !!F2x_factcantor_i(f,2); }
 
 void
-F2xv_to_Flxv_inplace(GEN v)
+F2xV_to_FlxV_inplace(GEN v)
 {
   long i;
   for(i=1;i<lg(v);i++) gel(v,i)= F2x_to_Flx(gel(v,i));
 }
 void
-Flxv_to_ZXV_inplace(GEN v)
+FlxV_to_ZXV_inplace(GEN v)
 {
   long i;
   for(i=1;i<lg(v);i++) gel(v,i)= Flx_to_ZX(gel(v,i));
 }
 void
-F2xv_to_ZXV_inplace(GEN v)
+F2xV_to_ZXV_inplace(GEN v)
 {
   long i;
   for(i=1;i<lg(v);i++) gel(v,i)= F2x_to_ZX(gel(v,i));
@@ -1330,7 +1330,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
   GEN X, E, f2, g, g1, u, v, q, y, t;
   if (p==2) { /*We need to handle 2 specially */
     GEN F = F2x_factcantor_i(Flx_to_F2x(f),flag);
-    if (flag==0) F2xv_to_Flxv_inplace(gel(F,1));
+    if (flag==0) F2xV_to_FlxV_inplace(gel(F,1));
     return F;
   }
   /* Now we assume p odd */
@@ -1446,10 +1446,10 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
     ulong p = pp[2];
     if (p==2) {
       F = F2x_factcantor_i(Flx_to_F2x(f),flag);
-      if (flag==0) F2xv_to_ZXV_inplace(gel(F,1));
+      if (flag==0) F2xV_to_ZXV_inplace(gel(F,1));
     } else {
       F = Flx_factcantor_i(f,p,flag);
-      if (flag==0) Flxv_to_ZXV_inplace(gel(F,1));
+      if (flag==0) FlxV_to_ZXV_inplace(gel(F,1));
     }
     return F;
   }
@@ -1949,7 +1949,7 @@ Flx_Berlekamp_i(GEN f, ulong p, long flag)
   if (p == 2)
   {
     GEN F = F2x_Berlekamp_i(Flx_to_F2x(f),flag);
-    if (flag==0) F2xv_to_Flxv_inplace(gel(F,1));
+    if (flag==0) F2xV_to_FlxV_inplace(gel(F,1));
     return F;
   }
   if (d <= 2) return Flx_factor_deg2(f,p,d,flag);
@@ -2026,10 +2026,10 @@ FpX_Berlekamp_i(GEN f, GEN pp, long flag)
     GEN F;
     if (p == 2) {
       F = F2x_Berlekamp_i(Flx_to_F2x(f), flag);
-      if (flag==0) F2xv_to_ZXV_inplace(gel(F,1));
+      if (flag==0) F2xV_to_ZXV_inplace(gel(F,1));
     } else {
       F = Flx_Berlekamp_i(f, p, flag);
-      if (flag==0) Flxv_to_ZXV_inplace(gel(F,1));
+      if (flag==0) FlxV_to_ZXV_inplace(gel(F,1));
     }
     return F;
   }

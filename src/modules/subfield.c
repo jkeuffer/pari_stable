@@ -553,7 +553,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
     av = avma;
   }
   if (DEBUGLEVEL) err_printf("Chosen prime: p = %ld\n", pp);
-  Flxv_to_ZXV_inplace(oldff);
+  FlxV_to_ZXV_inplace(oldff);
   S->ff = oldff;
   S->lcm= oldlcm;
   S->p  = utoipos(pp);
