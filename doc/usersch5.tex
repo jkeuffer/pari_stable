@@ -4273,6 +4273,10 @@ polynomial $S$ over the finite field $\F_q$ defined by $T$ and $p$.
 $X^{q}\pmod{S(X)}$ over the finite field $\F_q$ defined by $T$ and $p$, thus
 $q=p^n$ where $n$ is the degree of $T$.
 
+\fun{GEN}{FpXQXQ_halfFrobenius}{GEN A, GEN S, GEN T, GEN p} returns
+$A(X)^{{q-1}\over 2}\pmod{S(X)}$ over the finite field $\F_q$ defined by $T$
+and $p$, thus $q=p^n$ where $n$ is the degree of $T$.
+
 \subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
 prime, to be given the the function arguments; an \kbd{Fl} is an \kbd{ulong}
 belonging to $[0,\kbd{p}-1]$, an \kbd{Flx}~\kbd{z} is a \typ{VECSMALL}
@@ -4610,9 +4614,12 @@ particular, if $p$ is not prime or $T$ is not irreducible over $\F_p[X]$, the
 routine may still be used (but will fail if non-invertible leading terms
 occur).
 
-\fun{long}{FlxqX_Frobenius}{GEN f, GEN T, GEN p}, as \kbd{FpXQX\_Frobenius}
+\fun{GEN}{FlxqX_Frobenius}{GEN S, GEN T, GEN p}, as \kbd{FpXQX\_Frobenius}
 
-\fun{long}{FlxqX_nbroots}{GEN f, GEN T, GEN p}, as \kbd{FpX\_nbroots}.
+\fun{GEN}{FlxqXQ_halfFrobenius}{GEN A, GEN S, GEN T, GEN p}, as
+\kbd{FpXQXQ\_halfFrobenius}
+
+\fun{long}{FlxqX_nbroots}{GEN S, GEN T, GEN p}, as \kbd{FpX\_nbroots}.
 
 \fun{GEN}{FlxqX_FlxqXQ_eval}{GEN Q, GEN x, GEN S, GEN T, ulong p} as
 \kbd{FpX\_FpXQ\_eval}.

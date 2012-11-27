@@ -2186,6 +2186,33 @@ to_FqC(GEN P, GEN T, GEN p, pari_sp av)
 }
 
 GEN
+FlxqXQ_halfFrobenius(GEN a, GEN S, GEN T, ulong p)
+{
+  GEN xp = Flxq_powu(polx_Flx(T[1]), p, T, p);
+  GEN Xp = FlxqXQ_pow(pol_x(0), utoi(p), S, T, p);
+  GEN ap2 = FlxqXQ_pow(a,shifti(utoi(p),-1), S, T, p);
+  GEN V = FlxqXQV_autsum(mkvec3(xp,Xp,ap2), degpol(T), S, T, p);
+  return gel(V,3);
+}
+
+GEN
+FpXQXQ_halfFrobenius(GEN a, GEN S, GEN T, GEN p)
+{
+  if (lgefint(p)==3)
+  {
+    ulong pp = p[2];
+    long v = varn(T);
+    GEN Tp = ZX_to_Flx(T,pp), Sp = ZXX_to_FlxX(S,pp,v);
+    return FlxX_to_ZXX(FlxqXQ_halfFrobenius(ZXX_to_FlxX(a,pp,v),Sp,Tp,pp));
+  }
+  else
+  {
+    long n = degpol(T);
+    return FpXQXQ_pow(a, shifti(powiu(p,n),-1), S, T, p);
+  }
+}
+
+GEN
 FlxqX_Frobenius(GEN S, GEN T, ulong p)
 {
   pari_sp av = avma;
@@ -2315,14 +2342,13 @@ FqX_nbfact(GEN u, GEN T, GEN p)
 long
 FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
 {
-  GEN u = *t, a,b,qo2,vker,pol;
+  GEN u = *t, a,b,vker,pol;
   long N = degpol(u), vu = varn(u), vT = varn(T), dT = degpol(T);
   long d, i, ir, L, la, lb;
 
   vker = FqX_Berlekamp_ker(u,q,T,p);
   vker = RgM_to_RgXV(vker,vu);
   d = lg(vker)-1;
-  qo2 = shifti(q, -1); /* (q-1) / 2 */
   pol = cgetg(N+3,t_POL);
   ir = 0;
   /* t[i] irreducible for i < ir, still to be treated for i < L */
@@ -2344,7 +2370,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
         pari_sp av = avma;
         b = FqX_rem(polt, a, T,p);
         if (!degpol(b)) { avma=av; continue; }
-        b = FpXQXQ_pow(b,qo2, a,T,p);
+        b = FpXQXQ_halfFrobenius(b, a,T,p);
         if (!degpol(b)) { avma=av; continue; }
         gel(b,2) = gadd(gel(b,2), gen_1);
         b = FqX_gcd(a,b, T,p); lb = degpol(b);
@@ -2393,7 +2419,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     }
     else
     {
-      w = FpXQXQ_pow(w, shifti(q,-1), *t, T, p);
+      w = FpXQXQ_halfFrobenius(w, *t, T, p);
       /* w in {-1,0,1}^r */
       if (degpol(w) <= 0) continue;
       gel(w,2) = gadd(gel(w,2), gen_1);
