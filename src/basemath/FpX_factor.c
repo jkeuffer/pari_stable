@@ -2314,22 +2314,42 @@ FlxqX_nbroots(GEN f, GEN T, ulong p)
 }
 
 GEN
-FqX_Berlekamp_ker(GEN u, GEN q, GEN T, GEN p)
+FlxqX_Berlekamp_ker(GEN u, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long j,N = degpol(u);
-  GEN XP = FpXQXQ_pow(pol_x(varn(u)),q,u,T,p);
-  GEN Q  = FpXQXQ_matrix_pow(XP,N,N,u,T,p);
+  GEN Xq = FlxqX_Frobenius(u,T,p);
+  GEN Q  = FlxqXQ_matrix_pow(Xq,N,N,u,T,p);
   for (j=1; j<=N; j++)
-    gcoeff(Q,j,j) = Fq_sub(gcoeff(Q,j,j), gen_1, T, p);
-  return gerepileupto(ltop, FqM_ker(Q,T,p));
+    gcoeff(Q,j,j) = Flx_Fl_add(gcoeff(Q,j,j), p-1, p);
+  return gerepileupto(ltop, FlxqM_ker(Q,T,p));
+}
+
+GEN
+FpXQX_Berlekamp_ker(GEN u, GEN T, GEN p)
+{
+  if (lgefint(p)==3)
+  {
+    ulong pp=p[2];
+    GEN Tp = ZX_to_Flx(T,pp), Sp = ZXX_to_FlxX(u,pp,varn(T));
+    return FlxM_to_ZXM(FlxqX_Berlekamp_ker(Sp, Tp, pp));
+  } else
+  {
+    pari_sp ltop=avma;
+    long j,N = degpol(u);
+    GEN Xq = FpXQX_Frobenius(u,T,p);
+    GEN Q  = FpXQXQ_matrix_pow(Xq,N,N,u,T,p);
+    for (j=1; j<=N; j++)
+      gcoeff(Q,j,j) = Fq_sub(gcoeff(Q,j,j), gen_1, T, p);
+    return gerepileupto(ltop, FqM_ker(Q,T,p));
+  }
 }
 
 long
 FpXQX_nbfact(GEN u, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN vker = FqX_Berlekamp_ker(u, powiu(p, degpol(T)), T, p);
+  GEN vker = FpXQX_Berlekamp_ker(u, T, p);
   avma = av; return lg(vker)-1;
 }
 
@@ -2343,24 +2363,21 @@ long
 FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
 {
   GEN u = *t, a,b,vker,pol;
-  long N = degpol(u), vu = varn(u), vT = varn(T), dT = degpol(T);
+  long vu = varn(u), vT = varn(T), dT = degpol(T);
   long d, i, ir, L, la, lb;
 
-  vker = FqX_Berlekamp_ker(u,q,T,p);
+  vker = FpXQX_Berlekamp_ker(u,T,p);
   vker = RgM_to_RgXV(vker,vu);
   d = lg(vker)-1;
-  pol = cgetg(N+3,t_POL);
   ir = 0;
   /* t[i] irreducible for i < ir, still to be treated for i < L */
   for (L=1; L<d; )
   {
-    GEN polt;
-    gel(pol,2) = random_FpX(dT,vT,p);
-    setlg(pol, signe(gel(pol,2))? 3: 2);
-    pol[1] = u[1];
+    pol= scalarpol(random_FpX(dT,vT,p),vu);
     for (i=2; i<=d; i++)
-      pol = gadd(pol, gmul(gel(vker,i), random_FpX(dT,vT,p)));
-    polt = FpXQX_red(pol,T,p);
+      pol = FqX_add(pol, FqX_Fq_mul(gel(vker,i),
+                                    random_FpX(dT,vT,p), T, p), T, p);
+    pol = FpXQX_red(pol,T,p);
     for (i=ir; i<L && L<d; i++)
     {
       a = t[i]; la = degpol(a);
@@ -2368,11 +2385,11 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
       else
       {
         pari_sp av = avma;
-        b = FqX_rem(polt, a, T,p);
-        if (!degpol(b)) { avma=av; continue; }
+        b = FqX_rem(pol, a, T,p);
+        if (degpol(b)<=0) { avma=av; continue; }
         b = FpXQXQ_halfFrobenius(b, a,T,p);
-        if (!degpol(b)) { avma=av; continue; }
-        gel(b,2) = gadd(gel(b,2), gen_1);
+        if (degpol(b)<=0) { avma=av; continue; }
+        gel(b,2) = Fq_sub(gel(b,2), gen_1,T,p);
         b = FqX_gcd(a,b, T,p); lb = degpol(b);
         if (lb && lb < la)
         {
