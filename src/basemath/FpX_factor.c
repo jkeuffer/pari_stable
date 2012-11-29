@@ -2519,7 +2519,7 @@ static void
 add(GEN z, GEN g, long d) { vectrunc_append(z, mkvec2(utoipos(d), g)); }
 /* return number of roots of u; assume deg u >= 0 */
 long
-FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
+FqX_split_deg1(GEN *pz, GEN u, GEN T, GEN p)
 {
   long dg, N = degpol(u);
   GEN v, S, g, X, z = vectrunc_init(N+1);
@@ -2539,7 +2539,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 
 /* return number of factors; z not properly initialized if deg(u) <= 1 */
 long
-FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
+FqX_split_by_degree(GEN *pz, GEN u, GEN T, GEN p)
 {
   long nb = 0, d, dg, N = degpol(u);
   GEN v, S, g, X, z = vectrunc_init(N+1);
@@ -2683,7 +2683,7 @@ FqX_roots_i(GEN f, GEN T, GEN p)
   }
   if (degpol(f)==2)
     return gen_sort(FqX_quad_roots(f,T,p), (void*) &cmp_RgX, &cmp_nodata);
-  switch( FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p) )
+  switch( FqX_split_deg1(&R, f, T, p) )
   {
   case 0: return cgetg(1, t_COL);
   case 1: if (lg(R) == 1) { R = mkvec(f); break; }

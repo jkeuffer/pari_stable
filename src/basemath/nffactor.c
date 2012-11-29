@@ -1649,8 +1649,8 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       if (ltp) red = FqX_normalize(red, aT,ap);
       if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
       q = powiu(ap, degpol(aT));
-      anbf = fl == FACTORS? FqX_split_by_degree(&fa, red, q, aT, ap)
-                          : FqX_split_deg1(&fa, red, q, aT, ap);
+      anbf = fl == FACTORS? FqX_split_by_degree(&fa, red, aT, ap)
+                          : FqX_split_deg1(&fa, red, aT, ap);
     }
     if (fl == ROOTS_SPLIT && anbf < dpol) return anbf;
     if (anbf <= 1)
@@ -1957,7 +1957,7 @@ nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P)
   GEN z, nfpol = nf_get_pol(nf), pol = polcyclo(n_cyclo, MAXVARN);
   long nbf, deg = degpol(pol); /* = eulerphi(n_cyclo) */
   if (P->L->Tp)
-    nbf = FqX_split_deg1(&init_fa, pol, P->q, P->L->Tp, P->L->p);
+    nbf = FqX_split_deg1(&init_fa, pol, P->L->Tp, P->L->p);
   else
   {
     ulong p = itou(P->L->p);
