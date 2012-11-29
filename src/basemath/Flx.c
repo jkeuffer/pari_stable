@@ -3122,7 +3122,8 @@ FlxY_evalx(GEN Q, ulong x, ulong p)
   return Flx_renormalize(z, lb);
 }
 
-GEN FlxY_Flxq_evalx(GEN P, GEN x, GEN T, ulong p)
+GEN
+FlxY_Flxq_evalx(GEN P, GEN x, GEN T, ulong p)
 {
   long i, lP = lg(P);
   GEN res = cgetg(lP,t_POL);

@@ -3760,9 +3760,13 @@ element of $\F_p[X][Y]$. Returns the \kbd{Fp} $Q(x,y)$.
 \fun{GEN}{FpXY_evaly}{GEN Q, GEN y, GEN p, long vy} $Q$ an \kbd{FpXY}, returns
 the \kbd{FpX} $Q(X,y)$, where $X$ is the second variable of $Q$.
 
-\fun{GEN}{FpXY_Fq_evaly}{GEN Q, GEN y, GEN p, long vy} $Q$ an \kbd{FpXY} and
-$y$ being an \kbd{Fq}, returns the \kbd{FqX} $Q(X,y)$, where $X$ is the second
-variable of $Q$.
+\fun{GEN}{FpXY_Fq_evaly}{GEN Q, GEN y, GEN T, GEN p, long vx} $Q$ an \kbd{FpXY}
+and $y$ being an \kbd{Fq}, returns the \kbd{FqX} $Q(X,y)$, where $X$ is the
+second variable of $Q$, and \kbd{vx} is the variable number of $X$.
+
+\fun{GEN}{FpXY_FpXQ_evalx}{GEN x, GEN Y, ulong p} $Q$ an \kbd{FpXY} and
+$y$ being an \kbd{FpXQ}, returns the \kbd{FpXQX} $Q(x,Y)$, where $Y$ is the
+first variable of $Q$.
 
 \fun{GEN}{FpXV_FpC_mul}{GEN V, GEN W, GEN p} multiplies a non-empty line
 vector of\kbd{FpX} by a column vector of \kbd{Fp} of compatible dimensions.
@@ -4165,6 +4169,18 @@ returning \kbd{NULL} if \kbd{x} is not invertible.
 \kbd{FpXQXQ\_powers}$(x, n-1,S, T, p)$, but returns the powers as a an
 $m\times n$ matrix.
 
+\fun{GEN}{FpXQXQV_autpow}{GEN a, long n, GEN S, GEN T, GEN p}
+$\sigma$ being the automorphism defined by $\sigma(X)=a[1]\pmod{T(X)}$,
+$\sigma(Y)=a[2]\pmod{S(X,Y),T(X)}$, returns $[\sigma^n(X),\sigma^n(Y)]$.
+
+\fun{GEN}{FpXQXQV_autsum}{GEN a, long n, GEN S, GEN T, GEN p}
+$\sigma$ being the automorphism defined by $\sigma(X)=a[1]\pmod{T(X)}$,
+$\sigma(Y)=a[2]\pmod{S(X,Y),T(X)}$, returns the vector
+$[\sigma^n(X),\sigma^n(Y),b\sigma(b)\ldots\sigma^{n-1}(b)]$
+where $b=a[3]$.
+
+% FqXQ
+
 \fun{GEN}{FqXQ_add}{GEN x, GEN y, GEN S, GEN T, GEN p}, \kbd{x}, \kbd{y} and
 \kbd{S} being \kbd{FqX}s, returns $\kbd{x} + \kbd{y}$ modulo \kbd{S}.
 
@@ -4401,9 +4417,6 @@ multiplicity of the $0$ root.
 valuation of \kbd{x}. In particular, if the valuation is $0$, set \kbd{*Z}
 to $x$, not a copy.
 
-\fun{GEN}{FlxYqQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}, as
-\kbd{FpXYQQ\_pow}.
-
 \fun{GEN}{Flx_div_by_X_x}{GEN A, ulong a, ulong p, ulong *rem}, returns the
 Euclidean quotient of the \kbd{Flx}~\kbd{A} by $X - \kbd{a}$, and sets
 \kbd{rem} to the remainder $ \kbd{A}(\kbd{a})$.
@@ -4578,6 +4591,9 @@ in the main variable of \kbd{b}.
 
 \fun{GEN}{FlxX_swap}{GEN x, long n, long ws}, as \kbd{RgXY\_swap}.
 
+\fun{GEN}{FlxYqQ_pow}{GEN x, GEN n, GEN S, GEN T, ulong p}, as
+\kbd{FpXYQQ\_pow}.
+
 \subsec{\kbd{FlxqX}} See \kbd{FpXQX} operations.
 
 \fun{GEN}{FlxqX_mul}{GEN x, GEN y, GEN T, ulong p}
@@ -4645,15 +4661,11 @@ occur).
 
 \fun{GEN}{FlxqXQ_matrix_pow}{GEN x, long n, long m, GEN S, GEN T, ulong p}
 
-\fun{GEN}{FlxqXQV_autpow}{GEN a, long n, long m, GEN S, GEN T, ulong p}
-$\sigma$ being the automorphism defined by $\sigma(x)=a[1]\mod{T}$,
-$\sigma(X)=a[2]\mod{S,T}$, returns $[\sigma^n(x),\sigma^n(X)]$.
+\fun{GEN}{FlxqXQV_autpow}{GEN a, long n, GEN S, GEN T, ulong p}
+as \kbd{FpXQXQV\_autpow}
 
 \fun{GEN}{FlxqXQV_autsum}{GEN a, long n, GEN S, GEN T, ulong p}
-$\sigma$ being the automorphism defined by $\sigma(x)=a[1]\mod{T}$,
-$\sigma(X)=a[2]\mod{S,T}$, returns the vector
-$[\sigma^n(x),\sigma^n(X),b\sigma(b)\ldots\sigma^{n-1}(b)]$
-where $b=a[3]$.
+as \kbd{FpXQXQV\_autsum}
 
 \subsec{\kbd{F2x}} An \kbd{F2x}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial over $\F_2[X]$. Specifically
