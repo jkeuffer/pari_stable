@@ -1645,10 +1645,8 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
     else
     {
-      GEN q;
       if (ltp) red = FqX_normalize(red, aT,ap);
       if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
-      q = powiu(ap, degpol(aT));
       anbf = fl == FACTORS? FqX_split_by_degree(&fa, red, aT, ap)
                           : FqX_split_deg1(&fa, red, aT, ap);
     }
