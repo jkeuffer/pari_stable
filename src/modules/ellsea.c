@@ -752,9 +752,9 @@ Flxq_study_eqn(long ell, GEN mpoly, GEN T, ulong p, long *pt_dG, long *pt_r)
 }
 
 static GEN
-Fp_study_eqn(long ell, GEN q, GEN mpoly, GEN p, long *pt_dG, long *pt_r)
+Fp_study_eqn(long ell, GEN mpoly, GEN p, long *pt_dG, long *pt_r)
 {
-  GEN XP = FpXQ_pow(pol_x(0), q, mpoly, p);
+  GEN XP = FpXQ_pow(pol_x(0), p, mpoly, p);
   GEN G  = FpX_gcd(FpX_sub(XP, pol_x(0), p), mpoly, p);
   *pt_dG = degpol(G);
   if (!*pt_dG)
@@ -768,7 +768,7 @@ Fp_study_eqn(long ell, GEN q, GEN mpoly, GEN p, long *pt_dG, long *pt_r)
 }
 
 static GEN
-FpXQ_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
+FpXQ_study_eqn(long ell, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
 {
   GEN G;
   if (lgefint(p)==3)
@@ -798,7 +798,7 @@ FpXQ_study_eqn(long ell, GEN q, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r
 
 /* Berlekamp variant */
 static GEN
-study_modular_eqn(long ell, GEN mpoly, GEN q, GEN T, GEN p, enum mod_type *mt, long *ptr_r)
+study_modular_eqn(long ell, GEN mpoly, GEN T, GEN p, enum mod_type *mt, long *ptr_r)
 {
   pari_sp ltop = avma;
   GEN g = gen_0;
@@ -808,8 +808,8 @@ study_modular_eqn(long ell, GEN mpoly, GEN q, GEN T, GEN p, enum mod_type *mt, l
   else
   {
     long dG;
-    g = T ? FpXQ_study_eqn(ell, q, mpoly, T, p, &dG, ptr_r)
-            : Fp_study_eqn(ell, q, mpoly, p, &dG, ptr_r);
+    g = T ? FpXQ_study_eqn(ell, mpoly, T, p, &dG, ptr_r)
+            : Fp_study_eqn(ell, mpoly, p, &dG, ptr_r);
     switch(dG)
     {
       case 0:  *mt = MTAtkin; break;
@@ -955,7 +955,7 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN q, GEN T, GEN p, long *ptr_kt, ulong s
   if (DEBUGLEVEL)
   { err_printf("Process prime %5ld. ", ell); timer_start(&ti); }
   meqnj = FqXY_evalx(MEQN.eq, Fq_ellj(a4, a6, T, p), T, p);
-  g = study_modular_eqn(ell, meqnj, q, T, p, &mt, &r);
+  g = study_modular_eqn(ell, meqnj, T, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
   * Then deduce the trace by looking for eigenvalues of the Frobenius by
   * computing modulo this factor */
