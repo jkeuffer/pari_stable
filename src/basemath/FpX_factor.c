@@ -2367,7 +2367,7 @@ FqX_nbfact(GEN u, GEN T, GEN p)
 }
 
 long
-FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
+FqX_split_Berlekamp(GEN *t, GEN T, GEN p)
 {
   GEN u = *t, a,b,vker,pol;
   long vu = varn(u), vT = varn(T), dT = degpol(T);
@@ -2827,7 +2827,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       else
       {
 #if 0
-        lfact += FqX_split_Berlekamp(&gel(t,lfact), q, T, p);
+        lfact += FqX_split_Berlekamp(&gel(t,lfact), T, p);
 #else
         GEN P = FqX_split_Trager(gel(t,lfact), T, p);
         if (P) {
