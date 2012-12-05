@@ -2081,8 +2081,8 @@ decodemodule(GEN nf, GEN fa)
   E = gel(fa,2);
   for (k=1; k<lg(G); k++)
   {
-    long code = itos(gel(G,k)), p = code / nn, j = (code%n)+1;
-    GEN P = idealprimedec(nf, utoipos(p)), e = gel(E,k);
+    long code = G[k], p = code / nn, j = (code%n)+1;
+    GEN P = idealprimedec(nf, utoipos(p)), e = stoi(E[k]);
     if (lg(P) <= j) pari_err_BUG("decodemodule [incorrect hash code]");
     pr = gel(P,j);
     id = id? idealmulpowprime(nf,id, pr,e)

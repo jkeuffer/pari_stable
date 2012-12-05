@@ -45,3 +45,7 @@ bnfisunit(bnf, x+100)
 
 \\#1247
 setrand(1);bnfinit(x^2+1635847).no
+
+\\#1381
+K = bnfinit(x^2+23); L = bnrdisclist(K, 10); s = L[1][2];
+bnfdecodemodule(K, s[1][1])
