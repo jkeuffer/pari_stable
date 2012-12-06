@@ -723,7 +723,8 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
 
   (void)bezout(r,l,&u1,&u2);
   v = grp->pow(E,a,u2);
-  w = grp->pow(E,a,Fp_mul(negi(u1),r,q));
+  w = grp->pow(E,v,l);
+  w = grp->mul(E,w,grp->pow(E,a,gen_m1));
   lim = stack_lim(av,1);
   while (!grp->equal1(w))
   {
