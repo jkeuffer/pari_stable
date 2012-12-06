@@ -1196,20 +1196,20 @@ FpXQ_sqr_mg(GEN y,GEN mg,GEN T,GEN p)
   return gerepileupto(av, FpX_divrem_Barrett_noGC(z, mg, T, p, ONLY_REM));
 }
 
-typedef struct {
+struct _FpXQ {
   GEN T, p, mg;
-} FpX_muldata;
+};
 
 static GEN
 _sqr_Barrett(void *data, GEN x)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return FpXQ_sqr_mg(x,D->mg, D->T, D->p);
 }
 static GEN
 _mul_Barrett(void *data, GEN x, GEN y)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return FpXQ_mul_mg(x,y,D->mg, D->T, D->p);
 }
 
@@ -1228,31 +1228,31 @@ _FpXQ_cmul(void *data, GEN P, long a, GEN x)
 static GEN
 _FpXQ_sqr(void *data, GEN x)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return FpXQ_sqr(x, D->T, D->p);
 }
 static GEN
 _FpXQ_mul(void *data, GEN x, GEN y)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return FpXQ_mul(x,y, D->T, D->p);
 }
 static GEN
 _FpXQ_zero(void *data)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return pol_0(varn(D->T));
 }
 static GEN
 _FpXQ_one(void *data)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return pol_1(varn(D->T));
 }
 static GEN
 _FpXQ_red(void *data, GEN x)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return FpX_red(x,D->p);
 }
 
@@ -1262,7 +1262,7 @@ static struct bb_algebra FpXQ_algebra = { _FpXQ_red,_FpXQ_add,_mul_Barrett,_sqr_
 GEN
 FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
 {
-  FpX_muldata D;
+  struct _FpXQ D;
   pari_sp av;
   long s = signe(n);
   GEN y;
@@ -1302,7 +1302,7 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
 GEN /*Assume n is very small*/
 FpXQ_powu(GEN x, ulong n, GEN T, GEN p)
 {
-  FpX_muldata D;
+  struct _FpXQ D;
   pari_sp av;
   GEN y;
   if (!n) return pol_1(varn(x));
@@ -1328,7 +1328,7 @@ FpXQ_powu(GEN x, ulong n, GEN T, GEN p)
 GEN
 FpXQ_powers(GEN x, long l, GEN T, GEN p)
 {
-  FpX_muldata D;
+  struct _FpXQ D;
   int use_sqr = (degpol(x)<<1)>=degpol(T);
   if (l>2 && lgefint(p) == 3) {
     pari_sp av = avma;
@@ -1354,7 +1354,7 @@ FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
 GEN
 FpX_FpXQV_eval(GEN Q, GEN x, GEN T, GEN p)
 {
-  FpX_muldata D;
+  struct _FpXQ D;
   D.T=T; D.p=p; D.mg = FpX_invBarrett(T,p);
   return gen_bkeval_powers(Q,degpol(Q),x,(void*)&D,&FpXQ_algebra,_FpXQ_cmul);
 }
@@ -1362,7 +1362,7 @@ FpX_FpXQV_eval(GEN Q, GEN x, GEN T, GEN p)
 GEN
 FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
 {
-  FpX_muldata D;
+  struct _FpXQ D;
   int use_sqr;
   if (lgefint(p) == 3)
   {
@@ -1480,7 +1480,7 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
 static GEN
 _FpXQ_pow(void *data, GEN x, GEN y)
 {
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   return FpXQ_pow(x,y, D->T, D->p);
 }
 
@@ -1488,7 +1488,7 @@ static GEN
 _FpXQ_rand(void *data)
 {
   pari_sp av=avma;
-  FpX_muldata *D = (FpX_muldata*)data;
+  struct _FpXQ *D = (struct _FpXQ*)data;
   GEN z;
   do
   {
@@ -1501,7 +1501,7 @@ _FpXQ_rand(void *data)
 static GEN
 _FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
 {
-  FpX_muldata *s=(FpX_muldata*) E;
+  struct _FpXQ *s=(struct _FpXQ*) E;
   if (degpol(a)) return NULL;
   return Fp_FpXQ_log(constant_term(a),g,ord,s->T,s->p);
 }
@@ -1520,7 +1520,7 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   }
   else
   {
-    FpX_muldata s;
+    struct _FpXQ s;
     s.T=T; s.p=p;
     return gen_order(a,ord, (void*)&s,&FpXQ_star);
   }
@@ -1538,7 +1538,7 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   }
   else
   {
-    FpX_muldata s;
+    struct _FpXQ s;
     GEN z;
     s.T=T; s.p=p;
     z = gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star);
@@ -1573,7 +1573,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   }
   else
   {
-    FpX_muldata s;
+    struct _FpXQ s;
     s.T=T; s.p=p;
     return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
                             (void*)&s,&FpXQ_star);
