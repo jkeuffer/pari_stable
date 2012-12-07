@@ -592,52 +592,46 @@ heegner_psi(GEN E, GEN N, GEN ymin, GEN points, long bitprec)
 static GEN
 lambda1(GEN E, GEN p, long prec)
 {
-  pari_sp ltop = avma;
+  pari_sp av;
   GEN res, lp;
   long kod = itos(gel(elllocalred(E, p), 2));
-  avma = ltop;
-  if (kod==2 || kod ==-2) return mkvec(gen_0);
-  lp = glog(p, prec);
+  if (kod==2 || kod ==-2) return cgetg(1,t_VEC);
+  av = avma; lp = glog(p, prec);
   if (kod > 4)
   {
-    long j, m = kod - 4;
     long n = Z_pval(ell_get_disc(E), p);
-    long nl = 1 + (m >> 1L);
-    res = cgetg(nl+1, t_VEC);
-    for (j = 1; j <= nl; j++)
-      /* *= (j-1)^2/n - (j-1) */
-      gel(res, j) = gmul(lp, gsubgs(gdivgs(sqrs(j - 1), n), j - 1));
+    long j, m = kod - 4, nl = 1 + (m >> 1L);
+    res = cgetg(nl, t_VEC);
+    for (j = 1; j < nl; j++)
+      gel(res, j) = gmul(lp, gsubgs(gdivgs(sqru(j), n), j)); /* j^2/n - j */
   }
   else if (kod < -4)
-    res = mkvec3(gen_0, negr(lp), divrs(mulrs(lp, kod), 4));
+    res = mkvec2(negr(lp), divrs(mulrs(lp, kod), 4));
   else
   {
     const long lam[] = {8,9,0,6,0,0,0,3,4};
     long m = -lam[kod+4];
-    res = mkvec2(gen_0, divrs(mulrs(lp, m), 6));
+    res = mkvec(divrs(mulrs(lp, m), 6));
   }
-  return gerepilecopy(ltop, res);
+  return gerepilecopy(av, res);
 }
 
 static GEN
 lambdalist(GEN E, GEN faN, long prec)
 {
   pari_sp ltop = avma;
-  GEN res;
-  long i, j, k, l, m, n;
-  GEN plist = gel(faN, 1);
-  long np = lg(plist);
-  GEN dis = ell_get_disc(E);
-  GEN v = cgetg(np, t_VEC);
-  long lr = 1;
+  GEN plist = gel(faN,1);
+  GEN res, v, D = ell_get_disc(E);
+  long i, j, k, l, m, n, np = lg(plist), lr = 1;
+  v = cgetg(np, t_VEC);
   for (j = 1, i = 1 ; j < np; ++j)
   {
     GEN p = gel(plist, j);
-    if (dvdii(dis, sqri(p)))
+    if (dvdii(D, sqri(p)))
     {
-      GEN l = lambda1(E, p, prec);
-      gel(v, i++) = l;
-      lr *= lg(l)-1;
+      GEN la = lambda1(E, p, prec);
+      gel(v, i++) = la;
+      lr *= lg(la);
     }
   }
   np = i;
@@ -650,8 +644,8 @@ lambdalist(GEN E, GEN faN, long prec)
     for (k = 1; k <= n; k++)
     {
       GEN t = gel(res, k);
-      for (l = 1, m = 0; l < lw; l++, m+=n)
-        gel(res, k + m) = mpadd(t , gel(w, l));
+      for (l = 1, m = n; l < lw; l++, m+=n)
+        gel(res, k + m) = mpadd(t, gel(w, l));
     }
     n = m;
   }
