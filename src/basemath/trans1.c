@@ -1877,6 +1877,7 @@ mpexp(GEN x)
   z = cgetr(l); /* room for result */
   x = modlog2(x, &sh);
   if (!x) { avma = (pari_sp)(z+lg(z)); return real2n(sh, l); }
+  constpi(l); /* precompute for later logr_abs() */
   mask = quadratic_prec_mask(prec2nbits(l)+BITS_IN_LONG);
   for(i=0, p=1; i<s+TWOPOTBITS_IN_LONG; i++) { p <<= 1; if (mask & 1) p-=1; mask >>= 1; }
   a = mpexp_basecase(rtor(x, nbits2prec(p)));
