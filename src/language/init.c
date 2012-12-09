@@ -464,7 +464,7 @@ static size_t
 fix_size(size_t a)
 {
   size_t b = (a / sizeof(long)) * sizeof(long); /* Align */
-  if (b < 1024) b = 1024;
+  if (b < 500000) b = 500000;
   return b;
 }
 /* old = current stack size (0 = unallocated), size = new size */
@@ -743,8 +743,8 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
   pari_init_stack(parisize, 0);
-  diffptr = NULL; initprimetable(maxprime);
   init_universal_constants();
+  diffptr = NULL; initprimetable(maxprime);
   pari_kernel_init();
 
   primetab = cgetalloc(t_VEC, 1);
