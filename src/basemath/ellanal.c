@@ -990,39 +990,8 @@ heegner_indexmultD(GEN faN, GEN a, long D, GEN sqrtD)
   return gerepileupto(av, mulri(mulrr(a, sqrtD), c));
 }
 
-/* E integral model, P != oo in E(Q) */
-static long
-is_tors(GEN E, GEN torsion, GEN P)
-{
-  long a, i;
-  GEN Q, R, dx, dy;
-  if (lg(gel(torsion,2))==1) return 0;
-  dx = Q_denom(gel(P,1));
-  dy = Q_denom(gel(P,2)); /* Nagell Lutz "integrality" condition */
-  if (cmpiu(dx, 4) > 0 || cmpiu(dy, 8) > 0) return 0;
-
-  a = itou(gmael(torsion,2,1)); /* torsion exponent */
-  Q = gmael(torsion,3,1);
-  if (!odd(a))
-  {
-    P = elladd(E,P,P);
-    if (ell_is_inf(P)) return 1;
-    if (a==2) return 0;
-    Q = elladd(E,Q,Q);
-    a >>=1;
-  }
-  if (gequal(P,Q)) return 1;
-  R = Q;
-  for(i=2; i<=a; i++)
-  {
-    R = elladd(E,R,Q);
-    if (gequal(R,P)) return 1;
-  }
-  return 0;
-}
-
 static GEN
-heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN torsion, GEN z, long prec)
+heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN z, long prec)
 {
   long l = lg(lambdas);
   long i, eps;
@@ -1044,8 +1013,11 @@ heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN torsion, GEN z, long prec)
       if (lg(ylist) > 1)
       {
         GEN P = mkvec2(X, gel(ylist, 1));
-        if (DEBUGLEVEL > 0) err_printf("Found point %Ps\n", P);
-        if (!is_tors(E,torsion,P)) return P;
+        GEN hp = ghell(E,P,prec);
+        if (cmprr(hp, shiftr(ht,1)) < 0 && cmprr(hp, shiftr(ht,-1)) > 0)
+          return P;
+        if (DEBUGLEVEL > 0)
+          err_printf("found non-Heegner point %Ps\n", P);
       }
     }
   }
@@ -1053,7 +1025,7 @@ heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN torsion, GEN z, long prec)
 }
 
 static GEN
-heegner_find_point(GEN e, GEN om, GEN ht, GEN torsion, GEN z1, long k, long prec)
+heegner_find_point(GEN e, GEN om, GEN ht, GEN z1, long k, long prec)
 {
   GEN lambdas = lambdalist(e, prec);
   pari_sp av = avma;
@@ -1064,12 +1036,12 @@ heegner_find_point(GEN e, GEN om, GEN ht, GEN torsion, GEN z1, long k, long prec
     GEN P, z2 = divrs(addrr(z1, mulsr(m, Ore)), k);
     if (DEBUGLEVEL > 1)
       err_printf("Trying multiplier %ld\n",m);
-    P = heegner_try_point(e, lambdas, ht, torsion, z2, prec);
+    P = heegner_try_point(e, lambdas, ht, z2, prec);
     if (P) return P;
     if (signe(ell_get_disc(e)) > 0)
     {
       z2 = gadd(z2, gmul2n(Oim, -1));
-      P = heegner_try_point(e, lambdas, ht, torsion, z2, prec);
+      P = heegner_try_point(e, lambdas, ht, z2, prec);
       if (P) return P;
     }
     avma = av;
@@ -1259,8 +1231,9 @@ heegner_find_disc(GEN *ymin, GEN *points, GEN *coefs, long *pind, GEN E,
           GEN pts, cfs, L, indi = grndtoi(sqrtr_abs(indr), &e);
           if (e > expi(indi)-7)
           {
+            bprec++;
             pari_warn(warnprec, "ellL1",bprec);
-            bprec++; continue;
+            continue;
           }
           *pind = itos(indi);
           *ymin = gsqrt(gel(Lk, 1), prec);
@@ -1341,7 +1314,7 @@ ellheegner(GEN E)
   if (DEBUGLEVEL) err_printf("z=%Ps\n", z);
   z = gsub(z, gmul(gel(om,1), ground(gdiv(z, gel(om,1)))));
   lint = wtor > 1 ? cgcd(ind, etor): 1;
-  P = heegner_find_point(E, om, ht, torsion, gmulsg(2*lint, z), lint*2*ind, prec);
+  P = heegner_find_point(E, om, ht, gmulsg(2*lint, z), lint*2*ind, prec);
   if (DEBUGLEVEL) timer_printf(&T,"heegner_find_point");
   if (cb) P = ellchangepointinv(P, cb);
   return gerepilecopy(av, P);
