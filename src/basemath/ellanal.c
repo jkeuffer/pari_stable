@@ -1347,8 +1347,7 @@ ellheegner(GEN E)
     gel(points, i) = qfb_root(gmael(pts, i, 1), vDi);
   if (DEBUGLEVEL) timer_start(&T);
   s = heegner_psi(E, N, ymin, points, bitprec);
-  if (DEBUGLEVEL)
-    timer_printf(&T,"heegner_psi");
+  if (DEBUGLEVEL) timer_printf(&T,"heegner_psi");
   z = mulir(gmael(pts, 1, 2), gel(s, 1));
   for (k = 2; k < l; ++k)
     z = addrr(z, mulir(gmael(pts, k, 2), gel(s, k)));
@@ -1356,9 +1355,7 @@ ellheegner(GEN E)
   z = gsub(z, gmul(gel(om,1), ground(gdiv(z, gel(om,1)))));
   lint = lg(gel(torsion, 2)) >= 2 ? cgcd(ind, itos(gmael(torsion, 2, 1))): 1;
   P = heegner_find_point(E, om, ht, faN, torsion, gmulsg(2*lint, z), lint*2*ind, prec);
-  if (DEBUGLEVEL)
-    timer_printf(&T,"heegner_find_point");
-  if (cb)
-    P = ellchangepointinv(P, cb);
+  if (DEBUGLEVEL) timer_printf(&T,"heegner_find_point");
+  if (cb) P = ellchangepointinv(P, cb);
   return gerepilecopy(av, P);
 }
