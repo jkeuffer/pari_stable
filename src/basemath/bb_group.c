@@ -739,7 +739,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
     dl = gen_plog(z,m,l,E,grp);
     if (typ(dl) != t_INT) { avma = av; return NULL; }
     dl = negi(dl);
-    p1 = grp->pow(E,y, Fp_mul(dl,powiu(l,e-k-1),q));
+    p1 = grp->pow(E, grp->pow(E,y, dl), powiu(l,e-k-1));
     m = grp->pow(E,m,dl);
     e = k;
     v = grp->mul(E,p1,v);
