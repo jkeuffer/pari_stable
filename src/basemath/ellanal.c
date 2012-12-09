@@ -1011,7 +1011,7 @@ best_lift(GEN N, GEN Q, GEN NQ, GEN f)
 {
   GEN a,b,c,d,M;
   best_point(Q, NQ, f, &c, &d);
-  bezout(mulii(d, Q), mulii(NQ, c), &a, &b);
+  (void)bezout(mulii(d, Q), mulii(NQ, c), &a, &b);
   M = mkmat2( mkcol2(mulii(d, Q), mulii(negi(N), c)),
               mkcol2(b, mulii(a, Q)));
   return qfb_mult(f, M);
@@ -1140,7 +1140,7 @@ heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN torsion, GEN z, long prec)
 {
   long l = lg(lambdas);
   long i, eps;
-  GEN P = greal(pointell(E, z, prec)), x =  gel(P,1);
+  GEN P = greal(pointell(E, z, prec)), x = gel(P,1);
   GEN rh = subrr(ht, shiftr(ellheightoo(E, P, prec),1));
   for (i = 1; i < l; ++i)
   {
