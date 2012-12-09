@@ -1302,18 +1302,20 @@ ellheegner(GEN E)
   pari_sp av = avma;
   GEN z, vDi;
   GEN P, ht, pointsf, pts, points, ymin, D, s, om, indmult;
-  long ind, lint;
+  long ind, lint, wtor, etor;
   long i,k,l;
   long bitprec=16, prec=nbits2prec(bitprec)+1;
   pari_timer T;
   GEN red = ellglobalred(E), N = gel(red, 1), cb = gel(red,2), faN = gel(red,4);
   GEN tam = signe(ell_get_disc(E))>0 ? shifti(gel(red,3),1):gel(red,3);
-  GEN torsion = elltors(E);
-  long wtor = itos( gel(torsion,1) );
+  GEN torsion;
 
   if (trivial_change(cb)) cb = NULL; else E = ellchangecurve(E, cb);
   if (ellrootno_global(E, faN) == 1)
     pari_err_DOMAIN("ellheegner", "(analytic rank)%2","=",gen_0,E);
+  torsion = elltors(E);
+  wtor = itos( gel(torsion,1) ); /* #E(Q)_tor */
+  etor = wtor > 1? itos(gmael(torsion, 2, 1)): 1; /* exponent of E(Q)_tor */
   om = ellomega_real(E,prec);
   while (1)
   {
@@ -1353,7 +1355,7 @@ ellheegner(GEN E)
     z = addrr(z, mulir(gmael(pts, k, 2), gel(s, k)));
   if (DEBUGLEVEL) err_printf("z=%Ps\n", z);
   z = gsub(z, gmul(gel(om,1), ground(gdiv(z, gel(om,1)))));
-  lint = lg(gel(torsion, 2)) >= 2 ? cgcd(ind, itos(gmael(torsion, 2, 1))): 1;
+  lint = wtor > 1 ? cgcd(ind, etor): 1;
   P = heegner_find_point(E, om, ht, faN, torsion, gmulsg(2*lint, z), lint*2*ind, prec);
   if (DEBUGLEVEL) timer_printf(&T,"heegner_find_point");
   if (cb) P = ellchangepointinv(P, cb);
