@@ -1078,30 +1078,29 @@ heegner_indexmult(GEN om, long t, GEN tam, long prec)
 
 /* omega(gcd(D, N)), given faN = factor(N) */
 static long
-omega_N_D(GEN faN, GEN D)
+omega_N_D(GEN faN, ulong D)
 {
   GEN P = gel(faN, 1);
   long i, l = lg(P), w = 0;
   for (i = 1; i < l; i++)
-    if (dvdii(D, gel(P,i))) w++;
+    if (dvdui(D, gel(P,i))) w++;
   return w;
 }
 
 static GEN
-heegner_indexmultD(GEN faN, GEN a, GEN D, long prec)
+heegner_indexmultD(GEN faN, GEN a, long D, GEN sqrtD)
 {
   pari_sp av = avma;
-  GEN b, c;
-  long wd22;
-  b = sqrtr_abs(itor(D, prec)); /* sqrt(|D|) */
-  if (equalis(D, -3))
-    wd22 = 9;
-  else if (equalis(D, -4))
-    wd22 = 4;
-  else
-    wd22 = 1; /* (w(D)/2)^2 */
-  c = shifti(stoi(wd22), omega_N_D(faN,D)); /* (w(D)/2)^2 * 2^omega(gcd(D,N)) */
-  return gerepileupto(av, mulri(mulrr(a, b), c));
+  GEN c;
+  long w;
+  switch(D)
+  {
+    case -3: w = 9; break;
+    case -4: w = 4; break;
+    default: w = 1;
+  }
+  c = shifti(stoi(w), omega_N_D(faN,-D)); /* (w(D)/2)^2 * 2^omega(gcd(D,N)) */
+  return gerepileupto(av, mulri(mulrr(a, sqrtD), c));
 }
 
 /* E integral model, P != oo in E(Q) */
@@ -1270,7 +1269,8 @@ heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN faN, GEN indmul
     for (k = 1; k < l; ++k)
     {
       GEN P = gel(liste,k), D = gel(P,3);
-      GEN indmultD = heegner_indexmultD(faN, indmult, D, prec);
+      GEN sqrtD = sqrtr_abs(itor(D, prec)); /* sqrt(|D|) */
+      GEN indmultD = heegner_indexmultD(faN, indmult, itos(D), sqrtD);
       GEN mulf = ltwist1(ell, D, 8+expo(indmultD));
       GEN indr = mulrr(indmultD, mulf);
       if (DEBUGLEVEL>=1) err_printf("Index^2 = %Ps\n", indr);
