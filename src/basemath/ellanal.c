@@ -1150,20 +1150,15 @@ heegner_try_point(GEN E, GEN lambdas, GEN ht, GEN torsion, GEN z, long prec)
     d = grndtoi(approxd, &eps);
     if (signe(d) > 0 && eps<-10)
     {
-      GEN d2 = sqri(d);
-      GEN approxn = mulir(d2, x);
-      GEN n, ylist;
-      if (DEBUGLEVEL > 1)
-        err_printf("approxn=%Ps  eps=%ld\n", approxn,eps);
-      n = ground(approxn);
-      ylist = ellordinate(E, gdiv(n, d2), prec);
+      GEN X, ylist, d2 = sqri(d), approxn = mulir(d2, x);
+      if (DEBUGLEVEL > 1) err_printf("approxn=%Ps  eps=%ld\n", approxn,eps);
+      X = gdiv(ground(approxn), d2);
+      ylist = ellordinate(E, X, prec);
       if (lg(ylist) > 1)
       {
-        GEN P = mkvec2(gdiv(n, d2), gel(ylist, 1));
-        if (DEBUGLEVEL > 0)
-          err_printf("Found point %Ps\n", P);
-        if (!is_tors(E,torsion,P))
-          return P;
+        GEN P = mkvec2(X, gel(ylist, 1));
+        if (DEBUGLEVEL > 0) err_printf("Found point %Ps\n", P);
+        if (!is_tors(E,torsion,P)) return P;
       }
     }
   }
