@@ -1243,27 +1243,27 @@ listDisc(GEN fa4N, GEN bad, long d)
 /* L = vector of [q1,q2] or [q1,q2,q2']
  * cd = (b^2 - D)/(4N) */
 static void
-heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN faN, GEN indmult, long prec)
+heegner_find_disc(GEN *ppointsf, long *pind, GEN E, GEN N, GEN faN, GEN indmult, long prec)
 {
   long d = 0;
-  GEN faN4 = fa_shift2(faN);
-  GEN bad = get_bad(ell, gel(faN, 1));
+  GEN faN4, bad;
+  faN4 = fa_shift2(faN);
+  bad = get_bad(E, gel(faN, 1));
   for(;;)
   {
-    GEN liste, listed = listDisc(faN4, bad, d);
-    long k, l = lg(listed);
-    if (DEBUGLEVEL)
-      err_printf("List of discriminants...%Ps\n", listed);
-    liste = cgetg(l, t_VEC);
+    GEN list, listD = listDisc(faN4, bad, d);
+    long k, l = lg(listD);
+    if (DEBUGLEVEL) err_printf("List of discriminants...%Ps\n", listD);
+    list = cgetg(l, t_VEC);
     for (k = 1; k < l; ++k)
-      gel(liste, k) = process_points(ell, N, faN, faN4, listed[k]);
-    liste = vecsort0(liste, gen_1, 4);
+      gel(list, k) = process_points(E, N, faN, faN4, listD[k]);
+    list = vecsort0(list, gen_1, 4);
     for (k = 1; k < l; ++k)
     {
-      GEN P = gel(liste,k), D = gel(P,3);
+      GEN Lk = gel(list,k), D = gel(Lk,3);
       GEN sqrtD = sqrtr_abs(itor(D, prec)); /* sqrt(|D|) */
       GEN indmultD = heegner_indexmultD(faN, indmult, itos(D), sqrtD);
-      GEN mulf = ltwist1(ell, D, 8+expo(indmultD));
+      GEN mulf = ltwist1(E, D, 8+expo(indmultD));
       GEN indr = mulrr(indmultD, mulf);
       if (DEBUGLEVEL>=1) err_printf("Index^2 = %Ps\n", indr);
       if (signe(indr)>0 && expo(indr) >= -1) /* indr >=.5 */
@@ -1271,12 +1271,12 @@ heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN faN, GEN indmul
         long e;
         GEN indi = grndtoi(sqrtr_abs(indr), &e);
         if (e > expi(indi)-7) pari_err_BUG("ellheegner");
-        *ppointsf = P;
+        *ppointsf = Lk;
         *pind = itos(indi);
         return;
       }
     }
-    d = listed[l-1];
+    d = listD[l-1];
   }
 }
 
