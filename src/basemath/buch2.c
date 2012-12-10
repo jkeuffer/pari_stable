@@ -624,7 +624,7 @@ FBgen(FB_t *F, GEN nf, long N, ulong C1, ulong C2, GRHcheck_t *S)
   F->sfb_chg = 0;
   F->FB  = cgetg(C2+1, t_VECSMALL);
   F->iLP = cgetg(C2+1, t_VECSMALL);
-  F->LV = (GEN*)new_chunk(C2+1);
+  F->LV = (GEN*)const_vec(C2, NULL);
 
   prim = icopy(gen_1);
   i = ip = 0;
@@ -729,59 +729,58 @@ store(long i, long e, FACT *fact)
 
 /* divide out x by all P|p, where x as in can_factor().  k = v_p(Nx) */
 static int
-divide_p_elt(FB_t *F, long p, long k, GEN nf, GEN m, FACT *fact)
+divide_p_elt(GEN LP, long ip, long k, GEN nf, GEN m, FACT *fact)
 {
-  GEN P, LP = F->LV[p];
-  long j, v, l = lg(LP), ip = F->iLP[p];
+  long j, l = lg(LP);
   for (j=1; j<l; j++)
   {
-    P = gel(LP,j);
-    v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
+    GEN P = gel(LP,j);
+    long v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
     if (!v) continue;
     store(ip + j, v, fact); /* v = v_P(m) > 0 */
-    k -= v * itos(gel(P,4));
+    k -= v * pr_get_f(P);
     if (!k) return 1;
   }
   return 0;
 }
 static int
-divide_p_id(FB_t *F, long p, long k, GEN nf, GEN I, FACT *fact)
+divide_p_id(GEN LP, long ip, long k, GEN nf, GEN I, FACT *fact)
 {
-  GEN P, LP = F->LV[p];
-  long j, v, l = lg(LP), ip = F->iLP[p];
+  long j, l = lg(LP);
   for (j=1; j<l; j++)
   {
-    P = gel(LP,j);
-    v = idealval(nf,I, P);
+    GEN P = gel(LP,j);
+    long v = idealval(nf,I, P);
     if (!v) continue;
     store(ip + j, v, fact); /* v = v_P(I) > 0 */
-    k -= v * itos(gel(P,4));
+    k -= v * pr_get_f(P);
     if (!k) return 1;
   }
   return 0;
 }
 static int
-divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
+divide_p_quo(GEN LP, long ip, long k, GEN nf, GEN I, GEN m, FACT *fact)
 {
-  GEN P, LP = F->LV[p];
-  long j, v, l = lg(LP), ip = F->iLP[p];
+  long j, l = lg(LP);
   for (j=1; j<l; j++)
   {
-    P = gel(LP,j);
-    v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
+    GEN P = gel(LP,j);
+    long v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
     if (!v) continue;
     v -= idealval(nf,I, P);
     if (!v) continue;
     store(ip + j, v, fact); /* v = v_P(m / I) > 0 */
-    k -= v * itos(gel(P,4));
+    k -= v * pr_get_f(P);
     if (!k) return 1;
   }
   return 0;
 }
 
-/* is *N > 0 a smooth rational integer wrt F ? (put the exponents in *ex) */
+/* *N > 0 is the norm of a primitive ideal, in particular not divisible by
+ * any inert prime. Is *N > 0 a smooth rational integer wrt F ?
+ * (put the exponents in *ex) */
 static int
-smooth_int(FB_t *F, GEN *N, GEN *ex)
+smooth_norm(FB_t *F, GEN *N, GEN *ex)
 {
   GEN FB = F->FB;
   const long KCZ = F->KCZ;
@@ -803,15 +802,22 @@ smooth_int(FB_t *F, GEN *N, GEN *ex)
 static int
 divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
 {
-  if (!m) return divide_p_id (F,p,k,nf,I,fact);
-  if (!I) return divide_p_elt(F,p,k,nf,m,fact);
-  return divide_p_quo(F,p,k,nf,I,m,fact);
+  GEN LP = F->LV[p];
+  long ip = F->iLP[p];
+  if (!LP)
+  {
+    if (!I) pari_err_BUG("divide_p");
+    pari_err_TYPE("divide_p [not an ideal]", I);
+  }
+  if (!m) return divide_p_id (LP,ip,k,nf,I,fact);
+  if (!I) return divide_p_elt(LP,ip,k,nf,m,fact);
+  return divide_p_quo(LP,ip,k,nf,I,m,fact);
 }
 
 /* Let x = m if I == NULL,
  *         I if m == NULL,
  *         m/I otherwise.
- * Can we factor the integral ideal x ? N = Norm x > 0 [DESTROYED] */
+ * Can we factor the integral primitive ideal x ? N = Norm x > 0 [DESTROYED] */
 static long
 can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 {
@@ -819,7 +825,7 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
   long i;
   fact[0].pr = 0;
   if (is_pm1(N)) return 1;
-  if (!smooth_int(F, &N, &ex)) return 0;
+  if (!smooth_norm(F, &N, &ex)) return 0;
   for (i=1; i<=ex[0]; i++)
     if (ex[i] && !divide_p(F, F->FB[i], ex[i], nf, I, m, fact)) return 0;
   return is_pm1(N) || divide_p(F, itos(N), 1, nf, I, m, fact);
@@ -1149,6 +1155,9 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   GEN vecG, z, ex, y, x0, Nx = ZM_det_triangular(x);
   long nbtest_lim, nbtest, i, j, ru, lgsub;
   pari_sp av;
+
+  if (nf_get_degree(nf) != lg(x)-1)
+    pari_err_TYPE("idealtyp [dimension != degree]", x);
 
   /* try without reduction if x is small.
    * N.B. can_factor() destroys its NI argument */
