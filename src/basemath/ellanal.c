@@ -652,35 +652,6 @@ lambdalist(GEN E, GEN faN, long prec)
   return gerepilecopy(ltop, res);
 }
 
-static long
-testdisc(GEN badp, long d)
-{
-  long k, l = lg(badp);
-  for (k = 1; k < l; ++k)
-    if (d % badp[k] == 0) return 0;
-  return 1;
-}
-
-static GEN
-listedisc(GEN fa4N, GEN badp, long d)
-{
-  const long NBR_disc = 10;
-  GEN v = cgetg(NBR_disc+1, t_VECSMALL);
-  pari_sp av = avma;
-  long j = 1;
-  for ( ;; d -= odd(d)? 1: 3)
-  {
-    GEN dd = stoi(d);
-    if (testdisc(badp, d) && Z_isfundamental(dd) && Zn_issquare(dd, fa4N))
-    {
-      v[j++] = d;
-      if (j > NBR_disc) break;
-    }
-    avma = av;
-  }
-  avma = av; return v;
-}
-
 /* L = vector of [q1,q2] or [q1,q2,q2']
  * cd = (b^2 - D)/(4N) */
 static void
@@ -1227,33 +1198,59 @@ fa_shift2(GEN fa)
   return mkmat2(P, E);
 }
 
-/* P = prime divisors of N(E). Return the list of primes p in P, a_p != -1
+/* P = prime divisors of N(E). Return the product of primes p in P, a_p != -1
  * HACK: restrict to small primes since large ones won't divide our C-long
  * discriminants */
 static GEN
-get_badp(GEN E, GEN P)
+get_bad(GEN E, GEN P)
 {
-  long k, l = lg(P), ibadp = 1;
-  GEN badp = cgetg(l, t_VECSMALL);
+  long k, l = lg(P), ibad = 1;
+  GEN B = cgetg(l, t_VECSMALL);
   for (k = 1; k < l; k++)
   {
     GEN p = gel(P,k);
     long pp = itos_or_0(p);
     if (!pp) break;
-    if (! equalim1(ellap(E,p))) badp[ibadp++] = pp;
+    if (! equalim1(ellap(E,p))) B[ibad++] = pp;
   }
-  setlg(badp, ibadp); return badp;
+  setlg(B, ibad); return ibad == 1? NULL: zv_prod_Z(B);
 }
 
+static long
+testDisc(GEN bad, long d)
+{ return !bad || ugcd(umodiu(bad, -d), -d) == 1; }
+/* bad = product of bad primes. Return the NDISC largest fundamental
+ * discriminants D < d such that (D,bad) = 1 and d is a square mod 4N */
+static GEN
+listDisc(GEN fa4N, GEN bad, long d)
+{
+  const long NDISC = 10;
+  GEN v = cgetg(NDISC+1, t_VECSMALL);
+  pari_sp av = avma;
+  long j = 1;
+  for(;;)
+  {
+    d -= odd(d)? 1: 3;
+    if (testDisc(bad,d) && unegisfundamental(-d) && Zn_issquare(stoi(d), fa4N))
+    {
+      v[j++] = d;
+      if (j > NDISC) break;
+    }
+    avma = av;
+  }
+  avma = av; return v;
+}
+/* L = vector of [q1,q2] or [q1,q2,q2']
+ * cd = (b^2 - D)/(4N) */
 static void
 heegner_find_disc(GEN *ppointsf, long *pind, GEN ell, GEN N, GEN faN, GEN indmult, long prec)
 {
   long d = 0;
   GEN faN4 = fa_shift2(faN);
-  GEN badp = get_badp(ell, gel(faN, 1));
+  GEN bad = get_bad(ell, gel(faN, 1));
   for(;;)
   {
-    GEN liste, listed = listedisc(faN4, badp, d);
+    GEN liste, listed = listDisc(faN4, bad, d);
     long k, l = lg(listed);
     if (DEBUGLEVEL)
       err_printf("List of discriminants...%Ps\n", listed);
