@@ -1241,33 +1241,41 @@ heegner_find_disc(GEN *ymin, GEN *points, GEN *coefs, long *pind, GEN E, GEN faN
     list = vecsort0(list, gen_1, 0);
     for (k = l-1; k > 0; --k)
     {
+      long bprec = 8;
       GEN Lk = gel(list,k), D = gel(Lk,3);
       GEN sqrtD = sqrtr_abs(itor(D, prec)); /* sqrt(|D|) */
       GEN indmultD = heegner_indexmultD(faN, indmult, itos(D), sqrtD);
-      GEN mulf = ltwist1(E, D, 8+expo(indmultD));
-      GEN indr = mulrr(indmultD, mulf);
-      if (DEBUGLEVEL>=1) err_printf("Index^2 = %Ps\n", indr);
-      if (signe(indr)>0 && expo(indr) >= -1) /* indr >=.5 */
+      do
       {
-        long e, i, l;
-        GEN pts, cfs, L, indi = grndtoi(sqrtr_abs(indr), &e);
-        if (e > expi(indi)-7) pari_err_BUG("ellheegner");
-        *pind = itos(indi);
-        *ymin = gsqrt(gel(Lk, 1), prec);
-        L = gel(Lk, 2); l = lg(L);
-        pts = cgetg(l, t_VEC);
-        cfs = cgetg(l, t_VECSMALL);
-        for (i = 1; i < l; ++i)
+        GEN mulf = ltwist1(E, D, bprec+expo(indmultD));
+        GEN indr = mulrr(indmultD, mulf);
+        if (DEBUGLEVEL>=1) err_printf("Disc = %Ps, Index^2 = %Ps\n", D, indr);
+        if (signe(indr)>0 && expo(indr) >= -1) /* indr >=.5 */
         {
-          GEN P = gel(L,i), z = gel(P,2), Q = gel(P,3); /* [1 or 2, Q] */
-          long c;
-          gel(pts, i) = qfb_root(gel(P,1), sqrtD);
-          c = rootno(E, Q, gel(faN,1));
-          if (!equali1(z)) c *= 2;
-          cfs[i] = c;
+          long e, i, l;
+          GEN pts, cfs, L, indi = grndtoi(sqrtr_abs(indr), &e);
+          if (e > expi(indi)-7)
+          {
+            pari_warn(warnprec, "ellL1",bprec);
+            bprec++; continue;
+          }
+          *pind = itos(indi);
+          *ymin = gsqrt(gel(Lk, 1), prec);
+          L = gel(Lk, 2); l = lg(L);
+          pts = cgetg(l, t_VEC);
+          cfs = cgetg(l, t_VECSMALL);
+          for (i = 1; i < l; ++i)
+          {
+            GEN P = gel(L,i), z = gel(P,2), Q = gel(P,3); /* [1 or 2, Q] */
+            long c;
+            gel(pts, i) = qfb_root(gel(P,1), sqrtD);
+            c = rootno(E, Q, gel(faN,1));
+            if (!equali1(z)) c *= 2;
+            cfs[i] = c;
+          }
+          *coefs = cfs; *points = pts; return;
         }
-        *coefs = cfs; *points = pts; return;
-      }
+      } while(0);
     }
     d = listD[l-1]; avma = av;
   }
