@@ -24,12 +24,14 @@ e,
 f,
 fu,
 gen,
+group,
 index,
 j,
 mod,
 nf,
 no,
 omega,
+orders,
 eta,
 p,
 pol,
@@ -49,7 +51,7 @@ test(s)=
 {
   for (i=1, #members,
     my (m = members[i]);
-    iferr( print(".", m, ": ",  eval(Str(s,".", m))),
+    iferr( print(".", m, ": ",  eval(Str("s.", m))),
            E, n = errname(E);
               if (n != "e_IMPL" && n != "e_TYPE" && n != "e_MISC", error(E))));
 }
@@ -66,4 +68,4 @@ print("SMALLELL");test( ellinit([1,2,3,4,5], 1) )
 print("INTMOD");test( Mod(1,3) )
 print("POLMOD");test( Mod(x,x^2+1) )
 print("QFB");test( Qfb(1,2,3) )
-print("QUAD"); test( "quadgen(-4)" )
+print("QUAD"); test( quadgen(-4) )

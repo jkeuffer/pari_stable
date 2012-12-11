@@ -260,10 +260,10 @@ check_RES(GEN x, const char *s)
   return y;
 }
 
-GEN
-member_clgp(GEN x) /* class group (3-component row vector) */
+/* y = get_bnf(x, &t) */
+static GEN
+_member_clgp(GEN x, GEN y, long t) /* class group (3-component row vector) */
 {
-  long t; GEN y = get_bnf(x,&t);
   if (!y)
   {
     switch(t)
@@ -280,9 +280,14 @@ member_clgp(GEN x) /* class group (3-component row vector) */
     member_err("clgp",x);
   }
   if (t==typ_BNR) return gel(x,5);
-  y = check_RES(y, "clgp");
-  return gel(y,1);
+  y = check_RES(y, "clgp"); return gel(y,1);
 }
+static GEN
+_check_clgp(GEN x, GEN y, long t)
+{ GEN c = _member_clgp(x,y,t); checkclgp(c); return c; }
+GEN
+member_clgp(GEN x)
+{ long t; GEN y = get_bnf(x,&t); return _check_clgp(x,y,t); }
 
 GEN
 member_reg(GEN x) /* regulator */
@@ -375,7 +380,8 @@ GEN
 member_no(GEN x) /* number of elements of a group (of type clgp) */
 {
   pari_sp av = avma;
-  x = member_clgp(x); checkclgp(x);
+  long t; GEN y = get_bnf(x,&t);
+  x = _check_clgp(x,y,t);
   avma = av; return gel(x,1);
 }
 
@@ -383,7 +389,8 @@ GEN
 member_cyc(GEN x) /* cyclic decomposition (SNF) of a group (of type clgp) */
 {
   pari_sp av = avma;
-  x = member_clgp(x); checkclgp(x);
+  long t; GEN y = get_bnf(x,&t);
+  x = _check_clgp(x,y,t);
   avma = av; return gel(x,2);
 }
 
@@ -393,13 +400,12 @@ GEN
 member_gen(GEN x)
 {
   pari_sp av;
-  long t;
-  GEN y = get_prid(x);
-  if (y) return mkvec2(gel(y,1), gel(y,2));
-  (void)get_nf(x,&t);
+  long t; GEN y = get_bnf(x,&t);
+  if (t == typ_PRID) return mkvec2(gel(x,1), gel(x,2));
   if (t == typ_GAL) return gal_get_gen(x);
+  if (t == typ_ELL) return ellgenerators(x);
   av = avma;
-  x = member_clgp(x); checkclgp(x);
+  x = _check_clgp(x,y,t);
   if (lg(x)!=4) member_err("gen",x);
   avma = av; return gel(x,3);
 }
