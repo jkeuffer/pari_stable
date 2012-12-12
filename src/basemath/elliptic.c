@@ -2629,39 +2629,45 @@ ellintegralmodel(GEN e, GEN *pv)
 
 /* e integral model */
 static void
-standard_model(GEN e, GEN *pv)
+standard_model(GEN *pv, GEN *pe)
 {
-  GEN a1 = ell_get_a1(e), a2 = ell_get_a2(e);
+  GEN e = *pe, a1 = ell_get_a1(e), a2 = ell_get_a2(e);
   GEN r, t, s = truedivis(a1, -2);
-  r = truedivis(addis(subii(a2, mulii(s,addii(s,a1))), 1), -3);
+  r = truedivis(addiu(subii(a2, mulii(s,addii(s,a1))), 1), -3);
   t = truedivis(ellLHS0_i(e,r), -2);
-  composev_rst(pv, r, s, t);
+  E_compose_rst(pv, pe, r, s, t);
 }
 
+/* primes dividing gcd(c4,c6) */
+static GEN
+c4c6_primes(GEN E)
+{
+  GEN c4 = ell_get_c4(E), c6 = ell_get_c6(E);
+  return gel(Z_factor(gcdii(c4,c6)),1);
+}
+
+
+/* E/Q */
 GEN
 ellminimalmodel(GEN E, GEN *ptv)
 {
   pari_sp av = avma;
-  GEN c4, c6, e, v, v0, P;
+  GEN v, v0, P;
   long l, k;
 
-  e = ellintegralmodel(E, &v0);
+  E = ellintegralmodel(E, &v0);
   v = init_ch();
-  c4 = ell_get_c4(e);
-  c6 = ell_get_c6(e);
-  P = gel(Z_factor(gcdii(c4,c6)),1);
-  l = lg(P);
+  P = c4c6_primes(E); l = lg(P);
   for (k = 1; k < l; k++)
   {
-    GEN w = localred(e, gel(P,k), 1);
+    GEN w = localred(E, gel(P,k), 1);
     E_compose(&v, &E, w);
   }
-  standard_model(e, &v);
+  standard_model(&v, &E);
   if (v0) { gcomposev(&v0, v); v = v0; }
-  e = _coordch(E, v);
-  if (ptv) { gerepileall(av, 2, &e, &v); *ptv = v; }
-  else e = gerepilecopy(av, e);
-  return e;
+  if (ptv) { gerepileall(av, 2, &E, &v); *ptv = v; }
+  else E = gerepilecopy(av, E);
+  return E;
 }
 
 /* Reduction of a rational curve E to its standard minimal model
@@ -2675,39 +2681,40 @@ ellminimalmodel(GEN E, GEN *ptv)
 GEN
 ellglobalred(GEN E)
 {
-  long k, l, iN;
   pari_sp av = avma;
-  GEN c, P, NP, NE, Nfa, v, v0, e, c4, c6, D;
+  long k, l, iN;
+  GEN c, L, P, NP, NE, v, v0, D;
 
-  e = ellintegralmodel(E, &v0);
+  E = ellintegralmodel(E, &v0);
   v = init_ch();
-  c4 = ell_get_c4(e);
-  c6 = ell_get_c6(e);
-  D  = ell_get_disc(e);
-  P = gel(Z_factor(gcdii(c4,c6)),1);
-  l = lg(P);
+  P = c4c6_primes(E); l = lg(P);
+  D  = ell_get_disc(E);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
   if (!is_pm1(D)) P = ZV_sort( shallowconcat(P, gel(Z_factor(absi(D)),1)) );
   l = lg(P); c = gen_1;
   iN = 1;
   NP = cgetg(l, t_COL);
   NE = cgetg(l, t_COL);
+  L = cgetg(l, t_VEC);
   for (k = 1; k < l; k++)
   {
-    GEN p = gel(P,k), q = localred(e, p, 0), ex = gel(q,1), w = gel(q,3);
+    GEN p = gel(P,k), q = localred(E, p, 0), ex = gel(q,1), w = gel(q,3);
     if (signe(ex))
     {
       gel(NP, iN) = p;
-      gel(NE, iN) = ex; iN++;
+      gel(NE, iN) = ex;
+      gel(L, iN) = q; iN++;
+      gel(q,3) = gen_0; /*delete variable change*/
+      c = mulii(c, gel(q,4));
     }
-    c = mulii(c, gel(q,4));
-    E_compose(&v, &e, w);
+    E_compose(&v, &E, w);
   }
+  setlg(L, iN);
   setlg(NP, iN);
-  setlg(NE, iN); Nfa = mkmat2(NP, NE);
-  standard_model(e, &v);
+  setlg(NE, iN);
+  standard_model(&v, &E);
   if (v0) { gcomposev(&v0, v); v = v0; }
-  return gerepilecopy(av, mkvec4(factorback(Nfa),v,c,Nfa));
+  return gerepilecopy(av, mkvec4(factorback2(NP,NE), v,c, mkmat2(NP,NE)));
 }
 
 GEN
