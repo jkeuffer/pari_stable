@@ -1361,7 +1361,7 @@ zell(GEN e, GEN z, long prec)
   return gerepileupto(av,t);
 }
 
-enum period_type { t_W, t_WETA, t_SMALLELL, t_ELL };
+enum period_type { t_PER_W, t_PER_WETA, t_PER_SMALLELL, t_PER_ELL };
 /* normalization / argument reduction for ellptic functions */
 typedef struct {
   enum period_type type;
@@ -1506,7 +1506,7 @@ compute_periods(ellred_t *T, GEN z, long prec)
   T->some_q_is_real = 0;
   switch(T->type)
   {
-    case t_SMALLELL:
+    case t_PER_SMALLELL:
     {
       long pr, p = prec;
       if (z && (pr = precision(z))) p = pr;
@@ -1514,15 +1514,15 @@ compute_periods(ellred_t *T, GEN z, long prec)
       w = doellomega_real(e, p);
       T->some_q_is_real = T->q_is_real = 1;
     } /* fall through */
-    case  t_W:
+    case  t_PER_W:
       w = T->in;
       w1 = gel(w,1);
       w2 = gel(w,2); break;
-    case  t_WETA:
+    case  t_PER_WETA:
       w = gel(T->in,1);
       w1 = gel(w,1);
       w2 = gel(w,2); break;
-    case t_ELL:
+    case t_PER_ELL:
       e = T->in;
       w1 = gel(e,15);
       w2 = gel(e,16);
@@ -1542,20 +1542,20 @@ check_periods(GEN e, ellred_t *T)
   switch(lg(e))
   {
     case 14:
-      T->type = t_SMALLELL;
+      T->type = t_PER_SMALLELL;
       break;
     case 20:
       if (!ell_is_real(e)) return 0;
-      T->type = t_ELL;
+      T->type = t_PER_ELL;
       break;
     case 3:
       w1 = gel(e,1);
       if (typ(w1) != t_VEC)
-        T->type = t_W;
+        T->type = t_PER_W;
       else
       {
         if (lg(w1) != 3) return 0;
-        T->type = t_WETA;
+        T->type = t_PER_WETA;
       }
       break;
     default: return 0;
@@ -1829,7 +1829,7 @@ get_c4c6(ellred_t *T, GEN *c4, GEN *c6)
 {
   switch(T->type)
   {
-    case t_ELL: case t_SMALLELL:
+    case t_PER_ELL: case t_PER_SMALLELL:
       *c4 = ell_get_c4(T->in);
       *c6 = ell_get_c6(T->in);
       break;
