@@ -2104,22 +2104,37 @@ localredbug(GEN p, const char *s)
   return NULL; /* not reached */
 }
 
+/* v_p( denom(j(E)) ) >= 0 */
+static long
+j_pval(GEN E, GEN p) { return Z_pval(Q_denom(ell_get_j(E)), p); }
+
+/* Here p > 3. e assumed integral, return v_p(N). Simplified version of
+ * localred_p */
+static long
+localred_p_get_f(GEN e, GEN p)
+{
+  long nuj, nuD;
+  GEN D = ell_get_disc(e);
+  nuj = j_pval(e, p);
+  nuD = Z_pval(D, p);
+  if (nuj == 0) return (nuD % 12)? 2 : 0;
+  return (nuD - nuj) % 12 ? 2: 1;
+}
 /* Here p > 3. e assumed integral, minim = 1 if we only want a minimal model */
 static GEN
 localred_p(GEN e, GEN p, int minim)
 {
   long k, f, kod, c, nuj, nuD;
-  GEN p2, v = init_ch();
-  GEN c4, c6, D, tri;
+  GEN p2, v, tri, c4, c6, D = ell_get_disc(e);
 
   c4 = ell_get_c4(e);
   c6 = ell_get_c6(e);
-  D  = ell_get_disc(e);
-  nuj = gequal0(ell_get_j(e))? 0: - Q_pval(ell_get_j(e), p);
+  nuj = j_pval(e, p);
   nuD = Z_pval(D, p);
   k = (nuj > 0 ? nuD - nuj : nuD) / 12;
   if (k <= 0)
   {
+    v = init_ch();
     if (minim) return v;
   }
   else
@@ -2131,7 +2146,7 @@ localred_p(GEN e, GEN p, int minim)
     if (mpodd(s)) s = addii(s, pk);
     s = shifti(s, -1);
 
-    r = subii(ell_get_a2(e), mulii(s, addii(ell_get_a1(e), s))); /* a_2' */
+    r = subii(ell_get_a2(e), mulii(s, addii(ell_get_a1(e), s)));
     switch(umodiu(r, 3))
     {
       default: break; /* 0 */
@@ -2140,14 +2155,11 @@ localred_p(GEN e, GEN p, int minim)
     }
     r = negi( diviuexact(r, 3) );
 
-    t = negi(ellLHS0_i(e,r)); /* - a_3' */
+    t = negi(ellLHS0_i(e,r));
     if (mpodd(t)) t = addii(t, mulii(pk, p2k));
     t = shifti(t, -1);
 
-    gel(v,1) = pk;
-    gel(v,2) = r;
-    gel(v,3) = s;
-    gel(v,4) = t;
+    v = mkvec4(pk,r,s,t);
     if (minim) return v;
 
     nuD -= 12 * k;
@@ -2166,12 +2178,13 @@ localred_p(GEN e, GEN p, int minim)
         default: return localredbug(p,"localred (p | c6)");
       }
       break;
-    case 6: f = 2; kod = -4-nuj; /* Inu* */
-      if (nuj & 1)
-        c = 3 + kronecker(diviiexact(mulii(c6, D),powiu(p, 9+nuj)), p);
-      else
-        c = 3 + kronecker(diviiexact(D, powiu(p, 6+nuj)), p);
+    case 6:
+    {
+      GEN d = Fp_red(diviiexact(D, powiu(p, 6+nuj)), p);
+      if (nuj & 1) d = Fp_mul(d, diviiexact(c6, powiu(p,3)), p);
+      f = 2; kod = -4-nuj; c = 3 + kronecker(d, p); /* Inu* */
       break;
+    }
     default: return localredbug(p,"localred (nu_D - nu_j != 0,6)");
   }
   else switch(nuD)
@@ -2863,12 +2876,11 @@ ellrootno(GEN e, GEN p)
     e = ell_to_small(e);
     v = ellintegralmodel(e);
     if (v) e = _coordch(e, v);
-    v = localred(e, p, 0);
     switch(pp)
     {
       case 2: s = ellrootno_2(e); break;
       case 3: s = ellrootno_3(e); break;
-      default: s = ellrootno_p(e,p, itou(gel(v,1))); break;
+      default: s = ellrootno_p(e,p, localred_p_get_f(e,p)); break;
     }
   }
   avma = av; return s;
