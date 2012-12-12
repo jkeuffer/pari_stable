@@ -668,10 +668,7 @@ ellchangepoint(GEN x, GEN ch)
   if (typ(x) != t_VEC) pari_err_TYPE("ellchangepoint",x);
   checkcoordch(ch);
   if (lx == 1) return cgetg(1, t_VEC);
-  u = gel(ch,1);
-  r = gel(ch,2);
-  s = gel(ch,3);
-  t = gel(ch,4);
+  u = gel(ch,1); r = gel(ch,2); s = gel(ch,3); t = gel(ch,4);
   v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2);
   tx = typ(gel(x,1));
   if (is_matvec_t(tx))
@@ -685,23 +682,16 @@ ellchangepoint(GEN x, GEN ch)
   return gerepilecopy(av,y);
 }
 
-/* x =  u^2*X +r
- * y =  u^3*Y +s*u^2*X+t */
+/* x = u^2*X + r
+ * y = u^3*Y + s*u^2*X + t */
 static GEN
-ellchangepointinv0(GEN x, GEN u2, GEN u3, GEN r, GEN s, GEN t)
+ellchangepointinv0(GEN P, GEN u2, GEN u3, GEN r, GEN s, GEN t)
 {
-  GEN u2X, z, X, Y;
-  if (ell_is_inf(x)) return x;
-
-  X = gel(x,1);
-  Y = gel(x,2);
-  u2X = gmul(u2,X);
-  z = cgetg(3, t_VEC);
-  gel(z,1) = gadd(u2X, r);
-  gel(z,2) = gadd(gmul(u3, Y), gadd(gmul(s, u2X), t));
-  return z;
+  GEN a, X, Y;
+  if (ell_is_inf(P)) return P;
+  X = gel(P,1); Y = gel(P,2); a = gmul(u2,X);
+  return mkvec2(gadd(a, r), gadd(gmul(u3, Y), gadd(gmul(s, a), t)));
 }
-
 GEN
 ellchangepointinv(GEN x, GEN ch)
 {
@@ -712,12 +702,9 @@ ellchangepointinv(GEN x, GEN ch)
   if (typ(x) != t_VEC) pari_err_TYPE("ellchangepointinv",x);
   checkcoordch(ch);
   if (lx == 1) return cgetg(1, t_VEC);
-  u = gel(ch,1);
-  r = gel(ch,2);
-  s = gel(ch,3);
-  t = gel(ch,4);
-  tx = typ(gel(x,1));
+  u = gel(ch,1); r = gel(ch,2); s = gel(ch,3); t = gel(ch,4);
   u2 = gsqr(u); u3 = gmul(u,u2);
+  tx = typ(gel(x,1));
   if (is_matvec_t(tx))
   {
     y = cgetg(lx,tx);
