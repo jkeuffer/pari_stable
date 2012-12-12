@@ -2580,10 +2580,12 @@ elllocalred(GEN e, GEN p)
   return gerepileupto(av, localred(e, p, 0));
 }
 
+/* Return an integral model for e / Q. Set v = NULL (already integral)
+ * or the variable change [u,0,0,0], u = 1/t, t > 1 integer making e integral */
 static GEN
-ellintegralmodel(GEN e)
+ellintegralmodel(GEN e, GEN *pv)
 {
-  GEN a = cgetg(6,t_VEC), v, L, u;
+  GEN a = cgetg(6,t_VEC), t, u, L;
   long i, l, k;
 
   checksmallell(e);
@@ -2602,12 +2604,11 @@ ellintegralmodel(GEN e)
     }
   }
   /* a = [a1, a2, a3, a4, a6] */
-  l = lg(L);
-  if (l == 1) return NULL;
+  l = lg(L); if (l == 1) { if (pv) *pv = NULL; return e; }
   L = ZV_sort_uniq(L);
   l = lg(L);
 
-  u = gen_1;
+  t = gen_1;
   for (k = 1; k < l; k++)
   {
     GEN p = gel(L,k);
@@ -2619,9 +2620,11 @@ ellintegralmodel(GEN e)
         m = r * n + Q_pval(gel(a,i), p);
         while (m < 0) { n++; m += r; }
       }
-    u = mulii(u, powiu(p, n));
+    t = mulii(t, powiu(p, n));
   }
-  v = init_ch(); gel(v,1) = ginv(u); return v;
+  u = ginv(t);
+  if (pv) *pv = mkvec4(u,gen_0,gen_0,gen_0);
+  return coordch_u(e, u);
 }
 
 /* e integral model */
@@ -2642,9 +2645,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   GEN c4, c6, e, v, v0, P;
   long l, k;
 
-  v0 = ellintegralmodel(E);
-  e = ell_to_small(E);
-  if (v0) e = _coordch(e, v0);
+  e = ellintegralmodel(E, &v0);
   v = init_ch();
   c4 = ell_get_c4(e);
   c6 = ell_get_c6(e);
@@ -2678,9 +2679,7 @@ ellglobalred(GEN E)
   pari_sp av = avma;
   GEN c, P, NP, NE, Nfa, v, v0, e, c4, c6, D;
 
-  v0 = ellintegralmodel(E);
-  e = ell_to_small(E);
-  if (v0) e = _coordch(e, v0);
+  e = ellintegralmodel(E, &v0);
   v = init_ch();
   c4 = ell_get_c4(e);
   c6 = ell_get_c6(e);
@@ -3026,9 +3025,7 @@ ellrootno(GEN e, GEN p)
     if (signe(p) < 0) pari_err_PRIME("ellrootno",p);
     if (!signe(p)) return -1; /* local factor at infinity */
     pp = itou_or_0(p);
-    e = ell_to_small(e);
-    v = ellintegralmodel(e);
-    if (v) e = _coordch(e, v);
+    e = ellintegralmodel(e, &v);
     switch(pp)
     {
       case 2: s = ellrootno_2(e); break;
@@ -3938,8 +3935,7 @@ nagelllutz(GEN e)
   long i, j, nlr, t, t2, k, k2;
   pari_sp av=avma;
 
-  v = ellintegralmodel(e);
-  if (v) e = _coordch(e,v);
+  e = ellintegralmodel(e, &v);
   pol = RgX_rescale(RHSpol(e), utoipos(4));
   r = cgetg(17, t_VEC);
   gel(r,1) = ellinf();
@@ -4064,8 +4060,7 @@ elltors_doud(GEN e)
   GEN v,w,w1,w22,w1j,w12,p,tor1,tor2;
 
   checkell_real(e);
-  v = ellintegralmodel(e);
-  if (v) e = _coordch(e,v);
+  e = ellintegralmodel(e, &v);
 
   B = torsbound(e); /* #E_tor | B */
   if (B == 1) { avma = av; return tors(e,1,NULL,NULL, v); }
@@ -4196,8 +4191,7 @@ elltors_divpol(GEN E)
   GEN T2 = NULL, p, P, Q, v;
   long v2, r2, B;
 
-  v = ellintegralmodel(E);
-  if (v) E = _coordch(E,v);
+  E = ellintegralmodel(E, &v);
 
   B = torsbound(E); /* #E_tor | B */
   if (B == 1) return tors(E,1,NULL,NULL, v);
