@@ -805,6 +805,16 @@ E_compose(GEN *vtotal, GEN *E, GEN w)
   }
 }
 
+/* apply [1,r,0,0] to P */
+static GEN
+ellchangepoint_r(GEN P, GEN r)
+{
+  GEN x, y, a;
+  if (ell_is_inf(P)) return P;
+  x = gel(P,1); y = gel(P,2); a = gsub(x,r);
+  return mkvec2(a, y);
+}
+
 /* X = (x-r)/u^2
  * Y = (y - s(x-r) - t) / u^3 */
 static GEN
@@ -3369,15 +3379,17 @@ hells(GEN e, GEN Q, long prec)
 static GEN
 hell2(GEN e, GEN x, long prec)
 {
-  GEN e3, ro, v, D;
+  GEN e3, ro, r, D;
   pari_sp av = avma;
 
   if (ell_is_inf(x)) return gen_0;
   D = ell_get_disc(e);
-  ro= ell_get_roots(e);
+  ro= ell_rootsprec(e, prec);
   e3 = (gsigne(D) < 0)? gel(ro,1): gel(ro,3);
-  v = init_ch(); gel(v,2) = addis(gfloor(e3),-1);
-  return gerepileupto(av, hells(_coordch(e,v), ellchangepoint(x,v), prec));
+  r = addis(gfloor(e3),-1);
+  e = coordch_r(e, r);
+  x = ellchangepoint_r(x, r);
+  return gerepileupto(av, hells(e, x, prec));
 }
 
 /* exp( h_oo(z) ), assume z on neutral component.
