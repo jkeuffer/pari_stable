@@ -58,9 +58,8 @@ of accuracy $e$ (via \kbd{cvtop}). Shallow function.
 \fun{GEN}{ellinit_real}{GEN x, long prec} initializes an \var{ell} over
 $\R$. Shallow function.
 
-\fun{GEN}{ell_to_small_red}{GEN e, GEN *N} takes an \var{ell} or \var{smallell}
-over the rationals, and returns a global minimal model for $e$, as a
-\var{smallell}. Sets \kbd{*N} to the conductor.
+\fun{GEN}{ell_apply_globalred}{GEN e} takes an \var{ell} over the rationals,
+and returns a global minimal model for $e$.
 
 \subsec{Extracting info from an \kbd{ell} structure}
 

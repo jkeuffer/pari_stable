@@ -501,29 +501,29 @@ area : area                                           ell\n\
 bid  : big ideal                     bid,                           bnr\n\
 bnf  : big number field                                        bnf, bnr\n\
 clgp : class group                   bid,                      bnf, bnr\n\
-cyc  : cyclic decomposition (SNF)    bid,       clgp,          bnf, bnr\n\
+cyc  : cyclic decomposition (SNF)    bid,       clgp, ell,     bnf, bnr\n\
 diff, codiff: different and codifferent                    nf, bnf, bnr\n\
 disc : discriminant                                   ell, nf, bnf, bnr\n\
 e, f : inertia/residue  degree            prid\n\
 fu   : fundamental units                                       bnf, bnr\n\
 gen  : generators                    bid, prid, clgp, ell,     bnf, bnr, gal\n\
-group: group                                                             gal\n\
+group: group                                          ell,             , gal\n\
 index: index                                               nf, bnf, bnr\n\
 j    : j-invariant                                    ell\n");
 /* split: some compilers can't handle long constant strings */
   pari_puts("\
 mod  : modulus                       bid,                           bnr, gal\n\
 nf   : number field                                        nf, bnf, bnr\n\
-no   : number of elements            bid,       clgp,          bnf, bnr\n\
+no   : number of elements            bid,       clgp, ell,     bnf, bnr\n\
 omega, eta: [w1,w2] and [eta1, eta2]                  ell\n\
 orders: relative orders of generators                                    gal\n\
-p    : rational prime                     prid,                          gal\n\
+p    : rational prime                     prid,       ell,             , gal\n\
 pol  : defining polynomial                                 nf, bnf, bnr, gal\n\
 reg  : regulator                                               bnf, bnr\n\
 roots: roots                                          ell, nf, bnf, bnr, gal\n\
 sign,r1,r2 : signature                                     nf, bnf, bnr\n\
 t2   : t2 matrix                                           nf, bnf, bnr\n\
-tate : Tate's [u^2, u, q]                             ell\n\
+tate : Tate's [u^2, u, q, w]                          ell\n\
 tu   : torsion unit and its order                              bnf, bnr\n\
 w    : Mestre's w                                     ell\n\
 zk   : integral basis                                      nf, bnf, bnr\n\

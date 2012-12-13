@@ -180,7 +180,7 @@ get_bnf(GEN x, long *t)
         case 10: *t = typ_NF; return NULL;
         case 11: *t = typ_BNF; return x;
         case 13: *t = typ_RNF; return NULL;
-        case 14: case 19: case 20: *t = typ_ELL; return NULL;
+        case 17: *t = typ_ELL; return NULL;
       }
   }
   *t = typ_NULL; return NULL;
@@ -219,7 +219,7 @@ get_nf(GEN x, long *t)
           x = bnf_get_nf(x); if (typ(x)!=t_VEC || lg(x)!=10) break;
           return x;
         case 13: *t = typ_RNF; return NULL;
-        case 14: case 19: case 20: *t = typ_ELL; return NULL;
+        case 17: *t = typ_ELL; return NULL;
       }
   }
   *t = typ_NULL; return NULL;
@@ -249,7 +249,7 @@ nftyp(GEN x)
         case 9:
           x = gel(x,2);
           if (typ(x) == t_VEC && lg(x) == 4) return typ_GAL;
-        case 14: case 19: case 20: return typ_ELL;
+        case 17: return typ_ELL;
       }
   }
   return typ_NULL;

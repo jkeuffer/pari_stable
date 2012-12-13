@@ -850,6 +850,7 @@ gen_ellgroup(GEN N, GEN d, GEN *pt_m, void *E, const struct bb_group *grp,
 {
   pari_sp av = avma;
   GEN N0, N1, F = ellgroup_d2(N, d);
+  if (pt_m) *pt_m = gen_1;
   if (!F) {avma = av; return mkveccopy(N);}
   N0 = gel(F,1); N1 = diviiexact(N, N0);
   while(1)

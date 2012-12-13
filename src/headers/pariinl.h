@@ -2251,23 +2251,16 @@ INLINE GEN ell_get_c4(GEN e) { return gel(e,10); }
 INLINE GEN ell_get_c6(GEN e) { return gel(e,11); }
 INLINE GEN ell_get_disc(GEN e) { return gel(e,12); }
 INLINE GEN ell_get_j(GEN e) { return gel(e,13); }
-INLINE GEN ell_get_roots(GEN e) { return gel(e,14); }
+INLINE long ell_get_type(GEN e) { return mael(e,14,1); }
+INLINE GEN ellff_get_field(GEN x) { return gmael(x, 15, 1); }
+INLINE GEN ellff_get_a4a6(GEN x)  { return gmael(x, 15, 2); }
+INLINE GEN ellQp_get_zero(GEN x) { return gmael(x, 15, 1); }
+INLINE long ellQp_get_prec(GEN E) { GEN z = ellQp_get_zero(E); return valp(z); }
+INLINE GEN ellQp_get_p(GEN E) { GEN z = ellQp_get_zero(E); return gel(z,2); }
+INLINE long ellR_get_prec(GEN x) { return nbits2prec(mael3(x, 15, 1, 1)); }
 
-INLINE int
-ell_is_inf(GEN z) { return lg(z) < 3; }
-INLINE int
-ell_is_padic(GEN x) { return lg(x) == 20 && typ(gel(x,19)) == t_INT; }
-INLINE int
-ell_is_real(GEN x) { return lg(x) == 20 && typ(gel(x,19)) != t_INT; }
-INLINE GEN
-ellinf(void) { return mkvec(gen_0); }
-
-INLINE GEN ellff_get_field(GEN x) { return gel(x, 14); }
-INLINE GEN ellff_get_a4a6(GEN x)  { return gel(x, 15); }
-INLINE GEN ellff_get_card(GEN x)  { return gel(x, 16); }
-INLINE GEN ellff_get_d1(GEN x)    { GEN D = gel(x, 17); return typ(D)==t_VEC ? gel(D,1): D; }
-INLINE GEN ellff_get_o(GEN x)     { return gel(x, 17); }
-INLINE GEN ellff_get_m(GEN x)     { return gel(x, 18); }
+INLINE int ell_is_inf(GEN z) { return lg(z) < 3; }
+INLINE GEN ellinf(void) { return mkvec(gen_0); }
 
 /*******************************************************************/
 /*                                                                 */

@@ -1,6 +1,6 @@
 Function: ellcard
 Section: elliptic_curves
-C-Name: ellcard0
+C-Name: ellcard
 Prototype: GDG
 Help: ellcard(E,{p}): computes the order of the group E(Fp)
  Assume the equation is minimal at p.

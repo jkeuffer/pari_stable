@@ -1808,9 +1808,12 @@ shiftaddress_canon(GEN x, long dec)
 GEN
 obj_insert(GEN S, long K, GEN O)
 {
-  GEN v = gel(S, lg(S)-1);
+  GEN o, v = gel(S, lg(S)-1);
   if (typ(v) != t_VEC) pari_err_TYPE("obj_insert", S);
-  return gel(v,K) = gclone(O);
+  o = gel(v,K);
+  gel(v,K) = gclone(O); /*SIGINT: before unclone(o)*/
+  if (isclone(o)) gunclone(o);
+  return gel(v,K);
 }
 
 /* Does S [last position] contain data at position K ? Return it, or NULL */
@@ -1829,6 +1832,52 @@ obj_checkbuild(GEN S, long tag, GEN (*build)(GEN))
   if (!O)
   { pari_sp av = avma; O = obj_insert(S, tag, build(S)); avma = av; }
   return O;
+}
+
+GEN
+obj_checkbuild_prec(GEN S, long tag, GEN (*build)(GEN,long), long prec)
+{
+  pari_sp av = avma;
+  GEN w = obj_check(S, tag);
+  if (w)
+  {
+    long p = gprecision(w);
+    if (p >= prec) return gprec_w(w, prec);
+  }
+  w = obj_insert(S, tag, build(S, prec));
+  avma = av; return w;
+}
+
+/* x a t_PADIC/t_FRAC/t_INT or a vector of such */
+static long
+padicprec_relative(GEN x)
+{
+  long i, s;
+  switch(typ(x))
+  {
+    case t_PADIC:
+      return signe(gel(x,4))? precp(x): 0;
+
+    case t_VEC: case t_COL: case t_MAT:
+      for (s=LONG_MAX, i=lg(x)-1; i>0; i--)
+      { long t = padicprec_relative(gel(x,i)); if (t<s) s = t; }
+      return s;
+  }
+  return LONG_MAX;
+}
+
+GEN
+obj_checkbuild_padicprec(GEN S, long tag, GEN (*build)(GEN,long), long prec)
+{
+  pari_sp av = avma;
+  GEN w = obj_check(S, tag);
+  if (w)
+  {
+    long p = padicprec_relative(w);
+    if (p >= prec) return gprec_w(w, prec);
+  }
+  w = obj_insert(S, tag, build(S, prec));
+  avma = av; return w;
 }
 
 /*******************************************************************/

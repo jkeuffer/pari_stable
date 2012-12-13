@@ -168,8 +168,6 @@ E=ellinit([1,1]);
 ellap(E)
 elltaniyama(E,-1)
 ellheight(E,[2,2])
-elllog(ellinit([ffgen(ffinit(5,2)),0]), [1,1], [1,1])
-ellorder(ellinit([ffgen(ffinit(5,2)),0]), [1,1])
 Qfb(0,0,0)
 quadpoly(2)
 qfbprimeform(2,5)

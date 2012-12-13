@@ -5,8 +5,8 @@ ellap(ellinit([0, 0, 1, -1, 0]),2486246173)
 
 testgroup(v,p)=
 { my(E,F,G,g);
-  E=ellinit(v, 1); if(!E, next);
-  E[13] = Mod(0,p); E *= Mod(1,p);/*allow singular curves*/
+  E=ellinit(v); if(!E || E.disc%p==0, next);
+  E[13] = 0; /*allow singular curves*/
   G=ellgroup(E,p,1); if (G.no == 1, return);
   g=G.gen; if (!ellisoncurve(E,g), error(E, G));
   F=vector(#g,i, ellorder(E,g[i],G.no));
@@ -16,7 +16,7 @@ testgroup(v,p)=
 {
   for(x=10,63,
     my(p,E,G,g);
-    p=nextprime(2^x);E=ellinit([0,0,1,2,3],1);
+    p=nextprime(2^x);E=ellinit([0,0,1,2,3]);
     G = ellgroup(E,p,1); if (!ellisoncurve(E,G.gen), error(E));
     if(ellorder(E,G.gen[1])!=G.cyc[1], error(E));
     print(p,":",ellgroup(E,p)));
@@ -66,6 +66,37 @@ a=ffgen(ffinit(2,5),'a);ellinit(ellfromj(a)).j
 a=ffgen(ffinit(3,5),'a);ellinit(ellfromj(a)).j
 elldivpol(ellinit([1,2,3,5,7]),4)
 elldivpol(ellinit([0,0,0,0,1]),8)
+
+e = ellinit([1,2,3,4,5]); ellglobalred(E); e.eta; e.roots;
+E = ellchangecurve(e, [2,3,4,5]);
+E.omega
+E.eta
+E.roots
+ellglobalred(E)
+ellglobalred(e)
+
+E = ellchangecurve(e, [2,3,4,5]*Mod(1,7));
+E.omega
+E.group
+
+ellminimalmodel(ellinit([1/5,1/4,1/3,1/2,1],1),&v)
+v
+
+j=ffgen(ffinit(2,5),'a);e = ellinit(ellfromj(j)); e.group; elllog(e,e.gen[1],e.gen[1])
+E = ellchangecurve(e,[3,7,1,0]);
+E.group
+
+e = ellinit(ellfromj(Mod(1,3))); e.group; elllog(e,e.gen[1],e.gen[1])
+E = ellchangecurve(e,[2,7,1,0]);
+E.group
+
+e = ellinit(ellfromj(Mod(1,5))); e.group; elllog(e,e.gen[1],e.gen[1])
+E = ellchangecurve(e,[2,7,1,0]);
+E.group
+
+e = ellinit(ellfromj(1/3),  O(3^10)); e.tate
+E = ellchangecurve(e,[3,1,1,2]);
+E.tate
 
 \\#1185
 ellwp(ellinit([0,-1,1,-10,-20]),x+O(x^12))

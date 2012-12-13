@@ -23,15 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /********************************************************************/
 INLINE int is_ell5(GEN x) {
   long lx = lg(x);
-  return (typ(x) == t_VEC && (lx == 6 || lx == 14 || lx == 19 || lx == 20));
-}
-INLINE int is_smallell(GEN x) {
-  long lx = lg(x);
-  return (typ(x) == t_VEC && (lx == 14 || lx == 19 || lx == 20));
+  return (typ(x) == t_VEC && (lx == 6 || lx==17));
 }
 INLINE int is_ell(GEN x) {
   long lx = lg(x);
-  return (typ(x) == t_VEC && lx == 20);
+  return (typ(x) == t_VEC && lx == 17);
 }
 
 static void
@@ -58,6 +54,13 @@ member_p(GEN x)
 {
   long t; (void)get_nf(x,&t);
   if (t == typ_GAL) return gal_get_p(x);
+  if (t == typ_ELL) switch(ell_get_type(x))
+  {
+    case t_ELL_Fp:
+    case t_ELL_Fq: return ellff_get_p(x);
+    case t_ELL_Qp: return ellQp_get_p(x);
+    default: member_err("p",x);
+  }
   switch(typ(x)) {
     case t_VEC:
     {
@@ -244,8 +247,14 @@ member_roots(GEN x) /* roots */
   long t; GEN y = get_nf(x,&t);
   if (!y)
   {
-    if (t == typ_ELL && is_ell(x)) return ell_get_roots(x);
     if (t == typ_GAL) return gal_get_roots(x);
+    if (t == typ_ELL)
+      switch(ell_get_type(x))
+      {
+        case t_ELL_Qp: return ellQp_root(x, ellQp_get_prec(x));
+        case t_ELL_Q:
+        case t_ELL_Rg: return ellR_roots(x, ellR_get_prec(x));
+      }
     member_err("roots",x);
   }
   return nf_get_roots(y);
@@ -381,6 +390,11 @@ member_no(GEN x) /* number of elements of a group (of type clgp) */
 {
   pari_sp av = avma;
   long t; GEN y = get_bnf(x,&t);
+  if (t == typ_ELL) switch(ell_get_type(x))
+  {
+    case t_ELL_Fp:
+    case t_ELL_Fq: return ellcard(x, NULL);
+  }
   x = _check_clgp(x,y,t);
   avma = av; return gel(x,1);
 }
@@ -390,6 +404,11 @@ member_cyc(GEN x) /* cyclic decomposition (SNF) of a group (of type clgp) */
 {
   pari_sp av = avma;
   long t; GEN y = get_bnf(x,&t);
+  if (t == typ_ELL) switch(ell_get_type(x))
+  {
+    case t_ELL_Fp:
+    case t_ELL_Fq: return ellgroup(x, NULL);
+  }
   x = _check_clgp(x,y,t);
   avma = av; return gel(x,2);
 }
@@ -414,6 +433,7 @@ member_group(GEN x)
 {
   long t; (void)get_nf(x,&t);
   if (t == typ_GAL) return gal_get_group(x);
+  if (t == typ_ELL) return ellgroup0(x, NULL, 1);
   member_err("group",x);
   return NULL; /* not reached */
 }
@@ -464,49 +484,49 @@ member_a6(GEN x)
 GEN
 member_b2(GEN x)
 {
-  if (!is_smallell(x)) member_err("b2",x);
+  if (!is_ell(x)) member_err("b2",x);
   return ell_get_b2(x);
 }
 
 GEN
 member_b4(GEN x)
 {
-  if (!is_smallell(x)) member_err("b4",x);
+  if (!is_ell(x)) member_err("b4",x);
   return ell_get_b4(x);
 }
 
 GEN
 member_b6(GEN x)
 {
-  if (!is_smallell(x)) member_err("b6",x);
+  if (!is_ell(x)) member_err("b6",x);
   return ell_get_b6(x);
 }
 
 GEN
 member_b8(GEN x)
 {
-  if (!is_smallell(x)) member_err("b8",x);
+  if (!is_ell(x)) member_err("b8",x);
   return ell_get_b8(x);
 }
 
 GEN
 member_c4(GEN x)
 {
-  if (!is_smallell(x)) member_err("c4",x);
+  if (!is_ell(x)) member_err("c4",x);
   return ell_get_c4(x);
 }
 
 GEN
 member_c6(GEN x)
 {
-  if (!is_smallell(x)) member_err("c6",x);
+  if (!is_ell(x)) member_err("c6",x);
   return ell_get_c6(x);
 }
 
 GEN
 member_j(GEN x)
 {
-  if (!is_smallell(x)) member_err("j",x);
+  if (!is_ell(x)) member_err("j",x);
   return ell_get_j(x);
 }
 
@@ -515,7 +535,7 @@ member_omega(GEN x)
 {
   if (!is_ell(x)) member_err("omega",x);
   if (!ell_is_real(x)) pari_err_TYPE("omega [not defined over R]",x);
-  return mkvec2(gel(x,15), gel(x,16));
+  return ellR_omega(x, ellR_get_prec(x));
 }
 
 GEN
@@ -523,29 +543,37 @@ member_eta(GEN x)
 {
   if (!is_ell(x)) member_err("eta",x);
   if (!ell_is_real(x)) pari_err_TYPE("eta [not defined over R]",x);
-  return mkvec2(gel(x,17), gel(x,18));
+  return ellR_eta(x, ellR_get_prec(x));
 }
 
 GEN
 member_area(GEN x)
 {
+  GEN w, w1, w2;
   if (!is_ell(x)) member_err("area",x);
   if (!ell_is_real(x)) pari_err_TYPE("area [not defined over R]",x);
-  return gel(x,19);
+  w = ellR_omega(x, ellR_get_prec(x));
+  w1 = gel(w,1);
+  w2 = gel(w,2);
+  return absr(mulrr(w1, gel(w2,2)));
 }
 
 GEN
 member_tate(GEN x)
 {
+  long prec;
   if (!is_ell(x)) member_err("tate",x);
   if (!ell_is_padic(x)) pari_err_TYPE("tate [not defined over Qp]",x);
-  return mkvec3(gel(x,15), gel(x,16), gel(x,17));
+  prec = ellQp_get_prec(x);
+  return ellQp_Tate_uniformization(x, prec);
 }
 
 GEN
 member_w(GEN x)
 {
+  long prec;
   if (!is_ell(x)) member_err("w",x);
   if (!ell_is_padic(x)) pari_err_TYPE("w [not defined over Qp]",x);
-  return gel(x,18);
+  prec = ellQp_get_prec(x);
+  return ellQp_Tate_w(x, prec);
 }

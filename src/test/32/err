@@ -377,12 +377,6 @@
   ***   at top-level: ellheight(E,[2,2])
   ***                 ^------------------
   *** ellheight: domain error in ellheight: point not on E
-  ***   at top-level: elllog(ellinit([ffge
-  ***                 ^--------------------
-  *** elllog: sorry, elllog [non prime finite field without group order] is not yet implemented.
-  ***   at top-level: ellorder(ellinit([ff
-  ***                 ^--------------------
-  *** ellorder: sorry, ellorder [non prime finite field without group order] is not yet implemented.
   ***   at top-level: Qfb(0,0,0)
   ***                 ^----------
   *** Qfb: domain error in Qfb: issquare(disc) = 1
@@ -574,4 +568,4 @@
   ***   at top-level: e.w
   ***                   ^-
   *** _.w: incorrect type in w [not defined over Qp] (t_VEC).
-Total time spent: 16
+Total time spent: 35

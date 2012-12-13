@@ -2,9 +2,10 @@ Function: ellglobalred
 Section: elliptic_curves
 C-Name: ellglobalred
 Prototype: G
-Help: ellglobalred(E): E being an elliptic curve, returns [N,[u,r,s,t],c, faN],
- where N is the conductor of E, [u,r,s,t] leads to the standard model for E,
- c is the product of the local Tamagawa numbers c_p, and faN is factor(N).
+Help: ellglobalred(E): E being an elliptic curve, returns [N,[u,r,s,t],c,
+ faN,L], where N is the conductor of E, [u,r,s,t] leads to the standard model
+ for E, c is the product of the local Tamagawa numbers c_p, faN is factor(N)
+ and L[i] is elllocalred(E, faN[i,1]).
 Description:
  (gen):gen        ellglobalred($1)
 Doc:
@@ -12,7 +13,7 @@ Doc:
  minimal model of $E$ and the global \idx{Tamagawa number} $c$.
  $E$ must be a \var{smallell} as output by \kbd{ellinit}, \emph{and is supposed
  to have all its coefficients $a_i$ in} $\Q$. The result is a
- vector $[N,v,c,F]$, where
+ vector $[N,v,c,F,L]$, where
 
  \item $N$ is the arithmetic conductor of the curve,
 
@@ -24,3 +25,6 @@ Doc:
  conjecture},\sidx{minimal model}
 
  \item $F$ is the factorization of $N$ over $\Z$.
+
+ \item $L$ is a vector, whose $i$-th entry contains the local data
+ at the $i$-th prime divisor of $N$, i.e. \kbd{L[i] = elllocalred(E,F[i,1])}

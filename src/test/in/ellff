@@ -1,7 +1,7 @@
 test(p,n=0,v='a,w=1)=
 {
   my(a=if(n,ffgen(ffinit(p,n),v),p));
-  my(E=ellffinit([w,1,1-w,0,a+3],a));
+  my(E=ellinit([w,1,1-w,0,a+3],a));
   my(G=ellgenerators(E)[1]);
   my(P=random(E));
   [d1]=ellgroup(E);
@@ -35,7 +35,7 @@ test(1073741827);
 test(nextprime(2^65),2);
 
 a=ffgen(ffinit(101,3),'a);
-E=ellffinit([1,3],a); E.j
+E=ellinit([1,3],a); E.j
 E.disc
 P=random(E);Q=random(E);
 R=elladd(E,P,Q);
@@ -45,7 +45,7 @@ N=ellcard(E);ellpow(E,P,N)
 check(a)=
 {
   my(E,P,N);
-  E=ellffinit([1,0,0,0,a],a,1);
+  E=ellinit([1,0,0,0,a],a);
   N=ellcard(E);
   for(i=1,4,
     P=random(E);
@@ -69,7 +69,7 @@ checkt(p,n,f,B=100)=
     until(b,b=random(a));
     E=ellinit(if(f==0,[0,b],f==1,[b,0],[b^2,b^3]));
     if(#E==0,next);
-    N=ellcard(ellffinit(E,a,2));
+    N=ellcard(ellinit(E,a));
     if(#ellmul(E,random(E),N)>1,error([p,n,f],b)));
 }
 checkt(3,5,0);
