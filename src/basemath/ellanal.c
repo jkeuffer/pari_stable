@@ -495,9 +495,8 @@ ellanalyticrank(GEN e, GEN eps, long prec)
     }
   init_el(&el, e, &rk, prec2nbits(prec)); /* set rk to rank parity (0 or 1) */
   if (DEBUGLEVEL) {
-    err_printf("ellanalyticrank: CURVE = %Ps\n", e);
-    err_printf("Rank is %s\n", rk == 0? "even": "odd");
-    err_printf("eps = %Ps\nconductor = %Ps\n", eps, el.N);
+    err_printf("ellanalyticrank: Rank is %s, eps= % Ps\n",
+                rk == 0? "even": "odd",eps);
     timer_start(&T);
   }
   av2 = avma;
