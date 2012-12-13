@@ -168,6 +168,25 @@ FF_1(GEN x)
 }
 
 GEN
+FF_q(GEN x)
+{
+  ulong pp;
+  GEN T, p;
+  _getFF(x,&T,&p,&pp);
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    return powiu(p, degpol(T));
+    break;
+  case t_FF_F2xq:
+    return int2n(F2x_degree(T));
+    break;
+  default:
+    return powuu(pp,degpol(T));
+  }
+}
+
+GEN
 FF_p(GEN x)
 {
   return icopy(gel(x,4));

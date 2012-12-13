@@ -1965,6 +1965,7 @@ GEN     FF_p(GEN x);
 GEN     FF_p_i(GEN x);
 GEN     FF_pow(GEN x, GEN n);
 GEN     FF_primroot(GEN x, GEN *o);
+GEN     FF_q(GEN x);
 int     FF_samefield(GEN x, GEN y);
 GEN     FF_sqr(GEN a);
 GEN     FF_sqrt(GEN a);
