@@ -4593,8 +4593,24 @@ GEN
 ellap(GEN E, GEN p)
 {
   pari_sp av = avma;
+  GEN q, card;
   p = checkellp(E, p, "ellap");
-  return gerepileuptoint(av, subii(addiu(p,1), ellcard_ram(E,p)));
+  switch(ell_get_type(E))
+  {
+  case t_ELL_Fp:
+    q = p; card = ellff_get_card(E);
+    break;
+  case t_ELL_Fq:
+    q = FF_q(ellff_get_field(E)); card = ellff_get_card(E);
+    break;
+  case t_ELL_Q:
+    q = p; card = ellcard_ram(E, p);
+    break;
+  default:
+    pari_err_TYPE("ellap",E);
+    return NULL; /*NOT REACHED*/
+  }
+  return gerepileuptoint(av, subii(addiu(q,1), card));
 }
 
 static GEN
