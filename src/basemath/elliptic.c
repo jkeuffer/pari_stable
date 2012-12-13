@@ -1419,17 +1419,18 @@ static GEN
 zellcx(GEN E, GEN P, long prec)
 {
   GEN roots = ell_rootsprec(E, prec+EXTRAPRECWORD);
-  GEN e1=gel(roots,1), e2=gel(roots,2), e3=gel(roots,3);
+  GEN e1 = gel(roots,1), e2 = gel(roots,2), e3 = gel(roots,3);
   GEN x0 = gel(P,1), y0 = d_ellLHS(E,P);
   if (gequal0(y0))
     return zell_closest_0(ellomega_cx(E,prec),x0,e1,e2,e3);
   else
   {
-    GEN a=gsqrt(gsub(e1,e3),prec), b=gsqrt(gsub(e1,e2),prec);
-    GEN r=gsqrt(gdiv(gsub(x0,e3), gsub(x0,e2)),prec);
-    GEN t=gdiv(gneg(y0), gmul2n(gmul(r,gsub(x0,e2)),1));
-    if (gcmp(gnorm(gsub(a,b)),gnorm(gadd(a,b)))>0)
-      b = gneg(b);
+    GEN a = gsqrt(gsub(e1,e3),prec), b = gsqrt(gsub(e1,e2),prec);
+    GEN r = gsqrt(gdiv(gsub(x0,e3), gsub(x0,e2)),prec);
+    GEN t = gdiv(gneg(y0), gmul2n(gmul(r,gsub(x0,e2)),1));
+    GEN ar = real_i(a), br = real_i(b), ai = imag_i(a), bi = imag_i(b);
+    /* |a+b| < |a-b| */
+    if (gcmp(gmul(ar,br), gneg(gmul(ai,bi))) < 0) b = gneg(b);
     return zellagmcx(a,b,r,t,prec);
   }
 }
@@ -1445,12 +1446,12 @@ zellrealneg(GEN E, GEN P, long prec)
   else
   {
     GEN roots = ell_rootsprec(E, prec+EXTRAPRECWORD);
-    GEN e1=gel(roots,1), e3=gel(roots,3);
-    GEN a=gsqrt(gsub(e1,e3),prec);
-    GEN ar=greal(a),ai=gimag(a);
-    GEN z=gsqrt(gsub(x0,e3), prec);
-    GEN t=gdiv(gneg(y0), gmul2n(gnorm(z),1));
-    GEN r2=ginv(gsqrt(gaddsg(1,gdiv(gmul(ai,gimag(z)),gmul(ar,greal(z)))),prec));
+    GEN e1 = gel(roots,1), e3 = gel(roots,3);
+    GEN a = gsqrt(gsub(e1,e3),prec);
+    GEN z = gsqrt(gsub(x0,e3), prec);
+    GEN ar = real_i(a), zr = real_i(z), ai = imag_i(a), zi = imag_i(z);
+    GEN t = gdiv(gneg(y0), gmul2n(gnorm(z),1));
+    GEN r2 = ginv(gsqrt(gaddsg(1,gdiv(gmul(ai,zi),gmul(ar,zr))),prec));
     return zellagmcx(ar,gabs(a,prec),r2,gmul(t,r2),prec);
   }
 }
