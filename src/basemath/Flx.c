@@ -1944,7 +1944,7 @@ Flxq_sqr_mg(GEN y,GEN mg,GEN T,ulong p)
 }
 
 struct _Flxq {
-  GEN mg;
+  GEN mg, aut;
   GEN T;
   ulong p;
 };
@@ -2123,25 +2123,123 @@ Flx_Flxq_eval(GEN Q, GEN x, GEN T, ulong p)
   return gen_bkeval(Q,degpol(Q),x,use_sqr,(void*)&D,&Flxq_algebra,_Flxq_cmul);
 }
 
-/* assume T irreducible mod p */
-int
-Flxq_issquare(GEN x, GEN T, ulong p)
+static GEN
+Flxq_autpow_sqr(void *E, GEN x)
 {
-  pari_sp av;
-  GEN m;
-  ulong z;
-  if (lg(x) == 2 || p == 2) return 1;
-  av = avma;
-  m = diviuexact(subis(powuu(p, degpol(T)), 1), p - 1);
-  z = Flxq_pow(x, m, T, p)[2];
-  avma = av; return krouu(z, p) == 1;
+  struct _Flxq *D = (struct _Flxq*)E;
+  return Flx_Flxq_eval(x, x, D->T, D->p);
+}
+static GEN
+Flxq_autpow_mul(void *E, GEN x, GEN y)
+{
+  struct _Flxq *D = (struct _Flxq*)E;
+  return Flx_Flxq_eval(x, y, D->T, D->p);
+}
+
+GEN
+Flxq_autpow(GEN x, ulong n, GEN T, ulong p)
+{
+  struct _Flxq D;
+  D.T=T; D.p=p;
+  if (n==0) return polx_Flx(T[1]);
+  if (n==1) return Flx_copy(x);
+  return gen_powu(x,n,(void*)&D,Flxq_autpow_sqr,Flxq_autpow_mul);
+}
+
+static GEN
+Flxq_autsum_mul(void *E, GEN x, GEN y)
+{
+  struct _Flxq *D = (struct _Flxq*)E;
+  GEN phi1 = gel(x,1), a1 = gel(x,2);
+  GEN phi2 = gel(y,1), a2 = gel(y,2);
+  ulong d = brent_kung_optpow(maxss(degpol(phi1),degpol(a1)),2,1);
+  GEN V2 = Flxq_powers(phi2,d,D->T,D->p);
+  GEN phi3 = Flx_FlxqV_eval(phi1,V2,D->T,D->p);
+  GEN aphi = Flx_FlxqV_eval(a1,V2,D->T,D->p);
+  GEN a3 = Flxq_mul(aphi,a2,D->T,D->p);
+  return mkvec2(phi3, a3);
+}
+static GEN
+Flxq_autsum_sqr(void *E, GEN x)
+{ return Flxq_autsum_mul(E, x, x); }
+
+GEN
+Flxq_autsum(GEN x, ulong n, GEN T, ulong p)
+{
+  struct _Flxq D;
+  D.T=T; D.p=p;
+  return gen_powu(x,n,(void*)&D,Flxq_autsum_sqr,Flxq_autsum_mul);
+}
+
+static long
+bounded_order(ulong p, GEN b, long k)
+{
+  long i;
+  GEN a=modii(utoi(p),b);
+  for(i=1;i<k;i++)
+  {
+    if (equali1(a))
+      return i;
+    a = modii(muliu(a,p),b);
+  }
+  return 0;
+}
+
+/*
+  n = (p^d-a)\b
+  b = bb*p^vb
+  p^k = 1 [bb]
+  d = m*k+r+vb
+  u = (p^k-1)/bb;
+  v = (p^(r+vb)-a)/b;
+  w = (p^(m*k)-1)/(p^k-1)
+  n = p^r*w*u+v
+  w*u = p^vb*(p^(m*k)-1)/b
+  n = p^(r+vb)*(p^(m*k)-1)/b+(p^(r+vb)-a)/b
+*/
+
+static GEN
+Flxq_pow_Frobenius(GEN x, GEN n, GEN aut, GEN T, ulong p)
+{
+  pari_sp av=avma;
+  long d = degpol(T);
+  GEN an = absi(n), z, q;
+  if (cmpiu(an,p)<0 || cmpis(an,d)<=0)
+    return Flxq_pow(x, n, T, p);
+  q = powuu(p, d);
+  if (dvdii(q, n))
+  {
+    long vn = logint(an,utoi(p),NULL)-1;
+    GEN autvn = vn==1 ? aut: Flxq_autpow(aut,vn,T,p);
+    z = Flx_Flxq_eval(x,autvn,T,p);
+  } else
+  {
+    GEN b = diviiround(q, an), a = subii(q, mulii(an,b));
+    GEN bb, u, v, autk;
+    long vb = Z_lvalrem(b,p,&bb);
+    long m, r, k = is_pm1(bb) ? 1 : bounded_order(p,bb,d);
+    if (!k) return Flxq_pow(x,n, T, p);
+    m = (d-vb)/k; r = (d-vb)%k;
+    u = diviiexact(subis(powuu(p,k),1),bb);
+    v = diviiexact(subii(powuu(p,r+vb),a),b);
+    autk = k==1 ? aut: Flxq_autpow(aut,k,T,p);
+    if (r)
+    {
+      GEN autr = r==1 ? aut: Flxq_autpow(aut,r,T,p);
+      z = Flx_Flxq_eval(x,autr,T,p);
+    } else z = x;
+    if (m > 1) z = gel(Flxq_autsum(mkvec2(autk, z), m, T, p), 2);
+    if (!is_pm1(u)) z = Flxq_pow(z, u, T, p);
+    if (signe(v)) z = Flxq_mul(z, Flxq_pow(x, v, T, p), T, p);
+  }
+  return gerepileupto(av,signe(n)>0 ? z : Flxq_inv(z,T,p));
 }
 
 static GEN
 _Flxq_pow(void *data, GEN x, GEN n)
 {
   struct _Flxq *D = (struct _Flxq*)data;
-  return Flxq_pow(x,n, D->T, D->p);
+  return Flxq_pow_Frobenius(x, n, D->aut, D->T, D->p);
 }
 
 static GEN
@@ -2389,7 +2487,7 @@ smooth_cost(GEN fb, GEN pr, GEN prC)
 }
 
 /* Return best choice of r.
-   We loop over d until there is suffciently many triples (a,b,c) (a+b+c=0)
+   We loop over d until there is sufficiently many triples (a,b,c) (a+b+c=0)
    of degree <=d with respect to the probability of smoothness of (a*b-c^2)*C
  */
 
@@ -2538,10 +2636,9 @@ GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)
 {
   struct _Flxq E;
-  E.T=T; E.p=p;
+  E.T=T; E.p=p; E.aut = Flxq_powu(polx_Flx(T[1]),p,T,p);
   return gen_order(a,ord,(void*)&E,&Flxq_star);
 }
-
 
 GEN
 Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
@@ -2549,7 +2646,7 @@ Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
   struct _Flxq E;
   GEN v = dlog_get_ordfa(ord);
   ord = mkvec2(gel(v,1),ZM_famat_limit(gel(v,2),int2n(27)));
-  E.T=T; E.p=p;
+  E.T=T; E.p=p; E.aut = Flxq_powu(polx_Flx(T[1]),p,T,p);
   return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star);
 }
 
@@ -2557,14 +2654,36 @@ GEN
 Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
 {
   struct _Flxq E;
+  GEN o;
   if (!lgpol(a))
   {
     if (zeta)
       *zeta=pol1_Flx(T[1]);
     return pol0_Flx(T[1]);
   }
-  E.T=T; E.p=p;
-  return gen_Shanks_sqrtn(a,n,addis(powuu(p,degpol(T)),-1),zeta,(void*)&E,&Flxq_star);
+  E.T=T; E.p=p; E.aut = Flxq_powu(polx_Flx(T[1]),p,T,p);
+  o = addis(powuu(p,degpol(T)),-1);
+  return gen_Shanks_sqrtn(a,n,o,zeta,(void*)&E,&Flxq_star);
+}
+
+GEN
+Flxq_sqrt(GEN a, GEN T, ulong p)
+{
+  return Flxq_sqrtn(a, gen_2, T, p, NULL);
+}
+
+/* assume T irreducible mod p */
+int
+Flxq_issquare(GEN x, GEN T, ulong p)
+{
+  pari_sp av;
+  GEN m;
+  ulong z;
+  if (lg(x) == 2 || p == 2) return 1;
+  av = avma;
+  m = diviuexact(subis(powuu(p, degpol(T)), 1), p - 1);
+  z = Flxq_pow(x, m, T, p)[2];
+  avma = av; return krouu(z, p) == 1;
 }
 
 GEN
@@ -2591,33 +2710,6 @@ Flxq_lroot(GEN a, GEN T, long p)
     return gerepileuptoleaf(av, Flxq_lroot_fast(a,V,T,p));
   } else
     return gerepileuptoleaf(av, Flx_Flxq_eval(a,sqx,T,p));
-}
-
-GEN
-Flxq_sqrt(GEN a, GEN T, ulong p)
-{
-  return Flxq_sqrtn(a, gen_2, T, p, NULL);
-}
-
-static GEN
-Flxq_autpow_sqr(void *E, GEN x)
-{
-  struct _Flxq *D = (struct _Flxq*)E;
-  return Flx_Flxq_eval(x, x, D->T, D->p);
-}
-static GEN
-Flxq_autpow_mul(void *E, GEN x, GEN y)
-{
-  struct _Flxq *D = (struct _Flxq*)E;
-  return Flx_Flxq_eval(x, y, D->T, D->p);
-}
-
-GEN
-Flxq_autpow(GEN x, long n, GEN T, ulong p)
-{
-  struct _Flxq D;
-  D.T=T; D.p=p;
-  return gen_powu(x,n,(void*)&D,Flxq_autpow_sqr,Flxq_autpow_mul);
 }
 
 ulong

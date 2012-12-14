@@ -1197,7 +1197,7 @@ FpXQ_sqr_mg(GEN y,GEN mg,GEN T,GEN p)
 }
 
 struct _FpXQ {
-  GEN T, p, mg;
+  GEN T, p, mg, aut;
 };
 
 static GEN
@@ -1393,6 +1393,119 @@ FpXQ_autpowers(GEN aut, long f, GEN T, GEN p)
   return gerepileupto(av, V);
 }
 
+static GEN
+FpXQ_autpow_sqr(void *E, GEN x)
+{
+  struct _FpXQ *D = (struct _FpXQ*)E;
+  return FpX_FpXQ_eval(x, x, D->T, D->p);
+}
+
+static GEN
+FpXQ_autpow_mul(void *E, GEN x, GEN y)
+{
+  struct _FpXQ *D = (struct _FpXQ*)E;
+  return FpX_FpXQ_eval(x, y, D->T, D->p);
+}
+
+GEN
+FpXQ_autpow(GEN x, ulong n, GEN T, GEN p)
+{
+  struct _FpXQ D;
+  D.T=T; D.p=p;
+  if (n==0) return pol_x(varn(T));
+  if (n==1) return ZX_copy(x);
+  return gen_powu(x,n,(void*)&D,FpXQ_autpow_sqr,FpXQ_autpow_mul);
+}
+
+static GEN
+FpXQ_autsum_mul(void *E, GEN x, GEN y)
+{
+  struct _FpXQ *D = (struct _FpXQ*)E;
+  GEN phi1 = gel(x,1), a1 = gel(x,2);
+  GEN phi2 = gel(y,1), a2 = gel(y,2);
+  ulong d = brent_kung_optpow(maxss(degpol(phi1),degpol(a1)),2,1);
+  GEN V2 = FpXQ_powers(phi2,d,D->T,D->p);
+  GEN phi3 = FpX_FpXQV_eval(phi1,V2,D->T,D->p);
+  GEN aphi = FpX_FpXQV_eval(a1,V2,D->T,D->p);
+  GEN a3 = FpXQ_mul(aphi,a2,D->T,D->p);
+  return mkvec2(phi3, a3);
+}
+static GEN
+FpXQ_autsum_sqr(void *E, GEN x)
+{ return FpXQ_autsum_mul(E, x, x); }
+
+GEN
+FpXQ_autsum(GEN x, ulong n, GEN T, GEN p)
+{
+  struct _FpXQ D;
+  D.T=T; D.p=p;
+  return gen_powu(x,n,(void*)&D,FpXQ_autsum_sqr,FpXQ_autsum_mul);
+}
+
+static long
+bounded_order(GEN p, GEN b, long k)
+{
+  long i;
+  GEN a=modii(p,b);
+  for(i=1;i<k;i++)
+  {
+    if (equali1(a))
+      return i;
+    a = Fp_mul(a,p,b);
+  }
+  return 0;
+}
+
+/*
+  n = (p^d-a)\b
+  b = bb*p^vb
+  p^k = 1 [bb]
+  d = m*k+r+vb
+  u = (p^k-1)/bb;
+  v = (p^(r+vb)-a)/b;
+  w = (p^(m*k)-1)/(p^k-1)
+  n = p^r*w*u+v
+  w*u = p^vb*(p^(m*k)-1)/b
+  n = p^(r+vb)*(p^(m*k)-1)/b+(p^(r+vb)-a)/b
+*/
+
+static GEN
+FpXQ_pow_Frobenius(GEN x, GEN n, GEN aut, GEN T, GEN p)
+{
+  pari_sp av=avma;
+  long d = degpol(T);
+  GEN an = absi(n), z, q;
+  if (cmpii(an,p)<0 || cmpis(an,d)<=0)
+    return FpXQ_pow(x, n, T, p);
+  q = powiu(p, d);
+  if (dvdii(q, n))
+  {
+    long vn = logint(an,p,NULL)-1;
+    GEN autvn = vn==1 ? aut: FpXQ_autpow(aut,vn,T,p);
+    z = FpX_FpXQ_eval(x,autvn,T,p);
+  } else
+  {
+    GEN b = diviiround(q, an), a = subii(q, mulii(an,b));
+    GEN bb, u, v, autk;
+    long vb = Z_pvalrem(b,p,&bb);
+    long m, r, k = is_pm1(bb) ? 1 : bounded_order(p,bb,d);
+    if (!k) return FpXQ_pow(x,n, T, p);
+    m = (d-vb)/k; r = (d-vb)%k;
+    u = diviiexact(subis(powiu(p,k),1),bb);
+    v = diviiexact(subii(powiu(p,r+vb),a),b);
+    autk = k==1 ? aut: FpXQ_autpow(aut,k,T,p);
+    if (r)
+    {
+      GEN autr = r==1 ? aut: FpXQ_autpow(aut,r,T,p);
+      z = FpX_FpXQ_eval(x,autr,T,p);
+    } else z = x;
+    if (m > 1) z = gel(FpXQ_autsum(mkvec2(autk, z), m, T, p), 2);
+    if (!is_pm1(u)) z = FpXQ_pow(z, u, T, p);
+    if (signe(v)) z = FpXQ_mul(z, FpXQ_pow(x, v, T, p), T, p);
+  }
+  return gerepileupto(av,signe(n)>0 ? z : FpXQ_inv(z,T,p));
+}
+
 /* assume T irreducible mod p */
 int
 FpXQ_issquare(GEN x, GEN T, GEN p)
@@ -1478,10 +1591,10 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
 }
 
 static GEN
-_FpXQ_pow(void *data, GEN x, GEN y)
+_FpXQ_pow(void *data, GEN x, GEN n)
 {
   struct _FpXQ *D = (struct _FpXQ*)data;
-  return FpXQ_pow(x,y, D->T, D->p);
+  return FpXQ_pow_Frobenius(x,n, D->aut, D->T, D->p);
 }
 
 static GEN
@@ -1521,7 +1634,7 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   else
   {
     struct _FpXQ s;
-    s.T=T; s.p=p;
+    s.T=T; s.p=p; s.aut = FpXQ_pow(pol_x(varn(T)), p, T, p);
     return gen_order(a,ord, (void*)&s,&FpXQ_star);
   }
 }
@@ -1540,7 +1653,7 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   {
     struct _FpXQ s;
     GEN z;
-    s.T=T; s.p=p;
+    s.T=T; s.p=p; s.aut = FpXQ_pow(pol_x(varn(T)), p, T, p);
     z = gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star);
     return z? z: cgetg(1,t_VEC);
   }
@@ -1574,7 +1687,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   else
   {
     struct _FpXQ s;
-    s.T=T; s.p=p;
+    s.T=T; s.p=p; s.aut = FpXQ_pow(pol_x(varn(T)), p, T, p);
     return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
                             (void*)&s,&FpXQ_star);
   }

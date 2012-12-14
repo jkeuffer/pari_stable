@@ -4012,15 +4012,24 @@ its factorization.
 \kbd{FpXQ\_powers}$(x, n-1, T, p)$, but returns the powers as a an
 $m\times n$ matrix. Usually, we have $m = n = \deg T$.
 
+\fun{GEN}{FpXQ_autpow}{GEN a, ulong n, GEN T, GEN p} computes $\sigma^n(X)$
+assuming $a=\sigma(X)$ where $\sigma$ is an automorphism of the algebra
+$\F_p[X]/T(X)$.
+
+\fun{GEN}{FpXQ_autsum}{GEN a, ulong n, GEN T, GEN p}
+$\sigma$ being the automorphism defined by $\sigma(X)=a[1]\pmod{T(X)}$,
+returns the vector $[\sigma^n(X),b\sigma(b)\ldots\sigma^{n-1}(b)]$
+where $b=a[2]$.
+
+\fun{GEN}{FpXQ_autpowers}{GEN S, long n, GEN T, GEN p} returns
+$[x,S(x),S(S(x)),\dots,S^{(n)}(x)]$ as a \typ{VEC} of \kbd{FpXQ}s.
+
 \fun{GEN}{FpX_FpXQ_eval}{GEN f,GEN x,GEN T,GEN p} returns
 $\kbd{f}(\kbd{x})$.
 
 \fun{GEN}{FpX_FpXQV_eval}{GEN f,GEN V,GEN T,GEN p} returns
 $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$.
-
-\fun{GEN}{FpXQ_autpowers}{GEN S, long n, GEN T, GEN p} returns
-$[x,S(x),S(S(x)),\dots,S^{(n)}(x)]$ as a \typ{VEC} of \kbd{FpXQ}s.
 
 \subsec{\kbd{FpXX}}
 Contrary to what the name implies, an \kbd{FpXX} is a \typ{POL} whose
@@ -4493,9 +4502,11 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{Flxq_matrix_pow}{GEN x, long m, long n, GEN T, ulong p},
 see \kbd{FpXQ\_matrix\_pow}.
 
-\fun{GEN}{Flxq_autpow}{GEN a, long n, GEN T, ulong p} computes $\sigma^n(X)$
-assuming $a=\sigma(X)$ where $\sigma$ is an automorphism of the algebra
-$\F_l[X]/T(X)$.
+\fun{GEN}{Flxq_autpow}{GEN a, long n, GEN T, ulong p}
+see \kbd{FpXQ\_autpow}.
+
+\fun{GEN}{Flxq_autsum}{GEN a, long n, GEN T, GEN p}
+see \kbd{Flxq\_autsum}.
 
 \fun{GEN}{Flxq_ffisom_inv}{GEN S, GEN T, ulong p}, as \kbd{FpXQ\_ffisom\_inv}.
 
