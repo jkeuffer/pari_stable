@@ -4079,7 +4079,11 @@ ellorder(GEN E, GEN P, GEN o)
     GEN p = NULL;
     if (is_rational_t(typ(gel(P,1))) && is_rational_t(typ(gel(P,2))))
       return utoi( _orderell(E, P) );
-    if (RgV_is_FpV(P,&p) && p) E = ellredmodp(E,p);
+    if (RgV_is_FpV(P,&p) && p)
+    {
+      E = ellredmodp(E,p);
+      if (!o) o = doellff_get_o(E); /*do not clone o*/
+    }
   }
   checkell_Fq(E);
   fg = ellff_get_field(E);
