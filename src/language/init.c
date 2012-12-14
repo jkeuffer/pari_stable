@@ -2238,6 +2238,7 @@ pari_version(void)
  *  V  lexical variable
  *  C  lexical context
  *  n  variable number
+ *  W  GEN, which will be modified in place (for t_LIST)
  *  &  *GEN
  *  f  Fake *long (function requires it, but we don't use the resulting long)
  *  p  real precision (prec for the C library)
@@ -2257,7 +2258,7 @@ pari_version(void)
  *     Special syntax:
  *       if type = G, &, r, s, I or V:  D[G&rsIV] all send NULL.
  *       if type = n: Dn sends -1.
- *       if type = &: argument must be prepened by '&'.
+ *       if type = &: argument must be prefixed by '&'.
  *
  *     The user-given args are read first, then completed by the defaults
  *

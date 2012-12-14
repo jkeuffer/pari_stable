@@ -1198,9 +1198,10 @@ char of the code string:
 \+& \kbd{i} & return \kbd{int}\cr
 \+& \kbd{l} & return \kbd{long}\cr
 \+& \kbd{v} & return \kbd{void}\cr
-\+& \kbd{m} & return \kbd{GEN}. Here it is allowed to directly return
-a component of the input (obviously \cr
-\+&&\quad  not suitable for \kbd{gerepileupto}). Used for member functions, to avoid costly copies.\cr
+\+& \kbd{m} & return \kbd{GEN}. Here it is allowed to directly return a
+component of the input (obviously \cr
+\+&&\quad  not suitable for \kbd{gerepileupto}). Used for member functions, to
+avoid costly copies.\cr
 
 \noindent$\bullet$ Mandatory arguments, appearing in the same order as the
 input arguments they describe:
@@ -1211,6 +1212,8 @@ input arguments they describe:
 \+& \kbd{V} & loop variable\cr
 \+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
 \kbd{*entree})\cr
+\+& \kbd{W} & a \kbd{GEN} which is a lvalue which will be modified in place
+(for \typ{LIST})\cr
 \+& \kbd{r} & raw input (treated as a string without quotes). Quoted %
  args are copied as strings\cr
 \+&&\quad Stops at first unquoted \kbd{')'} or \kbd{','}. Special chars can
@@ -1274,6 +1277,7 @@ special notations are available:
 \+&\kbd{DG}& optional \kbd{GEN}, & send \kbd{NULL} if argument omitted.\cr
 
 \+&\kbd{D\&}& optional \kbd{*GEN}, send \kbd{NULL} if argument omitted.\cr
+\+&&\quad The argument must be prefixed by \kbd{\&}.\cr
 
 \+&\kbd{Dr}& optional raw string, send \kbd{NULL} if argument omitted.\cr
 
