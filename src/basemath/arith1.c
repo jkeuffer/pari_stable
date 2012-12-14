@@ -2491,10 +2491,10 @@ Fl_order(ulong a, ulong o, ulong p)
 /*Find the exact order of a assuming a^o==1*/
 GEN
 Fp_order(GEN a, GEN o, GEN p) {
-  if (lgefint(p) == 3 && typ(o) == t_INT)
+  if (lgefint(p) == 3 && typ(o) == t_INT && lgefint(o)==3)
   {
-    ulong q = p[2];
-    return utoi( Fl_order(umodiu(a, q), umodiu(o, q-1), q) );
+    ulong pp = p[2], oo = o[2];
+    return utoi( Fl_order(umodiu(a, pp), oo, pp) );
   }
   return gen_order(a, o, (void*)p, &Fp_star);
 }

@@ -118,6 +118,7 @@ BA 96- idealramgroups() and idealfrobenius() did not accept a bnf
    98- rare corruption in ECM [#1240] factorint(,1) => SEGV
    99- add missing call to normalize() in lift(t_POL/t_SER) [#1359]
 BA 100- listput was not SIGINT safe
+BA 101- znorder(Mod(5,16),200) -> 5 instead of 4
 
   Changed
     1- mathnf: swapped flag 3 and 5.
