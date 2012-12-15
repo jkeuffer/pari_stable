@@ -715,7 +715,8 @@ gen_gener(GEN o, void *E, const struct bb_group *grp)
  * y is not an l-th power, hence generates the l-Sylow of G
  * m = y^(q/l) != 1 */
 static GEN
-gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const struct bb_group *grp)
+gen_Shanks_sqrtl(GEN a, GEN l, long e, GEN r, GEN y, GEN m,void *E,
+                 const struct bb_group *grp)
 {
   pari_sp av = avma,lim;
   long k;
@@ -795,7 +796,7 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
       if (!is_1) {
         do
         {
-          a = gen_Shanks_sqrtl(a,l,q,e,r,y,zeta,E,grp);
+          a = gen_Shanks_sqrtl(a,l,e,r,y,zeta,E,grp);
           if (!a) { avma = ltop; return NULL;}
         } while (--j);
       }
