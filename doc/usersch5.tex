@@ -3153,6 +3153,8 @@ the prime field.
   \kbd{M}: matrix (\typ{MAT}). E.g. \kbd{QM} means a matrix with rational
   entries
 
+  \kbd{T}: Trees. Either a scalar or a \typ{VEC} of trees.
+
   \kbd{E}: point over an elliptic curve, represented
   as two-component vectors \kbd{[x,y]}, except for the  represented by the
   one-component vector \kbd{[0]}. Not all curve models are supported.
@@ -3627,6 +3629,10 @@ Mod(1,p))}, normalized.
 
 \fun{GEN}{FpXV_red}{GEN z, GEN p}, \kbd{z} a \typ{VEC} of \kbd{ZX}. Applies
 \kbd{FpX\_red} componentwise and returns the result (and we obtain a vector
+of \kbd{FpX}s).
+
+\fun{GEN}{FpXT_red}{GEN z, GEN p}, \kbd{z} a tree of \kbd{ZX}. Applies
+\kbd{FpX\_red} to each leaves and returns the result (and we obtain a tree
 of \kbd{FpX}s).
 
 \subsubsec{Basic operations} In what follows \kbd{p} is always a \typ{INT},
@@ -4477,6 +4483,10 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{FlxV_red}{GEN V, ulong p} reduces each components with \kbd{Flx\_red}.
 
+\subsec{\kbd{FlxT}} See \kbd{FpXT} operations.
+
+\fun{GEN}{FlxT_red}{GEN V, ulong p} reduces each leaves with \kbd{Flx\_red}.
+
 \subsec{\kbd{Flxq}} See \kbd{FpXQ} operations.
 
 \fun{GEN}{Flxq_add}{GEN x, GEN y, GEN T, ulong p}
@@ -5178,6 +5188,9 @@ whose modulus is divisible by $T$ (once mapped to a \kbd{Flx}), a suitable
 
 \fun{GEN}{ZXV_to_FlxV}{GEN v, ulong p}, as \kbd{ZX\_to\_Flx}, repeatedly
 called on the vector's coefficients.
+
+\fun{GEN}{ZXT_to_FlxT}{GEN v, ulong p}, as \kbd{ZX\_to\_Flx}, repeatedly
+called on the tree leaves.
 
 \fun{GEN}{ZXX_to_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_to\_Flx},
 repeatedly called on the polynomial's coefficients.
@@ -6298,6 +6311,11 @@ coefficients of \kbd{x}.
 
 \fun{GEN}{ZXV_dotproduct}{GEN x,GEN y} as \kbd{RgV\_dotproduct} assuming $x$
 and $y$ have \kbd{ZX} entries.
+
+\subsec{\kbd{ZXT}}
+
+\fun{GEN}{ZXT_remi2n}{GEN x, long n} applies \kbd{ZX\_remi2n} to all
+leaves of the tree \kbd{x}.
 
 \subsec{\kbd{ZXX}}
 

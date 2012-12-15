@@ -2908,6 +2908,20 @@ ZXV_to_FlxV(GEN v, ulong p)
 }
 
 GEN
+ZXT_to_FlxT(GEN z, ulong p)
+{
+  if (typ(z) == t_POL)
+    return ZX_to_Flx(z, p);
+  else
+  {
+    long i,l = lg(z);
+    GEN x = cgetg(l, t_VEC);
+    for (i=1; i<l; i++) gel(x,i) = ZXT_to_FlxT(gel(z,i), p);
+    return x;
+  }
+}
+
+GEN
 FlxV_to_Flm(GEN v, long n)
 {
   long j, N = lg(v);
@@ -2924,6 +2938,20 @@ FlxV_red(GEN z, ulong p)
   res = cgetg(l,t_VEC);
   for(i=1;i<l;i++) gel(res,i) = Flx_red(gel(z,i),p);
   return res;
+}
+
+GEN
+FlxT_red(GEN z, ulong p)
+{
+  if (typ(z) == t_VECSMALL)
+    return Flx_red(z, p);
+  else
+  {
+    long i,l = lg(z);
+    GEN x = cgetg(l, t_VEC);
+    for (i=1; i<l; i++) gel(x,i) = FlxT_red(gel(z,i), p);
+    return x;
+  }
 }
 
 GEN

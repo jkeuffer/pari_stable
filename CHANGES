@@ -387,6 +387,7 @@ BA 122- PARI functions Fp_ellj, FpXQ_ellj, Flxq_ellj
 BA 123- PARI functions FpX_mulu, Flx_mulu, ZX_mulu
 BA 124- PARI functions FlxqXQV_autpow, FlxqXQV_autsum
 BA 125- PARI functions FpXQXQV_autpow, FpXQXQV_autsum
+BA 126- PARI functions FpXT_red, FlxT_red, ZXT_to_FlxT, ZXT_remi2n
 
   Removed
     1- dropped DOS support

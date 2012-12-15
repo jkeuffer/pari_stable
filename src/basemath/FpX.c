@@ -65,6 +65,20 @@ FpXV_red(GEN z, GEN p)
 }
 
 GEN
+FpXT_red(GEN z, GEN p)
+{
+  if (typ(z) == t_POL)
+    return FpX_red(z, p);
+  else
+  {
+    long i,l = lg(z);
+    GEN x = cgetg(l, t_VEC);
+    for (i=1; i<l; i++) gel(x,i) = FpXT_red(gel(z,i), p);
+    return x;
+  }
+}
+
+GEN
 FpX_normalize(GEN z, GEN p)
 {
   GEN p1 = leading_term(z);

@@ -267,6 +267,20 @@ ZX_remi2n(GEN y, long n)
 }
 
 GEN
+ZXT_remi2n(GEN z, long n)
+{
+  if (typ(z) == t_POL)
+    return ZX_remi2n(z, n);
+  else
+  {
+    long i,l = lg(z);
+    GEN x = cgetg(l, t_VEC);
+    for (i=1; i<l; i++) gel(x,i) = ZXT_remi2n(gel(z,i), n);
+    return x;
+  }
+}
+
+GEN
 zx_to_ZX(GEN z)
 {
   long i, l = lg(z);
