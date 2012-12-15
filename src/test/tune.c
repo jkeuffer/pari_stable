@@ -244,9 +244,10 @@ static double speed_Flx_rem(speed_param *s) {
   TIME_FUN(Flx_rem(x, s->x, s->l));
 }
 
-static double speed_Flxq_pow(speed_param *s) {
-  GEN x = rand_Flx(degpol(s->x)-1, s->l);
-  TIME_FUN( Flxq_pow(x, utoipos(s->l), s->x, s->l) );
+static double speed_Flxq_red(speed_param *s) {
+  GEN x = rand_NFlx((degpol(s->x)-1)*2, s->l);
+  GEN q = Flx_get_red(s->x, s->l);
+  TIME_FUN(Flx_rem(x, q, s->l));
 }
 
 static double speed_Flx_halfgcd(speed_param *s)
@@ -274,9 +275,10 @@ static double speed_FpX_rem(speed_param *s)
   TIME_FUN(FpX_rem(x, s->x, s->p));
 }
 
-static double speed_FpXQ_pow(speed_param *s) {
-  GEN x = rand_NFpX(degpol(s->x)-1);
-  TIME_FUN( FpXQ_pow(x, s->p, s->x, s->p) );
+static double speed_FpXQ_red(speed_param *s) {
+  GEN x = rand_NFpX((degpol(s->x)-1)*2);
+  GEN q = FpX_get_red(s->x, s->p);
+  TIME_FUN(FpX_rem(x, q, s->p));
 }
 
 static double speed_FpX_halfgcd(speed_param *s)
@@ -327,14 +329,14 @@ static tune_param param[] = {
 {0,   var(Flx_SQR_SQRI2_LIMIT),    t_Fl2x,5,20000, speed_Flx_sqr,0.05},
 {0,   var(Flx_INVBARRETT_LIMIT),t_NFlx,10,0, speed_Flx_inv,0.05},
 {0,  var(Flx_REM_BARRETT_LIMIT),t_NFlx,10,0, speed_Flx_rem,0.05},
-{0,  var(Flx_POW_BARRETT_LIMIT),t_NFlx,10,0, speed_Flxq_pow},
+{0,  var(Flx_POW_BARRETT_LIMIT),t_NFlx,10,0, speed_Flxq_red},
 {0,  var(Flx_HALFGCD_LIMIT),       t_Flx,10,0, speed_Flx_halfgcd},
 {0,  var(Flx_GCD_LIMIT),           t_Flx,10,0, speed_Flx_gcd,0.1},
 {0,  var(Flx_EXTGCD_LIMIT),        t_Flx,10,0, speed_Flx_extgcd},
 {0,  var(FpX_INVBARRETT_LIMIT), t_NFpX,10,0, speed_FpX_inv,0.05},
 {0,  var(FpX_DIVREM_BARRETT_LIMIT),t_NFpX,10,0, speed_FpX_divrem,0.05},
 {0,  var(FpX_REM_BARRETT_LIMIT),t_NFpX,10,0, speed_FpX_rem,0.05},
-{0,  var(FpX_POW_BARRETT_LIMIT),t_NFpX,10,0, speed_FpXQ_pow},
+{0,  var(FpX_POW_BARRETT_LIMIT),t_NFpX,10,0, speed_FpXQ_red},
 {0,  var(FpX_HALFGCD_LIMIT),       t_FpX,10,0, speed_FpX_halfgcd},
 {0,  var(FpX_GCD_LIMIT),           t_FpX,10,0, speed_FpX_gcd,0.1},
 {0,  var(FpX_EXTGCD_LIMIT),        t_FpX,10,0, speed_FpX_extgcd},

@@ -18,6 +18,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* Not so fast arithmetic with polynomials over Fp */
 
+static GEN
+get_FpX_red(GEN T, GEN *B)
+{
+  if (typ(T)!=t_VEC) { *B=NULL; return T; }
+  *B = gel(T,1); return gel(T,2);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                              FpX                                  **/
@@ -997,6 +1004,14 @@ FpX_invBarrett(GEN T, GEN p)
   return gerepileupto(ltop, r);
 }
 
+GEN
+FpX_get_red(GEN T, GEN p)
+{
+  if (typ(T)==t_POL && lg(T)>FpX_POW_BARRETT_LIMIT)
+    retmkvec2(FpX_invBarrett(T,p),T);
+  return T;
+}
+
 /* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
  * and mg is the Barrett inverse of T. */
 static GEN
@@ -1094,16 +1109,17 @@ FpX_divrem_Barrett(GEN x, GEN B, GEN T, GEN p, GEN *pr)
 }
 
 GEN
-FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
+FpX_divrem(GEN x, GEN T, GEN p, GEN *pr)
 {
+  GEN B, y = get_FpX_red(T, &B);
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (pr==ONLY_REM) return FpX_rem(x, y, p);
-  if (d+3 < FpX_DIVREM_BARRETT_LIMIT)
+  if (!B && d+3 < FpX_DIVREM_BARRETT_LIMIT)
     return FpX_divrem_basecase(x,y,p,pr);
   else
   {
     pari_sp av=avma;
-    GEN mg = FpX_invBarrett(y, p);
+    GEN mg = B? B: FpX_invBarrett(y, p);
     GEN q1 = FpX_divrem_Barrett_noGC(x,mg,y,p,pr);
     if (!q1) {avma=av; return NULL;}
     if (!pr || pr==ONLY_DIVIDES) return gerepilecopy(av, q1);
@@ -1120,16 +1136,17 @@ FpX_rem_Barrett(GEN x, GEN mg, GEN T, GEN p)
 }
 
 GEN
-FpX_rem(GEN x, GEN y, GEN p)
+FpX_rem(GEN x, GEN T, GEN p)
 {
+  GEN B, y = get_FpX_red(T, &B);
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return FpX_red(x,p);
-  if (d+3 < FpX_REM_BARRETT_LIMIT)
+  if (!B && d+3 < FpX_REM_BARRETT_LIMIT)
     return FpX_divrem_basecase(x,y,p,ONLY_REM);
   else
   {
     pari_sp av=avma;
-    GEN mg = FpX_invBarrett(y, p);
+    GEN mg = B? B: FpX_invBarrett(y, p);
     return gerepileupto(av, FpX_divrem_Barrett_noGC(x, mg, y, p, ONLY_REM));
   }
 }

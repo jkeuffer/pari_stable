@@ -18,6 +18,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* Not so fast arithmetic with polynomials with small coefficients. */
 
+static GEN
+get_Flx_red(GEN T, GEN *B)
+{
+  if (typ(T)!=t_VEC) { *B=NULL; return T; }
+  *B = gel(T,1); return gel(T,2);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**               Flx                                                 **/
@@ -1029,6 +1036,14 @@ Flx_invBarrett(GEN T, ulong p)
   return gerepileuptoleaf(ltop, r);
 }
 
+GEN
+Flx_get_red(GEN T, ulong p)
+{
+  if (typ(T)==t_VECSMALL && lg(T) >= Flx_POW_BARRETT_LIMIT)
+    retmkvec2(Flx_invBarrett(T,p),T);
+  return T;
+}
+
 /* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
  * and mg is the Barrett inverse of T. */
 static GEN
@@ -1152,16 +1167,17 @@ Flx_rem_Barrett(GEN x, GEN mg, GEN T, ulong p)
 }
 
 GEN
-Flx_rem(GEN x, GEN y, ulong p)
+Flx_rem(GEN x, GEN T, ulong p)
 {
+  GEN B, y = get_Flx_red(T, &B);
   long dy = degpol(y), dx = degpol(x), d = dx-dy;
   if (d < 0) return Flx_copy(x);
-  if (d+3 < Flx_REM_BARRETT_LIMIT)
+  if (!B && d+3 < Flx_REM_BARRETT_LIMIT)
     return Flx_rem_basecase(x,y,p);
   else
   {
     pari_sp av=avma;
-    GEN mg = Flx_invBarrett(y, p);
+    GEN mg = B ? B: Flx_invBarrett(y, p);
     return gerepileupto(av, Flx_rem_Barrett(x, mg, y, p));
   }
 }
