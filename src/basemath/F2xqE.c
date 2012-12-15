@@ -467,7 +467,7 @@ gen_Z2x_Dixon(GEN F, GEN V, long N, void *E, GEN lin(void *E, GEN F, GEN d, long
   if (N == 1) return invl(E, V);
   V = Flx_red(V, q);
   N2 = (N + 1)>>1; M = N - N2;
-  F = FlxV_red(F, q);
+  F = FlxT_red(F, q);
   VN2 = gen_Z2x_Dixon(F, V, N2, E, lin, invl);
   bil = lin(E, F, VN2, N);
   V2 = Z2x_rshift(Flx_sub(V, bil, q), N2);
@@ -494,11 +494,11 @@ gen_Z2X_Dixon(GEN F, GEN V, long N, void *E,
   if (N<BITS_IN_LONG)
   {
     ulong q = 1UL<<N;
-    return Flx_to_ZX(gen_Z2x_Dixon(ZXV_to_FlxV(F,q), ZX_to_Flx(V,q),N,E,lins,invls));
+    return Flx_to_ZX(gen_Z2x_Dixon(ZXT_to_FlxT(F,q), ZX_to_Flx(V,q),N,E,lins,invls));
   }
   V = ZX_remi2n(V, N);
   n = (N + 1)>>1; m = N - n;
-  F = ZXV_remi2n(F, N);
+  F = ZXT_remi2n(F, N);
   Xn = gen_Z2X_Dixon(F, V, n, E, lin, lins, invls);
   FXn = lin(E, F, Xn, N);
   Vm = ZX_shifti(ZX_sub(V, FXn), -n);
