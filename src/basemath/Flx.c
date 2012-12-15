@@ -1039,7 +1039,7 @@ Flx_invBarrett(GEN T, ulong p)
 GEN
 Flx_get_red(GEN T, ulong p)
 {
-  if (typ(T)==t_VECSMALL && lg(T) >= Flx_POW_BARRETT_LIMIT)
+  if (typ(T)==t_VECSMALL && lg(T) >= Flx_BARRETT_LIMIT)
     retmkvec2(Flx_invBarrett(T,p),T);
   return T;
 }
@@ -2031,7 +2031,7 @@ Flxq_powu(GEN x, ulong n, GEN T, ulong p)
     case 2: return Flxq_sqr(x, T, p);
   }
   D.T = T; D.p = p;
-  if (lg(T) >= Flx_POW_BARRETT_LIMIT)
+  if (lg(T) >= Flx_BARRETT_LIMIT)
   {
     D.mg  = Flx_invBarrett(T,p);
     y = gen_powu_i(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
@@ -2056,7 +2056,7 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   D.T = T;
   D.p = p;
   lx = lg(x);
-  if (lT >= Flx_POW_BARRETT_LIMIT)
+  if (lT >= Flx_BARRETT_LIMIT)
   {
     D.mg  = Flx_invBarrett(T,p);
     if (lx >= lT) x = Flx_rem_Barrett(x,D.mg,T,p);
@@ -2105,7 +2105,7 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
   struct _Flxq D;
   int use_sqr = (degpol(x)<<1)>=degpol(T);
   D.T = T; D.p = p;
-  if (l>2 && lg(T) >= Flx_POW_BARRETT_LIMIT)
+  if (l>2 && lg(T) >= Flx_BARRETT_LIMIT)
   {
     D.mg  = Flx_invBarrett(T,p);
     return gen_powers(x, l, use_sqr, (void*)&D, &_sqr_Barrett, &_mul_Barrett,&_Flxq_one);

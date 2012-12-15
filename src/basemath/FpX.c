@@ -1007,7 +1007,7 @@ FpX_invBarrett(GEN T, GEN p)
 GEN
 FpX_get_red(GEN T, GEN p)
 {
-  if (typ(T)==t_POL && lg(T)>FpX_POW_BARRETT_LIMIT)
+  if (typ(T)==t_POL && lg(T)>FpX_BARRETT_LIMIT)
     retmkvec2(FpX_invBarrett(T,p),T);
   return T;
 }
@@ -1315,7 +1315,7 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
     D.p = p;
     if (s < 0) x = FpXQ_inv(x,T,p);
     lx = lgpol(x);
-    if (lT+2>FpX_POW_BARRETT_LIMIT)
+    if (lT+2>FpX_BARRETT_LIMIT)
     {
       D.mg  = FpX_invBarrett(T,p);
       if (lx>=lT) x = FpX_rem_Barrett(x,D.mg,T,p);
@@ -1368,7 +1368,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
     return gerepileupto(av, z);
   }
   D.T = T; D.p = p;
-  if (l>2 && lg(T)>FpX_POW_BARRETT_LIMIT)
+  if (l>2 && lg(T)>FpX_BARRETT_LIMIT)
   {
     D.mg  = FpX_invBarrett(T,p);
     return gen_powers(x, l, use_sqr, (void*)&D, &_sqr_Barrett, &_mul_Barrett,&_FpXQ_one);
