@@ -1310,22 +1310,9 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
   }
   else
   {
-    long lx, lT = lgpol(T);
-    D.T = T;
-    D.p = p;
     if (s < 0) x = FpXQ_inv(x,T,p);
-    lx = lgpol(x);
-    if (lT+2>FpX_BARRETT_LIMIT)
-    {
-      D.mg  = FpX_invBarrett(T,p);
-      if (lx>=lT) x = FpX_rem_Barrett(x,D.mg,T,p);
-      y = gen_pow(x, n, (void*)&D, &_sqr_Barrett, &_mul_Barrett);
-    }
-    else
-    {
-      if (lx>=lT) x = FpX_rem(x,T,p);
-      y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
-    }
+    D.p = p; D.T = FpX_get_red(T,p);
+    y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   }
   return gerepileupto(av, y);
 }
@@ -1348,8 +1335,7 @@ FpXQ_powu(GEN x, ulong n, GEN T, GEN p)
   }
   else
   {
-    D.T = T; D.p = p;
-    x = FpX_rem(x,T,p);
+    D.T = FpX_get_red(T, p); D.p = p;
     y = gen_powu(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   }
   return gerepileupto(av, y);
@@ -1367,13 +1353,8 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
     GEN z = FlxV_to_ZXV(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
     return gerepileupto(av, z);
   }
-  D.T = T; D.p = p;
-  if (l>2 && lg(T)>FpX_BARRETT_LIMIT)
-  {
-    D.mg  = FpX_invBarrett(T,p);
-    return gen_powers(x, l, use_sqr, (void*)&D, &_sqr_Barrett, &_mul_Barrett,&_FpXQ_one);
-  } else
-    return gen_powers(x, l, use_sqr, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul,&_FpXQ_one);
+  D.T = FpX_get_red(T,p); D.p = p;
+  return gen_powers(x, l, use_sqr, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul,&_FpXQ_one);
 }
 
 GEN
