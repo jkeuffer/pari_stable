@@ -206,7 +206,7 @@ random_F3xqE(GEN a2, GEN a6, GEN T)
   do
   {
     avma= ltop;
-    x   = random_Flx(degpol(T),T[1],p);
+    x   = random_Flx(get_Flx_degree(T),get_Flx_var(T),p);
     rhs = Flx_add(Flxq_mul(Flxq_sqr(x, T, p), Flx_add(x, a2, p), T, p), a6, p);
   } while ((!lgpol(rhs) && !lgpol(x)) || !Flxq_issquare(rhs, T, p));
   y = Flxq_sqrt(rhs, T, p);
@@ -225,8 +225,8 @@ random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
   do
   {
     avma= ltop;
-    x   = random_Flx(degpol(T),T[1],p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
-    x2  = Flxq_sqr(x, T, p);
+    x   = random_Flx(get_Flx_degree(T),get_Flx_var(T),p);
+    x2  = Flxq_sqr(x, T, p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
   } while ((!lgpol(rhs) && !lgpol(Flx_add(Flx_Fl_mul(x2, 3, p), a4, p)))
           || !Flxq_issquare(rhs, T, p));
@@ -248,7 +248,7 @@ const struct bb_group *
 get_FlxqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, ulong p)
 {
   struct _FlxqE *e = (struct _FlxqE *) stack_malloc(sizeof(struct _FlxqE));
-  e->a4 = a4; e->a6 = a6; e->T = T; e->p = p;
+  e->a4 = a4; e->a6 = a6; e->T = Flx_get_red(T, p); e->p = p;
   *pt_E = (void *) e;
   return &FlxqE_group;
 }
@@ -445,7 +445,7 @@ GEN
 Flxq_ellgroup(GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m)
 {
   struct _FlxqE e;
-  GEN q = powuu(p, degpol(T));
+  GEN q = powuu(p, get_Flx_degree(T));
   e.a4=a4; e.a6=a6; e.T=T; e.p=p;
   return gen_ellgroup(N, subis(q,1), pt_m, (void*)&e, &FlxqE_group, _FlxqE_pairorder);
 }
@@ -667,7 +667,7 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
 {
   pari_sp av = avma, av2;
   pari_timer ti;
-  long n = degpol(T), N = (n+4)/2;
+  long n = get_Flx_degree(T), N = (n+4)/2;
   GEN a12 = ss(52734375,45), a13 = ss(421875,30), a14 = stoi(36864000);
   GEN a23 = ss(135806625,16), a24 = stoi(-1069956), a34 = stoi(2232);
   GEN phi = mkmat4( mkcol4(gen_0,a12,a13,a14),
@@ -677,19 +677,20 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   GEN phix = mkmat4(gel(phi,2),ZC_z_mul(gel(phi,3),2),
                     ZC_z_mul(gel(phi,4),3),mkcol4s(4,0,0,0));
   GEN q = powuu(3, N), p =utoi(3);
-  GEN T2, T3, Xm, j, c2, t;
+  GEN T2, Xm, j, c2, t, lr;
   GEN J1,A60,A61,X, sqx;
   timer_start(&ti);
-  T2 = F3x_canonlift(T,N);
+  T2 = F3x_canonlift(get_Flx_mod(T),N);
   if (DEBUGLEVEL) timer_printf(&ti,"Teich");
-  T2 = FpX_get_red(T2, q); T3 = ZXT_to_FlxT(T2, 3);
+  T2 = FpX_get_red(T2, q); T = ZXT_to_FlxT(T2, 3);
   av2 = avma;
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
-  Xm = FpXQ_powers(monomial(gen_1,n,varn(T)),2,T2,q);
+  Xm = FpXQ_powers(monomial(gen_1,n,get_FpX_var(T2)),2,T2,q);
   if (DEBUGLEVEL) timer_printf(&ti,"Xm");
   j = Flx_neg(Flxq_inv(a6,T,3),3);
-  sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, 3), 2, T3, 3);
-  J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, T2, sqx, T3, 3);
+  lr = Flxq_lroot(polx_Flx( get_Flx_var(T)), T, 3);
+  sqx = Flxq_powers(lr, 2, T, 3);
+  J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, T2, sqx, T, 3);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
   A61 = liftcurve(J1,T2,p,N);
   A60 = ZpXQ_frob(A61,Xm,T2,q,3);
@@ -819,9 +820,9 @@ static ulong
 F3xq_ellcard_naive(GEN a2, GEN a6, GEN T)
 {
   pari_sp av = avma;
-  long i, d = degpol(T), lx = d+2;
+  long i, d = get_Flx_degree(T), lx = d+2;
   long q = upowuu(3, d), a;
-  GEN x = const_vecsmall(lx,0); x[1] = T[1];
+  GEN x = const_vecsmall(lx,0); x[1] = get_Flx_var(T);
   for(a=1, i=0; i<q; i++)
   {
     GEN rhs;
@@ -838,7 +839,7 @@ static ulong
 Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
-  long i, d = degpol(T), lx = d+2;
+  long i, d = get_Flx_degree(T), lx = d+2;
   long q = upowuu(p, d), a;
   GEN x = const_vecsmall(lx,0); x[1] = T[1];
   for(a=1, i=0; i<q; i++)
@@ -861,7 +862,7 @@ Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
   long vn = T[1];
   long i, twistp, twistpold=0;
   GEN h,f, ta4, u, x, A, B;
-  long n = degpol(T);
+  long n = get_Flx_degree(T);
   GEN q1p = addsi(1, q), q2p = shifti(q1p, 1);
   GEN bound = addis(sqrti(gmul2n(q,4)), 1); /* ceil( 4sqrt(q) ) */
   /* once #E(Flxq) is know mod B >= bound, it is completely determined */
@@ -913,12 +914,12 @@ Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
 static GEN
 F3xq_ellcard(GEN a2, GEN a6, GEN T)
 {
-  long n = degpol(T);
+  long n = get_Flx_degree(T);
   if (n <= 2)
     return utoi(F3xq_ellcard_naive(a2, a6, T));
   else
   {
-    GEN q1 = addis(powuu(3, degpol(T)), 1), t;
+    GEN q1 = addis(powuu(3, get_Flx_degree(T)), 1), t;
     GEN a = Flxq_div(a6,Flxq_powu(a2,3,T,3),T,3);
     if (Flx_equal1(Flxq_powu(a, 8, T, 3)))
     {
@@ -1028,7 +1029,7 @@ GEN
 Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma;
-  long n = degpol(T);
+  long n = get_Flx_degree(T);
   GEN J, r, q = powuu(p,  n);
   if (typ(a4)==t_VEC)
     r = F3xq_ellcard(gel(a4,1), a6, T);

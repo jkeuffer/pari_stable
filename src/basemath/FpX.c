@@ -25,7 +25,7 @@ get_FpX_red(GEN T, GEN *B)
   *B = gel(T,1); return gel(T,2);
 }
 
-static GEN
+GEN
 get_FpX_mod(GEN T) { return typ(T)==t_VEC? gel(T,2): T; }
 
 long
