@@ -25,8 +25,11 @@ get_FpX_red(GEN T, GEN *B)
   *B = gel(T,1); return gel(T,2);
 }
 
-static long
+long
 get_FpX_var(GEN T) { return typ(T)==t_VEC? varn(gel(T,2)): varn(T); }
+
+long
+get_FpX_degree(GEN T) { return typ(T)==t_VEC? degpol(gel(T,2)): degpol(T); }
 
 /***********************************************************************/
 /**                                                                   **/
@@ -1317,13 +1320,14 @@ GEN
 FpXQ_powers(GEN x, long l, GEN T, GEN p)
 {
   struct _FpXQ D;
-  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  int use_sqr;
   if (l>2 && lgefint(p) == 3) {
     pari_sp av = avma;
     long pp = p[2];
-    GEN z = FlxV_to_ZXV(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
+    GEN z = FlxV_to_ZXV(Flxq_powers(ZX_to_Flx(x, pp), l, ZXT_to_FlxT(T,pp), pp));
     return gerepileupto(av, z);
   }
+  use_sqr = (degpol(x)<<1)>=get_FpX_degree(T);
   D.T = FpX_get_red(T,p); D.p = p;
   return gen_powers(x, l, use_sqr, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul,&_FpXQ_one);
 }

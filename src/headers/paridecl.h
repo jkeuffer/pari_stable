@@ -258,6 +258,8 @@ GEN     ZXV_to_FlxV(GEN v, ulong p);
 GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
 GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
 GEN     gener_Flxq(GEN T, ulong p, GEN *o);
+long    get_Flx_degree(GEN T);
+long    get_Flx_var(GEN T);
 const struct bb_field *get_Flxq_field(void **E, GEN T, ulong p);
 GEN     pol1_FlxX(long v, long sv);
 GEN     random_Flx(long d1, long v, ulong p);
@@ -402,6 +404,8 @@ int     Fq_issquare(GEN x, GEN T, GEN p);
 GEN     FqV_inv(GEN x, GEN T, GEN p);
 GEN     Z_to_FpX(GEN a, GEN p, long v);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
+long    get_FpX_degree(GEN T);
+long    get_FpX_var(GEN T);
 GEN     random_FpX(long d, long v, GEN p);
 
 /* FpX_factor.c */

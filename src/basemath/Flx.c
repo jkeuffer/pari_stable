@@ -25,8 +25,11 @@ get_Flx_red(GEN T, GEN *B)
   *B = gel(T,1); return gel(T,2);
 }
 
-static long
+long
 get_Flx_var(GEN T) { return typ(T)==t_VEC? mael(T,2,1): T[1]; }
+
+long
+get_Flx_degree(GEN T) { return typ(T)==t_VEC? degpol(gel(T,2)): degpol(T); }
 
 /***********************************************************************/
 /**                                                                   **/
@@ -2058,7 +2061,7 @@ GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
   struct _Flxq D;
-  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  int use_sqr = (degpol(x)<<1)>=get_FpX_degree(T);
   D.T = Flx_get_red(T, p); D.p = p;
   return gen_powers(x, l, use_sqr, (void*)&D, &_Flxq_sqr, &_Flxq_mul, &_Flxq_one);
 }
