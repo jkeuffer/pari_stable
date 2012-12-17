@@ -562,20 +562,20 @@ F2x_canonlift(GEN P, long n)
 { return gen_ZpX_Newton(F2x_to_ZX(P),gen_2, n, NULL, _can_iter, _can_invd); }
 
 static GEN
-Z2XQ_frob(GEN x, GEN B, GEN T, GEN q)
+Z2XQ_frob(GEN x, GEN T, GEN q)
 {
-  return FpX_rem_Barrett(RgX_inflate(x, 2), B, T, q);
+  return FpX_rem(RgX_inflate(x, 2), T, q);
 }
 
 static GEN
-Z2xq_frob(GEN x, GEN B, GEN T, ulong q)
+Z2xq_frob(GEN x, GEN T, ulong q)
 {
-  return Flx_rem_Barrett(Flx_inflate(x, 2), B, T, q);
+  return Flx_rem(Flx_inflate(x, 2), T, q);
 }
 
 struct _frob_lift
 {
-  GEN B, T, sqx;
+  GEN T, sqx;
 };
 
 /* H -> S^-1(H) mod 2 */
@@ -591,22 +591,22 @@ static GEN _frob_invls(void *E, GEN V)
 
 static GEN _frob_lin(void *E, GEN F, GEN x2, long N)
 {
-  GEN B = gel(F,3), T = gel(F,4);
-  GEN q   = int2n(N);
-  GEN y2  = Z2XQ_frob(x2, B, T, q);
+  GEN T = gel(F,3);
+  GEN q = int2n(N);
+  GEN y2  = Z2XQ_frob(x2, T, q);
   GEN lin = ZX_add(ZX_mul(gel(F,1), y2), ZX_mul(gel(F,2), x2));
   (void) E;
-  return FpX_rem_Barrett(ZX_remi2n(lin, N), B, T, q);
+  return FpX_rem(ZX_remi2n(lin, N), T, q);
 }
 
 static GEN _frob_lins(void *E, GEN F, GEN x2, long N)
 {
-  GEN B = gel(F,3), T = gel(F,4);
+  GEN T = gel(F,3);
   ulong q = 1UL<<N;
-  GEN y2  = Z2xq_frob(x2, B, T, q);
+  GEN y2  = Z2xq_frob(x2, T, q);
   GEN lin = Flx_add(Flx_mul(gel(F,1), y2,q), Flx_mul(gel(F,2), x2,q),q);
   (void) E;
-  return Flx_rem_Barrett(lin, B, T, q);
+  return Flx_rem(lin, T, q);
 }
 
 /* X -> P(X,S(X)) */
@@ -616,12 +616,12 @@ _lift_iter(void *E, GEN x2, GEN q)
 {
   struct _frob_lift *F = (struct _frob_lift*) E;
   long N = expi(q);
-  GEN BN = ZX_remi2n(F->B, N), TN = ZX_remi2n(F->T, N);
-  GEN y2 = Z2XQ_frob(x2, BN, TN, q);
-  GEN x2y2 = FpX_rem_Barrett(ZX_remi2n(ZX_mul(x2, y2), N), BN, TN, q);
+  GEN TN = ZXT_remi2n(F->T, N);
+  GEN y2 = Z2XQ_frob(x2, TN, q);
+  GEN x2y2 = FpX_rem(ZX_remi2n(ZX_mul(x2, y2), N), TN, q);
   GEN s = ZX_add(ZX_add(x2, ZX_shifti(y2, 1)), ZX_shifti(x2y2, 3));
   GEN V = ZX_add(ZX_add(ZX_sqr(s), y2), ZX_shifti(x2y2, 2));
-  return mkvec4(FpX_rem_Barrett(ZX_remi2n(V, N), BN, TN, q),x2,y2,s);
+  return mkvec4(FpX_rem(ZX_remi2n(V, N), TN, q),x2,y2,s);
 }
 
 /* H -> Dx*H+Dy*S(H) */
@@ -630,15 +630,15 @@ static GEN
 _lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
 {
   struct _frob_lift *F = (struct _frob_lift*) E;
-  GEN BM = ZX_remi2n(F->B, M), TM = ZX_remi2n(F->T, M);
+  GEN TM = ZXT_remi2n(F->T, M);
   GEN x2 = gel(v,2), y2 = gel(v,3), s = gel(v,4), r;
   GEN Dx = ZX_add(ZX_mul(ZX_Z_add(ZX_shifti(y2, 4), gen_2), s),
                          ZX_shifti(y2, 2));
   GEN Dy = ZX_add(ZX_Z_add(ZX_mul(ZX_Z_add(ZX_shifti(x2, 4), utoi(4)), s),
                            gen_1), ZX_shifti(x2, 2));
-  Dx = FpX_rem_Barrett(ZX_remi2n(Dx, M), BM, TM, qM);
-  Dy = FpX_rem_Barrett(ZX_remi2n(Dy, M), BM, TM, qM);
-  r = mkvec4(Dy, Dx, BM, TM);
+  Dx = FpX_rem(ZX_remi2n(Dx, M), TM, qM);
+  Dy = FpX_rem(ZX_remi2n(Dy, M), TM, qM);
+  r = mkvec3(Dy, Dx, TM);
   return gen_Z2X_Dixon(r, V, M, E, _frob_lin, _frob_lins, _frob_invls);
 }
 
@@ -653,10 +653,10 @@ _lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
 */
 
 static GEN
-solve_AGM_eqn(GEN x0, long n, GEN B, GEN T, GEN sqx)
+solve_AGM_eqn(GEN x0, long n, GEN T, GEN sqx)
 {
   struct _frob_lift F;
-  F.B=B; F.T=T; F.sqx=sqx;
+  F.T=T; F.sqx=sqx;
   return gen_ZpX_Newton(x0, gen_2, n, &F, _lift_iter, _lift_invd);
 }
 
@@ -698,9 +698,9 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
   if (DEBUGLEVEL>1) timer_printf(&ti,"Sqrtx");
   T = F2x_canonlift(T2, N-2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Teich");
-  B = FpX_invBarrett(T, int2n(N));
+  B = FpX_get_red(T, int2n(N));
   if (DEBUGLEVEL>1) timer_printf(&ti,"Barrett");
-  x = solve_AGM_eqn(F2x_to_ZX(a6), N-2, B, T, sqx);
+  x = solve_AGM_eqn(F2x_to_ZX(a6), N-2, B, sqx);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Lift");
   t = Z2XQ_invnorm(ZX_Z_add_shallow(ZX_shifti(x,2), gen_1), T, N);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Norm");
