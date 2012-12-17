@@ -447,7 +447,7 @@ ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e)
   if (v) { pv = powiu(p,v); qv = mulii(pv,p); df = ZXX_Z_divexact(df, pv); }
   else qv = p;
   mask = quadratic_prec_mask(e-v);
-  Tq = FpX_red(T, qv); dfr = FpXQX_red(df, Tq, p);
+  Tq = FpXT_red(T, qv); dfr = FpXQX_red(df, Tq, p);
   W = Fq_inv(FqX_eval(dfr, a, Tq, p), Tq, p); /* 1/f'(a) mod (T,p) */
   q = p;
   av2 = avma; lim = stack_lim(av2, 2);
@@ -459,7 +459,7 @@ ZpXQX_liftroot_vald(GEN f, GEN a, long v, GEN T, GEN p, long e)
     mask >>= 1;
     if (v) { qv = mulii(q, pv); q2v = mulii(q2, pv); }
     else { qv = q; q2v = q2; }
-    Tq2 = FpX_red(T, q2v); Tq = FpX_red(T, qv);
+    Tq2 = FpXT_red(T, q2v); Tq = FpXT_red(T, qv);
     fr = FpXQX_red(f, Tq, qv);
     fa = FqX_eval(fr, a, Tq, qv);
     fa = typ(fa)==t_INT? diviiexact(fa,q2v): ZX_Z_divexact(fa, q2v);
@@ -592,7 +592,7 @@ static GEN
 ZpXQ_log_to_ath(GEN x, long k, GEN T, GEN p, long e, GEN pe)
 {
   pari_sp av = avma;
-  long vT = varn(T);
+  long vT = get_FpX_var(T);
   GEN bn, bdi;
   GEN bd = ZX_Z_add(x, gen_1);
   if (equaliu(p,2)) /*For p=2, we need to simplify by 2*/
@@ -727,7 +727,7 @@ static GEN
 _inv_invd(void *E, GEN V, GEN v, GEN q, long M/*unused*/)
 {
   struct _ZpXQ_inv *d = (struct _ZpXQ_inv *) E;
-  GEN Tq = FpX_red(d->T, q);
+  GEN Tq = FpXT_red(d->T, q);
   (void)M;
   return FpXQ_mul(V, gel(v,2), Tq, q);
 }
@@ -736,7 +736,7 @@ static GEN
 _inv_eval(void *E, GEN x, GEN q)
 {
   struct _ZpXQ_inv *d = (struct _ZpXQ_inv *) E;
-  GEN Tq = FpX_red(d->T, q);
+  GEN Tq = FpXT_red(d->T, q);
   GEN f = FpX_Fp_sub(FpXQ_mul(x, FpX_red(d->a, q), Tq, q), gen_1, q);
   return mkvec2(f, x);
 }
@@ -757,9 +757,9 @@ ZpXQ_inv(GEN a, GEN T, GEN p, long e)
   if (lgefint(p)==3)
   {
     ulong pp = p[2];
-    ai = Flx_to_ZX(Flxq_inv(ZX_to_Flx(a,pp),ZX_to_Flx(T,pp),pp));
+    ai = Flx_to_ZX(Flxq_inv(ZX_to_Flx(a,pp), ZXT_to_FlxT(T, pp), pp));
   } else
-    ai = FpXQ_inv(FpX_red(a,p),FpX_red(T,p),p);
+    ai = FpXQ_inv(FpX_red(a,p), FpXT_red(T,p),p);
   return gerepileupto(av, ZpXQ_invlift(a, ai, T, p, e));
 }
 
