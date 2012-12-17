@@ -25,6 +25,9 @@ get_FpX_red(GEN T, GEN *B)
   *B = gel(T,1); return gel(T,2);
 }
 
+static GEN
+get_FpX_mod(GEN T) { return typ(T)==t_VEC? gel(T,2): T; }
+
 long
 get_FpX_var(GEN T) { return typ(T)==t_VEC? varn(gel(T,2)): varn(T); }
 
@@ -1189,9 +1192,9 @@ FpXQ_sqr(GEN x, GEN T, GEN p)
 /* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
  * return lift(1 / (x mod (p,pol))) */
 GEN
-FpXQ_invsafe(GEN x, GEN T, GEN p)
+FpXQ_invsafe(GEN x, GEN y, GEN p)
 {
-  GEN V, z = FpX_extgcd(T, x, p, NULL, &V);
+  GEN V, z = FpX_extgcd(get_FpX_mod(y), x, p, NULL, &V);
   if (degpol(z)) return NULL;
   z = Fp_invsafe(gel(z,2), p);
   if (!z) return NULL;
@@ -1278,7 +1281,7 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
   if (!is_bigint(p))
   {
     ulong pp = p[2];
-    T = ZX_to_Flx(T, pp);
+    T = ZXT_to_FlxT(T, pp);
     x = ZX_to_Flx(x, pp);
     y = Flx_to_ZX( Flxq_pow(x, n, T, pp) );
   }
@@ -1303,9 +1306,8 @@ FpXQ_powu(GEN x, ulong n, GEN T, GEN p)
   if (!is_bigint(p))
   {
     ulong pp = p[2];
-    T = ZX_to_Flx(T, pp);
     x = ZX_to_Flx(x, pp);
-    y = Flx_to_ZX( Flxq_powu(x, n, T, pp) );
+    y = Flx_to_ZX( Flxq_powu(x, n, ZXT_to_FlxT(T, pp), pp) );
   }
   else
   {
@@ -1355,11 +1357,11 @@ FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
   {
     pari_sp av = avma;
     long pp = p[2];
-    GEN Qp = ZX_to_Flx(Q, pp), Tp = ZX_to_Flx(T,pp);
+    GEN Qp = ZX_to_Flx(Q, pp), Tp = ZXT_to_FlxT(T,pp);
     GEN z = Flx_to_ZX(Flx_Flxq_eval(Qp, ZX_to_Flx(x, pp), Tp, pp));
     return gerepileupto(av, z);
   }
-  use_sqr = (degpol(x)<<1) >= degpol(T);
+  use_sqr = (degpol(x)<<1) >= get_FpX_degree(T);
   D.T = FpX_get_red(T,p); D.p = p;
   return gen_bkeval(Q,degpol(Q),x,use_sqr,(void*)&D,&FpXQ_algebra,_FpXQ_cmul);
 }
@@ -1368,11 +1370,13 @@ GEN
 FpXQ_autpowers(GEN aut, long f, GEN T, GEN p)
 {
   pari_sp av = avma;
-  long n = degpol(T);
+  long n = get_FpX_degree(T);
   long i, nautpow = brent_kung_optpow(n-1,f-2,1);
-  long v = varn(T);
-  GEN autpow = FpXQ_powers(aut, nautpow,T,p);
-  GEN V = cgetg(f + 2, t_VEC);
+  long v = get_FpX_var(T);
+  GEN autpow, V;
+  T = FpX_get_red(T, p);
+  autpow = FpXQ_powers(aut, nautpow,T,p);
+  V = cgetg(f + 2, t_VEC);
   gel(V,1) = pol_x(v); if (f==0) return gerepileupto(av, V);
   gel(V,2) = gcopy(aut);
   for (i = 3; i <= f+1; i++)
@@ -1398,7 +1402,7 @@ GEN
 FpXQ_autpow(GEN x, ulong n, GEN T, GEN p)
 {
   struct _FpXQ D;
-  D.T=T; D.p=p;
+  D.T = FpX_get_red(T, p); D.p = p;
   if (n==0) return pol_x(varn(T));
   if (n==1) return ZX_copy(x);
   return gen_powu(x,n,(void*)&D,FpXQ_autpow_sqr,FpXQ_autpow_mul);
@@ -1425,7 +1429,7 @@ GEN
 FpXQ_autsum(GEN x, ulong n, GEN T, GEN p)
 {
   struct _FpXQ D;
-  D.T=T; D.p=p;
+  D.T = FpX_get_red(T, p); D.p = p;
   return gen_powu(x,n,(void*)&D,FpXQ_autsum_sqr,FpXQ_autsum_mul);
 }
 
@@ -1503,7 +1507,7 @@ FpXQ_issquare(GEN x, GEN T, GEN p)
   if (lg(x) == 2 || equalui(2, p)) return 1;
   if (lg(x) == 3) return Fq_issquare(gel(x,2), T, p);
   av = avma;
-  m = diviiexact(subis(powiu(p, degpol(T)), 1), subis(p,1));
+  m = diviiexact(subis(powiu(p, get_FpX_degree(T)), 1), subis(p,1));
   z = constant_term( FpXQ_pow(x, m, T, p) );
   res = kronecker(z, p) == 1;
   avma = av; return res;
@@ -1687,9 +1691,10 @@ FpXQ_sqrt(GEN a, GEN T, GEN p)
 }
 
 GEN
-FpXQ_norm(GEN x, GEN T, GEN p)
+FpXQ_norm(GEN x, GEN TB, GEN p)
 {
   pari_sp av = avma;
+  GEN T = get_FpX_mod(TB);
   GEN y = FpX_resultant(T, x, p);
   GEN L = leading_term(T);
   if (gequal1(L) || signe(x)==0) return y;
@@ -1697,12 +1702,13 @@ FpXQ_norm(GEN x, GEN T, GEN p)
 }
 
 GEN
-FpXQ_trace(GEN x, GEN T, GEN p)
+FpXQ_trace(GEN x, GEN TB, GEN p)
 {
   pari_sp av = avma;
-  long n = degpol(T)-1;
-  GEN z = FpX_mul(x, FpX_deriv(T, p), p);
-  z = FpX_rem(z, T, p);
+  GEN T = get_FpX_mod(TB);
+  GEN dT = FpX_deriv(T,p);
+  long n = degpol(dT);
+  GEN z = FpXQ_mul(x, dT, TB, p);
   if (degpol(z)<n) { avma = av; return gen_0; }
   return gerepileuptoint(av, Fp_div(gel(z,2+n), gel(T,3+n),p));
 }
@@ -1711,9 +1717,10 @@ GEN
 FpXQ_charpoly(GEN x, GEN T, GEN p)
 {
   pari_sp ltop=avma;
-  long v=varn(T);
+  long v;
   GEN R;
-  T = leafcopy(T); setvarn(T, MAXVARN);
+  T = leafcopy(get_FpX_mod(T));
+  v = varn(T); setvarn(T, MAXVARN);
   x = leafcopy(x); setvarn(x, MAXVARN);
   R = FpX_FpXY_resultant(T, deg1pol_shallow(gen_1,FpX_neg(x,p),v),p);
   return gerepileupto(ltop,R);
@@ -1741,7 +1748,7 @@ FpXQ_conjvec(GEN x, GEN T, GEN p)
 {
   pari_sp av=avma;
   long i;
-  long n = degpol(T), v = varn(T);
+  long n = get_FpX_degree(T), v = get_FpX_var(T);
   GEN M = FpXQ_matrix_pow(FpXQ_pow(pol_x(v),p,T,p),n,n,T,p);
   GEN z = cgetg(n+1,t_COL);
   gel(z,1) = RgX_to_RgV(x,n);
@@ -1754,7 +1761,7 @@ FpXQ_conjvec(GEN x, GEN T, GEN p)
 GEN
 gener_FpXQ(GEN T, GEN p, GEN *po)
 {
-  long i, j, vT = varn(T), f = degpol(T);
+  long i, j, vT = get_FpX_var(T), f = get_FpX_degree(T);
   GEN g, L, L2, p_1, q, o;
   pari_sp av0 = avma, av;
 

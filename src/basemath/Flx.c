@@ -25,6 +25,9 @@ get_Flx_red(GEN T, GEN *B)
   *B = gel(T,1); return gel(T,2);
 }
 
+static GEN
+get_Flx_mod(GEN T) { return typ(T)==t_VEC? gel(T,2): T; }
+
 long
 get_Flx_var(GEN T) { return typ(T)==t_VEC? mael(T,2,1): T[1]; }
 
@@ -2019,7 +2022,7 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
   struct _Flxq D;
   GEN y;
   long s = signe(n);
-  if (!s) return pol1_Flx(T[1]);
+  if (!s) return pol1_Flx(get_Flx_var(T));
   if (s < 0)
     x = Flxq_inv(x,T,p);
   if (is_pm1(n)) return s < 0 ? x : Flx_copy(x);
@@ -2034,7 +2037,7 @@ Flxq_pow(GEN x, GEN n, GEN T, ulong p)
 GEN
 Flxq_invsafe(GEN x, GEN T, ulong p)
 {
-  GEN V, z = Flx_extgcd(T, x, p, NULL, &V);
+  GEN V, z = Flx_extgcd(get_Flx_mod(T), x, p, NULL, &V);
   ulong iz;
   if (degpol(z)) return NULL;
   iz = Fl_inv ((ulong)z[2], p);
@@ -2085,7 +2088,7 @@ Flx_FlxqV_eval(GEN Q, GEN x, GEN T, ulong p)
 GEN
 Flx_Flxq_eval(GEN Q, GEN x, GEN T, ulong p)
 {
-  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  int use_sqr = (degpol(x)<<1) >= get_Flx_degree(T);
   struct _Flxq D;
   D.T = Flx_get_red(T, p); D.p=p;
   return gen_bkeval(Q,degpol(Q),x,use_sqr,(void*)&D,&Flxq_algebra,_Flxq_cmul);
@@ -2108,7 +2111,7 @@ GEN
 Flxq_autpow(GEN x, ulong n, GEN T, ulong p)
 {
   struct _Flxq D;
-  D.T=T; D.p=p;
+  D.T = Flx_get_red(T, p); D.p = p;
   if (n==0) return polx_Flx(T[1]);
   if (n==1) return Flx_copy(x);
   return gen_powu(x,n,(void*)&D,Flxq_autpow_sqr,Flxq_autpow_mul);
@@ -2135,7 +2138,7 @@ GEN
 Flxq_autsum(GEN x, ulong n, GEN T, ulong p)
 {
   struct _Flxq D;
-  D.T=T; D.p=p;
+  D.T = Flx_get_red(T, p); D.p = p;
   return gen_powu(x,n,(void*)&D,Flxq_autsum_sqr,Flxq_autsum_mul);
 }
 
@@ -2219,7 +2222,7 @@ _Flxq_rand(void *data)
   do
   {
     avma = av;
-    z = random_Flx(degpol(D->T),D->T[1],D->p);
+    z = random_Flx(get_Flx_degree(D->T),get_Flx_var(D->T),D->p);
   } while (lgpol(z)==0);
   return z;
 }
@@ -2626,8 +2629,8 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
   if (!lgpol(a))
   {
     if (zeta)
-      *zeta=pol1_Flx(T[1]);
-    return pol0_Flx(T[1]);
+      *zeta=pol1_Flx(get_Flx_var(T));
+    return pol0_Flx(get_Flx_var(T));
   }
   E.T=T; E.p=p; E.aut = Flxq_powu(polx_Flx(T[1]),p,T,p);
   o = addis(powuu(p,degpol(T)),-1);
@@ -2649,7 +2652,7 @@ Flxq_issquare(GEN x, GEN T, ulong p)
   ulong z;
   if (lg(x) == 2 || p == 2) return 1;
   av = avma;
-  m = diviuexact(subis(powuu(p, degpol(T)), 1), p - 1);
+  m = diviuexact(subis(powuu(p, get_Flx_degree(T)), 1), p - 1);
   z = Flxq_pow(x, m, T, p)[2];
   avma = av; return krouu(z, p) == 1;
 }
@@ -2666,11 +2669,12 @@ GEN
 Flxq_lroot(GEN a, GEN T, long p)
 {
   pari_sp av=avma;
-  long n = degpol(T), d = degpol(a);
+  long n = get_Flx_degree(T), d = degpol(a);
+  long v = get_Flx_var(T);
   GEN sqx,V;
   if (n==1) return leafcopy(a);
   if (n==2) return Flxq_powu(a, p, T, p);
-  sqx = Flxq_autpow(Flxq_powu(polx_Flx(T[1]), p, T, p), n-1, T, p);
+  sqx = Flxq_autpow(Flxq_powu(polx_Flx(v), p, T, p), n-1, T, p);
   if (d==1 && a[2]==0 && a[3]==1) return gerepileuptoleaf(av, sqx);
   if (d>=p)
   {
@@ -2681,8 +2685,9 @@ Flxq_lroot(GEN a, GEN T, long p)
 }
 
 ulong
-Flxq_norm(GEN x, GEN T, ulong p)
+Flxq_norm(GEN x, GEN TB, ulong p)
 {
+  GEN T = get_Flx_mod(TB);
   ulong y = Flx_resultant(T, x, p);
   ulong L = T[lg(T)-1];
   if ( L==1 || lgpol(x)==0) return y;
@@ -2690,13 +2695,13 @@ Flxq_norm(GEN x, GEN T, ulong p)
 }
 
 ulong
-Flxq_trace(GEN x, GEN T, ulong p)
+Flxq_trace(GEN x, GEN TB, ulong p)
 {
   pari_sp av = avma;
   ulong t;
+  GEN T = get_Flx_mod(TB);
   long n = degpol(T)-1;
-  GEN z = Flx_mul(x, Flx_deriv(T, p), p);
-  z = Flx_rem(z, T, p);
+  GEN z = Flxq_mul(x, Flx_deriv(T, p), TB, p);
   t = degpol(z)<n ? 0 : Fl_div(z[2+n],T[3+n],p);
   avma=av;
   return t;
@@ -2704,12 +2709,12 @@ Flxq_trace(GEN x, GEN T, ulong p)
 
 /*x must be reduced*/
 GEN
-Flxq_charpoly(GEN x, GEN T, ulong p)
+Flxq_charpoly(GEN x, GEN TB, ulong p)
 {
   pari_sp ltop=avma;
-  long v=varn(T);
-  GEN R = Flx_FlxY_resultant(T, deg1pol_shallow(pol1_Flx(x[1]),Flx_neg(x,p),v) ,p);
-  return gerepileupto(ltop,R);
+  GEN T = get_Flx_mod(TB);
+  GEN xm1 = deg1pol_shallow(pol1_Flx(x[1]),Flx_neg(x,p),varn(T));
+  return gerepileupto(ltop, Flx_FlxY_resultant(T, xm1 ,p));
 }
 
 GEN
@@ -2732,8 +2737,9 @@ Flxq_minpoly(GEN x, GEN T, ulong p)
 GEN
 Flxq_conjvec(GEN x, GEN T, ulong p)
 {
-  long i, l = lgpol(T);
+  long i, l = 1+get_Flx_degree(T);
   GEN z = cgetg(l,t_COL);
+  T = Flx_get_red(T,p);
   gel(z,1) = Flx_copy(x);
   for (i=2; i<l; i++) gel(z,i) = Flxq_powu(gel(z,i-1), p, T, p);
   return z;
@@ -2742,7 +2748,8 @@ Flxq_conjvec(GEN x, GEN T, ulong p)
 GEN
 gener_Flxq(GEN T, ulong p, GEN *po)
 {
-  long i, j, vT = T[1], f = degpol(T);
+  long i, j;
+  long vT = get_Flx_var(T), f =get_Flx_degree(T);
   ulong p_1;
   GEN g, L, L2, o, q;
   pari_sp av0, av;
@@ -2786,9 +2793,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     if (p == 2) tt = g;
     else
     {
-      ulong t;
-      /* norm(g), assuming T is monic */
-      t = Flx_resultant(T, g, p);
+      ulong t = Flxq_norm(g, T, p);
       if (t == 1 || !is_gener_Fl(t, p, p_1, L)) continue;
       tt = Flxq_powu(g, p_1>>1, T, p);
     }
@@ -2844,7 +2849,7 @@ const struct bb_field *get_Flxq_field(void **E, GEN T, ulong p)
 {
   GEN z = new_chunk(sizeof(struct _Flxq));
   struct _Flxq *e = (struct _Flxq *) z;
-  e->T = T; e->p  = p; *E = (void*)e;
+  e->T = Flx_get_red(T, p); e->p  = p; *E = (void*)e;
   return &Flxq_field;
 }
 
