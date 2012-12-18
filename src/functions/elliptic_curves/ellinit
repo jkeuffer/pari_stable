@@ -11,9 +11,7 @@ Help: ellinit(x,{fg=0}): x being a vector [a1,a2,a3,a4,a6] or [a4,a6]
  x can also be a string, in which case the curve with matching name is
  retrieved from the elldata database, if available.
 Description:
- (gen, ?0):bell:prec    ellinit($1, prec)
- (gen, 1):ell           smallellinit($1)
- (gen, small):ell:prec  ellinit0($1, $2, prec)
+ (gen, gen, small):ell:prec  ellinit($1, $2, prec)
 Doc:
  initialize an \tet{ell} structure, associated to the elliptic curve $E$.
  $E$ is either

@@ -13,6 +13,5 @@ Description:
  (bnr):void                     checkbnr($1)
  (prid):void                    checkprid($1)
  (clgp):void                    checkclgp($1)
- (ell):void                     checksmallell($1)
- (bell):void                    checkell($1)
+ (ell):void                     checkell($1)
  (*gal):gal:parens              $1 = checkgal($1)

@@ -17,7 +17,7 @@ Description:
  (empty, error, gen)
  (empty, bnr, bnf, nf, vec)
  (empty, bnr, bnf, clgp, vec)
- (empty, bell, ell, vec)
+ (empty, ell, vec)
  (empty, prid, vec)
  (empty, gal, vec)
  (empty, var, pol, gen)
@@ -94,7 +94,6 @@ Description:
  (bnf):vec
  (bnr):vec
  (ell):vec
- (bell):vec
  (clgp):vec
  (prid):vec
  (gal):vec
@@ -137,8 +136,6 @@ Description:
  (bnf):clgp            bnf_get_clgp($1)
  (bnr):clgp            bnr_get_clgp($1)
  (gen):clgp
- (bell):ell
  (gen):ell
- (gen):bell
  (gen):gal
  (gen):prid

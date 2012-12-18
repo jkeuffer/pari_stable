@@ -3,5 +3,3 @@ Help: _.w
 Section: member_functions
 C-Name: member_w
 Prototype: mG
-Description:
- (bell):gen:copy       gel($1, 18)
