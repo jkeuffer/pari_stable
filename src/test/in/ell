@@ -94,7 +94,8 @@ e = ellinit(ellfromj(Mod(1,5))); e.group; elllog(e,e.gen[1],e.gen[1])
 E = ellchangecurve(e,[2,7,1,0]);
 E.group
 
-e = ellinit(ellfromj(1/3),  O(3^10)); e.tate
+e = ellinit(ellfromj(1/3),  O(3^5)); e.tate
+e.roots
 E = ellchangecurve(e,[3,1,1,2]);
 E.tate
 

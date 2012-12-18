@@ -259,7 +259,7 @@ QpXQX_to_ZXY(GEN f, GEN p)
 /* f primitive ZX, squarefree, leading term prime to p; a in Z such that
  * f(a) = 0 mod p. Return p-adic roots of f equal to a mod p, in
  * precision >= prec */
-static GEN
+GEN
 ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
 {
   GEN z, R, a0 = modii(a, p);

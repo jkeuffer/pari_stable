@@ -18,6 +18,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*                          CONSTRUCTORS                           */
 /*                                                                 */
 /*******************************************************************/
+#define retmkfrac(x,y)\
+  do { GEN _v = cgetg(3, t_FRAC);\
+       gel(_v,1) = (y);\
+       gel(_v,2) = (x); return _v; } while(0)
 #define retmkintmod(x,y)\
   do { GEN _v = cgetg(3, t_INTMOD);\
        gel(_v,1) = (y);\
@@ -1508,6 +1512,28 @@ Fp_mulu(GEN a, ulong b, GEN m)
     GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
     (void)new_chunk(lg(a)+1+(l<<1));
     p = muliu(a,b);
+    avma = av; return modii(p,m);
+  }
+}
+INLINE GEN
+Fp_muls(GEN a, long b, GEN m)
+{
+  long l = lgefint(m);
+  if (l == 3)
+  {
+    ulong mm = m[2];
+    if (b < 0)
+    {
+      ulong t = Fl_mul(umodiu(a, mm), -b, mm);
+      return t? utoipos(mm - t): gen_0;
+    }
+    else
+      return utoi( Fl_mul(umodiu(a, mm), b, mm) );
+  } else {
+    pari_sp av = avma;
+    GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
+    (void)new_chunk(lg(a)+1+(l<<1));
+    p = mulis(a,b);
     avma = av; return modii(p,m);
   }
 }

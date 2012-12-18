@@ -1086,6 +1086,20 @@ long
 Q_pval(GEN x, GEN p) { return (typ(x) == t_INT)? Z_pval(x, p): ratval(x, p); }
 
 long
+Q_pvalrem(GEN x, GEN p, GEN *y)
+{
+  GEN a, b;
+  long v;
+  if (typ(x) == t_INT) return Z_pvalrem(x, p, y);
+  a = gel(x,1);
+  b = gel(x,2);
+  v = Z_pvalrem(b, p, &b);
+  if (v) { *y = isint1(b)? a: mkfrac(a, b); return -v; }
+  v = Z_pvalrem(b, p, &a);
+  *y = mkfrac(a, b); return v;
+}
+
+long
 gvaluation(GEN x, GEN p)
 {
   long tx = typ(x), tp = typ(p);

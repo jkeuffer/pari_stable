@@ -633,7 +633,6 @@ GEN     F2x_factcantor(GEN f, long flag);
 GEN     Flx_factcantor(GEN f, ulong p, long flag);
 GEN     FpX_factcantor(GEN f, GEN pp, long flag);
 GEN     FqX_rand(long d1, long v, GEN T, GEN p);
-GEN     Zp_appr(GEN f, GEN a);
 int     cmp_padic(GEN x, GEN y);
 GEN     factcantor0(GEN f, GEN pp, long flag);
 

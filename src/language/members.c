@@ -251,7 +251,7 @@ member_roots(GEN x) /* roots */
     if (t == typ_ELL)
       switch(ell_get_type(x))
       {
-        case t_ELL_Qp: return ellQp_root(x, ellQp_get_prec(x));
+        case t_ELL_Qp: return mkcol( ellQp_root(x, ellQp_get_prec(x)) );
         case t_ELL_Q:
         case t_ELL_Rg: return ellR_roots(x, ellR_get_prec(x));
       }

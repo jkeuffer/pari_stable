@@ -2899,6 +2899,9 @@ returns the representative of \kbd{a} in the symmetric residue system.
 \fun{GEN}{Fp_mulu}{GEN a, ulong b, GEN m} returns the product of \kbd{a} by
 \kbd{b} modulo \kbd{m} (smallest non-negative residue).
 
+\fun{GEN}{Fp_muls}{GEN a, long b, GEN m} returns the product of \kbd{a} by
+\kbd{b} modulo \kbd{m} (smallest non-negative residue).
+
 \fun{GEN}{Fp_sqr}{GEN a, GEN m} returns $\kbd{a}^2$ modulo \kbd{m} (smallest
 non-negative residue).
 
@@ -5149,6 +5152,13 @@ usually more efficient than computations using a priori bounds.
 return the logarithm of $a$ in $\Z_p[X]/(T)$ to precision $e$, assuming that
 $a\equiv 1 \pmod{p\Z_p[X]}$ if $p$ odd or $a\equiv 1 \pmod{4\Z_2[X]}$ if $p=2$.
 
+\fun{GEN}{padic_to_Q}{GEN x} truncate the \typ{PADIC} to a \typ{INT} or
+\typ{FRAC}.
+
+\fun{GEN}{padic_to_Q_shallow}{GEN x} shallow version of \tet{padic_to_Q}
+
+\fun{GEN}{QpV_to_QV}{GEN v} apply \tet{padic_to_Q_shallow}
+
 \subsec{Conversions involving single precision objects}
 
 \subsubsec{To single precision}
@@ -7321,6 +7331,9 @@ returns the $4$-dimensional \typ{MAT} \kbd{[x,y,z,t]}.
 \fun{GEN}{retmkmat5}{GEN x, GEN y, GEN z, GEN t, GEN u}
 returns the $5$-dimensional \typ{MAT} \kbd{[x,y,z,t,u]}.
 
+\fun{GEN}{retmkfrac}{GEN x, GEN y}
+returns the \typ{FRAC} \kbd{x / y}. Assume $x$ and $y$ are coprime and $y > 1$.
+
 \fun{GEN}{retmkintmod}{GEN x, GEN y}
 returns the \typ{INTMOD} \kbd{Mod(x, y)}.
 
@@ -7840,6 +7853,10 @@ and returns the primitive part \kbd{x} / \kbd{c}. A trivial content is set to
 
 \fun{long}{Q_pval}{GEN x, GEN p} valuation at the \typ{INT} \kbd{p}
 of the \typ{INT} or \typ{FRAC}~\kbd{x}.
+
+\fun{long}{Q_pvalrem}{GEN x, GEN p, GEN *r} returns the valuation $e$ at the
+\typ{INT} \kbd{p} of the \typ{INT} or \typ{FRAC}~\kbd{x}. The quotient
+$\kbd{x}/\kbd{p}^{e}$ is returned in~\kbd{*r}.
 
 \fun{GEN}{Q_abs}{GEN x} absolute value of the \typ{INT} or
 \typ{FRAC}~\kbd{x}.

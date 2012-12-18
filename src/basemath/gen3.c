@@ -2319,11 +2319,59 @@ ser2rfrac(GEN x)
   return gerepilecopy(av, ser2rfrac_i(x));
 }
 
+/* x t_PADIC, truncate to rational (t_INT/t_FRAC) */
+GEN
+padic_to_Q(GEN x)
+{
+  GEN u = gel(x,4), p;
+  long v;
+  if (!signe(u)) return gen_0;
+  v = valp(x);
+  if (!v) return icopy(u);
+  p = gel(x,2);
+  if (v>0)
+  {
+    pari_sp av = avma;
+    return gerepileuptoint(av, mulii(u, powiu(p,v)));
+  }
+  retmkfrac(icopy(u), powiu(p,-v));
+}
+GEN
+padic_to_Q_shallow(GEN x)
+{
+  GEN u = gel(x,4), p;
+  long v;
+  if (!signe(u)) return gen_0;
+  v = valp(x);
+  if (!v) return u;
+  p = gel(x,2);
+  if (v>0) return mulii(powiu(p,v), u);
+  return mkfrac(u, powiu(p,-v));
+}
+GEN
+QpV_to_QV(GEN v)
+{
+  long i, l;
+  GEN w = cgetg_copy(v, &l);
+  for (i = 1; i < l; i++)
+  {
+    GEN c = gel(v,i);
+    switch(typ(c))
+    {
+      case t_INT:
+      case t_FRAC: break;
+      case t_PADIC: c = padic_to_Q_shallow(c); break;
+      default: pari_err_TYPE("padic_to_Q", v);
+    }
+    gel(w,i) = c;
+  }
+  return w;
+}
+
 GEN
 gtrunc(GEN x)
 {
-  long i, v;
-  pari_sp av;
+  long i;
   GEN y;
 
   switch(typ(x))
@@ -2331,28 +2379,10 @@ gtrunc(GEN x)
     case t_INT: return icopy(x);
     case t_REAL: return truncr(x);
     case t_FRAC: return divii(gel(x,1),gel(x,2));
-
-    case t_PADIC:
-      if (!signe(gel(x,4))) return gen_0;
-      v = valp(x);
-      if (!v) return icopy(gel(x,4));
-      if (v>0)
-      { /* here p^v is an integer */
-        av = avma; y = powiu(gel(x,2),v);
-        return gerepileuptoint(av, mulii(y,gel(x,4)));
-      }
-      y = cgetg(3,t_FRAC);
-      gel(y,1) = icopy(gel(x,4));
-      gel(y,2) = powiu(gel(x,2),-v);
-      return y;
-
+    case t_PADIC: return padic_to_Q(x);
     case t_POL: return RgX_copy(x);
-    case t_RFRAC:
-      return gdeuc(gel(x,1),gel(x,2));
-
-    case t_SER:
-      return ser2rfrac(x);
-
+    case t_RFRAC: return gdeuc(gel(x,1),gel(x,2));
+    case t_SER: return ser2rfrac(x);
     case t_VEC: case t_COL: case t_MAT:
     {
       long lx;

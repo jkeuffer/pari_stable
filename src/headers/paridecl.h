@@ -2058,6 +2058,7 @@ GEN     map_proto_lGG(long f(GEN,GEN), GEN x, GEN n);
 GEN     map_proto_lGL(long f(GEN,long), GEN x, long y);
 
 long    Q_pval(GEN x, GEN p);
+long    Q_pvalrem(GEN x, GEN p, GEN *y);
 long    RgX_val(GEN x);
 long    RgX_valrem(GEN x, GEN *z);
 long    RgX_valrem_inexact(GEN x, GEN *Z);
@@ -2137,6 +2138,9 @@ long    z_pvalrem(long n, GEN p, long *py);
 
 /* gen3.c */
 
+GEN     padic_to_Q(GEN x);
+GEN     padic_to_Q_shallow(GEN x);
+GEN     QpV_to_QV(GEN v);
 GEN     RgM_mulreal(GEN x, GEN y);
 GEN     RgX_RgM_eval_col(GEN x, GEN M, long c);
 GEN     RgX_deflate_max(GEN x0, long *m);
@@ -2673,6 +2677,8 @@ long    vecvecsmall_search(GEN x, GEN y, long flag);
 
 /* polarit1.c */
 
+GEN     ZX_Zp_root(GEN f, GEN a, GEN p, long prec);
+GEN     Zp_appr(GEN f, GEN a);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic(GEN x, GEN p, long r);
 GEN     gdeuc(GEN x, GEN y);
@@ -3467,6 +3473,7 @@ INLINE GEN    Fp_div(GEN a, GEN b, GEN m);
 INLINE GEN    Fp_inv(GEN a, GEN m);
 INLINE GEN    Fp_invsafe(GEN a, GEN m);
 INLINE GEN    Fp_mul(GEN a, GEN b, GEN m);
+INLINE GEN    Fp_muls(GEN a, long b, GEN m);
 INLINE GEN    Fp_mulu(GEN a, ulong b, GEN m);
 INLINE GEN    Fp_neg(GEN b, GEN m);
 INLINE GEN    Fp_red(GEN x, GEN p);
