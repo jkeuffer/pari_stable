@@ -3846,6 +3846,8 @@ Besides \kbd{T} and \kbd{p}, arguments are either \kbd{FpXQ} or \kbd{Fq}
 depending on the function name. (All \kbd{Fq} routines accept \kbd{FpXQ}s by
 definition, not the other way round.)
 
+\subsec{Conversions}
+
 \fun{GEN}{Rg_is_FpXQ}{GEN z, GEN *T, GEN *p}, checks if \kbd{z} is a \kbd{GEN}
 which can be mapped to $\F_p[X]/(T)$: anything for which \kbd{Rg\_is\_Fp} return
 $1$, a \typ{POL} for which \kbd{RgX\_to\_FpX} return $1$, a \typ{POLMOD}
@@ -3886,6 +3888,8 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 
 \fun{GEN}{FpXQ_red}{GEN x, GEN T,GEN p} \kbd{x} a \typ{POL}
 whose coefficients are \typ{INT}s, reduce them to \kbd{FpXQ}s.
+
+\subsec{\kbd{FpXQ}}
 
 \fun{GEN}{FpXQ_add}{GEN x, GEN y, GEN T,GEN p}
 
@@ -3932,6 +3936,8 @@ Return \kbd{NULL} if \kbd{x} is not a square.
 \kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
 \kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to a
 primitive \kbd{n}-th root of the unity. Assumes that \kbd{T} is irreducible mod \kbd{p}.
+
+\subsec{\kbd{Fq}}
 
 \fun{GEN}{Fq_add}{GEN x, GEN y, GEN T/*unused*/, GEN p}
 
