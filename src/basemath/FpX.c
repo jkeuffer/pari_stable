@@ -1403,7 +1403,7 @@ FpXQ_autpow(GEN x, ulong n, GEN T, GEN p)
 {
   struct _FpXQ D;
   D.T = FpX_get_red(T, p); D.p = p;
-  if (n==0) return pol_x(varn(T));
+  if (n==0) return pol_x(varn(x));
   if (n==1) return ZX_copy(x);
   return gen_powu(x,n,(void*)&D,FpXQ_autpow_sqr,FpXQ_autpow_mul);
 }
@@ -1464,7 +1464,7 @@ static GEN
 FpXQ_pow_Frobenius(GEN x, GEN n, GEN aut, GEN T, GEN p)
 {
   pari_sp av=avma;
-  long d = degpol(T);
+  long d = get_FpX_degree(T);
   GEN an = absi(n), z, q;
   if (cmpii(an,p)<0 || cmpis(an,d)<=0)
     return FpXQ_pow(x, n, T, p);
@@ -1497,6 +1497,12 @@ FpXQ_pow_Frobenius(GEN x, GEN n, GEN aut, GEN T, GEN p)
   return gerepileupto(av,signe(n)>0 ? z : FpXQ_inv(z,T,p));
 }
 
+static GEN
+FpX_Frobenius(GEN T, GEN p)
+{
+  return FpXQ_pow(pol_x(get_FpX_var(T)), p, T, p);
+}
+
 /* assume T irreducible mod p */
 int
 FpXQ_issquare(GEN x, GEN T, GEN p)
@@ -1523,7 +1529,7 @@ int
 Fq_issquare(GEN x, GEN T, GEN p)
 {
   if (typ(x) != t_INT) return FpXQ_issquare(x, T, p);
-  return (! odd(degpol(T)) || Fp_issquare(x, p));
+  return (! odd(get_FpX_degree(T)) || Fp_issquare(x, p));
 }
 
 static GEN
@@ -1561,7 +1567,7 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
 
   ordp = subis(p, 1); /* even */
   ord  = dlog_get_ord(o);
-  if (!ord) ord = T? subis(powiu(p, degpol(T)), 1): ordp;
+  if (!ord) ord = T? subis(powiu(p, get_FpX_degree(T)), 1): ordp;
   if (equalii(a, ordp)) /* -1 */
     return gerepileuptoint(av, shifti(ord,-1));
   ordp = gcdii(ordp,ord);
@@ -1597,7 +1603,7 @@ _FpXQ_rand(void *data)
   do
   {
     avma=av;
-    z=random_FpX(degpol(D->T),varn(D->T),D->p);
+    z=random_FpX(get_FpX_degree(D->T),get_FpX_var(D->T),D->p);
   } while (!signe(z));
   return z;
 }
@@ -1625,7 +1631,7 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   else
   {
     struct _FpXQ s;
-    s.T=T; s.p=p; s.aut = FpXQ_pow(pol_x(varn(T)), p, T, p);
+    s.T=T; s.p=p; s.aut = FpX_Frobenius(T, p);
     return gen_order(a,ord, (void*)&s,&FpXQ_star);
   }
 }
@@ -1644,7 +1650,7 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   {
     struct _FpXQ s;
     GEN z;
-    s.T=T; s.p=p; s.aut = FpXQ_pow(pol_x(varn(T)), p, T, p);
+    s.T=T; s.p=p; s.aut = FpX_Frobenius(T, p);
     z = gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star);
     return z? z: cgetg(1,t_VEC);
   }
@@ -1655,7 +1661,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
 {
   if (!signe(a))
   {
-    long v=varn(T);
+    long v=varn(a);
     if (zeta)
       *zeta=pol_1(v);
     return pol_0(v);
@@ -1678,9 +1684,9 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   else
   {
     struct _FpXQ s;
-    s.T=T; s.p=p; s.aut = FpXQ_pow(pol_x(varn(T)), p, T, p);
-    return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
-                            (void*)&s,&FpXQ_star);
+    GEN o = addis(powiu(p,get_FpX_degree(T)),-1);
+    s.T=T; s.p=p; s.aut = FpX_Frobenius(T, p);
+    return gen_Shanks_sqrtn(a,n,o,zeta, (void*)&s,&FpXQ_star);
   }
 }
 
@@ -1748,7 +1754,7 @@ FpXQ_conjvec(GEN x, GEN T, GEN p)
 {
   pari_sp av=avma;
   long i;
-  long n = get_FpX_degree(T), v = get_FpX_var(T);
+  long n = get_FpX_degree(T), v = varn(x);
   GEN M = FpXQ_matrix_pow(FpXQ_pow(pol_x(v),p,T,p),n,n,T,p);
   GEN z = cgetg(n+1,t_COL);
   gel(z,1) = RgX_to_RgV(x,n);
