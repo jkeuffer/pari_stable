@@ -3760,24 +3760,6 @@ work with any non-zero \typ{INT} but is not efficient in this case).
 \fun{GEN}{FpX_eval}{GEN x, GEN y, GEN p} evaluates the \kbd{FpX}~\kbd{x}
 at the \kbd{Fp}~\kbd{y}. The result is an~\kbd{Fp}.
 
-\fun{GEN}{FpXY_eval}{GEN Q, GEN y, GEN x, GEN p} $Q$ being an \kbd{FpXY},
-i.e.~a \typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an
-element of $\F_p[X][Y]$. Returns the \kbd{Fp} $Q(x,y)$.
-
-\fun{GEN}{FpXY_evalx}{GEN Q, GEN x, GEN p} $Q$ being an \kbd{FpXY}, returns the
-\kbd{FpX} $Q(x,Y)$, where $Y$ is the main variable of $Q$.
-
-\fun{GEN}{FpXY_evaly}{GEN Q, GEN y, GEN p, long vy} $Q$ an \kbd{FpXY}, returns
-the \kbd{FpX} $Q(X,y)$, where $X$ is the second variable of $Q$.
-
-\fun{GEN}{FpXY_Fq_evaly}{GEN Q, GEN y, GEN T, GEN p, long vx} $Q$ an \kbd{FpXY}
-and $y$ being an \kbd{Fq}, returns the \kbd{FqX} $Q(X,y)$, where $X$ is the
-second variable of $Q$, and \kbd{vx} is the variable number of $X$.
-
-\fun{GEN}{FpXY_FpXQ_evalx}{GEN x, GEN Y, ulong p} $Q$ an \kbd{FpXY} and
-$y$ being an \kbd{FpXQ}, returns the \kbd{FpXQX} $Q(x,Y)$, where $Y$ is the
-first variable of $Q$.
-
 \fun{GEN}{FpXV_FpC_mul}{GEN V, GEN W, GEN p} multiplies a non-empty line
 vector of\kbd{FpX} by a column vector of \kbd{Fp} of compatible dimensions.
 The result is an~\kbd{FpX}.
@@ -4037,10 +4019,11 @@ $\kbd{f}(\kbd{x})$.
 $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$.
 
-\subsec{\kbd{FpXX}}
+\subsec{\kbd{FpXX}, \kbd{FpXY}}
 Contrary to what the name implies, an \kbd{FpXX} is a \typ{POL} whose
 coefficients are either \typ{INT}s or \typ{FpX}s. This reduces memory
-overhead at the expense of consistency.
+overhead at the expense of consistency. The prefix \kbd{FpXY} is an
+alias for \kbd{FpXX} when variables matters.
 
 \fun{GEN}{FpXX_red}{GEN z, GEN p}, \kbd{z} a \typ{POL} whose coefficients are
 either \kbd{ZX}s or \typ{INT}s. Returns the \typ{POL} equal to \kbd{z} with
@@ -4063,6 +4046,28 @@ by the \kbd{Fp}~\kbd{y}.
 
 \fun{GEN}{FpXX_mulu}{GEN x, GEN y, GEN p} multiplies the \kbd{FpXX}~\kbd{x}
 by the scalar \kbd{y}.
+
+\fun{GEN}{FpXY_eval}{GEN Q, GEN y, GEN x, GEN p} $Q$ being an \kbd{FpXY},
+i.e.~a \typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an
+element of $\F_p[X][Y]$. Returns the \kbd{Fp} $Q(x,y)$.
+
+\fun{GEN}{FpXY_evalx}{GEN Q, GEN x, GEN p} $Q$ being an \kbd{FpXY}, returns the
+\kbd{FpX} $Q(x,Y)$, where $Y$ is the main variable of $Q$.
+
+\fun{GEN}{FpXY_evaly}{GEN Q, GEN y, GEN p, long vy} $Q$ an \kbd{FpXY}, returns
+the \kbd{FpX} $Q(X,y)$, where $X$ is the second variable of $Q$.
+
+\fun{GEN}{FpXY_Fq_evaly}{GEN Q, GEN y, GEN T, GEN p, long vx} $Q$ an \kbd{FpXY}
+and $y$ being an \kbd{Fq}, returns the \kbd{FqX} $Q(X,y)$, where $X$ is the
+second variable of $Q$, and \kbd{vx} is the variable number of $X$.
+
+\fun{GEN}{FpXY_FpXQ_evalx}{GEN x, GEN Y, ulong p} $Q$ an \kbd{FpXY} and
+$y$ being an \kbd{FpXQ}, returns the \kbd{FpXQX} $Q(x,Y)$, where $Y$ is the
+first variable of $Q$.
+
+\fun{GEN}{FpXYQQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} being a
+\kbd{FpXY}, \kbd{T} being a \kbd{FpX} and \kbd{S} being a \kbd{FpY},
+return $x^n \pmod{S,T,p}$.
 
 \subsec{\kbd{FpXQX}, \kbd{FqX}}
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
@@ -4235,10 +4240,6 @@ $m\times n$ matrix.
 \fun{GEN}{FqV_roots_to_pol}{GEN V, GEN T, GEN p, long v},
 \kbd{V} being a vector of \kbd{Fq}s, returns the monic \kbd{FqX}
 $\prod_i (\kbd{pol\_x[v]} - \kbd{V[i]})$.
-
-\fun{GEN}{FpXYQQ_pow}{GEN x, GEN n, GEN S, GEN T, GEN p}, \kbd{x} being a
-\kbd{FpXY}, \kbd{T} being a \kbd{FpX} and \kbd{S} being a \kbd{FpY},
-return $x^n \pmod{S,T,p}$.
 
 \subsubsec{Miscellaneous operations}
 
