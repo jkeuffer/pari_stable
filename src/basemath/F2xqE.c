@@ -666,7 +666,8 @@ Z2XQ_invnorm(GEN a, GEN T, long e)
 {
   pari_timer ti;
   GEN pe = int2n(e), s;
-  if (degpol(a)==0) return Fp_inv(Fp_powu(gel(a,2),degpol(T),pe),pe);
+  if (degpol(a)==0)
+    return Fp_inv(Fp_powu(gel(a,2), get_FpX_degree(T), pe), pe);
   if (DEBUGLEVEL>=3) timer_start(&ti);
   s = ZpXQ_log(a, T, gen_2, e);
   if (DEBUGLEVEL>=3) timer_printf(&ti,"Z2XQ_log");
@@ -686,7 +687,7 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
 {
   pari_sp ltop = avma;
   pari_timer ti;
-  GEN B, T, sqx;
+  GEN T, sqx;
   GEN x, t;
   long n = F2x_degree(T2), N = ((n + 1)>>1) + 2;
   if (n==1) return gen_m1;
@@ -698,9 +699,9 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
   if (DEBUGLEVEL>1) timer_printf(&ti,"Sqrtx");
   T = F2x_canonlift(T2, N-2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Teich");
-  B = FpX_get_red(T, int2n(N));
+  T = FpX_get_red(T, int2n(N));
   if (DEBUGLEVEL>1) timer_printf(&ti,"Barrett");
-  x = solve_AGM_eqn(F2x_to_ZX(a6), N-2, B, sqx);
+  x = solve_AGM_eqn(F2x_to_ZX(a6), N-2, T, sqx);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Lift");
   t = Z2XQ_invnorm(ZX_Z_add_shallow(ZX_shifti(x,2), gen_1), T, N);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Norm");

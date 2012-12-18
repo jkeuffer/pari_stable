@@ -677,22 +677,22 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   GEN phix = mkmat4(gel(phi,2),ZC_z_mul(gel(phi,3),2),
                     ZC_z_mul(gel(phi,4),3),mkcol4s(4,0,0,0));
   GEN q = powuu(3, N), p =utoi(3);
-  GEN B, T2, Xm, j, c2, t;
+  GEN T2, T3, Xm, j, c2, t;
   GEN J1,A60,A61,X, sqx;
   timer_start(&ti);
   T2 = F3x_canonlift(T,N);
   if (DEBUGLEVEL) timer_printf(&ti,"Teich");
-  B = FpX_get_red(T2, q);
+  T2 = FpX_get_red(T2, q); T3 = ZXT_to_FlxT(T2, 3);
   av2 = avma;
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
   Xm = FpXQ_powers(monomial(gen_1,n,varn(T)),2,T2,q);
   if (DEBUGLEVEL) timer_printf(&ti,"Xm");
   j = Flx_neg(Flxq_inv(a6,T,3),3);
-  sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, 3), 2, T, 3);
-  J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, B,sqx,T,3);
+  sqx = Flxq_powers(Flxq_lroot(polx_Flx(T[1]), T, 3), 2, T3, 3);
+  J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, T2, sqx, T3, 3);
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
   A61 = liftcurve(J1,T2,p,N);
-  A60 = ZpXQ_frob(A61,Xm,B,q,3);
+  A60 = ZpXQ_frob(A61,Xm,T2,q,3);
   if (DEBUGLEVEL) timer_printf(&ti,"liftcurve");
   X = liftX(a6,A60,T2,p,N);
   if (DEBUGLEVEL) timer_printf(&ti,"X");
