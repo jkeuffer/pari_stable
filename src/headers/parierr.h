@@ -39,4 +39,4 @@ enum err_list {
   e_NONE
 };
 
-enum { warner, warnprec, warnfile, warnmem };
+enum { warner, warnprec, warnfile, warnmem, warnuser };

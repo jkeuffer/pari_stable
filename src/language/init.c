@@ -909,7 +909,7 @@ pari_warn(int numerr, ...)
   err_init_msg(numerr);
   switch (numerr)
   {
-    case e_USER:
+    case warnuser:
       out_puts(pariErr, "user warning: ");
       out_print0(pariErr, NULL, va_arg(ap, GEN), f_RAW);
       break;

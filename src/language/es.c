@@ -4471,7 +4471,7 @@ error0(GEN g)
   else pari_err(e_USER, g);
 }
 
-void warning0(GEN g) { pari_warn(e_USER, g); }
+void warning0(GEN g) { pari_warn(warnuser, g); }
 
 static char *
 wr_check(const char *s) {
