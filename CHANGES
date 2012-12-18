@@ -388,7 +388,8 @@ BA 123- PARI functions FpX_mulu, Flx_mulu, ZX_mulu
 BA 124- PARI functions FlxqXQV_autpow, FlxqXQV_autsum
 BA 125- PARI functions FpXQXQV_autpow, FpXQXQV_autsum
 BA 126- PARI functions FpXT_red, FlxT_red, ZXT_to_FlxT, ZXT_remi2n
-   127- PARI functions padic_to_Q, padic_to_Q_shallow, QpV_to_QV, Q_pvalrem,
+BA 127- Support for preconditionned reduction in FpXQ/Flxq
+   128- PARI functions padic_to_Q, padic_to_Q_shallow, QpV_to_QV, Q_pvalrem,
         ZX_Zp_root, Zp_appr, Fp_muls, retmkfrac
 
   Removed

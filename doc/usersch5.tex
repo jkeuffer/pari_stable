@@ -3846,6 +3846,26 @@ Besides \kbd{T} and \kbd{p}, arguments are either \kbd{FpXQ} or \kbd{Fq}
 depending on the function name. (All \kbd{Fq} routines accept \kbd{FpXQ}s by
 definition, not the other way round.)
 
+\subsec{Preconditioned reduction}
+
+For faster reduction, the modulus \kbd{T} can be replaced by an extended modulus,
+which is an \kbd{FpXT}, in all \kbd{FpXQ}- and \kbd{Fq}-classes functions,
+and in \kbd{FpX\_rem} and \kbd{FpX\_divrem}.
+
+\fun{GEN}{FpX_get_red}{GEN T, GEN p} returns the extended modulus \kbd{eT}.
+
+To write code that works both with plain and extended moduli, the following
+accessors are defined:
+
+\fun{GEN}{get_FpX_mod}{GEN eT} returns the underlying modulus \kbd{T}.
+
+\fun{GEN}{get_FpX_var}{GEN eT} returns the variable number of the modulus.
+
+\fun{GEN}{get_FpX_degree}{GEN eT} returns the degree of the modulus.
+
+Furthermore, \kbd{ZXT\_to\_FlxT} allows to convert an extended modulus for
+a \kbd{FpX} to an extended modulus of for the corresponding \kbd{Flx}.
+
 \subsec{Conversions}
 
 \fun{GEN}{Rg_is_FpXQ}{GEN z, GEN *T, GEN *p}, checks if \kbd{z} is a \kbd{GEN}
@@ -4332,6 +4352,26 @@ variable $v$, then the coefficients by increasing degree. An \kbd{FlxX} is a
 
 \noindent In the following, an argument called \kbd{sv} is of the form
 \kbd{evalvarn}$(v)$ for some variable number~$v$.
+
+\subsec{Preconditioned reduction}
+
+For faster reduction, the modulus \kbd{T} can be replaced by an extended
+modulus, which is an \kbd{FlxT}, in all \kbd{Flxq}-classes functions, and in
+\kbd{Flx\_divrem}.
+
+\fun{GEN}{Flx_get_red}{GEN T, ulong p} returns the extended modulus \kbd{eT}.
+
+To write code that works both with plain and extended moduli, the following
+accessors are defined:
+
+\fun{GEN}{get_Flx_mod}{GEN eT} returns the underlying modulus \kbd{T}.
+
+\fun{GEN}{get_Flx_var}{GEN eT} returns the variable number of the modulus.
+
+\fun{GEN}{get_Flx_degree}{GEN eT} returns the degree of the modulus.
+
+Furthermore, \kbd{ZXT\_to\_FlxT} allows to convert an extended modulus for
+a \kbd{FpX} to an extended modulus of for the corresponding \kbd{Flx}.
 
 \subsubsec{Basic operations}
 
