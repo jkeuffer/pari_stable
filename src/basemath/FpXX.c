@@ -25,6 +25,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*******************************************************************/
 /*Polynomials whose coefficients are either polynomials or integers*/
 
+static ulong
+to_FlxqX(GEN P, GEN Q, GEN T, GEN p, GEN *pt_P, GEN *pt_Q, GEN *pt_T)
+{
+  ulong pp = (ulong)p[2];
+  long v = get_FpX_var(T);
+  *pt_P = ZXX_to_FlxX(P, pp, v);
+  if (pt_Q) *pt_Q = ZXX_to_FlxX(Q, pp, v);
+  *pt_T = ZXT_to_FlxT(T, pp);
+  return pp;
+}
+
 static GEN
 ZXX_copy(GEN a) { return gcopy(a); }
 
@@ -313,11 +324,8 @@ FpXQX_divrem_basecase(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   { /* assume ab != 0 mod p */
     {
       GEN *gptr[2];
-      ulong pp = (ulong)p[2];
-      long v = varn(T);
-      GEN a = ZXX_to_FlxX(x, pp, v);
-      GEN b = ZXX_to_FlxX(y, pp, v);
-      GEN t = ZX_to_Flx(T, pp);
+      GEN a, b, t;
+      ulong pp = to_FlxqX(x, y, T, p, &a, &b, &t);
       z = FlxqX_divrem(a,b,t,pp,pr);
       tetpil=avma;
       z = FlxX_to_ZXX(z);
@@ -388,11 +396,8 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
   GEN R;
   if (lgefint(p) == 3)
   {
-    ulong pp = (ulong)p[2];
     GEN Pl, Ql, Tl, U;
-    Pl = ZXX_to_FlxX(P, pp, varn(T));
-    Ql = ZXX_to_FlxX(Q, pp, varn(T));
-    Tl = ZX_to_Flx(T, pp);
+    ulong pp = to_FlxqX(P, Q, T, p, &Pl, &Ql, &Tl);
     U  = FlxqX_gcd(Pl, Ql, Tl, pp);
     return gerepileupto(av, FlxX_to_ZXX(U));
   }
@@ -415,11 +420,8 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   pari_sp ltop=avma;
   if (lgefint(p) == 3)
   {
-    ulong pp = (ulong)p[2];
     GEN Pl, Ql, Tl, Dl;
-    Pl = ZXX_to_FlxX(x, pp, varn(T));
-    Ql = ZXX_to_FlxX(y, pp, varn(T));
-    Tl = ZX_to_Flx(T, pp);
+    ulong pp = to_FlxqX(x, y, T, p, &Pl, &Ql, &Tl);
     Dl = FlxqX_extgcd(Pl, Ql, Tl, pp, ptu, ptv);
     if (ptu) *ptu = FlxX_to_ZXX(*ptu);
     *ptv = FlxX_to_ZXX(*ptv);
@@ -716,8 +718,8 @@ FpXQXV_prod(GEN V, GEN T, GEN p)
   {
     pari_sp av = avma;
     ulong pp = p[2];
-    GEN Tl = ZX_to_Flx(T, pp);
-    GEN Vl = ZXXV_to_FlxXV(V, pp, varn(T));
+    GEN Tl = ZXT_to_FlxT(T, pp);
+    GEN Vl = ZXXV_to_FlxXV(V, pp, get_FpX_var(T));
     Tl = FlxqXV_prod(Vl, Tl, pp);
     return gerepileupto(av, FlxX_to_ZXX(Tl));
   }
@@ -825,10 +827,8 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   GEN y;
   if (lgefint(p) == 3)
   {
-    ulong pp = p[2];
-    x = ZXX_to_FlxX(x, pp, varn(T));
+    ulong pp = to_FlxqX(x, NULL, T, p, &x, NULL, &T);
     S = ZX_to_Flx(S, pp);
-    T = ZX_to_Flx(T, pp);
     y = FlxX_to_ZXX( FlxYqQ_pow(x, n, S, T, pp) );
   }
   else
@@ -939,13 +939,8 @@ FpXQXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     return (s < 0)? FpXQXQ_inv(x,S,T,p): ZXX_copy(x);
   if (lgefint(p) == 3)
   {
-    ulong pp = p[2];
-    GEN z;
-    long v = varn(T);
-    T = ZX_to_Flx(T, pp);
-    x = ZXX_to_FlxX(x, pp, v);
-    S = ZXX_to_FlxX(S, pp, v);
-    z = FlxqXQ_pow(x, n, S, T, pp);
+    ulong pp = to_FlxqX(x, S, T, p, &x, &S, &T);
+    GEN z = FlxqXQ_pow(x, n, S, T, pp);
     y = FlxX_to_ZXX(z);
   }
   else
