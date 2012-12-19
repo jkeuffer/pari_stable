@@ -794,14 +794,12 @@ static GEN
 FpXYQQ_redswap(GEN x, GEN S, GEN T, GEN p)
 {
   pari_sp ltop=avma;
-  long n=degpol(S);
-  long m=degpol(T);
-  long v=varn(T),w=varn(S);
-  GEN V = RgXY_swap(x,n,w);
-  setvarn(T,w);
+  long n = get_FpX_degree(S);
+  long m = get_FpX_degree(T);
+  long v = get_FpX_var(T);
+  GEN V = RgXY_swap(x,n,v);
   V = FpXQX_red(V,T,p);
-  setvarn(T,v);
-  V = RgXY_swap(V,m,w);
+  V = RgXY_swap(V,m,v);
   return gerepilecopy(ltop,V);
 }
 static GEN

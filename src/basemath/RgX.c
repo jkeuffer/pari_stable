@@ -594,7 +594,10 @@ RgXY_swapspec(GEN x, long n, long w, long nx)
 /* P(X,Y) --> P(Y,X), n is an upper bound for deg_Y(P) */
 GEN
 RgXY_swap(GEN x, long n, long w)
-{ return RgXY_swapspec(x+2, n, w, lgpol(x)); }
+{
+  GEN z = RgXY_swapspec(x+2, n, w, lgpol(x));
+  setvarn(z, varn(x)); return z;
+}
 
 /* return (x % X^n). Shallow */
 GEN
