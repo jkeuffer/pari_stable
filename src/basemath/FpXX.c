@@ -565,8 +565,8 @@ FpXQX_invBarrett(GEN S, GEN T, GEN p)
   return gerepileupto(ltop, r);
 }
 
-/* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
- * and mg is the Barrett inverse of T. */
+/* Compute x mod S where 2 <= degpol(S) <= l+1 <= 2*(degpol(S)-1)
+ * and mg is the Barrett inverse of S. */
 static GEN
 FpXQX_divrem_Barrettspec(GEN x, long l, GEN mg, GEN S, GEN T, GEN p, GEN *pr)
 {
@@ -964,7 +964,7 @@ GEN
 FpXQXQ_powers(GEN x, long l, GEN S, GEN T, GEN p)
 {
   FpXQXQ_muldata D;
-  int use_sqr = (degpol(x)<<1)>=degpol(T);
+  int use_sqr = (degpol(x)<<1) >= degpol(S);
   D.S = S; D.T = T; D.p = p;
   return gen_powers(x, l, use_sqr, (void*)&D, &_FpXQXQ_sqr, &_FpXQXQ_mul,&_FpXQXQ_one);
 }
@@ -988,7 +988,7 @@ GEN
 FpXQX_FpXQXQ_eval(GEN Q, GEN x, GEN S, GEN T, GEN p)
 {
   FpXQXQ_muldata D;
-  int use_sqr = (degpol(x)<<1) >= degpol(T);
+  int use_sqr = (degpol(x)<<1) >= degpol(S);
   D.S=S; D.T=T; D.p=p;
   return gen_bkeval(Q, degpol(Q), x, use_sqr, (void*)&D, &FpXQXQ_algebra,
                                                     _FpXQXQ_cmul);
