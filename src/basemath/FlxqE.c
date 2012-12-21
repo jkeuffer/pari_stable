@@ -518,6 +518,93 @@ static GEN
 F3x_canonlift(GEN P, long n)
 { return gen_ZpX_Newton(Flx_to_ZX(P),utoi(3), n, NULL, _can_iter, _can_invd); }
 
+static GEN _can5_invl(void *E, GEN V) {(void) E; return V; }
+
+static GEN _can5_lin(void *E, GEN F, GEN V, GEN q)
+{
+  ulong p = *(ulong*)E;
+  GEN v = RgX_splitting(V, p);
+  return FpX_sub(V,ZXV_dotproduct(v, F), q);
+}
+
+/* P(X,t) -> P(X*t^n,t) mod (t^p-1) */
+static GEN
+_shift(GEN P, long n, ulong p, long v)
+{
+  long i, l=lg(P);
+  GEN r = cgetg(l,t_POL); r[1] = P[1];
+  for(i=2;i<l;i++)
+  {
+    long s = n*(i-2)%p;
+    GEN ci = gel(P,i);
+    if (typ(ci)==t_INT)
+      gel(r,i) = monomial(ci, s, v);
+    else
+      gel(r,i) = RgX_rotate_shallow(ci, s, p);
+  }
+  return FpXX_renormalize(r, l);
+}
+
+struct _can_mul
+{
+  GEN T, q;
+  ulong p;
+};
+
+static GEN
+_can5_mul(void *E, GEN A, GEN B)
+{
+  struct _can_mul *d = (struct _can_mul *)E;
+  GEN a = gel(A,1), b = gel(B,1);
+  long n = itos(gel(A,2));
+  GEN bn = _shift(b, n, d->p, get_FpX_var(d->T));
+  GEN c = FpXQX_mul(a, bn, d->T, d->q);
+  return mkvec2(c, addii(gel(A,2), gel(B,2)));
+}
+
+static GEN
+_can5_sqr(void *E, GEN A)
+{
+  return _can5_mul(E,A,A);
+}
+
+static GEN
+_can5_iter(void *E, GEN f, GEN q)
+{
+  pari_sp av = avma;
+  struct _can_mul D;
+  ulong p = *(ulong*)E;
+  long i;
+  GEN N, P, d, V, fs;
+  D.q = q; D.T = ZX_Z_sub(monomial(gen_1,p,MAXVARN),gen_1);
+  D.p = p;
+  fs = mkvec2(_shift(f, 1, p, MAXVARN), gen_1);
+  N = gel(gen_powu(fs,p-1,(void*)&D,_can5_sqr,_can5_mul),1);
+  N = simplify_shallow(FpXQX_red(N,polcyclo(p,MAXVARN),q));
+  P = FpX_mul(N,f,q);
+  P = RgX_deflate(P, p);
+  d = RgX_splitting(N, p);
+  V = cgetg(p+1,t_VEC);
+  gel(V,1) = ZX_mulu(gel(d,1), p);
+  for(i=2; i<=p; i++)
+    gel(V,i) = ZX_mulu(RgX_shift(gel(d,p+2-i), 1), p);
+  return gerepilecopy(av, mkvec2(ZX_sub(f,P),V));
+}
+
+static GEN
+_can5_invd(void *E, GEN H, GEN v, GEN qM, long M)
+{
+  ulong p = *(long*)E;
+  return gen_ZpX_Dixon(gel(v,2), H, qM, utoi(p), M, E, _can5_lin, _can5_invl);
+}
+
+static GEN
+Flx_canonlift(GEN P, long n, ulong p)
+{
+  return p==3 ? F3x_canonlift(P,n):
+         gen_ZpX_Newton(Flx_to_ZX(P),utoi(p), n, &p, _can5_iter, _can5_invd);
+}
+
 static GEN
 ZpXQ_frob(GEN x, GEN Xm, GEN T, GEN q, ulong p)
 {
@@ -600,8 +687,7 @@ _lift_iter(void *E, GEN x2, GEN q)
   GEN y2 = ZpXQ_frob(x2, XN, TN, q, p);
   GEN xp = FpXQ_powers(x2, p, TN, q);
   GEN yp = FpXQ_powers(y2, p, TN, q);
-  GEN V  = FpM_FpXV_bilinear(d->phi,xp,yp,q);
-  V = FpX_rem(V,TN,q);
+  GEN V  = FpM_FpXQV_bilinear(d->phi,xp,yp,TN,q);
   return mkvec3(V,xp,yp);
 }
 
@@ -633,14 +719,14 @@ lift_isogeny(GEN phi, GEN x0, long n, GEN Xm, GEN T, GEN sqx, GEN Tp, ulong p)
 }
 
 static GEN
-getc2(GEN act, GEN X, GEN T, GEN q, long N)
+getc2(GEN act, GEN X, GEN T, GEN q, ulong p, long N)
 {
   GEN A1 = RgV_to_RgX(gel(act,1),0), A2 =  RgV_to_RgX(gel(act,2),0);
   long n = brent_kung_optpow(maxss(degpol(A1),degpol(A2)),2,1);
   GEN xp = FpXQ_powers(X,n,T,q);
   GEN P  = FpX_FpXQV_eval(A1, xp, T, q);
   GEN Q  = FpX_FpXQV_eval(A2, xp, T, q);
-  return FpXQ_mul(P,ZpXQ_inv(Q,T,utoi(3),N),T,q);
+  return FpXQ_mul(P,ZpXQ_inv(Q,T,utoi(p),N),T,q);
 }
 
 /* Assume a = 1 [p], return the square root of the norm */
@@ -652,57 +738,193 @@ ZpXQ_sqrtnorm(GEN a, GEN T, GEN p, long e)
   return modii(gel(Qp_exp(cvtop(s, p, e-1)),4),pe);
 }
 
+struct _teich_lin
+{
+  ulong p;
+  GEN sqx, Tp;
+  long m;
+};
+
+static GEN
+_teich_invl(void *E, GEN x)
+{
+  struct _teich_lin *d = (struct _teich_lin *) E;
+  ulong p = d->p;
+  GEN T = d->Tp;
+  return Flx_to_ZX(Flxq_lroot_fast(ZX_to_Flx(x, p), d->sqx, T, p));
+}
+
+static GEN
+_teich_lin(void *E, GEN F, GEN x2, GEN q)
+{
+  struct _teich_lin *d = (struct _teich_lin *) E;
+  pari_sp av = avma;
+  GEN T = gel(F,2), Xm = gel(F,3);
+  GEN y2  = ZpXQ_frob(x2, Xm, T, q, d->p);
+  GEN lin = FpX_sub(y2, ZX_mulu(ZX_mul(gel(F,1), x2), d->p), q);
+  return gerepileupto(av, FpX_rem(lin, T, q));
+}
+
+struct _teich_iso
+{
+  GEN Xm, T;
+  GEN sqx, Tp;
+  ulong p;
+};
+
+static GEN
+_teich_iter(void *E, GEN x2, GEN q)
+{
+  struct _teich_iso *d = (struct _teich_iso *) E;
+  ulong p = d->p;
+  GEN TN = FpXT_red(d->T, q), XN = FpXV_red(d->Xm, q);
+  GEN y2 = ZpXQ_frob(x2, XN, TN, q, d->p);
+  GEN x1 = FpXQ_powu(x2, p-1, TN, q);
+  GEN xp = FpXQ_mul(x2, x1, TN, q);
+  GEN V = FpX_sub(y2,xp,q);
+  return mkvec2(V,x1);
+}
+
+static GEN
+_teich_invd(void *E, GEN V, GEN v, GEN qM, long M)
+{
+  struct _teich_iso *d = (struct _teich_iso *) E;
+  struct _teich_lin e;
+  ulong p = d->p;
+  GEN TM = FpXT_red(d->T, qM), XM = FpXV_red(d->Xm, qM);
+  GEN x1 = FpX_red(gel(v,2), qM);
+  GEN F = mkvec3(x1, TM, XM);
+  e.sqx = d->sqx; e.Tp = d->Tp; e.p=p;
+  return gen_ZpX_Dixon(F,V,qM,utoi(p),M,(void*) &e, _teich_lin, _teich_invl);
+}
+
+static GEN
+Teichmuller_lift(GEN x, GEN Xm, GEN T, GEN sqx, GEN Tp, ulong p, long N)
+{
+  struct _teich_iso d;
+  d.Xm = Xm; d.T = T; d.sqx = sqx; d.Tp = Tp; d.p = p;
+  return gen_ZpX_Newton(x,utoi(p), N,(void*)&d, _teich_iter, _teich_invd);
+}
+
+static GEN
+get_norm(GEN a4, GEN a6, GEN T, GEN q, ulong p, long N)
+{
+  long sv=T[1];
+  GEN a;
+  if (p==3) a = gel(a4,1);
+  else
+  {
+    GEN P = mkpoln(4, pol1_Flx(sv), pol0_Flx(sv), a4, a6);
+    a = gel(FlxqX_pow(P,p>>1,T,p),2+p-1);
+  }
+  return Zp_sqrtnlift(gen_1,subss(p,1),utoi(Flxq_norm(a,T,p)),utoi(p), N);
+}
+
+static GEN
+fill_pols(long n, const long *v, long d, long m, const long *vn,
+          const long *vd, GEN *act)
+{
+  long i, j;
+  GEN N, D, M = zeromatcopy(n+1,n+1);
+  gmael(M,1,n+1) = gen_1;
+  for(i=2;i<=n+1;i++)
+    for(j=i-1;j<=n;j++)
+      gmael(M,i,j) = mulis(powuu(d,i-2),v[j-i+1]);
+  N = cgetg(m+1,t_COL);
+  D = cgetg(m+1,t_COL);
+  for(i=1;i<=m;i++)
+  {
+    gel(N,i) = stoi(*vn++);
+    gel(D,i) = stoi(*vd++);
+  }
+  *act = mkmat2(N,D);
+  return M;
+}
+
 /*
   These polynomials were extracted from the ECHIDNA databases
   available at <http://echidna.maths.usyd.edu.au/echidna/>
   and computed by David R. Kohel.
+  Return the matrix of the modular polynomial, set act to the parametrization,
+  and set dj to the opposite of the supersingular j-invariant.
 */
-
 static GEN
-get_Kohel_polynomial(ulong p, GEN *act)
+get_Kohel_polynomials(ulong p, GEN *act, long *dj)
 {
+  const long mat3[] = {-1,-36,-270};
+  const long num3[] = {1,-483,-21141,-59049};
+  const long den3[] = {1,261, 4347, -6561};
+  const long mat5[] = {-1,-30,-315,-1300,-1575};
+  const long num5[] = {-1,490,20620,158750,78125};
+  const long den5[] = {-1,-254,-4124,-12250,3125};
+  const long mat7[] = {-1,-28,-322,-1904,-5915,-8624,-4018};
+  const long num7[] = {1,-485,-24058,-343833,-2021642,-4353013,-823543};
+  const long den7[] = {1,259,5894,49119,168406,166355,-16807};
+  const long mat13[]= {-1,-26,-325,-2548,-13832,-54340,-157118,-333580,-509366,
+                       -534820,-354536,-124852,-15145};
+  const long num13[]= {1,-487,-24056,-391463,-3396483,-18047328,-61622301,
+                       -133245853,-168395656,-95422301,-4826809};
+  const long den13[]= {1,257,5896,60649,364629,1388256,3396483,5089019,4065464,
+                       1069939,-28561};
   switch(p)
   {
   case 3:
-    *act = mkvec2(mkcol4s(1, -483,-21141,-59049),
-        mkcol4s(1, 261, 4347, -6561));
-    return mkvec4( mkcol4s(0,0,0,1),
-        mkcol4s(-1,-36,-270,0),
-        mkcol4s(0,-729, -26244,0),
-        mkcol4s(0,0,-531441,0));
+    *dj = 0;
+    return fill_pols(3,mat3,729,4,num3,den3,act);
+  case 5:
+    *dj = 0;
+    return fill_pols(5,mat5,125,5,num5,den5,act);
+  case 7:
+    *dj = 1;
+    return fill_pols(7,mat7,49,7,num7,den7,act);
+  case 13:
+    *dj = 8;
+    return fill_pols(13,mat13,13,11,num13,den13,act);
   }
-  *act = NULL;
+  *dj=0; *act = NULL;
   return NULL;
 }
 
 static GEN
-F3xq_elltrace_Harley(GEN a6, GEN T)
+Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
 {
   pari_sp av = avma, av2;
   pari_timer ti;
-  long n = get_Flx_degree(T), N = (n+4)/2;
-  GEN q = powuu(3, N), p = utoi(3);
+  long n = get_Flx_degree(T), N = (n+4)/2, dj;
+  GEN q = powuu(p, N);
   GEN T2, Xm, s1, c2, t, lr;
   GEN S1, sqx;
-  GEN act, phi = get_Kohel_polynomial(3, &act);
+  GEN Nc2, Np;
+  GEN act, phi = get_Kohel_polynomials(p, &act, &dj);
   timer_start(&ti);
-  T2 = F3x_canonlift(get_Flx_mod(T),N);
+  T2 = Flx_canonlift(get_Flx_mod(T),N,p);
   if (DEBUGLEVEL) timer_printf(&ti,"Teich");
-  T2 = FpX_get_red(T2, q); T = ZXT_to_FlxT(T2, 3);
+  T2 = FpX_get_red(T2, q); T = ZXT_to_FlxT(T2, p);
   av2 = avma;
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
-  Xm = FpXQ_powers(monomial(gen_1,n,get_FpX_var(T2)),2,T2,q);
+  Xm = FpXQ_powers(monomial(gen_1,n,get_FpX_var(T2)),p-1,T2,q);
   if (DEBUGLEVEL) timer_printf(&ti,"Xm");
-  s1 = Flx_neg(a6,3);
-  lr = Flxq_lroot(polx_Flx( get_Flx_var(T)), T, 3);
-  sqx = Flxq_powers(lr, 2, T, 3);
-  S1 = lift_isogeny(phi, Flx_to_ZX(s1), N, Xm, T2, sqx, T, 3);
-  if (DEBUGLEVEL) timer_printf(&ti,"Lift invariant");
-  c2 = gerepileupto(av2, getc2(act,S1,T2,q,N));
-  if (DEBUGLEVEL) timer_printf(&ti,"c2");
-  t = Fp_center(ZpXQ_sqrtnorm(c2,T2,p,N),q,shifti(q,-1));
+  s1 = Flxq_inv(Flx_Fl_add(Flxq_ellj(a4,a6,T,p),dj, p),T,p);
+  lr = Flxq_lroot(polx_Flx(get_Flx_var(T)), T, p);
+  sqx = Flxq_powers(lr, p-1, T, p);
+  S1 = lift_isogeny(phi, Flx_to_ZX(s1), N, Xm, T2, sqx, T ,p);
+  if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
+  c2 = getc2(act, S1, T2, q, p, N);
+  if (DEBUGLEVEL) timer_printf(&ti,"c^2");
+  if (p>3)
+  {
+    GEN c2p = Flx_to_ZX(Flxq_inv(ZX_to_Flx(c2,p),T,p));
+    GEN tc2 = Teichmuller_lift(c2p,Xm, T2,sqx,T,p,N);
+    if (DEBUGLEVEL) timer_printf(&ti,"teichmuller");
+    c2 = FpX_rem(FpX_mul(tc2,c2,q),T2,q);
+  }
+  c2 = gerepileupto(av2, c2);
+  if (DEBUGLEVEL) timer_printf(&ti,"tc2");
+  Nc2 = ZpXQ_sqrtnorm(c2,T2,utoi(p),N);
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
-  return gerepileupto(av, umodiu(t,3)==1 ? t: negi(t));
+  Np = get_norm(a4,a6,T,q,p,N);
+  t = Fp_center(Fp_mul(Nc2,Np,q),q,shifti(q,-1));
+  return gerepileupto(av, subii(addis(powuu(p,n),1),t));
 }
 
 /***************************************************************************/
@@ -929,9 +1151,39 @@ F3xq_ellcard(GEN a2, GEN a6, GEN T)
       long tP = q + 1 - F3xq_ellcard_naive(A2, A6, P);
       t = elltrace_extension(stoi(tP), n/dP, utoi(q));
       if (umodiu(t, 3)!=1) t = negi(t);
+      return Flx_equal1(a2) || Flxq_issquare(a2,T,3) ? subii(q1,t): addii(q1,t);
     }
-    else t = F3xq_elltrace_Harley(a, T);
-    return Flx_equal1(a2) || Flxq_issquare(a2,T,3) ? subii(q1,t): addii(q1,t);
+    else return Flxq_ellcard_Harley(mkvec(a2), a6, T, 3);
+  }
+}
+
+static GEN
+Flxq_ellcard_Satoh(GEN a4, GEN a6, GEN T, ulong p)
+{
+  long n = get_Flx_degree(T);
+  if (n <= 2)
+    return utoi(Flxq_ellcard_naive(a4, a6, T, p));
+  else
+  {
+    GEN q1 = addis(powuu(p, get_Flx_degree(T)), 1), t;
+    GEN j = Flxq_ellj(a4,a6,T,p);
+    if (Flx_equal1(Flxq_powu(j, p*p-1, T, p)))
+    {
+      GEN sk, sA4, u;
+      GEN P = Flxq_minpoly(j, T, p);
+      long dP = degpol(P); /* dP <= 2 */
+      GEN q = powuu(p,dP);
+      GEN k = mkvecsmall3(T[1], 1728%p, p-1);
+      GEN kj = Flx_shift(k, 1), k2j = Flxq_mul(kj, k, P, p);
+      GEN A4 = Flx_Fl_mul(kj,3,p), A6 = Flx_Fl_mul(k2j,2,p);
+      GEN tP = addis(q, 1 - Flxq_ellcard_naive(A4, A6, P, p));
+      t = elltrace_extension(tP, n/dP, q);
+      sk = Flx_Fl_add(Flx_neg(j,p),1728%p,p);
+      sA4 = Flx_Fl_mul(Flxq_mul(sk,j,T,p),3,p);
+      u = Flxq_div(a4,sA4, T, p);
+      return Flxq_is2npower(u, 2, T, p) ? subii(q1,t): addii(q1,t);
+    }
+    else return Flxq_ellcard_Harley(a4, a6, T, p);
   }
 }
 
@@ -1036,6 +1288,8 @@ Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
     r = Fp_ffellcard(utoi(Flx_eval(a4,0,p)),utoi(Flx_eval(a6,0,p)),q,n,utoi(p));
   else if (degpol(J=Flxq_ellj(a4,a6,T,p))<=0)
     r = Flxq_ellcardj(a4,a6,lgpol(J)?J[2]:0,T,q,p,n);
+  else if (p <= 7 || p==13)
+    r = Flxq_ellcard_Satoh(a4,a6,T,p);
   else if (cmpis(q,100)<0)
     r = utoi(Flxq_ellcard_naive(a4, a6, T, p));
   else if (expi(q)<=62)
