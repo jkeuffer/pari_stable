@@ -2064,7 +2064,7 @@ GEN
 Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
   struct _Flxq D;
-  int use_sqr = (degpol(x)<<1)>=get_FpX_degree(T);
+  int use_sqr = (degpol(x)<<1) >= get_Flx_degree(T);
   D.T = Flx_get_red(T, p); D.p = p;
   return gen_powers(x, l, use_sqr, (void*)&D, &_Flxq_sqr, &_Flxq_mul, &_Flxq_one);
 }
@@ -3329,8 +3329,8 @@ FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  kx= zxX_to_Kronecker_spec(x,lx,get_FpX_mod(T));
-  ky= zxX_to_Kronecker_spec(y,ly,get_FpX_mod(T));
+  kx= zxX_to_Kronecker_spec(x,lx,get_Flx_mod(T));
+  ky= zxX_to_Kronecker_spec(y,ly,get_Flx_mod(T));
   z = Flx_mul(ky, kx, p);
   z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
@@ -3341,8 +3341,8 @@ FlxqX_mul(GEN x, GEN y, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  kx= zxX_to_Kronecker(x,get_FpX_mod(T));
-  ky= zxX_to_Kronecker(y,get_FpX_mod(T));
+  kx= zxX_to_Kronecker(x,get_Flx_mod(T));
+  ky= zxX_to_Kronecker(y,get_Flx_mod(T));
   z = Flx_mul(ky, kx, p);
   z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
@@ -3353,7 +3353,7 @@ FlxqX_sqr(GEN x, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z,kx;
-  kx= zxX_to_Kronecker(x,get_FpX_mod(T));
+  kx= zxX_to_Kronecker(x,get_Flx_mod(T));
   z = Flx_sqr(kx, p);
   z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
