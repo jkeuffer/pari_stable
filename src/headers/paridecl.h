@@ -702,6 +702,7 @@ GEN     RgX_recip(GEN x);
 GEN     RgX_recip_shallow(GEN x);
 GEN     RgX_renormalize(GEN x);
 GEN     RgX_rescale(GEN P, GEN h);
+GEN     RgX_rotate_shallow(GEN P, long k, long p);
 GEN     RgX_shift(GEN a, long n);
 GEN     RgX_shift_shallow(GEN x, long n);
 GEN     RgX_splitting(GEN p, long k);

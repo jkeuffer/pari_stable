@@ -657,6 +657,23 @@ RgX_shift(GEN a, long n)
   }
   return b;
 }
+
+GEN
+RgX_rotate_shallow(GEN P, long k, long p)
+{
+  long i, l = lgpol(P);
+  GEN r;
+  if (signe(P)==0)
+    return pol_0(varn(P));
+  r = cgetg(p+2,t_POL); r[1] = P[1];
+  for(i=0; i<p; i++)
+  {
+    long s = 2+(i+k)%p;
+    gel(r,s) = i<l? gel(P,2+i): gen_0;
+  }
+  return RgX_renormalize(r);
+}
+
 GEN
 RgX_mulXn(GEN x, long d)
 {

@@ -6526,6 +6526,10 @@ and $\kbd{x} \bs t^{-n}$ otherwise.
 \fun{GEN}{RgX_shift_shallow}{GEN x, long n} as \kbd{RgX\_shift}, but
 shallow (coefficients are not copied).
 
+\fun{GEN}{RgX_rotate_shallow}{GEN P, long k, long p} returns $\kbd{P} * X^k
+\pmod {X^p-1}$, assuming the degree of $P$ is strictly less than $p$, and
+$k\geq 0$.
+
 \fun{void}{RgX_shift_inplace_init}{long v} $v \geq 0$, prepare for a later
 call to \tet{RgX_shift_inplace}. Reserves $v$ words on the stack.
 
