@@ -163,9 +163,9 @@ FpXX_mulu(GEN P, ulong u, GEN p)
 GEN
 Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
 {
-  long i,j,lx,l, N = (degpol(T)<<1) + 1;
+  long i,j,lx,l, N = (get_FpX_degree(T)<<1) + 1;
   GEN x, t = cgetg(N,t_POL), z = FpX_red(Z, p);
-  t[1] = T[1];
+  t[1] = evalvarn(get_FpX_var(T));
   l = lg(z); lx = (l-2) / (N-2);
   x = cgetg(lx+3,t_POL);
   x[1] = z[1];
@@ -230,9 +230,9 @@ static GEN
 FpXY_FpY_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
 {
   pari_sp av = avma;
-  GEN z = RgXY_swapspec(x,degpol(T)-1,MAXVARN,lx);
+  GEN z = RgXY_swapspec(x,get_FpX_degree(T)-1,MAXVARN,lx);
   z = FpXX_FpX_mulspec(z,y,p,MAXVARN,ly);
-  z = RgXY_swapspec(z+2,lx+ly+3,varn(T),lgpol(z));
+  z = RgXY_swapspec(z+2,lx+ly+3,get_FpX_var(T),lgpol(z));
   return gerepilecopy(av,z);
 }
 
