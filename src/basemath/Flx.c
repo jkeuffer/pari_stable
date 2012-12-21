@@ -3329,8 +3329,8 @@ FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  kx= zxX_to_Kronecker_spec(x,lx,T);
-  ky= zxX_to_Kronecker_spec(y,ly,T);
+  kx= zxX_to_Kronecker_spec(x,lx,get_FpX_mod(T));
+  ky= zxX_to_Kronecker_spec(y,ly,get_FpX_mod(T));
   z = Flx_mul(ky, kx, p);
   z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
@@ -3341,8 +3341,8 @@ FlxqX_mul(GEN x, GEN y, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  kx= zxX_to_Kronecker(x,T);
-  ky= zxX_to_Kronecker(y,T);
+  kx= zxX_to_Kronecker(x,get_FpX_mod(T));
+  ky= zxX_to_Kronecker(y,get_FpX_mod(T));
   z = Flx_mul(ky, kx, p);
   z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
@@ -3353,7 +3353,7 @@ FlxqX_sqr(GEN x, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z,kx;
-  kx= zxX_to_Kronecker(x,T);
+  kx= zxX_to_Kronecker(x,get_FpX_mod(T));
   z = Flx_sqr(kx, p);
   z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
