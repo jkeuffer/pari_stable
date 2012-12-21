@@ -434,12 +434,12 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
     d = a; d1 = b; v = pol_0(vx); v1 = pol_1(vx);
     while (signe(d1))
     {
-      q = FqX_divrem(d,d1,T,p, &r);
-      v = FqX_sub(v, FqX_mul(q,v1, T,p), T,p);
+      q = FpXQX_divrem(d,d1,T,p, &r);
+      v = FpXX_sub(v, FpXQX_mul(q,v1, T,p), p);
       u=v; v=v1; v1=u;
       u=r; d=d1; d1=u;
     }
-    if (ptu) *ptu = FqX_div(FqX_sub(d, FqX_mul(b,v, T,p), T,p),a, T,p);
+    if (ptu) *ptu = FpXQX_div(FpXX_sub(d, FpXQX_mul(b,v, T,p), p),a, T,p);
     *ptv = v;
   }
   gerepileall(ltop,ptu?3:2,&d,ptv,ptu);
