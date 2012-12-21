@@ -239,6 +239,12 @@ static double speed_Flx_inv(speed_param *s)
 static double speed_Flx_mul(speed_param *s)
 { TIME_FUN(Flx_mul(s->x, s->y, s->l)); }
 
+static double speed_Flx_divrem(speed_param *s)
+{
+  GEN r, x = rand_NFlx((degpol(s->x)-1)*2, s->l);
+  TIME_FUN(Flx_divrem(x, s->x, s->l, &r));
+}
+
 static double speed_Flx_rem(speed_param *s) {
   GEN x = rand_NFlx((degpol(s->x)-1)*2, s->l);
   TIME_FUN(Flx_rem(x, s->x, s->l));
@@ -264,8 +270,7 @@ static double speed_FpX_inv(speed_param *s)
 
 static double speed_FpX_divrem(speed_param *s)
 {
-  GEN r;
-  GEN x = rand_NFpX((degpol(s->x)-1)*2);
+  GEN r, x = rand_NFpX((degpol(s->x)-1)*2);
   TIME_FUN(FpX_divrem(x, s->x, s->p, &r));
 }
 
@@ -328,6 +333,7 @@ static tune_param param[] = {
 {0,   var(Flx_MUL_MULII2_LIMIT),   t_Fl2x,5,20000, speed_Flx_mul,0.05},
 {0,   var(Flx_SQR_SQRI2_LIMIT),    t_Fl2x,5,20000, speed_Flx_sqr,0.05},
 {0,   var(Flx_INVBARRETT_LIMIT),  t_NFlx,10,0, speed_Flx_inv,0.05},
+{0,  var(Flx_DIVREM_BARRETT_LIMIT),t_NFlx,10,0, speed_Flx_divrem,0.05},
 {0,  var(Flx_REM_BARRETT_LIMIT),  t_NFlx,10,0, speed_Flx_rem,0.05},
 {0,  var(Flx_BARRETT_LIMIT),      t_NFlx,10,0, speed_Flxq_red},
 {0,  var(Flx_HALFGCD_LIMIT),       t_Flx,10,0, speed_Flx_halfgcd},

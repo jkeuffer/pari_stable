@@ -19,6 +19,7 @@ extern long Flx_SQR_SQRI_LIMIT;
 extern long Flx_MUL_MULII2_LIMIT;
 extern long Flx_SQR_SQRI2_LIMIT;
 extern long Flx_INVBARRETT_LIMIT;
+extern long Flx_DIVREM_BARRETT_LIMIT;
 extern long Flx_REM_BARRETT_LIMIT;
 extern long Flx_BARRETT_LIMIT;
 extern long Flx_HALFGCD_LIMIT;
@@ -62,6 +63,7 @@ extern long RgX_MUL_LIMIT;
 #  define Flx_MUL_MULII2_LIMIT     __Flx_MUL_MULII2_LIMIT
 #  define Flx_SQR_SQRI2_LIMIT      __Flx_SQR_SQRI2_LIMIT
 #  define Flx_INVBARRETT_LIMIT     __Flx_INVBARRETT_LIMIT
+#  define Flx_DIVREM_BARRETT_LIMIT __Flx_DIVREM_BARRETT_LIMIT
 #  define Flx_REM_BARRETT_LIMIT    __Flx_REM_BARRETT_LIMIT
 #  define Flx_BARRETT_LIMIT        __Flx_BARRETT_LIMIT
 #  define Flx_HALFGCD_LIMIT        __Flx_HALFGCD_LIMIT

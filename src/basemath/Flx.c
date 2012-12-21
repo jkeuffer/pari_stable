@@ -1053,148 +1053,10 @@ Flx_get_red(GEN T, ulong p)
   return T;
 }
 
-/* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
- * and mg is the Barrett inverse of T. */
-static GEN
-Flx_rem_Barrettspec(GEN x, long l, GEN mg, GEN T, ulong p)
-{
-  pari_sp ltop=avma;
-  GEN z;
-  long lt = degpol(T); /*We discard the leading term*/
-  long ld, lm, lT, lmg;
-  (void)new_chunk(lt+2);
-  ld = l-lt;
-  lm = minss(ld, lgpol(mg));
-  lT  = Flx_lgrenormalizespec(T+2,lt);
-  lmg = Flx_lgrenormalizespec(mg+2,lm);
-  z = Flx_recipspec(x+lt,ld,ld);               /* z = rec(x)      lz<=ld*/
-  z = Flx_mulspec(z+2,mg+2,p,lgpol(z),lmg);    /* z = rec(x) * mg lz<=ld+lm*/
-  z = Flx_recipspec(z+2,minss(ld,lgpol(z)),ld);/* z = rec (rec(x) * mg) lz<=ld*/
-  z = Flx_mulspec(z+2,T+2,p,lgpol(z),lT);      /* z *= pol        lz<=ld+lt*/
-  avma=ltop;
-  z = Flx_subspec(x,z+2,p,lt,minss(lt,lgpol(z)));/* z = x - z       lz<=lt */
-  z[1] = x[1];
-  return z;
-}
-
-/* separate from Flx_divrem for maximal speed. */
-static GEN
-Flx_rem_basecase(GEN x, GEN y, ulong p)
-{
-  pari_sp av;
-  GEN z, c;
-  long dx,dy,dz,i,j;
-  ulong p1,inv;
-  long vs=x[1];
-
-  dy = degpol(y); if (!dy) return pol0_Flx(x[1]);
-  dx = degpol(x);
-  dz = dx-dy; if (dz < 0) return Flx_copy(x);
-  x += 2; y += 2;
-  inv = y[dy];
-  if (inv != 1UL) inv = Fl_inv(inv,p);
-
-  c = cgetg(dy+3, t_VECSMALL); c[1]=vs; c += 2; av=avma;
-  z = cgetg(dz+3, t_VECSMALL); z[1]=vs; z += 2;
-
-  if (SMALL_ULONG(p))
-  {
-    z[dz] = (inv*x[dx]) % p;
-    for (i=dx-1; i>=dy; --i)
-    {
-      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
-      for (j=i-dy+1; j<=i && j<=dz; j++)
-      {
-        p1 += z[j]*y[i-j];
-        if (p1 & HIGHBIT) p1 %= p;
-      }
-      p1 %= p;
-      z[i-dy] = p1? ((p - p1)*inv) % p: 0;
-    }
-    for (i=0; i<dy; i++)
-    {
-      p1 = z[0]*y[i];
-      for (j=1; j<=i && j<=dz; j++)
-      {
-        p1 += z[j]*y[i-j];
-        if (p1 & HIGHBIT) p1 %= p;
-      }
-      c[i] = Fl_sub(x[i], p1%p, p);
-    }
-  }
-  else
-  {
-    z[dz] = Fl_mul(inv, x[dx], p);
-    for (i=dx-1; i>=dy; --i)
-    {
-      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
-      for (j=i-dy+1; j<=i && j<=dz; j++)
-        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
-      z[i-dy] = p1? Fl_mul(p - p1, inv, p): 0;
-    }
-    for (i=0; i<dy; i++)
-    {
-      p1 = Fl_mul(z[0],y[i],p);
-      for (j=1; j<=i && j<=dz; j++)
-        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
-      c[i] = Fl_sub(x[i], p1, p);
-    }
-  }
-  i = dy-1; while (i>=0 && !c[i]) i--;
-  avma=av;
-  return Flx_renormalize(c-2, i+3);
-}
-
-GEN
-Flx_rem_Barrett(GEN x, GEN mg, GEN T, ulong p)
-{
-  pari_sp av;
-  long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
-  GEN r;
-  if (l <= lt)
-    return Flx_copy(x);
-  if (lt <= 1)
-    return Flx_rem_basecase(x,T,p);
-  if (l <= lm)
-  {
-    r = Flx_rem_Barrettspec(x+2,l,mg,T,p);
-    r[1] = x[1]; return r;
-  }
-  r = Flx_copy(x); av = avma;
-  while (l>lt)
-  {
-    long i, lz, lu = minss(l,lm);
-    GEN rp = r+2+l-lu;
-    GEN z = Flx_rem_Barrettspec(rp,lu,mg,T,p);
-    lz = lgpol(z);
-    for(i=0; i<lz; i++)
-      gel(rp,i) = gel(z,2+i);
-    l -= lu-lz;
-  }
-  r[1] = x[1]; avma = av;
-  return Flx_renormalize(r, l+2);
-}
-
-GEN
-Flx_rem(GEN x, GEN T, ulong p)
-{
-  GEN B, y = get_Flx_red(T, &B);
-  long dy = degpol(y), dx = degpol(x), d = dx-dy;
-  if (d < 0) return Flx_copy(x);
-  if (!B && d+3 < Flx_REM_BARRETT_LIMIT)
-    return Flx_rem_basecase(x,y,p);
-  else
-  {
-    pari_sp av=avma;
-    GEN mg = B ? B: Flx_invBarrett(y, p);
-    return gerepileupto(av, Flx_rem_Barrett(x, mg, y, p));
-  }
-}
-
 /* as FpX_divrem but working only on ulong types.
  * if relevant, *pr is the last object on stack */
 GEN
-Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
+Flx_divrem_basecase(GEN x, GEN y, ulong p, GEN *pr)
 {
   GEN z,q,c;
   long dx,dy,dz,i,j;
@@ -1284,6 +1146,223 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   else
     *pr = c;
   return q;
+}
+
+
+/* Compute x mod T where 2 <= degpol(T) <= l+1 <= 2*(degpol(T)-1)
+ * and mg is the Barrett inverse of T. */
+static GEN
+Flx_divrem_Barrettspec(GEN x, long l, GEN mg, GEN T, ulong p, GEN *pr)
+{
+  GEN q, r;
+  long lt = degpol(T); /*We discard the leading term*/
+  long ld, lm, lT, lmg;
+  ld = l-lt;
+  lm = minss(ld, lgpol(mg));
+  lT  = Flx_lgrenormalizespec(T+2,lt);
+  lmg = Flx_lgrenormalizespec(mg+2,lm);
+  q = Flx_recipspec(x+lt,ld,ld);               /* q = rec(x)      lz<=ld*/
+  q = Flx_mulspec(q+2,mg+2,p,lgpol(q),lmg);    /* q = rec(x) * mg lz<=ld+lm*/
+  q = Flx_recipspec(q+2,minss(ld,lgpol(q)),ld);/* q = rec (rec(x) * mg) lz<=ld*/
+  if (!pr) return q;
+  r = Flx_mulspec(q+2,T+2,p,lgpol(q),lT);      /* r = q*pol       lz<=ld+lt*/
+  r = Flx_subspec(x,r+2,p,lt,minss(lt,lgpol(r)));/* r = x - q*pol lz<=lt */
+  if (pr == ONLY_REM) return r;
+  *pr = r; return q;
+}
+
+static GEN
+Flx_divrem_Barrett_noGC(GEN x, GEN mg, GEN T, ulong p, GEN *pr)
+{
+  long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
+  GEN q = NULL, r;
+  long i;
+  if (l <= lt)
+  {
+    if (pr == ONLY_REM) return Flx_copy(x);
+    if (pr == ONLY_DIVIDES) return lgpol(x)? NULL: pol0_Flx(x[1]);
+    if (pr) *pr = Flx_copy(x);
+    return pol0_Flx(x[1]);
+  }
+  if (lt <= 1)
+    return Flx_divrem_basecase(x,T,p,pr);
+  if (pr != ONLY_REM && l>lm)
+    q = const_vecsmall(l-lt+1, 0);
+  r = Flx_copy(x);
+  while (l>lm)
+  {
+    GEN zr, zq = Flx_divrem_Barrettspec(r+2+l-lm,lm,mg,T,p,&zr);
+    long lz = lgpol(zr);
+    if (pr != ONLY_REM)
+    {
+      long lq = lgpol(zq);
+      for(i=0; i<lq; i++) q[2+l-lm+i] = zq[2+i];
+    }
+    for(i=0; i<lz; i++)   r[2+l-lm+i] = zr[2+i];
+    l = l-lm+lz;
+  }
+  if (pr != ONLY_REM)
+  {
+    if (l > lt)
+    {
+      GEN zq = Flx_divrem_Barrettspec(r+2,l,mg,T,p,&r);
+      if (!q) q = zq;
+      else
+      {
+        long lq = lgpol(zq);
+        for(i=0; i<lq; i++) q[2+i] = zq[2+i];
+      }
+    }
+    else
+      r = Flx_renormalize(r, l+2);
+  }
+  else
+  {
+    if (l > lt)
+      r = Flx_divrem_Barrettspec(r+2,l,mg,T,p,ONLY_REM);
+    else
+      r = Flx_renormalize(r, l+2);
+    r[1] = x[1]; return Flx_renormalize(r, lg(r));
+  }
+  if (pr) { r[1] = x[1]; r = Flx_renormalize(r, lg(r)); }
+  q[1] = x[1]; q = Flx_renormalize(q, lg(q));
+  if (pr == ONLY_DIVIDES) return lgpol(r)? NULL: q;
+  if (pr) *pr = r;
+  return q;
+}
+
+GEN
+Flx_divrem(GEN x, GEN T, ulong p, GEN *pr)
+{
+  GEN B, y = get_Flx_red(T, &B);
+  long dy = degpol(y), dx = degpol(x), d = dx-dy;
+  if (pr==ONLY_REM) return Flx_rem(x, y, p);
+  if (!B && d+3 < Flx_DIVREM_BARRETT_LIMIT)
+    return Flx_divrem_basecase(x,y,p,pr);
+  else
+  {
+    pari_sp av=avma;
+    GEN mg = B? B: Flx_invBarrett(y, p);
+    GEN q1 = Flx_divrem_Barrett_noGC(x,mg,y,p,pr);
+    if (!q1) {avma=av; return NULL;}
+    if (!pr || pr==ONLY_DIVIDES) return gerepileuptoleaf(av, q1);
+    gerepileall(av,2,&q1,pr);
+    return q1;
+  }
+}
+
+/* separate from Flx_divrem for maximal speed. */
+static GEN
+Flx_rem_basecase(GEN x, GEN y, ulong p)
+{
+  pari_sp av;
+  GEN z, c;
+  long dx,dy,dz,i,j;
+  ulong p1,inv;
+  long vs=x[1];
+
+  dy = degpol(y); if (!dy) return pol0_Flx(x[1]);
+  dx = degpol(x);
+  dz = dx-dy; if (dz < 0) return Flx_copy(x);
+  x += 2; y += 2;
+  inv = y[dy];
+  if (inv != 1UL) inv = Fl_inv(inv,p);
+
+  c = cgetg(dy+3, t_VECSMALL); c[1]=vs; c += 2; av=avma;
+  z = cgetg(dz+3, t_VECSMALL); z[1]=vs; z += 2;
+
+  if (SMALL_ULONG(p))
+  {
+    z[dz] = (inv*x[dx]) % p;
+    for (i=dx-1; i>=dy; --i)
+    {
+      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
+      for (j=i-dy+1; j<=i && j<=dz; j++)
+      {
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
+      }
+      p1 %= p;
+      z[i-dy] = p1? ((p - p1)*inv) % p: 0;
+    }
+    for (i=0; i<dy; i++)
+    {
+      p1 = z[0]*y[i];
+      for (j=1; j<=i && j<=dz; j++)
+      {
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
+      }
+      c[i] = Fl_sub(x[i], p1%p, p);
+    }
+  }
+  else
+  {
+    z[dz] = Fl_mul(inv, x[dx], p);
+    for (i=dx-1; i>=dy; --i)
+    {
+      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
+      for (j=i-dy+1; j<=i && j<=dz; j++)
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+      z[i-dy] = p1? Fl_mul(p - p1, inv, p): 0;
+    }
+    for (i=0; i<dy; i++)
+    {
+      p1 = Fl_mul(z[0],y[i],p);
+      for (j=1; j<=i && j<=dz; j++)
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+      c[i] = Fl_sub(x[i], p1, p);
+    }
+  }
+  i = dy-1; while (i>=0 && !c[i]) i--;
+  avma=av;
+  return Flx_renormalize(c-2, i+3);
+}
+
+GEN
+Flx_rem_Barrett(GEN x, GEN mg, GEN T, ulong p)
+{
+  pari_sp av;
+  long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
+  GEN r;
+  if (l <= lt)
+    return Flx_copy(x);
+  if (lt <= 1)
+    return Flx_rem_basecase(x,T,p);
+  if (l <= lm)
+  {
+    r = Flx_divrem_Barrettspec(x+2,l,mg,T,p, ONLY_REM);
+    r[1] = x[1]; return r;
+  }
+  r = Flx_copy(x); av = avma;
+  while (l>lt)
+  {
+    long i, lz, lu = minss(l,lm);
+    GEN rp = r+2+l-lu;
+    GEN z = Flx_divrem_Barrettspec(rp,lu,mg,T,p, ONLY_REM);
+    lz = lgpol(z);
+    for(i=0; i<lz; i++)
+      gel(rp,i) = gel(z,2+i);
+    l -= lu-lz;
+  }
+  r[1] = x[1]; avma = av;
+  return Flx_renormalize(r, l+2);
+}
+
+GEN
+Flx_rem(GEN x, GEN T, ulong p)
+{
+  GEN B, y = get_Flx_red(T, &B);
+  long dy = degpol(y), dx = degpol(x), d = dx-dy;
+  if (d < 0) return Flx_copy(x);
+  if (!B && d+3 < Flx_REM_BARRETT_LIMIT)
+    return Flx_rem_basecase(x,y,p);
+  else
+  {
+    pari_sp av=avma;
+    GEN mg = B ? B: Flx_invBarrett(y, p);
+    return gerepileupto(av, Flx_rem_Barrett(x, mg, y, p));
+  }
 }
 
 /* reduce T mod (X^n - 1, p). Shallow function */

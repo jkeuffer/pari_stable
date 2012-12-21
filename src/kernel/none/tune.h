@@ -22,6 +22,7 @@
 #define __Flx_MUL_MULII2_LIMIT           5
 #define __Flx_SQR_SQRI2_LIMIT            9
 #define __Flx_INVBARRETT_LIMIT        7426
+#define __Flx_DIVREM_BARRETT_LIMIT    3407
 #define __Flx_REM_BARRETT_LIMIT       3407
 #define __Flx_BARRETT_LIMIT           1015
 #define __Flx_HALFGCD_LIMIT             74
@@ -60,6 +61,7 @@
 #define __Flx_MUL_MULII2_LIMIT        7337
 #define __Flx_SQR_SQRI2_LIMIT         8511
 #define __Flx_INVBARRETT_LIMIT        1228
+#define __Flx_DIVREM_BARRETT_LIMIT     835
 #define __Flx_REM_BARRETT_LIMIT        835
 #define __Flx_BARRETT_LIMIT            224
 #define __Flx_HALFGCD_LIMIT            602
