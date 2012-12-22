@@ -2826,17 +2826,18 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       if (N == 1) lfact++;
       else
       {
-#if 0
-        lfact += FqX_split_Berlekamp(&gel(t,lfact), T, p);
-#else
-        GEN P = FqX_split_Trager(gel(t,lfact), T, p);
-        if (P) {
-          for (j = 1; j < lg(P); j++) gel(t,lfact++) = gel(P,j);
-        } else {
-          if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
-          lfact += FqX_sqf_split(&gel(t,lfact), q, T, p);
+        if (!equaliu(p,2))
+          lfact += FqX_split_Berlekamp(&gel(t,lfact), T, p);
+        else
+        {
+          GEN P = FqX_split_Trager(gel(t,lfact), T, p);
+          if (P) {
+            for (j = 1; j < lg(P); j++) gel(t,lfact++) = gel(P,j);
+          } else {
+            if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
+            lfact += FqX_sqf_split(&gel(t,lfact), q, T, p);
+          }
         }
-#endif
       }
       for (j = nb0; j < lfact; j++) E[j] = e;
     }
