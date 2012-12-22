@@ -541,54 +541,88 @@ and pass it to the relevant functions, as in
 
 \section{Functions related to elliptic curves}
 
-We have implemented a number of functions which are useful for number
-theorists working on elliptic curves. We always use \idx{Tate}'s notations.
-The functions assume that the curve is given by a general Weierstrass
-model\sidx{Weierstrass equation}
+\subsec{Elliptic curve structures}
+An elliptic curve is given by a Weierstrass model\sidx{Weierstrass
+equation}
 $$
   y^2+a_1xy+a_3y=x^3+a_2x^2+a_4x+a_6,
 $$
-where a priori the $a_i$ can be of any scalar type. This curve can be
-considered as a five-component vector \kbd{E=[a1,a2,a3,a4,a6]}. Points on
-\kbd{E} are represented as two-component vectors \kbd{[x,y]}, except for the
-point at infinity, i.e.~the identity element of the group law, represented by
-the one-component vector \kbd{[0]}.
+whose discriminant is non-zero. Affine points on \kbd{E} are represented as
+two-component vectors \kbd{[x,y]}; the point at infinity, i.e.~the identity
+element of the group law, is represented by the one-component vector
+\kbd{[0]}.
 
-  It is useful to have at one's disposal more information. This is given by
-the function \tet{ellinit}, which initializes and returns an
-\tev{ell} structure by default. If a specific flag is added, a
-shortened \tev{smallell} is returned, which is much
-faster to compute but contains less information. The following \idx{member
-functions} are available to deal with the output of \kbd{ellinit},
-both \var{ell} and \var{smallell}:
-\settabs\+xxxxxxxxxxxxxxxxxx&: &\cr
+Given a vector of coefficients $[a_1,a_2,a_3,a_4,a_6]$, the function
+\tet{ellinit} initializes and returns an \tev{ell} structure. (An additional
+optional argument allows to specify the base field in case it cannot be
+inferred from the curve coefficients.) This structure contains data needed by
+elliptic curve related functions, and is generally passed as a first argument.
+Expensive data are skipped on initialization: they will be dynamically
+computed when (and if) needed, and then inserted in the structure. The
+precise layout of the \tev{ell} structure is left undefined and should never
+be used directly. The following \idx{member functions} are available,
+depending on the underlying domain.
 
-\+ \kbd{a1}--\kbd{a6}, \kbd{b2}--\kbd{b8}, \kbd{c4}--\kbd{c6} &: &
-coefficients of the elliptic curve.\cr
+\subsubsec{All domains}
 
-\+ \tet{area} &: &  volume of the complex lattice defining $E$.\cr
+\item \tet{a1}, \tet{a2}, \tet{a3}, \tet{a4}, \tet{a6}: coefficients of the
+elliptic curve.
 
-\+ \tet{disc} &: & discriminant of the curve.\cr
+\item \tet{b2}, \tet{b4}, \tet{b6}, \tet{b8}: $b$-invariants of the curve; in
+characteristic $\neq 2$, for $Y = 2y + a_1x+a3$, the curve equation becomes
+$$ Y^2 = 4 x^3 + b_2 x^2 + 2b_4 x + b_6 =: g(x). $$
 
-\+ \tet{j}    &: & $j$-invariant of the curve.\cr
+\item \tet{c4}, \tet{c6}: $c$-invariants of the curve; in characteristic $\neq
+2,3$, for $X = x + b_2/12$ and $Y = 2y + a_1x+a3$, the curve equation becomes
+$$ Y^2 = 4 X^3 - (c_4/12) X - (c_6/216). $$
 
-\+ \tet{omega}&: & $[\omega_1,\omega_2]$, periods forming a basis of
-the complex lattice defining $E$ ($\omega_1$ is the\cr
+\item \tet{disc}: discriminant of the curve. This is only required to be
+non-zero, not necessarily a unit.
 
-\+            &   & real period, and $\omega_1/\omega_2$ belongs to
-Poincar\'e's half-plane).\cr
+\item \tet{j}: $j$-invariant of the curve.
 
-\+ \tet{eta}  &: & quasi-periods $[\eta_1, \eta_2]$, such that
-$\eta_1\omega_2-\eta_2\omega_1=2i\pi$.\cr
+\noindent These are used as follows:
+\bprog
+? E = ellinit([0,0,0, a4,a6]);
+? E.b4
+%2 = 2*a4
+? E.disc
+%3 = -64*a4^3 - 432*a6^2
+@eprog
 
-\+ \tet{roots}&: & roots of the associated Weierstrass equation.\cr
+\subsubsec{Curves over $\R$}
 
-\+ \tet{tate} &: & $[u^2,u,v]$ in the notation of Tate.\cr
+This in particular includes curves defined over $\Q$. All member functions in
+this section return data, as it is currently stored in the structure, if
+present; and otherwise compute it to the default accuracy, that was fixed
+\emph{at the time of ellinit} (via a \typ{REAL} $D$ domain argument, or
+\kbd{realprecision} by default). The function \tet{ellperiods} allows to
+recompute (and cache) the following data to \emph{current}
+\kbd{realprecision}.
 
-\+ \tet{w} &: & Mestre's $w$ (this is technical).\cr
+\item \tet{area}: volume of the complex lattice defining $E$.
 
-\noindent
-{\bf Warning:} as for the orientation of the basis of the period lattice,
+\item \tet{roots} is a vector whose three components contain the complex
+roots of the right hand side $g(x)$ of the associated $b$-model $Y^2 = g(x)$.
+If the roots are all real, they are ordered by decreasing value. If only one
+is real, it is the first component.
+
+\item \tet{omega}: $[\omega_1,\omega_2]$, periods forming a basis of the
+complex lattice defining $E$. The first component $\omega_1$ is the
+(positive) real period, in other words the integral of $dx/(2y+a_1x+a_3)$
+over the connected component of the identity component of $E(\R)$.
+The second component $\omega_2$ is a complex period, such that
+such that $\tau=\dfrac{\omega_1}{\omega_2}$ belongs to Poincar\'e's
+half-plane (positive imaginary part); not necessarily to the standard
+fundamental domain.
+
+\item \tet{eta} is a row vector containing the quasi-periods $\eta_1$ and
+$\eta_2$ such that $\eta_i = 2\zeta(\omega_i/2)$, where $\zeta$ is the
+Weierstrass zeta function associated to the period lattice; see
+\tet{ellzeta}. In particular, the Legendre relation holds: $\eta_2\omega_1 -
+\eta_1\omega_2 = 2i\pi$.
+
+\misctitle{Warning} As for the orientation of the basis of the period lattice,
 beware that many sources use the inverse convention where $\omega_2/\omega_1$
 has positive imaginary part and our $\omega_2$ is the negative of theirs. Our
 convention $\tau = \omega_1/\omega_2$  ensures that the action of $\text{PSL}_2$ is the natural
@@ -598,20 +632,40 @@ $$[a,b;c,d]\cdot\tau = (a\tau+b)/(c\tau+d)
 instead of a twisted one. (Our $tau$ is $-1/\tau$ in the above inverse
 convention.)
 
-The member functions \kbd{area}, \kbd{eta} and \kbd{omega} are only available
-for curves over $\Q$. Conversely, \kbd{tate} and \kbd{w} are only available
-for curves defined over $\Q_p$. The use of member functions is best described
-by an example:
-\bprog
-  ? E = ellinit([0,1]); \\@com The curve $y^2 = x^3 + 0.x + 1$
-  ? E.a6
-  %2 = 1
-  ? E.c6
-  %3 = -864
-  ? E.disc
-  %4 = -432
-@eprog
-\smallskip
+\subsubsec{Curves over $\Q_p$}
+
+For the time being only curve with multiplicative reduction (split or
+non-split) are supported, i.e. $v_p(j) < 0$, for $p\neq 2$. In this
+case the curve is analytically isomorphic to $\bar{\Q}_p^*/q^\Z :=
+E_q(\bar{\Q}_p)$, for some $p$-adic integer $q$ (Tate's theorem). In
+particular, we have $j(q) = j(E)$.
+
+\item \tet{p} is the residual characteristic
+
+\item \tet{roots} is a vector with a single component, equal to the $p$-adic
+roots $e_1$ of the right hand side $g(x)$ of the associated $b$-model $Y^2
+= g(x)$. The point $(e_1,0)$ corresponds to $-1 \in \bar{\Q}_p^*/q^\Z$
+under the Tate parametrization.
+
+\item \tet{tate} returns $[u^2,u,q,w]$ in the notation of Henniart \& Mestre
+(CRAS t. 308, p.~391--395, 1989): $q$ is as above, $u\in \Q_p(\sqrt{-c_6})$
+is such that $\phi^* dx/(2y + a_1x+a3) = u dt/t$, where $\phi: E(q)\to E$
+is an isomorphism (well defined up to sign) and $dt/t$ is the canonical
+invariant differential on the Tate curve; $u^2\in\Q_p$ does not depend on
+$\phi$. Finally, $w^2 = 12e_1^2 + 2b_2e_1 + 2b_4$. % FIXME: remove w
+
+\subsubsec{Curves over $\F_q$}
+
+\item \tet{p} is the characteristic of $\F_q$.
+
+\item \tet{no} is $\#E(\F_q)$.
+
+\item \tet{cyc} gives the cycle structure of $E(\F_q)$.
+
+\item \tet{gen} returns the generators of $E(\F_q)$.
+
+\item \tet{group} returns $[\kbd{no},\kbd{cyc},\kbd{gen}]$, i.e. $E(\F_q)$
+as an abelian group structure.
 
 Some functions, in particular those relative to height computations (see
 \kbd{ellheight}) require also that the curve be in minimal Weierstrass
