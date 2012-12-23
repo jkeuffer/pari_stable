@@ -3345,6 +3345,7 @@ INLINE GEN    ellQp_get_p(GEN E);
 INLINE long   ellQp_get_prec(GEN E);
 INLINE GEN    ellQp_get_zero(GEN x);
 INLINE long   ellR_get_prec(GEN x);
+INLINE long   ellR_get_sign(GEN x);
 
 INLINE GEN    gal_get_pol(GEN gal);
 INLINE GEN    gal_get_p(GEN gal);
