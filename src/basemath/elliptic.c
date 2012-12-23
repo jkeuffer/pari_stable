@@ -1145,60 +1145,51 @@ ellsub(GEN e, GEN z1, GEN z2)
   return gerepileupto(av, elladd(e, z1, ellneg_i(e,z2)));
 }
 
-/* e an ell5, x a scalar */
+/* E an ell, x a scalar */
 static GEN
-ellordinate_i(GEN e, GEN x, long prec)
+ellordinate_i(GEN E, GEN x, long prec)
 {
-  long td;
   pari_sp av = avma;
-  GEN D, a, b, d, y;
+  GEN a = ellRHS(E,x), b = ellLHS0(E,x), D = gadd(gsqr(b), gmul2n(a,2));
+  GEN d, y, p;
 
-  a = ellRHS(e,x);
-  b = ellLHS0(e,x); /* y*(y+b) = a */
-  D = gadd(gsqr(b), gmul2n(a,2));
-  td = typ(D);
-  if (td == t_INTMOD && equaliu(gel(D,1), 2))
-  { /* curve over F_2 */
-    avma = av;
-    if (!signe(gel(D,2))) {
-      y = cgetg(2,t_VEC);
-      gel(y,1) = mkintmodu(gequal0(a)?0:1, 2);
-    } else {
-      if (!gequal0(a)) return cgetg(1,t_VEC);
-      y = cgetg(3,t_VEC);
-      gel(y,1) = mkintmodu(0,2);
-      gel(y,2) = mkintmodu(1,2);
-    }
-    return y;
-  }
-  if (td == t_FFELT && equaliu(FF_p_i(D),2))
-  {
-    GEN F = FFX_roots(mkpoln(3, gen_1, b, a), D);
-    if (lg(F) == 1) { avma = av; return cgetg(1,t_VEC); }
-    return gerepileupto(av, F);
-  }
-
+  /* solve y*(y+b) = a */
   if (gequal0(D)) {
-    b = gneg_i(b);
-    y = cgetg(2,t_VEC);
+    if (ell_get_type(E) == t_ELL_Fq && equaliu(ellff_get_p(E),2))
+      retmkvec( FF_sqrt(a) );
+    b = gneg_i(b); y = cgetg(2,t_VEC);
     gel(y,1) = gmul2n(b,-1);
     return gerepileupto(av,y);
   }
-  switch(td)
+  /* D != 0 */
+  switch(ell_get_type(E))
   {
-    case t_INT:
-      if (!Z_issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
+    case t_ELL_Fp: /* imply p!=2 */
+      p = ellff_get_p(E);
+      D = gel(D,2);
+      if (kronecker(D, p) < 0) { avma = av; return cgetg(1,t_VEC); }
+      d = Fp_sqrt(D, p);
       break;
-    case t_FRAC:
-      if (!issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
-      break;
-    case t_FFELT:
+    case t_ELL_Fq:
+      if (equaliu(ellff_get_p(E),2))
+      {
+        GEN F = FFX_roots(mkpoln(3, gen_1, b, a), D);
+        if (lg(F) == 1) { avma = av; return cgetg(1,t_VEC); }
+        return gerepileupto(av, F);
+      }
       if (!FF_issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
       break;
-    case t_INTMOD:
-      if (kronecker(gel(D,2),gel(D,1)) < 0) {
-        avma = av; return cgetg(1,t_VEC);
-      } /* fall through */
+    case t_ELL_Q:
+      if (!issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
+      break;
+
+    case t_ELL_Qp:
+      p = ellQp_get_p(E);
+      D = cvtop(D, p, ellQp_get_prec(E));
+      if (!issquare(D)) { avma = av; return cgetg(1,t_VEC); }
+      d = Qp_sqrt(D);
+      break;
+
     default:
       d = gsqrt(D,prec);
   }
@@ -1211,7 +1202,7 @@ ellordinate_i(GEN e, GEN x, long prec)
 GEN
 ellordinate(GEN e, GEN x, long prec)
 {
-  checkell5(e);
+  checkell(e);
   if (is_matvec_t(typ(x)))
   {
     long i, lx;
@@ -1702,8 +1693,8 @@ zellQp(GEN E, GEN z, long prec)
   b = gel(ab,2); d = gsub(a,b);
   x = gel(z,1);
   p1 = gmul2n(gadd(x, gmul2n(gadd(gmul2n(e1,2), b2),-3)), -1);
-  p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,d)), prec));
-  x1 = gmul(p1, gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,d),p1),prec)),-1)));
+  p1 = gadd(p1, Qp_sqrt(gsub(gsqr(p1), gmul(a,d))));
+  x1 = gmul(p1, gsqr(gmul2n(gaddsg(1,Qp_sqrt(gdiv(gadd(p1,d),p1))),-1)));
   if (gequal0(x1)) pari_err_PREC("ellpointtoz");
 
   u2 = do_padic_agm(&x1,a,b);
@@ -2436,7 +2427,7 @@ pointell(GEN e, GEN z, long prec)
   pari_sp av = avma;
   GEN v;
 
-  checkell_Q(e);
+  checkell(e);
   v = ellwpnum_all(e,z,1,prec);
   if (!v) { avma = av; return ellinf(); }
   gel(v,1) = gsub(gel(v,1), gdivgs(ell_get_b2(e),12));
@@ -4283,7 +4274,6 @@ torsbound(GEN e)
   pari_sp av = avma, av2;
   long m, b, bold, nb;
   forprime_t S;
-  if (typ(D) != t_INT) pari_err_TYPE("elltors [not an ell]",e);
   nb = expi(D) >> 3;
   /* nb = number of primes to try ~ 1 prime every 8 bits in D */
   b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
