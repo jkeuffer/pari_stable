@@ -99,6 +99,9 @@ e.roots
 E = ellchangecurve(e,[3,1,1,2]);
 E.tate
 
+e = ellinit(ellfromj(11/8),  O(2^5));
+e.tate
+
 \\#1185
 ellwp(ellinit([0,-1,1,-10,-20]),x+O(x^12))
 

@@ -1625,7 +1625,7 @@ static void
 doellQp_ab(GEN E, GEN *pta, GEN *ptb, long prec)
 {
   GEN b2 = ell_get_b2(E), b4 = ell_get_b4(E), e1 = ellQp_root(E, prec);
-  GEN w, t = gmulsg(3, gadd(e1, gdivgs(b2,12)));
+  GEN w, t = gadd(gdivgs(b2,4), gmulsg(3,e1));
   w = Qp_sqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1));
   if (valp(gadd(t,w)) <= valp(w)) w = gneg_i(w); /* <=> v(d) > v(w) */
   /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
