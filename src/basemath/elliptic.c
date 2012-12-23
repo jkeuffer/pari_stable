@@ -404,8 +404,6 @@ ellinit_Qp(GEN x, GEN p, long prec)
   if (lg(x) > 6) x = vecslice(x,1,5);
   x = QpV_to_QV(x); /* make entries rational */
   if (!(y = initsmall(x))) return NULL;
-  if (Q_pval(ell_get_j(y), p) >= 0)
-    pari_err_IMPL("p-adic ellinit with v_p(j) >= 0");
   gel(y,14) = mkvecsmall(t_ELL_Qp);
   gel(y,15) = mkvec(zeropadic(p, prec));
   gel(y,16) = zerovec(2);
@@ -1578,33 +1576,38 @@ zellrealpos(GEN E, GEN P, long prec)
   }
 }
 
-/* Let T = 4x^3 + b2 x^2 + 2b4 x + b6, p != 2, where T = 4(x-a)(x-b)^2 mod p
- * [ possibly a = b ]. Return a lift of a to padic accuracy prec.
- * We have 216 T = 864 X^3 - 18 c4X - c6, where X = x + b2/12 */
+/* Let T = 4x^3 + b2 x^2 + 2b4 x + b6, where T has a unique p-adic root 'a'.
+ * Return a lift of a to padic accuracy prec. We have
+ * 216 T = 864 X^3 - 18 c4X - c6, where X = x + b2/12 */
 static GEN
 doellQp_root(GEN E, long prec)
 {
-  GEN c4 = ell_get_c4(E), c6 = ell_get_c6(E), p = ellQp_get_p(E);
+  GEN c4=ell_get_c4(E), c6=ell_get_c6(E), j=ell_get_j(E), p=ellQp_get_p(E);
   GEN c4p, c6p, T, a, pe;
   long alpha;
+  if (Q_pval(j, p) >= 0) pari_err_DOMAIN(".root", "v_p(j)", ">=", gen_0, j);
   /* v(j) < 0 => v(c4^3) = v(c6^2) = 2 alpha */
   alpha = Q_pvalrem(ell_get_c4(E), p, &c4) >> 1;
   if (alpha) (void)Q_pvalrem(ell_get_c6(E), p, &c6);
-  /* Renormalized so that v(c4) = v(c6) = 0; will multiply by p^alpha at the
-   * end. Now 4(x-a)(x-b)^2 = 4x^3 - 3a^2 x - a^3 when b = -a/2
-   * (so that the trace coefficient vanishes) => a = c6/6c4 */
+  /* Renormalized so that v(c4) = v(c6) = 0; multiply by p^alpha at the end */
   pe = powiu(p, prec);
   c4 = Rg_to_Fp(c4, pe); c4p = remii(c4,p);
   c6 = Rg_to_Fp(c6, pe); c6p = remii(c6,p);
-  if (equaliu(p, 3))
-  { /* use T(X/3) to have integral root, a = c6 / 2c4 mod p */
-    a = Fp_div(c6p, Fp_mulu(c4p, 2, p), p);
+  if (equaliu(p, 2))
+  { /* Use 432(X/4) = 27X^3 - 9c4 X - 2c6 to have integral root; a=0 mod 2 */
+    T = mkpoln(4, utoipos(27), gen_0, Fp_muls(c4, -9, pe), Fp_muls(c6, -2, pe));
+    a = ZpX_liftroot(T, gen_0, p, prec); alpha-=2;
+  }
+  else if (equaliu(p, 3))
+  { /* Use 216T(X/3) = 32X^3 - 6c4 X - c6 to have integral root; a=-c6 mod 3 */
+    a = Fp_neg(c6p, p);
     T = mkpoln(4, utoipos(32), gen_0, Fp_muls(c4, -6, pe), Fp_neg(c6, pe));
     a = ZX_Zp_root(T, a, p, prec); /* single root */
     a = gel(a,1); alpha--;
   }
   else
-  { /* a = c6 / 6c4 mod p */
+  { /* p != 2,3: T = 4(x-a)(x-b)^2 = 4x^3 - 3a^2 x - a^3 when b = -a/2
+     * (so that the trace coefficient vanishes) => a = c6/6c4 (mod p)*/
     a = Fp_div(c6p, Fp_mulu(c4p, 6, p), p);
     T = mkpoln(4, utoipos(864), gen_0, Fp_muls(c4, -18, pe), Fp_neg(c6, pe));
     a = ZpX_liftroot(T, a, p, prec);
@@ -1633,11 +1636,11 @@ doellQp_ab(GEN E, GEN *pta, GEN *ptb, long prec)
 static GEN
 doellQp_Tate_uniformization(GEN E, long prec0)
 {
-  GEN p = ellQp_get_p(E);
+  GEN p = ellQp_get_p(E), j = ell_get_j(E);
   GEN u, u2, q, x1, a, b, d, s, t;
   long v, prec = prec0+2;
 
-  if (equaliu(p,2)) pari_err_IMPL("ellinit for 2-adic numbers");
+  if (Q_pval(j, p) >= 0) pari_err_DOMAIN(".tate", "v_p(j)", ">=", gen_0, j);
 START:
   doellQp_ab(E, &a, &b, prec);
   d = gsub(a,b);
