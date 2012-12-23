@@ -236,10 +236,10 @@ GEN FF_elldata(GEN E, GEN fg);
 /* Elliptic curves */
 enum { t_ELL_Rg = 0, t_ELL_Q = 1, t_ELL_Qp = 2, t_ELL_Fp = 3, t_ELL_Fq = 4};
 /* common to Q and Rg */
-enum { R_PERIODS = 1, R_ETA, R_ROOTS };
+enum { R_PERIODS = 1, R_ETA, R_ROOTS, R_AB };
 
 enum { Qp_ROOT = 1, Qp_TATE };
-enum { Q_GROUPGEN = 4, Q_GLOBALRED, Q_ROOTNO };
+enum { Q_GROUPGEN = 5, Q_GLOBALRED, Q_ROOTNO };
 
 /* common to Fp and Fq */
 enum { FF_CARD = 1, FF_GROUP, FF_GROUPGEN, FF_O };

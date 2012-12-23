@@ -119,6 +119,7 @@ BA 96- idealramgroups() and idealfrobenius() did not accept a bnf
    99- add missing call to normalize() in lift(t_POL/t_SER) [#1359]
 BA 100- listput was not SIGINT safe
 BA 101- znorder(Mod(5,16),200) -> 5 instead of 4
+   102- e.tate lost accuracy
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -408,3 +409,4 @@ BA  6- [libpari] removed unusable functions dbg_close/dbg_release.
        gsumdiv, gdumdivk, znprimroot0
     8- ellsigma: flags 3 and 4 [ inefficient algorithm using the product
        formula ]
+    9- Member function 'w' (this is technical, and no longer needed:-)

@@ -171,7 +171,6 @@ entree oldfonctions[]={
 {"_.tate",0,(void*)member_tate,14,"G","_.tate"},
 {"_.tu",0,(void*)member_tu,14,"G","_.tu"},
 {"_.tufu",0,(void*)member_tufu,14,"G","_.tufu"},
-{"_.w",0,(void*)member_w,14,"G","_.w"},
 {"_.zk",0,(void*)member_zk,14,"G","_.zk"},
 {"_.zkst",0,(void*)member_zkst,14,"G","_.zkst"},
 {"_/=_",0,(void*)gdive,13,"&G","x/=y"},

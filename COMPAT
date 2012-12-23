@@ -29,6 +29,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     later allow passing factorization matrices ]: use apply()
   - ellsigma: removed flags 3 and 4 [ inefficient algorithm using the product
     formula ]
+  - removed member function 'w' (this is technical, and no longer needed:-)
 
 * Specific to the PARI library:
 ===============================

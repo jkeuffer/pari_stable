@@ -565,7 +565,4 @@
   ***   at top-level: e.tate
   ***                   ^----
   *** _.tate: incorrect type in tate [not defined over Qp] (t_VEC).
-  ***   at top-level: e.w
-  ***                   ^-
-  *** _.w: incorrect type in w [not defined over Qp] (t_VEC).
-Total time spent: 35
+Total time spent: 12

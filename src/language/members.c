@@ -567,13 +567,3 @@ member_tate(GEN x)
   prec = ellQp_get_prec(x);
   return ellQp_Tate_uniformization(x, prec);
 }
-
-GEN
-member_w(GEN x)
-{
-  long prec;
-  if (!is_ell(x)) member_err("w",x);
-  if (!ell_is_padic(x)) pari_err_TYPE("w [not defined over Qp]",x);
-  prec = ellQp_get_prec(x);
-  return ellQp_Tate_w(x, prec);
-}

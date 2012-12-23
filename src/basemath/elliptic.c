@@ -276,64 +276,44 @@ ellprint(GEN e)
   (void)delete_var(); avma = av;
 }
 
-/* compute a,b such that E1: y^2 = x(x-a)(x-b) ~ E0 */
-/* e1 = realroot(e) */
+/* compute a,b such that E1: y^2 = x(x-a)(x-b) ~ E */
 static GEN
-Qp_new_coords(GEN e, GEN x, GEN e1, GEN *pta, GEN *ptb, long prec)
+doellR_ab(GEN E, long prec)
 {
-  GEN b2 = ell_get_b2(e), a, b, d, p1, p2, w;
+  GEN b2 = ell_get_b2(E), b4 = ell_get_b4(E), e1 = ellR_root(E, prec);
+  GEN a, b, t, w;
 
-  p2 = gmul2n(gadd(gmulsg(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
-  w = ellQp_Tate_w(e, prec);
-  /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
-  *pta = a = gmul2n(gsub(w,p2),-2);
-  *ptb = b = gmul2n(w,-1); /* = sqrt( (e1 - e2)(e1 - e3) ) */
-  d = gsub(a,b);
-  p1 = gadd(x, gmul2n(gadd(gmul2n(e1,2), b2),-3));
-  p1 = gmul2n(p1,-1);
-  p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,d)), prec));
-  return gmul(p1, gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,d),p1),prec)),-1)));
-}
-
-/* compute a,b such that E1: y^2 = x(x-a)(x-b) ~ E0 */
-/* e1 = realroot(e) */
-static GEN
-new_coords(GEN e, GEN x, GEN e1, GEN *pta, GEN *ptb, long prec)
-{
-  GEN b2 = ell_get_b2(e), b4, a, b, p1, p2, w;
-  long ty = typ(e1);
-
-  p2 = gmul2n(gadd(gmulsg(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
-  b4 = ell_get_b4(e);
-  if (!is_const_t(ty)) pari_err_TYPE("zell",e1);
+  t = gmul2n(gadd(gmulsg(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
   w = sqrtr( gmul2n(gadd(b4, gmul(e1,gadd(b2, mulur(6,e1)))),1) );
-  if (gsigne(p2) > 0) setsigne(w, -1);
+  if (gsigne(t) > 0) setsigne(w, -1);
   /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
-  *pta = a = gmul2n(gsub(w,p2),-2);
-  *ptb = b = gmul2n(w,-1); /* = sqrt( (e1 - e2)(e1 - e3) ) */
-  x = gsub(x, e1);
-  p1 = gadd(x, b);
-  return gmul2n(gadd(p1, gsqrt(gsub(gsqr(p1), gmul2n(gmul(a,x),2)),prec)), -1);
+  a = gmul2n(gsub(w,t),-2);
+  b = gmul2n(w,-1); /* = sqrt( (e1 - e2)(e1 - e3) ) */
+  return mkvec2(a, b);
 }
+GEN
+ellR_ab(GEN E, long prec)
+{ return obj_checkbuild_prec(E, R_AB, &doellR_ab, prec); }
+
+/* return x mod p */
+static GEN
+padic_mod(GEN x) { return modii(gel(x,4), gel(x,2)); }
 
 /* a1, b1 are t_PADICs, a1 = b1 (mod p) */
 static GEN
-do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p, long prec)
+do_padic_agm(GEN *ptx, GEN a1, GEN b1)
 {
-  GEN bmod1, bmod = modii(gel(b1,4),p), x = *ptx;
-
+  GEN bp = padic_mod(b1), x = *ptx;
   if (gequal0(x)) pari_err_PREC("ellinit");
   for(;;)
   {
     GEN p1, d, a = a1, b = b1;
     b1 = Qp_sqrt(gmul(a,b));
-    bmod1 = modii(gel(b1,4),p);
-    if (!equalii(bmod1,bmod)) b1 = gneg_i(b1);
+    if (!equalii(padic_mod(b1), bp)) b1 = gneg_i(b1);
     a1 = gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2);
     d = gsub(a1,b1);
     if (gequal0(d)) break;
-    p1 = Qp_sqrt(gdiv(gadd(x,d),x));
-    if (! equali1(modii(gel(p1,4),p))) p1 = gneg_i(p1);
+    p1 = Qp_sqrt(gdiv(gadd(x,d),x)); /* = 1 (mod p) */
     x = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
   }
   *ptx = x; return ginv(gmul2n(a1,2));
@@ -440,7 +420,7 @@ ellinit_Q(GEN x, long prec)
   if (!(y = initsmall(x))) return NULL;
   gel(y,14) = mkvecsmall(t_ELL_Q);
   gel(y,15) = mkvec(mkvecsmall(prec2nbits(prec)));
-  gel(y,16) = zerovec(6);
+  gel(y,16) = zerovec(7);
   return gerepilecopy(av, y);
 }
 
@@ -788,12 +768,12 @@ ch_Qp(GEN E, GEN e, GEN w)
   }
   if ((S = obj_check(e, Qp_TATE)))
   {
-    GEN U2 = gel(S,1), U = gel(S,2), Q = gel(S,3), W = gel(S,4);
+    GEN U2 = gel(S,1), U = gel(S,2), Q = gel(S,3), AB = gel(S,4);
     if (!u2) u2 = gsqr(u);
     U2 = gmul(U2, u2);
     U = gmul(U, u);
-    W = gdiv(W, u2);
-    obj_insert(E, Qp_TATE, mkvec4(U2,U,Q,W));
+    AB = gdiv(AB, u2);
+    obj_insert(E, Qp_TATE, mkvec4(U2,U,Q,AB));
   }
   return E;
 }
@@ -1497,7 +1477,6 @@ static GEN
 doellR_eta(GEN E, long prec)
 { GEN w = ellR_omega(E, prec); return elleta(w, prec); }
 
-
 GEN
 ellR_omega(GEN E, long prec)
 { return obj_checkbuild_prec(E, R_PERIODS, &doellR_omega, prec); }
@@ -1638,72 +1617,79 @@ GEN
 ellQp_root(GEN E, long prec)
 { return obj_checkbuild_padicprec(E, Qp_ROOT, &doellQp_root, prec); }
 
-static GEN
-fix_padic(GEN x, GEN p, long prec)
+/* compute a,b such that E1: y^2 = x(x-a)(x-b) ~ E */
+static void
+doellQp_ab(GEN E, GEN *pta, GEN *ptb, long prec)
 {
-  if (typ(x) == t_PADIC)
-  {
-    if (!signe(gel(x,4))) return gen_0;
-    if (precp(x) < prec) x = gprec(x, prec);
-  }
-  return x;
+  GEN b2 = ell_get_b2(E), b4 = ell_get_b4(E), e1 = ellQp_root(E, prec);
+  GEN w, t = gmulsg(3, gadd(e1, gdivgs(b2,12)));
+  w = Qp_sqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1));
+  if (valp(gadd(t,w)) <= valp(w)) w = gneg_i(w); /* <=> v(d) > v(w) */
+  /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
+  *pta = gmul2n(gsub(w,t),-2);
+  *ptb = gmul2n(w,-1);
 }
 
 static GEN
-doellQp_Tate_uniformization(GEN E, long prec)
+doellQp_Tate_uniformization(GEN E, long prec0)
 {
-  GEN p1, u, u2, w, t, q, x1, a1, b1, b2, b4, e03, e0, e1, p = ellQp_get_p(E);
+  GEN p = ellQp_get_p(E);
+  GEN u, u2, q, x1, a, b, d, s, t;
+  long v, prec = prec0+2;
 
   if (equaliu(p,2)) pari_err_IMPL("ellinit for 2-adic numbers");
-
-  e1 = ellQp_root(E, prec);
-  b2 = fix_padic(ell_get_b2(E), p, prec);
-  b4 = fix_padic(ell_get_b4(E), p, prec);
-  e0 = gadd(e1, gdivgs(b2,12));
-  e03 = gmulsg(3, e0);
-
-  w = Qp_sqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1));
-  if (valp(gadd(e03,w)) <= valp(w)) w = gneg_i(w);
-
-  a1 = gmul2n(gsub(w, e03),-2);
-  b1 = gmul2n(w,-1);
-  x1 = gmul2n(gsub(a1,b1),-2);
-  u2 = do_padic_agm(&x1,a1,b1,p, prec);
+START:
+  doellQp_ab(E, &a, &b, prec);
+  d = gsub(a,b);
+  v = prec0 - precp(d);
+  if (v > 0) { prec += v; goto START; }
+  x1 = gmul2n(d,-2);
+  u2 = do_padic_agm(&x1,a,b);
 
   t = gaddsg(1, ginv(gmul2n(gmul(u2,x1),1)));
-  q = Qp_sqrt(gsubgs(gsqr(t), 1));
-  p1 = gadd(t,q);
-  q = gequal0(p1)? gsub(t,q): p1;
+  s = Qp_sqrt(gsubgs(gsqr(t), 1));
+  q = gadd(t,s);
+  if (gequal0(q)) q = gsub(t,s);
+  v = prec0 - precp(q);
+  if (v > 0) { prec += v; goto START; }
   if (valp(q) < 0) q = ginv(q);
   u = issquare(u2)? Qp_sqrt(u2): gen_0;
-  return mkvec4(u2, u, q, w);
+  return mkvec4(u2, u, q, mkvec2(a, b));
 }
 GEN
 ellQp_Tate_uniformization(GEN E, long prec)
 {return obj_checkbuild_padicprec(E,Qp_TATE,&doellQp_Tate_uniformization,prec);}
 GEN
-ellQp_Tate_u(GEN E, long prec)
+ellQp_u(GEN E, long prec)
 { GEN T = ellQp_Tate_uniformization(E, prec); return gel(T,2); }
 GEN
-ellQp_Tate_u2(GEN E, long prec)
+ellQp_u2(GEN E, long prec)
 { GEN T = ellQp_Tate_uniformization(E, prec); return gel(T,1); }
 GEN
-ellQp_Tate_q(GEN E, long prec)
+ellQp_q(GEN E, long prec)
 { GEN T = ellQp_Tate_uniformization(E, prec); return gel(T,3); }
 GEN
-ellQp_Tate_w(GEN E, long prec)
+ellQp_ab(GEN E, long prec)
 { GEN T = ellQp_Tate_uniformization(E, prec); return gel(T,4); }
 
 static GEN
-zellQp(GEN e, GEN z, long prec)
+zellQp(GEN E, GEN z, long prec)
 {
   pari_sp av = avma;
-  GEN a, b, e1, x1, u2, t;
+  GEN b2, a, b, ab, d, p1, e1, x, x1, u2, t;
   if (ell_is_inf(z)) return gen_1;
-  e1 = ellQp_root(e, prec);
-  x1 = Qp_new_coords(e, gel(z,1), e1, &a,&b, prec);
-  u2 = do_padic_agm(&x1,a,b, ellQp_get_p(e), prec);
-  if (!gequal0(ellQp_Tate_u(e, prec)))
+  b2 = ell_get_b2(E);
+  e1 = ellQp_root(E, prec);
+  ab = ellQp_ab(E, prec);
+  a = gel(ab,1);
+  b = gel(ab,2); d = gsub(a,b);
+  x = gel(z,1);
+  p1 = gmul2n(gadd(x, gmul2n(gadd(gmul2n(e1,2), b2),-3)), -1);
+  p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,d)), prec));
+  x1 = gmul(p1, gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,d),p1),prec)),-1)));
+
+  u2 = do_padic_agm(&x1,a,b);
+  if (!gequal0(ellQp_u(E, prec)))
   {
     t = Qp_sqrt(gaddsg(1, gdiv(x1,a)));
     t = gdiv(gaddsg(-1,t), gaddsg(1,t));
@@ -3603,16 +3589,31 @@ hell2(GEN e, GEN x, long prec)
   return gerepileupto(av, hells(e, x, prec));
 }
 
+/* one root of X^2 - t X + c */
+static GEN
+quad_root(GEN t, GEN c, long prec)
+{
+  return gmul2n(gadd(t, gsqrt(gsub(gsqr(t), gmul2n(c,2)),prec)), -1);
+}
+
 /* exp( h_oo(z) ), assume z on neutral component.
  * If flag, return exp(4 h_oo(z)) instead */
 static GEN
-exphellagm(GEN e, GEN z, GEN e1, int flag, long prec)
+exphellagm(GEN e, GEN z, int flag, long prec)
 {
-  GEN x_a, a, b, r, V = cgetg(1, t_VEC), x = gel(z,1);
-  long n, ex = 5-prec2nbits(prec), prec_e = realprec(e1);
+  GEN x_a, a, b, e1, r, V = cgetg(1, t_VEC), x = gel(z,1);
+  long n, ex = 5-prec2nbits(prec), p = prec+EXTRAPRECWORD;
 
-  if (typ(x) == t_REAL && realprec(x) < prec_e) x = gprec_w(x, prec_e);
-  x = new_coords(e, x, e1, &a,&b, prec);
+  if (typ(x) == t_REAL && realprec(x) < p) x = gprec_w(x, p);
+  e1 = ellR_root(e, p);
+  {
+    GEN ab = ellR_ab(e, p);
+    a = gel(ab, 1);
+    b = gel(ab, 2);
+  }
+  x = gsub(x, e1);
+  x = quad_root(gadd(x,b), gmul(a,x), prec);
+
   x_a = gsub(x, a);
   if (gsigne(a) > 0)
   {
@@ -3648,35 +3649,41 @@ exphellagm(GEN e, GEN z, GEN e1, int flag, long prec)
   return flag? gsqr( gdiv(gsqr(x), x_a) )
              : gdiv(x, sqrtr( mpabs(x_a) ));
 }
+/* is P \in E(R)^0, the neutral component ? */
+static int
+ellR_on_neutral(GEN E, GEN P, long prec)
+{
+  GEN x = gel(P,1), e1 = ellR_root(E, prec);
+  return gcmp(x, e1) >= 0;
+}
+
 /* exp( 4h_oo(z) ) */
 static GEN
-exp4hellagm(GEN e, GEN z, long prec)
+exp4hellagm(GEN E, GEN z, long prec)
 {
-  GEN e1 = ellR_root(e, prec+EXTRAPRECWORD), x = gel(z,1);
-  if (gcmp(x, e1) < 0) /* z not on neutral component */
+  if (!ellR_on_neutral(E, z, prec))
   {
-    GEN eh = exphellagm(e, elladd(e, z,z), e1, 0, prec);
+    GEN eh = exphellagm(E, elladd(E, z,z), 0, prec);
     /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
-    return gmul(eh, gabs(d_ellLHS(e, z), prec));
+    return gmul(eh, gabs(d_ellLHS(E, z), prec));
   }
-  return exphellagm(e, z, e1, 1, prec);
+  return exphellagm(E, z, 1, prec);
 }
 
 GEN
-ellheightoo(GEN e, GEN z, long prec)
+ellheightoo(GEN E, GEN z, long prec)
 {
-  GEN e1, h, x = gel(z,1);
   pari_sp av = avma;
-  checkell_Q(e);
-  e1 = ellR_root(e, prec+EXTRAPRECWORD);
-  if (gcmp(x, e1) < 0) /* z not on neutral component */
+  GEN h;
+  checkell_Q(E);
+  if (!ellR_on_neutral(E, z, prec))
   {
-    GEN eh = exphellagm(e, elladd(e, z,z), e1, 0, prec);
+    GEN eh = exphellagm(E, elladd(E, z,z), 0, prec);
     /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
-    h = gmul(eh, gabs(d_ellLHS(e, z), prec));
+    h = gmul(eh, gabs(d_ellLHS(E, z), prec));
   }
   else
-    h = exphellagm(e, z, e1, 1, prec);
+    h = exphellagm(E, z, 1, prec);
   return gerepileuptoleaf(av, gmul2n(mplog(h), -2));
 }
 

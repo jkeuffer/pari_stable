@@ -232,4 +232,3 @@ e.eta
 e.area
 e=ellinit([0,1]);
 e.tate
-e.w
