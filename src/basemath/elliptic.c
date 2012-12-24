@@ -305,7 +305,8 @@ ellR_ab(GEN E, long prec)
 static GEN
 padic_mod(GEN x) { return modii(gel(x,4), gel(x,2)); }
 
-/* a1, b1 are t_PADICs, a1 = b1 (mod p) */
+/* a1, b1 are t_PADICs, a1/b1 = 1 (mod p) if p odd, (mod 2^4) otherwise.
+ * Return u^2 = 1 / 4AGM(a1,b1), update x using p-adic Landen transform */
 static GEN
 do_padic_agm(GEN *ptx, GEN a1, GEN b1)
 {
@@ -1684,21 +1685,24 @@ static GEN
 zellQp(GEN E, GEN z, long prec)
 {
   pari_sp av = avma;
-  GEN b2, a, b, ab, d, p1, e1, x, x1, u2, t;
+  GEN b2, a, b, ab, c0, r0, r1, e1, x, delta, x0, x1, u2, t;
   if (ell_is_inf(z)) return gen_1;
   b2 = ell_get_b2(E);
   e1 = ellQp_root(E, prec);
   ab = ellQp_ab(E, prec);
   a = gel(ab,1);
-  b = gel(ab,2); d = gsub(a,b);
+  b = gel(ab,2); r1 = gsub(a,b);
   x = gel(z,1);
-  p1 = gmul2n(gadd(x, gmul2n(gadd(gmul2n(e1,2), b2),-3)), -1);
-  p1 = gadd(p1, Qp_sqrt(gsub(gsqr(p1), gmul(a,d))));
-  x1 = gmul(p1, gsqr(gmul2n(gaddsg(1,Qp_sqrt(gdiv(gadd(p1,d),p1))),-1)));
+  r0 = gadd(e1,gmul2n(b2,-2));
+  c0 = gadd(x, gmul2n(r0,-1));
+  delta = gdiv(gmul(a,r1), gsqr(c0));
+  x0 = gmul2n(gmul(c0,gaddsg(1,Qp_sqrt(gsubsg(1,gmul2n(delta,2))))),-1);
+  x1 = gmul(x0, gsqr(gmul2n(gaddsg(1, Qp_sqrt(gdiv(gadd(x0,r1),x0))),-1)));
   if (gequal0(x1)) pari_err_PREC("ellpointtoz");
 
-  u2 = do_padic_agm(&x1,a,b);
-  if (typ(ellQp_u(E, prec)) != t_PADIC)
+  (void)do_padic_agm(&x1,a,b); /* returns ellQp_u2(E, prec' <= prec) */
+  u2 = ellQp_u2(E, prec);
+  if (typ(ellQp_u(E, prec)) != t_INT)
   { /* 1 + 4u^2 x_oo = ((1 + t) / (1 - t))^2 */
     GEN s = Qp_sqrt(gaddsg(1, gmul(x1,gmul2n(u2,2))));
     t = gdiv(gaddsg(-1,s), gaddsg(1,s));

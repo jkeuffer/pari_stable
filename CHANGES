@@ -122,6 +122,7 @@ BA 101- znorder(Mod(5,16),200) -> 5 instead of 4
    102- e.tate lost accuracy
    103- 2-adic ellinit
    104- allow ellinit over C
+   105- ellpointtoz(E / Qp, ...)  [ wrong result / error messages ]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
