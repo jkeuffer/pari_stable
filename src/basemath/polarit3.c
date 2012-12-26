@@ -2084,12 +2084,14 @@ FpX_compositum(GEN A, GEN B, GEN p)
   }
 }
 
-/* Return x such that theta(x) - theta(27448) >= 2^bound */
+#if 0
+/* Return x such that theta(x) - theta(27448) >= ln(2)*bound */
 /* NB: theta(27449) ~ 27225.387, theta(x) > 0.98 x for x>7481
  * (Schoenfeld, 1976 for x > 1155901 + direct calculations) */
 static ulong
 get_theta_x(ulong bound)
 { return (ulong)ceil((bound * LOG2 + 27225.388) / 0.98); }
+#endif
 /* 27449 = prime(3000) */
 void
 init_modular(forprime_t *S) { u_forprime_init(S, 27449, ULONG_MAX); }
@@ -2407,18 +2409,20 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       const long CNTMAX = 5; /* to avoid oo loops if R = 0 */
       long bnd = 0, cnt;
       long prec = nbits2prec( maxss(gexpo(A), gexpo(B)) + 1 );
+      long bndden = dB? (long)(dbllog2(dB)*degA): 0;
       for(cnt = 1; cnt < CNTMAX; cnt++, prec = precdbl(prec))
       {
         GEN R = fp_resultant(RgX_gtofp(A, prec), RgX_gtofp(B, prec));
-        bnd = gexpo(R) + 1;
-        if (bnd >= 0 && bnd <= (long)bound && !gequal0(R)) break;
+        bnd = gexpo(R) - bndden + 1;
+        if (bnd >= 0 && bnd <= (long)bound && !gequal0(R))
+        {
+          bound = bnd; break;
+        }
       }
-      if (cnt < CNTMAX) bound = bnd;
-      if (dB) bound -= (long)(dbllog2(dB)*degA);
     }
   }
   if (DEBUGLEVEL>4) err_printf("bound for resultant: 2^%ld\n",bound);
-  u_forprime_init(&S, 27449, get_theta_x(bound));
+  init_modular(&S);
   av2 = avma; lim = stack_lim(av,2);
 
   dp = 1; /* denominator mod p */
