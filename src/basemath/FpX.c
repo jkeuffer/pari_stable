@@ -1051,9 +1051,9 @@ FpX_divrem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p, GEN *pr)
   long i;
   if (l <= lt)
   {
-    if (pr == ONLY_REM) return ZX_copy(x);
+    if (pr == ONLY_REM) return FpX_red(x, p);
     if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
-    if (pr) *pr =  ZX_copy(x);
+    if (pr) *pr = FpX_red(x, p);
     return pol_0(varn(T));
   }
   if (lt <= 1)
@@ -1089,14 +1089,14 @@ FpX_divrem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p, GEN *pr)
       }
     }
     else
-    { setlg(r, l+2); r = ZX_copy(r); }
+    { setlg(r, l+2); r = FpX_red(r, p); }
   }
   else
   {
     if (l > lt)
       (void) FpX_divrem_Barrettspec(r+2,l,mg,T,p,&r);
     else
-    { setlg(r, l+2); r = ZX_copy(r); }
+    { setlg(r, l+2); r = FpX_red(r, p); }
     r[1] = x[1]; return FpX_renormalize(r, lg(r));
   }
   if (pr) { r[1] = x[1]; r = FpX_renormalize(r, lg(r)); }
