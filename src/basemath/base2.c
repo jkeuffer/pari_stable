@@ -1006,7 +1006,7 @@ Decomp(decomp_t *S, long flag)
 {
   pari_sp av = avma;
   GEN fred, res, pr, pk, ph, b1, b2, a, e, de, f1, f2, dt, th;
-  GEN p = S->p;
+  GEN p = S->p, chip;
   long k, r = flag? flag: 2*S->df + 1;
   long vde, vdt;
 
@@ -1016,12 +1016,13 @@ Decomp(decomp_t *S, long flag)
     if (DEBUGLEVEL>5) err_printf(", parameters: %Ps^%ld\n  f = %Ps",p, r, S->f);
     err_printf("\n");
   }
-  if (!FpX_valrem(S->chi, S->nu, p, &b1))
+  chip = FpX_red(S->chi, p);
+  if (!FpX_valrem(chip, S->nu, p, &b1))
   {
     if (!BPSW_psp(p)) pari_err_PRIME("Decomp",p);
     pari_err_BUG("Decomp (not a factor)");
   }
-  b2 = FpX_div(S->chi, b1, p);
+  b2 = FpX_div(chip, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   /* E = e / de, e in Z[X], de in Z,  E = a(phi) mod (f, p) */
   th = QpX_remove_denom(S->phi, p, &dt, &vdt);
