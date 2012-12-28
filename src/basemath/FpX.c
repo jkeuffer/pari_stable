@@ -1059,24 +1059,23 @@ FpX_divrem_Barrettspec(GEN x, long l, GEN mg, GEN T, GEN p, GEN *pr)
 static GEN
 FpX_divrem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p, GEN *pr)
 {
-  long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
-  GEN q = NULL, r;
+  GEN q = NULL, r = FpX_red(x, p);
+  long l = lgpol(r), lt = degpol(T), lm = 2*lt-1;
   long i;
   if (l <= lt)
   {
-    if (pr == ONLY_REM) return FpX_red(x, p);
+    if (pr == ONLY_REM) return r;
     if (pr == ONLY_DIVIDES) return signe(x)? NULL: pol_0(varn(x));
-    if (pr) *pr = FpX_red(x, p);
+    if (pr) *pr = r;
     return pol_0(varn(T));
   }
   if (lt <= 1)
-    return FpX_divrem_basecase(x,T,p,pr);
+    return FpX_divrem_basecase(r,T,p,pr);
   if (pr != ONLY_REM && l>lm)
   {
     q = cgetg(l-lt+2, t_POL);
     for (i=0;i<l-lt;i++) gel(q+2,i) = gen_0;
   }
-  r = l>lm ? shallowcopy(x): x;
   while (l>lm)
   {
     GEN zr, zq = FpX_divrem_Barrettspec(r+2+l-lm,lm,mg,T,p,&zr);
@@ -1102,14 +1101,14 @@ FpX_divrem_Barrett_noGC(GEN x, GEN mg, GEN T, GEN p, GEN *pr)
       }
     }
     else
-    { setlg(r, l+2); r = FpX_red(r, p); }
+      r = FpX_renormalize(r, l+2);
   }
   else
   {
     if (l > lt)
-      (void) FpX_divrem_Barrettspec(r+2,l,mg,T,p,&r);
+      r = FpX_divrem_Barrettspec(r+2, l, mg, T, p, ONLY_REM);
     else
-    { setlg(r, l+2); r = FpX_red(r, p); }
+      r = FpX_renormalize(r, l+2);
     r[1] = x[1]; return FpX_renormalize(r, lg(r));
   }
   if (pr) { r[1] = x[1]; r = FpX_renormalize(r, lg(r)); }
