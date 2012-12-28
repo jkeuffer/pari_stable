@@ -255,6 +255,12 @@ BA 95- rename RgX_check_ZXY -> RgX_check_ZXX, ZXY_max_lg -> to ZXX_max_lg
        O~(prec^(3/2)) instead of O~(prec^2).
 BA 97- zv_cmp0 renamed to zv_equal0
    98- allow ellinit / Qp for arbitrary reduction type
+   99- ellpointtoz(E / Qp, ...), now return phi(P) [ used to return the same
+       result for phi(P) and phi(-P) [ split multiplicative reduction ],
+       resp. phi(P) + 1/phi(P) [ non-split reduction ]
+  100- ellinit(E / Qp).tate : the u component is now always a square root
+       of u2, also in the non-split case (in which case it lives in a
+       quadratic extension of Qp)
 
   Added
     1- mathnf for matrices over K[X] [#41]

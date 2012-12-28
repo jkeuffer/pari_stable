@@ -306,9 +306,13 @@ static GEN
 padic_mod(GEN x) { return modii(gel(x,4), gel(x,2)); }
 
 /* a1, b1 are t_PADICs, a1/b1 = 1 (mod p) if p odd, (mod 2^4) otherwise.
- * Return u^2 = 1 / 4AGM(a1,b1), update x using p-adic Landen transform */
+ * Return u^2 = 1 / 4M2(a1,b1), where M2(A,B) = B AGM(sqrt(A/B),1)^2; M2(A,B)
+ * is the common limit of (A_n, B_n), A_0 = A, B _0 = B;
+ *   A_{n+1} = (A_n + B_n + 2 B_{n+1}) / 4
+ *   B_{n+1} = B_n sqrt(A_n / B_n) = the square root of A_n B_n congruent to B_n
+ * Update (x,y) using p-adic Landen transform; if *pty = NULL, don't update y */
 static GEN
-do_padic_agm(GEN *ptx, GEN a1, GEN b1)
+do_padic_agm(GEN *ptx, GEN *pty, GEN a1, GEN b1)
 {
   GEN bp = padic_mod(b1), x = *ptx;
   for(;;)
@@ -318,11 +322,13 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1)
     if (!equalii(padic_mod(b1), bp)) b1 = gneg_i(b1);
     a1 = gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2);
     d = gsub(a1,b1);
-    if (gequal0(d)) break;
+    if (gequal0(d)) { *ptx = x; return ginv(gmul2n(a1,2)); }
     p1 = Qp_sqrt(gdiv(gadd(x,d),x)); /* = 1 (mod p) */
+    /* x_{n+1} = x_n  ((1 + sqrt(1 + r_n/x_n)) / 2)^2 */
     x = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
+    /* y_{n+1} = y_n / (1 - (r_n/4x_{n+1})^2) */
+    if (pty) *pty = gdiv(*pty, gsubsg(1, gsqr(gdiv(d,gmul2n(x,2)))));
   }
-  *ptx = x; return ginv(gmul2n(a1,2));
 }
 
 /* q a t_PADIC */
@@ -1602,14 +1608,31 @@ doellQp_root(GEN E, long prec)
   if (equaliu(p, 2))
   { /* Use 432(X/4) = 27X^3 - 9c4 X - 2c6 to have integral root; a=0 mod 2 */
     T = mkpoln(4, utoipos(27), gen_0, Fp_muls(c4, -9, pe), Fp_muls(c6, -2, pe));
-    a = ZpX_liftroot(T, gen_0, p, prec); alpha-=2;
+    a = ZpX_liftroot(T, gen_0, p, prec);
+    alpha -= 2;
   }
   else if (equaliu(p, 3))
   { /* Use 216T(X/3) = 32X^3 - 6c4 X - c6 to have integral root; a=-c6 mod 3 */
     a = Fp_neg(c6p, p);
     T = mkpoln(4, utoipos(32), gen_0, Fp_muls(c4, -6, pe), Fp_neg(c6, pe));
-    a = ZX_Zp_root(T, a, p, prec); /* single root */
-    a = gel(a,1); alpha--;
+    a = ZX_Zp_root(T, a, p, prec);
+    switch(lg(a)-1)
+    {
+      case 1: /* single root */
+        a = gel(a,1); break;
+      case 3: /* three roots, e.g. "15a1", choose the right one */
+      {
+        GEN a1 = gel(a,1), a2 = gel(a,2), a3 = gel(a,3);
+        long v1 = Z_lval(subii(a2, a3), 3);
+        long v2 = Z_lval(subii(a1, a3), 3);
+        long v3 = Z_lval(subii(a1, a2), 3);
+        if      (v1 == v2) a = a3;
+        else if (v1 == v3) a = a2;
+        else a = a1;
+      }
+      break;
+    }
+    alpha--;
   }
   else
   { /* p != 2,3: T = 4(x-a)(x-b)^2 = 4x^3 - 3a^2 x - a^3 when b = -a/2
@@ -1653,7 +1676,7 @@ START:
   v = prec0 - precp(d);
   if (v > 0) { prec += v; goto START; }
   x1 = gmul2n(d,-2);
-  u2 = do_padic_agm(&x1,a,b);
+  u2 = do_padic_agm(&x1,NULL,a,b);
 
   t = gaddsg(1, ginv(gmul2n(gmul(u2,x1),1)));
   s = Qp_sqrt(gsubgs(gsqr(t), 1));
@@ -1662,7 +1685,14 @@ START:
   v = prec0 - precp(q);
   if (v > 0) { prec += v; goto START; }
   if (valp(q) < 0) q = ginv(q);
-  u = issquare(u2)? Qp_sqrt(u2): gen_0;
+  if (issquare(u2))
+    u = Qp_sqrt(u2);
+  else
+  {
+    long v = fetch_user_var("u");
+    GEN T = mkpoln(3, gen_1, gen_0, gneg(u2));
+    setvarn(T, v); u = mkpolmod(pol_x(v), T);
+  }
   return mkvec4(u2, u, q, mkvec2(a, b));
 }
 GEN
@@ -1685,7 +1715,7 @@ static GEN
 zellQp(GEN E, GEN z, long prec)
 {
   pari_sp av = avma;
-  GEN b2, a, b, ab, c0, r0, r1, e1, x, delta, x0, x1, u2, t;
+  GEN b2, a, b, ab, c0, r0, r1, ar1, e1, x, y, delta, x0,x1, y0,y1, t;
   if (ell_is_inf(z)) return gen_1;
   b2 = ell_get_b2(E);
   e1 = ellQp_root(E, prec);
@@ -1693,22 +1723,20 @@ zellQp(GEN E, GEN z, long prec)
   a = gel(ab,1);
   b = gel(ab,2); r1 = gsub(a,b);
   x = gel(z,1);
+  y = gel(z,2);
   r0 = gadd(e1,gmul2n(b2,-2));
-  c0 = gadd(x, gmul2n(r0,-1));
-  delta = gdiv(gmul(a,r1), gsqr(c0));
+  c0 = gadd(x, gmul2n(r0,-1)); ar1 = gmul(a,r1);
+  delta = gdiv(ar1, gsqr(c0));
   x0 = gmul2n(gmul(c0,gaddsg(1,Qp_sqrt(gsubsg(1,gmul2n(delta,2))))),-1);
+  y0 = gdiv(gadd(y, gmul2n(d_ellLHS(E,z), -1)), gsubsg(1, gdiv(ar1,gsqr(x0))));
+
   x1 = gmul(x0, gsqr(gmul2n(gaddsg(1, Qp_sqrt(gdiv(gadd(x0,r1),x0))),-1)));
+  y1 = gdiv(y0, gsubsg(1, gsqr(gdiv(r1,gmul2n(x1,2)))));
   if (gequal0(x1)) pari_err_PREC("ellpointtoz");
 
-  (void)do_padic_agm(&x1,a,b); /* returns ellQp_u2(E, prec' <= prec) */
-  u2 = ellQp_u2(E, prec);
-  if (typ(ellQp_u(E, prec)) != t_INT)
-  { /* 1 + 4u^2 x_oo = ((1 + t) / (1 - t))^2 */
-    GEN s = Qp_sqrt(gaddsg(1, gmul(x1,gmul2n(u2,2))));
-    t = gdiv(gaddsg(-1,s), gaddsg(1,s));
-  }
-  else
-    t = gaddsg(2, ginv(gmul(u2,x1))); /* actually t+1/t: t not in Q_p */
+  (void)do_padic_agm(&x1,&y1, a,b);
+  t = gmul(ellQp_u(E, prec), gmul2n(y1,1)); /* 2u y_oo */
+  t = gdiv(gsub(t, x1), gadd(t, x1));
   return gerepileupto(av, t);
 }
 

@@ -237,7 +237,7 @@ padicprec_relative(GEN x)
       return LONG_MAX;
     case t_PADIC:
       return signe(gel(x,4))? precp(x): 0;
-    case t_VEC: case t_COL: case t_MAT:
+    case t_POLMOD: case t_VEC: case t_COL: case t_MAT:
       return vec_padicprec_relative(x, 1);
     case t_POL: case t_SER:
       return vec_padicprec_relative(x, 2);

@@ -635,9 +635,9 @@ convention.)
 \subsubsec{Curves over $\Q_p$}
 
 For the time being only curve with multiplicative reduction (split or
-non-split) are supported, i.e. $v_p(j) < 0$, for $p\neq 2$. In this
-case the curve is analytically isomorphic to $\bar{\Q}_p^*/q^\Z :=
-E_q(\bar{\Q}_p)$, for some $p$-adic integer $q$ (Tate's theorem). In
+non-split), i.e. $v_p(j) < 0$, are supported by non-trivial functions. In
+this case the curve is analytically isomorphic to $\bar{\Q}_p^*/q^\Z :=
+E_q(\bar{\Q}_p)$, for some $p$-adic integer $q$ (the Tate period). In
 particular, we have $j(q) = j(E)$.
 
 \item \tet{p} is the residual characteristic
@@ -652,8 +652,9 @@ under the Tate parametrization.
 is such that $\phi^* dx/(2y + a_1x+a3) = u dt/t$, where $\phi: E(q)\to E$
 is an isomorphism (well defined up to sign) and $dt/t$ is the canonical
 invariant differential on the Tate curve; $u^2\in\Q_p$ does not depend on
-$\phi$. (Technicality: if $u\not\in\Q_p$, it is arbitrarily set to $0$.)
-Finally, $[a,b]$ satisfy $4u^2 b \text{agm}(\sqrt{a/b},1)^2 = 1$
+$\phi$. (Technicality: if $u\not\in\Q_p$, it is stored as a quadratic
+\typ{POLMOD}.)
+Finally, $[a,b]$ satisfy $4u^2 b \cdot \text{agm}(\sqrt{a/b},1)^2 = 1$
 as in Theorem~2 (\emph{loc.~cit.}).
 
 \subsubsec{Curves over $\F_q$}

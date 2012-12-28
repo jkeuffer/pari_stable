@@ -30,6 +30,12 @@ This file lists the incompatible changes between Version 2.x and older versions
   - ellsigma: removed flags 3 and 4 [ inefficient algorithm using the product
     formula ]
   - removed member function 'w' (this is technical, and no longer needed:-)
+  - ellpointtoz(E / Qp, ...), now return phi(P) [ used to return the same
+    result for phi(P) and phi(-P) [ split multiplicative reduction ],
+    resp. phi(P) + 1/phi(P) [ non-split reduction ]
+  - ellinit(E / Qp).tate : the u component is now always a square root
+    of u2, also in the non-split case (in which case it lives in a
+    quadratic extension of Qp)
 
 * Specific to the PARI library:
 ===============================
