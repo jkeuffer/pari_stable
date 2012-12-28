@@ -1126,7 +1126,19 @@ FpX_divrem(GEN x, GEN T, GEN p, GEN *pr)
   if (pr==ONLY_REM) return FpX_rem(x, y, p);
   if (!B && d+3 < FpX_DIVREM_BARRETT_LIMIT)
     return FpX_divrem_basecase(x,y,p,pr);
-  else
+  else if (lgefint(p)==3)
+  {
+    pari_sp av = avma;
+    ulong pp = to_Flxq(x, T, p, &x, &T);
+    GEN z = Flx_divrem(x, T, pp, pr);
+    if (!z) return NULL;
+    if (!pr || pr == ONLY_DIVIDES)
+      return gerepileupto(av, Flx_to_ZX(z));
+    z = Flx_to_ZX(z);
+    *pr = Flx_to_ZX(*pr);
+    gerepileall(av, 2, &z, pr);
+    return z;
+  } else
   {
     pari_sp av=avma;
     GEN mg = B? B: FpX_invBarrett(y, p);
