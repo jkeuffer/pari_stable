@@ -1053,6 +1053,74 @@ Flx_get_red(GEN T, ulong p)
   return T;
 }
 
+/* separate from Flx_divrem for maximal speed. */
+static GEN
+Flx_rem_basecase(GEN x, GEN y, ulong p)
+{
+  pari_sp av;
+  GEN z, c;
+  long dx,dy,dz,i,j;
+  ulong p1,inv;
+  long vs=x[1];
+
+  dy = degpol(y); if (!dy) return pol0_Flx(x[1]);
+  dx = degpol(x);
+  dz = dx-dy; if (dz < 0) return Flx_copy(x);
+  x += 2; y += 2;
+  inv = y[dy];
+  if (inv != 1UL) inv = Fl_inv(inv,p);
+
+  c = cgetg(dy+3, t_VECSMALL); c[1]=vs; c += 2; av=avma;
+  z = cgetg(dz+3, t_VECSMALL); z[1]=vs; z += 2;
+
+  if (SMALL_ULONG(p))
+  {
+    z[dz] = (inv*x[dx]) % p;
+    for (i=dx-1; i>=dy; --i)
+    {
+      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
+      for (j=i-dy+1; j<=i && j<=dz; j++)
+      {
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
+      }
+      p1 %= p;
+      z[i-dy] = p1? ((p - p1)*inv) % p: 0;
+    }
+    for (i=0; i<dy; i++)
+    {
+      p1 = z[0]*y[i];
+      for (j=1; j<=i && j<=dz; j++)
+      {
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 %= p;
+      }
+      c[i] = Fl_sub(x[i], p1%p, p);
+    }
+  }
+  else
+  {
+    z[dz] = Fl_mul(inv, x[dx], p);
+    for (i=dx-1; i>=dy; --i)
+    {
+      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
+      for (j=i-dy+1; j<=i && j<=dz; j++)
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+      z[i-dy] = p1? Fl_mul(p - p1, inv, p): 0;
+    }
+    for (i=0; i<dy; i++)
+    {
+      p1 = Fl_mul(z[0],y[i],p);
+      for (j=1; j<=i && j<=dz; j++)
+        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
+      c[i] = Fl_sub(x[i], p1, p);
+    }
+  }
+  i = dy-1; while (i>=0 && !c[i]) i--;
+  avma=av;
+  return Flx_renormalize(c-2, i+3);
+}
+
 /* as FpX_divrem but working only on ulong types.
  * if relevant, *pr is the last object on stack */
 GEN
@@ -1065,7 +1133,7 @@ Flx_divrem_basecase(GEN x, GEN y, ulong p, GEN *pr)
 
   dy = degpol(y);
   if (dy<0) pari_err_INV("Flx_divrem",y);
-  if (pr == ONLY_REM) return Flx_rem(x, y, p);
+  if (pr == ONLY_REM) return Flx_rem_basecase(x, y, p);
   if (!dy)
   {
     if (pr && pr != ONLY_DIVIDES) *pr = pol0_Flx(sv);
@@ -1251,104 +1319,6 @@ Flx_divrem(GEN x, GEN T, ulong p, GEN *pr)
   }
 }
 
-/* separate from Flx_divrem for maximal speed. */
-static GEN
-Flx_rem_basecase(GEN x, GEN y, ulong p)
-{
-  pari_sp av;
-  GEN z, c;
-  long dx,dy,dz,i,j;
-  ulong p1,inv;
-  long vs=x[1];
-
-  dy = degpol(y); if (!dy) return pol0_Flx(x[1]);
-  dx = degpol(x);
-  dz = dx-dy; if (dz < 0) return Flx_copy(x);
-  x += 2; y += 2;
-  inv = y[dy];
-  if (inv != 1UL) inv = Fl_inv(inv,p);
-
-  c = cgetg(dy+3, t_VECSMALL); c[1]=vs; c += 2; av=avma;
-  z = cgetg(dz+3, t_VECSMALL); z[1]=vs; z += 2;
-
-  if (SMALL_ULONG(p))
-  {
-    z[dz] = (inv*x[dx]) % p;
-    for (i=dx-1; i>=dy; --i)
-    {
-      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
-      for (j=i-dy+1; j<=i && j<=dz; j++)
-      {
-        p1 += z[j]*y[i-j];
-        if (p1 & HIGHBIT) p1 %= p;
-      }
-      p1 %= p;
-      z[i-dy] = p1? ((p - p1)*inv) % p: 0;
-    }
-    for (i=0; i<dy; i++)
-    {
-      p1 = z[0]*y[i];
-      for (j=1; j<=i && j<=dz; j++)
-      {
-        p1 += z[j]*y[i-j];
-        if (p1 & HIGHBIT) p1 %= p;
-      }
-      c[i] = Fl_sub(x[i], p1%p, p);
-    }
-  }
-  else
-  {
-    z[dz] = Fl_mul(inv, x[dx], p);
-    for (i=dx-1; i>=dy; --i)
-    {
-      p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
-      for (j=i-dy+1; j<=i && j<=dz; j++)
-        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
-      z[i-dy] = p1? Fl_mul(p - p1, inv, p): 0;
-    }
-    for (i=0; i<dy; i++)
-    {
-      p1 = Fl_mul(z[0],y[i],p);
-      for (j=1; j<=i && j<=dz; j++)
-        p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
-      c[i] = Fl_sub(x[i], p1, p);
-    }
-  }
-  i = dy-1; while (i>=0 && !c[i]) i--;
-  avma=av;
-  return Flx_renormalize(c-2, i+3);
-}
-
-GEN
-Flx_rem_Barrett(GEN x, GEN mg, GEN T, ulong p)
-{
-  pari_sp av;
-  long l = lgpol(x), lt = degpol(T), lm = 2*lt-1;
-  GEN r;
-  if (l <= lt)
-    return Flx_copy(x);
-  if (lt <= 1)
-    return Flx_rem_basecase(x,T,p);
-  if (l <= lm)
-  {
-    r = Flx_divrem_Barrettspec(x+2,l,mg,T,p, ONLY_REM);
-    r[1] = x[1]; return r;
-  }
-  r = Flx_copy(x); av = avma;
-  while (l>lt)
-  {
-    long i, lz, lu = minss(l,lm);
-    GEN rp = r+2+l-lu;
-    GEN z = Flx_divrem_Barrettspec(rp,lu,mg,T,p, ONLY_REM);
-    lz = lgpol(z);
-    for(i=0; i<lz; i++)
-      gel(rp,i) = gel(z,2+i);
-    l -= lu-lz;
-  }
-  r[1] = x[1]; avma = av;
-  return Flx_renormalize(r, l+2);
-}
-
 GEN
 Flx_rem(GEN x, GEN T, ulong p)
 {
@@ -1361,7 +1331,8 @@ Flx_rem(GEN x, GEN T, ulong p)
   {
     pari_sp av=avma;
     GEN mg = B ? B: Flx_invBarrett(y, p);
-    return gerepileupto(av, Flx_rem_Barrett(x, mg, y, p));
+    GEN r  = Flx_divrem_Barrett_noGC(x, mg, y, p, ONLY_REM);
+    return gerepileuptoleaf(av, r);
   }
 }
 
