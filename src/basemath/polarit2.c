@@ -2564,7 +2564,7 @@ isinexactall(GEN x, int *simple, int *rational)
 static int
 inexact(GEN x, int *simple, int *rational)
 {
-  int junk;
+  int junk = 0;
   switch(typ(x))
   {
     case t_INT: case t_FRAC: return 0;
