@@ -1123,7 +1123,7 @@ Flx_rem_basecase(GEN x, GEN y, ulong p)
 
 /* as FpX_divrem but working only on ulong types.
  * if relevant, *pr is the last object on stack */
-GEN
+static GEN
 Flx_divrem_basecase(GEN x, GEN y, ulong p, GEN *pr)
 {
   GEN z,q,c;
