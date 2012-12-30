@@ -1845,7 +1845,7 @@ obj_checkbuild_prec(GEN S, long tag, GEN (*build)(GEN,long), long prec)
     if (p >= prec) return gprec_w(w, prec);
   }
   w = obj_insert(S, tag, build(S, prec));
-  avma = av; return w;
+  avma = av; return gcopy(w);
 }
 
 /* x a t_PADIC/t_FRAC/t_INT or a vector of such */
@@ -1877,7 +1877,7 @@ obj_checkbuild_padicprec(GEN S, long tag, GEN (*build)(GEN,long), long prec)
     if (p >= prec) return gprec_w(w, prec);
   }
   w = obj_insert(S, tag, build(S, prec));
-  avma = av; return w;
+  avma = av; return gcopy(w);
 }
 
 /*******************************************************************/
