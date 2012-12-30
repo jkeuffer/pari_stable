@@ -1722,7 +1722,9 @@ zell(GEN e, GEN z, long prec)
   checkell(e); checkellpt(z);
   switch(ell_get_type(e))
   {
-    case t_ELL_Qp: return zellQp(e, z, prec);
+    case t_ELL_Qp:
+      prec = minss(ellQp_get_prec(e), padicprec_relative(z));
+      return zellQp(e, z, prec);
     case t_ELL_Q: break;
     case t_ELL_Rg: break;
     default: pari_err_TYPE("ellpointtoz", e);

@@ -1848,24 +1848,6 @@ obj_checkbuild_prec(GEN S, long tag, GEN (*build)(GEN,long), long prec)
   avma = av; return gcopy(w);
 }
 
-/* x a t_PADIC/t_FRAC/t_INT or a vector of such */
-static long
-padicprec_relative(GEN x)
-{
-  long i, s;
-  switch(typ(x))
-  {
-    case t_PADIC:
-      return signe(gel(x,4))? precp(x): 0;
-
-    case t_VEC: case t_COL: case t_MAT:
-      for (s=LONG_MAX, i=lg(x)-1; i>0; i--)
-      { long t = padicprec_relative(gel(x,i)); if (t<s) s = t; }
-      return s;
-  }
-  return LONG_MAX;
-}
-
 GEN
 obj_checkbuild_padicprec(GEN S, long tag, GEN (*build)(GEN,long), long prec)
 {

@@ -2233,6 +2233,7 @@ GEN     mkvecsmalln(long n, ...);
 GEN     mulreal(GEN x, GEN y);
 GEN     numer(GEN x);
 long    padicprec(GEN x, GEN p);
+long    padicprec_relative(GEN x);
 GEN     polcoeff0(GEN x,long n,long v);
 GEN     polcoeff_i(GEN x, long n, long v);
 long    poldegree(GEN x,long v);
