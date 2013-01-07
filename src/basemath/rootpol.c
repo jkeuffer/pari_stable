@@ -366,7 +366,7 @@ polgraeffe(GEN p)
  * return y rounded to 2 ulp. In particular, if result < 2^21, absolute error
  * is bounded by 2^-31. If result > 2^21, it is correct to 2 ulp */
 static double
-dbllog2i(GEN x)
+mydbllog2i(GEN x)
 {
 #ifdef LONG_IS_64BIT
   const double W = 1/(4294967296. * 4294967296.); /* 2^-64 */
@@ -387,25 +387,32 @@ dbllog2i(GEN x)
   return log2(l) + (double)(BITS_IN_LONG*(lx-3));
 }
 
-/* return log(|x|) */
+/* return log(|x|) or -pariINFINITY */
 static double
-dbllogr(GEN x) {
+mydbllogr(GEN x) {
   if (!signe(x)) return -pariINFINITY;
   return LOG2*dbllog2r(x);
 }
+
+/* return log2(|x|) or -pariINFINITY */
 static double
-dbllogmp(GEN x) { return typ(x) == t_INT? dbllog2i(x): dbllog2r(x); }
+mydbllog2r(GEN x) {
+  if (!signe(x)) return -pariINFINITY;
+  return dbllog2r(x);
+}
+static double
+dbllog2mp(GEN x) { return typ(x) == t_INT? mydbllog2i(x): mydbllog2r(x); }
 double
 dbllog2(GEN z)
 {
   double x, y;
   switch(typ(z))
   {
-    case t_INT: return dbllog2i(z);
-    case t_REAL: return dbllog2r(z);
+    case t_INT: return mydbllog2i(z);
+    case t_REAL: return mydbllog2r(z);
     default: /*t_COMPLEX*/
-      x = dbllogmp(gel(z,1));
-      y = dbllogmp(gel(z,2));
+      x = dbllog2mp(gel(z,1));
+      y = dbllog2mp(gel(z,2));
       if (fabs(x-y) > 10) return maxdd(x,y);
       return x + 0.5*log2(1 + exp2(2*(y-x)));
   }
@@ -971,7 +978,7 @@ isreal(GEN p)
 static GEN
 abs_update_r(GEN x, double *mu) {
   GEN y = gtofp(x, DEFAULTPREC);
-  double ly = dbllogr(y); if (ly < *mu) *mu = ly;
+  double ly = mydbllogr(y); if (ly < *mu) *mu = ly;
   setabssign(y); return y;
 }
 /* return |x|, low accuracy. Set *mu = min(log(y), *mu) */
@@ -988,7 +995,7 @@ abs_update(GEN x, double *mu) {
   xr = gtofp(xr, DEFAULTPREC);
   yr = gtofp(yr, DEFAULTPREC);
   y = sqrtr(addrr(sqrr(xr), sqrr(yr)));
-  ly = dbllogr(y); if (ly < *mu) *mu = ly;
+  ly = mydbllogr(y); if (ly < *mu) *mu = ly;
   return y;
 }
 
@@ -1046,7 +1053,7 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
       gerepileall(av2,2, &g,&RU);
     }
   }
-  *gamma = dbllog2r(divru(g,NN));
+  *gamma = mydbllog2r(divru(g,NN));
   *LMAX = Lmax; avma = av;
 }
 
@@ -1402,7 +1409,7 @@ conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
       GEN t, r = dblexp(radii[i]), r2 = sqrr(r);
       /* 2(r^2 - 1) / (r^2 - 3(r-1)) */
       t = divrr(shiftr((subrs(r2,1)),1), subrr(r2, mulur(3,subrs(r,1))));
-      radii[i] = dbllogr(addsr(1,t)) / 2;
+      radii[i] = mydbllogr(addsr(1,t)) / 2;
       avma = av2;
     }
   lrho = logradius(radii, q,k,aux/10., &delta);
@@ -1817,7 +1824,7 @@ cauchy_bound(GEN p)
     GEN y = gel(p,i+2);
     double L;
     if (gequal0(y)) continue;
-    L = dbllogr(mulrr(quickabs(y), invlc)) / (n-i);
+    L = mydbllogr(mulrr(quickabs(y), invlc)) / (n-i);
     if (L > Lmax) Lmax = L;
   }
   avma = av; return Lmax + LOG2;
