@@ -123,6 +123,7 @@ BA 101- znorder(Mod(5,16),200) -> 5 instead of 4
    103- 2-adic ellinit
    104- allow ellinit over C
    105- ellpointtoz(E / Qp, ...)  [ wrong result / error messages ]
+JD 106- galoisinit(x^3+x^2-2*x-1) -> uninitialized read [#1389]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

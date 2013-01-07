@@ -1288,7 +1288,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   ga->deg = deg;
   ga->ord = order;
   ga->l  = O[1];
-  ga->p4 = O[4];
+  ga->p4 = n >= 4 ? O[4] : 0;
   if (DEBUGLEVEL >= 4)
     err_printf("GaloisAnalysis:p=%ld l=%ld group=%ld deg=%ld ord=%ld\n",
                plift, O[1], group, deg, order);
