@@ -634,7 +634,7 @@ convention.)
 
 \subsubsec{Curves over $\Q_p$}
 
-For the time being only curve with multiplicative reduction (split or
+For the time being only curves with multiplicative reduction (split or
 non-split), i.e. $v_p(j) < 0$, are supported by non-trivial functions. In
 this case the curve is analytically isomorphic to $\bar{\Q}_p^*/q^\Z :=
 E_q(\bar{\Q}_p)$, for some $p$-adic integer $q$ (the Tate period). In
@@ -670,28 +670,23 @@ as in Theorem~2 (\emph{loc.~cit.}).
 \item \tet{group} returns $[\kbd{no},\kbd{cyc},\kbd{gen}]$, i.e. $E(\F_q)$
 as an abelian group structure.
 
+\subsubsec{Curves over $\Q$}
+
+\item \tet{gen} returns the generators of $E(\Q)$, if known (from John
+  Cremona's database)
+
 Some functions, in particular those relative to height computations (see
 \kbd{ellheight}) require also that the curve be in minimal Weierstrass
 form, which is duly stressed in their description below. This is achieved by
 the function \kbd{ellminimalmodel}. \emph{Using a non-minimal model in such a
 routine will yield a wrong result!}
 
-All functions related to elliptic curves share the prefix \kbd{ell}, and the
-precise curve we are interested in is always the first argument, in either
-one of the three formats discussed above, unless otherwise specified. The
-requirements are given as the \emph{minimal} ones: any richer structure may
-replace the ones requested. For instance, in functions which have no use for
-the extra information given by an \tev{ell} structure, the curve can be given
-either as a five-component vector, as a \var{smallell}, or as an \var{ell};
-if a \var{smallell} is requested, an \var{ell} may equally be given.
-
-
 A few routines --- namely \tet{ellgenerators}, \tet{ellidentify},
 \tet{ellsearch}, \tet{forell} --- require the optional package \tet{elldata}
-(John Cremona's database) to be installed. The function \tet{ellinit} will
-also allow alternative inputs, e.g.~\kbd{ellinit("11a1")}. Functions using
-this package need to load chunks of a large database in memory and require
-at least 2MB stack to avoid stack overflows.
+(John Cremona's database) to be installed. In that case, the function
+\tet{ellinit} will allow alternative inputs, e.g.~\kbd{ellinit("11a1")}.
+Functions using this package need to load chunks of a large database in
+memory and require at least 2MB stack to avoid stack overflows.
 
 %SECTION: elliptic_curves
 
