@@ -250,7 +250,7 @@ static long
 vec_padicprec(GEN x, GEN p, long imin)
 {
   long s, t, i;
-  for (s=LONG_MAX, i=lg(x)-1; i>1; i--)
+  for (s=LONG_MAX, i=lg(x)-1; i>=imin; i--)
   {
     t = padicprec(gel(x,i),p); if (t<s) s = t;
   }
