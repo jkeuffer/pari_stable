@@ -27,33 +27,6 @@ RgX_check_QX(GEN x, const char *s)
 void
 RgX_check_ZX(GEN x, const char *s)
 { if (!RgX_is_ZX(x)) pari_err_TYPE(stack_strcat(s," [not in Z[X]]"), x); }
-void
-RgX_check_ZXX(GEN x, const char *s)
-{
-  long k = lg(x)-1;
-  for ( ; k>1; k--) {
-    GEN t = gel(x,k);
-    switch(typ(t)) {
-      case t_INT: break;
-      case t_POL: if (RgX_is_ZX(t)) break;
-      /* fall through */
-      default: pari_err_TYPE(stack_strcat(s, " not in Z[X,Y]"),x);
-    }
-  }
-}
-
-long
-ZXX_max_lg(GEN x)
-{
-  long i, prec = 0, lx = lg(x);
-  for (i=2; i<lx; i++)
-  {
-    GEN p = gel(x,i);
-    long l = (typ(p) == t_INT)? lgefint(p): ZX_max_lg(p);
-    if (l > prec) prec = l;
-  }
-  return prec;
-}
 long
 ZX_max_lg(GEN x)
 {
@@ -61,17 +34,6 @@ ZX_max_lg(GEN x)
 
   for (i=2; i<lx; i++) { long l = lgefint(gel(x,i)); if (l > prec) prec = l; }
   return prec;
-}
-
-/*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
-GEN
-ZX_renormalize(GEN x, long lx)
-{
-  long i;
-  for (i = lx-1; i>1; i--)
-    if (signe(gel(x,i))) break;
-  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + (i+1)));
-  setlg(x, i+1); setsigne(x, i!=1); return x;
 }
 
 GEN
@@ -647,19 +609,6 @@ ZX_mod_Xn_1(GEN T, ulong n)
   return normalizepol_lg(S, l);
 }
 
-GEN
-ZXX_Z_divexact(GEN y, GEN x)
-{
-  long i, l = lg(y);
-  GEN z = cgetg(l,t_POL); z[1] = y[1];
-  for(i=2; i<l; i++)
-    if(typ(gel(y,i))==t_INT)
-      gel(z,i) = diviiexact(gel(y,i),x);
-    else
-      gel(z,i) = ZX_Z_divexact(gel(y,i),x);
-  return z;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                                ZXV                              */
@@ -707,4 +656,62 @@ ZXV_dotproduct(GEN x, GEN y)
     if (signe(t)) c = ZX_add(c, t);
   }
   return gerepileupto(av, c);
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                                ZXX                              */
+/*                                                                 */
+/*******************************************************************/
+
+void
+RgX_check_ZXX(GEN x, const char *s)
+{
+  long k = lg(x)-1;
+  for ( ; k>1; k--) {
+    GEN t = gel(x,k);
+    switch(typ(t)) {
+      case t_INT: break;
+      case t_POL: if (RgX_is_ZX(t)) break;
+      /* fall through */
+      default: pari_err_TYPE(stack_strcat(s, " not in Z[X,Y]"),x);
+    }
+  }
+}
+
+/*Renormalize (in place) polynomial with t_INT or ZX coefficients.*/
+GEN
+ZXX_renormalize(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>1; i--)
+    if (signe(gel(x,i))) break;
+  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + (i+1)));
+  setlg(x, i+1); setsigne(x, i!=1); return x;
+}
+
+long
+ZXX_max_lg(GEN x)
+{
+  long i, prec = 0, lx = lg(x);
+  for (i=2; i<lx; i++)
+  {
+    GEN p = gel(x,i);
+    long l = (typ(p) == t_INT)? lgefint(p): ZX_max_lg(p);
+    if (l > prec) prec = l;
+  }
+  return prec;
+}
+
+GEN
+ZXX_Z_divexact(GEN y, GEN x)
+{
+  long i, l = lg(y);
+  GEN z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l; i++)
+    if(typ(gel(y,i))==t_INT)
+      gel(z,i) = diviiexact(gel(y,i),x);
+    else
+      gel(z,i) = ZX_Z_divexact(gel(y,i),x);
+  return z;
 }

@@ -1858,11 +1858,13 @@ INLINE int
 ZX_equal1(GEN x) { return degpol(x)==0 && equali1(gel(x,2)); }
 
 INLINE GEN
-FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }
+ZX_renormalize(GEN x, long lx)    { return ZXX_renormalize(x,lx); }
 INLINE GEN
-FpXX_renormalize(GEN x, long lx)  { return ZX_renormalize(x,lx); }
+FpX_renormalize(GEN x, long lx)   { return ZXX_renormalize(x,lx); }
 INLINE GEN
-FpXQX_renormalize(GEN x, long lx) { return ZX_renormalize(x,lx); }
+FpXX_renormalize(GEN x, long lx)  { return ZXX_renormalize(x,lx); }
+INLINE GEN
+FpXQX_renormalize(GEN x, long lx) { return ZXX_renormalize(x,lx); }
 INLINE GEN
 F2x_renormalize(GEN x, long lx)   { return Flx_renormalize(x,lx); }
 INLINE GEN

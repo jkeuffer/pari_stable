@@ -6369,6 +6369,9 @@ leaves of the tree \kbd{x}.
 raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
 ($s$ should point to the name of the caller).
 
+\fun{GEN}{ZXX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
+
 \fun{long}{ZXX_max_lg}{GEN x} returns the effective length of the longest
 component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
 
