@@ -6,8 +6,9 @@ Help: elltaniyama(E, {d = seriesprecision}): modular parametrization of elliptic
  model).
 Doc:
  computes the modular parametrization of the
- elliptic curve $E$, where $E$ is a \var{smallell} as output by \kbd{ellinit},
- in the form of a two-component vector $[u,v]$ of power series, given to $d$
+ elliptic curve $E$, where $E$ is an \var{ell} structure as output by
+ \kbd{ellinit}. This returns a two-component vector $[u,v]$ of power series,
+ given to $d$
  significant terms (\tet{seriesprecision} by default). This vector is
  characterized by the
  following two properties. First the point $(x,y)=(u,v)$ satisfies the

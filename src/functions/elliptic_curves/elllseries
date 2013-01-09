@@ -5,13 +5,10 @@ Prototype: GGDGp
 Help: elllseries(E,s,{A=1}): L-series at s of the elliptic curve E, where A
  a cut-off point close to 1.
 Doc:
- $E$ being an \var{sell} as output by
- \kbd{ellinit}, this computes the value of the L-series of $E$ at $s$. It is
- assumed that $E$ is defined over $\Q$, not necessarily minimal. The optional
- parameter $A$ is a cutoff point for the integral, which must be chosen close
- to 1 for best speed. The result must be independent of $A$, so this allows
- some internal checking of the function.
+ $E$ being an elliptic curve over $\Q$ (not necessarily minimal), as output by
+ \kbd{ellinit}, this computes the value of the L-series of $E$ at $s$.
+ The optional parameter $A$ is a cutoff point for the integral, which must be
+ chosen close to 1 for best speed. The result must be independent of $A$, so
+ this allows some internal checking of the function.
 
- Note that if the conductor of the curve is large, say greater than $10^{12}$,
- this function will take an unreasonable amount of time since it uses an
- $O(N^{1/2})$ algorithm.
+ This function uses an $O(N^{1/2})$ algorithm, where $N$ is the conductor.

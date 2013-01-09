@@ -10,12 +10,12 @@ Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  where $\#E(\F_p)$ stands for the number of points of the curve $E$ over the
  finite field $\F_p$.
 
- No checking is done that $p$ is indeed prime. $E$ must be a \var{smallell} as
+ No checking is done that $p$ is indeed prime. $E$ must be an \var{ell}
+ structure as
  output by \kbd{ellinit}, defined over $\Q$, $\Q_p$, or $\F_p$. The prime $p$
- may be omitted if the curve was defined over $\F_p$ (\typ{INTMOD}
- coefficients) or $\Q_p$ (\typ{PADIC} coefficients). Otherwise the curve must
- be defined over $\Q$, and $p$ must be explicitly given. Over $\Q$ or
- $\Q_p$, the equation is assumed to be minimal at $p$.
+ may be omitted if the curve was defined over $\F_p$ or $\Q_p$. Otherwise the
+ curve must be defined over $\Q$, and $p$ must be explicitly given. Over $\Q$
+ or $\Q_p$, the equation is assumed to be minimal at $p$.
  \bprog
  ? E = ellinit([0,1]);  \\ y^2 = x^3 + 0.x + 1, defined over Q
  ? ellap(E, 3)  \\ 3 necessary here

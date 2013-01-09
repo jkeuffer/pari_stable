@@ -10,4 +10,4 @@ Doc:
  changes the data for the elliptic curve $E$
  by changing the coordinates using the vector \kbd{v=[u,r,s,t]}, i.e.~if $x'$
  and $y'$ are the new coordinates, then $x=u^2x'+r$, $y=u^3y'+su^2x'+t$.
- $E$ must be a \var{smallell} as output by \kbd{ellinit}.
+ $E$ must be an \var{ell} structure as output by \kbd{ellinit}.

@@ -10,8 +10,8 @@ Doc:
  subgroup of $E$ as a 3-component vector \kbd{[t,v1,v2]}, where \kbd{t} is the
  order of the torsion group, \kbd{v1} gives the structure of the torsion group
  as a product of cyclic groups (sorted by decreasing order), and \kbd{v2}
- gives generators for these cyclic groups. $E$ must be an \var{smallell} as
- output by \kbd{ellinit}, defined over $\Q$.
+ gives generators for these cyclic groups. $E$ must be an \var{ell} structure
+ as output by \kbd{ellinit}, defined over $\Q$.
 
  \bprog
  ?  E = ellinit([-1,0]);
