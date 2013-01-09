@@ -187,7 +187,7 @@ RgX_to_FpX(GEN x, GEN p)
   long i, l;
   GEN z = cgetg_copy(x, &l); z[1] = x[1];
   for (i = 2; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
-  return normalizepol_lg(z, l);
+  return FpX_renormalize(z, l);
 }
 
 GEN
@@ -223,7 +223,7 @@ RgX_to_FpXQX(GEN x, GEN T, GEN p)
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) gel(z,i) = Rg_to_FpXQ(gel(x,i), T,p);
-  return normalizepol_lg(z, l);
+  return FpXQX_renormalize(z, l);
 }
 GEN
 RgX_to_FqX(GEN x, GEN T, GEN p)
@@ -231,7 +231,7 @@ RgX_to_FqX(GEN x, GEN T, GEN p)
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++) gel(z,i) = simplify_shallow(Rg_to_FpXQ(gel(x,i), T,p));
-  return normalizepol_lg(z, l);
+  return FpXQX_renormalize(z, l);
 }
 
 /* lg(V) > 1 */
@@ -638,7 +638,7 @@ FqX_translate(GEN P, GEN c, GEN T, GEN p)
       Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
     }
   }
-  return gerepilecopy(av, normalizepol(Q));
+  return gerepilecopy(av, FpXQX_renormalize(Q, lg(Q)));
 }
 
 GEN
