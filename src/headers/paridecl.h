@@ -632,8 +632,8 @@ GEN     scalarmat_s(long x, long n);
 
 /* RgX.c */
 
+GEN     Kronecker_to_mod(GEN z, GEN pol);
 GEN     QX_ZXQV_eval(GEN P, GEN V, GEN dV);
-int     ZXQX_dvd(GEN x, GEN y, GEN T);
 GEN     QXQ_powers(GEN a, long n, GEN T);
 GEN     QXQV_to_mod(GEN V, GEN T);
 GEN     QXQXV_to_mod(GEN V, GEN T);
@@ -707,11 +707,13 @@ GEN     Rg_RgX_sub(GEN x, GEN y);
 GEN     ZX_translate(GEN P, GEN c);
 GEN     ZX_unscale(GEN P, GEN h);
 GEN     ZX_unscale_div(GEN P, GEN h);
+int     ZXQX_dvd(GEN x, GEN y, GEN T);
 long    brent_kung_optpow(long d, long n, long m);
 GEN     gen_bkeval(GEN Q, long d, GEN x, int use_sqr, void *E,
           struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
 GEN     gen_bkeval_powers(GEN P, long d, GEN V, void *E,
           struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
+
 /* ZV.c */
 
 GEN     ZC_ZV_mul(GEN x, GEN y);
@@ -821,6 +823,8 @@ GEN     ZXV_remi2n(GEN x, long n);
 GEN     ZXX_Z_divexact(GEN y, GEN x);
 long    ZXX_max_lg(GEN x);
 GEN     ZXX_renormalize(GEN x, long lx);
+GEN     ZXX_to_Kronecker(GEN P, long n);
+GEN     ZXX_to_Kronecker_spec(GEN P, long lP, long n);
 GEN     scalar_ZX(GEN x, long v);
 GEN     scalar_ZX_shallow(GEN x, long v);
 GEN     zx_to_ZX(GEN z);
@@ -2842,11 +2846,8 @@ GEN     ffnbirred(GEN p, long n);
 GEN     ffnbirred0(GEN p, long n, long flag);
 GEN     ffsumnbirred(GEN p, long n);
 const struct bb_field *get_Fq_field(void **E, GEN T, GEN p);
-GEN     Kronecker_to_mod(GEN z, GEN pol);
 GEN     init_Fq(GEN p, long n, long v);
 GEN     pol_x_powers(long N, long v);
-GEN     mod_to_Kronecker(GEN P, GEN Q);
-GEN     mod_to_Kronecker_spec(GEN P, long lP, GEN Q);
 
 /* prime.c */
 

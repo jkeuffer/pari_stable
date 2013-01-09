@@ -1369,67 +1369,6 @@ FpX_factorff_irred(GEN P, GEN Q, GEN p)
   return gerepilecopy(ltop,res);
 }
 
-/* z in R[Y] representing an elt in R[X,Y] mod T(Y) in Kronecker form,
- * i.e subst(lift(z), x, y^(2deg(z)-1)). Recover the "real" z, with
- * normalized coefficients */
-GEN
-Kronecker_to_mod(GEN z, GEN T)
-{
-  long i,j,lx,l = lg(z), N = (degpol(T)<<1) + 1;
-  GEN x, t = cgetg(N,t_POL);
-  t[1] = T[1];
-  lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
-  x[1] = z[1];
-  T = RgX_copy(T);
-  for (i=2; i<lx+2; i++, z+= N-2)
-  {
-    for (j=2; j<N; j++) gel(t,j) = gel(z,j);
-    gel(x,i) = mkpolmod(RgX_rem(normalizepol_lg(t,N), T), T);
-  }
-  N = (l-2) % (N-2) + 2;
-  for (j=2; j<N; j++) t[j] = z[j];
-  gel(x,i) = mkpolmod(RgX_rem(normalizepol_lg(t,N), T), T);
-  return normalizepol_lg(x, i+1);
-}
-
-/* Kronecker substitution, RgYX -> RgY :
- * Q a RgY of degree n, P(X) = sum P_i * X^i, where the deg P_i are t_POLMOD
- * mod Q or RgY of degree < n.
- * Lift the P_i which are t_POLMOD, then return subst(P( Y^(2n-1) ), Y,X) */
-GEN
-mod_to_Kronecker_spec(GEN P, long lP, GEN Q)
-{
-  long i, k, lQ = lg(Q), N = ((lQ-3)<<1) + 1, vQ = varn(Q);
-  GEN y = cgetg((N-2)*lP + 2, t_POL) + 2;
-
-  for (k=i=0; i<lP; i++)
-  {
-    GEN c = gel(P,i);
-    long j, tc = typ(c);
-    if (tc == t_POLMOD) { c = gel(c,2); tc = typ(c); }
-    if (is_scalar_t(tc) || varncmp(varn(c), vQ) > 0)
-    {
-      gel(y,k++) = c; j = 3;
-    }
-    else
-    {
-      long l = lg(c);
-      if (l >= lQ)
-        pari_err_BUG("mod_to_Kronecker, P is not reduced mod Q");
-      for (j=2; j < l; j++) gel(y,k++) = gel(c,j);
-    }
-    if (i == lP-1) break;
-    for (   ; j < N; j++) gel(y,k++) = gen_0;
-  }
-  y-=2; setlg(y, k+2); return y;
-}
-GEN
-mod_to_Kronecker(GEN P, GEN Q)
-{
-  GEN z = mod_to_Kronecker_spec(P+2, lgpol(P), Q);
-  setvarn(z,varn(P)); return z;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                          MODULAR GCD                            */

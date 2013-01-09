@@ -6378,6 +6378,10 @@ component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
 \fun{GEN}{ZXX_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all integer divisions
 are exact.
 
+\fun{GEN}{ZXX_to_Kronecker}{GEN P, long n} Assuming $P(X,Y)$ is a polynomial of
+degree in $X$ strictly less than $n$, returns $P(X,X^{2*n-1})$, the Kronecker form
+of $P$.
+
 \subsec{\kbd{QX}}
 
 \fun{void}{RgX_check_QX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}

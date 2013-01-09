@@ -1923,3 +1923,32 @@ RgX_splitting(GEN p, long k)
     gel(r,i) = normalizepol_lg(gel(r,i),i<j?l+1:l);
   return r;
 }
+
+/*******************************************************************/
+/*                                                                 */
+/*                        Kronecker form                           */
+/*                                                                 */
+/*******************************************************************/
+
+/* z in R[Y] representing an elt in R[X,Y] mod T(Y) in Kronecker form,
+ * i.e subst(lift(z), x, y^(2deg(z)-1)). Recover the "real" z, with
+ * normalized coefficients */
+GEN
+Kronecker_to_mod(GEN z, GEN T)
+{
+  long i,j,lx,l = lg(z), N = (degpol(T)<<1) + 1;
+  GEN x, t = cgetg(N,t_POL);
+  t[1] = T[1];
+  lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
+  x[1] = z[1];
+  T = RgX_copy(T);
+  for (i=2; i<lx+2; i++, z+= N-2)
+  {
+    for (j=2; j<N; j++) gel(t,j) = gel(z,j);
+    gel(x,i) = mkpolmod(RgX_rem(normalizepol_lg(t,N), T), T);
+  }
+  N = (l-2) % (N-2) + 2;
+  for (j=2; j<N; j++) t[j] = z[j];
+  gel(x,i) = mkpolmod(RgX_rem(normalizepol_lg(t,N), T), T);
+  return normalizepol_lg(x, i+1);
+}

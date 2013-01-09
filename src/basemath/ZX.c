@@ -715,3 +715,42 @@ ZXX_Z_divexact(GEN y, GEN x)
       gel(z,i) = ZX_Z_divexact(gel(y,i),x);
   return z;
 }
+
+/* Kronecker substitution, ZXX -> ZX:
+ * P(X,Y) = sum_{0<=i<lP} P_i(X) * Y^i, where deg P_i < n.
+ * Returns P(X,X^(2n-1)) */
+GEN
+ZXX_to_Kronecker_spec(GEN P, long lP, long n)
+{
+  long i, k, N = (n<<1) + 1;
+  GEN y;
+  if (!lP) return pol_0(0);
+  y = cgetg((N-2)*lP + 2, t_POL) + 2;
+  for (k=i=0; i<lP; i++)
+  {
+    long j;
+    GEN c = gel(P,i);
+    if (typ(c)==t_INT)
+    {
+      gel(y,k++) = c;
+      j = 3;
+    }
+    else
+    {
+      long l = lg(c);
+      if (l-3 >= n)
+        pari_err_BUG("ZXX_to_Kronecker, P is not reduced mod Q");
+      for (j=2; j < l; j++) gel(y,k++) = gel(c,j);
+    }
+    if (i == lP-1) break;
+    for (   ; j < N; j++) gel(y,k++) = gen_0;
+  }
+  y-=2; setlg(y, k+2); y[1] = evalsigne(1); return y;
+}
+
+GEN
+ZXX_to_Kronecker(GEN P, long n)
+{
+  GEN z = ZXX_to_Kronecker_spec(P+2, lgpol(P), n);
+  setvarn(z,varn(P)); return z;
+}

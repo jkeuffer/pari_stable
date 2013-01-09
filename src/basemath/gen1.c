@@ -2050,7 +2050,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     return 0;
   Q = RgX_to_FpX(*pol, *p);
   P = RgX_to_FpXQX(P, Q, *p);
-  *x = mod_to_Kronecker(P, Q);
+  *x = ZXX_to_Kronecker(P, degpol(Q));
   *pol = Q;
   return 1;
 }

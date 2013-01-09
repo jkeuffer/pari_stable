@@ -241,6 +241,7 @@ FpXQX_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
 {
   pari_sp av = avma;
   GEN z, kx, ky;
+  long n;
   if (ZXX_is_ZX_spec(y,ly))
   {
     if (ZXX_is_ZX_spec(x,lx))
@@ -249,8 +250,9 @@ FpXQX_mulspec(GEN x, GEN y, GEN T, GEN p, long lx, long ly)
       return FpXY_FpY_mulspec(x,y,T,p,lx,ly);
   } else if (ZXX_is_ZX_spec(x,lx))
       return FpXY_FpY_mulspec(y,x,T,p,ly,lx);
-  kx = mod_to_Kronecker_spec(x,lx,get_FpX_mod(T));
-  ky = mod_to_Kronecker_spec(y,ly,get_FpX_mod(T));
+  n = get_FpX_degree(T);
+  kx = ZXX_to_Kronecker_spec(x, lx, n);
+  ky = ZXX_to_Kronecker_spec(y, ly, n);
   z = Kronecker_to_FpXQX(ZX_mul(ky,kx), T, p);
   return gerepileupto(av, z);
 }
@@ -268,7 +270,7 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   pari_sp av = avma;
   GEN z, kx;
   if (ZXX_is_ZX(x)) return ZX_sqr(x);
-  kx= mod_to_Kronecker(x,get_FpX_mod(T));
+  kx= ZXX_to_Kronecker(x, get_FpX_degree(T));
   z = Kronecker_to_FpXQX(ZX_sqr(kx), T, p);
   return gerepileupto(av, z);
 }
