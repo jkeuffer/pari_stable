@@ -8046,6 +8046,10 @@ characteristic is small enough.
 
 \fun{GEN}{FF_to_Flxq_i}{GEN a} shallow version of \kbd{FF\_to\_Flxq}.
 
+\fun{GEN}{p_to_FF}{GEN p, long v} returns a \typ{FFELT} equal to $1$ in the
+finite field $\Z/p\Z$. Useful for generic code that wants to handle
+(inefficiently) $\Z/p\Z$ as if it were not a prime field.
+
 \fun{GEN}{FF_1}{GEN a} returns the unity in the definition field of the
 \typ{FFELT} element \kbd{a}.
 
