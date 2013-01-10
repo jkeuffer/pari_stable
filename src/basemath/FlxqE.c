@@ -283,7 +283,7 @@ static GEN
 FlxqE_vert(GEN P, GEN Q, GEN T, ulong p)
 {
   if (ell_is_inf(P))
-    return pol1_Flx(T[1]);
+    return pol1_Flx(get_Flx_var(T));
   return Flx_sub(gel(Q, 1), gel(P, 1), p);
 }
 
@@ -297,7 +297,7 @@ FlxqE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
   if (ell_is_inf(R))
   {
     *pt_R = ellinf();
-    return pol1_Flx(T[1]);
+    return pol1_Flx(get_Flx_var(T));
   }
   else if (!lgpol(gel(R,2)))
   {
@@ -400,7 +400,7 @@ FlxqE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN T, ulong p)
   GEN v, num, denom, g1;
 
   d.a4 = a4; d.T = T; d.p = p; d.P = P;
-  g1 = pol1_Flx(T[1]);
+  g1 = pol1_Flx(get_Flx_var(T));
   v = gen_pow(mkvec3(g1,g1,Q), m, (void*)&d, FlxqE_Miller_dbl, FlxqE_Miller_add);
   num = gel(v,1); denom = gel(v,2);
   if (!lgpol(num) || !lgpol(denom)) { avma = ltop; return NULL; }
@@ -413,11 +413,11 @@ FlxqE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
   pari_sp ltop = avma;
   GEN num, denom, result;
   if (ell_is_inf(P) || ell_is_inf(Q) || zv_equal(P,Q))
-    return pol1_Flx(T[1]);
+    return pol1_Flx(get_Flx_var(T));
   num    = FlxqE_Miller(P, Q, m, a4, T, p);
-  if (!num) return pol1_Flx(T[1]);
+  if (!num) return pol1_Flx(get_Flx_var(T));
   denom  = FlxqE_Miller(Q, P, m, a4, T, p);
-  if (!denom) {avma = ltop; return pol1_Flx(T[1]); }
+  if (!denom) {avma = ltop; return pol1_Flx(get_Flx_var(T)); }
   result = Flxq_div(num, denom, T, p);
   if (mpodd(m))
     result  = Flx_neg(result, p);
@@ -429,9 +429,9 @@ FlxqE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
 {
   GEN num;
   if (ell_is_inf(P) || ell_is_inf(Q))
-    return pol1_Flx(T[1]);
+    return pol1_Flx(get_Flx_var(T));
   num = FlxqE_Miller(P, Q, m, a4, T, p);
-  return num? num: pol1_Flx(T[1]);
+  return num? num: pol1_Flx(get_Flx_var(T));
 }
 
 static GEN
@@ -841,7 +841,7 @@ Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
   pari_sp av = avma;
   long i, d = get_Flx_degree(T), lx = d+2;
   long q = upowuu(p, d), a;
-  GEN x = const_vecsmall(lx,0); x[1] = T[1];
+  GEN x = const_vecsmall(lx,0); x[1] = get_Flx_var(T);
   for(a=1, i=0; i<q; i++)
   {
     GEN x2, rhs;
@@ -859,7 +859,7 @@ static GEN
 Flxq_ellcard_Shanks(GEN a4, GEN a6, GEN q, GEN T, ulong p)
 {
   pari_sp av = avma;
-  long vn = T[1];
+  long vn = get_Flx_var(T);
   long i, twistp, twistpold=0;
   GEN h,f, ta4, u, x, A, B;
   long n = get_Flx_degree(T);
@@ -943,7 +943,7 @@ Flxq_ellj(GEN a4, GEN a6, GEN T, ulong p)
   if (p==3)
   {
     GEN J;
-    if (typ(a4)!=t_VEC) return pol0_Flx(T[1]);
+    if (typ(a4)!=t_VEC) return pol0_Flx(get_Flx_var(T));
     J = Flxq_div(Flxq_powu(gel(a4,1),3, T, p),Flx_neg(a6,p), T, p);
     return gerepileuptoleaf(av, J);
   }

@@ -1248,7 +1248,7 @@ random_FpXQE(GEN a4, GEN a6, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   GEN x, x2, y, rhs;
-  long v = varn(T), d = degpol(T);
+  long v = get_FpX_var(T), d = get_FpX_degree(T);
   do
   {
     avma= ltop;
@@ -1311,7 +1311,7 @@ static GEN
 FpXQE_vert(GEN P, GEN Q, GEN T, GEN p)
 {
   if (ell_is_inf(P))
-    return pol_1(varn(T));
+    return pol_1(get_FpX_var(T));
   return FpX_sub(gel(Q, 1), gel(P, 1), p);
 }
 
@@ -1325,7 +1325,7 @@ FpXQE_tangent_update(GEN R, GEN Q, GEN a4, GEN T, GEN p, GEN *pt_R)
   if (ell_is_inf(R))
   {
     *pt_R = ellinf();
-    return pol_1(varn(T));
+    return pol_1(get_FpX_var(T));
   }
   else if (!signe(gel(R,2)))
   {
@@ -1428,7 +1428,7 @@ FpXQE_Miller(GEN Q, GEN P, GEN m, GEN a4, GEN T, GEN p)
   GEN v, num, denom, g1;
 
   d.a4 = a4; d.T = T; d.p = p; d.P = P;
-  g1 = pol_1(varn(T));
+  g1 = pol_1(get_FpX_var(T));
   v = gen_pow(mkvec3(g1,g1,Q), m, (void*)&d, FpXQE_Miller_dbl, FpXQE_Miller_add);
   num = gel(v,1); denom = gel(v,2);
   if (!signe(num) || !signe(denom)) { avma = ltop; return NULL; }
@@ -1441,11 +1441,11 @@ FpXQE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
   pari_sp ltop = avma;
   GEN num, denom, result;
   if (ell_is_inf(P) || ell_is_inf(Q) || ZX_equal(P,Q))
-    return pol_1(varn(T));
+    return pol_1(get_FpX_var(T));
   num    = FpXQE_Miller(P, Q, m, a4, T, p);
-  if (!num) return pol_1(varn(T));
+  if (!num) return pol_1(get_FpX_var(T));
   denom  = FpXQE_Miller(Q, P, m, a4, T, p);
-  if (!denom) { avma = ltop; return pol_1(varn(T)); }
+  if (!denom) { avma = ltop; return pol_1(get_FpX_var(T)); }
   result = FpXQ_div(num, denom, T, p);
   if (mpodd(m))
     result  = FpX_neg(result, p);
@@ -1457,9 +1457,9 @@ FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 {
   GEN num;
   if (ell_is_inf(P) || ell_is_inf(Q))
-    return pol_1(varn(T));
+    return pol_1(get_FpX_var(T));
   num = FpXQE_Miller(P, Q, m, a4, T, p);
-  return num? num: pol_1(varn(T));
+  return num? num: pol_1(get_FpX_var(T));
 }
 
 /***********************************************************************/
@@ -1471,7 +1471,7 @@ FpXQE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 GEN
 FpXQ_ellj(GEN a4, GEN a6, GEN T, GEN p)
 {
-  if (equaliu(p,3)) return pol_0(varn(T));
+  if (equaliu(p,3)) return pol_0(get_FpX_var(T));
   else
   {
     pari_sp av=avma;
@@ -1570,7 +1570,7 @@ GEN
 FpXQ_ellcard(GEN a4, GEN a6, GEN T, GEN p)
 {
   pari_sp av = avma;
-  long n = degpol(T);
+  long n = get_FpX_degree(T);
   GEN q = powiu(p, n), r, J;
   if (degpol(a4)<=0 && degpol(a6)<=0)
     r = Fp_ffellcard(constant_term(a4),constant_term(a6),q,n,p);
@@ -1600,7 +1600,7 @@ GEN
 FpXQ_ellgroup(GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m)
 {
   struct _FpXQE e;
-  GEN q = powiu(p, degpol(T));
+  GEN q = powiu(p, get_FpX_degree(T));
   e.a4=a4; e.a6=a6; e.T=T; e.p=p;
   return gen_ellgroup(N, subis(q,1), pt_m, (void*)&e, &FpXQE_group, _FpXQE_pairorder);
 }
