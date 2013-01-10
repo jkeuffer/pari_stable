@@ -1133,7 +1133,7 @@ FpX_divrem(GEN x, GEN T, GEN p, GEN *pr)
     GEN z = Flx_divrem(x, T, pp, pr);
     if (!z) return NULL;
     if (!pr || pr == ONLY_DIVIDES)
-      return gerepileupto(av, Flx_to_ZX(z));
+      return Flx_to_ZX_inplace(gerepileuptoleaf(av, z));
     z = Flx_to_ZX(z);
     *pr = Flx_to_ZX(*pr);
     gerepileall(av, 2, &z, pr);
@@ -1162,7 +1162,7 @@ FpX_rem(GEN x, GEN T, GEN p)
   {
     pari_sp av = avma;
     ulong pp = to_Flxq(x, T, p, &x, &T);
-    return gerepileupto(av, Flx_to_ZX(Flx_rem(x, T, pp)));
+    return Flx_to_ZX_inplace(gerepileuptoleaf(av, Flx_rem(x, T, pp)));
   } else
   {
     pari_sp av = avma;
@@ -1292,14 +1292,12 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
   if (!is_bigint(p))
   {
     ulong pp = to_Flxq(x, T, p, &x, &T);
-    y = Flx_to_ZX( Flxq_pow(x, n, T, pp) );
+    y = Flxq_pow(x, n, T, pp);
+    return Flx_to_ZX_inplace(gerepileuptoleaf(av, y));
   }
-  else
-  {
-    if (s < 0) x = FpXQ_inv(x,T,p);
-    D.p = p; D.T = FpX_get_red(T,p);
-    y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
-  }
+  if (s < 0) x = FpXQ_inv(x,T,p);
+  D.p = p; D.T = FpX_get_red(T,p);
+  y = gen_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   return gerepileupto(av, y);
 }
 
@@ -1315,13 +1313,11 @@ FpXQ_powu(GEN x, ulong n, GEN T, GEN p)
   if (!is_bigint(p))
   {
     ulong pp = to_Flxq(x, T, p, &x, &T);
-    y = Flx_to_ZX( Flxq_powu(x, n, T, pp) );
+    y = Flxq_powu(x, n, T, pp);
+    return Flx_to_ZX_inplace(gerepileuptoleaf(av, y));
   }
-  else
-  {
-    D.T = FpX_get_red(T, p); D.p = p;
-    y = gen_powu(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
-  }
+  D.T = FpX_get_red(T, p); D.p = p;
+  y = gen_powu(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   return gerepileupto(av, y);
 }
 
@@ -1365,8 +1361,8 @@ FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
   {
     pari_sp av = avma;
     ulong pp = to_Flxq(x, T, p, &x, &T);
-    GEN z = Flx_to_ZX(Flx_Flxq_eval(ZX_to_Flx(Q, pp), x, T, pp));
-    return gerepileupto(av, z);
+    GEN z = Flx_Flxq_eval(ZX_to_Flx(Q, pp), x, T, pp);
+    return Flx_to_ZX_inplace(gerepileuptoleaf(av, z));
   }
   use_sqr = (degpol(x)<<1) >= get_FpX_degree(T);
   D.T = FpX_get_red(T,p); D.p = p;
@@ -1679,14 +1675,12 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
     ulong pp = to_Flxq(a, T, p, &a, &T);
     GEN z = Flxq_sqrtn(a, n, T, pp, zeta);
     if (!z) return NULL;
+    if (!zeta)
+      return Flx_to_ZX_inplace(gerepileuptoleaf(av, z));
     z = Flx_to_ZX(z);
-    if (zeta)
-    {
-      *zeta=Flx_to_ZX(*zeta);
-      gerepileall(av,2,&z,zeta);
-      return z;
-    }
-    else return gerepileupto(av, z);
+    *zeta=Flx_to_ZX(*zeta);
+    gerepileall(av,2,&z,zeta);
+    return z;
   }
   else
   {
@@ -1795,13 +1789,10 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   {
     ulong pp = to_Flxq(NULL, T, p, NULL, &T);
     g = gener_Flxq(T, pp, po);
+    if (!po) return Flx_to_ZX_inplace(gerepileuptoleaf(av0, g));
     g = Flx_to_ZX(g);
-    if (!po) g = gerepileupto(av0, g);
-    else
-    {
-      gel(*po,2) = Flx_to_ZX(gel(*po,2));
-      gerepileall(av0, 2, &g, po);
-    }
+    gel(*po,2) = Flx_to_ZX(gel(*po,2));
+    gerepileall(av0, 2, &g, po);
     return g;
   }
   p_1 = subis(p,1);
