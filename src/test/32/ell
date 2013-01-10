@@ -93,7 +93,7 @@ a
 [10351, [1, -1, 0, -1], 1, [11, 1; 941, 1], [[1, 5, 0, 1], [1, 5, 0, 1]]]
   ***   at top-level: E.omega
   ***                   ^-----
-  *** _.omega: incorrect type in omega [not defined over R] (t_VEC).
+  *** _.omega: incorrect type in omega [not defined over C] (t_VEC).
 [9, [9], [[Mod(0, 7), Mod(5, 7)]]]
 [0, 0, 0, 413748, 716503104, 0, 827496, 2866012416, -171187407504, -19859904
 , -619058681856, -226311754192704000000, 97158364170048/2807086984375, Vecsm

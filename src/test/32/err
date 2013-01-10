@@ -555,14 +555,14 @@
   ***   domain error in forstep: step = 0
   ***   at top-level: e.omega
   ***                   ^-----
-  *** _.omega: incorrect type in omega [not defined over R] (t_VEC).
+  *** _.omega: incorrect type in omega [not defined over C] (t_VEC).
   ***   at top-level: e.eta
   ***                   ^---
-  *** _.eta: incorrect type in eta [not defined over R] (t_VEC).
+  *** _.eta: incorrect type in eta [not defined over C] (t_VEC).
   ***   at top-level: e.area
   ***                   ^----
-  *** _.area: incorrect type in area [not defined over R] (t_VEC).
+  *** _.area: incorrect type in area [not defined over C] (t_VEC).
   ***   at top-level: e.tate
   ***                   ^----
   *** _.tate: incorrect type in tate [not defined over Qp] (t_VEC).
-Total time spent: 12
+Total time spent: 32

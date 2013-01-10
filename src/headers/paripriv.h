@@ -234,7 +234,6 @@ GEN FF_ellinit(GEN E, GEN fg);
 GEN FF_elldata(GEN E, GEN fg);
 
 /* Elliptic curves */
-enum { t_ELL_Rg = 0, t_ELL_Q = 1, t_ELL_Qp = 2, t_ELL_Fp = 3, t_ELL_Fq = 4};
 /* common to Q and Rg */
 enum { R_PERIODS = 1, R_ETA, R_ROOTS, R_AB };
 
@@ -243,11 +242,6 @@ enum { Q_GROUPGEN = 5, Q_GLOBALRED, Q_ROOTNO };
 
 /* common to Fp and Fq */
 enum { FF_CARD = 1, FF_GROUP, FF_GROUPGEN, FF_O };
-INLINE int
-ell_is_padic(GEN x) { long t = ell_get_type(x); return t == t_ELL_Qp; }
-INLINE int
-ell_is_real(GEN x)
-{ long t = ell_get_type(x); return t == t_ELL_Q || t == t_ELL_Rg; }
 
 /* for Buchall_param */
 enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI };

@@ -1718,14 +1718,13 @@ GEN     ellsearchcurve(GEN name);
 void    forell(void *E, long call(void*, GEN), long a, long b);
 
 /* elliptic.c */
-
+enum { t_ELL_Rg = 0, t_ELL_Q = 1, t_ELL_Qp = 2, t_ELL_Fp = 3, t_ELL_Fq = 4};
 GEN     akell(GEN e, GEN n);
 GEN     anell(GEN e, long n);
 GEN     anellsmall(GEN e, long n);
 GEN     bilhell(GEN e, GEN z1, GEN z2, long prec);
 void    checkell(GEN e);
 void    checkell_real(GEN e);
-void    checkell_Fp(GEN e);
 void    checkell_Fq(GEN e);
 void    checkell_Q(GEN e);
 void    checkell_Qp(GEN e);
@@ -1756,10 +1755,7 @@ GEN     ellff_get_gens(GEN E);
 GEN     ellff_get_group(GEN E);
 GEN     ellff_get_o(GEN x);
 GEN     ellff_get_p(GEN E);
-GEN     ellfflog(GEN E, GEN P, GEN Q, GEN o);
 GEN     ellffmul(GEN E, GEN P, GEN n);
-GEN     ellfforder(GEN E, GEN P, GEN o);
-GEN     ellffweilpairing(GEN E, GEN P, GEN Q, GEN m);
 GEN     ellfromj(GEN j);
 GEN     ellgenerators(GEN E);
 GEN     ellglobalred(GEN e1);
@@ -3337,6 +3333,7 @@ INLINE GEN    ell_get_c4(GEN e);
 INLINE GEN    ell_get_c6(GEN e);
 INLINE GEN    ell_get_disc(GEN e);
 INLINE GEN    ell_get_j(GEN e);
+INLINE long   ell_get_type(GEN e);
 INLINE int    ell_is_inf(GEN z);
 INLINE GEN    ellinf(void);
 INLINE GEN    ellff_get_field(GEN x);

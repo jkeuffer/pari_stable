@@ -530,11 +530,15 @@ member_j(GEN x)
   return ell_get_j(x);
 }
 
+static int
+ell_is_complex(GEN x)
+{ long t = ell_get_type(x); return t == t_ELL_Q || t == t_ELL_Rg; }
+
 GEN
 member_omega(GEN x)
 {
   if (!is_ell(x)) member_err("omega",x);
-  if (!ell_is_real(x)) pari_err_TYPE("omega [not defined over R]",x);
+  if (!ell_is_complex(x)) pari_err_TYPE("omega [not defined over C]",x);
   return ellR_omega(x, ellR_get_prec(x));
 }
 
@@ -542,20 +546,22 @@ GEN
 member_eta(GEN x)
 {
   if (!is_ell(x)) member_err("eta",x);
-  if (!ell_is_real(x)) pari_err_TYPE("eta [not defined over R]",x);
+  if (!ell_is_complex(x)) pari_err_TYPE("eta [not defined over C]",x);
   return ellR_eta(x, ellR_get_prec(x));
 }
 
 GEN
 member_area(GEN x)
 {
-  GEN w, w1, w2;
+  GEN w, w1, w2, a,b,c,d;
+  long prec;
   if (!is_ell(x)) member_err("area",x);
-  if (!ell_is_real(x)) pari_err_TYPE("area [not defined over R]",x);
-  w = ellR_omega(x, ellR_get_prec(x));
-  w1 = gel(w,1);
-  w2 = gel(w,2);
-  return absr(mulrr(w1, gel(w2,2)));
+  if (!ell_is_complex(x)) pari_err_TYPE("area [not defined over C]",x);
+  prec = ellR_get_prec(x);
+  w = ellR_omega(x, prec);
+  w1 = gel(w,1); a = real_i(w1); b = imag_i(w1);
+  w2 = gel(w,2); c = real_i(w2); d = imag_i(w2);
+  return gabs(gsub(gmul(a,d),gmul(b,c)), prec);
 }
 
 GEN
@@ -563,7 +569,8 @@ member_tate(GEN x)
 {
   long prec;
   if (!is_ell(x)) member_err("tate",x);
-  if (!ell_is_padic(x)) pari_err_TYPE("tate [not defined over Qp]",x);
+  if (ell_get_type(x) != t_ELL_Qp)
+    pari_err_TYPE("tate [not defined over Qp]",x);
   prec = ellQp_get_prec(x);
   return ellQp_Tate_uniformization(x, prec);
 }
