@@ -1797,7 +1797,6 @@ GEN     ellchangepoint(GEN x, GEN ch);
 GEN     ellchangepointinv(GEN x, GEN ch);
 GEN     pointell(GEN e, GEN z, long prec);
 GEN     elltors(GEN e);
-GEN     weipell(GEN e, long precdl);
 GEN     zell(GEN e, GEN z, long prec);
 
 /* ellsea.c */

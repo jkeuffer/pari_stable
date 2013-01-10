@@ -421,3 +421,4 @@ BA  6- [libpari] removed unusable functions dbg_close/dbg_release.
     8- ellsigma: flags 3 and 4 [ inefficient algorithm using the product
        formula ]
     9- Member function 'w' (this is technical, and no longer needed:-)
+   10- obsolete function weipell(). Use ellwpseries()

@@ -58,6 +58,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     gmoebius, gnextprime, gnumbdiv, gomega, gprecprime, gsumdiv, gdumdivk,
     znprimroot0
   - rename zv_cmp0 -> to zv_equal0
+  - removed obsolete function weipell(). Use ellwpseries()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

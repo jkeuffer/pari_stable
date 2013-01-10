@@ -44,7 +44,7 @@ static GEN
 lseriesell0(GEN a, GEN b, GEN c, GEN d, long prec)
   {(void)c; return elllseries(a,b,d,prec);}
 
-GEN
+static GEN
 weipell(GEN e, long precdl) { return ellwpseries(e,0,precdl); }
 
 static long
