@@ -4932,7 +4932,7 @@ ellfromj(GEN j)
   return gerepilecopy(av, mkvec5(gen_0,gen_0,gen_0,gmulsg(3,kj),gmulsg(2,k2j)));
 }
 
-GEN
+static GEN
 ellffmul(GEN E, GEN P, GEN n)
 {
   GEN fg = ellff_get_field(E);

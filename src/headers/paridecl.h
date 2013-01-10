@@ -1755,7 +1755,6 @@ GEN     ellff_get_gens(GEN E);
 GEN     ellff_get_group(GEN E);
 GEN     ellff_get_o(GEN x);
 GEN     ellff_get_p(GEN E);
-GEN     ellffmul(GEN E, GEN P, GEN n);
 GEN     ellfromj(GEN j);
 GEN     ellgenerators(GEN E);
 GEN     ellglobalred(GEN e1);
