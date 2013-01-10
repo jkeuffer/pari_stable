@@ -1295,6 +1295,22 @@ _sqr(void *e, GEN x) { return elladd((GEN)e, x, x); }
 static GEN
 _mul(void *e, GEN x, GEN y) { return elladd((GEN)e, x, y); }
 
+static GEN
+ellffmul(GEN E, GEN P, GEN n)
+{
+  GEN fg = ellff_get_field(E);
+  if (typ(fg)==t_FFELT)
+    return FF_ellmul(E, P, n);
+  else
+  {
+    pari_sp av = avma;
+    GEN p = fg, e = ellff_get_a4a6(E), Q;
+    GEN Pp = FpE_changepointinv(RgE_to_FpE(P, p), gel(e,3), p);
+    GEN Qp = FpE_mul(Pp, n, gel(e,1), p);
+    Q = FpE_to_mod(FpE_changepoint(Qp, gel(e,3), p), p);
+    return gerepileupto(av, Q);
+  }
+}
 /* [n] z, n integral */
 static GEN
 ellmul_Z(GEN e, GEN z, GEN n)
@@ -4930,23 +4946,6 @@ ellfromj(GEN j)
     retmkvec5(gen_0,gen_0,gen_0,gen_1,gen_0);
   k = gsubsg(1728,j); kj = gmul(k, j); k2j = gmul(kj, k);
   return gerepilecopy(av, mkvec5(gen_0,gen_0,gen_0,gmulsg(3,kj),gmulsg(2,k2j)));
-}
-
-static GEN
-ellffmul(GEN E, GEN P, GEN n)
-{
-  GEN fg = ellff_get_field(E);
-  if (typ(fg)==t_FFELT)
-    return FF_ellmul(E, P, n);
-  else
-  {
-    pari_sp av = avma;
-    GEN p = fg, e = ellff_get_a4a6(E), Q;
-    GEN Pp = FpE_changepointinv(RgE_to_FpE(P, p), gel(e,3), p);
-    GEN Qp = FpE_mul(Pp, n, gel(e,1), p);
-    Q = FpE_to_mod(FpE_changepoint(Qp, gel(e,3), p), p);
-    return gerepileupto(av, Q);
-  }
 }
 
 /* n <= 4 */
