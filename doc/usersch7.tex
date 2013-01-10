@@ -56,13 +56,16 @@ a \var{smallell} or an \var{ell5}.
 \fun{long}{ell_get_type}{GEN e} returns the domain type over which the curve
 is defined, one of
 
-  \tet{t_ELL_Q} the field of rational numbers
+  \tet{t_ELL_Q} the field of rational numbers;
 
-  \tet{t_ELL_Qp} the field of $p$-adic numbers, for some prime $p$.
+  \tet{t_ELL_Qp} the field of $p$-adic numbers, for some prime $p$;
 
-  \tet{t_ELL_Fp} a prime finite field.
+  \tet{t_ELL_Fp} a prime finite field, base field elements are represented as
+  \kbd{Fp} (\typ{INT} reduced modulo $p$);
 
-  \tet{t_ELL_Fq} a non-prime finite field.
+  \tet{t_ELL_Fq} a non-prime finite field (a prime finite field can also be
+  represented by this subtype, but this is inefficient), base field elements
+  are represented as \typ{FFELT};
 
   \tet{t_ELL_Rg} none of the above.
 
@@ -234,27 +237,26 @@ infinity.
 \fun{GEN}{ellap}{GEN E, GEN p} given a prime number $p$ and an elliptic curve
 defined over $\Q$ or $\Q_p$ (assumed integral and minimal at $p$), computes
 the  trace of  Frobenius  $a_p = p+1 - \#E(\F_p)$. If $E$ is defined over
-a non-prime finite field $\F_q$, ignore $p$ and return $q+1 - \#(\F_q)$.
+a non-prime finite field $\F_q$, ignore $p$ and return $q+1 - \#E(\F_q)$.
 When $p$ is implied ($E$ defined over $\Q_p$ or a finite field), $p$ can be
 omitted (set to \kbd{NULL}).
 
 \fun{GEN}{ellsea}{GEN E, GEN p, long s} available if the \kbd{seadata}
-package is installed. This function returns directly $\#E(\F_p)$, by
-computing it modulo $\ell$ for many small $\ell$; it is called by
-\kbd{ellap}: same conditions as above for $E$, except that curves over
-non-prime finite fields are not allowed. The extra flag
-\kbd{s}, if set to a non-zero value, causes the computation to
-return \kbd{gen\_0} (an impossible cardinality) if one of the small primes
-$\ell>s$ divides the curve order. For cryptographic applications, where one is
-usually interested in curves of prime order, setting $s=1$ efficiently weeds
-out most uninteresting curves; if curves of order a power of $2$ times a
-prime are acceptable, set $s=2$. There is no guarantee that the resulting
-cardinality is prime, only that it has no small prime divisor larger than
-$s$.
+package is installed. This function returns $\#E(\F_p)$, using the
+Schoof-Elkies-Atkin algorithm; it is called by \kbd{ellap}: same conditions
+as above for $E$, except that \tet{t_ELL_Fq} are not allowed. The extra flag
+\kbd{s}, if set to a non-zero value, causes the computation to return
+\kbd{gen\_0} (an impossible cardinality) if one of the small primes $\ell>s$
+divides the curve order. For cryptographic applications, where one is usually
+interested in curves of prime order, setting $s=1$ efficiently weeds out most
+uninteresting curves; if curves of order a power of $2$ times a prime are
+acceptable, set $s=2$. There is no guarantee that the resulting cardinality
+is prime, only that it has no small prime divisor larger than $s$.
 
 \subsubsec{Curves defined a non-prime finite field}
-In this subsection, $E$ is assumed to be defined over a \emph{non-prime}
-finite field $\F_q$, i.e. \tet{ell_get_type}$(E)$ is \tet{t_ELL_Fq}.
+In this subsection, we assume that \tet{ell_get_type}$(E)$ is \tet{t_ELL_Fq}.
+(As noted above, a curve defined over $\Z/p\Z$ can be represented as a
+\tet{t_ELL_Fq}.)
 
 \fun{GEN}{FF_ellmul}{GEN E, GEN P, GEN n} returns $[n]P$ where $n$ is an
 integer and $P$ is a point on the curve $E$.
