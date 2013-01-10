@@ -386,6 +386,7 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
 static byteptr
 initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
 {
+  pari_sp av = avma;
   long alloced, psize;
   byteptr q, fin, p, fin1, plast, curdiff;
   ulong last, remains, curlow, rootnum, asize, maxpr = maxprime();
@@ -440,7 +441,7 @@ initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
   if (alloced)
     p = (byteptr) pari_malloc(asize + 1);
   else
-    p = (byteptr) bot;
+    p = (byteptr) stack_malloc(asize + 1);
   fin = p + asize;              /* the 0 sentinel goes at fin. */
   curlow = last + 2; /* First candidate: know primes up to last (odd). */
   curdiff = fin1;
@@ -488,7 +489,7 @@ initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
   *curdiff++ = 0;               /* sentinel */
   *lenp = curdiff - p1;
   *lastp = last;
-  if (alloced) pari_free(p);
+  if (alloced) pari_free(p); else avma = av;
   return p1;
 }
 byteptr
