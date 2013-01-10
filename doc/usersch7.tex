@@ -175,25 +175,32 @@ $E(\F_q)$.
 \fun{GEN}{ellff_get_o}{GEN E} returns $[d, \kbd{factor{d}}]$, where $d$ is
 the exponent of $E(\F_q)$.
 
-\fun{GEN}{ellff_get_a4a6}{GEN E} returns a canonical ``short model'' for $E$
-and the corresponding change of variable. For $p\neq,2,3$,
+\fun{GEN}{ellff_get_a4a6}{GEN E} returns a canonical ``short model'' for $E$,
+and the corresponding change of variable $[u,r,s,t]$. For $p\neq 2,3$,
 this is $[A_4,A_6,[u,r,s,t]]$, corresponding to $y^2 = x^3 + A_4x + A_6$,
 where $A_4 = -27c_4$, $A_6 = -54c_6$, $[u,r,s,t] = [6, 3b_2,3a_1,108a_3]$.
 
-If $p = 3$ and the curve is ordinary ($b_2\neq 0$), this is
-$[b_2, A_6, [1,v,-a_1,-a_3]]$, corresponding to $y^2 = x^3 + b_2 x + A_6$,
+\item If $p = 3$ and the curve is ordinary ($b_2\neq 0$), this is
+$[[b_2], A_6, [1,v,-a_1,-a_3]]$, corresponding to
+$$y^2 = x^3 + b_2 x + A_6,$$
 where $v = b_4/b_2$, $A_6 = b_6 - v(b_4+v^2)$.
 
-If $p = 3$ and the curve is supersingular ($b_2 = 0$), this is
-$[-b_4, b_6, [1,0,-a_1,-a_3]]$, corresponding to $y^2 = x^3 - b_4 x + b_6$.
+\item If $p = 3$ and the curve is supersingular ($b_2 = 0$), this is
+$[-b_4, b_6, [1,0,-a_1,-a_3]]$, corresponding to
+$$y^2 = x^3 + 2b_4 x + b_6.$$
 
-If $p = 2$ and $a1 \neq 0$, return
-$[d_2,d_6,[a_1^{-1}, da_1^{-2}, 0, (a_4+d^2)a_1^{-1}]$, where
-$d = a_3/a_1$, $a_1^2 d_2 = (a_2 + d)$ and
-$$ a_1^6 d_6 = d^3 + a_2 d^2 + a_4 d + a_6 + (a_4 + d^2)^2a_1^{-2}.$$
+\item If $p = 2$ and the curve is ordinary ($a_1 \neq 0$), return
+$[A_2,A_6,[a_1^{-1}, da_1^{-2}, 0, (a_4+d^2)a_1^{-1}]]$, corresponding to
+$$ y^2 + xy = x^3 + A_2 x^2 + A_6,$$
+where
+$d = a_3/a_1$, $a_1^2 A_2 = (a_2 + d)$ and
+$$ a_1^6 A_6 = d^3 + a_2 d^2 + a_4 d + a_6 + (a_4^2 + d^4)a_1^{-2}.$$
 
-If $p = 2$ and $a3 \neq 0$, return
-$[[a_3, a_2^2 + a_4, 1/a_3], a_2a_4 + a_6, [1,a_2,0,0]]$
+\item If $p = 2$ and the curve is supersingular ($a_1 = 0$, $a_3\neq 0$), return
+$[[a_3, A_4, 1/a_3], A_6, [1,a_2,0,0]]$, corresponding to
+$$ y^2 + a_3 y = x^3 + A_4 x + A_6,$$
+where $A_4 = a_2^2 + a_4$, $ A_6 = a_2a_4 + a_6$. The value $1/a_3$ is
+included in the vector since it is frequently needed in computations.
 
 \subsubsec{Curves over $\C$} (This includes curves over $\Q$!)
 
@@ -377,11 +384,9 @@ Weil pairing of the points of $m$-torsion $P$ and $Q$.
 \subsec{Elliptic curves over $\F_{2^n}$}
 Let $T$ be an irreducible \kbd{F2x} and $E$ the
 elliptic curve given by either the equation
-$E:y^2+x*y=x^3+a_2\*x^2+a_6$ with $a_2$ and $a_6$ being \kbd{F2x} in $\F_2[X]/(T)$
-(ordinary case)
-or
-$E:y^2+a_3*y=x^3+a_4\*x+a_6$ with $a_3$, $a_4$ and $a_6$ being \kbd{F2x} in $\F_2[X]/(T)$
-(supersingular case).
+$E:y^2+x*y=x^3+a_2\*x^2+a_6$, where $a_2, a_6$ are \kbd{F2x} in
+$\F_2[X]/(T)$ (ordinary case) or $E:y^2+a_3*y=x^3+a_4\*x+a_6$, where
+$a_3, a_4, a_6$ are \kbd{F2x} in $\F_2[X]/(T)$ (supersingular case).
 
 A \kbd{F2xqE} is a point of $E(\F_2[X]/(T))$.  In the supersingular case, the
 parameter \kbd{a2} is actually the \typ{VEC} $[a_3,a_4,a_3^{-1}]$.
@@ -434,18 +439,19 @@ Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 \fun{GEN}{F2xqE_weilpairing}{GEN Q, GEN Q, GEN m, GEN a2, GEN T} returns the
 Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
-\fun{GEN}{RgE_to_F2xqE}{GEN P, GEN T} returns the \kbd{F2xqE} obtained by applying
-\kbd{Rg\_to\_F2xq} coefficientwise.
+\fun{GEN}{RgE_to_F2xqE}{GEN P, GEN T} returns the \kbd{F2xqE} obtained by
+applying \kbd{Rg\_to\_F2xq} coefficientwise.
 
-\subsec{Elliptic curves over $\F_q$, small characteristic $p>3$ }
-Let $p$ be a prime \kbd{ulong}, $T$ an irreducible \kbd{Flx} mod $p$, and $E$ the
-elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$ with $a_4$ and $a_6$
-being \kbd{Flx} in $\F_p[X]/(T)$.  A \kbd{FlxqE} is a point of $E(\F_p[X]/(T))$.
+\subsec{Elliptic curves over $\F_q$, small characteristic $p>2$ }
+Let $p$ be a prime \kbd{ulong}, $T$ an irreducible \kbd{Flx} mod $p$, and $E$
+the elliptic curve given by the equation $E:y^2=x^3+a_4\*x+a_6$, where $a_4$
+and $a_6$ are \kbd{Flx} in $\F_p[X]/(T)$.  A \kbd{FlxqE} is a point of
+$E(\F_p[X]/(T))$.
 
-In the special case of characteristic $3$, an ordinary elliptic curve can be
-given by the equation $E:y^2=x^3+a_2\*x^2+a_6$ with $a_2$ and $a_6$ being
-\kbd{Flx} in $\F_3[X]/(T)$. In that case, the parameter parameter \kbd{a4} is
-actually the \typ{VEC} $[a_2]$.
+In the special case $p = 3$, ordinary elliptic curves ($j(E)\neq 0$) cannot
+be represented as above, but admit a model $E:y^2 = x^3+a_2\*x^2+a_6$ with
+$a_2$ and $a_6$ being \kbd{Flx} in $\F_3[X]/(T)$. In that case, the parameter
+\kbd{a2} is actually stored as a \typ{VEC}, $[a_2]$, to avoid ambiguities.
 
 \fun{GEN}{Flxq_ellj}{GEN a4, GEN a6, GEN T, ulong p}
 returns the $j$-invariant of the curve $E$.
