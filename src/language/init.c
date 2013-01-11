@@ -1804,6 +1804,13 @@ shiftaddress_canon(GEN x, long dec)
 /**                INSERT DYNAMIC OBJECT IN STRUCTURE              **/
 /**                                                                **/
 /********************************************************************/
+GEN
+obj_init(long d, long n)
+{
+  GEN S = cgetg(d+2, t_VEC);
+  gel(S, d+1) = zerovec(n);
+  return S;
+}
 /* insert O in S [last position] at position K, return it */
 GEN
 obj_insert(GEN S, long K, GEN O)
@@ -1860,6 +1867,21 @@ obj_checkbuild_padicprec(GEN S, long tag, GEN (*build)(GEN,long), long prec)
   }
   w = obj_insert(S, tag, build(S, prec));
   avma = av; return gcopy(w);
+}
+
+/* Reset S [last position], freeing all clones */
+void
+obj_free(GEN S)
+{
+  GEN v = gel(S, lg(S)-1);
+  long i;
+  if (typ(v) != t_VEC) pari_err_TYPE("obj_free", S);
+  for (i = 1; i < lg(v); i++)
+  {
+    GEN o = gel(v,i);
+    if (isclone(o)) gunclone(o);
+    gel(v,i) = gen_0;
+  }
 }
 
 /*******************************************************************/

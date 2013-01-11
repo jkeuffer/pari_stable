@@ -178,13 +178,15 @@ d_ellLHS(GEN e, GEN z)
   return gadd(ellLHS0(e, gel(z,1)), gmul2n(gel(z,2),1));
 }
 
-/* return basic elliptic struct y[1..13] of length 17, from x[1], ..., x[5].
- * The last 3 components are left uninitialized */
+/* return basic elliptic struct y[1..13], y[14] (domain type) and y[15]
+ * (domain-specific data) are left uninitialized, from x[1], ..., x[5].
+ * Also allocate room for n dynamic members (actually stored in the last
+ * component y[16])*/
 static GEN
-initsmall(GEN x)
+initsmall(GEN x, long n)
 {
   GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D, j, a11, a13, a33, b22;
-  GEN y = cgetg(17, t_VEC);
+  GEN y = obj_init(15, n);
   switch(lg(x))
   {
     case 1:
@@ -265,7 +267,8 @@ initsmall(GEN x)
   }
   else
     j = gdiv(gmul(gsqr(c4),c4), D);
-  gel(y,13) = j; return y;
+  gel(y,13) = j;
+  gel(y,16) = zerovec(n); return y;
 }
 
 void
@@ -410,11 +413,10 @@ ellinit_Rg(GEN x, int real, long prec)
   pari_sp av=avma;
   GEN y;
   long s;
-  if (!(y = initsmall(x))) return NULL;
+  if (!(y = initsmall(x, 4))) return NULL;
   s = real? gsigne( ell_get_disc(y) ): 0;
   gel(y,14) = mkvecsmall(t_ELL_Rg);
   gel(y,15) = mkvec(mkvecsmall2(prec2nbits(prec), s));
-  gel(y,16) = zerovec(4);
   return gerepilecopy(av, y);
 }
 
@@ -425,10 +427,9 @@ ellinit_Qp(GEN x, GEN p, long prec)
   GEN y;
   if (lg(x) > 6) x = vecslice(x,1,5);
   x = QpV_to_QV(x); /* make entries rational */
-  if (!(y = initsmall(x))) return NULL;
+  if (!(y = initsmall(x, 2))) return NULL;
   gel(y,14) = mkvecsmall(t_ELL_Qp);
   gel(y,15) = mkvec(zeropadic(p, prec));
-  gel(y,16) = zerovec(2);
   return gerepilecopy(av, y);
 }
 
@@ -438,11 +439,10 @@ ellinit_Q(GEN x, long prec)
   pari_sp av=avma;
   GEN y;
   long s;
-  if (!(y = initsmall(x))) return NULL;
+  if (!(y = initsmall(x, 7))) return NULL;
   s = gsigne( ell_get_disc(y) );
   gel(y,14) = mkvecsmall(t_ELL_Q);
   gel(y,15) = mkvec(mkvecsmall2(prec2nbits(prec), s));
-  gel(y,16) = zerovec(7);
   return gerepilecopy(av, y);
 }
 
@@ -452,7 +452,7 @@ ellinit_Fp(GEN x, GEN p)
   pari_sp av=avma;
   long i;
   GEN y, disc;
-  if (!(y = initsmall(x))) return NULL;
+  if (!(y = initsmall(x, 4))) return NULL;
   if (cmpiu(p,3)<=0) /* ell_to_a4a6_bc does not handle p<=3 */
   {
     y = FF_ellinit(y,p_to_FF(p,0));
@@ -465,7 +465,6 @@ ellinit_Fp(GEN x, GEN p)
     gel(y,i) = Fp_to_mod(Rg_to_Fp(gel(y,i),p),p);
   gel(y,14) = mkvecsmall(t_ELL_Fp);
   gel(y,15) = mkvec2(p, ell_to_a4a6_bc(y, p));
-  gel(y,16) = zerovec(4);
   return gerepilecopy(av, y);
 }
 
@@ -474,7 +473,7 @@ ellinit_Fq(GEN x, GEN fg)
 {
   pari_sp av=avma;
   GEN y;
-  if (!(y = initsmall(x))) return NULL;
+  if (!(y = initsmall(x, 4))) return NULL;
   y = FF_ellinit(y,fg);
   return y ? gerepilecopy(av, y): NULL;
 }

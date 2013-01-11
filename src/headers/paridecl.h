@@ -2387,6 +2387,8 @@ GEN     obj_check(GEN S, long K);
 GEN     obj_checkbuild(GEN S, long tag, GEN (*build)(GEN));
 GEN     obj_checkbuild_padicprec(GEN S, long tag, GEN (*build)(GEN,long), long prec);
 GEN     obj_checkbuild_prec(GEN S, long tag, GEN (*build)(GEN,long), long prec);
+void    obj_free(GEN S);
+GEN     obj_init(long d, long n);
 GEN     obj_insert(GEN S, long K, GEN O);
 void    pari_add_function(entree *ep);
 void    pari_add_module(entree *ep);

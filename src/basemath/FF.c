@@ -1097,7 +1097,6 @@ FF_ellinit(GEN E, GEN fg)
   }
   gel(y,14) = mkvecsmall(t_ELL_Fq);
   gel(y,15) = mkvec2(fg,e);
-  gel(y,16) = zerovec(4);
   return y;
 }
 

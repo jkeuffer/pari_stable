@@ -9815,3 +9815,78 @@ possibly a message associated to it via the \kbd{msg} argument, and return
 
 \item \kbd{pstr} points to the current string value, and is set to the new
 value (when \kbd{v} is non-empty).
+
+\section{Records and Lazy vectors}
+The functions in this section are used to implement \kbd{ell} structures and
+analogous objects, which are vectors some of whose components are initialized
+to dummy values, later computed on demand. We start by initializing the
+structure:
+
+\fun{GEN}{obj_init}{long d, long n} returns an \tev{obj} $S$, a \typ{VEC}
+with $d$ regular components, accessed as \kbd{gel(S,1)}, \dots,
+\kbd{gel(S,d)}; and a record of $n$ members, all initialized to $0$.
+The arguments $d$ and $n$ must be non-negative.
+
+After \kbd{S = obj\_init(d, n)}, the prototype of our other functions are of
+the form
+\bprog
+  GEN obj_do(GEN S, long tag, ...)
+@eprog\noindent The first argument $S$ holds the structure to be managed;
+think of it as an ordinary \typ{VEC} with $d$ entries, together with a record
+containing \kbd{GEN} members indexed by integers $1,\dots,n$, all initially
+set to $0$.
+
+The second argument \var{tag} is the index of the struct member (from $1$ to
+$n$) we operate on. We recommand to define an \kbd{enum} and use descriptive
+names instead of hardcoded numbers. For instance, if $n = 3$, after defining
+\bprog
+  enum { TAG_p = 1, TAG_list, TAG_data };
+@eprog\noindent one may use \kbd{TAG\_list} or $2$ indifferently as a tag.
+The former being preferred, of course.
+
+\misctitle{Technical note}
+In the current implementation, $S$ is a \typ{VEC} with $d+1$ entries.
+The first $d$ components one are ordinary \typ{GEN} entries, which you can
+read or assign to in the customary way. But the last component $\kbd{gel(S,
+d)}$, a \typ{VEC} of length $n$ initialized to \kbd{zerovec}$(n)$, must
+be handled in a special way: you should never access or modify its components
+directly, only through the API we are about to describe. Indeed, its entries
+are meant to contain dynamic data, which will be stored, retrieved and
+replaced (for instance by a value computed to a higher accuracy), while
+interacting safely with intermediate \kbd{gerepile} calls.
+
+This mechanism allows to simulate C \kbd{struct}s, in a simpler way than
+general hashtables, while remaining compatible with the GP language, which
+knows neither structs nor hashtables. It also serialize the structure in an
+ordinary \kbd{GEN}, which facilitates copies and garbage collection (use
+\kbd{gcopy} or \kbd{gerepile}), rather than having to deal with individual
+components of actual C \kbd{struct}s.
+
+
+\fun{GEN}{obj_check}{GEN S, long tag} if the \emph{tag}-component in $S$
+is non empty, return it. Otherwhise return \kbd{NULL}. The \typ{INT} $0$
+(initial value) is used as a sentinel to indicated an empty component.
+
+\fun{GEN}{obj_insert}{GEN S, long tag, GEN O} insert (a clone of) $O$
+as \emph{tag}-component of $S$. Any previous value is deleted, and
+data pointing to it become invalid.
+
+\fun{GEN}{obj_checkbuild}{GEN S, long tag, GEN (*build)(GEN)} if the
+\emph{tag}-component of $S$ is non empty, return it. Otherwise insert
+(a clone of) \kbd{build(S)} as \emph{tag}-component in $S$, and return it.
+
+\fun{GEN}{obj_checkbuild_padicprec}{GEN S, long tag, GEN (*build)(GEN,long),
+long prec}
+if the \emph{tag}-component of $S$ is non empty \emph{and} has relative
+$p$-adic precision $\geq \kbd{prec}$, return it. Otherwise insert (a clone
+of) \kbd{build(S, prec)} as \emph{tag}-component in $S$, and return it.
+
+\fun{GEN}{obj_checkbuild_prec}{GEN S, long tag, GEN (*build)(GEN,long), long prec}
+if the \emph{tag}-component of $S$ is non empty \emph{and} has
+\kbd{gprecision} $\geq \kbd{prec}$, return it. Otherwise insert (a clone of)
+\kbd{build(S, prec)} as \emph{tag}-component in $S$, and return it.
+
+\fun{void}{obj_free}{GEN S} destroys all clones stored in the $n$ tagged
+components, and replace them by the initial value $0$. The regular entries of
+$S$ are unaffected, and $S$ remains a valid object. This is used to
+avoid memory leaks.
