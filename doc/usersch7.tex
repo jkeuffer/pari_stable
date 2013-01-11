@@ -470,13 +470,13 @@ returns generators of the group $E(\F_p[X]/(T))$ with the base change \kbd{ch}
 
 \subsec{\kbd{FlxqE}}
 
-\fun{GEN}{FlxqE_changepoint}{GEN P, GEN m, GEN a4, GEN T, ulong p} returns the image
-$Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
-change $m$ (which is a \kbd{FlxqV}).
-
-\fun{GEN}{FlxqE_changepointinv}{GEN P, GEN m, GEN a4, GEN T, ulong p} returns the image
-$Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
+\fun{GEN}{FlxqE_changepoint}{GEN P, GEN m, GEN a4, GEN T, ulong p} returns
+the image $Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the
 coordinate change $m$ (which is a \kbd{FlxqV}).
+
+\fun{GEN}{FlxqE_changepointinv}{GEN P, GEN m, GEN a4, GEN T, ulong p} returns
+the image $Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the
+inverse of the coordinate change $m$ (which is a \kbd{FlxqV}).
 
 \fun{GEN}{FlxqE_add}{GEN P, GEN Q, GEN a4, GEN T, ulong p}
 
@@ -490,23 +490,22 @@ coordinate change $m$ (which is a \kbd{FlxqV}).
 
 \fun{GEN}{random_FlxqE}{GEN a4, GEN a6, GEN T, ulong p}
 
-\fun{GEN}{FlxqE_order}{GEN P, GEN o, GEN a4, GEN T, ulong p} returns the order of $P$ in
-the group $E(\F_p[X]/(T))$, where $o$ is a multiple of the order of $P$, or its
-factorization.
+\fun{GEN}{FlxqE_order}{GEN P, GEN o, GEN a4, GEN T, ulong p} returns the
+order of $P$ in the group $E(\F_p[X]/(T))$, where $o$ is a multiple of the
+order of $P$, or its factorization.
 
-\fun{GEN}{FlxqE_log}{GEN P, GEN G, GEN o, GEN a4, GEN T, ulong p} Let \kbd{G} be a
-point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not exists,
-the result is currently undefined.
+\fun{GEN}{FlxqE_log}{GEN P, GEN G, GEN o, GEN a4, GEN T, ulong p} Let \kbd{G}
+be a point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not
+exists, the result is currently undefined.
 
-\fun{GEN}{FlxqE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p} returns the
-Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
+\fun{GEN}{FlxqE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p}
+returns the Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
-\fun{GEN}{FlxqE_weilpairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p} returns the
-Weil pairing of the points of $m$-torsion $P$ and $Q$.
+\fun{GEN}{FlxqE_weilpairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p}
+returns the Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
-\fun{GEN}{RgE_to_FlxqE}{GEN P, GEN T, ulong p} returns the \kbd{FlxqE} obtained by applying
-\kbd{Rg\_to\_Flxq} coefficientwise.
-
+\fun{GEN}{RgE_to_FlxqE}{GEN P, GEN T, ulong p} returns the \kbd{FlxqE}
+obtained by applying \kbd{Rg\_to\_Flxq} coefficientwise.
 
 \subsec{Elliptic curves over $\F_q$, large characteristic }
 
@@ -529,21 +528,22 @@ Returns generators of the group $E(\F_p[X]/(T))$ with the base change \kbd{ch}
 (see \kbd{FpXQE\_changepoint}), where $D$ and $m$ are as returned by
 \kbd{FpXQ\_ellgroup}.
 
-\fun{GEN}{FpXQ_elldivpol}{GEN a4, GEN a6, long n, GEN T, GEN p} returns the $n$-division
-polynomial of the elliptic curve $E$.
+\fun{GEN}{FpXQ_elldivpol}{GEN a4, GEN a6, long n, GEN T, GEN p} returns the
+$n$-division polynomial of the elliptic curve $E$.
 
-\fun{GEN}{Fq_elldivpolmod}{GEN a4, GEN a6, long n, GEN h, GEN T, GEN p} returns the $n$-division
-polynomial of the elliptic curve $E$ modulo the polynomial $h$.
+\fun{GEN}{Fq_elldivpolmod}{GEN a4, GEN a6, long n, GEN h, GEN T, GEN p}
+returns the $n$-division polynomial of the elliptic curve $E$ modulo the
+polynomial $h$.
 
 \subsec{\kbd{FpXQE}}
 
-\fun{GEN}{FpXQE_changepoint}{GEN P, GEN m, GEN a4, GEN T, GEN p} returns the image
-$Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the coordinate
-change $m$ (which is a \kbd{FpXQV}).
-
-\fun{GEN}{FpXQE_changepointinv}{GEN P, GEN m, GEN a4, GEN T, GEN p} returns the image
-$Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the inverse of the
+\fun{GEN}{FpXQE_changepoint}{GEN P, GEN m, GEN a4, GEN T, GEN p} returns the
+image $Q$ of the point $P$ on the curve $E:y^2=x^3+a_4\*x+a_6$ by the
 coordinate change $m$ (which is a \kbd{FpXQV}).
+
+\fun{GEN}{FpXQE_changepointinv}{GEN P, GEN m, GEN a4, GEN T, GEN p} returns
+the image $Q$ on the curve $E:y^2=x^3+a_4\*x+a_6$ of the point $P$ by the
+inverse of the coordinate change $m$ (which is a \kbd{FpXQV}).
 
 \fun{GEN}{FpXQE_add}{GEN P, GEN Q, GEN a4, GEN T, GEN p}
 
@@ -561,18 +561,18 @@ coordinate change $m$ (which is a \kbd{FpXQV}).
 point of order \kbd{o}, return $e$ such that $e.P=G$. If $e$ does not exists,
 the result is currently undefined.
 
-\fun{GEN}{FpXQE_order}{GEN P, GEN o, GEN a4, GEN T, GEN p} returns the order of $P$ in
-the group $E(\F_p[X]/(T))$, where $o$ is a multiple of the order of $P$, or its
-factorization.
+\fun{GEN}{FpXQE_order}{GEN P, GEN o, GEN a4, GEN T, GEN p} returns the order
+of $P$ in the group $E(\F_p[X]/(T))$, where $o$ is a multiple of the order of
+$P$, or its factorization.
 
-\fun{GEN}{FpXQE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p} returns the
-Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
+\fun{GEN}{FpXQE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p}
+returns the Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
-\fun{GEN}{FpXQE_weilpairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p} returns the
-Weil pairing of the points of $m$-torsion $P$ and $Q$.
+\fun{GEN}{FpXQE_weilpairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p}
+returns the Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
-\fun{GEN}{RgE_to_FpXQE}{GEN P, GEN T, GEN p} returns the \kbd{FpXQE} obtained by applying
-\kbd{Rg\_to\_FpXQ} coefficientwise.
+\fun{GEN}{RgE_to_FpXQE}{GEN P, GEN T, GEN p} returns the \kbd{FpXQE} obtained
+by applying \kbd{Rg\_to\_FpXQ} coefficientwise.
 
 \section{Other curves}
 

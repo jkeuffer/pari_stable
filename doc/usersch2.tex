@@ -549,11 +549,11 @@ independently of the current value of~\kbd{x}.
 @eprog\noindent
 You may also use the functions \kbd{Pol} or \kbd{Polrev}:
 \bprog
-? Pol([1,2,3])         \\@com \kbd{Pol} creates a polynomial in \kbd{x} by default
+? Pol([1,2,3])       \\@com \kbd{Pol} creates a polynomial in \kbd{x} by default
 %1 = x^2 + 2*x + 3
 ? Polrev([1,2,3])
 %2 = 3*x^2 + 2*x + 1
-? Pol([1,2,3], 'y)     \\@com we use \kbd{'y}, safer than \kbd{y}
+? Pol([1,2,3], 'y)   \\@com we use \kbd{'y}, safer than \kbd{y}
 %3 = y^2 + 2*y + 3
 @eprog\noindent The latter two are much more efficient constructors than an
 explicit summation (the latter is quadratic in the degree, the former linear):
@@ -995,13 +995,13 @@ function, which will perform \idx{numerical derivation} when evaluated
 at a scalar $x$; this is defined as $(f(x+\varepsilon) - f(x-\varepsilon)) /
 2\varepsilon$ for a suitably small epsilon depending on current precision.
 \bprog
-? (x^2 + y*x + y^2)'  \\@com derivation with respect to main variable \kbd{x}
+? (x^2 + y*x + y^2)'  \\@com derive with respect to main variable \kbd{x}
 %1 = 2*x + y
 ? SIN = cos'
 %2 = cos'
 ? SIN(Pi/6)         \\@com numerical derivation
 %3 = -0.5000000000000000000000000000
-? cos'(Pi/6)        \\@com works directly: no need for the intermediate \kbd{SIN}
+? cos'(Pi/6)        \\@com works directly: no need for intermediate \kbd{SIN}
 %4 = -0.5000000000000000000000000000
 @eprog
 
@@ -1034,9 +1034,9 @@ equal to $0$ (specifically, if \kbd{gequal0($x$)==1}), and $0$ otherwise.
 
 \kbd{\bs}, \kbd{\%}: Euclidean quotient and remainder, i.e.~if $x =
 qy + r$, then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$. If $x$ and $y$
-are scalars, then $q$ is an integer and $r$ satisfies $0\le r < y$; if $x$ and $y$
-are polynomials, then $q$ and $r$ are polynomials such that $\deg r< \deg y$ and
-the leading terms of $r$ and $x$ have the same sign.
+are scalars, then $q$ is an integer and $r$ satisfies $0\le r < y$; if $x$
+and $y$ are polynomials, then $q$ and $r$ are polynomials such that $\deg r<
+\deg y$ and the leading terms of $r$ and $x$ have the same sign.
 
 \kbd{\bs/}: rounded Euclidean quotient for integers (rounded towards
 $+\infty$ when the exact quotient would be a half-integer).
@@ -1254,10 +1254,10 @@ constructors) would produce an invalid object, and eventually a disaster.
 In any case, if you are working with expressions involving several variables
 and want to have them ordered in a specific manner in the internal
 representation just described, the simplest is just to write down the
-variables one after the other under \kbd{gp} before starting any real computations.
-You could also define variables from your \tet{gprc} to have a consistent
-ordering of common variable names in all your \kbd{gp} sessions, e.g read in a file
-\kbd{variables.gp} containing
+variables one after the other under \kbd{gp} before starting any real
+computations. You could also define variables from your \tet{gprc} to have a
+consistent ordering of common variable names in all your \kbd{gp} sessions,
+e.g read in a file \kbd{variables.gp} containing
 \bprog
 x;y;z;t;a;b;c;d;
 @eprog
@@ -2578,11 +2578,11 @@ Available defaults are described in the reference guide,
 
 \noindent
 Simple metacommands are meant as shortcuts and should not be used in GP
-scripts (see \secref{se:programming}). Beware that these, as all of \kbd{gp} input,
-are \emph{case sensitive}. For example, \b{Q} is not identical to \b{q}. In
-the following list, braces are used to denote optional arguments, with their
-default values when applicable, e.g.~$\{n=0\}$ means that if $n$ is not
-there, it is assumed to be~$0$. Whitespace (or spaces) between the
+scripts (see \secref{se:programming}). Beware that these, as all of \kbd{gp}
+input, are \emph{case sensitive}. For example, \b{Q} is not identical to
+\b{q}. In the following list, braces are used to denote optional arguments,
+with their default values when applicable, e.g.~$\{n=0\}$ means that if $n$
+is not there, it is assumed to be~$0$. Whitespace (or spaces) between the
 metacommand and its arguments and within arguments is optional. (This can
 cause problems only with \b{w}, when you insist on having a file name whose
 first character is a digit, and with \b{r} or \b{w}, if the file name itself
@@ -2785,14 +2785,13 @@ Useful when you forgot to turn on the \kbd{timer}.
 \label{se:gprc}
 
 This file, called \tet{gprc} in the sequel, is used to modify or extend
-\kbd{gp}
-default behavior, in all \kbd{gp} sessions: e.g customize \kbd{default} values or
-load common user functions and aliases. \kbd{gp} opens the \kbd{gprc} file and
-processes the commands in there, \emph{before} doing anything else,
-e.g.~creating the PARI stack. If the file does not exist or cannot be read,
-\kbd{gp} will proceed to the initialization phase at once, eventually emitting a
-prompt. If any explicit command line switches are given, they override the
-values read from the preferences file.
+\kbd{gp} default behavior, in all \kbd{gp} sessions: e.g customize
+\kbd{default} values or load common user functions and aliases. \kbd{gp}
+opens the \kbd{gprc} file and processes the commands in there, \emph{before}
+doing anything else, e.g.~creating the PARI stack. If the file does not exist
+or cannot be read, \kbd{gp} will proceed to the initialization phase at once,
+eventually emitting a prompt. If any explicit command line switches are
+given, they override the values read from the preferences file.
 
 \subsec{Syntax} The syntax in the \kbd{gprc} file (and valid in this file
 only) is simple-minded, but should be sufficient for most purposes. The file
@@ -2839,9 +2838,9 @@ the available defaults (see \secref{se:defaults}), which will be set to
 (e.g.~for \kbd{prompt} or \kbd{help}).
 
 $\bullet$ \kbd{read "\var{some\_GP\_file}"} where \kbd{\var{some\_GP\_file}}
-is a regular GP script this time, which will be read just before \kbd{gp} prompts
-you for commands, but after initializing the defaults. In particular, file
-input is delayed until the \kbd{gprc} has been fully loaded. This is the
+is a regular GP script this time, which will be read just before \kbd{gp}
+prompts you for commands, but after initializing the defaults. In particular,
+file input is delayed until the \kbd{gprc} has been fully loaded. This is the
 right place to input files containing \kbd{alias} commands, or your favorite
 macros.
 
@@ -2884,8 +2883,9 @@ one (note the terminating \kbd{;} to separate the expressions):
 @eprog
 
 \subsec{The gprc location}
-When \kbd{gp} is started, it looks for a customization file, or \kbd{gprc} in the
-following places (in this order, only the first one found will be loaded):
+When \kbd{gp} is started, it looks for a customization file, or \kbd{gprc} in
+the following places (in this order, only the first one found will be
+loaded):
 
 \noindent$\bullet$ \kbd{gp} checks whether the environment variable
 \tet{GPRC} is set. On Unix, this can be done with something like: \smallskip

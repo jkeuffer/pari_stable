@@ -370,7 +370,8 @@ Returns \kbd{LONG\_MAX} is $x$ is $0$.
 \fun{GEN}{nfpoleval}{GEN nf, GEN pol, GEN a} evaluate the \typ{POL} \kbd{pol}
 (with coefficients in \kbd{nf}) on the algebraic number $a$ (also in $nf$).
 
-\fun{GEN}{FpX_FpC_nfpoleval}{GEN nf, GEN pol, GEN a, GEN p} evaluate the \typ{FpX} \kbd{pol} on the algebraic number $a$ (also in $nf$).
+\fun{GEN}{FpX_FpC_nfpoleval}{GEN nf, GEN pol, GEN a, GEN p} evaluate the
+\typ{FpX} \kbd{pol} on the algebraic number $a$ (also in $nf$).
 
 The following three functions implement trivial functionality akin to
 Euclidean division for which we currently have no real use. Of course, even if
@@ -541,9 +542,9 @@ regular algebraic numbers (not \var{famat}s) over a given number field:
 $g$ without repeated elements or 0 exponents, such that the expanded forms
 of $f$ and $g$ would be equal.
 
-\fun{GEN}{ZM_famat_limit}{GEN f, GEN limit} given a \var{famat} $f$ with \typ{INT} entries,
-returns a \var{famat} $g$ with all factors larger than \kbd{limit} multiplied out as
-the last entry (with exponent $1$).
+\fun{GEN}{ZM_famat_limit}{GEN f, GEN limit} given a \var{famat} $f$ with
+\typ{INT} entries, returns a \var{famat} $g$ with all factors larger than
+\kbd{limit} multiplied out as the last entry (with exponent $1$).
 
 \fun{GEN}{famat_to_nf}{GEN nf, GEN f} You normally never want to do this!
 This is a simplified form of \tet{nffactorback}, where we do not check the
@@ -1542,9 +1543,9 @@ memory) if the dimension is large, $> 50$ say.
 \fun{GEN}{ZM_hnfmodid}{GEN x, GEN d} returns the HNF of the matrix $(x \mid d
 \text{Id})$ (removing $0$ columns), for a \kbd{ZM} $x$ and a \typ{INT} $d$.
 
-\fun{GEN}{ZM_hnfmodall}{GEN x, GEN d, long flag} low-level function underlying the
-\kbd{ZM\_hnfmod} variants. If \kbd{flag} is $0$, calls \kbd{ZM\_hnfmod(x,d)};
-\kbd{flag} is an or-ed combination of:
+\fun{GEN}{ZM_hnfmodall}{GEN x, GEN d, long flag} low-level function
+underlying the \kbd{ZM\_hnfmod} variants. If \kbd{flag} is $0$, calls
+\kbd{ZM\_hnfmod(x,d)}; \kbd{flag} is an or-ed combination of:
 
 \item \tet{hnf_MODID} call \kbd{ZM\_hnfmodid} instead of \kbd{ZM\_hnfmod},
 
@@ -1553,17 +1554,18 @@ saving time. The pivots are non-negative and give the diagonal of the true HNF,
 but the entries to the right of the pivots need not be reduced, i.e.~they may be
 large or negative.
 
-\item \tet{hnf_CENTER} returns the centered HNF, where the entries to the right of
-a pivot $p$ are centered residues in $[-p/2, p/2[$, hence smallest possible in
-absolute value, but possibly negative.
+\item \tet{hnf_CENTER} returns the centered HNF, where the entries to the
+right of a pivot $p$ are centered residues in $[-p/2, p/2[$, hence smallest
+possible in absolute value, but possibly negative.
 
-\fun{GEN}{ZM_hnfall}{GEN x, GEN *U, long remove} returns the upper triangular HNF
-$H$ of the \kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix $U$ such
-that $x U = H$. If $\kbd{remove} = 0$, $H$ is the true HNF, including $0$ columns;
-if $\kbd{remove} = 1$, delete the $0$ columns from $H$ but do not update $U$
-accordingly (so that the integer kernel may still be recovered): we no longer have
-$x U = H$; if $\kbd{remove} = 2$, remove $0$ columns from $H$ and update $U$ so
-that $x U = H$. The matrix $U$ is square and invertible unless $\kbd{remove} = 2$.
+\fun{GEN}{ZM_hnfall}{GEN x, GEN *U, long remove} returns the upper triangular
+HNF $H$ of the \kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix
+$U$ such that $x U = H$. If $\kbd{remove} = 0$, $H$ is the true HNF,
+including $0$ columns; if $\kbd{remove} = 1$, delete the $0$ columns from $H$
+but do not update $U$ accordingly (so that the integer kernel may still be
+recovered): we no longer have $x U = H$; if $\kbd{remove} = 2$, remove $0$
+columns from $H$ and update $U$ so that $x U = H$. The matrix $U$ is square
+and invertible unless $\kbd{remove} = 2$.
 
 This routine uses a naive algorithm which is potentially exponential in the
 dimension (due to coefficient explosion) but is fast in practice, although it
