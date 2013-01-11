@@ -9824,18 +9824,14 @@ structure:
 
 \fun{GEN}{obj_init}{long d, long n} returns an \tev{obj} $S$, a \typ{VEC}
 with $d$ regular components, accessed as \kbd{gel(S,1)}, \dots,
-\kbd{gel(S,d)}; and a record of $n$ members, all initialized to $0$.
-The arguments $d$ and $n$ must be non-negative.
+\kbd{gel(S,d)}; together with a record of $n$ members, all initialized to
+$0$. The arguments $d$ and $n$ must be non-negative.
 
 After \kbd{S = obj\_init(d, n)}, the prototype of our other functions are of
 the form
 \bprog
   GEN obj_do(GEN S, long tag, ...)
-@eprog\noindent The first argument $S$ holds the structure to be managed;
-think of it as an ordinary \typ{VEC} with $d$ entries, together with a record
-containing \kbd{GEN} members indexed by integers $1,\dots,n$, all initially
-set to $0$.
-
+@eprog\noindent The first argument $S$ holds the structure to be managed.
 The second argument \var{tag} is the index of the struct member (from $1$ to
 $n$) we operate on. We recommand to define an \kbd{enum} and use descriptive
 names instead of hardcoded numbers. For instance, if $n = 3$, after defining
@@ -9846,18 +9842,17 @@ The former being preferred, of course.
 
 \misctitle{Technical note}
 In the current implementation, $S$ is a \typ{VEC} with $d+1$ entries.
-The first $d$ components one are ordinary \typ{GEN} entries, which you can
+The first $d$ components are ordinary \typ{GEN} entries, which you can
 read or assign to in the customary way. But the last component $\kbd{gel(S,
-d)}$, a \typ{VEC} of length $n$ initialized to \kbd{zerovec}$(n)$, must
+d+1)}$, a \typ{VEC} of length $n$ initialized to \kbd{zerovec}$(n)$, must
 be handled in a special way: you should never access or modify its components
 directly, only through the API we are about to describe. Indeed, its entries
 are meant to contain dynamic data, which will be stored, retrieved and
 replaced (for instance by a value computed to a higher accuracy), while
-interacting safely with intermediate \kbd{gerepile} calls.
-
-This mechanism allows to simulate C \kbd{struct}s, in a simpler way than
-general hashtables, while remaining compatible with the GP language, which
-knows neither structs nor hashtables. It also serialize the structure in an
+interacting safely with intermediate \kbd{gerepile} calls. This mechanism
+allows to simulate C \kbd{struct}s, in a simpler way than with general
+hashtables, while remaining compatible with the GP language, which knows
+neither structs nor hashtables. It also serialize the structure in an
 ordinary \kbd{GEN}, which facilitates copies and garbage collection (use
 \kbd{gcopy} or \kbd{gerepile}), rather than having to deal with individual
 components of actual C \kbd{struct}s.
