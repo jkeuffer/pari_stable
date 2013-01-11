@@ -2042,8 +2042,8 @@ void
 debug_stack(void)
 {
   GEN z;
-  err_printf("bot=0x%lx\ttop=0x%lx\n", bot, top);
-  for (z = (GEN)top; z >= (GEN)avma; z--)
+  err_printf("bot=0x%lx\ttop=0x%lx\tavma=0x%lx\n", bot, top, avma);
+  for (z = ((GEN)top)-1; z >= (GEN)avma; z--)
     err_printf("%p:\t0x%lx\t%lu\n",z,*z,*z);
 }
 
