@@ -1817,7 +1817,6 @@ GEN     Strchr(GEN g);
 GEN     Strexpand(GEN g);
 GEN     Strtex(GEN g);
 void    brute(GEN g, char format, long dec);
-GEN     dbg_err(void);
 void    dbgGEN(GEN x, long nb);
 void    error0(GEN g);
 void    dbg_pari_heap(void);
