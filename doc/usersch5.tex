@@ -4459,6 +4459,19 @@ by an exhaustive search. Efficient for very small $p$ !
 
 \fun{GEN}{Flx_factor}{GEN f, ulong p}
 
+\fun{GEN}{Flx_mod_Xn1}{GEN T, ulong n, ulong p} return $T$ modulo
+$(X^n + 1, p)$. Shallow function.
+
+\fun{GEN}{Flx_mod_Xnm1}{GEN T, ulong n, ulong p} return $T$ modulo
+$(X^n - 1, p)$. Shallow function.
+
+\fun{GEN}{Flx_degfact}{GEN f, ulong p} as \tet{FpX_degfact}.
+
+\fun{GEN}{Flx_factorff_irred}{GEN P, GEN Q, ulong p} as
+\tet{FpX_factorff_irred}.
+
+\fun{GEN}{Flx_ffisom}{GEN P,GEN Q,ulong l} as \tet{FpX_ffisom}.
+
 \subsubsec{Miscellaneous operations}
 
 \fun{GEN}{pol0_Flx}{long sv} returns a zero \kbd{Flx} in variable $v$.
