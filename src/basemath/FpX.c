@@ -304,7 +304,7 @@ FpX_Fp_mulspec(GEN y,GEN x,GEN p,long ly)
   GEN z;
   long i;
   if (!signe(x)) return pol_0(0);
-  z = cgetg(ly+2,t_POL);
+  z = cgetg(ly+2,t_POL); z[1] = evalsigne(1);
   for(i=0; i<ly; i++) gel(z,i+2) = Fp_mul(gel(y,i), x, p);
   return ZX_renormalize(z, ly+2);
 }
