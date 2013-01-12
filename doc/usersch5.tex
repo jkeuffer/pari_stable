@@ -6416,6 +6416,21 @@ and $\kbd{x} \bs t^{-n}$ otherwise.
 \fun{GEN}{RgX_shift_shallow}{GEN x, long n} as \kbd{RgX\_shift}, but
 shallow (coefficients are not copied).
 
+\fun{void}{RgX_shift_inplace_init}{long v} $v \geq 0$, prepare for a later
+call to \tet{RgX_shift_inplace}. Reserves $v$ words on the stack.
+
+\fun{GEN}{RgX_shift_inplace}{GEN x, long v} $v \geq 0$, assume that
+\tet{RgX_shift_inplace_init}$(v)$ has been called (reserving $v$ words on the
+stack), immediately followed by a \typ{POL} $x$. Return \kbd{RgX\_shift}$(x,v)$
+by shifting $x$ in place. To be used as follows
+\bprog
+  RgX_shift_inplace_init(v);
+  av = avma;
+  ...
+  x = gerepileupto(av, ...); /* a t_POL */
+  return RgX_shift_inplace(x, v);
+@eprog
+
 \fun{long}{RgX_valrem}{GEN P, GEN *pz} returns the valuation $v$ of the
 \typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
 coefficients are $0$ using \kbd{gequal0}. Set \kbd{*pz} to
