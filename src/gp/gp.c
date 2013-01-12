@@ -1787,6 +1787,9 @@ dbg_down(long k)
   gp_err_recover(e_NONE);
 }
 
+GEN
+dbg_err(void) { GEN E = pari_err_last(); return E? gcopy(E):gnil; }
+
 void
 pari_breakpoint(void)
 {

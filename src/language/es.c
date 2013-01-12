@@ -2139,9 +2139,6 @@ dbg(GEN x, long nb, long bl)
 void
 dbgGEN(GEN x, long nb) { dbg(x,nb,0); }
 
-GEN
-dbg_err(void) { GEN E = pari_err_last(); return E? gcopy(E):gnil; }
-
 static void
 print_entree(entree *ep, long hash)
 {
