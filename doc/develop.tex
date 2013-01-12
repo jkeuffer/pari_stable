@@ -522,6 +522,15 @@ current default output context.
 \tet{print0}, using output context \kbd{out} and separator \kbd{sep} between
 successive entries (no separator if \kbd{NULL}).
 
+\fun{void}{printsep}{const char *s, GEN g, long flag} \tet{out_print0} on
+\tet{pariOut} followed by a newline.
+
+\fun{void}{printsep1}{const char *s, GEN g, long flag} \tet{out_print0} on
+\tet{pariOut}.
+
+\fun{char*}{pari_sprint0}{const char *s, GEN g, long flag} displays $s$,
+then \kbd{print0(g, flag)}.
+
 \fun{void}{print}{GEN g} equivalent to \kbd{print0(g, f\_RAW)}, followed
 by a \kbd{\bs n} then an \kbd{fflush}.
 
