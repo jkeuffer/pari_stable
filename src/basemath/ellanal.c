@@ -357,8 +357,8 @@ init_Gr(struct ellld *el, long prec)
   if (el->r == 0)
   {
     el->bgbnd = el->rootbnd+1;
-    el->baby  = mpvecpow(el->emX, el->bgbnd);
-    el->giant = mpvecpow(gel(el->baby,el->bgbnd), el->bgbnd);
+    el->baby  = powruvec(el->emX, el->bgbnd);
+    el->giant = powruvec(gel(el->baby,el->bgbnd), el->bgbnd);
     return gel(el->baby, 1);
   }
   else if (el->r == 1) el->gcache = mpveceint1(el->X, el->eX, el->rootbnd);

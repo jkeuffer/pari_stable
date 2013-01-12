@@ -1991,7 +1991,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       err_printf("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
     if (realprec(ec2) > prec) ec2 = rtor(ec2, prec);
     veint1 = mpveceint1(rtor(c2, prec), ec2, NN);
-    vcn = mpvecpow(invr(ec2), NN);
+    vcn = powruvec(invr(ec2), NN);
     av2 = avma;
     for (n=2; n<=NN; n++, avma = av2) affrr(divru(gel(vcn,n), n), gel(vcn,n));
 

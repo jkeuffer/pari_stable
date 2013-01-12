@@ -1072,12 +1072,15 @@ mpveceint1(GEN C, GEN eC, long n)
 
 /* e t_REAL, vector of e^i, 1 <= i <= n */
 GEN
-mpvecpow(GEN e, long n)
+powruvec(GEN e, ulong n)
 {
   GEN G = cgetg(n+1, t_VEC);
   long j;
-  gel(G, 1) = e;
-  for (j = 2; j <= n; j++) gel(G,j) = mulrr(gel(G,j-1), e);
+  if (n)
+  {
+    gel(G, 1) = e;
+    for (j = 2; j <= n; j++) gel(G,j) = mulrr(gel(G,j-1), e);
+  }
   return G;
 }
 
