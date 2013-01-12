@@ -10,3 +10,5 @@ Doc: vector of $p$-adic roots of the
  integral element of a finite extension of $\Q_p$, given as a \typ{POLMOD}
  at least one of whose coefficients is a \typ{PADIC}. In this case, the result
  is the vector of roots belonging to the same extension of $\Q_p$ as $a$.
+Variant: Also available is \fun{GEN}{Zp_appr}{GEN f, GEN a} when $a$ is a
+ \typ{PADIC}.

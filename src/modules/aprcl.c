@@ -71,7 +71,7 @@ red_cyclop(GEN T, long p)
   if (d <= -2) return T;
 
   /* reduce mod (x^p - 1) */
-  y = ZX_mod_Xn_1(T, p);
+  y = ZX_mod_Xnm1(T, p);
   z = (GEN*)(y+2);
 
   /* reduce mod x^(p-1) + ... + 1 */

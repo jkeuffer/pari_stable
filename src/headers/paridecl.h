@@ -801,7 +801,7 @@ GEN     ZX_deriv(GEN x);
 int     ZX_equal(GEN V, GEN W);
 GEN     ZX_eval1(GEN x);
 long    ZX_max_lg(GEN x);
-GEN     ZX_mod_Xn_1(GEN T, ulong n);
+GEN     ZX_mod_Xnm1(GEN T, ulong n);
 GEN     ZX_mul(GEN x, GEN y);
 GEN     ZX_mulspec(GEN a, GEN b, long na, long nb);
 GEN     ZX_mulu(GEN y, ulong x);

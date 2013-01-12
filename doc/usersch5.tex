@@ -5102,8 +5102,8 @@ $p$ be a prime \typ{INT} and $a,b$ be \kbd{FpXQ}s (modulo $T$) such that $a\*b
 \equiv 1 \mod (p,T)$.  Returns an \kbd{FpXQ} $A$ such that
 $A\*b \equiv 1 \mod (p^e, T)$.  Special case of \tet{ZpXQ_liftroot}.
 
-\fun{GEN}{ZpXQ_invlift}{GEN b, GEN T, GEN p, long e} let
-$p$ be a prime \typ{INT} and $b$ be a \kbd{FpXQ}s(modulo $T$).
+\fun{GEN}{ZpXQ_inv}{GEN b, GEN T, GEN p, long e} let
+$p$ be a prime \typ{INT} and $b$ be a \kbd{FpXQ} (modulo $T, p^e$).
 Returns an \kbd{FpXQ} $A$ such that $A\*b \equiv 1 \mod (p^e, T)$.
 
 \fun{GEN}{ZpXQ_sqrtnlift}{GEN b, GEN n, GEN a, GEN T, GEN p, long e} let
@@ -5119,8 +5119,13 @@ special case of \kbd{rootpadic}.
 
 \fun{GEN}{ZpX_liftroot}{GEN f, GEN a, GEN p, long e} $f$ a \kbd{ZX} with
 leading term prime to $p$, and $a$ a root mod $p$ such that
-$v_p(f'(a))=0$.  Return a \typ{INT} which are the root of $f$ mod $p^e$
+$v_p(f'(a))=0$.  Return a \typ{INT} which is the root of $f$ mod $p^e$
 congruent to $a$ mod $p$.
+
+\fun{GEN}{ZX_Zp_root}{GEN f, GEN a, GEN p, long e} same as \tet{ZpX_liftroot}
+without the assumption $v_p(f'(a)) = 0$. Return a \typ{VEC} of \typ{INT}s,
+which are the $p$-adic roots of $f$ congruent to $a$ mod $p$ (given modulo
+$p^e$).
 
 \fun{GEN}{ZpX_liftroots}{GEN f, GEN S, GEN q, long e} $f$ a \kbd{ZX} with
 leading term prime to $p$, and $S$ a vector of simple roots mod $p$. Return a
@@ -5644,6 +5649,9 @@ and $0$ otherwise.
 \fun{int}{zv_equal}{GEN x, GEN y} returns $1$ if the two \kbd{zv} are equal
 and $0$ otherwise.
 
+\fun{int}{zv_equal0}{GEN x} returns $1$ if all entries are $0$, and return
+$0$ otherwise.
+
 \fun{long}{zv_search}{GEN L, long y} look for $y$ in the sorted
 \kbd{zv} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
 
@@ -6003,6 +6011,9 @@ $\sum_{i = 0}^{\kbd{na-1}} \kbd{a}[i] X^i$. Return its square (as a true
 \fun{GEN}{ZX_rem}{GEN x, GEN y} returns the remainder of the Euclidean
 division of $x$ mod $y$. Assume that $x$, $y$ are two \kbd{ZX} and that
 $y$ is monic.
+
+\fun{GEN}{ZX_mod_Xnm1}{GEN T, ulong n} return $T$ modulo $X^n - 1)$. Shallow
+function.
 
 \fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of the \kbd{ZX} $x$ and $y$.
 Not memory-clean, but suitable for \kbd{gerepileupto}.

@@ -594,7 +594,7 @@ ZX_eval1(GEN x)
 
 /* reduce T mod X^n - 1. Shallow function */
 GEN
-ZX_mod_Xn_1(GEN T, ulong n)
+ZX_mod_Xnm1(GEN T, ulong n)
 {
   long i, j, L = lg(T), l = n+2;
   GEN S;

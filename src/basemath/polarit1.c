@@ -294,8 +294,6 @@ Zp_appr(GEN f, GEN a)
   pari_sp av = avma;
   long prec;
   GEN z, p;
-  if (typ(f) != t_POL) pari_err_TYPE("Zp_appr",f);
-  if (typ(a) != t_PADIC) pari_err_TYPE("Zp_appr",a);
   p = gel(a,2); prec = gequal0(a)? valp(a): precp(a);
   f = QpX_to_ZX(f, p);
   if (degpol(f) <= 0) pari_err_CONSTPOL("Zp_appr");
@@ -435,12 +433,12 @@ padicappr(GEN f, GEN a)
   long prec;
   pari_sp av = avma;
 
+  if (typ(f)!=t_POL) pari_err_TYPE("padicappr",f);
   switch(typ(a)) {
     case t_PADIC: return Zp_appr(f,a);
     case t_POLMOD: break;
     default: pari_err_TYPE("padicappr",a);
   }
-  if (typ(f)!=t_POL) pari_err_TYPE("padicappr",f);
   if (gequal0(f)) pari_err_ROOTS0("padicappr");
   z = RgX_gcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
