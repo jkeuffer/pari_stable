@@ -3087,6 +3087,20 @@ discriminant, and $0$ otherwise.
 \fun{long}{unegisfundamental}{ulong x} return $1$ is $-x$ is a fundamental
 discriminant, and $0$ otherwise.
 
+\fun{int}{uis_357_power}{ulong x, ulong *pt, ulong *mask} as \tet{is_357_power}
+for \kbd{ulong} $x$.
+
+\fun{int}{uis_357_powermod}{ulong x, ulong *mask} as \tet{uis_357_power}, but
+only check for 3rd, 5th or 7th powers modulo
+$211\times209\times61\times203\times117\times31\times43\times71$.
+
+\fun{long}{uisprimepower}{ulong n, ulong *p} as \tet{isprimepower}, for
+\kbd{ulong} $n$.
+
+\fun{int}{uislucaspsp}{ulong n} returns $1$ if the \kbd{ulong} $n$ fails Lucas
+compositeness test (it thus may be prime or composite), and $0$ otherwise
+(proving that $n$ is composite).
+
 \fun{ulong}{sumdigitsu}{ulong n} returns the sum of decimal digits of $u$.
 
 \fun{GEN}{hilbertii}{GEN x, GEN y, GEN p}, returns the Hilbert symbol
@@ -3098,6 +3112,12 @@ the \typ{INT} $h$ and $k$, $k > 0$.
 
 \fun{GEN}{sumdedekind_coprime}{GEN h, GEN k} as \kbd{sumdedekind}, except
 that $h$ and $k$ are assumed to be coprime \typ{INT}s.
+
+\fun{GEN}{u_sumdedekind_coprime}{long h, long k}
+Let $k > 0$, $0 \leq h < k$, $(h,k) = 1$. Returns $[s_1,s_2]$
+in a \typ{VECSMALL}, such that $s(h,k) = (s_2 + k s_1) / (12k)$.
+Requires $\max(h + k/2, k) < \kbd{LONG\_MAX}$
+to avoid overflow, in particular $k \leq (2/3)\kbd{LONG\_MAX}$ is fine.
 
 \newpage
 \chapter{Level 2 kernel}
