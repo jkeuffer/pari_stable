@@ -4203,6 +4203,16 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FpXQX_rem}{GEN x, GEN y, GEN T, GEN p}
 
+\fun{GEN}{FpXQX_invBarrett}{GEN y, GEN T, GEN p} returns the Barrett inverse of
+the \kbd{FpXQX} $y$, namely a lift of $1/\kbd{polrecip}(y)+O(x^{\deg(y)-1})$.
+
+\fun{GEN}{FpXQX_rem_Barrett}{GEN x, GEN iy, GEN y, GEN T, GEN p} returns $x$
+mod $y$, assuming \kbd{iy} is the Barrett inverse of $y$.
+
+\fun{GEN}{FpXQX_divrem_Barrett}{GEN x, GEN iy, GEN y, GEN T, GEN p, GEN *pr}
+performs the Euclidean division of $x$ by $y$, assuming \kbd{iy} is the Barrett
+inverse of $y$. Returns the quotient and set \kbd{*pr} to the remainder.
+
 \fun{GEN}{FpXQXV_prod}{GEN V, GEN T, GEN p}, \kbd{V} being a vector of
 \kbd{FpXQX}, returns their product.
 
@@ -4858,6 +4868,8 @@ and $0$ otherwise.
 
 \fun{GEN}{F2x_sqrt}{GEN x} returns the squareroot of $x$, assuming $x$ is a
 square of a \kbd{F2x}.
+
+\fun{GEN}{F2x_factor}{GEN f}
 
 \subsec{\kbd{F2xq}} See \kbd{FpXQ} operations.
 

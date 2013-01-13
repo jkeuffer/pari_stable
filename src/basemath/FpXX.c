@@ -544,7 +544,7 @@ const long FpXQX_INVBARRETT_LIMIT = 50;
 const long FpXQX_DIVREM_BARRETT_LIMIT = 50;
 const long FpXQX_REM_BARRETT_LIMIT = 50;
 
-/* 1/polrecip(T)+O(x^(deg(T)-1)) */
+/* 1/polrecip(S)+O(x^(deg(S)-1)) */
 GEN
 FpXQX_invBarrett(GEN S, GEN T, GEN p)
 {
