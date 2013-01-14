@@ -33,4 +33,7 @@ Doc: true (1) if $x$ is a square, false (0)
  directly odd and even-power monomials) or we assume that $2$ is invertible
  and check whether squaring the truncated power series for the square root
  yields the original input.
-Variant: Also available is \fun{GEN}{gissquare}{GEN x}.
+Variant: Also available is \fun{long}{issquare}{GEN x}. Deprecated
+ GP-specific functions \fun{GEN}{gissquare}{GEN x} and
+ \fun{GEN}{gissquareall}{GEN x, GEN *pt} return \kbd{gen\_0} and \kbd{gen\_1}
+ instead of a boolean value.
