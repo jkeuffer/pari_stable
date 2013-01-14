@@ -233,9 +233,11 @@ GEN     FlxqX_Flxq_mul_to_monic(GEN P, GEN U, GEN T, ulong p);
 GEN     FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr);
 GEN     FlxqX_extgcd(GEN a, GEN b, GEN T, ulong p, GEN *ptu, GEN *ptv);
 GEN     FlxqX_gcd(GEN P, GEN Q, GEN T, ulong p);
+GEN     FlxqX_invBarrett(GEN T, GEN Q, ulong p);
 GEN     FlxqX_mul(GEN x, GEN y, GEN T, ulong p);
 GEN     FlxqX_normalize(GEN z, GEN T, ulong p);
 GEN     FlxqX_red(GEN z, GEN T, ulong p);
+GEN     FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 GEN     FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p);
 GEN     FlxqX_sqr(GEN x, GEN T, ulong p);
 GEN     FlxqXQ_div(GEN x, GEN y, GEN S, GEN T, ulong p);
@@ -248,6 +250,7 @@ GEN     FlxqXQ_powers(GEN x, long n, GEN S, GEN T, ulong p);
 GEN     FlxqXQ_sqr(GEN x, GEN S, GEN T, ulong p);
 GEN     FlxqXQV_autpow(GEN x, long n, GEN S, GEN T, ulong p);
 GEN     FlxqXV_prod(GEN V, GEN T, ulong p);
+GEN     Kronecker_to_FlxqX(GEN z, GEN T, ulong p);
 ulong   Rg_to_Fl(GEN x, ulong p);
 GEN     Rg_to_Flxq(GEN x, GEN T, ulong p);
 GEN     RgX_to_Flx(GEN x, ulong p);
@@ -263,6 +266,7 @@ long    get_Flx_var(GEN T);
 const struct bb_field *get_Flxq_field(void **E, GEN T, ulong p);
 GEN     pol1_FlxX(long v, long sv);
 GEN     random_Flx(long d1, long v, ulong p);
+GEN     zxX_to_Kronecker(GEN P, GEN Q);
 
 /* FlxqE.c */
 
@@ -489,6 +493,7 @@ GEN     FpXY_eval(GEN Q, GEN y, GEN x, GEN p);
 GEN     FpXY_evalx(GEN Q, GEN x, GEN p);
 GEN     FpXY_evaly(GEN Q, GEN y, GEN p, long vy);
 GEN     FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
+GEN     Kronecker_to_FpXQX(GEN z, GEN pol, GEN p);
 
 /* FpV.c */
 

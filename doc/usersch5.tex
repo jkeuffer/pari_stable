@@ -42,6 +42,9 @@ care must be taken when garbage collecting objects which have been input to
 shallow functions: corresponding outputs also become invalid and should no
 longer be accessed.
 
+A function is \emph{not stack clean} if it leaves intermediate data on the
+stack besides its output, for efficiency reasons.
+
 \section{Initializing the library}
 
 The following functions enable you to start using the PARI functions
@@ -4193,6 +4196,14 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FpXQX_mul}{GEN x, GEN y, GEN T, GEN p}
 
+\fun{GEN}{Kronecker_to_FpXQX}{GEN z, GEN T, GEN p}. Let $n = \deg T$ and let
+$P(X,Y)\in \Z[X,Y]$ lift a polynomial in $K[Y]$, where $K := \F_p[X]/(T)$ and
+$\deg_X P < 2n-1$ --- such as would result from multiplying minimal degree
+lifts of two polynomials in $K[Y]$. Let $z = P(t,t^{2*n-1})$ be a Kronecker
+form of $P$, this function returns $Q\in \Z[X,t]$ such that $Q$ is congruent to
+$P(X,t)$ mod $(p, T(X))$, $\deg_X Q < n$, and all coefficients are in $[0,p[$.
+Not stack-clean. Note that $t$ need not be the same variable as $Y$!
+
 \fun{GEN}{FpXQX_FpXQ_mul}{GEN x, GEN y, GEN T, GEN p}
 
 \fun{GEN}{FpXQX_sqr}{GEN x, GEN T, GEN p}
@@ -4711,6 +4722,18 @@ in the main variable of \kbd{b}.
 \kbd{FpXYQQ\_pow}.
 
 \subsec{\kbd{FlxqX}} See \kbd{FpXQX} operations.
+
+\fun{GEN}{zxX_to_Kronecker}{GEN P, GEN Q} assuming $P(X,Y)$ is a polynomial
+of degree in $X$ strictly less than $n$, returns $P(X,X^{2*n-1})$, the
+Kronecker form of $P$.
+
+\fun{GEN}{Kronecker_to_FlxqX}{GEN z, GEN T, ulong p}. Let $n = \deg T$ and let
+$P(X,Y)\in \Z[X,Y]$ lift a polynomial in $K[Y]$, where $K := \F_p[X]/(T)$ and
+$\deg_X P < 2n-1$ --- such as would result from multiplying minimal degree
+lifts of two polynomials in $K[Y]$. Let $z = P(t,t^{2*n-1})$ be a Kronecker
+form of $P$, this function returns $Q\in \Z[X,t]$ such that $Q$ is congruent to
+$P(X,t)$ mod $(p, T(X))$, $\deg_X Q < n$, and all coefficients are in $[0,p[$.
+Not stack-clean. Note that $t$ need not be the same variable as $Y$!
 
 \fun{GEN}{FlxqX_mul}{GEN x, GEN y, GEN T, ulong p}
 
@@ -6175,6 +6198,11 @@ divisions are exact.
 of degree in $X$ strictly less than $n$, returns $P(X,X^{2*n-1})$, the
 Kronecker form of $P$.
 
+\fun{GEN}{ZXX_to_Kronecker_spec}{GEN Q, long lQ, long n} return
+\tet{ZXX_to_Kronecker}$(P, n)$, where $P$ is the polynomial
+$\sum_{i = 0}^{\kbd{lQ} - 1} Q[i] x^i$. To be used when splitting
+the coefficients of genuine polynomials into blocks.
+
 \subsec{\kbd{QX}}
 
 \fun{void}{RgX_check_QX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
@@ -6629,6 +6657,16 @@ coefficients are \kbd{RgX}s (arbitrary \kbd{GEN}s in fact), reduce them to
 \kbd{RgXQ}s (applying \kbd{grem} coefficientwise).
 
 \fun{GEN}{RgXQX_mul}{GEN x, GEN y, GEN T}
+
+\fun{GEN}{Kronecker_to_mod}{GEN z, GEN T} $z\in R[X]$ represents an element
+$P(X,Y)$ in $R[X,Y]$ mod $T(Y)$ in Kronecker form, i.e. $z = P(X,X^{2*n-1})$
+
+Let $R$ be some commutative ring, $n = \deg T$ and let $P(X,Y)\in R[X,Y]$ lift
+a polynomial in $K[Y]$, where $K := R[X]/(T)$ and $\deg_X P < 2n-1$ --- such as
+would result from multiplying minimal degree lifts of two polynomials in
+$K[Y]$. Let $z = P(t,t^{2*n-1})$ be a Kronecker form of $P$, this function
+returns the image of $P(X,t)$ in $K[t]$, with \typ{POLMOD} coefficients.
+Not stack-clean. Note that $t$ need not be the same variable as $Y$!
 
 \fun{GEN}{RgX_Rg_mul}{GEN y, GEN x} multiplies the \kbd{RgX} \kbd{y}
 by the scalar \kbd{x}.

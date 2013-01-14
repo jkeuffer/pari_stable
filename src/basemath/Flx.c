@@ -3342,7 +3342,7 @@ FlxX_recipspec(GEN x, long l, long n, long vs)
 /* FlxqX are t_POL with Flxq coefficients.
  * Normally the variable ordering should be respected.*/
 
-/*Not stack clean.*/
+/*Not stack clean*/
 GEN
 Kronecker_to_FlxqX(GEN z, GEN T, ulong p)
 {

@@ -159,7 +159,7 @@ FpXX_mulu(GEN P, ulong u, GEN p)
 /*                             (Fp[X]/(Q))[Y]                      */
 /*                                                                 */
 /*******************************************************************/
-/*Not malloc nor warn-clean.*/
+/*Not stack clean*/
 GEN
 Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
 {

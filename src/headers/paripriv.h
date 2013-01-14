@@ -194,7 +194,6 @@ GEN  RgX_recipspec_shallow(GEN x, long l, long n);
 
 /* b) Modular */
 GEN  bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
-GEN  Kronecker_to_FpXQX(GEN z, GEN pol, GEN p);
 long F2x_split_Berlekamp(GEN *t);
 long Flx_split_Berlekamp(GEN *t, ulong p);
 long FpX_split_Berlekamp(GEN *t, GEN pp);
@@ -440,13 +439,6 @@ char *file_input(char **s0, int junk, input_method *IM, filtre_t *F);
 char *file_getline(Buffer *b, char **s0, input_method *IM);
 
 /* By files */
-
-/* Flx.c */
-
-GEN     zxX_to_Kronecker(GEN P, GEN Q);
-GEN     Kronecker_to_FlxqX(GEN z, GEN T, ulong p);
-GEN     FlxqX_invBarrett(GEN T, GEN Q, ulong p);
-GEN     FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p);
 
 /* Qfb.c */
 
