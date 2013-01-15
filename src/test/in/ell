@@ -24,6 +24,7 @@ testgroup(v,p)=
     forvec(v=vector(5,i,[0,p-1]), testgroup(v,p)));
   forvec(v=vector(2,i,[0,4]), testgroup(v,5));
 }
+setrand(1)
 a=ffgen(ffinit(2,8),'a); E=ellinit([a,1,0,0,1]);
 P=[a^3,ellordinate(E,a^3)[1]]; Q=ellmul(E,P,113);
 e=elllog(E,P,Q,242)
