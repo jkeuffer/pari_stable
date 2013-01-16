@@ -75,6 +75,8 @@ E.roots
 ellglobalred(E)
 ellglobalred(e)
 
+E = ellchangecurve(e, [1,0,0,0]);
+
 E = ellchangecurve(e, [2,3,4,5]*Mod(1,7));
 E.omega
 E.group

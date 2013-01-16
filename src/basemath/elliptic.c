@@ -898,7 +898,7 @@ ellchangecurve(GEN e, GEN w)
   pari_sp av = avma;
   GEN E;
   checkcoordch(w); checkell5(e);
-  E = coordch(e, w);
+  E = coordch(leafcopy(e), w);
   if (lg(E) == 6) return gerepilecopy(av, E);
   gel(E,16) = zerovec(lg(gel(e,16))-1);
   E = gerepilecopy(av, E);
