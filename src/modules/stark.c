@@ -2022,15 +2022,32 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   avma = av; return an;
 }
 
-/* compute S and T for the quadratic case where
-   the extension is of the type used to construct
-   abelian extensions using Stark units */
+/* return the vector of values (1/i)*exp(-iA) for i = 1...n */
+static GEN
+mpveciexp(GEN A, long n)
+{
+  GEN p1 = powruvec(invr(mpexp(A)), n);
+  pari_sp av = avma;
+  long i;
+
+  for (i=2; i<=n; i++, avma = av)
+    affrr(divru(gel(p1,i), i), gel(p1,i));
+  return p1;
+}
+
+static void GetST0(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec);
+
+/* compute S and T for the quadratic case. The following cases (cs) are:
+   1) bnr complex;
+   2) bnr real and no infinite place divide cond_chi (TBD);
+   3) bnr real and one infinite place divide cond_chi;
+   4) bnr real and both infinite places divide cond_chi (TBD) */
 static void
 QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 {
   pari_sp av = avma, av1, av2;
   long ncond, n, j, k, n0;
-  GEN N0, C, T = *pT, S = *pS, cf, cfh, an, degs;
+  GEN N0, C, T = *pT, S = *pS, cf0, cf1, an, degs, cs;
   LISTray LIST;
 
   /* initializations */
@@ -2038,57 +2055,96 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   ncond = lg(vChar)-1;
   C    = cgetg(ncond+1, t_VEC);
   N0   = cgetg(ncond+1, t_VECSMALL);
+  cs   = cgetg(ncond+1, t_VECSMALL);
   n0 = 0;
   for (j = 1; j <= ncond; j++)
   {
-    GEN dtcr = gel(dataCR, mael(vChar,j,1)), c = ch_C(dtcr);
+    /* FIXME: make sure that this value of c is correct for the general case */
+    long r1, r2, q;
+    GEN dtcr = gel(dataCR, mael(vChar,j,1)), p1 = ch_4(dtcr), c = ch_C(dtcr);
+
     gel(C,j) = c;
-    N0[j] = (long)prec2nbits_mul(prec, 0.35 * gtodouble(c));
+    q = p1[1];
+
+    nf_get_sign(bnr_get_nf(gel(dtcr, 3)), &r1, &r2);
+    if (r1 == 2) /* real quadratic */
+    {
+      cs[j] = 2 + q;
+      /* FIXME:
+         make sure that this value of N0 is correct for the general case */
+      N0[j] = (long)prec2nbits_mul(prec, 0.35 * gtodouble(c));
+      if (cs[j] == 2 || cs[j] == 4) /* NOT IMPLEMENTED YET */
+      {
+        GetST0(bnr, pS, pT, dataCR, vChar, prec);
+        return;
+      }
+    }
+    else /* complex quadratic */
+    {
+      cs[j] = 1;
+      N0[j] = (long)prec2nbits_mul(prec, 0.7 * gtodouble(c));
+    }
     if (n0 < N0[j]) n0 = N0[j];
   }
   if (DEBUGLEVEL>1) err_printf("N0 = %ld\n", n0);
   InitPrimesQuad(bnr, n0, &LIST);
 
-  cfh = sqrtr(mppi(prec));
-  cf  = gmul2n(cfh, 1);
   av1 = avma;
   /* loop over conductors */
   for (j = 1; j <= ncond; j++)
   {
-    GEN c1 = gel(C,j), c2 = divur(2,c1), ec2 = mpexp(c2);
-    GEN LChar = gel(vChar,j);
+    GEN c0 = gel(C,j), c1 = divur(1, c0), c2 = divur(2, c0);
+    GEN ec1 = mpexp(c1), ec2 = mpexp(c2), LChar = gel(vChar,j);
     const long nChar = lg(LChar)-1, NN = N0[j];
-    GEN veint1, vcn;
 
     if (DEBUGLEVEL>1)
       err_printf("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
+    if (realprec(ec1) > prec) ec1 = rtor(ec1, prec);
     if (realprec(ec2) > prec) ec2 = rtor(ec2, prec);
-    veint1 = mpveceint1(rtor(c2, prec), ec2, NN);
-    vcn = powruvec(invr(ec2), NN);
-    av2 = avma;
-    for (n=2; n<=NN; n++, avma = av2) affrr(divru(gel(vcn,n), n), gel(vcn,n));
-
     for (k = 1; k <= nChar; k++)
     {
-      const long t = LChar[k];
+      const long t = LChar[k], d = degs[t];
+      const GEN dtcr = gel(dataCR, t), z = gel(ch_CHI(dtcr), 2);
+      GEN vf0, vf1;
+      GEN p1 = gen_0, p2 = gen_0;
+      int **matan;
+      long c = 0;
+
+      switch(cs[j])
+      {
+      case 1:
+        cf0 = gen_1;
+        cf1 = c0;
+        vf0 = mpveceint1(rtor(c1, prec), ec1, NN);
+        vf1 = mpveciexp(c1, NN); break;
+
+      case 3:
+        cf0 = sqrtr(mppi(prec));
+        cf1 = gmul2n(cf0, 1);
+        cf0 = gmul(cf0, c0);
+        vf0 = mpveciexp(c2, NN);
+        vf1 = mpveceint1(rtor(c2, prec), ec2, NN); break;
+
+      default:
+        cf0 = gen_0; cf1 = gen_0;
+        vf0 = gen_0; vf1 = gen_0;
+      }
+      av2 = avma;
+
       if (DEBUGLEVEL>1)
         err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
       if (!isintzero( ch_comp(gel(dataCR, t)) ))
       {
-        const GEN dtcr = gel(dataCR, t), z = gel(ch_CHI(dtcr), 2);
-        const long d = degs[t];
-        GEN p1 = gen_0, p2 = gen_0;
-        int **matan = computean(gel(dataCR,t), &LIST, NN, d);
-        long c = 0;
+        matan = computean(gel(dataCR,t), &LIST, NN, d);
         for (n = 1; n <= NN; n++)
           if ((an = EvalCoeff(z, matan[n], d)))
           {
-            p1 = gadd(p1, gmul(an, gel(vcn,n)));
-            p2 = gadd(p2, gmul(an, gel(veint1,n)));
+            p1 = gadd(p1, gmul(an, gel(vf0,n)));
+            p2 = gadd(p2, gmul(an, gel(vf1,n)));
             if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
           }
-        gaffect(gmul(cfh, gmul(p1,c1)), gel(S,t));
-        gaffect(gmul(cf,  gconj(p2)),   gel(T,t));
+        gaffect(gmul(cf0, p1), gel(S,t));
+        gaffect(gmul(cf1,  gconj(p2)), gel(T,t));
         FreeMat(matan,NN); avma = av2;
       }
       else
@@ -2193,31 +2249,14 @@ init_cScT(ST_t *T, GEN dtcr, long N, long prec)
 }
 
 static void
-GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
+GetST0(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 {
-  const long cl = lg(dataCR) - 1;
-  pari_sp av, av1, av2;
+  pari_sp av = avma, av1, av2;
   long ncond, n, j, k, jc, n0, prec2, i0, r1, r2;
-  GEN nf, racpi, powracpi;
-  GEN N0, C, T, S, an, degs, limx;
+  GEN nf = checknf(bnr), racpi, powracpi;
+  GEN N0, C, T = *pT, S = *pS, an, degs, limx;
   LISTray LIST;
   ST_t cScT;
-
-  nf  = checknf(bnr);
-  /* allocate memory for answer */
-  *pS = S = cgetg(cl+1, t_VEC);
-  *pT = T = cgetg(cl+1, t_VEC);
-  for (j = 1; j <= cl; j++)
-  {
-    gel(S,j) = cgetc(prec);
-    gel(T,j) = cgetc(prec);
-  }
-  if (nf_get_degree(nf) == 2)
-  {
-    QuadGetST(bnr, pS,pT,dataCR,vChar,prec);
-    return;
-  }
-  av = avma;
 
   /* initializations */
   degs = GetDeg(dataCR);
@@ -2296,6 +2335,29 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   }
   clear_cScT(&cScT, n0);
   avma = av;
+}
+
+static void
+GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
+{
+  const long cl = lg(dataCR) - 1;
+  GEN S, T, nf  = checknf(bnr);
+  long j;
+
+  /* allocate memory for answer */
+  *pS = S = cgetg(cl+1, t_VEC);
+  *pT = T = cgetg(cl+1, t_VEC);
+  for (j = 1; j <= cl; j++)
+  {
+    gel(S,j) = cgetc(prec);
+    gel(T,j) = cgetc(prec);
+  }
+  if (nf_get_degree(nf) == 2)
+  {
+    QuadGetST(bnr, pS, pT, dataCR, vChar, prec);
+    return;
+  }
+  GetST0(bnr, pS, pT, dataCR, vChar, prec);
 }
 
 /*******************************************************************/
