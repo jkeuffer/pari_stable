@@ -977,6 +977,31 @@ F2xq_ell_to_a4a6(GEN E, GEN T)
   return NULL;
 }
 
+static GEN
+Fq_to_FpXQ(GEN x, GEN T)
+{
+  if (typ(x)==t_INT)
+    return scalarpol(x, varn(T));
+  else
+    return x;
+}
+
+static GEN
+FqV_to_FpXQV(GEN x, GEN T)
+{
+  pari_sp av = avma;
+  long v = varn(T), i, s=0, l = lg(x);
+  GEN y = shallowcopy(x);
+  for(i=1; i<l; i++)
+    if (typ(gel(x,i))==t_INT)
+    {
+      gel(y,i) = scalarpol(gel(x,i), v);
+      s = 1;
+    }
+  if (!s) { avma = av; return x; }
+  return y;
+}
+
 GEN
 FF_ellcard(GEN E)
 {
@@ -988,7 +1013,7 @@ FF_ellcard(GEN E)
   switch(fg[1])
   {
   case t_FF_FpXQ:
-    return FpXQ_ellcard(gel(e,1),gel(e,2),T,p);
+    return FpXQ_ellcard(Fq_to_FpXQ(gel(e,1),T), Fq_to_FpXQ(gel(e,2),T),T,p);
   case t_FF_F2xq:
     return F2xq_ellcard(gel(e,1),gel(e,2),T);
   default:
@@ -1010,7 +1035,8 @@ FF_ellgroup(GEN E)
   switch(fg[1])
   {
   case t_FF_FpXQ:
-    G = FpXQ_ellgroup(gel(e,1),gel(e,2),N,T,p,&m); break;
+    G = FpXQ_ellgroup(Fq_to_FpXQ(gel(e,1),T),Fq_to_FpXQ(gel(e,2),T),N,T,p,&m);
+    break;
   case t_FF_F2xq:
     G = F2xq_ellgroup(gel(e,1),gel(e,2),N,T,&m); break;
   default:
@@ -1022,7 +1048,7 @@ FF_ellgroup(GEN E)
 GEN
 FF_ellgens(GEN E)
 {
-  GEN fg, e, Gm, G, m, T, p, F;
+  GEN fg, e, Gm, G, m, T, p, F, e3;
   ulong pp;
 
   fg = ellff_get_field(E);
@@ -1032,7 +1058,8 @@ FF_ellgens(GEN E)
   switch(fg[1])
   {
   case t_FF_FpXQ:
-    F = FpXQ_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T, p);
+    e3 = FqV_to_FpXQV(gel(e,3),T);
+    F = FpXQ_ellgens(Fq_to_FpXQ(gel(e,1),T),Fq_to_FpXQ(gel(e,2),T),e3,G,m,T,p);
     break;
   case t_FF_F2xq:
     F = F2xq_ellgens(gel(e,1),gel(e,2),gel(e,3),G,m,T);
@@ -1111,8 +1138,8 @@ FF_ellrandom(GEN E)
   switch (fg[1])
   {
   case t_FF_FpXQ:
-    Q = random_FpXQE(gel(e,1), gel(e,2), T, p);
-    Q = FpXQE_changepoint(Q, gel(e,3), T, p);
+    Q = random_FpXQE(Fq_to_FpXQ(gel(e,1),T), Fq_to_FpXQ(gel(e,2),T), T, p);
+    Q = FpXQE_changepoint(Q, FqV_to_FpXQV(gel(e,3), T) , T, p);
     break;
   case t_FF_F2xq:
     Q = random_F2xqE(gel(e,1), gel(e,2), T);
@@ -1130,13 +1157,14 @@ FF_ellmul(GEN E, GEN P, GEN n)
 {
   pari_sp av = avma;
   GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E), Q;
-  GEN T,p, Pp, Qp;
+  GEN T,p, Pp, Qp, e3;
   ulong pp;
   _getFF(fg,&T,&p,&pp);
   switch (fg[1])
   {
   case t_FF_FpXQ:
-    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P, T, p), gel(e,3), T, p);
+    e3 = FqV_to_FpXQV(gel(e,3),T);
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P, T, p), e3, T, p);
     Qp = FpXQE_mul(Pp, n, gel(e,1), T, p);
     Q = FpXQE_changepoint(Qp, gel(e,3), T, p);
     break;
@@ -1158,13 +1186,14 @@ FF_ellorder(GEN E, GEN P, GEN o)
 {
   pari_sp av = avma;
   GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
-  GEN r,T,p,Pp;
+  GEN r,T,p,Pp,e3;
   ulong pp;
   _getFF(fg,&T,&p,&pp);
   switch (fg[1])
   {
   case t_FF_FpXQ:
-    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), gel(e,3), T, p);
+    e3 = FqV_to_FpXQV(gel(e,3),T);
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), e3, T, p);
     r = FpXQE_order(Pp, o, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
@@ -1183,14 +1212,15 @@ FF_elllog(GEN E, GEN P, GEN Q, GEN o)
 {
   pari_sp av = avma;
   GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
-  GEN r,T,p, Pp,Qp;
+  GEN r,T,p, Pp,Qp, e3;
   ulong pp;
   _getFF(fg,&T,&p,&pp);
   switch(fg[1])
   {
   case t_FF_FpXQ:
-    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), gel(e,3), T, p);
-    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), gel(e,3), T, p);
+    e3 = FqV_to_FpXQV(gel(e,3),T);
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), e3, T, p);
+    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), e3, T, p);
     r = FpXQE_log(Pp, Qp, o, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
@@ -1210,15 +1240,16 @@ GEN
 FF_ellweilpairing(GEN E, GEN P, GEN Q, GEN m)
 {
   GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
-  GEN r,T,p, Pp,Qp;
+  GEN r,T,p, Pp,Qp, e3;
   ulong pp;
   GEN z=_initFF(fg,&T,&p,&pp);
   pari_sp av = avma;
   switch(fg[1])
   {
   case t_FF_FpXQ:
-    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), gel(e,3), T, p);
-    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), gel(e,3), T, p);
+    e3 = FqV_to_FpXQV(gel(e,3),T);
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), e3, T, p);
+    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), e3, T, p);
     r = FpXQE_weilpairing(Pp, Qp, m, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
@@ -1239,15 +1270,16 @@ GEN
 FF_elltatepairing(GEN E, GEN P, GEN Q, GEN m)
 {
   GEN fg = ellff_get_field(E), e = ellff_get_a4a6(E);
-  GEN r,T,p, Pp,Qp;
+  GEN r,T,p, Pp,Qp, e3;
   ulong pp;
   GEN z=_initFF(fg,&T,&p,&pp);
   pari_sp av = avma;
   switch(fg[1])
   {
   case t_FF_FpXQ:
-    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), gel(e,3), T, p);
-    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), gel(e,3), T, p);
+    e3 = FqV_to_FpXQV(gel(e,3),T);
+    Pp = FpXQE_changepointinv(RgE_to_FpXQE(P,T,p), e3, T, p);
+    Qp = FpXQE_changepointinv(RgE_to_FpXQE(Q,T,p), e3, T, p);
     r = FpXQE_tatepairing(Pp, Qp, m, gel(e,1), T, p);
     break;
   case t_FF_F2xq:
