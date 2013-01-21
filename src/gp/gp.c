@@ -579,23 +579,21 @@ static void
 external_help(const char *s, int num)
 {
   long nbli = term_height()-3, li = 0;
-  char buf[256], ar[32], *str;
-  const char *opt = "";
+  char buf[256], *str;
+  const char *opt = "", *ar = "";
   char *t;
   pariFILE *z;
   FILE *f;
 
   if (!has_ext_help()) pari_err(e_MISC,"no external help program");
   t = filter_quotes(s);
-  str = (char*)pari_malloc(strlen(Help) + strlen(t) + 64);
-  *ar = 0;
   if (num < 0)
     opt = "-k";
   else if (t[strlen(t)-1] != '@')
-    sprintf(ar,"@%d",num);
-  sprintf(str,"%s -fromgp %s %c%s%s%c",Help,opt, SHELL_Q,t,ar,SHELL_Q);
+    ar = stack_sprintf("@%d",num);
+  str = stack_sprintf("%s -fromgp %s %c%s%s%c",Help,opt,
+                                               SHELL_Q,t,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
-  pari_free(str);
   pari_free(t);
   while (fgets(buf, nbof(buf), f))
   {
