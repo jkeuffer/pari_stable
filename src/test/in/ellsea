@@ -1,5 +1,5 @@
-iferrname("e_MISC", ellmodulareqn(5),\
-          err, print("this test requires the package seadata"); quit())
+\\package:seadata
+ellmodulareqn(5)
 do(i,v)=
 {
   E = ellinit([0,0,0,v[2],v[3]]*Mod(1,v[1]));

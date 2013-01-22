@@ -32,49 +32,64 @@ file_bench=Bench-$VersionMajor.$VersionMinor.$patch
 
 dotestSUF=${dotestSUF:-"sta dyn"}
 for arg in $dotestSUF; do
-  if test $x $execdir/gp-$arg; then SUF="$SUF $arg"; fi
+  if test $x $execdir/gp-$arg; then
+    SUF="$SUF $arg"
+    datadir=`echo 'print(default(datadir))' | $execdir/gp-$arg -q -f`
+  fi
 done
 file_test=gp.out
 for suf in $SUF; do eval time$suf=0 files$suf=; done
 for testdata in $testlist; do
   O=$IFS;IFS=_;set $testdata;IFS=$O;testname=$1;testmul=$2
-  file_in=$testdir/in/$testname
-  file_out=$testdir/$bitlen/$testname
-  if test ! -r $file_out; then file_out=$testdir/32/$testname; fi
-  if test ! -r $file_out; then touch $file_out; fi
-  if test ! -r $file_in; then
-    wrln "Error! Missing file, can't test $testname"
-    exit 1
-  fi
-
-  testmul=${testmul:-1000}
-  wr "* Testing $testname $c"
-  for suf in $SUF; do
-    wr "	for gp-$suf..$c"
-    file_diff=$testname-$suf.dif
-    gp=$execdir/gp-$suf
-    (cat $file_in; echo 'print("Total time spent: ",gettime);') | $RUNTEST $gp -q --test  > $file_test 2>&1
-    diff -c $file_out $file_test > $file_diff
-    pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
-    time=`${tail}1 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
-    if test -n "$time"; then
-      eval t='$'time$suf
-      if test -n "$exprbug"; then
-        t=`expr $time \'\*\' $testmul / 1000 + $t`
-      else
-        t=`expr $time '*' $testmul / 1000 + $t`
-      fi
-      eval time$suf=$t
-    fi
-    if test -z "$pat"; then
-      wr "TIME=$time";
-    else
-      eval BUG$suf=BUG
-      eval files$suf=\"'$'files$suf $file_diff\"
-      wr "BUG [${time:-0}]"
+  pkgs=`${head}1 $testdir/in/$testname | grep package: | cut -f2 -d:`
+  skip=""
+  for pkg in $pkgs; do
+    if test ! $x "$datadir/$pkg"; then
+      echo "Skipping $testname because optional package $pkg has not been installed."
+      skip="true";
     fi
   done
-  wrln
+  if test "$skip" = "true"; then
+    untested="$untested $testname"
+  else
+    file_in=$testdir/in/$testname
+    file_out=$testdir/$bitlen/$testname
+    if test ! -r $file_out; then file_out=$testdir/32/$testname; fi
+    if test ! -r $file_out; then touch $file_out; fi
+    if test ! -r $file_in; then
+      wrln "Error! Missing file, can't test $testname"
+      exit 1
+    fi
+
+    testmul=${testmul:-1000}
+    wr "* Testing $testname $c"
+    for suf in $SUF; do
+      wr "	for gp-$suf..$c"
+      file_diff=$testname-$suf.dif
+      gp=$execdir/gp-$suf
+      (cat $file_in; echo 'print("Total time spent: ",gettime);') | $RUNTEST $gp -q --test  > $file_test 2>&1
+      diff -c $file_out $file_test > $file_diff
+      pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
+      time=`${tail}1 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
+      if test -n "$time"; then
+        eval t='$'time$suf
+        if test -n "$exprbug"; then
+          t=`expr $time \'\*\' $testmul / 1000 + $t`
+        else
+          t=`expr $time '*' $testmul / 1000 + $t`
+        fi
+        eval time$suf=$t
+      fi
+      if test -z "$pat"; then
+        wr "TIME=$time";
+      else
+        eval BUG$suf=BUG
+        eval files$suf=\"'$'files$suf $file_diff\"
+        wr "BUG [${time:-0}]"
+      fi
+    done
+    wrln
+  fi
 done
 $RM -f $file_test
 BUG=
@@ -84,6 +99,9 @@ for suf in $SUF; do
   if test -n "$B"; then B=' [BUG]'; fi
   wrln "+++$B Total bench for gp-$suf is $t"
 done
+if test -n "$untested"; then
+  wrln "Note: the following tests have been skipped:$untested"
+fi
 if test -z "$BUG"; then exit 0; fi
 
 pwd=`pwd`

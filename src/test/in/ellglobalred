@@ -1,3 +1,4 @@
+\\package:elldata
 {
   forell(E,1,9999,
     N = ellconvertname(E[1])[1];

@@ -1,3 +1,4 @@
+\\package:galdata
 test(a)=
 { my(x, y, z);
   for (i=1, 10000,
