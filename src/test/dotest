@@ -29,27 +29,10 @@ $RM -f echotmp
 
 . $confdir/version
 file_bench=Bench-$VersionMajor.$VersionMinor.$patch
-if (touch $file_bench 2> /dev/null); then
-  SUF=
-else
-  if test ! $x $execdir/gp.exe; then
-    echo "build gp.exe first" >&2; exit 1
-  fi
-  if (echo | $RUNTEST gp --test -q 2> /dev/null); then
-    gp=gp
-  else
-    gp="command /c gp"
-  fi
-  if (expr 2 \* 2 2> /dev/null); then exprbug=0; else exprbug=1; fi
-  SUF="exe"; file_bench=Bench.$patch
-fi
-$RM -f $file_bench
 
 dotestSUF=${dotestSUF:-"sta dyn"}
 for arg in $dotestSUF; do
-  case "$arg" in
-    sta|dyn) if test $x $execdir/gp-$arg; then SUF="$SUF $arg"; fi ;;
-  esac
+  if test $x $execdir/gp-$arg; then SUF="$SUF $arg"; fi
 done
 file_test=gp.out
 for suf in $SUF; do eval time$suf=0 files$suf=; done
@@ -68,11 +51,8 @@ for testdata in $testlist; do
   wr "* Testing $testname $c"
   for suf in $SUF; do
     wr "	for gp-$suf..$c"
-    case "$suf" in
-      exe) file_diff=$testname.dif;;
-      *)   file_diff=$testname-$suf.dif
-           gp=$execdir/gp-$suf;;
-    esac
+    file_diff=$testname-$suf.dif
+    gp=$execdir/gp-$suf
     (cat $file_in; echo 'print("Total time spent: ",gettime);') | $RUNTEST $gp -q --test  > $file_test 2>&1
     diff -c $file_out $file_test > $file_diff
     pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
