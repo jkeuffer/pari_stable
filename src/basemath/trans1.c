@@ -1643,6 +1643,65 @@ Qp_sqrtn(GEN x, GEN n, GEN *zetan)
 }
 
 GEN
+sqrtnint(GEN a, long n)
+{
+  pari_sp ltop = avma;
+  GEN x, y, b;
+  long s;
+  ulong k, e;
+  const ulong nm1 = n - 1;
+  if (typ(a) != t_INT) pari_err_TYPE("sqrtnint",a);
+  if (n <= 0) pari_err_DOMAIN("sqrtnint", "n", "<=", gen_0, stoi(n));
+  if (n == 1) return icopy(a);
+  s = signe(a);
+  if (s < 0) pari_err_DOMAIN("sqrtnint", "x", "<", gen_0, a);
+  if (!s) return gen_0;
+  if (lgefint(a) == 3) return utoi(usqrtn(itou(a), n));
+  e = expi(a); k = e/(2*n);
+  if (k == 0)
+  {
+    long flag;
+    if (n > e) {avma = ltop; return gen_1;}
+    flag = cmpii(a, powuu(3, n)); avma = ltop;
+    return (flag < 0) ? gen_2: stoi(3);
+  }
+  if (e < n*(BITS_IN_LONG - 1))
+  {
+    ulong s, xs, q;
+    s = 1 + e/n; xs = 1UL << s;
+    q = itou(shifti(a, -nm1*s));
+    while (q < xs) {xs -= (xs - q + nm1)/n; q = itou(divii(a, powuu(xs, nm1)));}
+    return utoi(xs);
+  }
+  b = addsi(1, shifti(a, -n*k));
+  x = shifti(addsi(1, sqrtnint(b, n)), k);
+  while (1) /* normally only one iteration, no stack handling necessary */
+  {
+    y = divis(addii(mului(nm1, x), divii(a, powiu(x, nm1))), n);
+    if (cmpii(y, x) >= 0) return gerepileuptoleaf(ltop, x);
+    x = y;
+  }
+}
+
+ulong
+usqrtn(ulong a, ulong n)
+{
+  ulong x, s, q;
+  const ulong nm1 = n - 1;
+  if (!n) pari_err_DOMAIN("sqrtnint", "n", "=", gen_0, utoi(n));
+  if (n == 1 || a == 0) return a;
+  s = 1 + expu(a)/n; x = 1UL << s;
+  q = (nm1*s >= BITS_IN_LONG)? 0: a >> (nm1*s);
+  while (q < x) {
+    ulong X;
+    x -= (x - q + nm1)/n;
+    X = upowuu(x, nm1);
+    q = X? a/X: 0;
+  }
+  return x;
+}
+
+GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
   long i, lx, tx;
@@ -1694,19 +1753,23 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 
   case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
     i = precision(x); if (i) prec = i;
-    if (tx==t_INT && is_pm1(x) && signe(x) > 0)
-     /*speed-up since there is no way to call rootsof1complex from gp*/
+    if (isint1(x))
       y = real_1(prec);
     else if (gequal0(x))
     {
+      long b;
       if (signe(n) < 0) pari_err_INV("gsqrtn",x);
       if (isinexactreal(x))
+        b = sdivsi(gexpo(x), n);
+      else
+        b = -prec2nbits(prec);
+      if (typ(x) == t_COMPLEX)
       {
-        long e = gexpo(x), junk;
-        y = real_0_bit(e < 2? 0: sdivsi_rem(e, n, &junk));
+        y = cgetg(3,t_COMPLEX);
+        gel(y,1) = gel(y,2) = real_0_bit(b);
       }
       else
-        y = real_0(prec);
+        y = real_0_bit(b);
     }
     else
       y = gerepileupto(av, gexp(gdiv(glog(x,prec), n), prec));

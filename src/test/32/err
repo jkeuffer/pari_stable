@@ -335,6 +335,12 @@
   ***   at top-level: sqrtint(-1)
   ***                 ^-----------
   *** sqrtint: domain error in sqrtint: argument < 0
+  ***   at top-level: sqrtnint(-1,2)
+  ***                 ^--------------
+  *** sqrtnint: domain error in sqrtnint: x < 0
+  ***   at top-level: sqrtnint(2,-2)
+  ***                 ^--------------
+  *** sqrtnint: domain error in sqrtnint: n <= 0
   ***   at top-level: znprimroot(8)
   ***                 ^-------------
   *** znprimroot: domain error in znprimroot: modulus = 8
@@ -565,4 +571,4 @@
   ***   at top-level: e.tate
   ***                   ^----
   *** _.tate: incorrect type in tate [not defined over Qp] (t_VEC).
-Total time spent: 32
+Total time spent: 16

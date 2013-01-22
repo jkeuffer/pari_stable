@@ -153,6 +153,8 @@ polsubcyclo(2,-1);
 random(-1)
 znprimroot(0)
 sqrtint(-1)
+sqrtnint(-1,2)
+sqrtnint(2,-2)
 znprimroot(8)
 polroots(x^2+Mod(1,2))
 prime(-2)

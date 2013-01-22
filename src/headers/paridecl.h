@@ -2997,8 +2997,10 @@ GEN     powru(GEN x, ulong n);
 GEN     powruhalf(GEN x, ulong s);
 GEN     powuu(ulong p, ulong k);
 GEN     powgi(GEN x, GEN n);
+GEN     sqrtnint(GEN a, long n);
 GEN     teich(GEN x);
 ulong   upowuu(ulong p, ulong k);
+ulong   usqrtn(ulong a, ulong n);
 
 /* trans2.c */
 

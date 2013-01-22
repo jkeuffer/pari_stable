@@ -1,0 +1,18 @@
+default(realprecision,38);
+sqrtn(0.,3)
+sqrtn(0.*I,3)
+sqrtn(1/2,3)
+sqrtn(quadgen(5),3)
+sqrtn(8+O(17^100), 3)
+
+test(b, M)=
+{ my (B = b);
+  for (i=2, M,
+    B *= b; \\ b^i
+    a = sqrtnint(B + 1, i);
+    if (a != b, error([b, B, i]));
+  );
+}
+test(2, 100);
+test(2^32+1, 10);
+test(2^64+1, 10);
