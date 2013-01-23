@@ -262,7 +262,7 @@ BA 97- zv_cmp0 renamed to zv_equal0
   100- ellinit(E / Qp).tate : the u component is now always a square root
        of u2, also in the non-split case (in which case it lives in a
        quadratic extension of Qp)
-  101- renamed divsum() => sumdivexpr()
+  101- renamed library function divsum() => sumdivexpr()
 
   Added
     1- mathnf for matrices over K[X] [#41]
