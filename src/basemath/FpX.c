@@ -1665,8 +1665,8 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   if (!signe(a))
   {
     long v=varn(a);
-    if (zeta)
-      *zeta=pol_1(v);
+    if (signe(n) < 0) pari_err_INV("FpXQ_sqrtn",a);
+    if (zeta) *zeta=pol_1(v);
     return pol_0(v);
   }
   if (lgefint(p)==3)

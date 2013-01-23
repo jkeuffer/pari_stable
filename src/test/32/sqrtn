@@ -3,4 +3,19 @@
 0.79370052598409973737585281963615413020
 1.1739849967053285099666839718862667420
 2 + O(17^100)
+  ***   at top-level: sqrtn(Mod(0,3),-2)
+  ***                 ^------------------
+  *** sqrtn: impossible inverse in Fp_sqrtn: Mod(0, 3).
+  ***   at top-level: sqrtn(O(3),-2)
+  ***                 ^--------------
+  *** sqrtn: impossible inverse in ginv: O(3).
+  ***   at top-level: sqrtn(0*ffgen(ffinit
+  ***                 ^--------------------
+  *** sqrtn: impossible inverse in FpXQ_sqrtn: 0.
+  ***   at top-level: sqrtn(0*ffgen(ffinit
+  ***                 ^--------------------
+  *** sqrtn: impossible inverse in Flxq_sqrtn: Vecsmall([0]).
+  ***   at top-level: sqrtn(0*ffgen(ffinit
+  ***                 ^--------------------
+  *** sqrtn: impossible inverse in F2xq_sqrtn: Vecsmall([0]).
 Total time spent: 4

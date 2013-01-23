@@ -955,6 +955,7 @@ F2xq_sqrtn(GEN a, GEN n, GEN T, GEN *zeta)
 {
   if (!lgpol(a))
   {
+    if (signe(n) < 0) pari_err_INV("F2xq_sqrtn",a);
     if (zeta)
       *zeta=pol1_F2x(T[1]);
     return pol0_F2x(T[1]);

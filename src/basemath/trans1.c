@@ -1066,14 +1066,18 @@ val_from_i(GEN E)
   return itos(E);
 }
 
-/* return x^q, assume typ(x) = t_SER, typ(q) = t_FRAC and q != 0 */
+/* return x^q, assume typ(x) = t_SER, typ(q) = t_INT/t_FRAC and q != 0 */
 static GEN
 ser_powfrac(GEN x, GEN q, long prec)
 {
   long e = valp(x);
   GEN y, E = gmulsg(e, q);
 
-  if (!signe(x)) return zeroser(varn(x), val_from_i(gfloor(E)));
+  if (!signe(x))
+  {
+    if (gsigne(q) < 0) pari_err_INV("gpow", x);
+    return zeroser(varn(x), val_from_i(gfloor(E)));
+  }
   if (typ(E) != t_INT)
     pari_err_DOMAIN("sqrtn", "valuation", "!=", mkintmod(gen_0, gel(q,2)), x);
   e = val_from_i(E);
@@ -1603,11 +1607,13 @@ Qp_sqrtn(GEN x, GEN n, GEN *zetan)
   if (equaliu(n, 2))
   {
     if (zetan) *zetan = gen_m1;
+    if (signe(n) < 0) x = ginv(x);
     return Qp_sqrt(x);
   }
   av = avma; p = gel(x,2);
   if (!signe(gel(x,4)))
   {
+    if (signe(n) < 0) pari_err_INV("Qp_sqrtn", x);
     q = divii(addis(n, valp(x)-1), n);
     if (zetan) *zetan = gen_1;
     avma = av; return zeropadic(p, itos(q));

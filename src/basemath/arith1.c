@@ -2969,6 +2969,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
   if (!signe(a))
   {
     if (zeta) *zeta = gen_1;
+    if (signe(n) < 0) pari_err_INV("Fp_sqrtn", mkintmod(gen_0,p));
     return gen_0;
   }
   return gen_Shanks_sqrtn(a,n,addis(p,-1),zeta,(void*)p,&Fp_star);

@@ -772,7 +772,7 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
   if (is_pm1(n))
   {
     if (zetan) *zetan = grp->pow(E,a,gen_0);
-    return gcopy(a);
+    return signe(n) < 0? grp->pow(E,a,gen_m1): gcopy(a);
   }
   is_1 = grp->equal1(a);
   if (is_1 && !zetan) return gcopy(a);

@@ -16,3 +16,9 @@ test(b, M)=
 test(2, 100);
 test(2^32+1, 10);
 test(2^64+1, 10);
+
+sqrtn(Mod(0,3),-2)
+sqrtn(O(3),-2)
+sqrtn(0*ffgen(ffinit(2^64+13,2)),-2)
+sqrtn(0*ffgen(ffinit(3,2)),-2)
+sqrtn(0*ffgen(ffinit(2,2)),-2)

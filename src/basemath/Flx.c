@@ -2686,6 +2686,7 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
   GEN o;
   if (!lgpol(a))
   {
+    if (signe(n) < 0) pari_err_INV("Flxq_sqrtn",a);
     if (zeta)
       *zeta=pol1_Flx(get_Flx_var(T));
     return pol0_Flx(get_Flx_var(T));
