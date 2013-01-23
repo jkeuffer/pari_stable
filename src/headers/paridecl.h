@@ -2343,7 +2343,7 @@ long    istotient(GEN n, GEN *px);
 long    moebius(GEN n);
 long    moebiusu(ulong n);
 GEN     nextprime(GEN n);
-GEN     numbdiv(GEN n);
+GEN     numdiv(GEN n);
 long    omega(GEN n);
 GEN     precprime(GEN n);
 GEN     sumdiv(GEN n);

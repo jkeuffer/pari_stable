@@ -1,0 +1,15 @@
+n = 10!; fa = factor(n);
+sumdiv(n, d, eulerphi(d))
+sumdiv(n, d, d^2)
+sumdiv(fa, d, eulerphi(d))
+sumdiv(fa, d, d^2)
+sumdivmult(n, d, eulerphi(d))
+sumdivmult(n, d, d^2)
+sumdivmult(fa, d, eulerphi(d))
+sumdivmult(fa, d, d^2)
+
+n = x^2*(x+1)^3*(x+2)^5; fa = factor(n);
+sumdiv(n, d, d)
+sumdiv(fa, d, d)
+sumdivmult(n, d, d)
+sumdivmult(fa, d, d)

@@ -714,14 +714,12 @@ factor_eulerphi(GEN n)
 /**                                                                   **/
 /***********************************************************************/
 
-GEN
-divisors(GEN n)
+int
+divisors_init(GEN n, GEN *pP, GEN *pE)
 {
-  pari_sp av = avma;
-  long i, j, l, tn = typ(n);
-  ulong nbdiv;
+  long tn = typ(n), i,l;
+  GEN E, P, e;
   int isint = 1;
-  GEN *d, *t, *t1, *t2, *t3, P, E, e;
 
   if (tn == t_MAT && lg(n) == 3)
   {
@@ -741,27 +739,41 @@ divisors(GEN n)
     P = gel(n,1); l = lg(P);
   }
   E = gel(n,2);
-  if (isint && l>1 && signe(gel(P,1)) < 0) { E++; P++; l--; } /* skip -1 */
+  /* skip -1 */
+  if (isint && l>1 && signe(gel(P,1)) < 0) { E++; P = vecslice(P,2,--l); }
   e = cgetg(l, t_VECSMALL);
-  nbdiv = 1;
   for (i=1; i<l; i++)
   {
     e[i] = itos(gel(E,i));
     if (e[i] < 0) pari_err_TYPE("divisors [denominator]",n);
-    nbdiv = itou_or_0( muluu(nbdiv, 1+e[i]) );
   }
-  if (!nbdiv || nbdiv & ~LGBITS) pari_err_OVERFLOW("divisors");
-  d = t = (GEN*) cgetg(nbdiv+1,t_VEC);
+  *pP = P; *pE = e; return isint;
+}
+
+GEN
+divisors(GEN n)
+{
+  pari_sp av = avma;
+  long i, j, l;
+  ulong ndiv;
+  GEN *d, *t, *t1, *t2, *t3, P, E, e;
+  int isint = divisors_init(n, &P, &E);
+
+  l = lg(E); e = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) e[i] = E[i]+1;
+  ndiv = itou_or_0( zv_prod_Z(e) );
+  if (!ndiv || ndiv & ~LGBITS) pari_err_OVERFLOW("divisors");
+  d = t = (GEN*) cgetg(ndiv+1,t_VEC);
   *++d = gen_1;
   if (isint)
   {
     for (i=1; i<l; i++)
-      for (t1=t,j=e[i]; j; j--,t1=t2)
+      for (t1=t,j=E[i]; j; j--,t1=t2)
         for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, gel(P,i));
-    e = sort((GEN)t);
+    e = ZV_sort((GEN)t);
   } else {
     for (i=1; i<l; i++)
-      for (t1=t,j=e[i]; j; j--,t1=t2)
+      for (t1=t,j=E[i]; j; j--,t1=t2)
         for (t2=d, t3=t1; t3<t2; ) *++d = gmul(*++t3, gel(P,i));
     e = (GEN)t;
   }

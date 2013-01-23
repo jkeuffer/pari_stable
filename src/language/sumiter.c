@@ -923,7 +923,7 @@ suminf0(GEN a, GEN code, long prec)
 { EXPR_WRAP(code, suminf(EXPR_ARG, a, prec)); }
 
 GEN
-divsum(GEN num, GEN code)
+sumdivexpr(GEN num, GEN code)
 {
   pari_sp av = avma;
   GEN y = gen_0, t = divisors(num);
@@ -934,6 +934,30 @@ divsum(GEN num, GEN code)
   {
     set_lex(-1,gel(t,i));
     y = gadd(y, closure_evalnobrk(code));
+  }
+  pop_lex(1); return gerepileupto(av,y);
+}
+GEN
+sumdivmultexpr(GEN num, GEN code)
+{
+  pari_sp av = avma;
+  GEN y = gen_1, P,E;
+  int isint = divisors_init(num, &P,&E);
+  long i, l = lg(P);
+
+  if (l == 1) { avma = av; return gen_1; }
+  push_lex(gen_0, code);
+  for (i=1; i<l; i++)
+  {
+    GEN p = gel(P,i), q = p, z = gen_1;
+    long j, e = E[i];
+    for (j = 1; j <= e; j++, q = isint?mulii(q, p): gmul(q,p))
+    {
+      set_lex(-1, q);
+      z = gadd(z, closure_evalnobrk(code));
+      if (j == e) break;
+    }
+    y = gmul(y, z);
   }
   pop_lex(1); return gerepileupto(av,y);
 }

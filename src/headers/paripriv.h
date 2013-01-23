@@ -83,7 +83,6 @@ GEN  gshift_right(GEN x, long n);
 GEN  derivnum0(GEN a, GEN code, long prec);
 GEN  derivfun0(GEN code, GEN args, long prec);
 GEN  direuler0(GEN a, GEN b, GEN code, GEN c);
-GEN  divsum(GEN num, GEN code);
 void forcomposite(GEN a, GEN b, GEN code);
 void fordiv(GEN a, GEN code);
 void forell0(long a, long b, GEN code);
@@ -108,6 +107,8 @@ GEN  prodinf0(GEN a, GEN code, long flag, long prec);
 GEN  produit(GEN a, GEN b, GEN code, GEN x);
 GEN  somme(GEN a, GEN b, GEN code, GEN x);
 GEN  sumalt0(GEN a, GEN code,long flag, long prec);
+GEN  sumdivexpr(GEN num, GEN code);
+GEN  sumdivmultexpr(GEN num, GEN code);
 GEN  suminf0(GEN a, GEN code, long prec);
 GEN  sumnum0(GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN  sumnumalt0(GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
@@ -459,6 +460,7 @@ int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 
 /* arith2.c */
 
+int     divisors_init(GEN n, GEN *pP, GEN *pE);
 byteptr initprimes0(ulong maxnum, long *lenp, ulong *lastp);
 long    set_optimize(long what, GEN g);
 

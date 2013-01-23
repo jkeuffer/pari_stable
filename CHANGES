@@ -262,6 +262,7 @@ BA 97- zv_cmp0 renamed to zv_equal0
   100- ellinit(E / Qp).tate : the u component is now always a square root
        of u2, also in the non-split case (in which case it lives in a
        quadratic extension of Qp)
+  101- renamed divsum() => sumdivexpr()
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -405,6 +406,7 @@ BA 127- Support for preconditionned reduction in FpXQ/Flxq
         ZX_Zp_root, Zp_appr, Fp_muls, retmkfrac
 BA 129- Add safegel et al. for GP2C -C option
 HC 130- Function sqrtnint
+   131- sumdivmult() to sum multiplicative functions
 
   Removed
     1- dropped DOS support
