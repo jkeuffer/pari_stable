@@ -9,4 +9,4 @@ Description:
  (gen, 0):int            numdiv($1)
 Doc: sum of the $k^{\text{th}}$ powers of the positive divisors of $|x|$. $x$
  and $k$ must be of type integer.
-Variant:
+Variant: Also available is \fun{GEN}{sumdiv}{GEN n}, for $k = 1$.
