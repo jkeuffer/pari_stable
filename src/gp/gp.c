@@ -620,6 +620,7 @@ const char *keyword_list[]={
   "rnf",
   "bid",
   "modulus",
+  "prototype",
   NULL
 };
 
