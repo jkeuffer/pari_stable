@@ -70,7 +70,7 @@ Doc: loads from dynamic library \var{lib} the function \var{name}. Assigns to it
  For instance the prototype corresponding to
  \bprog
    long issquareall(GEN x, GEN *n = NULL)
- @eprog\noindent is \kbd{lGD&}.
+ @eprog\noindent is \kbd{lGD\&}.
 
  \misctitle{Caution} This function may not work on all systems, especially
  when \kbd{gp} has been compiled statically. In that case, the first use of an
