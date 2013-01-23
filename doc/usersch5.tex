@@ -9435,6 +9435,8 @@ copying components, i.~e.,~it returns a \kbd{GEN} whose components are
 $x$ must be \typ{VEC} or \typ{LIST}, concatenate
 its elements from left to right. Shallow version of \kbd{concat1}.
 
+\fun{GEN}{shallowmatconcat}{GEN v} shallow version of \kbd{matconcat}.
+
 \fun{GEN}{shallowextract}{GEN x, GEN y} extract components
 of the vector or matrix $x$ according to the selection parameter $y$.
 This is the shallow analog of \kbd{extract0(x, y, NULL)}, see \tet{vecextract}.

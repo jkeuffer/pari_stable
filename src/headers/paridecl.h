@@ -1670,9 +1670,9 @@ GEN     strtofunction(const char *s);
 GEN     concat(GEN x, GEN y);
 GEN     concat1(GEN x);
 GEN     matconcat(GEN v);
-GEN     matconcat_shallow(GEN v);
 GEN     shallowconcat(GEN x, GEN y);
 GEN     shallowconcat1(GEN x);
+GEN     shallowmatconcat(GEN v);
 GEN     vconcat(GEN A, GEN B);
 
 /* default.c */
@@ -1733,7 +1733,6 @@ GEN     anell(GEN e, long n);
 GEN     anellsmall(GEN e, long n);
 GEN     bilhell(GEN e, GEN z1, GEN z2, long prec);
 void    checkell(GEN e);
-void    checkell_real(GEN e);
 void    checkell_Fq(GEN e);
 void    checkell_Q(GEN e);
 void    checkell_Qp(GEN e);

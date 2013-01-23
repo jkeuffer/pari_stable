@@ -373,7 +373,7 @@ _matsize(GEN x)
 }
 
 GEN
-matconcat_shallow(GEN v)
+shallowmatconcat(GEN v)
 {
   long i, j, h, l = lg(v), L = 0, H = 0;
   GEN M, maxh, maxl;
@@ -444,7 +444,7 @@ matconcat_shallow(GEN v)
       }
       return M;
     default:
-      pari_err_TYPE("matconcat_shallow", v);
+      pari_err_TYPE("shallowmatconcat", v);
       return NULL;
   }
 }
@@ -452,7 +452,7 @@ GEN
 matconcat(GEN v)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, matconcat_shallow(v));
+  return gerepilecopy(av, shallowmatconcat(v));
 }
 
 GEN
