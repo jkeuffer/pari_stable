@@ -1741,6 +1741,9 @@ $2^n$ if $n \geq 0$, and $0$ otherwise).
 \fun{GEN}{real2n}{long n, long prec} create a \typ{REAL} equal to $2^n$
 to \kbd{prec} words of accuracy.
 
+\fun{GEN}{real_m2n}{long n, long prec} create a \typ{REAL} equal to $-2^n$
+to \kbd{prec} words of accuracy.
+
 \fun{GEN}{strtoi}{char *s} convert the character string \kbd{s} to a
 non-negative \typ{INT}. The string \kbd{s} consists exclusively of digits (no
 leading sign).
@@ -1970,6 +1973,9 @@ by~$2^{-\kbd{n}}$.
 
 \fun{GEN}{shiftr}{GEN x, long n} shifts the \typ{REAL}~$x$ by~$n$.
 
+\fun{void}{shiftr_inplace}{GEN x, long n} shifts the \typ{REAL}~$x$ by~$n$,
+in place.
+
 \fun{GEN}{trunc2nr}{GEN x, long n} given a \typ{REAL} $x$, returns
 \kbd{truncr(shiftr(x,n))}, but faster, without leaving garbage on the stack
 and never raising a \emph{precision loss in truncation} error.
@@ -1978,6 +1984,16 @@ Called by \tet{gtrunc2n}.
 \fun{GEN}{trunc2nr_lg}{GEN x, long lx, long n} given a \typ{REAL} $x$, returns
 \kbd{trunc2nr(x,n)}, pretending that the length of $x$ is \kbd{lx}, which
 must be $\leq \kbd{lg}(x)$.
+
+\fun{GEN}{mantissa2nr}{GEN x, long n} given a \typ{REAL} $x$, returns
+the mantissa of $x 2^n$ (disregards the exponent of $x$). Equivalent to
+\bprog
+  trunc2nr(x, n-expo(x)+bit_prec(x)-1)
+@eprog
+
+\fun{GEN}{mantissa_real}{GEN z, long *e} returns the mantissa $m$ of $z$, and
+sets \kbd{*e} to the exponent $\kbd{bit\_accuracy(lg(z))}-1-\kbd{expo}(z)$,
+so that $z = m / 2^e$.
 
 \misctitle{Low-level} In the following two functions, $s$(ource) and $t$(arget)
 need not be valid \kbd{GEN}s (in practice, they usually point to some part of a
