@@ -1,0 +1,9 @@
+Function: sqrtnint
+Section: number_theoretical
+C-Name: sqrtnint
+Prototype: GL
+Help: sqrtnint(x,n): integer n-th root of x (x integer).
+Description:
+ (gen):int sqrtnint($1)
+Doc: integer $n$-th root of $x$, which must be a non-negative integer. The
+ result is rounded towards zero.
