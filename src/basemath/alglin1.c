@@ -2825,7 +2825,7 @@ RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
   GEN prow = cgetg(nbrow+1, t_VECSMALL);
   GEN pcol = const_vecsmall(nbcol, 0);
   pari_sp av = avma;
-  long rcol = nbcol, rrow = 0, imin = nbcol - usqrtsafe(nbcol);
+  long rcol = nbcol, rrow = 0, imin = nbcol - usqrt(nbcol);
   GEN iscol = const_vecsmall(nbcol, 1);
   GEN Wrow  = const_vecsmall(nbrow, 0);
   GEN wcol = cgetg(nbcol+1, t_VECSMALL);

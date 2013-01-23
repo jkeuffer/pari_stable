@@ -806,7 +806,7 @@ sqri(GEN a) { return sqrispec(a+2, lgefint(a)-2); }
 /* sqrt()'s result may be off by 1 when a is not representable exactly as a
  * double [64bit machine] */
 ulong
-usqrtsafe(ulong a)
+usqrt(ulong a)
 {
   ulong x = (ulong)sqrt((double)a);
 #ifdef LONG_IS_64BIT

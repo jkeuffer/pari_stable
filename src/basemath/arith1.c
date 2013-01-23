@@ -493,7 +493,7 @@ uissquareall(ulong A, ulong *sqrtA)
   if (!A) { *sqrtA = 0; return 1; }
   if (carremod(A))
   {
-    ulong a = usqrtsafe(A);
+    ulong a = usqrt(A);
     if (a * a == A) { *sqrtA = a; return 1; }
   }
   return 0;
@@ -504,7 +504,7 @@ uissquare(ulong A)
   if (!A) return 1;
   if (carremod(A))
   {
-    ulong a = usqrtsafe(A);
+    ulong a = usqrt(A);
     if (a * a == A) return 1;
   }
   return 0;

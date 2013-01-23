@@ -3001,6 +3001,7 @@ GEN     sqrtnint(GEN a, long n);
 GEN     teich(GEN x);
 ulong   upowuu(ulong p, ulong k);
 ulong   usqrtn(ulong a, ulong n);
+ulong   usqrt(ulong a);
 
 /* trans2.c */
 

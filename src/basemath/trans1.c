@@ -1707,6 +1707,16 @@ usqrtn(ulong a, ulong n)
   return x;
 }
 
+ulong
+usqrt2(ulong a)
+{
+  ulong x, s, q;
+  if (a == 0) return a;
+  s = 1 + expu(a)/2; x = 1UL << s; q = a >> s;
+  while (q < x) { x -= (x - q + 1)>>1; q = a/x; }
+  return x;
+}
+
 GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {

@@ -1520,8 +1520,8 @@ squfof(GEN n)
   if (!c1) pari_err_BUG("squfof [caller of] (n or 3n is a square)");
   c2 = itos(shifti(subii(D2, sqru((ulong)b2)), -2));
   if (!c2) pari_err_BUG("squfof [caller of] (5n is a square)");
-  L1 = (long)usqrtsafe(d1);
-  L2 = (long)usqrtsafe(d2);
+  L1 = (long)usqrt(d1);
+  L2 = (long)usqrt(d2);
   /* dd1 used to compute floor((d1+b1)/2) as dd1+floor(b1/2), without
    * overflowing the 31bit signed integer size limit. Same for dd2. */
   dd1 = (long) ((d1>>1) + (d1&1));

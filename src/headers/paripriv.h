@@ -147,7 +147,6 @@ double dabs(double s, double t);
 void   dcxlog(double s, double t, double *a, double *b);
 double dnorm(double s, double t);
 double dbllog2(GEN z);
-ulong  usqrtsafe(ulong a);
 
 /* hnf */
 GEN hnfadd(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);

@@ -190,7 +190,7 @@ optimize_chunk(ulong a, ulong b)
   /* TODO: Optimize size (surely < 512k to stay in L1 cache, but not so large */
   /* as to force recalculating too often). */
   /* Guesstimate: greater of sqrt(n) * lg(n) or 1M */
-  ulong chunk = maxuu(0x100000, usqrtsafe(b) * expu(b));
+  ulong chunk = maxuu(0x100000, usqrt(b) * expu(b));
   ulong tmp = (b - a) / chunk + 1;
 
   if (tmp == 1)
@@ -336,7 +336,7 @@ forprime_init(forprime_t *T, GEN a, GEN b)
 static void
 sieve_block(ulong a, ulong b, ulong maxpos, unsigned char* sieve)
 {
-  ulong p = 2, lim = usqrtsafe(b), sz = (b-a) >> 1;
+  ulong p = 2, lim = usqrt(b), sz = (b-a) >> 1;
   byteptr d = diffptr+1;
   (void)memset(sieve, 0, maxpos+1);
   for (;;)
