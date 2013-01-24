@@ -1075,7 +1075,7 @@ GEN
 powruvec(GEN e, ulong n)
 {
   GEN G = cgetg(n+1, t_VEC);
-  long j;
+  ulong j;
   if (n)
   {
     gel(G, 1) = e;

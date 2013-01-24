@@ -1653,8 +1653,7 @@ sqrtnint(GEN a, long n)
 {
   pari_sp ltop = avma;
   GEN x, b, q;
-  long s;
-  ulong k, e;
+  long s, k, e;
   const ulong nm1 = n - 1;
   if (typ(a) != t_INT) pari_err_TYPE("sqrtnint",a);
   if (n <= 0) pari_err_DOMAIN("sqrtnint", "n", "<=", gen_0, stoi(n));
@@ -1710,16 +1709,6 @@ usqrtn(ulong a, ulong n)
     X = upowuu(x, nm1);
     q = X? a/X: 0;
   }
-  return x;
-}
-
-ulong
-usqrt2(ulong a)
-{
-  ulong x, s, q;
-  if (a == 0) return a;
-  s = 1 + expu(a)/2; x = 1UL << s; q = a >> s;
-  while (q < x) { x -= (x - q + 1)>>1; q = a/x; }
   return x;
 }
 
