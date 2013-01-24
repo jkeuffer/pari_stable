@@ -18,4 +18,5 @@
   ***   at top-level: sqrtn(0*ffgen(ffinit
   ***                 ^--------------------
   *** sqrtn: impossible inverse in F2xq_sqrtn: Vecsmall([0]).
-Total time spent: 4
+9
+Total time spent: 8

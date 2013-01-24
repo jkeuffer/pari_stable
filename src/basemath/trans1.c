@@ -1678,7 +1678,9 @@ sqrtnint(GEN a, long n)
     qs = itou(shifti(a, -nm1*s));
     while (qs < xs) {
       xs -= (xs - qs + nm1)/n;
-      qs = itou(divii(a, powuu(xs, nm1)));
+      q = divii(a, powuu(xs, nm1));
+      if (lgefint(q) > 3) break;
+      qs = itou(q);
     }
     return utoi(xs);
   }

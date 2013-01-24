@@ -22,3 +22,5 @@ sqrtn(O(3),-2)
 sqrtn(0*ffgen(ffinit(2^64+13,2)),-2)
 sqrtn(0*ffgen(ffinit(3,2)),-2)
 sqrtn(0*ffgen(ffinit(2,2)),-2)
+
+sqrtnint(10^1000,1001)
