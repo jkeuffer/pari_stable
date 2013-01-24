@@ -21,11 +21,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    This convention should be encapsulated; then we may declare [;] invalid
    input.
 
-4  ellinit over Q_2 doesn't work (AGM loses too much precision)
-
-4  ellpointtoz over Q_p makes no difference between P and -P (corrected over
-   C by a cheap trick)
-
 3  some functions assume MAXVARN is a free variable, yielding bogus
    results if the input involves it (only affects library programming).
 
@@ -64,7 +59,7 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 5  add examples for all functions in Chapter 3
 
-4  document the innards of PARI (entree, pariFILE, bloc, CATCH/TRY, ...)
+4  document the innards of PARI (entree, pariFILE, bloc, ...)
 
 ***************************  MISCELLANEOUS    ****************************
 
@@ -87,9 +82,6 @@ Kernel:
 2  interval arithmetic
 
 2  add support for different multiprecision kernels (a la LiDIA)
-
-0  check NaN in dbltor and related routines
-   [ not worth it ]
 
 0  support standard rounding modes in floating point operations
    [ not worth it ]
@@ -161,8 +153,6 @@ Misc:
 
 ***************************   GP DESIGN       ****************************
 
--  rework the semantics of "trap".
-
 -  Allow GP to trap an OS signal. Suppose that gp runs, say in nohup mode, and
    it takes several days to complete the program. In meantime several things
    can happen resulting in shutdown of the machine. On shutdown all programs
@@ -172,10 +162,6 @@ Misc:
 
 5  write an analog of the 'echo' default which would print code as it is
    _executed_, not as it is read
-
-4  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
-   in large intervals, sieve out multiple of small primes there, then use
-   isprime() on the rest]
 
 3  possibility to save and load a session (variables, functions, defaults)
 
@@ -190,8 +176,6 @@ Misc:
 ***************************   TOOLS           ****************************
 
 4  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
-
-2  write a GP scripts debugger
 
 2  write a GP scripts profiler
 
