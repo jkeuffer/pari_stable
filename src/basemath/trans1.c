@@ -1652,7 +1652,7 @@ GEN
 sqrtnint(GEN a, long n)
 {
   pari_sp ltop = avma;
-  GEN x, y, b;
+  GEN x, b, q;
   long s;
   ulong k, e;
   const ulong nm1 = n - 1;
@@ -1673,20 +1673,24 @@ sqrtnint(GEN a, long n)
   }
   if (e < n*(BITS_IN_LONG - 1))
   {
-    ulong s, xs, q;
+    ulong s, xs, qs;
     s = 1 + e/n; xs = 1UL << s;
-    q = itou(shifti(a, -nm1*s));
-    while (q < xs) {xs -= (xs - q + nm1)/n; q = itou(divii(a, powuu(xs, nm1)));}
+    qs = itou(shifti(a, -nm1*s));
+    while (qs < xs) {
+      xs -= (xs - qs + nm1)/n;
+      qs = itou(divii(a, powuu(xs, nm1)));
+    }
     return utoi(xs);
   }
   b = addsi(1, shifti(a, -n*k));
   x = shifti(addsi(1, sqrtnint(b, n)), k);
-  while (1) /* normally only one iteration, no stack handling necessary */
+  q = divii(a, powiu(x, nm1));
+  while (cmpii(q, x) < 0) /* a priori one iteration, no GC necessary */
   {
-    y = divis(addii(mului(nm1, x), divii(a, powiu(x, nm1))), n);
-    if (cmpii(y, x) >= 0) return gerepileuptoleaf(ltop, x);
-    x = y;
+    x = subii(x, divis(addsi(nm1, subii(x, q)), n));
+    q = divii(a, powiu(x, nm1));
   }
+  return gerepileuptoleaf(ltop, x);
 }
 
 ulong
