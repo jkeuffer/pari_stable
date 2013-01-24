@@ -622,8 +622,10 @@ ZpXQ_log(GEN a, GEN T, GEN p, long N)
   long e = is2 ? N-1: N;
   long i, l = (e-2)/(2*(k+is2));
   GEN pe = powiu(p,e);
+  GEN TNk, pNk = powiu(p,N+k);
   if( DEBUGLEVEL>=3) timer_start(&ti);
-  ak = FpXQ_pow(a, powiu(p,k), T, powiu(p,N+k));
+  TNk = FpX_get_red(get_FpX_mod(T), pNk);
+  ak = FpXQ_pow(a, powiu(p,k), TNk, pNk);
   if( DEBUGLEVEL>=3) timer_printf(&ti,"FpXQ_pow(%ld)",k);
   b = ZpXQ_log_to_ath(ak, k, T, p, e, pe);
   if( DEBUGLEVEL>=3) timer_printf(&ti,"ZpXQ_log_to_ath");
