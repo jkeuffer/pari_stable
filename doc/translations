@@ -1,5 +1,5 @@
-readline        @A (too) short introduction to readline@2
-edit            @A (too) short introduction to readline@2
+readline        @se:readline@2
+edit            @se:readline@2
 ?               @?@2
 ??              @?@2
 \\              @\bs\bs@2
