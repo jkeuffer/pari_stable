@@ -1,0 +1,3 @@
+default(realprecision,38);
+H=polhermite(66);
+imag(polroots(H))

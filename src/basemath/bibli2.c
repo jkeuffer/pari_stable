@@ -224,7 +224,7 @@ polhermite(long n, long v)
       av = avma;
       a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
       togglesign(a);
-      gel(r--,0) = gerepileuptoint(av, a);
+      gel(r--,0) = a = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
   else
@@ -233,7 +233,7 @@ polhermite(long n, long v)
       av = avma;
       a = diviuexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), 4*m);
       togglesign(a);
-      gel(r--,0) = gerepileuptoint(av, a);
+      gel(r--,0) = a = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
   q[1] = evalsigne(1) | evalvarn(v);
