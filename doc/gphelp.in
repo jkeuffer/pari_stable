@@ -280,7 +280,7 @@ sub treat {
   my ($first);
   while (<DOC>)
   {
-    if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){$help\b/)
+    if (/\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter|label){$help\b/)
       { $first = $_; last; }
   }
   if (eof(DOC))
