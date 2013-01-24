@@ -1832,6 +1832,10 @@ initially we had \kbd{avma} equal to \kbd{av}. There is no need to pass a
 pointer and update the value of the second argument: the new (fictitious)
 \kbd{avma} is just the return value (typecast to \kbd{pari\_sp}).
 
+\fun{GEN}{icopyspec}{GEN x, long nx} copy the \kbd{nx} words
+\kbd{x[2]}, \dots, \kbd{x[nx+1]} to make up a new \typ{INT}. Set the sign
+to $1$.
+
 \subsec{Conversions}
 
 \fun{GEN}{itor}{GEN x, long prec} converts the \typ{INT}~\kbd{x} to a
