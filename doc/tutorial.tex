@@ -175,10 +175,10 @@ Of course, this is going to break all your nice old scripts. Well, you can
 either change the compatibility level (typing \kbd{default(compatible, 3)}
 will send you back to the stone-age behavior of good ol' version 1.39.15),
 or rewrite the scripts. We really advise you to do the latter if they are not
-too long, since they can now be written much more cleanly than before
-(especially with the new control statements: \kbd{break}, \kbd{next},
-\kbd{return}), and besides it'll be as good a way as any to get used to the
-new names.
+too long, since they can now be written much more cleanly than before,
+especially with lexical scoping (\kbd{my}) and the new control statements
+(\kbd{break}, \kbd{next}, \kbd{return}). Besides it'll be as good a way as any
+to get used to the new names.
 
 To know how a specific function was changed, just type \kbd{whatnow({\rm
 function})}.
@@ -352,23 +352,23 @@ handle these types, but in this tutorial we will only look at a few.
 \misctitle{Additional comments} (as before, you are supposed to skip this
 at first reading)
 
-1) A complex number has a real part and an imaginary part (who would have
-guessed?). However, beware that when the imaginary part is the exact integer
-zero, it is not printed, but the complex number is not converted to a real
-number. Hence it may \emph{look} like a real number without being one, and
-this may cause some confusion in programs which expect real numbers. For
-example, type \kbd{n = 3 + 0*I}. The answer reads \kbd{3}, as expected. But
-it is still a complex number. Check it with \kbd{type(n)}. Hence if you then
-type \kbd{(1+x)\pow n}, instead of getting the polynomial \kbd{1 + 3*x +
-3*x\pow 2 + x\pow 3} as expected, you obtain a power series. Worse, when you
-try to apply an arithmetic function, say the Euler totient function (known as
-\kbd{eulerphi} to \kbd{gp}), you get an error message worrying about integer
-arguments. You would have guessed yourself, but the message is difficult to
-understand since 3 looks like a genuine integer! Please read again if this
-is not clear; it is a common source of incomprehension.
+1) In almost all cases, there is no loss of information in PARI output: what
+you see is all that PARI knows about the object, and you can happily
+copy-paste it into another session. There are exceptions, though. Type
+\kbd{n = 3 + 0*x}, then \kbd{n} is not the integer 3 but a constant polynomial
+equal to $3 x^0$. Check it with \kbd{type(n)}.
 
-Similarly, \kbd{n = 3 + 0*x} is not the integer 3 but a constant polynomial
-equal to $3x^0$.
+However, it \emph{looks} like an integer without being one, and this may
+cause some confusion in programs which actually expect integers. Hence if you
+try to \kbd{factor(n)}, you obtain an empty factorization ! (Because, once
+considered as a polynomial, \kbd{n} is a unit in $\Q[x]$.)
+
+If you try to apply more general arithmetic functions, say the Euler totient
+function (known as \kbd{eulerphi} to \kbd{gp}), you get an error message
+worrying about integer arguments. You would have guessed yourself, but the
+message is difficult to understand since 3 looks like a genuine integer!
+Please make sure you understand the above, it is a common source of
+incomprehension.
 
 2) If you want the final expression to be in the simplest form possible (for
 example before applying an arithmetic function, or simply because things will
