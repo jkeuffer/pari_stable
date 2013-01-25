@@ -1,10 +1,14 @@
+#! /bin/sh
+. config/version
+release=`echo "$pari_release"|sed  's/\./-/g'`
+cat << EOT
 ;--- PARI/GP: NullSoft Installer configuration file
 !include "MUI.nsh"
-Name "PARI 2.6 (UNSTABLE)"
+Name "PARI $pari_release_verbose"
 !define dll "libpari.dll"
-!define PARIver "PARI-2-6"
-
-;--No need to modify things below --
+!define PARIver "Pari-$release"
+EOT
+cat << 'EOT'
 !define top ".."
 !define tree "..\mingw"
 AutoCloseWindow false
@@ -37,7 +41,8 @@ Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
   File "${tree}\bin\gp.exe"
   File "${tree}\bin\${dll}"
-  File /oname=gprc.txt "${top}\config\gprc.mingw"
+  File /oname=gphelp.pl "${tree}\bin\gphelp"
+  File /oname=gprc.txt "${tree}\gprc.mingw"
 
   WriteRegStr HKCU "Software\${PARIver}" "" $INSTDIR
   WriteRegStr HKLM ${uninst} "DisplayName" "${PARIver} (remove only)"
@@ -52,9 +57,12 @@ Section "Data files" SecGAL
 SectionEnd
 
 Section "documentation" SecDOC
+  CreateDirectory "$INSTDIR\etc"
   SetOutPath "$INSTDIR"
   File /r "${tree}\share\pari\doc"
+  File /r "${tree}\perl"
   File /r "${tree}\share\pari\examples"
+  File /oname=gprc_dft.txt "${tree}\gprc.dft"
 SectionEnd
 
 Function .onInstSuccess
@@ -95,8 +103,11 @@ LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop
 ;--------------------------------
 Section "Uninstall"
   Delete "$INSTDIR\gp.exe"
+  Delete "$INSTDIR\gphelp.pl"
   Delete "$INSTDIR\${dll}"
 
+  RMDir /r "$INSTDIR\perl"
+  RMDir /r "$INSTDIR\etc"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\examples"
   RMDir /r "$INSTDIR\data"
@@ -109,3 +120,4 @@ Section "Uninstall"
   Delete "$DESKTOP\PARI.lnk"
   RMDir "$INSTDIR"
 SectionEnd
+EOT
