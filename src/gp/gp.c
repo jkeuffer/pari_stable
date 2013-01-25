@@ -583,7 +583,7 @@ external_help(const char *s, int num)
   long nbli = term_height()-3, li = 0;
   char buf[256], *str;
   const char *opt = "", *ar = "";
-  char *t;
+  char *t, *help = Help, *cdir="";
   pariFILE *z;
   FILE *f;
 
@@ -593,7 +593,15 @@ external_help(const char *s, int num)
     opt = "-k";
   else if (t[strlen(t)-1] != '@')
     ar = stack_sprintf("@%d",num);
-  str = stack_sprintf("%s -fromgp %s %c%s%s%c",Help,opt,
+#ifdef _WIN32
+  if (*help=='@')
+  {
+    const char *basedir = win32_basedir();
+    help++;
+    cdir = stack_sprintf("%c:& cd %s & ", *basedir, basedir);
+  }
+#endif
+  str=stack_sprintf("%s%s -fromgp %s %c%s%s%c",cdir,help,opt,
                                                SHELL_Q,t,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
   pari_free(t);
@@ -2501,7 +2509,11 @@ sd_help(const char *v, long flag)
     if (GP_DATA->secure)
       pari_err(e_MISC,"[secure mode]: can't modify 'help' default (to %s)",v);
     if (Help) pari_free((void*)Help);
+#ifndef _WIN32
     Help = path_expand(v);
+#else
+    Help = strdup(v);
+#endif
   }
   str = Help? Help: "none";
   if (flag == d_RETURN) return strtoGENstr(str);
