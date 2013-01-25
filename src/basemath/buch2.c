@@ -2380,7 +2380,6 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
   GEN Nideal = nbrelpid ? NULL : idealnorm(nf, ideal0);
   double BOUND;
   long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
-  const long maxtry_DEP  = 20, maxtry_FACT = 500;
 
   u = ZM_lll(ZM_mul(F->G0, ideal0), 0.99, LLL_IM);
   ideal = ZM_mul(ideal0,u); /* approximate T2-LLL reduction */
