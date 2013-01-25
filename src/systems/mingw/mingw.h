@@ -15,6 +15,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* Written by Vasili Burdo */
 
+const char* win32_basedir(void);
 char* win32_datadir(void);
 void win32_ansi_fputs(const char* s, void* f);
 int win32_terminal_width(void);

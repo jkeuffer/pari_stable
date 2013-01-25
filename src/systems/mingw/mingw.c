@@ -13,20 +13,36 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-/* Written by Vasili Burdo */
+/* Originally written by Vasili Burdo */
 
 #include <windows.h>
 #include <stdio.h>
 #include "mingw.h"
 
-char* win32_datadir(void)
+static const char * pariwin32_basedir = NULL;
+
+const char*
+win32_basedir(void)
 {
-  char datadir[1024];
-  char* slash;
-  GetModuleFileNameA(0, datadir, sizeof(datadir) );
-  slash = strrchr(datadir, '\\');
-  if( slash ) *(slash+1) = 0;
-  strcat(datadir, "data");
+  if (pariwin32_basedir) return pariwin32_basedir;
+  else
+  {
+    char basedir[1024];
+    char* slash;
+    GetModuleFileNameA(0, basedir, sizeof(basedir) );
+    slash = strrchr(basedir, '\\');
+    if (slash) slash[1] = 0;
+    pariwin32_basedir = strdup(basedir);
+    return pariwin32_basedir;
+  }
+}
+
+char*
+win32_datadir(void)
+{
+  char datadir[1029];
+  const char * basedir = win32_basedir();
+  sprintf(datadir, "%sdata",basedir);
   return strdup(datadir);
 }
 
