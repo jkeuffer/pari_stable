@@ -74,7 +74,7 @@ win32_ansi_fputs(const char* s, void* f)
     if( p )
       p += 2;
     else {
-      (fputs)(s,f);
+      fputs(s,f);
       return;
     }
     nbarg = 0;
@@ -95,6 +95,7 @@ win32_ansi_fputs(const char* s, void* f)
         color = win32_console_color(c[1]) | win32_console_color(c[2]);
         if (c[0]&4) color |= 0x8000;
       }
+      fflush(f);
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),color);
     }
     s = p;
