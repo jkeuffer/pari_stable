@@ -255,6 +255,7 @@ hit_return(void)
   if (GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)) return;
   disable_exception_handler = 1;
   pari_puts("/*-- (type RETURN to continue) --*/");
+  pari_flush();
   /* if called from a readline callback, may be in a funny TTY mode */
   do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r');
   pari_putc('\n');
