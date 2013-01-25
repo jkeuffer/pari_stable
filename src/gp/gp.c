@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #ifdef _WIN32
 #  include <windows.h>
+#  include "../systems/mingw/mingw.h"
 #  ifndef WINCE
 #    include <process.h>
 #  endif
@@ -1143,7 +1144,7 @@ gprc_get(void)
     if (free_it) pari_free((void*)home);
     s = str + l;
     if (c != '/' && c != '\\') *s++ = '/';
-#ifdef UNIX
+#ifndef _WIN32
     strcpy(s, ".gprc");
 #else
     strcpy(s, "gprc.txt");
@@ -1152,13 +1153,15 @@ gprc_get(void)
     if (!f) f = gprc_chk(s); /* in . */
 #ifndef _WIN32
     if (!f) f = gprc_chk("/etc/gprc");
-#endif
-    if (!f)  /* in datadir */
+#else
+    if (!f)  /* in basedir */
     {
-      char *t = (char *) pari_malloc(strlen(pari_datadir) + 9);
-      sprintf(t, "%s/%s", pari_datadir, s);
+      const char *basedir = win32_basedir();
+      char *t = (char *) pari_malloc(strlen(basedir) + 9);
+      sprintf(t, "%s/%s", basedir, s);
       f = gprc_chk(t);
     }
+#endif
     pari_free(str);
   }
   return f;
