@@ -16,6 +16,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+int
+RgM_is_ZM(GEN x)
+{
+  long i, j, h, l = lg(x);
+  if (l == 1) return 1;
+  h = lgcols(x);
+  if (h == 1) return 1;
+  for (j = l-1; j > 0; j--)
+    for (i = h-1; i > 0; i--)
+      if (typ(gcoeff(x,i,j)) != t_INT) return 0;
+  return 1;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                   GENERIC LINEAR ALGEBRA                       **/
