@@ -133,18 +133,15 @@ wr_rel(GEN col)
   err_printf("\n");
 }
 static void
-dbg_rel(long s, GEN col)
-{
-  if (DEBUGLEVEL == 1) err_printf("%ld ",s);
-  else { err_printf("cglob = %ld. ", s); wr_rel(col); }
-  err_flush();
-}
-static void
 dbg_newrel(RELCACHE_t *cache)
 {
-  err_printf("\n++++ cglob = %ld: new relation (need %ld)",
-             cache->last - cache->base, cache->end - cache->base);
-  wr_rel(cache->last->R);
+  if (DEBUGLEVEL > 1)
+  {
+    err_printf("\n++++ cglob = %ld", cache->last - cache->base);
+    wr_rel(cache->last->R);
+  }
+  else
+    err_printf("%ld ", cache->last - cache->base);
 }
 
 static void
@@ -402,11 +399,11 @@ subFB_change(FB_t *F)
   }
   if (zv_equal(F->subFB, yes))
   {
-    if (DEBUGLEVEL) err_printf("*** NOT Changing sub factor base\n");
+    if (DEBUGLEVEL) err_printf("\n*** NOT Changing sub factor base\n");
   }
   else
   {
-    if (DEBUGLEVEL) err_printf("*** Changing sub factor base\n");
+    if (DEBUGLEVEL) err_printf("\n*** Changing sub factor base\n");
     assign_subFB(F, yes, iyes);
   }
   F->sfb_chg = 0;
@@ -827,13 +824,16 @@ static long
 can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 {
   GEN ex;
-  long i;
+  long i, res = 0;
   fact[0].pr = 0;
   if (is_pm1(N)) return 1;
-  if (!smooth_norm(F, &N, &ex)) return 0;
+  if (!smooth_norm(F, &N, &ex)) goto END;
   for (i=1; i<=ex[0]; i++)
-    if (ex[i] && !divide_p(F, F->FB[i], ex[i], nf, I, m, fact)) return 0;
-  return is_pm1(N) || divide_p(F, itou(N), 1, nf, I, m, fact);
+    if (ex[i] && !divide_p(F, F->FB[i], ex[i], nf, I, m, fact)) goto END;
+  res = is_pm1(N) || divide_p(F, itou(N), 1, nf, I, m, fact);
+END:
+  if (!res && DEBUGLEVEL > 1) { err_printf("."); err_flush(); }
+  return res;
 }
 
 /* can we factor m/I ? [m in I from idealpseudomin_nonscalar], NI = norm I */
@@ -844,7 +844,11 @@ factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
   GEN M = nf_get_M(nf);
   GEN N = divri(norm_by_embed(r1, RgM_RgC_mul(M,m)), NI); /* ~ N(m/I) */
   N = grndtoi(N, &e);
-  if (e > -1) return 0;
+  if (e > -1)
+  {
+    if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
+    return 0;
+  }
   return can_factor(F, nf, I, m, N, fact);
 }
 
@@ -2255,13 +2259,7 @@ add_rel_i(RELCACHE_t *cache, GEN R, long nz, GEN m, long orig, long aut, REL_t *
     else
       rel->relaut = 0;
     if (relp) *relp = rel;
-    if (DEBUGLEVEL)
-    {
-      if (in_rnd_rel)
-        dbg_newrel(cache);
-      else
-        dbg_rel(rel - cache->base, R);
-    }
+    if (DEBUGLEVEL) dbg_newrel(cache);
   }
   return k;
 }
@@ -2482,10 +2480,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
         if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
         continue;
       }
-      if (!can_factor(F, nf, NULL, gx, Nx, fact)) {
-        if (DEBUGLEVEL > 1) { err_printf("."); err_flush(); }
-        continue;
-      }
+      if (!can_factor(F, nf, NULL, gx, Nx, fact)) continue;
     }
 
     /* smooth element */
@@ -2520,8 +2515,8 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   if (DEBUGLEVEL)
   {
     timer_start(&T);
-    err_printf("\n#### Looking for %ld relations (small norms)\n",
-               cache->end - last);
+    err_printf("\n#### Look for %ld relations in %ld ideals (small_norm)\n",
+               cache->end - last, lg(L_jid)-1);
   }
   nbsmallnorm = nbfact = 0;
 
@@ -2541,6 +2536,8 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 
     if (DEBUGLEVEL>1)
       err_printf("\n*** Ideal no %ld: %Ps\n", L_jid[noideal], vecslice(ideal,1,4));
+    else if (DEBUGLEVEL)
+      err_printf("(%ld) ", L_jid[noideal]);
     if (p0)
       ideal = idealmul(nf, p0, ideal);
     else
@@ -2552,11 +2549,9 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   }
   if (DEBUGLEVEL)
   {
-    if (cache->last != last) err_printf("\n");
+    err_printf("\n");
     timer_printf(&T, "small norm relations");
-    err_printf("  small norms gave %ld relations.\n",
-               cache->last - last);
-    if (nbsmallnorm)
+    if (nbsmallnorm && DEBUGLEVEL > 1)
       err_printf("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
                   nbfact,nbsmallnorm,((double)nbfact)/nbsmallnorm);
   }
@@ -2610,10 +2605,9 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
 
   /* will compute P[ L_jid[i] ] * (random product from subFB) */
   if (DEBUGLEVEL) {
-    long d = cache->end - cache->last;
     timer_start(&T);
-    err_printf("\n(more relations needed: %ld)\n", d > 0? d: 1);
-    if (l_jid <= F->orbits) err_printf("looking hard for %Ps\n",L_jid);
+    err_printf("\n#### Look for %ld relations in %ld ideals (rnd_rel)\n",
+               cache->end - cache->last, lg(L_jid)-1);
   }
   rr.ex = cgetg(lgsub, t_VECSMALL);
   baseideal = get_random_ideal(F, nf, rr.ex);
@@ -2628,8 +2622,11 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
     REL_t *last = cache->last;
 
     rr.jid = L_jid[jlist];
-    if (DEBUGLEVEL>1) err_printf("(%ld)", rr.jid);
     ideal = gel(F->LP,rr.jid);
+    if (DEBUGLEVEL>1)
+      err_printf("\n*** Ideal no %ld: %Ps\n", rr.jid, vecslice(ideal,1,4));
+    else if (DEBUGLEVEL)
+      err_printf("(%ld) ", jlist, rr.jid);
     ideal = idealmul_HNF(nf, baseideal, ideal);
     rr.Nideal = ZM_det_triangular(ideal);
     if (Fincke_Pohst_ideal(cache, F, nf, N, M, R1, G, ideal, fact,
@@ -2641,11 +2638,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
       GEN m = idealpseudomin_nonscalar(ideal, gel(F->vecG,j));
       GEN R;
       long nz;
-      if (!factorgen(F,nf,ideal,rr.Nideal,m,fact))
-      {
-        if (DEBUGLEVEL>1) { err_printf("."); err_flush(); }
-        continue;
-      }
+      if (!factorgen(F,nf,ideal,rr.Nideal,m,fact)) continue;
       /* can factor ideal, record relation */
       add_to_fact(rr.jid, 1, fact);
       R = set_fact(F, fact, rr.ex, &nz);
@@ -2662,7 +2655,11 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
       avma = av; return;
     }
   }
-  if (DEBUGLEVEL) timer_printf(&T, "for remaining ideals");
+  if (DEBUGLEVEL)
+  {
+    err_printf("\n");
+    timer_printf(&T, "for remaining ideals");
+  }
 }
 
 /* remark: F->KCZ changes if be_honest() fails */
@@ -3978,7 +3975,6 @@ START:
       {
         /* Random relations */
         if (lg(F.subFB) == 1) goto START;
-        if (DEBUGLEVEL) err_printf("\n#### Looking for random relations\n");
         nreldep++;
         if (nreldep > MAXDEPSIZESFB) {
           if (++sfb_trials > SFB_MAX && LIMC < LIMCMAX/6) goto START;
@@ -3987,7 +3983,11 @@ START:
         }
         else if (!(nreldep % MAXDEPSFB))
           F.sfb_chg = sfb_CHANGE;
-        if (F.newpow) F.sfb_chg = 0;
+        if (F.newpow)
+        {
+          F.sfb_chg = 0;
+          if (DEBUGLEVEL) err_printf("\n");
+        }
         if (F.sfb_chg && !subFB_change(&F)) goto START;
         if (F.newpow) {
           powFBgen(&cache, &F, nf, auts);
