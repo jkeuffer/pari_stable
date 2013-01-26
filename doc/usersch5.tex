@@ -802,6 +802,21 @@ specific to the multiprecision kernel in use. The \kbd{GENbin} type stores
 whether leaves are stored in canonical form, so \kbd{bin\_copy} can call
 the right variant.
 
+\noindent Objects containing closures are harder to e.g. copy and save to disk,
+since closures contain pointers to libpari functions that will not be valid in
+another gp instance: there is little chance for them to be loaded at the exact
+same address in memory. Such objects must be saved along with a linking table.
+
+\fun{GEN}{copybin_unlink}{GEN C} returns a linking table allowing to safely
+store and transmit \typ{CLOSURE} objects in $C$.  If $C = \kbd{NULL}$ return a
+linking table corresponding to the content of all gp variables. $C$ may then be
+dumped to disk in binary form, for instance.
+
+\fun{void}{bincopy_relink}{GEN C, GEN V} given a binary object $C$, as dumped
+by writebin and read back into a session, and a linking table $V$, restore all
+closures contained in $C$ (function pointers are translated to their current
+value).
+
 \subsec{Garbage collection}
 See \secref{se:garbage} for a detailed explanation and many examples.
 
