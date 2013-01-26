@@ -1015,10 +1015,9 @@ group_export_MAGMA(GEN G)
   GEN s, comma, g = grp_get_gen(G);
   long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("PermutationGroup<1|>");
-  s = cgetg(2*l+2, t_VEC); k = 1;
-  gel(s,k++) = strtoGENstr("PermutationGroup<");
-  gel(s,k++) = strtoGENstr( itostr( stoi(group_domain(G)) ) );
-  gel(s,k++) = strtoGENstr("|"); comma = strtoGENstr(", ");
+  s = cgetg(2*l+2, t_VEC); k = 2;
+  gel(s,1) = gsprintf("PermutationGroup<%ld|",group_domain(G));
+  comma = strtoGENstr(", ");
   for (i = 1; i < l; ++i)
   {
     if (i > 1) gel(s,k++) = comma;
