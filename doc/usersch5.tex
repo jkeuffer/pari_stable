@@ -1025,9 +1025,15 @@ Fatal error if $x$ not a block.
 \fun{GEN}{gclone}{GEN x} creates a new permanent copy of $x$ on the heap
 (allocated using \kbd{newblock}). The \emph{clone bit} of the result is set.
 
-\fun{void}{gunclone}{GEN x} deletes a clone. In the current implementation,
-this is an alias for \kbd{killblock}, but it is cleaner to kill clones (valid
-\kbd{GEN}s) using this function, and other blocks using \kbd{killblock}.
+\fun{GEN}{gcloneref}{GEN x} if $x$ is not a clone, clone it and return the
+result; otherwise, increase the clone reference count and return $x$.
+
+\fun{void}{gunclone}{GEN x} deletes a clone. Deletion at first only decreases
+the reference count by $1$. If the count remains positive, no further action is
+taken; if the count becomes zero, then the clone is actually deleted. In the
+current implementation, this is an alias for \kbd{killblock}, but it is cleaner
+to kill clones (valid \kbd{GEN}s) using this function, and other blocks using
+\kbd{killblock}.
 
 \fun{void}{gunclone_deep}{GEN x} is only useful in the context of the GP
 interpreter which may replace arbitrary components of container types
