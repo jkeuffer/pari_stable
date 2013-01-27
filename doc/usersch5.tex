@@ -9836,6 +9836,13 @@ with the lexical variable number $-1$ set to $x$.
 \kbd{`I'}. The resulting value is discarded.  Return a non-zero value if a
 control-flow instruction request the iterator to terminate immediatly.
 
+\fun{long}{gp_evalbool}{void *E, GEN x} returns the boolean 
+\kbd{gp\_eval(E, x)} evaluates to (i.e. true iff the value is non-zero).
+
+\fun{GEN}{gp_evalupto}{void *E, GEN x} memory-safe version of \kbd{gp\_eval},
+\kbd{gcopy}-ing the result, when the evaluator returns components of
+previously allocated objects (e.g. member functions).
+
 \subsubsec{Standard wrappers for true closures}
 These wrappers are used to implement GP functions taking true closures as
 input.
@@ -9925,6 +9932,8 @@ a \typ{STR} otherwise.
 \fun{GEN}{sd_seriesprecision}{const char *v, long flag}
 
 \fun{GEN}{sd_simplify}{const char *v, long flag}
+
+\fun{GEN}{sd_sopath}{char *v, int flag}
 
 \fun{GEN}{sd_strictmatch}{const char *v, long flag}
 
