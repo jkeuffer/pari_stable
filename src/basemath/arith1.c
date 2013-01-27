@@ -1274,21 +1274,18 @@ Z_isanypower(GEN x, GEN *pty)
 /* even for single-word values, and much faster for multiword values. */
 /* If all you have is a word, you can just use n & !(n & (n-1)). */
 long
-ispow2(GEN n)
+Z_ispow2(GEN n)
 {
   GEN xp;
   long i, lx;
   ulong u;
-  if (typ(n) != t_INT) pari_err_TYPE("ispow2", n);
   if (signe(n) != 1) return 0;
-
   xp = int_LSW(n);
   lx = lgefint(n);
   u = *xp;
-
   for (i = 3; i < lx; ++i)
   {
-    if (u != 0) return 0;
+    if (u) return 0;
     xp = int_nextW(xp);
     u = *xp;
   }

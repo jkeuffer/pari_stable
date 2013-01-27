@@ -1113,7 +1113,7 @@ GEN     gcf2(GEN b, GEN x);
 GEN     gcf(GEN x);
 const struct bb_field *get_Fp_field(void **E, GEN p);
 long    ispolygonal(GEN x, GEN S, GEN *N);
-long    ispow2(GEN x);
+long    Z_ispow2(GEN x);
 long    uisprimepower(ulong n, ulong *p);
 long    unegisfundamental(ulong x);
 long    uposisfundamental(ulong x);
