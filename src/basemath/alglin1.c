@@ -1320,7 +1320,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
     *li = 0; return 0;
   }
   *li = nbrows(a);
-  if (*li < *aco) pari_err_DIM("gauss");
+  if (*li < *aco) pari_err_INV("gauss [no left inverse]", a);
   if (*b)
   {
     if (*li != *aco) pari_err_DIM("gauss");
