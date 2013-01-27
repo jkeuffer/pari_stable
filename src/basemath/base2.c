@@ -727,9 +727,10 @@ maxord(GEN p,GEN f,long mf)
   return gerepileupto(av,res);
 }
 
-/* Sylvester's matrix, mod p^m (assumes f1 monic) */
+/* Sylvester's matrix, mod p^m (assumes f1 monic). If early_abort
+ * is set, return NULL if one pivot is 0 mod p^m */
 static GEN
-ZpX_sylvester_hnf(GEN f1, GEN f2, GEN pm)
+ZpX_sylvester_echelon(GEN f1, GEN f2, long early_abort, GEN p, GEN pm)
 {
   long j, n = degpol(f1);
   GEN h, a = cgetg(n+1,t_MAT);
@@ -740,42 +741,45 @@ ZpX_sylvester_hnf(GEN f1, GEN f2, GEN pm)
     if (j == n) break;
     h = FpX_rem(RgX_shift_shallow(h, 1), f1, pm);
   }
-  return ZM_hnfmodall(a, pm, hnf_MODID|hnf_PART);
+  return ZpM_echelon(a, early_abort, p, pm);
 }
 
 /* polynomial gcd mod p^m (assumes f1 monic) */
 GEN
-ZpX_gcd(GEN f1, GEN f2, GEN pm)
+ZpX_gcd(GEN f1, GEN f2, GEN p, GEN pm)
 {
   pari_sp av = avma;
-  GEN a = ZpX_sylvester_hnf(f1,f2,pm);
+  GEN a = ZpX_sylvester_echelon(f1,f2,0,p,pm);
   long c, l = lg(a), v = varn(f1);
   for (c = 1; c < l; c++)
   {
     GEN t = gcoeff(a,c,c);
-    if (!equalii(t, pm))
+    if (signe(t))
       return gerepileupto(av, RgX_Rg_div(RgV_to_RgX(gel(a,c), v), t));
   }
   avma = av; return pol_0(v);
 }
 
-/* Return m > 0, such that p^m ~ 2^32 for initial value of m; p > 1 */
+/* Return m > 0, such that p^m ~ 2^16 for initial value of m; p > 1 */
 static long
 init_m(GEN p)
 {
   if (lgefint(p) > 3) return 1;
-  return (long)(32 / log2(p[2]));
+  return (long)(16 / log2(p[2]));
 }
 
 /* reduced resultant mod p^m (assumes x monic) */
 GEN
-ZpX_reduced_resultant(GEN x, GEN y, GEN pm)
+ZpX_reduced_resultant(GEN x, GEN y, GEN p, GEN pm)
 {
   pari_sp av = avma;
-  GEN z = ZpX_sylvester_hnf(x,y,pm);
-  z = gcoeff(z,1,1);
-  if (equalii(z,pm)) { avma = av; return gen_0; }
-  return gerepileuptoint(av, icopy(z));
+  GEN z = ZpX_sylvester_echelon(x,y,0,p,pm);
+  if (lg(z) > 1)
+  {
+    GEN c = gcoeff(z,1,1);
+    if (signe(c)) return gerepileuptoint(av, c);
+  }
+  avma = av; return gen_0;
 }
 /* Assume Res(f,g) divides p^M. Return Res(f, g), using dynamic p-adic
  * precision (until result is non-zero or p^M). */
@@ -788,10 +792,10 @@ ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M)
   for(;; m <<= 1) {
     if (M < 2*m) break;
     q = q? sqri(q): powiu(p, m); /* p^m */
-    R = ZpX_reduced_resultant(f,g, q); if (signe(R)) return R;
+    R = ZpX_reduced_resultant(f,g, p, q); if (signe(R)) return R;
   }
   q = powiu(p, M);
-  R = ZpX_reduced_resultant(f,g, q); return signe(R)? R: q;
+  R = ZpX_reduced_resultant(f,g, p, q); return signe(R)? R: q;
 }
 
 /* discriminant valuation mod p^m (assumes x monic, dx = x') */
@@ -799,14 +803,11 @@ static long
 ZpX_disc_val_i(GEN x, GEN dx, GEN p, GEN pm)
 {
   pari_sp av = avma;
-  GEN z = ZpX_sylvester_hnf(x,dx,pm);
-  long i, v = 0, l = lg(z);
-  for (i = 1; i < l; i++)
-  {
-    GEN c = gcoeff(z,i,i);
-    if (equalii(c, pm)) { avma = av; return -1; } /* failure */
-    v += Z_pval(c, p);
-  }
+  GEN z = ZpX_sylvester_echelon(x, dx, 1, p, pm);
+  long i, l, v = 0;
+  if (!z) { avma = av; return -1; } /* failure */
+  l = lg(z);
+  for (i = 1; i < l; i++) v += Z_pval(gcoeff(z,i,i), p);
   return v;
 }
 /* assume f monic */
@@ -1061,7 +1062,7 @@ Decomp(decomp_t *S, long flag)
   fred = centermod(S->f, ph);
   e    = centermod(e, ph);
 
-  f1 = ZpX_gcd(fred, Z_ZX_sub(de, e), ph); /* p-adic gcd(f, 1-e) */
+  f1 = ZpX_gcd(fred, Z_ZX_sub(de, e), p, ph); /* p-adic gcd(f, 1-e) */
   fred = centermod(fred, pr);
   f1   = centermod(f1,   pr);
   f2 = FpX_div(fred,f1, pr);

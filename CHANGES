@@ -409,6 +409,7 @@ BA 129- Add safegel et al. for GP2C -C option
 HC 130- Function sqrtnint
    131- sumdivmult() to sum multiplicative functions
    132- ?? online help: allow searching labels, e.g. ??"se:priority"@
+   133- PARI function ZpM_echelon
 
   Removed
     1- dropped DOS support

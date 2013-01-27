@@ -5288,14 +5288,14 @@ and that $p$ is a prime number. Proceeds by dynamically increasing the
 $p$-adic accuracy; infinite loop if the discriminant of $f$ is
 $0$.
 
-\fun{GEN}{ZpX_gcd}{GEN f,GEN g, GEN pm} $f$ a monic \kbd{ZX}, $g$ a \kbd{ZX},
-$\kbd{pm} = p^m$ a prime power. There is a unique integer $r\geq 0$
-and a monic $h\in \Q_p[X]$ such that
+\fun{GEN}{ZpX_gcd}{GEN f,GEN g, GEN p, GEN pm} $f$ a monic \kbd{ZX},
+$g$ a \kbd{ZX}, $\kbd{pm} = p^m$ a prime power. There is a unique integer
+$r\geq 0$ and a monic $h\in \Q_p[X]$ such that
 $$p^rh\Z_p[X] + p^m\Z_p[X] = f\Z_p[X] + g\Z_p[X] + p^m\Z_p[X].$$
 Return the $0$ polynomial if $r\geq m$ and a monic $h\in\Z[1/p][X]$ otherwise
 (whose valuation at $p$ is $> -m$).
 
-\fun{GEN}{ZpX_reduced_resultant}{GEN f, GEN g, GEN pm} $f$ a monic
+\fun{GEN}{ZpX_reduced_resultant}{GEN f, GEN g, GEN p, GEN pm} $f$ a monic
 \kbd{ZX}, $g$ a \kbd{ZX}, $\kbd{pm} = p^m$ a prime power. The $p$-adic
 \emph{reduced resultant}\varsidx{resultant (reduced)} of $f$ and $g$ is
 $0$ if $f$, $g$ not coprime in $\Z_p[X]$, and otherwise the generator of the
@@ -5310,6 +5310,14 @@ computes resultants for a sequence of increasing $p$-adic accuracies
 (up to $M$ $p$-adic digits), returning as soon as it obtains a non-zero
 result. It is very inefficient when the resultant is $0$, but otherwise
 usually more efficient than computations using a priori bounds.
+
+\fun{GEN}{ZpM_echelon}{GEN M, long early_abort, GEN p, GEN pm} given a
+\kbd{ZM} $M$, a prime $p$ and $\kbd{pm} = p^m$, returns an echelon form
+$E$ for $M$ mod $p^m$. I.e. there exist a square integral matrix $U$ with
+$\det U$ coprime to $p$ such that $E = MU$ modulo $p^m$. I
+\kbd{early\_abort} is non-zero, return NULL as soon as one pivot in
+the echelon form is divisible by $p^m$. The echelon form is an upper
+triangular HNF, we do not waste time to reduce it to Gauss-Jordan form.
 
 \fun{GEN}{ZpXQ_log}{GEN a, GEN T, GEN p, long e} $T$ being a \kbd{ZpX}
 irreducible modulo $p$, return the logarithm of $a$ in $\Z_p[X]/(T)$ to

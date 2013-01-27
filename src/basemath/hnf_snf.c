@@ -978,6 +978,70 @@ FpV_red_part_ip(GEN z, GEN p, long k)
   long i;
   for (i = 1; i <= k; i++) gel(z,i) = modii(gel(z,i), p);
 }
+
+/* return x * U, in echelon form (mod p^m), where (det(U),p) = 1.
+ * If early_abort is set, return NULL as soon as one pivot is 0 (mod p^m) */
+GEN
+ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm)
+{
+  pari_sp av0 = avma, av, lim;
+  long m, li, co, i, j, k, def, ldef;
+
+  co = lg(x); if (co == 1) return cgetg(1,t_MAT);
+  li = lgcols(x);
+  av = avma; lim = stack_lim(av,1);
+  x = RgM_shallowcopy(x);
+  m = Z_pval(pm, p);
+
+  ldef = (li > co)? li - co: 0;
+  for (def = co-1,i = li-1; i > ldef; i--,def--)
+  {
+    long vmin = LONG_MAX, kmin = 0;
+    GEN umin = gen_0, pvmin, q;
+    for (k = 1; k <= def; k++)
+    {
+      GEN u = gcoeff(x,i,k);
+      long v;
+      if (!signe(u)) continue;
+      v = Z_pvalrem(u, p, &u);
+      if (v >= m) gcoeff(x,i,k) = gen_0;
+      else if (v < vmin) {
+        vmin = v; kmin = k; umin = u;
+        if (!vmin) break;
+      }
+    }
+    if (!kmin)
+    {
+      if (early_abort) return NULL;
+      gcoeff(x,i,def) = gen_0;
+      continue;
+    }
+    if (kmin != def) swap(gel(x,def), gel(x,kmin));
+    q = vmin? powiu(p, m-vmin): pm;
+    /* pivot has valuation vmin */
+    umin = modii(umin, q);
+    if (!equali1(umin))
+      FpV_Fp_mul_part_ip(gel(x,def), Fp_inv(umin,q), pm, i-1);
+    gcoeff(x, i, def) = pvmin = powiu(p, vmin);
+    for (j = def-1; j; j--)
+    { /* zero x[i, 1..def-1] using x[i,def] = pvmin */
+      GEN t, a = gcoeff(x,i,j) = modii(gcoeff(x,i,j), pm);
+      if (!signe(a)) continue;
+
+      t = diviiexact(a, pvmin); togglesign(t);
+      ZC_lincomb1_inplace(gel(x,j), gel(x,def), t);
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"ZpM_echelon. i=%ld",i);
+        x = gerepilecopy(av, x); pvmin = gcoeff(x,i,def);
+      }
+    }
+  }
+  x += co - li;
+  x[0] = evaltyp(t_MAT) | evallg(li);
+  return gerepilecopy(av0, x);
+}
+
 /* dm = multiple of diag element (usually detint(x))
  * flag & hnf_MODID: reduce mod dm * matid [ otherwise as above ].
  * flag & hnf_PART: don't reduce once diagonal is known; */
