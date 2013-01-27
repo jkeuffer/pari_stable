@@ -106,7 +106,7 @@ checkbid(GEN bid)
   if (!checkbid_i(bid)) pari_err_TYPE("checkbid",bid);
 }
 void
-checkclgp(GEN v)
+checkabelian_group(GEN v)
 {
   if (typ(v) == t_VEC) switch(lg(v))
   {
@@ -116,7 +116,7 @@ checkclgp(GEN v)
             return;/*OK*/
     default: break;
   }
-  pari_err_TYPE("checkclgp",v);
+  pari_err_TYPE("checkabelian_group",v);
 }
 
 void
