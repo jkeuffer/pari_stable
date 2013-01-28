@@ -247,8 +247,23 @@ command changes both the precision and the output format.
 \section{Warming up}
 
 Another thing you better get used to pretty fast is error messages. Try
-typing \kbd{1/0}. Couldn't be clearer. Taking again our universal example in
-precision 38, type
+typing \kbd{1/0}. Could not be clearer. But why has the prompt
+become funny, turning from \kbd{?} to \kbd{break>} ? When an error occurs, we
+enter a so-called \emph{break loop}, where you get a chance, e.g to inspect
+(and save!) values of variables before the prompt returns and all
+computations so far are lost. In fact you can run an arbitrary command at
+this point, and this mechanism is a tremendous help in debugging. To get out
+of the break loop, type \kbd{break}, as instructed in the error message
+last line.
+
+\misctitle{Comment} You can enter the break loop at any time using
+\kbd{Control-C}: this freezes the current computation and gets you a new
+prompt so that you may e.g., increase debugging level, inspect or modify
+variables (again, run arbitrary commands), before letting the program go
+on.
+\medskip
+
+Now, back to our favourite example, in precision 38, type
 \bprog
   floor(exp(100))
 @eprog\noindent
@@ -3170,19 +3185,15 @@ one.
 
 To customize \kbd{gp}, e.g.~increase the default stack space or load your
 private script libraries on startup, look up \kbd{The preferences file}
-section in the User's manual. You probably want to use \kbd{trap} on startup
-as well: it enables so-called \emph{break loops} when an error occurs, where
-you get a chance, e.g to inspect (and save!) values of variables before the
-prompt returns and all computations so far are lost. When break loops
-are enabled, \kbd{Control-C} is treated as a non-fatal error: it freezes a
-computation and gets you a new prompt so that you may e.g., increase debugging
-level, inspect or modify variables (in fact, run arbitrary commands), before
-letting the program go on.
+section in the User's manual. For clarity, it is advisable  to declare local
+variables in user functions (and in fact, with the smallest possible scope),
+as we have done so far with the keyword \kbd{my}. One is usually better off
+avoiding global variables altogether, but you are the sole master on board at
+this point.
 
-For clarity, it is advisable  to declare local variables in user functions
-(and in fact, with the smallest possible scope), as we have done so far with
-the keyword \kbd{my}. One is usually better off avoiding global variables
-altogether, but you are the sole master on board at this point.
+\emph{Break loops} are more powerful than we saw: look up \kbd{dbg\_down} /
+\kbd{dbg\_up} (to get a chance to inspect local variables in various scopes)
+and \kbd{dbg\_err} (to access all components of an error context).
 
 To reach grandwizard status, you may need to understand the all powerful
 \kbd{install} function, which imports into \kbd{gp} an (almost) arbitrary
