@@ -1042,7 +1042,7 @@ ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm)
   return gerepilecopy(av0, x);
 }
 GEN
-Zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
+zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
 {
   pari_sp av0 = avma;
   long li, co, i, j, k, def, ldef;

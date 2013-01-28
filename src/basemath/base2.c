@@ -740,7 +740,7 @@ Zlx_sylvester_echelon(GEN f1, GEN f2, long early_abort, ulong p, ulong pm)
     if (j == n) break;
     h = Flx_rem(Flx_shift(h, 1), f1, pm);
   }
-  return Zlm_echelon(a, early_abort, p, pm);
+  return zlm_echelon(a, early_abort, p, pm);
 }
 /* Sylvester's matrix, mod p^m (assumes f1 monic). If early_abort
  * is set, return NULL if one pivot is 0 mod p^m */
