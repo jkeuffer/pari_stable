@@ -208,11 +208,14 @@ Flc_Fl_div_inplace(GEN x, ulong y, ulong p)
 
 /* x *= y */
 void
-Flc_Fl_mul_inplace(GEN x, ulong y, ulong p)
+Flc_Fl_mul_part_inplace(GEN x, ulong y, ulong p, long l)
 {
-  long i, l = lg(x);
-  for (i=1;i<l;i++) x[i] = Fl_mul(x[i], y, p);
+  long i;
+  for (i=1;i<=l;i++) x[i] = Fl_mul(x[i], y, p);
 }
+void
+Flc_Fl_mul_inplace(GEN x, ulong y, ulong p)
+{ Flc_Fl_mul_part_inplace(x, y, p, lg(x)-1); }
 
 /* set y *= x */
 void

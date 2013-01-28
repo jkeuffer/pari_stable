@@ -1041,6 +1041,61 @@ ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm)
   x[0] = evaltyp(t_MAT) | evallg(li);
   return gerepilecopy(av0, x);
 }
+GEN
+Zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
+{
+  pari_sp av0 = avma;
+  long li, co, i, j, k, def, ldef;
+  ulong m;
+
+  co = lg(x); if (co == 1) return cgetg(1,t_MAT);
+  li = lgcols(x);
+  x = Flm_copy(x);
+  m = u_lval(pm, p);
+
+  ldef = (li > co)? li - co: 0;
+  for (def = co-1,i = li-1; i > ldef; i--,def--)
+  {
+    long vmin = LONG_MAX, kmin = 0;
+    ulong umin = 0, pvmin, q;
+    for (k = 1; k <= def; k++)
+    {
+      ulong u = ucoeff(x,i,k);
+      long v;
+      if (!u) continue;
+      v = u_lvalrem(u, p, &u);
+      if (v >= m) ucoeff(x,i,k) = 0;
+      else if (v < vmin) {
+        vmin = v; kmin = k; umin = u;
+        if (!vmin) break;
+      }
+    }
+    if (!kmin)
+    {
+      if (early_abort) return NULL;
+      ucoeff(x,i,def) = 0;
+      continue;
+    }
+    if (kmin != def) swap(gel(x,def), gel(x,kmin));
+    q = vmin? upowuu(p, m-vmin): pm;
+    /* pivot has valuation vmin */
+    umin %= q;
+    if (umin != 1)
+      Flc_Fl_mul_part_inplace(gel(x,def), Fl_inv(umin,q), pm, i-1);
+    ucoeff(x, i, def) = pvmin = upowuu(p, vmin);
+    for (j = def-1; j; j--)
+    { /* zero x[i, 1..def-1] using x[i,def] = pvmin */
+      ulong t, a = ucoeff(x,i,j);
+      if (!a) continue;
+
+      t = Fl_neg(a / pvmin, q);
+      Flc_lincomb1_inplace(gel(x,j), gel(x,def), t, pm);
+    }
+  }
+  x += co - li;
+  x[0] = evaltyp(t_MAT) | evallg(li);
+  return gerepilecopy(av0, x);
+}
 
 /* dm = multiple of diag element (usually detint(x))
  * flag & hnf_MODID: reduce mod dm * matid [ otherwise as above ].

@@ -727,6 +727,21 @@ maxord(GEN p,GEN f,long mf)
   return gerepileupto(av,res);
 }
 
+static GEN
+Zlx_sylvester_echelon(GEN f1, GEN f2, long early_abort, ulong p, ulong pm)
+{
+  long j, n = degpol(f1);
+  GEN h, a = cgetg(n+1,t_MAT);
+  f1 = Flx_get_red(f1, pm);
+  h = Flx_rem(f2,f1,pm);
+  for (j=1;; j++)
+  {
+    gel(a,j) = Flx_to_Flv(h, n);
+    if (j == n) break;
+    h = Flx_rem(Flx_shift(h, 1), f1, pm);
+  }
+  return Zlm_echelon(a, early_abort, p, pm);
+}
 /* Sylvester's matrix, mod p^m (assumes f1 monic). If early_abort
  * is set, return NULL if one pivot is 0 mod p^m */
 static GEN
@@ -744,18 +759,47 @@ ZpX_sylvester_echelon(GEN f1, GEN f2, long early_abort, GEN p, GEN pm)
   return ZpM_echelon(a, early_abort, p, pm);
 }
 
-/* polynomial gcd mod p^m (assumes f1 monic) */
+/* polynomial gcd mod p^m (assumes f1 monic). Return a QpX ! */
+static GEN
+Zlx_gcd(GEN f1, GEN f2, ulong p, ulong pm)
+{
+  pari_sp av = avma;
+  GEN a = Zlx_sylvester_echelon(f1,f2,0,p,pm);
+  long c, l = lg(a), v = varn(f1);
+  for (c = 1; c < l; c++)
+  {
+    ulong t = ucoeff(a,c,c);
+    if (t)
+    {
+      a = RgV_to_RgX(Flv_to_ZV(gel(a,c)), v);
+      if (t == 1) return gerepilecopy(av, a);
+      return gerepileupto(av, RgX_Rg_div(a, utoipos(t)));
+    }
+  }
+  avma = av; return pol_0(v);
+}
 GEN
 ZpX_gcd(GEN f1, GEN f2, GEN p, GEN pm)
 {
   pari_sp av = avma;
-  GEN a = ZpX_sylvester_echelon(f1,f2,0,p,pm);
-  long c, l = lg(a), v = varn(f1);
+  GEN a;
+  long c, l, v;
+  if (lgefint(pm) == 3)
+  {
+    ulong q = pm[2];
+    return Zlx_gcd(ZX_to_Flx(f1, q), ZX_to_Flx(f2,q), p[2], q);
+  }
+  a = ZpX_sylvester_echelon(f1,f2,0,p,pm);
+  l = lg(a); v = varn(f1);
   for (c = 1; c < l; c++)
   {
     GEN t = gcoeff(a,c,c);
     if (signe(t))
-      return gerepileupto(av, RgX_Rg_div(RgV_to_RgX(gel(a,c), v), t));
+    {
+      a = RgV_to_RgX(gel(a,c), v);
+      if (equali1(t)) return gerepilecopy(av, a);
+      return gerepileupto(av, RgX_Rg_div(a, t));
+    }
   }
   avma = av; return pol_0(v);
 }
@@ -773,11 +817,25 @@ GEN
 ZpX_reduced_resultant(GEN x, GEN y, GEN p, GEN pm)
 {
   pari_sp av = avma;
-  GEN z = ZpX_sylvester_echelon(x,y,0,p,pm);
-  if (lg(z) > 1)
+  GEN z;
+  if (lgefint(pm) == 3)
   {
-    GEN c = gcoeff(z,1,1);
-    if (signe(c)) return gerepileuptoint(av, c);
+    ulong q = pm[2];
+    z = Zlx_sylvester_echelon(ZX_to_Flx(x,q), ZX_to_Flx(y,q),0,p[2],q);
+    if (lg(z) > 1)
+    {
+      ulong c = ucoeff(z,1,1);
+      if (c) { avma = av; return utoipos(c); }
+    }
+  }
+  else
+  {
+    z = ZpX_sylvester_echelon(x,y,0,p,pm);
+    if (lg(z) > 1)
+    {
+      GEN c = gcoeff(z,1,1);
+      if (signe(c)) return gerepileuptoint(av, c);
+    }
   }
   avma = av; return gen_0;
 }
@@ -803,11 +861,23 @@ static long
 ZpX_disc_val_i(GEN x, GEN dx, GEN p, GEN pm)
 {
   pari_sp av = avma;
-  GEN z = ZpX_sylvester_echelon(x, dx, 1, p, pm);
-  long i, l, v = 0;
-  if (!z) { avma = av; return -1; } /* failure */
-  l = lg(z);
-  for (i = 1; i < l; i++) v += Z_pval(gcoeff(z,i,i), p);
+  GEN z;
+  long i, l, v;
+  if (lgefint(pm) == 3)
+  {
+    ulong q = pm[2], pp = p[2];
+    z = Zlx_sylvester_echelon(ZX_to_Flx(x,q), ZX_to_Flx(dx,q), 1, pp, q);
+    if (!z) { avma = av; return -1; } /* failure */
+    v = 0; l = lg(z);
+    for (i = 1; i < l; i++) v += u_lval(ucoeff(z,i,i), pp);
+  }
+  else
+  {
+    z = ZpX_sylvester_echelon(x, dx, 1, p, pm);
+    if (!z) { avma = av; return -1; } /* failure */
+    v = 0; l = lg(z);
+    for (i = 1; i < l; i++) v += Z_pval(gcoeff(z,i,i), p);
+  }
   return v;
 }
 /* assume f monic */

@@ -3504,6 +3504,10 @@ the \kbd{Flc} \kbd{x} by $\kbd{x}*\kbd{y}$.
 \fun{void}{Flc_Fl_div_inplace}{GEN x, ulong y, ulong p} replaces
 the \kbd{Flv} \kbd{x} by $\kbd{x}/\kbd{y}$.
 
+\fun{void}{Flc_lincomb1_inplace}{GEN X, GEN Y, ulong v, ulong q}
+sets $X\leftarrow X + vY$, where $X,Y$ are \kbd{Flc}. Memory efficient (e.g.
+no-op if $v = 0$), and gerepile-safe.
+
 \fun{GEN}{Flv_add}{GEN x, GEN y, ulong p} adds two \kbd{Flv}.
 
 \fun{void}{Flv_add_inplace}{GEN x, GEN y, ulong p} replaces
@@ -5327,6 +5331,9 @@ $\det U$ coprime to $p$ such that $E = MU$ modulo $p^m$. I
 \kbd{early\_abort} is non-zero, return NULL as soon as one pivot in
 the echelon form is divisible by $p^m$. The echelon form is an upper
 triangular HNF, we do not waste time to reduce it to Gauss-Jordan form.
+
+\fun{GEN}{Zlm_echelon}{GEN M, long early_abort, ulong p, ulong pm} \kbd{Zlm}
+variant of \kbd{ZpM\_echelon}.
 
 \fun{GEN}{ZpXQ_log}{GEN a, GEN T, GEN p, long e} $T$ being a \kbd{ZpX}
 irreducible modulo $p$, return the logarithm of $a$ in $\Z_p[X]/(T)$ to

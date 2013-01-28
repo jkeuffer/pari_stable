@@ -440,6 +440,13 @@ ZC_lincomb1_inplace(GEN X, GEN Y, GEN v)
   if (m == 2) return; /* v = 0 */
   for (i = lg(X)-1; i; i--) gel(X,i) = addmulii_inplace(gel(X,i), gel(Y,i), v);
 }
+void
+Flc_lincomb1_inplace(GEN X, GEN Y, ulong v, ulong q)
+{
+  long i;
+  if (!v) return; /* v = 0 */
+  for (i = lg(X)-1; i; i--) X[i] = Fl_add(X[i], Fl_mul(Y[i], v, q), q);
+}
 
 /* X + v Y, wasteful if (v = 0) */
 static GEN
