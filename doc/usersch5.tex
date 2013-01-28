@@ -9272,6 +9272,19 @@ exist, in function $s$.
 @eprog\noindent prints the error message: \kbd{not an n-th power residue in
 $s$: $x$}.
 
+\subsec{Miscellaneous functions}
+
+\fun{long}{name_numerr}{const char *s} return the error number corresponding to
+an error name. E.g. \kbd{name\_numerr("e\_DIM")} returns \kbd{e\_DIM}.
+
+\fun{const char*}{numerr_name}{long errnum} returns the error name
+corresponding to an error number. E.g. \kbd{name\_numerr(e\_DIM)} returns
+\kbd{"e\_DIM"}.
+
+\fun{char*}{pari_err2str}{GEN err} returns the error message that would be
+printed on \typ{ERROR} \kbd{err}. The name is allocated on the PARI stack and
+must not be freed.
+
 \section{Hashtables}
 A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys
 and values. PARI implements general extensible hashtables for fast data
