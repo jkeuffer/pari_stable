@@ -30,7 +30,7 @@ Doc:
  an order which will be maximal at all the small primes.
 
  If \var{fa} is present it must be either a factorization matrix
- of a prime number. If it is a matrix, we assume (without checking!) that
+ or a prime number. If it is a matrix, we assume (without checking!) that
  it is a two-column matrix of a (partial) factorization of the discriminant
  $D$ of $T$; namely the first column contains prime divisors of $D$, and the
  second one the valuation of $D$ at each of these primes. Returns a
