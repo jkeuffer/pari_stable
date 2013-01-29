@@ -994,7 +994,7 @@ ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm)
   m = Z_pval(pm, p);
 
   ldef = (li > co)? li - co: 0;
-  for (def = co-1,i = li-1; i > ldef; i--,def--)
+  for (def = co-1,i = li-1; i > ldef; i--)
   {
     long vmin = LONG_MAX, kmin = 0;
     GEN umin = gen_0, pvmin, q;
@@ -1014,6 +1014,8 @@ ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm)
     {
       if (early_abort) return NULL;
       gcoeff(x,i,def) = gen_0;
+      ldef--;
+      if (ldef < 0) ldef = 0;
       continue;
     }
     if (kmin != def) swap(gel(x,def), gel(x,kmin));
@@ -1036,9 +1038,13 @@ ZpM_echelon(GEN x, long early_abort, GEN p, GEN pm)
         x = gerepilecopy(av, x); pvmin = gcoeff(x,i,def);
       }
     }
+    def--;
   }
-  x += co - li;
-  x[0] = evaltyp(t_MAT) | evallg(li);
+  if (co > li)
+  {
+    x += co - li;
+    x[0] = evaltyp(t_MAT) | evallg(li);
+  }
   return gerepilecopy(av0, x);
 }
 GEN
@@ -1054,7 +1060,7 @@ zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
   m = u_lval(pm, p);
 
   ldef = (li > co)? li - co: 0;
-  for (def = co-1,i = li-1; i > ldef; i--,def--)
+  for (def = co-1,i = li-1; i > ldef; i--)
   {
     long vmin = LONG_MAX, kmin = 0;
     ulong umin = 0, pvmin, q;
@@ -1074,6 +1080,8 @@ zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
     {
       if (early_abort) return NULL;
       ucoeff(x,i,def) = 0;
+      ldef--;
+      if (ldef < 0) ldef = 0;
       continue;
     }
     if (kmin != def) swap(gel(x,def), gel(x,kmin));
@@ -1091,9 +1099,13 @@ zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
       t = Fl_neg(a / pvmin, q);
       Flc_lincomb1_inplace(gel(x,j), gel(x,def), t, pm);
     }
+    def--;
   }
-  x += co - li;
-  x[0] = evaltyp(t_MAT) | evallg(li);
+  if (co > li)
+  {
+    x += co - li;
+    x[0] = evaltyp(t_MAT) | evallg(li);
+  }
   return gerepilecopy(av0, x);
 }
 
