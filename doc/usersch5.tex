@@ -9823,6 +9823,9 @@ the number of variables allocated through \kbd{push\_lex}.
 
 \subsec{Functions returning new closures}
 
+\fun{GEN}{compile_str}{const char *s} returns the closure corresponding to the
+GP expression $s$.
+
 \fun{GEN}{closure_deriv}{GEN code} returns a closure corresponding to the
 numerical derivative of the closure \kbd{code}.
 
