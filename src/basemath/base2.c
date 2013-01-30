@@ -125,14 +125,14 @@ diag_denom(GEN M)
   return d;
 }
 static void
-allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
+allbase_from_maxord(nfmaxord_t *S, GEN maxord, GEN P, GEN f)
 {
   GEN a = NULL, da = NULL, index, P2, E2, D;
   long n = degpol(f), lP = lg(P), i, j, k;
   int centered = 0;
   for (i=1; i<lP; i++)
   {
-    GEN M, db, b = gel(ordmax,i);
+    GEN M, db, b = gel(maxord,i);
     if (b == gen_1) continue;
     db = diag_denom(b);
     if (db == gen_1) continue;
@@ -527,20 +527,20 @@ maxord2(GEN cf, GEN p, long epsilon)
 static void
 allbase2(nfmaxord_t *S, GEN f)
 {
-  GEN cf, ordmax, P = S->dTP, E = S->dTE;
+  GEN cf, maxord, P = S->dTP, E = S->dTE;
   long i, lP = lg(P), n = degpol(f);
 
   cf = cgetg(n+1,t_VEC); gel(cf,2) = companion(f);
   for (i=3; i<=n; i++) gel(cf,i) = ZM_mul(gel(cf,2), gel(cf,i-1));
-  ordmax = cgetg(lP, t_VEC);
+  maxord = cgetg(lP, t_VEC);
   for (i=1; i<lP; i++)
   {
     GEN p = gel(P, i);
     long e = E[i];
     if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n", p, e);
-    gel(ordmax,i) = e == 1? gen_1: maxord2(cf, p, e);
+    gel(maxord,i) = e == 1? gen_1: maxord2(cf, p, e);
   }
-  allbase_from_ordmax(S, ordmax, P, f);
+  allbase_from_maxord(S, maxord, P, f);
 }
 
 /*******************************************************************/
@@ -557,7 +557,7 @@ static GEN maxord(GEN p,GEN f,long mf);
 void
 nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
-  VOLATILE GEN P, E, ordmax;
+  VOLATILE GEN P, E, O;
   VOLATILE long lP, i, k;
 
   {
@@ -569,12 +569,12 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
   if (flag & nf_ROUND2) { allbase2(S, T); return; }
   P = S->dTP; lP = lg(P);
   E = S->dTE;
-  ordmax = cgetg(1, t_VEC);
+  O = cgetg(1, t_VEC);
   for (i=1; i<lP; i++)
   {
     VOLATILE pari_sp av;
     /* includes the silly case where P[i] = -1 */
-    if (E[i] <= 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
+    if (E[i] <= 1) { O = shallowconcat(O, gen_1); continue; }
     av = avma;
     pari_CATCH(e_INV) { /* caught false prime, update factorization */
       GEN x, N, p, u, ERR = pari_err_last();
@@ -596,10 +596,10 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
       for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
     } pari_RETRY {
       if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n",P[i],E[i]);
-      ordmax = shallowconcat(ordmax, mkvec( maxord(gel(P,i),T,E[i]) ));
+      O = shallowconcat(O, mkvec( maxord(gel(P,i),T,E[i]) ));
     } pari_ENDCATCH;
   }
-  allbase_from_ordmax(S, ordmax, P, T);
+  allbase_from_maxord(S, O, P, T);
 }
 
 /* d a t_INT; f a t_MAT factorisation of some t_INT sharing some divisors
@@ -2918,7 +2918,7 @@ ideal_is1(GEN x) {
 
 /* nf a true nf. Return NULL if power order if pr-maximal */
 static GEN
-rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
+rnfmaxord(GEN nf, GEN pol, GEN pr, long vdisc)
 {
   pari_sp av = avma, av1, lim;
   long i, j, k, n, vpol, cmpt, sep;
@@ -3047,7 +3047,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"rnfordmax");
+      if(DEBUGMEM>1) pari_warn(warnmem,"rnfmaxord");
       gerepileall(av1,2, &W,&I);
     }
   }
@@ -3152,7 +3152,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   for (i=1; i < l; i++)
   {
     long e = itos(gel(E,i));
-    if (e > 1) z = rnfjoinmodules(nf, z, rnfordmax(nf, pol, gel(P,i), e));
+    if (e > 1) z = rnfjoinmodules(nf, z, rnfmaxord(nf, pol, gel(P,i), e));
   }
   if (!z) z = triv_order(n);
   A = gel(z,1); d = get_d(nf, pol, A);
