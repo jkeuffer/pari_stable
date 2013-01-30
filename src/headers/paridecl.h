@@ -3580,7 +3580,6 @@ INLINE void   gmul2nz(GEN x, long s, GEN z);
 INLINE GEN    gmulgs(GEN y, long s);
 INLINE void   gmulz(GEN x, GEN y, GEN z);
 INLINE void   gnegz(GEN x, GEN z);
-INLINE GEN    gnormalize(GEN x);
 INLINE void   gshiftz(GEN x, long s, GEN z);
 INLINE GEN    gsubgs(GEN y, long s);
 INLINE void   gsubz(GEN x, GEN y, GEN z);

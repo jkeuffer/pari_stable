@@ -1746,18 +1746,6 @@ mul_denom(GEN dx, GEN dy)
   return mulii(dx,dy);
 }
 
-/* normalizepol / normalize / identity : in place */
-INLINE GEN
-gnormalize(GEN x)
-{
-  switch(typ(x))
-  {
-    case t_POL: return normalizepol(x);
-    case t_SER: return normalize(x);
-    default: return x;
-  }
-}
-
 /* POLYNOMIALS */
 INLINE GEN
 constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }

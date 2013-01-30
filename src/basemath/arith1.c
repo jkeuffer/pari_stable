@@ -3574,7 +3574,9 @@ bestappr_Q(GEN x, GEN k)
         a = bestappr_Q(gel(x,i),k); if (!a) return NULL;
         gel(y,i) = a;
       }
-      return gnormalize(y);
+      if (tx == t_POL) return normalizepol(y);
+      if (tx == t_SER) return normalize(y);
+      return y;
   }
   pari_err_TYPE("bestappr_Q",x);
   return NULL; /* not reached */
@@ -3648,7 +3650,7 @@ bestappr_RgX(GEN x, long B)
         t = bestappr_RgX(gel(x,i),B); if (!t) return NULL;
         gel(y,i) = t;
       }
-      return gnormalize(y);
+      return y;
   }
   pari_err_TYPE("bestappr_RgX",x);
   return NULL; /* not reached */
