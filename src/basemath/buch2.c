@@ -661,6 +661,11 @@ FBgen(FB_t *F, GEN nf, long N, ulong C1, ulong C2, GRHcheck_t *S)
     F->FB[++i]= p;
     F->LV[p]  = LP;
     F->iLP[p] = ip; ip += k;
+    if (p == C2)
+    {
+      if (!F->KC) { F->KCZ = i; F->KC = ip; }
+      break;
+    }
   }
   /* Note F->KC > 0 otherwise GRHchk is false */
   setlg(F->FB, F->KCZ+1); F->KCZ2 = i;
@@ -682,12 +687,11 @@ static int
 GRHchk(GEN nf, GRHcheck_t *S, ulong LIMC)
 {
   double logC = log((ulong)LIMC), SA = 0, SB = 0;
-  long i;
+  GRHprime_t *pr = S->primes;
 
   cache_prime_dec(S, LIMC, nf);
-  for (i = 0;; i++)
+  for (pr = S->primes;; pr++)
   {
-    GRHprime_t *pr = S->primes+i;
     ulong p = pr->p;
     GEN dec, fs, ns;
     double logCslogp;
@@ -714,6 +718,7 @@ GRHchk(GEN nf, GRHcheck_t *S, ulong LIMC)
       SA += nb * A;
       SB += nb * B;
     }
+    if (p == LIMC) break;
   }
   return GRHok(S, logC, SA, SB);
 }
