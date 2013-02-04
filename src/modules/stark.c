@@ -286,6 +286,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 #define ch_diff(x) gel(x,6)
 #define ch_cond(x) gel(x,7)
 #define ch_CHI0(x) gel(x,8)
+#define ch_comp(x) gel(x,9)
 
 static GEN
 GetDeg(GEN dataCR)
@@ -362,44 +363,70 @@ Order(GEN cyc, GEN x)
   return gerepileuptoint(av, f);
 }
 
-/* Let pr be a prime (pr may divide mod(bnr)), compute the indexes
-   e,f of the splitting of pr in the class field nf(bnr/subgroup) */
-static GEN
-GetIndex(GEN pr, GEN bnr, GEN subgroup)
+/* Let H be a subgroup of cl(bnr)/sugbroup, return 1 if
+   cl(bnr)/subgoup/H is cyclic and the signature of the
+   corresponding field is equal to sig and no finite prime
+   dividing cond(bnr) is totally split in this field. Return 0
+   otherwise. */
+static long
+IsGoodSubgroup(GEN H, GEN bnr, GEN sbg, GEN map)
 {
-  long v, e, f;
   pari_sp av = avma;
-  GEN bnf, mod, mod0, bnrpr, subpr, M, dtQ, p1;
-  GEN cycpr, cycQ;
+  long j, f;
+  GEN bnf, mod, mod0, mod1, modH, modH0, p1, p2, p3, p4;
+  GEN bnrH, cycH, iH, qH;
+
+  p1 = InitQuotient(H);
+  p2 = gel(p1, 2);
+  /* quotient is non cyclic */
+  if ((lg(p2) > 2) && !gcmp1(gel(p2, 2))) { avma = av; return 0; }
 
   bnf  = bnr_get_bnf(bnr);
   mod  = bnr_get_mod(bnr);
   mod0 = gel(mod,1);
+  mod1 = gel(mod,2);
 
-  v = idealval(bnf, mod0, pr);
-  if (v == 0)
+  p1 = concat(map, H);
+  p2 = ZM_hnfall(p1, &p3, 0);
+  setlg(p3, lg(H));
+  for (j = 1; j < lg(p3); j++) setlg(p3[j], lg(H));
+  p1 = ZM_hnf(concat(p3, diagonal_shallow(bnr_get_cyc(bnr)))); /* H as a subgroup of bnr */
+  modH = bnrconductor(bnr, p1, 0);
+
+  /* is the signature correct? */
+  if (!gequal(gel(modH, 2), mod1)) { avma = av; return 0; }
+
+  /* if the finite part are the same, then it's good */
+  if (gequal(gel(modH, 1), mod0)) { avma = av; return 1; }
+
+  /* we need to check the splitting of primes dividing mod0/p2 */
+  modH0 = gel(modH, 1);
+  p3 = idealdivexact(bnf, mod0, modH0);
+  p4 = gel(idealfactor(bnf, p3), 1);
+
+  bnrH = Buchray(bnf, mkvec2(modH, mod1), nf_INIT|nf_GEN);
+  cycH = bnr_get_cyc(bnrH);
+  p2 = ZM_mul(bnrsurjection(bnr, bnrH), p1);
+  /* H as a subgroup of bnrH */
+  iH = ZM_hnf(shallowconcat(p2, diagonal_shallow(cycH)));
+  qH = InitQuotient(iH);
+
+  for (j = 1; j < lg(p4); j++)
   {
-    bnrpr = bnr;
-    subpr = subgroup;
-    e = 1;
-  }
-  else
-  { /* part of mod coprime to pr */
-    GEN mpr0 = idealdivpowprime(bnf, mod0, pr, utoipos(v));
-    bnrpr = Buchray(bnf, mkvec2(mpr0, gel(mod,2)), nf_INIT|nf_GEN);
-    cycpr = bnr_get_cyc(bnrpr);
-    M = ZM_mul(bnrsurjection(bnr, bnrpr), subgroup);
-    subpr = ZM_hnf(shallowconcat(M, diagonal_shallow(cycpr)));
-    /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
-    e = itos( diviiexact(ZM_det_triangular(subgroup), ZM_det_triangular(subpr)) );
+    GEN pr = gel(p4, j);
+    /* if pr divides modH0, it is ramified, so it's good */
+    if (!idealval(bnf, modH0, pr))
+    {
+      /* we compute the inertia degree of pr in bnr(modH)/H*/
+      p1 = ZM_ZC_mul(gel(qH, 3), isprincipalray(bnrH, pr));
+      p2 = gel(qH, 2);
+      f  = itos(Order(p2, p1));
+      if (f == 1) { avma = av; return 0; }
+    }
   }
 
-  /* f = order of [pr] in bnrpr/subpr */
-  dtQ  = InitQuotient(subpr);
-  p1   = ZM_ZC_mul(gel(dtQ,3), isprincipalray(bnrpr, pr));
-  cycQ = gel(dtQ,2);
-  f  = itos( Order(cycQ, p1) );
-  avma = av; return mkvecsmall2(e, f);
+  avma = av;
+  return 1;
 }
 
 static GEN get_listCR(GEN bnr, GEN dtQ);
@@ -437,24 +464,25 @@ CplxModulus(GEN data, long *newprec)
   *newprec = dprec; return ex;
 }
 
-/* Let f be a conductor without infinite part and let C be a
+ /* Let f be a conductor without infinite part and let C be a
    congruence group modulo f, compute (m,D) such that D is a
    congruence group of conductor m where m is a multiple of f
    divisible by all the infinite places but one, D is a subgroup of
-   index 2 of Im(C) in Clk(m), no prime dividing f splits in the
-   corresponding quadratic extension and m is of minimal norm. Return
-   bnr(m), D, quotient Ck(m) / D and Clk(m) / C */
+   index 2 of Im(C) in Clk(m), and m is such that the intersection
+   of the subgroups H of Clk(n)/Im(C) such that the quotient is
+   cyclic and no prime divding m, but the one infinite prime, is
+   totally split in the extension corresponding to H is trival.
+   Return bnr(m), D, the quotient Ck(m)/D and Clk(m)/C */
 static GEN
 FindModulus(GEN bnr, GEN dtQ, long *newprec)
 {
   const long limnorm = 400;
-  long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
+  long n, i, narch, maxnorm, minnorm, N, nbidnn, s, c, j, k, nbcand;
   long first = 1, pr, rb, oldcpl = -1, iscyc = 0;
   pari_sp av = avma, av1;
   GEN bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC, rep = NULL;
-  GEN candD, bpr, indpr, sgp, p2;
+  GEN candD, p2;
 
-  sgp = gel(dtQ,4);
   bnf = bnr_get_bnf(bnr);
   nf  = bnf_get_nf(bnf);
   N   = nf_get_degree(nf);
@@ -462,16 +490,6 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
 
   /* if cpl < rb, it is not necessary to try another modulus */
   rb = expi( powii(mulii(nf_get_disc(nf), ZM_det_triangular(f)), gmul2n(bnr_get_no(bnr), 3)) );
-
-  bpr = divcond(bnr);
-  nbp = lg(bpr) - 1;
-
-  indpr = cgetg(nbp + 1,t_VECSMALL);
-  for (i = 1; i <= nbp; i++)
-  {
-    GEN ef = GetIndex(gel(bpr,i), bnr, sgp);
-    indpr[i] = ef[1] * ef[2];
-  }
 
   /* Initialization of the possible infinite part */
   arch = const_vec(N, gen_1);
@@ -486,7 +504,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
   minnorm = 1;
 
   /* if the extension is cyclic then we _must_ find a suitable conductor */
-  if (lg(gel(dtQ,2)) == 2) iscyc = 1;
+  if (lg(gel(dtQ,2)) == 2 || gcmp1(gmael(dtQ,2,2))) iscyc = 1;
 
   if (DEBUGLEVEL>1)
     err_printf("Looking for a modulus of norm: ");
@@ -528,13 +546,48 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
             GEN D  = gel(candD,c);
             long cpl;
 
-            /* check the splitting of primes */
-            for (j = 1; j <= nbp; j++)
+            /* check if the conductor is suitable */
             {
-              GEN ef = GetIndex(gel(bpr,j), bnrm, D);
-              if (ef[1] * ef[2] == indpr[j]) break; /* no good */
+              GEN p1 = InitQuotient(D), p2, ord = gel(p1, 1);
+              GEN map = gel(p1, 3), cyc = gel(p1, 2), H;
+              GEN lH = subgrouplist(cyc, NULL), IK = NULL;
+              long ok = 0;
+
+              /* if the extension is cyclic, then it's suitable */
+              if ((lg(cyc) > 2) && !gcmp1(gel(cyc, 2)))
+              {
+                for (j = 1; j < lg(lH); j++)
+                {
+                  H = gel(lH, j);
+                  /* if IK != NULL and H > IK, no need to test H */
+                  if (IK)
+                  {
+                    p1 = RgM_mul(IK, RgM_inv_upper(H));
+                    if (RgM_is_ZM(p1)) continue;
+                  }
+                  if (IsGoodSubgroup(H, bnrm, D, map))
+                  {
+                    if (!IK)
+                      IK = H;
+                    else
+                    {
+                      /* compute the intersection of IK and H */
+                      p1 = shallowconcat(IK, H);
+                      p1 = ZM_hnfall(p1, &p2, 1);
+                      setlg(p2, lg(IK));
+                      for (k = 1; k < lg(p2); k++) setlg(p2[k], lg(p1));
+                      IK = ZM_mul(IK, p2);
+                      IK = ZM_hnf(shallowconcat(IK, diagonal(cyc)));
+                    }
+                    if (gequal(ord, ZM_det_triangular(IK)))
+                    {
+                      ok = 1; break;
+                    }
+                  }
+                }
+                if (!ok) continue;
+              }
             }
-            if (j <= nbp) continue;
 
             p2 = cgetg(6, t_VEC); /* p2[5] filled in CplxModulus */
             gel(p2,1) = bnrm;
@@ -872,7 +925,8 @@ _data4(GEN arch, long r1, long r2)
 
    1: chi
    5: [(c_i), z, d] in bnr(m)
-   8: [(c_i), z, d] in bnr(F) */
+   8: [(c_i), z, d] in bnr(F)
+   9: if NULL then does not compute (for AllStark) */
 static GEN
 InitChar(GEN bnr, GEN listCR, long prec)
 {
@@ -892,7 +946,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   dataCR = cgetg_copy(listCR, &l);
   for (i = 1; i < l; i++)
   {
-    GEN olddtcr, dtcr = cgetg(9, t_VEC);
+    GEN olddtcr, dtcr = cgetg(10, t_VEC);
     gel(dataCR,i) = dtcr;
 
     chi  = gmael(listCR, i, 1);
@@ -930,6 +984,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 
     ch_chi(dtcr) = chi; /* the character */
     ch_CHI(dtcr) = get_Char(chi,initc,NULL,prec); /* associated to bnr(m) */
+    ch_comp(dtcr) = gen_1; /* compute this character (by default) */
     chi = GetPrimChar(chi, bnr, ch_bnr(dtcr), prec2);
     if (!chi) chi = ch_CHI(dtcr);
     ch_CHI0(dtcr) = chi;
@@ -2005,17 +2060,25 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 
       if (DEBUGLEVEL>1)
         err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
-      matan = computean(gel(dataCR,t), &LIST, NN, d);
-      for (n = 1; n <= NN; n++)
-        if ((an = EvalCoeff(z, matan[n], d)))
-        {
-          p1 = gadd(p1, gmul(an, gel(vcn,n)));
-          p2 = gadd(p2, gmul(an, gel(veint1,n)));
-          if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
-        }
-      gaffect(gmul(cfh, gmul(p1,c1)), gel(S,t));
-      gaffect(gmul(cf,  gconj(p2)),   gel(T,t));
-      FreeMat(matan,NN); avma = av2;
+      if (ch_comp(gel(dataCR, t)))
+      {
+        matan = computean(gel(dataCR,t), &LIST, NN, d);
+        for (n = 1; n <= NN; n++)
+          if ((an = EvalCoeff(z, matan[n], d)))
+          {
+            p1 = gadd(p1, gmul(an, gel(vcn,n)));
+            p2 = gadd(p2, gmul(an, gel(veint1,n)));
+            if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
+          }
+        gaffect(gmul(cfh, gmul(p1,c1)), gel(S,t));
+        gaffect(gmul(cf,  gconj(p2)),   gel(T,t));
+        FreeMat(matan,NN); avma = av2;
+      }
+      else
+      {
+        if (DEBUGLEVEL>1)
+          err_printf("\t  no need to compute this character\n");
+      }
     }
     if (DEBUGLEVEL>1) err_printf("\n");
     avma = av1;
@@ -2193,18 +2256,27 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 
       if (DEBUGLEVEL>1)
         err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
-      matan = ComputeCoeff(gel(dataCR,t), &LIST, NN, d);
-      for (n = 1; n <= NN; n++)
-        if ((an = EvalCoeff(z, matan[n], d)))
-        {
-          get_cS_cT(&cScT, n);
-          p1 = gadd(p1, gmul(an, gel(cScT.cS,n)));
-          p2 = gadd(p2, gmul(an, gel(cScT.cT,n)));
-          if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
-        }
-      gaffect(p1,        gel(S,t));
-      gaffect(gconj(p2), gel(T,t));
-      FreeMat(matan, NN); avma = av2;
+
+      if (ch_comp(gel(dataCR, t)))
+      {
+        matan = ComputeCoeff(gel(dataCR,t), &LIST, NN, d);
+        for (n = 1; n <= NN; n++)
+          if ((an = EvalCoeff(z, matan[n], d)))
+          {
+           get_cS_cT(&cScT, n);
+           p1 = gadd(p1, gmul(an, gel(cScT.cS,n)));
+           p2 = gadd(p2, gmul(an, gel(cScT.cT,n)));
+           if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
+          }
+        gaffect(p1,        gel(S,t));
+        gaffect(gconj(p2), gel(T,t));
+        FreeMat(matan, NN); avma = av2;
+      }
+      else
+      {
+        if (DEBUGLEVEL>1)
+          err_printf("\t  no need to compute this character\n");
+      }
     }
     if (DEBUGLEVEL>1) err_printf("\n");
     avma = av1;
@@ -2288,7 +2360,7 @@ static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
   const long BND = 300;
-  long cl, i, j, cpt = 0, N, h, v, n, r1, r2, den;
+  long cl, i, j, cpt = 0, N, h, v, n, r, r1, r2, den;
   pari_sp av, av2;
   int **matan;
   GEN bnr = gel(data,1), p1, p2, S, T, polrelnum, polrel, Lp, W, veczeta;
@@ -2312,6 +2384,14 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 LABDOUB:
   if (DEBUGLEVEL) timer_start(&ti);
   av = avma;
+
+  /* characters with rank > 1 should not be computed */
+  for (i = 1; i <= cl; i++)
+  {
+    ComputeAChi(gel(dataCR, i), &r, 0, DEFAULTPREC);
+    if (r) ch_comp(gel(dataCR, i)) = NULL;
+  }
+
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
   if (DEBUGLEVEL) timer_printf(&ti,"Compute W");
   Lp = cgetg(cl + 1, t_VEC);
@@ -2320,8 +2400,13 @@ LABDOUB:
     GetST(bnr, &S, &T, dataCR, vChar, newprec);
     if (DEBUGLEVEL) timer_printf(&ti, "S&T");
     for (i = 1; i <= cl; i++)
-      Lp[i] = GetValue(gel(dataCR,i), gel(W,i), gel(S,i), gel(T,i),
-                       2, newprec)[2];
+    {
+      if (ch_comp(gel(dataCR, i)))
+        gel(Lp, i) = gel(GetValue(gel(dataCR,i), gel(W,i), gel(S,i), gel(T,i),
+                                  2, newprec), 2);
+      else
+        gel(Lp, i) = gen_0;
+    }
   }
   else
   { /* compute a crude approximation of the result */
