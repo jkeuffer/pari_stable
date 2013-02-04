@@ -554,7 +554,7 @@ static GEN _lift_lin(void *E, GEN F, GEN x2, GEN q)
 }
 
 static GEN
-FpM_FpXV_bilinear(GEN P, GEN Y, GEN X, GEN p)
+FpM_FpXV_bilinear(GEN P, GEN X, GEN Y, GEN p)
 {
    pari_sp av = avma;
    GEN s =  ZX_mul(FpXV_FpC_mul(X,gel(P,1),p),gel(Y,1));
@@ -570,9 +570,22 @@ FpM_FpXQV_bilinear(GEN P, GEN X, GEN Y, GEN T, GEN p)
   return FpX_rem(FpM_FpXV_bilinear(P,X,Y,p),T,p);
 }
 
+static GEN
+FpXC_powderiv(GEN M, GEN p)
+{
+  long i, l;
+  long v = varn(gel(M,2));
+  GEN m = cgetg_copy(M, &l);
+  gel(m,1) = pol_0(v);
+  gel(m,2) = pol_1(v);
+  for(i=2; i<l-1; i++)
+    gel(m,i+1) = FpX_Fp_mul(gel(M,i),utoi(i), p);
+  return m;
+}
+
 struct _lift_iso
 {
-  GEN phi,phix;
+  GEN phi;
   GEN Xm,T;
   GEN sqx, Tp;
   ulong p;
@@ -582,13 +595,12 @@ static GEN
 _lift_iter(void *E, GEN x2, GEN q)
 {
   struct _lift_iso *d = (struct _lift_iso *) E;
-  ulong p = d->p, p1 = (p>>1)+2;
+  ulong p = d->p;
   GEN TN = FpXT_red(d->T, q), XN = FpXV_red(d->Xm, q);
   GEN y2 = ZpXQ_frob(x2, XN, TN, q, p);
   GEN xp = FpXQ_powers(x2, p, TN, q);
   GEN yp = FpXQ_powers(y2, p, TN, q);
   GEN V  = FpM_FpXV_bilinear(d->phi,xp,yp,q);
-  V = ZX_add(V,ZX_add(ZX_sqr(gel(xp,p1)),ZX_sqr(gel(yp,p1))));
   V = FpX_rem(V,TN,q);
   return mkvec3(V,xp,yp);
 }
@@ -602,8 +614,8 @@ _lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
   GEN TM = FpXT_red(d->T, qM), XM = FpXV_red(d->Xm, qM);
   GEN xp = FpXV_red(gel(v,2), qM);
   GEN yp = FpXV_red(gel(v,3), qM);
-  GEN Dx = FpM_FpXQV_bilinear(d->phix, xp, yp, TM, qM);
-  GEN Dy = FpM_FpXQV_bilinear(d->phix, yp, xp, TM, qM);
+  GEN Dx = FpM_FpXQV_bilinear(d->phi, FpXC_powderiv(xp, qM), yp, TM, qM);
+  GEN Dy = FpM_FpXQV_bilinear(d->phi, xp, FpXC_powderiv(yp, qM), TM, qM);
   GEN F = mkvec4(Dy, Dx, TM, XM);
   e.ai = Flxq_inv(ZX_to_Flx(Dy,p),d->Tp,p);
   e.sqx = d->sqx; e.Tp = d->Tp; e.p=p; e.Xm = XM;
@@ -611,44 +623,24 @@ _lift_invd(void *E, GEN V, GEN v, GEN qM, long M)
 }
 
 static GEN
-lift_isogeny(GEN phi, GEN phix, GEN x0, long n, GEN Xm,
-                      GEN T, GEN sqx, GEN Tp, ulong p)
+lift_isogeny(GEN phi, GEN x0, long n, GEN Xm, GEN T, GEN sqx, GEN Tp, ulong p)
 {
   struct _lift_iso d;
-  d.phi=phi, d.phix=phix; d.Xm=Xm; d.T=T;
+  d.phi=phi;
+  d.Xm=Xm; d.T=T;
   d.sqx=sqx; d.Tp=Tp; d.p=p;
-  return gen_ZpX_Newton(x0,utoi(p), n,(void*)&d, _lift_iter, _lift_invd);
+  return gen_ZpX_Newton(x0, utoi(p), n,(void*)&d, _lift_iter, _lift_invd);
 }
 
 static GEN
-getc2(GEN X, GEN A60, GEN A61, GEN T, GEN q, long N)
+getc2(GEN act, GEN X, GEN T, GEN q, long N)
 {
-  GEN p = utoi(3);
-  GEN X2 = FpXQ_sqr(X,T,q), X3 = FpXQ_mul(X,X2,T,q);
-  GEN P = Z_ZX_sub(gen_2,ZX_add(ZX_add(ZX_mulu(ZX_add(X3,X2),1890),
-                                ZX_mulu(X,252)), ZX_mulu(A60,729)));
-  GEN Q1 = ZX_Z_add(ZX_mulu(A61,27),gen_2);
-  GEN Q2 = ZX_Z_add(ZX_add(ZX_mulu(X2,90),ZX_mulu(X,60)),gen_1);
-  GEN Q = FpXQ_mul(Q1,Q2,T,q);
-  return FpXQ_mul(P,ZpXQ_inv(Q,T,p,N),T,q);
-}
-
-static GEN
-liftcurve(GEN J, GEN T, GEN p, long N)
-{
-  pari_sp av = avma;
-  GEN P = mkpoln(3,ZX_mulu(J,27),ZX_shifti(J,2),utoi(256));
-  GEN r = ZpXQX_liftroot(P,FpX_neg(FpXQ_inv(J,T,p),p),T,p,N);
-  return gerepileupto(av, r);
-}
-
-static GEN
-liftX(GEN a6, GEN A6, GEN T, GEN p, long N)
-{
-  pari_sp av = avma;
-  GEN P = mkpoln(5,p,utoi(4),gen_0,ZX_mulu(A6,12),ZX_shifti(A6,2));
-  GEN a = Flx_to_ZX(Flx_neg(a6,3));
-  return gerepileupto(av, ZpXQX_liftroot_vald(P,a,1,T,p,N));
+  GEN A1 = RgV_to_RgX(gel(act,1),0), A2 =  RgV_to_RgX(gel(act,2),0);
+  long n = brent_kung_optpow(maxss(degpol(A1),degpol(A2)),2,1);
+  GEN xp = FpXQ_powers(X,n,T,q);
+  GEN P  = FpX_FpXQV_eval(A1, xp, T, q);
+  GEN Q  = FpX_FpXQV_eval(A2, xp, T, q);
+  return FpXQ_mul(P,ZpXQ_inv(Q,T,utoi(3),N),T,q);
 }
 
 /* Assume a = 1 [p], return the square root of the norm */
@@ -660,7 +652,28 @@ ZpXQ_sqrtnorm(GEN a, GEN T, GEN p, long e)
   return modii(gel(Qp_exp(cvtop(s, p, e-1)),4),pe);
 }
 
-#define ss(a,b) shifti(stoi(a),b)
+/*
+  These polynomials were extracted from the ECHIDNA databases
+  available at <http://echidna.maths.usyd.edu.au/echidna/>
+  and computed by David R. Kohel.
+*/
+
+static GEN
+get_Kohel_polynomial(ulong p, GEN *act)
+{
+  switch(p)
+  {
+  case 3:
+    *act = mkvec2(mkcol4s(1, -483,-21141,-59049),
+        mkcol4s(1, 261, 4347, -6561));
+    return mkvec4( mkcol4s(0,0,0,1),
+        mkcol4s(-1,-36,-270,0),
+        mkcol4s(0,-729, -26244,0),
+        mkcol4s(0,0,-531441,0));
+  }
+  *act = NULL;
+  return NULL;
+}
 
 static GEN
 F3xq_elltrace_Harley(GEN a6, GEN T)
@@ -668,17 +681,10 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   pari_sp av = avma, av2;
   pari_timer ti;
   long n = get_Flx_degree(T), N = (n+4)/2;
-  GEN a12 = ss(52734375,45), a13 = ss(421875,30), a14 = stoi(36864000);
-  GEN a23 = ss(135806625,16), a24 = stoi(-1069956), a34 = stoi(2232);
-  GEN phi = mkmat4( mkcol4(gen_0,a12,a13,a14),
-                    mkcol4(a12,ss(-358953125,31),a23,a24),
-                    mkcol4(a13,a23,ss(1293959043,1),a34),
-                    mkcol4(a14,a24,a34,gen_m1));
-  GEN phix = mkmat4(gel(phi,2),ZC_z_mul(gel(phi,3),2),
-                    ZC_z_mul(gel(phi,4),3),mkcol4s(4,0,0,0));
-  GEN q = powuu(3, N), p =utoi(3);
-  GEN T2, Xm, j, c2, t, lr;
-  GEN J1,A60,A61,X, sqx;
+  GEN q = powuu(3, N), p = utoi(3);
+  GEN T2, Xm, s1, c2, t, lr;
+  GEN S1, sqx;
+  GEN act, phi = get_Kohel_polynomial(3, &act);
   timer_start(&ti);
   T2 = F3x_canonlift(get_Flx_mod(T),N);
   if (DEBUGLEVEL) timer_printf(&ti,"Teich");
@@ -687,24 +693,17 @@ F3xq_elltrace_Harley(GEN a6, GEN T)
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
   Xm = FpXQ_powers(monomial(gen_1,n,get_FpX_var(T2)),2,T2,q);
   if (DEBUGLEVEL) timer_printf(&ti,"Xm");
-  j = Flx_neg(Flxq_inv(a6,T,3),3);
+  s1 = Flx_neg(a6,3);
   lr = Flxq_lroot(polx_Flx( get_Flx_var(T)), T, 3);
   sqx = Flxq_powers(lr, 2, T, 3);
-  J1 = lift_isogeny(phi, phix, Flx_to_ZX(j), N, Xm, T2, sqx, T, 3);
-  if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
-  A61 = liftcurve(J1,T2,p,N);
-  A60 = ZpXQ_frob(A61,Xm,T2,q,3);
-  if (DEBUGLEVEL) timer_printf(&ti,"liftcurve");
-  X = liftX(a6,A60,T2,p,N);
-  if (DEBUGLEVEL) timer_printf(&ti,"X");
-  c2 = gerepileupto(av2, getc2(X,A60,A61,T2,q,N));
+  S1 = lift_isogeny(phi, Flx_to_ZX(s1), N, Xm, T2, sqx, T, 3);
+  if (DEBUGLEVEL) timer_printf(&ti,"Lift invariant");
+  c2 = gerepileupto(av2, getc2(act,S1,T2,q,N));
   if (DEBUGLEVEL) timer_printf(&ti,"c2");
   t = Fp_center(ZpXQ_sqrtnorm(c2,T2,p,N),q,shifti(q,-1));
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
   return gerepileupto(av, umodiu(t,3)==1 ? t: negi(t));
 }
-
-#undef ss
 
 /***************************************************************************/
 /*                                                                         */
