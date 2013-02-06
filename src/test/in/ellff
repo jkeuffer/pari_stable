@@ -7,11 +7,11 @@ test(p,n=0,v='a,w=1)=
   my(P=random(E));
   [d1]=ellgroup(E);
   if(ellorder(E,G)!=d1,error([p,n,0]));
-  if(ellpow(E,G,d1)!=[0],error([p,n,1]));
-  if(ellpow(E,P,d1)!=[0],error([p,n,2]));
+  if(ellmul(E,G,d1)!=[0],error([p,n,1]));
+  if(ellmul(E,P,d1)!=[0],error([p,n,2]));
   if(d1%ellorder(E,P)!=0,error([p,n,3]));
   if (d1<10^7,
-    P=ellpow(E,G,1023);
+    P=ellmul(E,G,1023);
     if(elllog(E,P,G)!=1023%d1,error([p,n,4]));
   );
 }
@@ -41,7 +41,7 @@ E.disc
 P=random(E);Q=random(E);
 R=elladd(E,P,Q);
 elladd(E,ellsub(E,R,P),ellneg(E,Q))
-N=ellcard(E);ellpow(E,P,N)
+N=ellcard(E);ellmul(E,P,N)
 
 check(a)=
 {
@@ -50,7 +50,7 @@ check(a)=
   N=ellcard(E);
   for(i=1,4,
     P=random(E);
-    if(ellpow(E,P,N)!=[0],error(a)));
+    if(ellmul(E,P,N)!=[0],error(a)));
   ellgenerators(E);
 }
 {
