@@ -2709,11 +2709,26 @@ Flxq_issquare(GEN x, GEN T, ulong p)
   pari_sp av;
   GEN m;
   ulong z;
-  if (lg(x) == 2 || p == 2) return 1;
+  if (lgpol(x) == 0 || p == 2) return 1;
   av = avma;
   m = diviuexact(subis(powuu(p, get_Flx_degree(T)), 1), p - 1);
   z = Flxq_pow(x, m, T, p)[2];
   avma = av; return krouu(z, p) == 1;
+}
+
+/* assume T irreducible mod p */
+int
+Flxq_is2npower(GEN x, long n, GEN T, ulong p)
+{
+  pari_sp av;
+  GEN m;
+  int z;
+  if (n==1) return Flxq_issquare(x, T, p);
+  if (lgpol(x) == 0 || p == 2) return 1;
+  av = avma;
+  m = shifti(subis(powuu(p, get_Flx_degree(T)), 1), -n);
+  z = Flx_equal1(Flxq_pow(x, m, T, p));
+  avma = av; return z;
 }
 
 GEN
