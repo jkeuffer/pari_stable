@@ -1070,7 +1070,7 @@ zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
       long v;
       if (!u) continue;
       v = u_lvalrem(u, p, &u);
-      if (v >= m) ucoeff(x,i,k) = 0;
+      if (v >= (long) m) ucoeff(x,i,k) = 0;
       else if (v < vmin) {
         vmin = v; kmin = k; umin = u;
         if (!vmin) break;

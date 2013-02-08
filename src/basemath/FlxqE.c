@@ -586,7 +586,7 @@ _can5_iter(void *E, GEN f, GEN q)
   d = RgX_splitting(N, p);
   V = cgetg(p+1,t_VEC);
   gel(V,1) = ZX_mulu(gel(d,1), p);
-  for(i=2; i<=p; i++)
+  for(i=2; i<= (long)p; i++)
     gel(V,i) = ZX_mulu(RgX_shift(gel(d,p+2-i), 1), p);
   return gerepilecopy(av, mkvec2(ZX_sub(f,P),V));
 }

@@ -582,8 +582,8 @@ external_help(const char *s, int num)
 {
   long nbli = term_height()-3, li = 0;
   char buf[256], *str;
-  const char *opt = "", *ar = "";
-  char *t, *help = Help, *cdir="";
+  const char *opt = "", *ar = "", *cdir = "";
+  char *t, *help = Help;
   pariFILE *z;
   FILE *f;
 
