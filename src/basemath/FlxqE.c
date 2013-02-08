@@ -821,10 +821,11 @@ get_norm(GEN a4, GEN a6, GEN T, GEN q, ulong p, long N)
 }
 
 static GEN
-fill_pols(long n, const long *v, long d, long m, const long *vn,
+fill_pols(long n, const long *v, long m, const long *vn,
           const long *vd, GEN *act)
 {
   long i, j;
+  long d = upowuu(n,12/(n-1));
   GEN N, D, M = zeromatcopy(n+1,n+1);
   gmael(M,1,n+1) = gen_1;
   for(i=2;i<=n+1;i++)
@@ -870,16 +871,16 @@ get_Kohel_polynomials(ulong p, GEN *act, long *dj)
   {
   case 3:
     *dj = 0;
-    return fill_pols(3,mat3,729,4,num3,den3,act);
+    return fill_pols(3,mat3,4,num3,den3,act);
   case 5:
     *dj = 0;
-    return fill_pols(5,mat5,125,5,num5,den5,act);
+    return fill_pols(5,mat5,5,num5,den5,act);
   case 7:
     *dj = 1;
-    return fill_pols(7,mat7,49,7,num7,den7,act);
+    return fill_pols(7,mat7,7,num7,den7,act);
   case 13:
     *dj = 8;
-    return fill_pols(13,mat13,13,11,num13,den13,act);
+    return fill_pols(13,mat13,11,num13,den13,act);
   }
   *dj=0; *act = NULL;
   return NULL;
