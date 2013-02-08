@@ -807,7 +807,7 @@ Teichmuller_lift(GEN x, GEN Xm, GEN T, GEN sqx, GEN Tp, ulong p, long N)
 }
 
 static GEN
-get_norm(GEN a4, GEN a6, GEN T, GEN q, ulong p, long N)
+get_norm(GEN a4, GEN a6, GEN T, ulong p, long N)
 {
   long sv=T[1];
   GEN a;
@@ -923,7 +923,7 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   if (DEBUGLEVEL) timer_printf(&ti,"tc2");
   Nc2 = ZpXQ_sqrtnorm(c2,T2,utoi(p),N);
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
-  Np = get_norm(a4,a6,T,q,p,N);
+  Np = get_norm(a4,a6,T,p,N);
   t = Fp_center(Fp_mul(Nc2,Np,q),q,shifti(q,-1));
   return gerepileupto(av, subii(addis(powuu(p,n),1),t));
 }
