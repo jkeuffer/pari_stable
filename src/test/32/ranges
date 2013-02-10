@@ -10,6 +10,10 @@
 [1, 2, 3, 4]
 [3, 4, 5]
 [1, 2, 4, 5]
+Vecsmall([2, 3])
+Vecsmall([1, 2, 3, 4])
+Vecsmall([3, 4, 5])
+Vecsmall([1, 2, 4, 5])
 
 [7 12]
 
@@ -139,3 +143,4 @@
 [0, 3, 4, [3, 4], 0, I]
 [0, 3, 4, [3, 4], 0, I]
 Total time spent: 0
+Total time spent: 4

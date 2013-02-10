@@ -577,7 +577,15 @@ off using \tet{gp_read_file}.
 
 \fun{void}{warning0}{GEN g}. Use \kbd{pari\_warn(e\_USER,)}
 
+\subsec{Accessors}
+
+\fun{GEN}{vecslice0}{GEN A, long y1, long y2} used to implement $A[y_1..y_2]$.
+
+\fun{GEN}{matslice0}{GEN A, long x1, long x2, long y1, long y2}
+used to implement $A[x_1..x_2,y_1..y_2]$.
+
 \subsec{Iterators}
+
 \fun{GEN}{apply0}{GEN f, GEN A} gp wrapper calling \tet{genapply}, where $f$
 is a \typ{CLOSURE}, applied to $A$. Use \kbd{genapply} latter or a standard C
 loop.
