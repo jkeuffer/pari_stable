@@ -973,23 +973,30 @@ compilefuncinline(long c, long a, long flag, long isif, long lev, long *ev)
   return getclosure(&pos);
 }
 
-static void
-compilemy(GEN arg, const char *str)
+static long
+countvar(GEN arg)
 {
-  long i, j, k, l = lg(arg);
+  long i, l = lg(arg);
   long n = l-1;
-  GEN vep;
   for(i=1; i<l; i++)
   {
     long a=arg[i];
     if (tree[a].f==Fassign)
     {
-       long x = detag(tree[a].x);
-       if (tree[x].f==Fvec && tree[x].x>=0)
-         n += countlisttogen(tree[x].x,Fmatrixelts)-1;
+      long x = detag(tree[a].x);
+      if (tree[x].f==Fvec && tree[x].x>=0)
+        n += countlisttogen(tree[x].x,Fmatrixelts)-1;
     }
   }
-  vep = cgetg(n+1,t_VECSMALL);
+  return n;
+}
+
+static void
+compilemy(GEN arg, const char *str)
+{
+  long i, j, k, l = lg(arg);
+  long n = countvar(arg);
+  GEN vep = cgetg(n+1,t_VECSMALL);
   for(k=0, i=1; i<l; i++)
   {
     long a=arg[i];
@@ -1041,6 +1048,54 @@ compilemy(GEN arg, const char *str)
     k++;
     localvars[s_lvar.n-n+k-1].ep=(entree*)vep[k];
   }
+}
+
+static long
+localpush(long op, long a)
+{
+  entree *ep = getvar(a);
+  long vep  = (long) ep;
+  op_push(op,vep,a);
+  var_push(ep,Llocal);
+  return vep;
+}
+
+static void
+compilelocal(GEN arg, const char *str)
+{
+  long i, j, k, l = lg(arg);
+  long n = countvar(arg);
+  GEN vep = cgetg(n+1,t_VECSMALL);
+  for(k=0, i=1; i<l; i++)
+  {
+    long a=arg[i];
+    if (tree[a].f==Fassign)
+    {
+      long x = detag(tree[a].x);
+      if (tree[x].f==Fvec && tree[x].x>=0)
+      {
+        GEN vars = listtogen(tree[x].x,Fmatrixelts);
+        long nv = lg(vars)-1;
+        compilenode(tree[a].y,Ggen,FLnocopy);
+        op_push(OCdup,nv-1,x);
+        for (j=1; j<=nv; j++)
+        {
+          long v = detag(vars[j]);
+          op_push(OCpushlong,j,v);
+          op_push(OCcompo1,Ggen,v);
+          vep[++k] = localpush(OClocalvar, v);
+        }
+      } else if (!is_node_zero(tree[a].y))
+      {
+        compilenode(tree[a].y,Ggen,FLnocopy);
+        vep[++k] = localpush(OClocalvar, x);
+      }
+      else
+        vep[++k] = localpush(OClocalvar0, x);
+    } else
+      vep[++k] = localpush(OClocalvar0, a);
+  }
+  checkdups(arg,vep);
 }
 
 static void
@@ -1102,28 +1157,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
   }
   else if (is_func_named(ep,"local"))
   {
-    long lgarg;
-    long i;
-    GEN vep = cgetg_copy(arg, &lgarg);
-    for (i=1;i<=nb;i++)
-    {
-      entree *en;
-      long a=arg[i];
-      op_code op=OClocalvar0;
-      if (tree[a].f==Fassign)
-      {
-        if (!is_node_zero(tree[a].y))
-        {
-          compilenode(tree[a].y,Ggen,FLnocopy);
-          op=OClocalvar;
-        }
-        a=tree[a].x;
-      }
-      vep[i] = (long) (en = getvar(a));
-      op_push(op,vep[i],a);
-      var_push(en,Llocal);
-    }
-    checkdups(arg,vep);
+    compilelocal(arg, str);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;
