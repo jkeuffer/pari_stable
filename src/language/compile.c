@@ -623,17 +623,25 @@ str_defproto(const char *p, const char *q, const char *loc)
   op_push_loc(OCpushgen,data_push(strntoGENexp(q+1,len)),loc);
 }
 
+static long
+countlisttogen(long n, Ffunc f)
+{
+  long x,i;
+  if (n==-1 || tree[n].f==Fnoarg) return 0;
+  for(x=n, i=0; tree[x].f==f ;x=tree[x].x, i++);
+  return i+1;
+}
+
 static GEN
 listtogen(long n, Ffunc f)
 {
-  GEN z;
-  long x,i,nb;
-  if (n==-1 || tree[n].f==Fnoarg) return cgetg(1,t_VECSMALL);
-  for(x=n, i=0; tree[x].f==f ;x=tree[x].x, i++);
-  nb=i+1;
-  z=cgetg(nb+1, t_VECSMALL);
-  for (x=n; i>0; z[i+1]=tree[x].y, x=tree[x].x, i--);
-  z[1]=x;
+  long x,i,nb = countlisttogen(n, f);
+  GEN z=cgetg(nb+1, t_VECSMALL);
+  if (nb)
+  {
+    for (x=n, i = nb-1; i>0; z[i+1]=tree[x].y, x=tree[x].x, i--);
+    z[1]=x;
+  }
   return z;
 }
 
@@ -966,6 +974,76 @@ compilefuncinline(long c, long a, long flag, long isif, long lev, long *ev)
 }
 
 static void
+compilemy(GEN arg, const char *str)
+{
+  long i, j, k, l = lg(arg);
+  long n = l-1;
+  GEN vep;
+  for(i=1; i<l; i++)
+  {
+    long a=arg[i];
+    if (tree[a].f==Fassign)
+    {
+       long x = detag(tree[a].x);
+       if (tree[x].f==Fvec && tree[x].x>=0)
+         n += countlisttogen(tree[x].x,Fmatrixelts)-1;
+    }
+  }
+  vep = cgetg(n+1,t_VECSMALL);
+  for(k=0, i=1; i<l; i++)
+  {
+    long a=arg[i];
+    if (tree[a].f==Fassign)
+    {
+       long x = detag(tree[a].x);
+       if (tree[x].f==Fvec && tree[x].x>=0)
+       {
+         GEN vars = listtogen(tree[x].x,Fmatrixelts);
+         long nv = lg(vars)-1;
+         for (j=1; j<=nv; j++)
+           vep[++k] = (long)getvar(vars[j]);
+       } else vep[++k] = (long)getvar(x);
+    } else vep[++k] = (long)getvar(a);
+  }
+  checkdups(arg,vep);
+  for(i=1; i<=n; i++) var_push(NULL,Lmy);
+  op_push_loc(OCnewframe,n,str);
+  frame_push(vep);
+  for (k=0, i=1; i<l; i++)
+  {
+    long a=arg[i];
+    if (tree[a].f==Fassign)
+    {
+      long x = detag(tree[a].x);
+      if (tree[x].f==Fvec && tree[x].x>=0)
+      {
+        GEN vars = listtogen(tree[x].x,Fmatrixelts);
+        long nv = lg(vars)-1;
+        compilenode(tree[a].y,Ggen,FLnocopy);
+        op_push(OCdup,nv-1,x);
+        for (j=1; j<=nv; j++)
+        {
+          long v = detag(vars[j]);
+          op_push(OCpushlong,j,v);
+          op_push(OCcompo1,Ggen,v);
+          k++;
+          op_push(OCstorelex,-n+k-1,a);
+          localvars[s_lvar.n-n+k-1].ep=(entree*)vep[k];
+        }
+        continue;
+      }
+      else if (!is_node_zero(tree[a].y))
+      {
+        compilenode(tree[a].y,Ggen,FLnocopy);
+        op_push(OCstorelex,-n+k,a);
+      }
+    }
+    k++;
+    localvars[s_lvar.n-n+k-1].ep=(entree*)vep[k];
+  }
+}
+
+static void
 compilefunc(entree *ep, long n, int mode, long flag)
 {
   pari_sp ltop=avma;
@@ -1017,32 +1095,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
   }
   else if (is_func_named(ep,"my"))
   {
-    long lgarg;
-    GEN vep = cgetg_copy(arg, &lgarg);
-
-    if (nb)
-    {
-      long i;
-      for(i=1;i<=nb;i++)
-      {
-        long a=arg[i];
-        vep[i]=(long)getvar(tree[a].f==Fassign?tree[a].x:a);
-        var_push(NULL,Lmy);
-      }
-      checkdups(arg,vep);
-      op_push_loc(OCnewframe,nb,str);
-      frame_push(vep);
-      for (i=1;i<=nb;i++)
-      {
-        long a=arg[i];
-        if (tree[a].f==Fassign && !is_node_zero(tree[a].y))
-        {
-          compilenode(tree[a].y,Ggen,FLnocopy);
-          op_push(OCstorelex,-nb+i-1,a);
-        }
-        localvars[s_lvar.n-nb+i-1].ep=(entree*)vep[i];
-      }
-    }
+    compilemy(arg, str);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;
