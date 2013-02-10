@@ -3498,6 +3498,9 @@ the \kbd{Flm} \kbd{x} by $\kbd{x}*\kbd{y}$.
 \fun{void}{Flc_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
 the \kbd{Flc} \kbd{x} by $\kbd{x}*\kbd{y}$.
 
+\fun{void}{Flc_Fl_mul_part_inplace}{GEN x, ulong y, ulong p, long l}
+multiplies $x[1..l]$ by $y$ modulo $p$. In place.
+
 \fun{GEN}{Flc_Fl_div}{GEN x, ulong y, ulong p} divides the \kbd{Flv}
 \kbd{x} by \kbd{y}.
 
