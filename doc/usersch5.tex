@@ -7094,6 +7094,12 @@ set to \kbd{gen\_0}, but for the \kbd{i}-th one which is set to \kbd{gen\_1}
 set to \kbd{gen\_0}, but for the \kbd{i}-th one which is set to \kbd{gen\_1}
 (\kbd{i}-th vector in the canonical basis).
 
+\fun{GEN}{trivial_fact}{void} returns the trivial (empty) factorization
+\kbd{Mat([]\til,[]\til)}
+
+\fun{GEN}{prime_fact}{GEN x} returns the factorization
+\kbd{Mat([x]\til, [1]\til)}
+
 \fun{GEN}{Rg_col_ei}{GEN x, long n, long i} creates a \typ{COL} with \kbd{n}
 components set to \kbd{gen\_0}, but for the \kbd{i}-th one which is set to
 \kbd{x}.

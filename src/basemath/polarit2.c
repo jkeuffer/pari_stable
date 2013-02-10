@@ -557,7 +557,7 @@ factor(GEN x)
       case t_INT:
       case t_COMPLEX:
       case t_POL:
-      case t_RFRAC: return zero_fact(x);
+      case t_RFRAC: return prime_fact(x);
       default: pari_err_TYPE("factor",x);
     }
   av = avma;

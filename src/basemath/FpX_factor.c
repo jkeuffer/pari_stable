@@ -940,7 +940,7 @@ FpX_degfact_2(GEN f, GEN p, long d)
 }
 
 GEN
-zero_fact(GEN x) { retmkmat2(mkcolcopy(x), mkcol(gen_1)); }
+prime_fact(GEN x) { retmkmat2(mkcolcopy(x), mkcol(gen_1)); }
 GEN
 trivial_fact(void) { retmkmat2(cgetg(1,t_COL), cgetg(1,t_COL)); }
 
@@ -949,7 +949,7 @@ static GEN
 Mod0pX(GEN f, GEN p)
 { return scalarpol(mkintmod(gen_0, p), varn(f)); }
 static GEN
-zero_fact_intmod(GEN f, GEN p) { return zero_fact(Mod0pX(f,p)); }
+zero_fact_intmod(GEN f, GEN p) { return prime_fact(Mod0pX(f,p)); }
 
 /* not gerepile safe */
 static GEN
@@ -2778,7 +2778,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
 
   switch(d)
   {
-    case -1: return zero_fact(f);
+    case -1: return prime_fact(f);
     case 0: return trivial_fact();
   }
   T = FpX_normalize(T, p);

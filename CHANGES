@@ -411,6 +411,7 @@ HC 130- Function sqrtnint
    133- PARI function ZpM_echelon, zlm_echelon
    134- GP functions matqr and mathouseholder, PARI functions QR_init,
         QgM_QR_init, gaussred_from_QR, R_from_QR, gtomp, RgC_gtomp, RgM_gtomp
+   135- PARI functions trivial_fact, prime_fact
 
   Removed
     1- dropped DOS support

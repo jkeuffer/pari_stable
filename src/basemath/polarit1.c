@@ -665,7 +665,7 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 {
   if (typ(f)!=t_POL) pari_err_TYPE("factorpadic",f);
   if (typ(p)!=t_INT) pari_err_TYPE("factorpadic",p);
-  if (!signe(f)) return zero_fact(f);
+  if (!signe(f)) return prime_fact(f);
   if (r <= 0)
     pari_err_DOMAIN("factorpadic", "precision", "<=",gen_0,stoi(r));
   switch(flag)

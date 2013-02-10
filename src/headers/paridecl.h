@@ -2773,7 +2773,7 @@ GEN     sylvestermatrix(GEN x,GEN y);
 GEN     trivial_fact(void);
 GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
-GEN     zero_fact(GEN x);
+GEN     prime_fact(GEN x);
 
 /* polarit3.c */
 
