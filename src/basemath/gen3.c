@@ -2660,7 +2660,6 @@ poltoser(GEN x, long v, long prec)
 
   if (varncmp(vx, v) > 0) return scalarser(x, v, prec);
   if (varncmp(vx, v) < 0) return coefstoser(x, v, prec);
-  if (!lgpol(x)) return zeroser(v, prec);
   y = RgX_to_ser(x, prec+2);
   setvarn(y, v); return y;
 }
@@ -2683,8 +2682,8 @@ toser_i(GEN x)
   switch(typ(x))
   {
     case t_SER: return x;
-    case t_POL: return poltoser(x, varn(x), precdl);
-    case t_RFRAC: return rfractoser(x, gvar(x), precdl);
+    case t_POL: return RgX_to_ser(x, precdl+2);
+    case t_RFRAC: return gdiv(gel(x,1), RgX_to_ser(gel(x,2), precdl+2));
   }
   return NULL;
 }

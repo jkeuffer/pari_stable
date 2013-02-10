@@ -210,6 +210,7 @@ GEN
 RgX_to_ser(GEN x, long l)
 {
   long i, lx = lg(x);
+  if (lx == 2) return zeroser(varn(x), l-2);
   /* analogous to RgX_valrem + normalize */
   i = 2; while (i<lx && isrationalzero(gel(x,i))) i++;
   return greffe_aux(x, l, lx, i - 2);
@@ -220,6 +221,7 @@ RgX_to_ser_inexact(GEN x, long l)
   long i, lx = lg(x);
   int first = 1;
   /* analogous to RgX_valrem + normalize */
+  if (lx == 2) return zeroser(varn(x), l-2);
   i = 2;
   while (i<lx && gequal0(gel(x,i))) {
     if (first && !isexactzero(gel(x,i)))
