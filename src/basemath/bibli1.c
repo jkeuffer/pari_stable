@@ -30,8 +30,9 @@ no_prec_pb(GEN x)
   return (typ(x) != t_REAL || realprec(x) > LOWDEFAULTPREC
                            || expo(x) < BITS_IN_LONG/2);
 }
-/* zero x[1..k-1], fill L = (mu_{i,j}). Return 0 if precision problem
- * [obtained a 0 vector], 1 otherwise */
+/* Find a Householder transformation which, applied to x[k..#x], zeroes
+ * x[k+1..#x]; fill L = (mu_{i,j}). Return 0 if precision problem [obtained
+ * a 0 vector], 1 otherwise */
 static int
 FindApplyQ(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
 {
@@ -68,6 +69,8 @@ FindApplyQ(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
   return no_prec_pb(x2);
 }
 
+/* apply Householder transformation Q = [beta,v] to r with t_INT/t_REAL
+ * coefficients, in place: r -= ((0|v).r * beta) v */
 static void
 ApplyQ(GEN Q, GEN r)
 {
@@ -81,47 +84,125 @@ ApplyQ(GEN Q, GEN r)
   for (i=1; i<l; i++)
     if (signe(gel(v,i))) gel(rd,i) = mpsub(gel(rd,i), mpmul(s, gel(v,i)));
 }
+/* apply Q[1], ..., Q[j-1] to r */
 static GEN
-ApplyAllQ(GEN Q, GEN r0, long k)
+ApplyAllQ(GEN Q, GEN r, long j)
 {
   pari_sp av = avma;
-  GEN r = leafcopy(r0);
-  long j;
-  for (j=1; j<k; j++) ApplyQ(gel(Q,j), r);
+  long i;
+  r = leafcopy(r);
+  for (i=1; i<j; i++) ApplyQ(gel(Q,i), r);
   return gerepilecopy(av, r);
 }
-/* compute B[k] = | x[k] |^2, update mu(k, 1..k-1) using Householder matrices
- * (Q = Householder(x[1..k-1]) in factored form) */
-static int
-incrementalQ(GEN x, GEN L, GEN B, GEN Q, long k, long prec)
+
+/* same, arbitrary coefficients [20% slower for t_REAL at DEFAULTPREC] */
+static void
+RgC_ApplyQ(GEN Q, GEN r)
 {
-  GEN r = ApplyAllQ(Q, gel(x,k), k);
-  return FindApplyQ(r, L, B, k, Q, prec);
+  GEN s, rd, beta = gel(Q,1), v = gel(Q,2);
+  long i, l = lg(v), lr = lg(r);
+
+  rd = r + (lr - l);
+  s = gmul(gel(v,1), gel(rd,1));
+  for (i=2; i<l; i++) s = gadd(s, gmul(gel(v,i) ,gel(rd,i)));
+  s = gmul(beta, s);
+  for (i=1; i<l; i++)
+    if (signe(gel(v,i))) gel(rd,i) = gsub(gel(rd,i), gmul(s, gel(v,i)));
 }
-/* x a square t_MAT with t_INT / t_REAL entries and maximal rank */
+static GEN
+RgC_ApplyAllQ(GEN Q, GEN r, long j)
+{
+  pari_sp av = avma;
+  long i;
+  r = leafcopy(r);
+  for (i=1; i<j; i++) RgC_ApplyQ(gel(Q,i), r);
+  return gerepilecopy(av, r);
+}
+
+int
+RgM_QR_init(GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec)
+{
+  x = RgM_gtomp(x, prec);
+  return QR_init(x, pB, pQ, pL, prec);
+}
+
+static void
+check_householder(GEN Q)
+{
+  long i, l = lg(Q);
+  if (typ(Q) != t_VEC) pari_err_TYPE("mathouseholder", Q);
+  for (i = 1; i < l; i++)
+  {
+    GEN q = gel(Q,i), v;
+    if (typ(q) != t_VEC || lg(q) != 3) pari_err_TYPE("mathouseholder", Q);
+    v = gel(q,2);
+    if (typ(v) != t_VEC || lg(v)+i-2 != l) pari_err_TYPE("mathouseholder", Q);
+  }
+}
+
 GEN
-Q_from_QR(GEN x, long prec)
+mathouseholder(GEN Q, GEN v)
+{
+  long l = lg(Q);
+  check_householder(Q);
+  if (typ(v) == t_MAT)
+  {
+    long lx, i;
+    GEN M = cgetg_copy(v, &lx);
+    for (i = 1; i < lx; i++) gel(M,i) = RgC_ApplyAllQ(Q, gel(v,i), l);
+    return M;
+  }
+  return RgC_ApplyAllQ(Q, v, l);
+}
+
+GEN
+matqr(GEN x, long flag, long prec)
+{
+  pari_sp av = avma;
+  GEN B, Q, L;
+  if (typ(x) != t_MAT) pari_err_TYPE("matqr",x);
+  if (!RgM_QR_init(x, &B,&Q,&L, prec)) pari_err_PREC("matqr");
+  if (!flag) Q = shallowtrans(mathouseholder(Q, matid(lg(x)-1)));
+  return gerepilecopy(av, mkvec2(Q, shallowtrans(L)));
+}
+
+/* compute B = | x[k] |^2, Q = Householder transforms and L = mu_{i,j} */
+int
+QR_init(GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec)
 {
   long j, k = lg(x)-1;
-  GEN B = cgetg(k+1, t_VEC), Q = cgetg(k+1, t_VEC), L = zeromatcopy(k,k);
+  GEN B = cgetg(k+1, t_VEC), Q = cgetg(k, t_VEC), L = zeromatcopy(k,k);
   for (j=1; j<=k; j++)
-    if (! incrementalQ(x, L, B, Q, j, prec)) return NULL;
+  {
+    GEN r = gel(x,j);
+    if (j > 1) r = ApplyAllQ(Q, r, j);
+    if (!FindApplyQ(r, L, B, j, Q, prec)) return 0;
+  }
+  *pB = B; *pQ = Q; *pL = L; return 1;
+}
+/* x a square t_MAT with t_INT / t_REAL entries and maximal rank. Return
+ * qfgaussred(x~*x) */
+GEN
+gaussred_from_QR(GEN x, long prec)
+{
+  long j, k = lg(x)-1;
+  GEN B, Q, L;
+  if (!QR_init(x, &B,&Q,&L, prec)) return NULL;
   for (j=1; j<k; j++)
-  { /* should set gel(m,j) = gen_1; but need it later */
+  {
     GEN m = gel(L,j), invNx = invr(gel(m,j));
     long i;
+    gel(m,j) = gel(B,j);
     for (i=j+1; i<=k; i++) gel(m,i) = mpmul(invNx, gel(m,i));
   }
-  for (j=1; j<=k; j++) gcoeff(L,j,j) = gel(B,j);
+  gcoeff(L,j,j) = gel(B,j);
   return shallowtrans(L);
 }
 GEN
 R_from_QR(GEN x, long prec)
 {
-  long j, k = lg(x)-1;
-  GEN B = cgetg(k+1, t_VEC), Q = cgetg(k+1, t_VEC), L = zeromatcopy(k,k);
-  for (j=1; j<=k; j++)
-    if (!incrementalQ(x, L, B, Q, j, prec)) return NULL;
+  GEN B, Q, L;
+  if (!QR_init(x, &B,&Q,&L, prec)) return NULL;
   return shallowtrans(L);
 }
 
@@ -1615,7 +1696,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   pari_TRY {
     GEN q;
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
-    q = Q_from_QR(r, gprecision(vnorm));
+    q = gaussred_from_QR(r, gprecision(vnorm));
     if (!q) pari_err_PREC("fincke_pohst");
     res = smallvectors(q, bound, stockmax, CHECK);
   } pari_ENDCATCH;

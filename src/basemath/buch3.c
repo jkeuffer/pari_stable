@@ -758,7 +758,7 @@ minimforunits(GEN nf, long BORNE, ulong w)
   r1 = nf_get_r1(nf); n = nf_get_degree(nf);
   minim_alloc(n+1, &q, &x, &y, &z, &v);
   M = gprec_w(nf_get_M(nf), prec);
-  r = Q_from_QR(nf_get_G(nf), prec);
+  r = gaussred_from_QR(nf_get_G(nf), prec);
   for (j=1; j<=n; j++)
   {
     v[j] = gtodouble(gcoeff(r,j,j));

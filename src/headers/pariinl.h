@@ -1252,6 +1252,20 @@ gtofp(GEN z, long prec)
     default: pari_err_TYPE("gtofp",z); return NULL; /* not reached */
   }
 }
+/* Force z to be of type real / int */
+INLINE GEN
+gtomp(GEN z, long prec)
+{
+  switch(typ(z))
+  {
+    case t_INT:  return z;
+    case t_FRAC: return fractor(z, prec);
+    case t_REAL: return rtor(z, prec);
+    case t_QUAD: z = quadtofp(z, prec);
+                 if (typ(z) == t_REAL) return z;
+    default: pari_err_TYPE("gtomp",z); return NULL; /* not reached */
+  }
+}
 
 INLINE GEN
 RgX_gtofp(GEN x, long prec)
@@ -1275,6 +1289,22 @@ RgM_gtofp(GEN x, long prec)
   long l;
   GEN y = cgetg_copy(x, &l);
   while (--l > 0) gel(y,l) = RgC_gtofp(gel(x,l), prec);
+  return y;
+}
+INLINE GEN
+RgC_gtomp(GEN x, long prec)
+{
+  long l = lg(x);
+  GEN y = cgetg(l, t_COL);
+  while (--l > 0) gel(y,l) = gtomp(gel(x,l), prec);
+  return y;
+}
+INLINE GEN
+RgM_gtomp(GEN x, long prec)
+{
+  long l;
+  GEN y = cgetg_copy(x, &l);
+  while (--l > 0) gel(y,l) = RgC_gtomp(gel(x,l), prec);
   return y;
 }
 

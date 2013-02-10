@@ -5,8 +5,7 @@ Done for version 2.6.0 (released ??/??/20??):
 
   Fixed
     1- Euclidean chains were confused by t_POLs with t_INTMOD/t_POLMOD coeffs
-       [ because a 0 polynomial could have lg() == 3 ]
-    2- numerical instability in ellheightoo [#1204]
+       [ because a 0 polynomial could have lg() == 3 ] 2- numerical instability in ellheightoo [#1204]
     3- Flm_gauss(m, smallish p): fix and enable the OK_ulong switch [ faster ]
     4- remi2n didn't allow negative arguments [native kernel] [#1215] 5- ellrootno(e, p) started by computing a global minimal model for e
        instead of a local one at p.
@@ -410,6 +409,8 @@ HC 130- Function sqrtnint
    131- sumdivmult() to sum multiplicative functions
    132- ?? online help: allow searching labels, e.g. ??"se:priority"@
    133- PARI function ZpM_echelon, zlm_echelon
+   134- GP functions matqr and mathouseholder, PARI functions QR_init,
+        QgM_QR_init, gaussred_from_QR, R_from_QR, gtomp, RgC_gtomp, RgM_gtomp
 
   Removed
     1- dropped DOS support

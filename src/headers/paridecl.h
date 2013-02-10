@@ -1486,15 +1486,19 @@ GEN gen_powu_fold_i(GEN x, ulong n, void *E, GEN  (*sqr)(void*,GEN), GEN (*msqr)
 
 /* bibli1.c */
 
-GEN     Q_from_QR(GEN x, long prec);
+int     QR_init(GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec);
 GEN     R_from_QR(GEN x, long prec);
+int     RgM_QR_init(GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec);
 GEN     algdep(GEN x, long n);
 GEN     algdep0(GEN x, long n, long bit);
 void    forqfvec0(GEN a, GEN BORNE, GEN code);
+GEN     gaussred_from_QR(GEN x, long prec);
 GEN     gram_matrix(GEN M);
 GEN     lindep0(GEN x, long flag);
 GEN     lindep(GEN x);
 GEN     lindep2(GEN x, long bit);
+GEN     mathouseholder(GEN Q, GEN v);
+GEN     matqr(GEN x, long flag, long prec);
 GEN     minim(GEN a, GEN borne, GEN stockmax);
 GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
@@ -3500,9 +3504,11 @@ INLINE GEN    Q_abs_shallow(GEN x);
 INLINE int    QV_isscalar(GEN x);
 INLINE GEN    RgC_fpnorml2(GEN x, long prec);
 INLINE GEN    RgC_gtofp(GEN x, long prec);
+INLINE GEN    RgC_gtomp(GEN x, long prec);
 INLINE void   RgM_dimensions(GEN x, long *m, long *n);
 INLINE GEN    RgM_fpnorml2(GEN x, long prec);
 INLINE GEN    RgM_gtofp(GEN x, long prec);
+INLINE GEN    RgM_gtomp(GEN x, long prec);
 INLINE GEN    RgM_inv(GEN a);
 INLINE GEN    RgM_minor(GEN a, long i, long j);
 INLINE GEN    RgM_shallowcopy(GEN x);
@@ -3588,6 +3594,7 @@ INLINE GEN    gsubgs(GEN y, long s);
 INLINE void   gsubz(GEN x, GEN y, GEN z);
 INLINE double gtodouble(GEN x);
 INLINE GEN    gtofp(GEN z, long prec);
+INLINE GEN    gtomp(GEN z, long prec);
 INLINE long   gtos(GEN x);
 INLINE long   gval(GEN x, long v);
 INLINE GEN    identity_perm(long l);

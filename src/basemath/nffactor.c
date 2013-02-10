@@ -1222,7 +1222,7 @@ get_R(GEN M)
 
   for(;;)
   {
-    R = Q_from_QR(M, prec);
+    R = gaussred_from_QR(M, prec);
     if (R) break;
     prec = precdbl(prec);
   }

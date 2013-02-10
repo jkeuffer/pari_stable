@@ -2388,7 +2388,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
 
   u = ZM_lll(ZM_mul(F->G0, ideal0), 0.99, LLL_IM);
   ideal = ZM_mul(ideal0,u); /* approximate T2-LLL reduction */
-  r = Q_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
+  r = gaussred_from_QR(RgM_mul(G, ideal), prec); /* Cholesky for T2 | ideal */
   if (!r) pari_err_BUG("small_norm (precision too low)");
 
   skipfirst = ZV_isscalar(gel(ideal,1))? 1: 0; /* 1 probable */

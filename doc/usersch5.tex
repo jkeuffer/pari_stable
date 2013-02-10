@@ -5785,6 +5785,8 @@ of \kbd{zv}) are equal and $0$ otherwise.
 of the same dimension. \kbd{RgM} assume the inputs are \kbd{MAT} of
 compatible dimensions.
 
+\subsubsec{Matrix arithmetic}
+
 \fun{void}{RgM_dimensions}{GEN}{x, long *m, long *n} sets $m$, resp.~$n$, to
 the number of rows, resp.~columns of the \typ{MAT} $x$.
 
@@ -5845,10 +5847,10 @@ $(x_iy_j)$).
 The following two functions are not well defined in general and only provided
 for convenience in specific cases:
 
-\fun{GEN}{RgC_RgM_mul}{GEN x, GEN y} returns $x\times y[1,]$ is $y$ is
+\fun{GEN}{RgC_RgM_mul}{GEN x, GEN y} returns $x\times y[1,]$ if $y$ is
 a row matrix $1\times n$, error otherwise.
 
-\fun{GEN}{RgM_RgV_mul}{GEN x, GEN y} returns $x\times y[,1]$ is $y$ is
+\fun{GEN}{RgM_RgV_mul}{GEN x, GEN y} returns $x\times y[,1]$ if $y$ is
 a column matrix $n\times 1$, error otherwise.
 
 \fun{GEN}{RgM_powers}{GEN x, long n} returns $[\kbd{x}^0,
@@ -5868,10 +5870,77 @@ when $m > n$.
 
 \fun{GEN}{RgV_dotsquare}{GEN x} returns the scalar product of $x$ with itself.
 
+\fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} $(v_i\cdot v_j)$
+associated to the entries of $v$ (matrix or vector).
+
 \fun{GEN}{RgV_polint}{GEN X, GEN Y, long v} $X$ and $Y$ being two vectors of
 the same length, returns the polynomial $T$ in variable $v$ such that
 $T(X[i]) = Y[i]$ for all $i$. The special case $X = \kbd{NULL}$
 corresponds to $X = [1,2,\dots,n]$, where $n$ is the length of $Y$.
+
+\subsubsec{Special shapes}
+
+The following routines check whether matrices or vectors have a special
+shape, using \kbd{gequal1} and \kbd{gequal0} to test components. (This makes
+a difference when components are inexact.)
+
+\fun{int}{RgV_isscalar}{GEN x} return 1 if all the entries of $x$ are $0$
+(as per \kbd{gequal0}), except possibly the first one. The name comes from
+vectors expressing polynomials on the standard basis $1,T,\dots, T^{n-1}$, or
+on \kbd{nf.zk} (whose first element is $1$).
+
+\fun{int}{QV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
+\kbd{QV} (\typ{INT} and \typ{FRAC} entries only).
+
+\fun{int}{ZV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
+\kbd{ZV} (\typ{INT} entries only).
+
+\fun{int}{RgM_isscalar}{GEN x, GEN s} return 1 if $x$ is the scalar matrix
+equal to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
+whether $x$ is an arbitrary scalar matrix.
+
+\fun{int}{RgM_isidentity}{GEN x} return 1 is the \typ{MAT} $x$ is the
+identity matrix, and 0 otherwise.
+
+\fun{int}{RgM_isdiagonal}{GEN x} return 1 is the \typ{MAT} $x$ is a
+diagonal matrix, and 0 otherwise.
+
+\fun{int}{RgM_is_ZM}{GEN x} return 1 is the \typ{MAT}~$x$ has only
+\typ{INT} coefficients, and 0 otherwise.
+
+\fun{long}{RgV_isin}{GEN v, GEN x} return the first index $i$ such that
+$v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
+not assume that \kbd{v} is sorted.
+
+\fun{GEN}{RgM_diagonal}{GEN m} returns the diagonal of $m$ as a \typ{VEC}.
+
+\fun{GEN}{RgM_diagonal_shallow}{GEN m} shallow version of \kbd{RgM\_diagonal}
+
+\subsubsec{Conversion to floating point entries}
+
+\fun{GEN}{RgC_gtofp}{GEN x, GEN prec} returns the \typ{COL} obtained by
+applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
+
+\fun{GEN}{RgC_gtomp}{GEN x, long prec} returns the \typ{COL} obtained by
+applying \kbd{gtomp(gel(x,i), prec)} to all coefficients of $x$.
+
+\fun{GEN}{RgC_fpnorml2}{GEN x, long prec} returns (a stack-clean variant of)
+\bprog
+  gnorml2( RgC_gtofp(x, prec) )
+@eprog
+
+\fun{GEN}{RgM_gtofp}{GEN x, GEN prec} returns the \typ{MAT} obtained by
+applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
+
+\fun{GEN}{RgM_gtomp}{GEN x, long prec} returns the \typ{MAT} obtained by
+applying \kbd{gtomp(gel(x,i), prec)} to all coefficients of $x$.
+
+\fun{GEN}{RgM_fpnorml2}{GEN x, long prec} returns (a stack-clean variant of)
+\bprog
+  gnorml2( RgM_gtofp(x, prec) )
+@eprog
+
+\subsubsec{Linear algebra, linear systems}
 
 \fun{GEN}{RgM_inv}{GEN a} returns a left inverse of $a$ (which needs not be
 square), or \kbd{NULL} if this turns out to be impossible. The latter
@@ -5910,64 +5979,34 @@ of the last $r_2$ rows of $x$. Called by \tet{RgM_solve_realimag}.
 \fun{GEN}{RgM_det_triangular}{GEN x} returns the product of the diagonal
 entries of $x$ (its determinant if it is indeed triangular).
 
-\fun{GEN}{RgM_diagonal}{GEN m} returns the diagonal of $m$ as a \typ{VEC}.
-
-\fun{GEN}{RgM_diagonal_shallow}{GEN m} shallow version of \kbd{RgM\_diagonal}
-
-\fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} $(v_i\cdot v_j)$
-associated to the entries of $v$ (matrix or vector).
-
-\fun{GEN}{RgC_gtofp}{GEN x, GEN prec} returns the \typ{COL} obtained by
-applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
-
-\fun{GEN}{RgC_fpnorml2}{GEN x, long prec} returns (a stack-clean variant of)
-\bprog
-  gnorml2( RgC_gtofp(x, prec) )
-@eprog
-
-\fun{GEN}{RgM_gtofp}{GEN x, GEN prec} returns the \typ{MAT} obtained by
-applying \kbd{gtofp(gel(x,i), prec)} to all coefficients of $x$.
-
-\fun{GEN}{RgM_fpnorml2}{GEN x, long prec} returns (a stack-clean variant of)
-\bprog
-  gnorml2( RgM_gtofp(x, prec) )
-@eprog
-
-The following routines check whether matrices or vectors have a special
-shape, using \kbd{gequal1} and \kbd{gequal0} to test components. (This makes a
-difference when components are inexact.)
-
-\fun{int}{RgV_isscalar}{GEN x} return 1 if all the entries of $x$ are $0$
-(as per \kbd{gequal0}), except possibly the first one. The name comes from
-vectors expressing polynomials on the standard basis $1,T,\dots, T^{n-1}$, or
-on \kbd{nf.zk} (whose first element is $1$).
-
-\fun{int}{QV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
-\kbd{QV} (\typ{INT} and \typ{FRAC} entries only).
-
-\fun{int}{ZV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
-\kbd{ZV} (\typ{INT} entries only).
-
-\fun{int}{RgM_isscalar}{GEN x, GEN s} return 1 if $x$ is the scalar matrix
-equal to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
-whether $x$ is an arbitrary scalar matrix.
-
-\fun{int}{RgM_isidentity}{GEN x} return 1 is the \typ{MAT} $x$ is the
-identity matrix, and 0 otherwise.
-
-\fun{int}{RgM_isdiagonal}{GEN x} return 1 is the \typ{MAT} $x$ is a
-diagonal matrix, and 0 otherwise.
-
-\fun{int}{RgM_is_ZM}{GEN x} return 1 is the \typ{MAT}~$x$ has only
-\typ{INT} coefficients, and 0 otherwise.
-
-\fun{long}{RgV_isin}{GEN v, GEN x} return the first index $i$ such that
-$v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
-not assume that \kbd{v} is sorted.
-
 \fun{GEN}{Frobeniusform}{GEN V, long n} given the vector $V$ of elementary
 divisors for $M - x\text{Id}$, where $M$ is an $n\times n$ square matrix.
 Returns the Frobenius form of $M$. Used by \kbd{matfrobenius}.
+
+\fun{int}{RgM_QR_init}{GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec}
+QR-decomposition of a square invertible \typ{MAT} $x$ with real coefficients.
+Sets \kbd{*pB} to the vector of squared lengths of the $x[i]$, \kbd{*pL} to
+the Gram-Schmidt coefficients and \kbd{*pQ} to a vector of successive
+Householder transforms. If $R$ denotes the transpose of $L$ and $Q$ is the
+result of applying \kbd{*pQ} to the identity matrix, then $x = QR$ is the QR
+decomposition of $x$. Returns $0$ is $x$ is not invertible or we hit a
+precision problem, and $1$ otherwise.
+
+\fun{int}{QR_init}{GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec} as
+\kbd{RgM\_QR\_init}, assuming further that $x$ has \typ{INT} or \typ{REAL}
+coefficients.
+
+\fun{GEN}{R_from_QR}{GEN x, long prec} assuming that $x$ is a square
+invertible \typ{MAT} with \typ{INT} or \typ{REAL} coefficients, return
+the upper triangular $R$ from the $QR$ docomposition of $x$. Not memory
+clean. If the matrix is not known to have \typ{INT} or \typ{REAL}
+coefficients, apply \tet{RgM_gtomp} first.
+
+\fun{GEN}{gaussred_from_QR}{GEN x, long prec} assuming that $x$ is a square
+invertible \typ{MAT} with \typ{INT} or \typ{REAL} coefficients, returns
+\kbd{qfgaussred(x\til * x)}; this is essentially the upper triangular $R$
+matrix from the $QR$ decomposition of $x$, renormalized to accomodate
+\kbd{qfgaussred} conventions. Not memory clean.
 
 \subsec{Blackbox linear algebra}
 
@@ -6854,6 +6893,11 @@ taken so that its modulus really has accuracy \kbd{prec}: there is a problem
 if the real part of the input is an exact $0$; indeed, converting it to
 \kbd{real\_0(prec)} would be wrong if the imaginary part is tiny, since the
 modulus would then become equal to $0$, as in $1.E-100 + 0.E-28 = 0.E-28$.
+
+\fun{GEN}{gtomp}{GEN z, long prec} converts the real number~\kbd{x}
+(\typ{INT}, \typ{REAL}, \typ{FRAC}, real \typ{QUAD}) to either
+a \typ{INT} or a \typ{REAL} of precision \kbd{prec}. Not memory clean
+if $x$ is a \typ{INT}: we return $x$ itself and not a copy.
 
 \fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts $x$ into a \typ{PADIC}
 of precision~$l$. Works componentwise on recursive objects,
