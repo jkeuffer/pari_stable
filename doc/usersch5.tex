@@ -8069,12 +8069,24 @@ in the underlying monoid; \kbd{sqr} is a (presumably optimized) shortcut for
 \fun{GEN}{gen_powu}{GEN x, ulong n, void *D, F1 sqr, F2 mul} $n > 0$,
 returns $x^n$. See \tet{gen_pow}.
 
+\fun{GEN}{gen_pow_i}{GEN x, GEN n, void *E, F1 sqr, F2 mul}
+non-memory-clean variant of \tet{gen_pow}.
+
+\fun{GEN}{gen_powu_i}{GEN x, ulong n, void *E, F1 sqr, F2 mul}
+non-memory-clean variant of \tet{gen_powu}.
+
 \fun{GEN}{gen_pow_fold}{GEN x, GEN n, void *D, F1 sqr, F1 msqr} as
 \tet{gen_pow}, \kbd{mul} being replaced by \kbd{msqr}, with \kbd{msqr(D,
 $y$)} returning $xy^2$. In particular \kbd{D} must implicitly contain $x$.
 
+\fun{GEN}{gen_pow_fold_i}{GEN x, GEN n, void *E, F1 sqr, F1 msqr}
+non-memory-clean variant of \tet{gen_pow_fold}.
+
 \fun{GEN}{gen_powu_fold}{GEN x, ulong n, void *D, F1 sqr, F1 msqr}, see
 the previous \tet{gen_pow_fold}
+
+\fun{GEN}{gen_powu_fold_i}{GEN x, ulong n, void *E, F1 sqr, F1 msqr}
+non-memory-clean variant of \tet{gen_powu_fold}.
 
 \fun{GEN}{gen_powers}{GEN x, long n, long use_sqr, void *D, F1 sqr, F2 mul, F0 one}
 returns $[\kbd{x}^0, \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC}; \kbd{mul(D,
