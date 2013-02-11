@@ -2683,7 +2683,7 @@ toser_i(GEN x)
   {
     case t_SER: return x;
     case t_POL: return RgX_to_ser(x, precdl+2);
-    case t_RFRAC: return gdiv(gel(x,1), RgX_to_ser(gel(x,2), precdl+2));
+    case t_RFRAC: return rfrac_to_ser(x, precdl+2);
   }
   return NULL;
 }

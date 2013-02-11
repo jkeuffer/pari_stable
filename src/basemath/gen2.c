@@ -233,6 +233,11 @@ RgX_to_ser_inexact(GEN x, long l)
   }
   return greffe_aux(x, l, lx, i - 2);
 }
+GEN
+rfrac_to_ser(GEN x, long l)
+{
+  return gdiv(gel(x,1), RgX_to_ser(gel(x,2), l));
+}
 /*******************************************************************/
 /*                                                                 */
 /*                 CONVERSION GEN --> long                         */

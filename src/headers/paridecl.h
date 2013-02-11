@@ -2132,6 +2132,7 @@ GEN     normalizepol_lg(GEN x, long lx);
 ulong   padic_to_Fl(GEN x, ulong p);
 GEN     padic_to_Fp(GEN x, GEN Y);
 GEN     quadtofp(GEN x, long l);
+GEN     rfrac_to_ser(GEN x, long l);
 long    sizedigit(GEN x);
 long    u_lval(ulong x, ulong p);
 long    u_lvalrem(ulong x, ulong p, ulong *py);
