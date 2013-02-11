@@ -1051,7 +1051,7 @@ compilemy(GEN arg, const char *str)
 }
 
 static long
-localpush(long op, long a)
+localpush(op_code op, long a)
 {
   entree *ep = getvar(a);
   long vep  = (long) ep;
