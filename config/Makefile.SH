@@ -77,7 +77,7 @@ Qt4)
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
-  postconfig='-cd $(BINDIR); fltk-config --post '
+  postconfig='fltk-config --post '
   graph=plotfltk;;
 win32)
   PLOTLIBS="-lgdi32"
@@ -375,7 +375,7 @@ install-bin-dyn: gp-dyn install-lib-dyn
 	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 	\$(LD) -o \$(BINDIR)/gp-$version$exe_suff -L\$(LIBDIR) \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(LDDYN) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
 	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version$exe_suff
-	$postconfig gp-$version$exe_suff
+	-cd \$(BINDIR); $postconfig gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 
 install-bin-sta: gp-sta
@@ -385,7 +385,7 @@ install-bin-sta: gp-sta
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 # Can't strip it if we want install() to work on OSF.
 #	-\$(STRIP) \$(STRIPFLAGS)  \$(BINDIR)/gp-$version
-	$postconfig gp-$version$exe_suff
+	-cd \$(BINDIR); $postconfig gp-$version$exe_suff
 
 install-man::
 	-mkdir -p \$(MANDIR)
