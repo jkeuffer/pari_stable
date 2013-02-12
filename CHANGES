@@ -414,6 +414,8 @@ HC 130- Function sqrtnint
         QgM_QR_init, gaussred_from_QR, R_from_QR, gtomp, RgC_gtomp, RgM_gtomp
    135- PARI functions trivial_fact, prime_fact
    136- PARI function rfrac_to_ser
+   137- PARI functions padic_lindep, Xadic_lindep
+   138- GP function seralgdep
 
   Removed
     1- dropped DOS support

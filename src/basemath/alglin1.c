@@ -2155,7 +2155,7 @@ deplin(GEN x0)
     gel(d,k) = gel(ck,i);
     c[i] = k; l[k] = i; /* pivot d[k] in x[i,k] */
   }
-  if (k > nc) { avma = av; return zerocol(nc); }
+  if (k > nc) { avma = av; return cgetg(1,t_COL); }
   if (k == 1) { avma = av; return scalarcol_shallow(gen_1,nc); }
   y = cgetg(nc+1,t_COL);
   gel(y,1) = gel(ck, l[1]);

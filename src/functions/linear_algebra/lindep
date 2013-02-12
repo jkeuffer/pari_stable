@@ -2,24 +2,49 @@ Function: lindep
 Section: linear_algebra
 C-Name: lindep0
 Prototype: GD0,L,
-Help: lindep(x,{flag=0}): Z-linear dependencies between components of x,
- using LLL. flag is optional, and can be 0: default, guess a suitable
+Help: lindep(x,{flag=0}): integral linear dependencies between components of x.
+ flag is optional, and can be 0: default, guess a suitable
  accuracy, or positive: accuracy to use for the computation, in decimal
  digits.
-Doc: \sidx{linear dependence}$x$ being a vector with $p$-adic or real/complex
- coefficients, finds a small integral linear combination among these
- coefficients.
+Doc: \sidx{linear dependence} finds a small integral linear combination
+ between components of $x$. If none can be found return an empty vector.
 
- If $x$ is $p$-adic, $\fl$ is meaningless and the algorithm LLL-reduces a
+ If $x$ is a vector with real/complex entries we use a floating point
+ (variable precision) LLL algorithm. If $\fl = 0$ the accuracy is chosen
+ internally using a crude heuristic. If $\fl > 0$ the computation is done with
+ an accuracy of $\fl$ decimal digits. To get meaningful results in the latter
+ case, the parameter $\fl$ should be smaller than the number of correct
+ decimal digits in the input.
+
+ \bprog
+ ? lindep([sqrt(2), sqrt(3), sqrt(2)+sqrt(3)])
+ %1 = [-1, -1, 1]~
+ @eprog
+
+ If $x$ is $p$-adic, $\fl$ is ignored and the algorithm LLL-reduces a
  suitable (dual) lattice.
+ \bprog
+ ? lindep([1, 2 + 3 + 3^2 + 3^3 + 3^4 + O(3^5)])
+ %2 = [1, -2]~
+ @eprog
 
- Otherwise, we use a floating point (variable precision) LLL algorithm.
- If $\fl = 0$ the accuracy is chosen internally using a crude heuristic.
- If $\fl > 0$ the computation is done with an accuracy of $\fl$ decimal digits.
- To get meaningful results in the latter case, the parameter $\fl$ should be
- smaller than the number of correct decimal digits in the input.
+ If $x$ is a matrix, $\fl$ is ignored and the function returns a non trivial
+ kernel vector (combination of the columns).
+ \bprog
+ ? lindep([1,2,3;4,5,6;7,8,9])
+ %3 = [1, -2, 1]~
+ @eprog
 
-Variant: Also available are \fun{GEN}{lindep}{GEN x} ($\fl=0$)
- \fun{GEN}{lindep2}{GEN x, long bit} ($\fl\geq 0$, bypasses the check for
- $p$-adic inputs).
+ If $x$ contains polynomials or power series over some base field, finds a
+ linear relation with coefficients in the field.
+ \bprog
+ ? lindep([x*y, x^2 + y, x^2*y + x*y^2, 1])
+ %4 = [y, y, -1, -y^2]~
+ @eprog
 
+Variant: Also available are \fun{GEN}{lindep}{GEN x} (real/complex entries,
+ $\fl=0$), \fun{GEN}{lindep2}{GEN x, long flag} (real/complex entries)
+ \fun{GEN}{padic_lindep}{GEN x} ($p$-adic entries) and
+ \fun{GEN}{Xadic_lindep}{GEN x} (polynomial entries).
+ Finally \fun{GEN}{deplin}{GEN x} returns a non-zero kernel vector for a
+ \typ{MAT} input.

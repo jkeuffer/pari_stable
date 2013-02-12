@@ -762,7 +762,7 @@ dalloc(size_t n)
 
 /* x is a vector of elts of a p-adic field */
 GEN
-plindep(GEN x)
+padic_lindep(GEN x)
 {
   long i, j, prec = LONG_MAX, nx = lg(x)-1, v;
   pari_sp av = avma;
@@ -776,11 +776,11 @@ plindep(GEN x)
 
     j = precp(c); if (j < prec) prec = j;
     q = gel(c,2);
-    if (!p) p = q; else if (!equalii(p, q)) pari_err_MODULUS("plindep", p, q);
+    if (!p) p = q; else if (!equalii(p, q)) pari_err_MODULUS("padic_lindep", p, q);
   }
-  if (!p) pari_err_TYPE("plindep [not a p-adic vector]",x);
+  if (!p) pari_err_TYPE("padic_lindep [not a p-adic vector]",x);
   v = gvaluation(x,p); pn = powiu(p,prec);
-  if (v != 0) x = gmul(x, powis(p, -v));
+  if (v) x = gmul(x, powis(p, -v));
   x = RgV_to_FpV(x, pn);
 
   a = negi(gel(x,1));
@@ -795,6 +795,36 @@ plindep(GEN x)
   m = ZM_lll(ZM_hnfmodid(m, pn), 0.99, LLL_INPLACE);
   return gerepilecopy(av, gel(m,1));
 }
+/* x is a vector of t_POL/t_SER */
+GEN
+Xadic_lindep(GEN x)
+{
+  long i, prec = LONG_MAX, deg = 0, lx = lg(x), vx, v;
+  pari_sp av = avma;
+  GEN m;
+
+  if (lx == 1) return cgetg(1,t_COL);
+  vx = gvar(x);
+  v = gvaluation(x, pol_x(vx));
+  if (v) x = gmul(x, monomial(gen_1, -v, vx)); else x = shallowcopy(x);
+  for (i=1; i<lx; i++)
+  {
+    GEN c = gel(x,i);
+    if (gvar(c) != vx) { gel(x,i) = scalarpol_shallow(c, vx); continue; }
+    switch(typ(c))
+    {
+      case t_POL: deg = maxss(deg, degpol(c)); break;
+      case t_RFRAC: pari_err_TYPE("Xadic_lindep", c);
+      case t_SER:
+        prec = minss(prec, valp(c) + lg(c)-2);
+        gel(x,i) = ser2rfrac_i(c);
+    }
+  }
+  if (prec == LONG_MAX) prec = deg;
+  prec++;
+  m = RgXV_to_RgM(x, prec);
+  return gerepileupto(av, deplin(m));
+}
 
 GEN
 lindep(GEN x) { return lindep2(x, 0); }
@@ -803,17 +833,17 @@ GEN
 lindep0(GEN x,long bit)
 {
   long i, tx = typ(x);
-  if (! is_vec_t(tx) && tx != t_MAT) pari_err_TYPE("lindep",x);
+  if (tx == t_MAT) return deplin(x);
+  if (! is_vec_t(tx)) pari_err_TYPE("lindep",x);
   for (i = 1; i < lg(x); i++)
-    if (typ(gel(x,i)) == t_PADIC) return plindep(x);
-  switch (bit)
-  {
-    case -1:
-    case -3:
-    case -4: pari_err_FLAG("lindep0");
-    case -2: return deplin(x);
-    default: return lindep2(x, bit);
-  }
+    switch(typ(gel(x,i)))
+    {
+      case t_PADIC: return padic_lindep(x);
+      case t_POL:
+      case t_RFRAC:
+      case t_SER: return Xadic_lindep(x);
+    }
+  return lindep2(x, bit);
 }
 
 GEN
@@ -837,19 +867,61 @@ algdep0(GEN x, long n, long bit)
   gel(y,2) = x; /* n >= 1 */
   for (i=3; i<=n+1; i++) gel(y,i) = gmul(gel(y,i-1),x);
   if (typ(x) == t_PADIC)
-    y = plindep(y);
+    y = padic_lindep(y);
   else
-    y = lindep0(y, bit);
-  if (lg(y) == 1) pari_err(e_MISC,"higher degree than expected in algdep");
+    y = lindep2(y, bit);
+  if (lg(y) == 1) pari_err(e_DOMAIN,"algdep", "degree(x)",">", stoi(n), x);
   y = RgV_to_RgX(y, 0);
-  if (gsigne(leading_term(y)) > 0) return gerepilecopy(av, y);
-  return gerepileupto(av, RgX_neg(y));
+  if (signe(leading_term(y)) > 0) return gerepilecopy(av, y);
+  return gerepileupto(av, ZX_neg(y));
 }
 
 GEN
 algdep(GEN x, long n)
 {
   return algdep0(x,n,0);
+}
+
+GEN
+seralgdep(GEN s, long p, long r)
+{
+  pari_sp av = avma;
+  long vy, i, m, n;
+  GEN S, u, v, D;
+
+  if (typ(s) != t_SER) pari_err_TYPE("seralgdep",s);
+  if (p <= 0) pari_err_DOMAIN("seralgdep", "p", "<=", gen_0, stoi(p));
+  if (r < 0) pari_err_DOMAIN("seralgdep", "r", "<", gen_0, stoi(r));
+  if (is_bigint(addiu(muluu(p, r), 1))) pari_err_OVERFLOW("seralgdep");
+  vy = varn(s);
+  if (!vy) pari_err_PRIORITY("seralgdep", s, ">", 0);
+  r++; p++;
+  S = cgetg(p+1, t_VEC);
+  gel(S, 1) = scalarser(gen_1, vy, lg(s));
+  u = s;
+  for (i = 2; i <= p; i++)
+  {
+    gel(S,i) = u;
+    if (i < p) u = gmul(u,s);
+  }
+  v = cgetg(r*p+1, t_VEC); /* v[r*n+m+1] = s^n * y^m */
+  for(n=0; n < p; n++)
+    for (m = 0; m < r; m++)
+    {
+      GEN c = gel(S,n+1);
+      if (m)
+      {
+        c = shallowcopy(c);
+        setvalp(c, valp(c) + m);
+      }
+      gel(v, r*n + m + 1) = c;
+    }
+  D = Xadic_lindep(v);
+  if (lg(D) == 1) { avma = av; return gen_0; }
+  v = cgetg(p+1, t_VEC);
+  for (n = 0; n < p; n++)
+    gel(v, n+1) = RgV_to_RgX(vecslice(D, r*n+1, r*n+r), vy);
+  return gerepilecopy(av, RgV_to_RgX(v, 0));
 }
 
 /********************************************************************/

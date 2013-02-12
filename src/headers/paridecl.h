@@ -1489,6 +1489,7 @@ GEN gen_powu_fold_i(GEN x, ulong n, void *E, GEN  (*sqr)(void*,GEN), GEN (*msqr)
 int     QR_init(GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec);
 GEN     R_from_QR(GEN x, long prec);
 int     RgM_QR_init(GEN x, GEN *pB, GEN *pQ, GEN *pL, long prec);
+GEN     Xadic_lindep(GEN x);
 GEN     algdep(GEN x, long n);
 GEN     algdep0(GEN x, long n, long bit);
 void    forqfvec0(GEN a, GEN BORNE, GEN code);
@@ -1500,10 +1501,12 @@ GEN     lindep2(GEN x, long bit);
 GEN     mathouseholder(GEN Q, GEN v);
 GEN     matqr(GEN x, long flag, long prec);
 GEN     minim(GEN a, GEN borne, GEN stockmax);
+GEN     minim2(GEN a, GEN borne, GEN stockmax);
+GEN     padic_lindep(GEN x);
 GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
-GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     perf(GEN a);
+GEN     seralgdep(GEN s, long p, long r);
 GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
 /* bibli2.c */

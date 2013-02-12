@@ -517,6 +517,7 @@ RgX_to_RgV(GEN x, long N)
     return z;
   }
   l = lg(x)-1; x++;
+  if (l > N+1) l = N+1; /* truncate higher degree terms */
   for (i=1; i<l ; i++) gel(z,i) = gel(x,i);
   for (   ; i<=N; i++) gel(z,i) = gen_0;
   return z;
