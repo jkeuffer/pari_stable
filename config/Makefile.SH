@@ -76,7 +76,7 @@ Qt4)
   graph=plotQt4;;
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
-  PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
+  PLOTLIBS="$FLTK_LIBS"
   postconfig='fltk-config --post '
   graph=plotfltk;;
 win32)

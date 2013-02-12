@@ -20,8 +20,4 @@ if test -n "$FLTKDIR"; then
 else
   echo "### FLTK not found. Building without FLTK support"
 fi
-case "$osname" in
-  cygwin) FLTK_LIBS="-lgdi32 -lole32 -luuid -lwsock32 -lsupc++" ;;
-  darwin) FLTK_LIBS="-framework Carbon -framework Cocoa -lsupc++" ;;
-  *)      FLTK_LIBS="$X11_LIBS -lstdc++" ;;
-esac
+FLTK_LIBS="`fltk-config --ldflags` -lstdc++"
