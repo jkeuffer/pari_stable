@@ -816,7 +816,7 @@ Xadic_lindep(GEN x)
       case t_POL: deg = maxss(deg, degpol(c)); break;
       case t_RFRAC: pari_err_TYPE("Xadic_lindep", c);
       case t_SER:
-        prec = minss(prec, valp(c) + lg(c)-2);
+        prec = minss(prec, -valp(c) + lg(c)-2);
         gel(x,i) = ser2rfrac_i(c);
     }
   }
@@ -887,7 +887,7 @@ seralgdep(GEN s, long p, long r)
 {
   pari_sp av = avma;
   long vy, i, m, n;
-  GEN S, u, v, D;
+  GEN S, v, D;
 
   if (typ(s) != t_SER) pari_err_TYPE("seralgdep",s);
   if (p <= 0) pari_err_DOMAIN("seralgdep", "p", "<=", gen_0, stoi(p));
@@ -896,19 +896,16 @@ seralgdep(GEN s, long p, long r)
   vy = varn(s);
   if (!vy) pari_err_PRIORITY("seralgdep", s, ">", 0);
   r++; p++;
-  S = cgetg(p+1, t_VEC);
-  gel(S, 1) = scalarser(gen_1, vy, lg(s));
-  u = s;
-  for (i = 2; i <= p; i++)
-  {
-    gel(S,i) = u;
-    if (i < p) u = gmul(u,s);
-  }
+  S = cgetg(p+1, t_VEC); gel(S, 1) = s;
+  for (i = 2; i <= p; i++) gel(S,i) = gmul(gel(S,i-1), s);
   v = cgetg(r*p+1, t_VEC); /* v[r*n+m+1] = s^n * y^m */
-  for(n=0; n < p; n++)
+  /* n = 0 */
+  for (m = 0; m < r; m++)
+    gel(v, m + 1) = monomial(gen_1, m, vy);
+  for(n=1; n < p; n++)
     for (m = 0; m < r; m++)
     {
-      GEN c = gel(S,n+1);
+      GEN c = gel(S,n);
       if (m)
       {
         c = shallowcopy(c);
