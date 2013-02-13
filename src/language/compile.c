@@ -1061,7 +1061,7 @@ localpush(op_code op, long a)
 }
 
 static void
-compilelocal(GEN arg, const char *str)
+compilelocal(GEN arg)
 {
   long i, j, k, l = lg(arg);
   long n = countvar(arg);
@@ -1157,7 +1157,7 @@ compilefunc(entree *ep, long n, int mode, long flag)
   }
   else if (is_func_named(ep,"local"))
   {
-    compilelocal(arg, str);
+    compilelocal(arg);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;

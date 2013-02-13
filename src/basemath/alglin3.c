@@ -355,7 +355,7 @@ vecslice_parse_arg(long lA, long *y1, long *y2, long *skip)
 }
 
 static GEN
-vecslice_i(GEN A, long t, long lB, long y1, long y2, long skip)
+vecslice_i(GEN A, long t, long lB, long y1, long skip)
 {
   GEN B = cgetg(lB, t);
   long i;
@@ -367,7 +367,7 @@ vecslice_i(GEN A, long t, long lB, long y1, long y2, long skip)
   return B;
 }
 static GEN
-vecsmallslice_i(GEN A, long t, long lB, long y1, long y2, long skip)
+vecsmallslice_i(GEN A, long t, long lB, long y1, long skip)
 {
   GEN B = cgetg(lB, t);
   long i;
@@ -386,9 +386,9 @@ vecslice0(GEN A, long y1, long y2)
   switch(t)
   {
     case t_VEC: case t_COL:
-      return vecslice_i(A, t,lB,y1,y2,skip);
+      return vecslice_i(A, t,lB,y1,skip);
     case t_VECSMALL:
-      return vecsmallslice_i(A, t,lB,y1,y2,skip);
+      return vecsmallslice_i(A, t,lB,y1,skip);
     default:
       pari_err_TYPE("_[_.._]",A);
       return NULL;
@@ -400,7 +400,7 @@ matslice0(GEN A, long x1, long x2, long y1, long y2)
 {
   GEN B;
   long i, lB, lA = lg(A), t, skip, rskip, rlB;
-  GEN (*slice)(GEN,long,long,long,long,long);
+  GEN (*slice)(GEN A, long t, long lB, long y1, long skip);
   if (typ(A)!=t_MAT) pari_err_TYPE("_[_.._,_.._]",A);
   lB = vecslice_parse_arg(lA, &y1, &y2, &skip);
 
@@ -413,7 +413,7 @@ matslice0(GEN A, long x1, long x2, long y1, long y2)
   for (i=1; i<lB; i++, y1++)
   {
     if (y1 == skip) { i--; continue; }
-    gel(B,i) = slice(gel(A,y1),t,rlB, x1,x2, rskip);
+    gel(B,i) = slice(gel(A,y1),t,rlB, x1, rskip);
   }
   return B;
 }
