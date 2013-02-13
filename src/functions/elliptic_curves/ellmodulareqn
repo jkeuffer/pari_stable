@@ -26,12 +26,15 @@ Doc: return a vector [\kbd{eqn},$t$] where \kbd{eqn} is a modular equation of
 
  \noindent In both cases, $f$ is a suitable modular function (see below).
 
- The following GP function returns values of the classical modular
- polynomial by eliminating $f(\tau)$ in the above two equations:
+ The following GP function returns values of the classical modular polynomial
+ by eliminating $f(\tau)$ in the above two equations, for $N\leq 31$ or
+ $N\in\{41,47,59,71\}$.
+
  \bprog
  classicaleqn(N, X='X, Y='Y)=
  {
    my(E=ellmodulareqn(N), P=E[1], t=E[2], Q, d);
+   if(poldegree(P,'y)>2,error("level unavailable in classicaleqn"));
    if (t == 0,
      my(s = 12/gcd(12,N-1));
      Q = 'x^(N+1) * substvec(P,['x,'y],[N^s/'x,Y]);
