@@ -151,7 +151,7 @@ typedef struct hashtable {
 } hashtable;
 
 typedef struct {
-  long offset;
+  void **data;
   long n;
   long alloc;
   size_t size;

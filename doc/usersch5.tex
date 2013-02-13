@@ -9487,29 +9487,9 @@ void swapfoo(long a, long b)
 @eprog
 
 \subsec{Stack of stacks}
-Changing the address of \kbd{t\_foo} is not supported in general,
-however changing both the address of \kbd{t\_foo} and \kbd{s\_foo}
-is supported as long as the offset \kbd{\&t\_foo-\&s\_foo} do not change.
-This allow to create stacks of stacks as follow:
-
-\bprog
-struct foo_s
-{
-  foo t_foo;
-  pari_stack s_foo;
-} tt_foo;
-pari_stack st_foo;
-pari_stack_init(&st_foo, sizeof(*tt_foo), (void**)&tt_foo);
-long new_stack(void)
-{
-  long n = pari_stack_new(&st_foo);
-  struct foo_s *st = tt_foo+n;
-  pari_stack_init(&st->s_foo, sizeof(*st->t_foo), (void**)&st->t_foo);
-  return n;
-}
-@eprog
-When a reallocation of \kbd{tt\_foo} occurs, the offset between the components
-\kbd{.t\_foo} and \kbd{.s\_foo} does not change.
+Changing the address of \kbd{t\_foo} is not supported in general.
+In particular \kbd{realloc()}'ed array of stacks and stack of stacks are not
+supported.
 
 \subsec{Public interface}
 Let \kbd{s} be a \kbd{pari\_stack} and \kbd{data} the data linked to it. The

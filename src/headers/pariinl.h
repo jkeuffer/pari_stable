@@ -691,12 +691,12 @@ RgV_is_ZV(GEN x)
 /**                                                                **/
 /********************************************************************/
 INLINE void **
-pari_stack_base(pari_stack *s) { return (void **) ((ulong)s + (ulong)s->offset); }
+pari_stack_base(pari_stack *s) { return s->data; }
 
 INLINE void
 pari_stack_init(pari_stack *s, size_t size, void **data)
 {
-  s->offset = (ulong)data-(ulong)s;
+  s->data = data;
   *data = NULL;
   s->n = 0;
   s->alloc = 0;
