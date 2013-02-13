@@ -1013,7 +1013,7 @@ aprcl(GEN N)
   {
     ulong sc = pC[1]->ctsgt;
     err_printf("Individual Fermat powerings:\n");
-    for (i=2; i<lg(pC); i++)
+    for (i=2; i<lpC; i++)
       if (pC[i]) {
         err_printf("  %-3ld: %3ld\n", i, pC[i]->ctsgt);
         sc += pC[i]->ctsgt;
