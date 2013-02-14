@@ -906,13 +906,12 @@ static GEN
 hnf_i(GEN A, int remove)
 {
   pari_sp av0 = avma, av, lim;
-  long s, m, n = lg(A)-1, j, k, li, def, ldef;
+  long s, n, m, j, k, li, def, ldef;
 
+  RgM_dimensions(A, &m, &n);
   if (!n) return cgetg(1,t_MAT);
-  av = avma; A = RgM_shallowcopy(A);
-  m = nbrows(A);
-
-  lim = stack_lim(av,1);
+  av = avma; lim = stack_lim(av,1);
+  A = RgM_shallowcopy(A);
   def = n; ldef = (m>n)? m-n: 0;
   for (li=m; li>ldef; li--)
   {
@@ -1738,13 +1737,12 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
   long m, n, r, i, j, k, li;
   GEN B, c, h, a;
 
-  n = lg(A)-1;
+  RgM_dimensions(A, &m,&n);
   if (!n)
   {
     if (ptB) *ptB = cgetg(1,t_MAT);
     return cgetg(1,t_MAT);
   }
-  m = nbrows(A);
   c = const_vecsmall(m, 0);
   h = const_vecsmall(n, m);
   av1 = avma; lim = stack_lim(av1,1);

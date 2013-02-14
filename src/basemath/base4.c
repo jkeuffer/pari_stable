@@ -2622,29 +2622,34 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
 GEN
 nfhnf(GEN nf, GEN x)
 {
-  long i, j, def, k, m;
+  long i, j, def, idef, m, n;
   pari_sp av0 = avma, av, lim;
   GEN y, A, I, J;
 
   nf = checknf(nf);
   check_ZKmodule(x, "nfhnf");
-  A = gel(x,1);
+  A = gel(x,1); RgM_dimensions(A, &m, &n);
   I = gel(x,2);
-  RgM_dimensions(A, &m, &k);
-  if (!k || k < m) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
-
+  if (!n) return gcopy(x);
+  idef = (n < m)? m-n : 0;
   av = avma; lim = stack_lim(av, 2);
   A = RgM_to_nfM(nf,A);
   I = leafcopy(I);
-  J = zerovec(k); def = k+1;
-  for (i=m; i>=1; i--)
+  J = zerovec(n); def = n;
+  for (i=m; i>idef; i--)
   {
     GEN d, di = NULL;
 
-    def--; j=def; while (j>=1 && gequal0(gcoeff(A,i,j))) j--;
-    if (!j) pari_err(e_MISC,"not a matrix of maximal rank in nfhnf");
-    if (j==def) j--; else {
-      swap(gel(A,j), gel(A,def)); swap(gel(I,j), gel(I,def));
+    j=def; while (j>=1 && gequal0(gcoeff(A,i,j))) j--;
+    if (!j)
+    { /* no pivot on line i */
+      if (idef) idef--;
+      continue;
+    }
+    if (j==def) j--;
+    else {
+      swap(gel(A,j), gel(A,def));
+      swap(gel(I,j), gel(I,def));
     }
 
     y = gcoeff(A,i,def);
@@ -2665,19 +2670,20 @@ nfhnf(GEN nf, GEN x)
     d = gel(I,def);
     if (!di) di = idealinv(nf,d);
     gel(J,def) = di;
-    for (j=def+1; j<=k; j++)
+    for (j=def+1; j<=n; j++)
     {
       GEN c = element_close(nf,gcoeff(A,i,j), idealmul(nf,d,gel(J,j)));
       gel(A,j) = colcomb1(nf, gneg(c), gel(A,j),gel(A,def));
     }
+    def--;
     if (low_stack(lim, stack_lim(av1,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nfhnf, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }
-  A += k-m; A[0] = evaltyp(t_MAT)|evallg(m+1);
-  I += k-m; I[0] = evaltyp(t_VEC)|evallg(m+1);
+  A += def; A[0] = evaltyp(t_MAT)|evallg(n+1-def);
+  I += def; I[0] = evaltyp(t_VEC)|evallg(n+1-def);
   return gerepilecopy(av0, mkvec2(A, I));
 }
 
