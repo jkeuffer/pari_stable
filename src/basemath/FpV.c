@@ -776,7 +776,7 @@ gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p)
 }
 
 GEN
-ZMs_ZC_mul(GEN M, GEN B)
+zMs_ZC_mul(GEN M, GEN B)
 {
   long i, j;
   long n = lg(B)-1;
@@ -807,7 +807,7 @@ ZMs_ZC_mul(GEN M, GEN B)
 }
 
 GEN
-FpMs_FpC_mul(GEN M, GEN B, GEN p) { return FpC_red(ZMs_ZC_mul(M, B), p); }
+FpMs_FpC_mul(GEN M, GEN B, GEN p) { return FpC_red(zMs_ZC_mul(M, B), p); }
 
 GEN
 ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C)
@@ -852,7 +852,7 @@ wrap_relcomb_modp(void *E, GEN x)
   return FpC_red(W->f(W->E, x), W->p);
 }
 static GEN
-wrap_relcomb(void*E, GEN x) { return ZMs_ZC_mul((GEN)E, x); }
+wrap_relcomb(void*E, GEN x) { return zMs_ZC_mul((GEN)E, x); }
 
 /* Solve f(X) = B (mod p^e); blackbox version of ZlM_gauss */
 GEN
