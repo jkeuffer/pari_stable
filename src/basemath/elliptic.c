@@ -4206,7 +4206,7 @@ GEN
 ellorder(GEN E, GEN P, GEN o)
 {
   pari_sp av = avma;
-  GEN fg, r;
+  GEN fg, r, E0 = E;
   checkell(E); checkellpt(P);
   if (ell_is_inf(P)) return gen_1;
   if (ell_get_type(E)==t_ELL_Q)
@@ -4214,11 +4214,7 @@ ellorder(GEN E, GEN P, GEN o)
     GEN p = NULL;
     if (is_rational_t(typ(gel(P,1))) && is_rational_t(typ(gel(P,2))))
       return utoi( _orderell(E, P) );
-    if (RgV_is_FpV(P,&p) && p)
-    {
-      E = ellredmodp(E,p);
-      if (!o) o = doellff_get_o(E); /*do not clone o*/
-    }
+    if (RgV_is_FpV(P,&p) && p) E = ellredmodp(E,p);
   }
   checkell_Fq(E);
   fg = ellff_get_field(E);
@@ -4231,6 +4227,7 @@ ellorder(GEN E, GEN P, GEN o)
     GEN Pp = FpE_changepointinv(RgE_to_FpE(P,p), gel(e,3), p);
     r = FpE_order(Pp, o, gel(e,1), p);
   }
+  if (E != E0) obj_free(E);
   return gerepileuptoint(av, r);
 }
 
