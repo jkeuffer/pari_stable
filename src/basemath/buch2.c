@@ -4133,8 +4133,7 @@ START:
       if (DEBUGLEVEL) timer_printf(&T, "getfu");
       if ((flun & nf_FORCE) && typ(fu) == t_MAT)
       { /* units not found but we want them */
-        if (e > 0)
-          pari_err(e_MISC, "bnfinit: fundamental units too large");
+        if (e > 0) pari_err_OVERFLOW("bnfinit [fundamental units too large]");
         if (e < 0) precadd = nbits2extraprec( (-e - (BITS_IN_LONG - 1)) + 64);
         avma = av3; precpb = "getfu"; continue;
       }
