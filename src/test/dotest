@@ -45,7 +45,7 @@ for testdata in $testlist; do
   skip=""
   for pkg in $pkgs; do
     if test ! $x "$datadir/$pkg"; then
-      echo "Skipping $testname because optional package $pkg has not been installed."
+      echo "! Skipping $testname: optional package $pkg not installed."
       skip="true";
     fi
   done
@@ -100,7 +100,7 @@ for suf in $SUF; do
   wrln "+++$B Total bench for gp-$suf is $t"
 done
 if test -n "$untested"; then
-  wrln "Note: the following tests have been skipped:$untested"
+  wrln "The following tests were skipped:$untested"
 fi
 if test -z "$BUG"; then exit 0; fi
 
