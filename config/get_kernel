@@ -24,13 +24,16 @@ case "$arch" in
            4) asmarch=hppa;             prettya='PA-RISC1.1';;
            8) asmarch=hppa64;           prettya='PA-RISC2.0';;
            esac;;
+  mips|mips64) case "$sizeof_long" in
+           4) asmarch=mips;             prettya='MIPS';;
+           8) asmarch=mips64;           prettya='MIPS64';;
+           esac;;
   alpha)         asmarch=$arch;         prettya=Alpha ;;
   ppc|ppc64)  case "$sizeof_long" in
         4) asmarch=ppc;;
         8) asmarch=ppc64;;
         esac;                           prettya='PowerPC' ;;
   arm*)          asmarch=none;          prettya=$arch ;;
-  mips)          asmarch=none;          prettya=MIPS ;;
   m68k)          asmarch=m68k;          prettya='Motorola 68k';;
   sh3)           asmarch=none;          prettya=SH-3 ;;
   sh5)           asmarch=none;          prettya=SH-5 ;;
