@@ -1168,13 +1168,15 @@ direuler(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, GEN c)
     tx = typ(polden);
     if (is_scalar_t(tx))
     {
-      if (!gequal1(polden)) pari_err(e_MISC,"constant term != 1 in direuler");
+      if (!gequal1(polden))
+        pari_err_DOMAIN("direuler","constant term", "!=", gen_1,polden);
     }
     else
     {
       if (tx != t_POL) pari_err_TYPE("direuler",polden);
       c = gel(polden,2);
-      if (!gequal1(c)) pari_err(e_MISC,"constant term != 1 in direuler");
+      if (!gequal1(c))
+        pari_err_DOMAIN("direuler","constant term", "!=", gen_1,polden);
       lx = degpol(polden);
       for (i=p; i<=n; i+=p)
       {
@@ -1579,7 +1581,7 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   fa = eval(E, a);
   fb = eval(E, b);
   if (gsigne(fa)*gsigne(fb) > 0)
-    pari_err(e_MISC,"roots must be bracketed in solve");
+    pari_err_DOMAIN("solve", "f(a)f(b)", ">", gen_0, mkvec2(fa,fb));
   itmax = prec2nbits(prec) * 2 + 1;
   tol = real2n(5-prec2nbits(prec), LOWDEFAULTPREC);
   fc = fb;

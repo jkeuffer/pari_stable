@@ -577,4 +577,10 @@
   ***   at top-level: thue(x*(x^3-2),0)
   ***                 ^-----------------
   *** thue: domain error in thue: #sols = oo
-Total time spent: 24
+  ***   at top-level: direuler(p=2,10,2/(1-p*X))
+  ***                                 ^----------
+  ***   domain error in direuler: constant term != 1
+  ***   at top-level: solve(x=0,1,x^2+1)
+  ***                             ^------
+  ***   domain error in solve: f(a)f(b) > 0
+Total time spent: 28
