@@ -33,7 +33,7 @@ allocatemem0(GEN z)
   else {
     if (typ(z) != t_INT) pari_err_TYPE("allocatemem",z);
     newsize = itou(z);
-    if (signe(z) < 0) pari_err(e_MISC,"negative size in allocatemem");
+    if (signe(z) < 0) pari_err_DOMAIN("allocatemem","size","<",gen_0,z);
   }
   allocatemem(newsize);
 }

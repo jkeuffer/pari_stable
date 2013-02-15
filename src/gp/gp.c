@@ -1961,7 +1961,7 @@ closure_alarmer(GEN C, long s)
 void
 alarm0(long s)
 {
-  if (s < 0) pari_err(e_MISC,"delay must be non-negative");
+  if (s < 0) pari_err_DOMAIN("alarm","delay","<",gen_0,stoi(s));
 #ifdef HAS_ALARM
   alarm(s);
 #else
