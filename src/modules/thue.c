@@ -1084,7 +1084,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
     GEN P, D, v = gmael(tnf, 2, 1), R = gmael(tnf, 2, 2);
     long i, l, degf = v[1], e = v[2], va = v[3], vb = v[4];
     if (!signe(rhs)) {
-      if (degf == 1) pari_err(e_MISC,"infinitely many solutions in thue");
+      if (degf == 1) pari_err_DOMAIN("thue","#sols","=",strtoGENstr("oo"),rhs);
       avma = av; return cgetg(1, t_VEC);
     }
     P = cgetg(lg(POL), t_POL); P[1] = POL[1];

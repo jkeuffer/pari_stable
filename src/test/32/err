@@ -574,4 +574,7 @@
   ***   at top-level: ellorder(e,[0,0]*Mod
   ***                 ^--------------------
   *** ellorder: sorry, ellorder for curve with singular reduction is not yet implemented.
-Total time spent: 20
+  ***   at top-level: thue(x*(x^3-2),0)
+  ***                 ^-----------------
+  *** thue: domain error in thue: #sols = oo
+Total time spent: 24
