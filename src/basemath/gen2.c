@@ -2665,7 +2665,7 @@ listpop(GEN L, long index)
   if (typ(L) != t_LIST) pari_err_TYPE("listinsert",L);
   if (index < 0) pari_err_COMPONENT("listpop", "<", gen_0, stoi(index));
   z = list_data(L);
-  if (!z || (l = lg(z)-1) == 0) pari_err_DOMAIN("listpop", "list", "=", L,L);
+  if (!z || (l = lg(z)-1) == 0) return;
 
   if (!index || index > l) index = l;
   gunclone_deep( gel(z, index) );

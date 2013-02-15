@@ -10,4 +10,4 @@ Doc:
  removes the $n$-th element of the list
  \var{list} (which must be of type \typ{LIST}). If $n$ is omitted,
  or greater than the list current length, removes the last element.
- This runs in time $O(\#L - n + 1)$.
+ If the list is already empty, do nothing. This runs in time $O(\#L - n + 1)$.

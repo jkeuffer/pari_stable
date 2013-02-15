@@ -239,9 +239,6 @@
   ***   at top-level: listinsert(L,x,10)
   ***                 ^------------------
   *** listinsert: non-existent component in listinsert: index > 1
-  ***   at top-level: listpop(L)
-  ***                 ^----------
-  *** listpop: domain error in listpop: list = List([])
   ***   at top-level: ellj(Mod(1,2))
   ***                 ^--------------
   *** ellj: incorrect type in modular function (t_INTMOD).
@@ -583,4 +580,4 @@
   ***   at top-level: solve(x=0,1,x^2+1)
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
-Total time spent: 20
+Total time spent: 24
