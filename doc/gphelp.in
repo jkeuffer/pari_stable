@@ -561,7 +561,8 @@ sub format_text {
       {
 	s/\Q$tr{nbrk}/ /g; push(@w, $_);
         # these codes will be replaced by 1 character
-        s/\@\[(obr|cbr|ouml|uuml|agrav|eacute|ldollar|pm|lt|gt|\{|\})]/\@/g;
+        s/\@\[(obr|cbr|ouml|uuml|agrav|eacute|ldollar|lt|gt|\{|\})]/\@/g;
+        s/\@\[pm]/+\/-/g;
         # the rest will be replaced by zero-width characters
 	s/\@\[\w+\]//g;    push(@l, length($_));
       }
