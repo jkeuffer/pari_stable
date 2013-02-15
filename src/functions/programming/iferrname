@@ -100,6 +100,14 @@ Doc: evaluates the expression sequence \var{seq1}. If an error of type
 
   \misctitle{Overflows}
 
+  \item \kbd{"e\_COMPONENT"}. Trying to access an inexistent component in a
+  vector/matrix: the index is less than $1$ or greater than the vector
+  length.
+  \var{E} has three components,
+  1 (\typ{STR}): an operator $\var{op}$ ($<$ or $>$),
+  2 (\typ{GEN}): a numerical limit $l$ bounding the allowed range,
+  3 (\kbd{GEN}): the index $x$. It satisfies $x$ \var{op} $l$.
+
   \item \kbd{"e\_DOMAIN"}. An argument is not in the function's domain.
   \var{E} has five components, 1 (\typ{STR}): the function name,
   2 (\typ{STR}): the mathematical name of the out-of-domain argument

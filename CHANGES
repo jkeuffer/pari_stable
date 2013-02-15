@@ -418,6 +418,7 @@ HC 130- Function sqrtnint
    137- PARI functions padic_lindep, Xadic_lindep
    138- GP function seralgdep
 BA 139- mips and mips64 level0 inline assembly kernel
+   140- new error class e_COMPONENT
 
   Removed
     1- dropped DOS support

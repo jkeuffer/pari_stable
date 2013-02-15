@@ -9225,6 +9225,14 @@ respectively.
 
 \subsec{Overflows}
 
+\subsubsec{e\_COMPONENT} Trying to access an inexistent component in a
+vector/matrix: the index is less than $1$ or greater than the vector length.
+\bprog
+  pari_err(e_COMPONENT, const char *op, GEN lim, GEN x)
+  pari_err_COMPONENT(const char *op, GEN lim, GEN x)
+@eprog\noindent prints the error message: \kbd{non-existent component: index
+\var{op} \var{lim}}.
+
 \subsubsec{e\_DOMAIN} An argument $x$ is not in the function's domain (as in
 \kbd{moebius(0)} or \kbd{zeta(1)}).
 \bprog

@@ -1050,6 +1050,13 @@ pari_err2GEN(long numerr, va_list ap)
       GEN y = va_arg(ap, GEN);
       retmkerr4(numerr,strtoGENstr(f),x,y);
     }
+  case e_COMPONENT:
+    {
+      const char *op = va_arg(ap, const char *);
+      GEN l = va_arg(ap, GEN);
+      GEN x = va_arg(ap, GEN);
+      retmkerr4(numerr,strtoGENstr(op),l,x);
+    }
   case e_DOMAIN:
     {
       const char *f = va_arg(ap, const char*);
@@ -1169,6 +1176,12 @@ pari_err2str(GEN e)
       }
       v = pari_sprintf("%s %s %s %s %s.", what,f,type_dim(x),op,type_dim(y));
       avma = av; return v;
+    }
+  case e_COMPONENT:
+    {
+      const char *op= GSTR(gel(e,2));
+      GEN l = gel(e,3);
+      return pari_sprintf("non-existent component: index %s %Ps",op,l);
     }
   case e_DOMAIN:
     {
@@ -1298,6 +1311,7 @@ numerr_name(long numerr)
   case e_ALARM:    return "e_ALARM";
   case e_ARCH:     return "e_ARCH";
   case e_BUG:      return "e_BUG";
+  case e_COMPONENT: return "e_COMPONENT";
   case e_CONSTPOL: return "e_CONSTPOL";
   case e_COPRIME:  return "e_COPRIME";
   case e_DIM:      return "e_DIM";
@@ -1337,6 +1351,7 @@ name_numerr(const char *s)
   if (!strcmp(s,"e_ALARM"))    return e_ALARM;
   if (!strcmp(s,"e_ARCH"))     return e_ARCH;
   if (!strcmp(s,"e_BUG"))      return e_BUG;
+  if (!strcmp(s,"e_COMPONENT")) return e_COMPONENT;
   if (!strcmp(s,"e_CONSTPOL")) return e_CONSTPOL;
   if (!strcmp(s,"e_COPRIME"))  return e_COPRIME;
   if (!strcmp(s,"e_DIM"))      return e_DIM;
