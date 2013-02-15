@@ -1094,8 +1094,8 @@ closure_eval(GEN C)
     case OCdefaultarg:
       if (var[s_var.n+operand].flag==DEFAULT_VAL)
       {
-        GEN z = closure_evalnobrk(gel(st,sp-1));
-        pushlex(operand,z);
+        GEN z = gel(st,sp-1);
+        pushlex(operand,typ(z)== t_CLOSURE? closure_evalnobrk(z): z);
       }
       sp--;
       break;

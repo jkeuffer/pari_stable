@@ -1926,12 +1926,18 @@ compilenode(long n, int mode, long flag)
         for (i=1;i<=nb;i++)
         {
           long a=arg[i];
-          if (tree[a].f==Fassign)
+          long y = tree[a].y;
+          if (tree[a].f==Fassign && !is_node_zero(y))
           {
-            struct codepos lpos;
-            getcodepos(&lpos);
-            compilenode(tree[a].y,Ggen,0);
-            op_push(OCpushgen, data_push(getclosure(&lpos)),a);
+            if (tree[y].f==Fsmall)
+              compilenode(y,Ggen,0);
+            else
+            {
+              struct codepos lpos;
+              getcodepos(&lpos);
+              compilenode(y,Ggen,0);
+              op_push(OCpushgen, data_push(getclosure(&lpos)),a);
+            }
             op_push(OCdefaultarg,-nb+i-1,a);
           }
           localvars[s_lvar.n-nb+i-1].ep=(entree*)vep[i];
