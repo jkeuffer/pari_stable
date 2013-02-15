@@ -234,3 +234,4 @@ e.eta
 e.area
 e=ellinit([0,1]);
 e.tate
+ellorder(e, [0,0]*Mod(1,2))

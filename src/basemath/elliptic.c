@@ -4106,14 +4106,6 @@ _pow(void *E, GEN x, GEN n) { return ellmul_Z((GEN)E,x,n); }
 static const struct bb_group ell_group={_mul,_pow,NULL,hash_GEN,gequal,ell_is_inf};
 
 static GEN
-ellredmodp(GEN E, GEN p)
-{
-  GEN Ep = ellinit(E,p,0);
-  if (lg(Ep)==1) pari_err(e_MISC,"curve is singular at p=%Ps",p);
-  return Ep;
-}
-
-static GEN
 doellff_get_o(GEN E)
 {
   GEN G = ellgroup(E, NULL), d1 = gel(G,1);
@@ -4214,7 +4206,11 @@ ellorder(GEN E, GEN P, GEN o)
     GEN p = NULL;
     if (is_rational_t(typ(gel(P,1))) && is_rational_t(typ(gel(P,2))))
       return utoi( _orderell(E, P) );
-    if (RgV_is_FpV(P,&p) && p) E = ellredmodp(E,p);
+    if (RgV_is_FpV(P,&p) && p)
+    {
+      E = ellinit(E,p,0);
+      if (lg(E)==1) pari_err_IMPL("ellorder for curve with singular reduction");
+    }
   }
   checkell_Fq(E);
   fg = ellff_get_field(E);

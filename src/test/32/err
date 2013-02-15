@@ -571,4 +571,7 @@
   ***   at top-level: e.tate
   ***                   ^----
   *** _.tate: incorrect type in tate [not defined over Qp] (t_VEC).
-Total time spent: 16
+  ***   at top-level: ellorder(e,[0,0]*Mod
+  ***                 ^--------------------
+  *** ellorder: sorry, ellorder for curve with singular reduction is not yet implemented.
+Total time spent: 20
