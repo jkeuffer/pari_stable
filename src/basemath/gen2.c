@@ -2622,7 +2622,7 @@ listput(GEN L, GEN x, long index)
   GEN z;
 
   if (typ(L) != t_LIST) pari_err_TYPE("listput",L);
-  if (index < 0) pari_err_DOMAIN("listput", "index", "<", gen_0, stoi(index));
+  if (index < 0) pari_err_COMPONENT("listput", "<", gen_0, stoi(index));
   z = list_data(L);
   l = z? lg(z): 1;
 
@@ -2647,10 +2647,8 @@ listinsert(GEN L, GEN x, long index)
 
   if (typ(L) != t_LIST) pari_err_TYPE("listinsert",L);
   z = list_data(L); l = z? lg(z): 1;
-  if (index <= 0)
-    pari_err_DOMAIN("listinsert", "index", "<=", gen_0, stoi(index));
-  if (index > l)
-    pari_err_DOMAIN("listinsert", "index", ">", stoi(l), stoi(index));
+  if (index <= 0) pari_err_COMPONENT("listinsert", "<=", gen_0, stoi(index));
+  if (index > l) pari_err_COMPONENT("listinsert", ">", stoi(l), stoi(index));
   ensure_nb(L, l);
   z = list_data(L);
   for (i=l; i > index; i--) gel(z,i) = gel(z,i-1);
@@ -2665,8 +2663,7 @@ listpop(GEN L, long index)
   GEN z;
 
   if (typ(L) != t_LIST) pari_err_TYPE("listinsert",L);
-  if (index < 0)
-    pari_err_DOMAIN("listpop", "index", "<", gen_0, stoi(index));
+  if (index < 0) pari_err_COMPONENT("listpop", "<", gen_0, stoi(index));
   z = list_data(L);
   if (!z || (l = lg(z)-1) == 0) pari_err_DOMAIN("listpop", "list", "=", L,L);
 

@@ -3053,13 +3053,13 @@ compo(GEN x, long n)
   {
     if (tx == t_VECSMALL)
     {
-      if (n < 1) pari_err_COMPONENT("<", gen_1, stoi(n));
-      if ((ulong)n >= lx) pari_err_COMPONENT(">", utoi(lx-1), stoi(n));
+      if (n < 1) pari_err_COMPONENT("", "<", gen_1, stoi(n));
+      if ((ulong)n >= lx) pari_err_COMPONENT("", ">", utoi(lx-1), stoi(n));
       return stoi(x[n]);
     }
     pari_err_TYPE("component [leaf]", x);
   }
-  if (n < 1) pari_err_COMPONENT("<", gen_1, stoi(n));
+  if (n < 1) pari_err_COMPONENT("", "<", gen_1, stoi(n));
   if (tx == t_POL && (ulong)n+1 >= lx) return gen_0;
   if (tx == t_LIST) {
     tx = t_VEC;
@@ -3067,7 +3067,7 @@ compo(GEN x, long n)
     lx = (ulong)(x? lg(x): 1);
   }
   l = (ulong)lontyp[tx] + (ulong)n-1; /* beware overflow */
-  if (l >= lx) pari_err_COMPONENT(">", utoi(lx-1), utoi(l));
+  if (l >= lx) pari_err_COMPONENT("", ">", utoi(lx-1), utoi(l));
   return gcopy(gel(x,l));
 }
 
@@ -3168,9 +3168,9 @@ polcoeff0(GEN x, long n, long v)
     case t_RFRAC: x = _rfraccoeff(x,n,v); break;
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      if (n < 1) pari_err_DOMAIN("polcoeff","index","<",gen_1,stoi(n));
+      if (n < 1) pari_err_COMPONENT("polcoeff","<",gen_1,stoi(n));
       lx = lg(x);
-      if (n >= lx) pari_err_DOMAIN("polcoeff","index",">",stoi(lx-1),stoi(n));
+      if (n >= lx) pari_err_COMPONENT("polcoeff",">",stoi(lx-1),stoi(n));
       return gcopy(gel(x,n));
 
     default: pari_err_TYPE("polcoeff", x);

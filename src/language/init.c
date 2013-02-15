@@ -1052,10 +1052,11 @@ pari_err2GEN(long numerr, va_list ap)
     }
   case e_COMPONENT:
     {
+      const char *f= va_arg(ap, const char *);
       const char *op = va_arg(ap, const char *);
       GEN l = va_arg(ap, GEN);
       GEN x = va_arg(ap, GEN);
-      retmkerr4(numerr,strtoGENstr(op),l,x);
+      retmkerr5(numerr,strtoGENstr(f),strtoGENstr(op),l,x);
     }
   case e_DOMAIN:
     {
@@ -1179,9 +1180,12 @@ pari_err2str(GEN e)
     }
   case e_COMPONENT:
     {
-      const char *op= GSTR(gel(e,2));
-      GEN l = gel(e,3);
-      return pari_sprintf("non-existent component: index %s %Ps",op,l);
+      const char *f= GSTR(gel(e,2));
+      const char *op= GSTR(gel(e,3));
+      GEN l = gel(e,4);
+      if (!*f)
+        return pari_sprintf("non-existent component: index %s %Ps",op,l);
+      return pari_sprintf("non-existent component in %s: index %s %Ps",f,op,l);
     }
   case e_DOMAIN:
     {

@@ -2516,7 +2516,7 @@ pari_err_IRREDPOL(const char *f, GEN x) { pari_err(e_IRREDPOL, f,x); }
 INLINE void
 pari_err_DOMAIN(const char *f, const char *v, const char *op, GEN l, GEN x) { pari_err(e_DOMAIN, f,v,op,l,x); }
 INLINE void
-pari_err_COMPONENT(const char *op, GEN l, GEN x) { pari_err(e_COMPONENT, op,l,x); }
+pari_err_COMPONENT(const char *f, const char *op, GEN l, GEN x) { pari_err(e_COMPONENT, f,op,l,x); }
 INLINE void
 pari_err_MAXPRIME(ulong c) { pari_err(e_MAXPRIME, c); }
 INLINE void

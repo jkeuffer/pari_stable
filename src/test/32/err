@@ -232,13 +232,13 @@
   *** vecmax: domain error in vecmax: empty argument = matrix(0,2)
   ***   at top-level: listput(L,x,-1)
   ***                 ^---------------
-  *** listput: domain error in listput: index < 0
+  *** listput: non-existent component in listput: index < 0
   ***   at top-level: listinsert(L,x,-1)
   ***                 ^------------------
-  *** listinsert: domain error in listinsert: index <= 0
+  *** listinsert: non-existent component in listinsert: index <= 0
   ***   at top-level: listinsert(L,x,10)
   ***                 ^------------------
-  *** listinsert: domain error in listinsert: index > 1
+  *** listinsert: non-existent component in listinsert: index > 1
   ***   at top-level: listpop(L)
   ***                 ^----------
   *** listpop: domain error in listpop: list = List([])
@@ -436,10 +436,10 @@
   *** polcoeff: domain error in polcoeff: degree > 1
   ***   at top-level: polcoeff([],2)
   ***                 ^--------------
-  *** polcoeff: domain error in polcoeff: index > 0
+  *** polcoeff: non-existent component in polcoeff: index > 0
   ***   at top-level: polcoeff([],-1)
   ***                 ^---------------
-  *** polcoeff: domain error in polcoeff: index < 1
+  *** polcoeff: non-existent component in polcoeff: index < 1
   ***   at top-level: polcoeff("",2)
   ***                 ^--------------
   *** polcoeff: incorrect type in polcoeff (t_STR).
@@ -454,10 +454,10 @@
   *** matrixqz: domain error in QM_minors_coprime: rank(A) < 1
   ***   at top-level: vecextract([1],[-1])
   ***                 ^--------------------
-  *** vecextract: domain error in vecextract: index <= 0
+  *** vecextract: non-existent component in vecextract: index <= 0
   ***   at top-level: vecextract([1],[2])
   ***                 ^-------------------
-  *** vecextract: domain error in vecextract: index >= 2
+  *** vecextract: non-existent component in vecextract: index >= 2
   ***   at top-level: idealfrobenius(K,gal
   ***                 ^--------------------
   *** idealfrobenius: domain error in idealfrobenius: pr.e > 1
@@ -583,4 +583,4 @@
   ***   at top-level: solve(x=0,1,x^2+1)
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
-Total time spent: 16
+Total time spent: 20

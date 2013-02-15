@@ -3799,7 +3799,7 @@ INLINE GEN    zx_to_zv(GEN x, long N);
 INLINE GEN     err_get_compo(GEN e, long i);
 INLINE long    err_get_num(GEN e);
 INLINE void    pari_err_BUG(const char *f);
-INLINE void    pari_err_COMPONENT(const char *op, GEN l, GEN x);
+INLINE void    pari_err_COMPONENT(const char *f, const char *op, GEN l, GEN x);
 INLINE void    pari_err_CONSTPOL(const char *f);
 INLINE void    pari_err_COPRIME(const char *f, GEN x, GEN y);
 INLINE void    pari_err_DIM(const char *f);
