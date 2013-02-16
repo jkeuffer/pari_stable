@@ -88,13 +88,13 @@ gen_BG_init(struct bg_data *bg, GEN E, GEN N, GEN bnd, GEN ap)
 static GEN
 gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
 {
-  long i, j, lp = bg->lp;
+  long i, j, lp = bg->lp, lim;
   GEN bndov2 = shifti(bg->bnd, -1);
   pari_sp av = avma, av2;
   GEN sum, p;
   forprime_t S;
   (void)forprime_init(&S, utoipos(bg->p[lp]+1), bg->bnd);
-  av2 = avma;
+  av2 = avma; lim = stack_lim(av2,2);
   if(DEBUGLEVEL)
     err_printf("1st stage, using recursion for p <= %ld\n", bg->p[lp]);
   sum = gcopy(sum0);
@@ -103,7 +103,11 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
     ulong pp = bg->p[i];
     long ap = bg->ap[i];
     gen_BG_add(E, fun, bg, &sum, utoipos(pp), i, stoi(ap), gen_1);
-    sum = gerepileupto(av2, sum);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"ellL1, p=%lu",pp);
+      sum = gerepileupto(av2, sum);
+    }
   }
   if (DEBUGLEVEL) err_printf("2nd stage, looping for p <= %Ps\n", bndov2);
   while ( (p = forprime_next(&S)) )
@@ -123,7 +127,11 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
       n = muliu(p, j);
       fun(E, &sum, n, a, j);
     }
-    sum = gerepilecopy(av2, sum);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"ellL1, p=%Ps",p);
+      sum = gerepilecopy(av2, sum);
+    }
     if (absi_cmp(p, bndov2) >= 0) break;
   }
   if (DEBUGLEVEL) err_printf("3nd stage, looping for p <= %Ps\n", bg->bnd);
@@ -132,7 +140,11 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
     GEN ap = ellap(bg->E, p);
     if (!signe(ap)) continue;
     fun(E, &sum, p, ap, 0);
-    sum = gerepilecopy(av2, sum);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"ellL1, p=%Ps",p);
+      sum = gerepilecopy(av2, sum);
+    }
   }
   return gerepileupto(av, sum);
 }
