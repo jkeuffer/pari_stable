@@ -1754,7 +1754,7 @@ void    checkell_Q(GEN e);
 void    checkell_Qp(GEN e);
 void    checkellpt(GEN z);
 void    checkell5(GEN e);
-GEN     ell_apply_globalred(GEN e);
+GEN     ell_apply_globalred(GEN e, GEN *gr);
 GEN     ellQ_get_N(GEN e);
 void    ellQ_get_Nfa(GEN e, GEN *N, GEN *faN);
 GEN     ellQp_Tate_uniformization(GEN E, long prec);

@@ -32,7 +32,7 @@ elllocalred(bcurve,2)
 elltaniyama(bcurve)
 \\
 ccurve=ellinit([0,0,-1,-1,0])
-l=elllseries(ccurve,2)
+ellglobalred(ccurve);l=elllseries(ccurve,2)
 elllseries(ccurve,2,1.2)-l
 \\
 tcurve=ellinit([1,0,1,-19,26]);

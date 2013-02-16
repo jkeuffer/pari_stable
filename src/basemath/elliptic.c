@@ -929,6 +929,10 @@ ch_Fq(GEN E, GEN e, GEN w)
   ch_FF(E, e, w); return E;
 }
 
+static void
+ell_reset(GEN E)
+{ gel(E,16) = zerovec(lg(gel(E,16))-1); }
+
 GEN
 ellchangecurve(GEN e, GEN w)
 {
@@ -937,8 +941,7 @@ ellchangecurve(GEN e, GEN w)
   checkcoordch(w); checkell5(e);
   E = coordch(leafcopy(e), w);
   if (lg(E) == 6) return gerepilecopy(av, E);
-  gel(E,16) = zerovec(lg(gel(e,16))-1);
-  E = gerepilecopy(av, E);
+  ell_reset(E); E = gerepilecopy(av, E);
   switch(ell_get_type(E))
   {
     case t_ELL_Qp: E = ch_Qp(E,e,w); break;
@@ -3026,21 +3029,34 @@ ellglobalred(GEN E) {
   return obj_checkbuild(E, Q_GLOBALRED, &doellglobalred);
 }
 
+static int
+is_trivial_change(GEN v)
+{
+  GEN u = gel(v,1), r = gel(v,2), s = gel(v,3), t = gel(v,4);
+  return isint1(u) && isintzero(r) && isintzero(s) && isintzero(t);
+}
+
 /* only update E[1..14] */
 GEN
-ell_apply_globalred(GEN e)
+ell_apply_globalred(GEN e, GEN *gr)
 {
-  GEN E, S;
+  GEN E, S, v;
   checkell_Q(e);
+  if (gr) *gr = NULL;
   if ((S = obj_check(e, Q_GLOBALRED)))
   {
-    GEN v = gel(S,2), u = gel(v,1), r = gel(v,2), s = gel(v,3), t = gel(v,4);
-    /* FIXME: add a better way to tell that e has been reduced */
-    if (isint1(u) && isintzero(r) && isintzero(s) && isintzero(t)) return e;
+    v = gel(S,2); /* FIXME: add a better way to tell that e has been reduced */
+    if (is_trivial_change(v)) return e;
     E = coordch(e,v);
+    S = leafcopy(S);
   }
   else
+  {
     E = ellglobalred_all(e, &S);
+    ell_reset(E);
+    v = gel(S,2);
+  }
+  if (gr) *gr = v;
   gel(S,2) = init_ch();
   obj_insert(E, Q_GLOBALRED, S);
   return E;
@@ -3567,7 +3583,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   if (isint(s, &s) && signe(s) <= 0) { avma = av; return gen_0; }
   flun = gequal1(A) && gequal1(s);
   checkell_Q(e);
-  e = ell_apply_globalred(e);
+  e = ell_apply_globalred(e, NULL);
   N = ellQ_get_N(e);
   eps = ellrootno_global(e);
   if (flun && eps < 0) { avma = av; return real_0(prec); }

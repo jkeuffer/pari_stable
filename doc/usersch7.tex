@@ -129,8 +129,11 @@ ordered as in \kbd{faN} above.
 \fun{GEN}{elldatagenerators}{GEN E} returns generators for $E(\Q)$
 extracted from Cremona's table.
 
-\fun{GEN}{ell_apply_globalred}{GEN e} takes an \var{ell} over $\Q$
-and returns a global minimal model for $e$.
+\fun{GEN}{ell_apply_globalred}{GEN e, GEN *v} takes an \var{ell} over $\Q$
+and returns a global minimal model $E$ for $e$. If \kbd{v} is not \kbd{NULL},
+set \kbd{*v} to the needed change of variable: \kbd{NULL} if $e$ was already
+the standard minimal model, such that $E = \kbd{ellchangecurve(e,v)}$
+otherwise.
 
 \subsubsec{Curves over $\Q_p$}
 

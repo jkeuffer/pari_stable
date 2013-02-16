@@ -459,7 +459,7 @@ init_el(struct ellld *el, GEN E, long *parity, long bitprec)
   GEN eX;
   long prec;
 
-  el->E = E = ell_apply_globalred(E);
+  el->E = E = ell_apply_globalred(E, NULL);
   el->N = ellQ_get_N(E);
   prec = nbits2prec(bitprec+(expi(el->N)>>1));
   el->X = divrr(Pi2n(1, prec), sqrtr(itor(el->N, prec))); /* << 1 */
@@ -1271,9 +1271,8 @@ heegner_find_disc(GEN *ymin, GEN *points, GEN *coefs, long *pind, GEN E,
 static GEN
 ell_apply_globalred_all(GEN e, GEN *N, GEN *cb, GEN *tam)
 {
-  GEN E = ell_apply_globalred(e), red = obj_check(E, Q_GLOBALRED);
+  GEN E = ell_apply_globalred(e, cb), red = obj_check(E, Q_GLOBALRED);
   *N = gel(red, 1);
-  *cb = (E == e)? NULL: gel(red,2);
   *tam = gel(red,3);
   if (signe(ell_get_disc(E))>0) *tam = shifti(*tam,1);
   return E;
