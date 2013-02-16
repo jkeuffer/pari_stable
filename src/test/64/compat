@@ -1677,7 +1677,7 @@ x
 ? ccurve=initell([0,0,-1,-1,0])
 [0, 0, -1, -1, 0, 0, -2, 1, -1, 48, -216, 37, 110592/37, Vecsmall([1]), [Vec
 small([64, 1])], [0, 0, 0, 0, 0, 0, 0]]
-? l=lseriesell(ccurve,2,-37,1)
+? globalred(ccurve);l=lseriesell(ccurve,2,-37,1)
 0.3815754082607112087
 ? lseriesell(ccurve,2,-37,1.2)-l
 2.439454888092384977 E-18

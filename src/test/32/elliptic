@@ -89,7 +89,7 @@ q^101)
 ? ccurve=ellinit([0,0,-1,-1,0])
 [0, 0, -1, -1, 0, 0, -2, 1, -1, 48, -216, 37, 110592/37, Vecsmall([1]), [Vec
 small([128, 1])], [0, 0, 0, 0, 0, 0, 0]]
-? l=elllseries(ccurve,2)
+? ellglobalred(ccurve);l=elllseries(ccurve,2)
 0.38157540826071121129371040958008663664
 ? elllseries(ccurve,2,1.2)-l
 2.292213984 E-37
