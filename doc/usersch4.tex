@@ -87,7 +87,10 @@ garbage collecting purposes, usually destroying them when returning.
 $\bullet$ a table of primes (in fact of \emph{differences} between
 consecutive primes), called \teb{diffptr}, of type \kbd{byteptr}
 (pointer to \kbd{unsigned char}). Its use is described in
-\secref{se:primetable} below.
+\secref{se:primetable} later. Using it directly is deprecated,
+high-level iterators provide a cleaner and more flexible interface, see
+\secref{se:primeiter} (such iterators use the private prime table, but extend
+it dynamically).
 
 $\bullet$ access to all the built-in functions of the PARI library.
 These are declared to the outside world when you include \kbd{pari.h}, but
@@ -1975,82 +1978,7 @@ minute. If speed is critical and you know that all integers involved are
 non-negative and going to remain less than $2^{32}$ or $2^{64}$, write a
 simple direct backtracking algorithm using $C$ \kbd{long}s.
 
-\subsec{Iterating over primes}\label{se:primetable}
-
-\subsubsec{Low-level interface}
-
-After \kbd{pari\_init(size, maxprime)} is called, a ``prime table'' is
-initialized with the successive \emph{differences} of primes up to (possibly
-just a little beyond) \kbd{maxprime}. The prime table occupies roughly
-$\kbd{maxprime}/\log(\kbd{maxprime})$ bytes in memory, so be sensible when
-choosing \kbd{maxprime}; it is $500000$ by default under \kbd{gp}. In any
-case, the implementation requires that $\tet{maxprime} < 2^{\B} - 2048$,
-whatever memory is available. If you need more primes, use \tet{nextprime}.
-
-\noindent Some convenience functions:
-
-\fun{ulong}{maxprime}{} the largest prime computable using our prime table.
-
-\fun{void}{maxprime_check}{ulong B} raise an error if \kbd{maxprime()} is $< B$.
-
-After the following initializations (the names $p$ and \var{ptr} are
-arbitrary of course)
-\bprog
-byteptr ptr = diffptr;
-ulong p = 0;
-@eprog
-\noindent calling the macro \tet{NEXT_PRIME_VIADIFF_CHECK}$(p, \var{ptr})$
-repeatedly will assign the successive prime numbers to $p$. Overrunning the
-prime table boundary will raise the error \tet{e_MAXPRIME}, which will just
-print the error message:
-
-\kbd{*** not enough precomputed primes}
-
-\noindent then abort the computation. The alternative macro
-\tet{NEXT_PRIME_VIADIFF} operates in the same way, but will omit that check,
-and is slightly faster. It should be used in the following way:
-%
-\bprog
-byteptr ptr = diffptr;
-ulong p = 0;
-
-if (maxprime() < goal) pari_err_MAXPRIME(goal); /*@Ccom not enough primes */
-while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
-{
-  NEXT_PRIME_VIADIFF(p, ptr);
-  ...
-}
-@eprog\noindent
-Here, we use the general error handling function \kbd{pari\_err} (see
-\secref{se:err}), with the codeword \kbd{e\_MAXPRIME}, raising the ``not enough
-primes'' error. This could be rewritten as
-\bprog
-maxprime_check(goal);
-while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
-{
-  NEXT_PRIME_VIADIFF(p, ptr);
-  ...
-}
-@eprog\noindent but in that case, the error message is less helpful: it will
-not mention the largest needed prime.
-
-\fun{bytepr}{initprimes}{ulong maxprime} computes a prime table (of all prime
-differences for $p < maxp$) on the fly.
-
-PARI currently guarantees that the first 6547 primes, up to and including
-65557, are present in the table, even if you set \kbd{maxprime} to zero.
-in the \kbd{pari\_init} call.
-
-\fun{void}{initprimetable}{ulong maxprime} computes a prime table (of all prime
-differences for $p < maxp$) and assign it to \kbd{diffptr}. You should refrain
-from changing \kbd{diffptr} and call this function instead.
-
-\fun{ulong}{init_primepointer}{ulong a, byteptr *pd}
-returns the smallest prime $p \geq a$, and sets \kbd{*pd} to the proper offset
-of \kbd{diffptr} so that \kbd{NEXT\_PRIME\_VIADIFF(p, *pd)} correctly
-returns \kbd{unextprime(p + 1)}.
-
-\subsubsec{High-level interface}
+\subsec{Iterating over primes}\label{se:primeiter}
 
 The library provides a high-level iterator, which stores its (private) data
 in a \kbd{struct} \tet{forprime_t} and runs over arbitrary ranges of primes,
@@ -2080,9 +2008,8 @@ are available in the interval.
 are available in the interval.
 
 These two functions leave alone the PARI stack, and write their state
-information in the preallocated \tet{forprime_t} struct.
-
-The typical usage is thus:
+information in the preallocated \tet{forprime_t} struct. The typical usage is
+thus:
 \bprog
   forprime_t T;
   GEN p;
@@ -2097,8 +2024,10 @@ The typical usage is thus:
     avma = av2; /* delete garbage accumulated in this iteration */
   }
   avma = av; /* delete all */
-  @eprog\noindent Of course, the final \kbd{avma = av} could be replaced
-  by a \kbd{gerepile} call.
+@eprog\noindent Of course, the final \kbd{avma = av} could be replaced
+by a \kbd{gerepile} call. Beware that swapping the
+\kbd{av2 = avma} and \tet{forprime_init} call would be incorrect: the
+first \kbd{avma = av2} would delete the \tet{forprime_t} structure!
 
 \subsec{Numerical analysis}
 

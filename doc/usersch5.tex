@@ -719,6 +719,87 @@ These are \kbd{double} approximations to useful constants:
 
 \noindent \tet{PI}: $\pi$.
 
+\section{Iterating over small primes, low-level interface}
+\label{se:primetable}
+
+One of the methods used by the high-level prime iterator (see
+\secref{se:primeiter}), is a precomputed table. Its direct use is deprecated,
+but documented here.
+
+After \kbd{pari\_init(size, maxprime)}, a ``prime table'' is
+initialized with the successive \emph{differences} of primes up to (possibly
+just a little beyond) \kbd{maxprime}. The prime table occupies roughly
+$\kbd{maxprime}/\log(\kbd{maxprime})$ bytes in memory, so be sensible when
+choosing \kbd{maxprime}; it is $500000$ by default under \kbd{gp} and there
+is no real benefit in choosing a much larger value: the high-level
+iterator provide \emph{fast} access to primes up to the \emph{square}
+of \kbd{maxprime}. In any case, the implementation requires that
+$\tet{maxprime} < 2^{\B} - 2048$, whatever memory is available.
+
+PARI currently guarantees that the first 6547 primes, up to and including
+65557, are present in the table, even if you set \kbd{maxprime} to zero.
+in the \kbd{pari\_init} call.
+
+\noindent Some convenience functions:
+
+\fun{ulong}{maxprime}{} the largest prime computable using our prime table.
+
+\fun{void}{maxprime_check}{ulong B} raise an error if \kbd{maxprime()} is $< B$.
+
+After the following initializations (the names $p$ and \var{ptr} are
+arbitrary of course)
+\bprog
+byteptr ptr = diffptr;
+ulong p = 0;
+@eprog
+\noindent calling the macro \tet{NEXT_PRIME_VIADIFF_CHECK}$(p, \var{ptr})$
+repeatedly will assign the successive prime numbers to $p$. Overrunning the
+prime table boundary will raise the error \tet{e_MAXPRIME}, which will just
+print the error message:
+
+\kbd{*** not enough precomputed primes, need primelimit \til $c$}
+
+\noindent (for some numerical value $c$), then abort the computation. The
+alternative macro \tet{NEXT_PRIME_VIADIFF} operates in the same way, but will
+omit that check, and is slightly faster. It should be used in the following
+way:
+%
+\bprog
+byteptr ptr = diffptr;
+ulong p = 0;
+
+if (maxprime() < goal) pari_err_MAXPRIME(goal); /*@Ccom not enough primes */
+while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
+{
+  NEXT_PRIME_VIADIFF(p, ptr);
+  ...
+}
+@eprog\noindent
+Here, we use the general error handling function \kbd{pari\_err} (see
+\secref{se:err}), with the codeword \kbd{e\_MAXPRIME}, raising the ``not enough
+primes'' error. This could be rewritten as
+\bprog
+maxprime_check(goal);
+while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
+{
+  NEXT_PRIME_VIADIFF(p, ptr);
+  ...
+}
+@eprog
+
+\fun{bytepr}{initprimes}{ulong maxprime} computes a ``prime table'' on the fly.
+In fact a table of all prime differences for $p < \kbd{maxprime}$.
+
+\fun{void}{initprimetable}{ulong maxprime} computes a prime table (of all prime
+differences for $p < \kbd{maxprime}$) and assign it to the global variable
+\kbd{diffptr}. Don't change \kbd{diffptr} directly, call this function
+instead.
+
+\fun{ulong}{init_primepointer}{ulong a, byteptr *pd}
+returns the smallest prime $p \geq a$, and sets \kbd{*pd} to the proper offset
+of \kbd{diffptr} so that \kbd{NEXT\_PRIME\_VIADIFF(p, *pd)} correctly
+returns \kbd{unextprime(p + 1)}.
+
 \section{Handling the PARI stack}
 
 \subsec{Allocating memory on the stack}
