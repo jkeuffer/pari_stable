@@ -795,10 +795,19 @@ differences for $p < \kbd{maxprime}$) and assign it to the global variable
 \kbd{diffptr}. Don't change \kbd{diffptr} directly, call this function
 instead.
 
-\fun{ulong}{init_primepointer}{ulong a, byteptr *pd}
+\fun{ulong}{init_primepointer_geq}{ulong a, byteptr *pd}
 returns the smallest prime $p \geq a$, and sets \kbd{*pd} to the proper offset
 of \kbd{diffptr} so that \kbd{NEXT\_PRIME\_VIADIFF(p, *pd)} correctly
 returns \kbd{unextprime(p + 1)}.
+
+\fun{ulong}{init_primepointer_gt}{ulong a, byteptr *pd} returns the smallest
+prime $p > a$.
+
+\fun{ulong}{init_primepointer_leq}{ulong a, byteptr *pd} returns the largest
+prime $p \leq a$.
+
+\fun{ulong}{init_primepointer_lt}{ulong a, byteptr *pd} returns the largest
+prime $p < a$.
 
 \section{Handling the PARI stack}
 

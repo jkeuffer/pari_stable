@@ -225,10 +225,7 @@ u_forprime_set_prime_table(forprime_t *T, ulong a)
     T->d = diffptr;
   }
   else
-  {
-    T->p = init_primepointer(a, &T->d);
-    PREC_PRIME_VIADIFF(T->p, T->d);
-  }
+    T->p = init_primepointer_lt(a, &T->d);
 }
 
 /* run through primes in arithmetic progression = c (mod q).

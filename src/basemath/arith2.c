@@ -393,32 +393,35 @@ initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
   ulong prime_above = 3;
   byteptr p_prime_above;
 
-  maxnum |= 1;                  /* make it odd. */
+  maxnum |= 1; /* make it odd. */
   if (maxnum > maxpr && maxnum <= maxpr+512) maxnum = uprecprime(maxnum);
   if (maxnum <= maxpr)
   {
     long last;
-    ulong prime, lastprime = 0;
+    ulong lastprime = 0;
     byteptr d;
     if (maxnum == maxpr)
     {
       memcpy(p1, diffptr, diffptrlen);
-      *lastp = maxnum;
-      *lenp = diffptrlen;
-      return p1;
+      lastprime = maxnum;
+      last = diffptrlen;
     }
-    p = diffptr; lastprime = 0; /* -Wall */
-    for (prime = 2, d = diffptr+1; prime < maxnum; )
+    else
     {
-      p = d; lastprime = prime;
-      NEXT_PRIME_VIADIFF(prime,d);
+      ulong q;
+      p = diffptr; lastprime = 0; /* -Wall */
+      for (q = 2, d = diffptr+1; q < maxnum; )
+      {
+        p = d; lastprime = q;
+        NEXT_PRIME_VIADIFF(q,d);
+      }
+      if (q == maxnum) { p = d; lastprime = q; }
+      last = p-diffptr;
+      memcpy(p1, diffptr, last);
+      p1[last++] = 0;
     }
-    if (prime == maxnum) { p = d; lastprime = prime; }
-    last = p-diffptr;
-    memcpy(p1, diffptr, last);
-    p1[last] = 0;
     *lastp = lastprime;
-    *lenp = last+1;
+    *lenp = last;
     return p1;
   }
   if (maxnum <= 1ul<<17)        /* Arbitrary. */
@@ -517,13 +520,41 @@ maxprime_check(ulong c)
   if (_maxprime < c) pari_err_MAXPRIME(c);
 }
 
-/* return smallest prime >= a, set *ptr to the corresponding place in prime
- * table */
+/* all init_primepointer_xx routines set *ptr to the corresponding place
+ * in prime table */
+/* smallest p >= a */
 ulong
-init_primepointer(ulong a, byteptr *pd)
+init_primepointer_geq(ulong a, byteptr *pd)
 {
   ulong n, p;
   prime_table_next_p(a, pd, &p, &n);
+  return p;
+}
+/* largest p < a */
+ulong
+init_primepointer_lt(ulong a, byteptr *pd)
+{
+  ulong n, p;
+  prime_table_next_p(a, pd, &p, &n);
+  PREC_PRIME_VIADIFF(p, *pd);
+  return p;
+}
+/* largest p <= a */
+ulong
+init_primepointer_leq(ulong a, byteptr *pd)
+{
+  ulong n, p;
+  prime_table_next_p(a, pd, &p, &n);
+  if (p != a) PREC_PRIME_VIADIFF(p, *pd);
+  return p;
+}
+/* smallest p > a */
+ulong
+init_primepointer_gt(ulong a, byteptr *pd)
+{
+  ulong n, p;
+  prime_table_next_p(a, pd, &p, &n);
+  if (p == a) NEXT_PRIME_VIADIFF(p, *pd);
   return p;
 }
 

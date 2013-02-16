@@ -420,6 +420,8 @@ HC 130- Function sqrtnint
    138- GP function seralgdep
 BA 139- mips and mips64 level0 inline assembly kernel
    140- new error class e_COMPONENT
+   141- PARI functions init_primepointer_geq, init_primepointer_gt,
+        init_primepointer_leq, init_primepointer_lt
 
   Removed
     1- dropped DOS support
