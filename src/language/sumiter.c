@@ -1632,7 +1632,7 @@ zbrent(void *E, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
     else                          b = subrr(b,tol1);
     fb = eval(E, b);
   }
-  if (iter > itmax) pari_err(e_MISC,"too many iterations in solve");
+  if (iter > itmax) pari_err_IMPL("solve recovery [too many iterations]");
   return gerepileuptoleaf(av, rcopy(b));
 }
 
