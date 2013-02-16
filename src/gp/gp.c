@@ -1713,6 +1713,7 @@ break_loop(int numerr)
   b = filtered_buffer(&F);
   nenv=pari_stack_new(&s_env);
   gp_context_save(&rec);
+  iferr_env = NULL;
   dbg_level = 0;
   frame_level = closure_context(oldframe_level, dbg_level);
   pari_infile = newfile(stdin, "stdin", mf_IN)->file;
@@ -1734,6 +1735,7 @@ break_loop(int numerr)
     {
       if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
       gp_context_restore(&rec);
+      iferr_env = NULL;
       closure_err(dbg_level);
       (void) closure_context(oldframe_level, dbg_level);
       pari_infile = newfile(stdin, "stdin", mf_IN)->file;
