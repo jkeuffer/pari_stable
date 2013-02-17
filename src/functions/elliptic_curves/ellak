@@ -3,19 +3,42 @@ Section: elliptic_curves
 C-Name: akell
 Prototype: GG
 Help: ellak(E,n): computes the n-th Fourier coefficient of the L-function of
- the elliptic curve E (assumed E is a minimal model).
+ the elliptic curve E (assumed E is an integral model).
 Doc:
  computes the coefficient $a_n$ of the
- $L$-function of the elliptic curve $E$, i.e.~in principle coefficients of a
+ $L$-function of the elliptic curve $E/\Q$, i.e.~in principle coefficients of a
  newform of weight 2 assuming \idx{Taniyama-Weil conjecture} (which is now
  known to hold in full generality thanks to the work of \idx{Breuil},
  \idx{Conrad}, \idx{Diamond}, \idx{Taylor} and \idx{Wiles}). $E$ must be an
- \var{ell} structure as output by \kbd{ellinit}. For this function
- to work for every $n$ and not just those prime to the conductor, $E$ must
- be a minimal Weierstrass equation. If this is not the case, use the
- function \kbd{ellminimalmodel} before using \kbd{ellak}.
+ \var{ell} structure as output by \kbd{ellinit}. $E$ must be given by an
+ integral model, not necessarily minimal, although a minimal model will
+ make the function faster.
  \bprog
  ? E = ellinit([0,1]);
  ? ellak(E, 10)
  %2 = 0
+ ? e = ellinit([5^4,5^6]); \\ not minimal at 5
+ ? ellak(e, 5) \\ wasteful but works
+ %3 = -3
+ ? E = ellminimalmodel(e); \\ now minimal
+ ? ellak(E, 5)
+ %5 = -3
+ @eprog\noindent If the model is not minimal at a number of bad primes, then
+ the function will be slower on those $n$ divisible by the bad primes.
+ The speed should be comparable for other $n$:
+ \bprog
+ ? for(i=1,10^6, ellak(E,5))
+ time = 877 ms.
+ ? for(i=1,10^6, ellak(e,5)) \\ 5 is bad, markedly slower
+ time = 2,632 ms.
+
+ ? for(i=1,10^5,ellak(E,5*i))
+ time = 1,080 ms.
+ ? for(i=1,10^5,ellak(e,5*i)) \\ still slower but not so much on average
+ time = 1,208 ms.
+
+ ? for(i=1,10^5,ellak(E,i))
+ time = 1,048 ms.
+ ? for(i=1,10^5,ellak(e,i)) \\ almost the same on average
+ time = 1,084 ms.
  @eprog

@@ -3446,9 +3446,10 @@ checkell_int(GEN e)
 GEN
 anellsmall(GEN e, long n0)
 {
+  pari_sp av;
   const long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] unused */
   ulong p, m, SQRTn, n = (ulong)n0;
-  GEN an, D, c6;
+  GEN an, D, c4, c6;
 
   checkell_int(e);
   if (n0 <= 0) return cgetg(1,t_VEC);
@@ -3458,15 +3459,17 @@ anellsmall(GEN e, long n0)
     pari_err_IMPL(s);
   }
   SQRTn = (ulong)sqrt(n);
+  c4= ell_get_c4(e);
   c6= ell_get_c6(e);
   D = ell_get_disc(e);
 
   an = cgetg(n+1,t_VECSMALL); an[1] = 1;
+  av = avma;
   for (p=2; p <= n; p++) an[p] = LONG_MAX; /* not computed yet */
   for (p=2; p<=n; p++)
   {
     if (an[p] != LONG_MAX) continue; /* p not prime */
-
+START:
     if (!umodiu(D,p)) /* bad reduction, p | D */
       switch (tab[p&3] * kroiu(c6,p)) /* (-c6/p) */
       {
@@ -3475,6 +3478,18 @@ anellsmall(GEN e, long n0)
             if (an[m/p] != LONG_MAX) an[m] = -an[m/p];
           continue;
         case 0: /* additive */
+          if (!umodiu(c4,p))
+          {
+            GEN v = localred(e, utoipos(p), 1);
+            if (!isint1(gel(v,1)))
+            { /* model not minimal at p */
+              e = coordch(e,v);
+              c4= ell_get_c4(e);
+              c6= ell_get_c6(e);
+              D = ell_get_disc(e);
+              goto START;
+            }
+          }
           for (m=p; m<=n; m+=p) an[m] = 0;
           continue;
         case 1: /* deployee */
@@ -3503,7 +3518,7 @@ anellsmall(GEN e, long n0)
       }
     }
   }
-  return an;
+  avma = av; return an;
 }
 
 GEN
@@ -3520,12 +3535,13 @@ akell(GEN e, GEN n)
 {
   long i, j, s, ex;
   pari_sp av = avma;
-  GEN fa, P, E, D, c6, ap, u, v, w, y, p;
+  GEN fa, P, E, D, c4, c6, ap, u, v, w, y, p;
 
   checkell_int(e);
   if (typ(n) != t_INT) pari_err_TYPE("akell",n);
   if (signe(n)<= 0) return gen_0;
   if (gequal1(n)) return gen_1;
+  c4= ell_get_c4(e);
   c6= ell_get_c6(e);
   D = ell_get_disc(e);
   u = coprime_part(n, D);
@@ -3538,7 +3554,26 @@ akell(GEN e, GEN n)
     for (i=1; i<lg(P); i++)
     {
       p = gel(P,i);
-      j = kronecker(c6,p); if (!j) { avma = av; return gen_0; }
+START:
+      j = kronecker(c6,p);
+      if (!j)
+      {
+        if (dvdii(c4,p))
+        {
+          GEN v = localred(e, p, 1);
+          if (!isint1(gel(v,1)))
+          { /* model not minimal at p */
+            e = coordch(e,v);
+            c4= ell_get_c4(e);
+            c6= ell_get_c6(e);
+            D = ell_get_disc(e);
+            if (dvdii(D,p)) goto START;
+            u = mulii(u, powiu(p, Z_pval(n,p)));
+            continue;
+          }
+        }
+        avma = av; return gen_0;
+      }
       if (mod2(gel(E,i)))
       {
         if (mod4(p) == 3) j = -j;
@@ -4693,14 +4728,26 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
   }
 }
 
-static GEN /*assume p odd, p |disc(e) */
-ellcard_oddbad_red(GEN e, GEN p)
+static GEN ellcard_ram(GEN E, GEN p);
+static GEN /*assume p | disc(e), e not necessarily minimal */
+ellcard_bad_red(GEN e, GEN p)
 {
   pari_sp av = avma;
-  GEN c6;
-  long s;
-  c6 = Rg_to_Fp(ell_get_c6(e), p);
-  s = kronecker(c6, p);
+  GEN c6 = ell_get_c6(e);
+  long s = kronecker(c6, p);
+  if (!s)
+  {
+    GEN c4 = Rg_to_Fp(ell_get_c4(e), p);
+    if (!signe(c4))
+    {
+      GEN v = localred(e, p, 1);
+      if (!isint1(gel(v,1)))
+      { /* model not minimal at p */
+        e = coordch(e,v);
+        return ellcard_ram(e, p);
+      }
+    }
+  }
   if (mod4(p) == 3) s = -s;
   avma = av; return addis(p,1-s);
 }
@@ -4708,11 +4755,10 @@ ellcard_oddbad_red(GEN e, GEN p)
 static GEN
 ellcard_ram(GEN E, GEN p)
 {
-  GEN a4, a6, D;
+  GEN a4, a6, D = Rg_to_Fp(ell_get_disc(E), p);
+  if (!signe(D)) return ellcard_bad_red(E,p);
   if (equaliu(p,2)) return utoi(cardmod2(E));
   if (equaliu(p,3)) return utoi(cardmod3(E));
-  D = Rg_to_Fp(ell_get_disc(E), p);
-  if (!signe(D)) return ellcard_oddbad_red(E,p);
   a4 = ell_to_a4a6(E,p,&a6);
   return Fp_ellcard(a4, a6, p);
 }
