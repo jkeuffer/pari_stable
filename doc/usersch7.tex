@@ -129,11 +129,17 @@ ordered as in \kbd{faN} above.
 \fun{GEN}{elldatagenerators}{GEN E} returns generators for $E(\Q)$
 extracted from Cremona's table.
 
-\fun{GEN}{ell_apply_globalred}{GEN e, GEN *v} takes an \var{ell} over $\Q$
-and returns a global minimal model $E$ for $e$. If \kbd{v} is not \kbd{NULL},
-set \kbd{*v} to the needed change of variable: \kbd{NULL} if $e$ was already
-the standard minimal model, such that $E = \kbd{ellchangecurve(e,v)}$
-otherwise.
+\fun{GEN}{ellanal_globalred}{GEN e, GEN *v} takes an \var{ell} over $\Q$
+and returns a global minimal model $E$ (in \kbd{ellinit} form, over $\Q$) for
+$e$ suitable for analytic computations related to the curve $L$ series: it
+contains \kbd{ellglobalred} data, as well as global and local root numbers. If
+\kbd{v} is not \kbd{NULL}, set \kbd{*v} to the needed change of variable:
+\kbd{NULL} if $e$ was already the standard minimal model, such that $E =
+\kbd{ellchangecurve(e,v)}$ otherwise. Compared to the direct use of
+\kbd{ellchangecurve} followed by \kbd{ellrootno}, this function avoids
+converting unneeded dynamic data and avoids potential memory leaks
+(the changed curve must be deleted using \tet{obj_free}). The original
+curve $e$ is updated as well with the same information.
 
 \subsubsec{Curves over $\Q_p$}
 

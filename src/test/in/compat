@@ -334,7 +334,7 @@ logagm(2)
 bcurve=initell([0,0,0,-3,0])
 localred(bcurve,2)
 ccurve=initell([0,0,-1,-1,0])
-globalred(ccurve);l=lseriesell(ccurve,2,-37,1)
+l=lseriesell(ccurve,2,-37,1)
 lseriesell(ccurve,2,-37,1.2)-l
 \\ M
 sbnf=smallbuchinit(x^3-x^2-14*x-1)

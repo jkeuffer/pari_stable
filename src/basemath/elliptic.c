@@ -878,15 +878,14 @@ ch_Q(GEN E, GEN e, GEN w)
     S = obj_insert(E, Q_GROUPGEN, ellchangepoint(S, w));
   if ((S = obj_check(e, Q_GLOBALRED)))
   {
-    GEN v;
-    S = shallowcopy(S); /*don't modify S in place, may be shared with other e*/
-    v = gel(S,2);
+    GEN v = gel(S,2);
     if (gequal(v, w)) v = init_ch(); /* most useful case! */
     else
     {
       w = ellchangeinvert(w);
       gcomposev(&w, v); v = w;
     }
+    S = leafcopy(S); /* don't modify S in place: would corrupt e */
     gel(S,2) = v;
     S = obj_insert(E, Q_GLOBALRED, S);
   }
@@ -3023,11 +3022,12 @@ ellglobalred_all(GEN E, GEN *gr)
 }
 static GEN
 doellglobalred(GEN E) { GEN gr; (void)ellglobalred_all(E, &gr); return gr; }
+static GEN
+ellglobalred_i(GEN E)
+{ return obj_checkbuild(E, Q_GLOBALRED, &doellglobalred); }
 GEN
-ellglobalred(GEN E) {
-  checkell_Q(E);
-  return obj_checkbuild(E, Q_GLOBALRED, &doellglobalred);
-}
+ellglobalred(GEN E)
+{ checkell_Q(E); return ellglobalred_i(E); }
 
 static int
 is_trivial_change(GEN v)
@@ -3038,27 +3038,34 @@ is_trivial_change(GEN v)
 
 /* only update E[1..14] */
 GEN
-ell_apply_globalred(GEN e, GEN *gr)
+ellanal_globalred(GEN e, GEN *gr)
 {
   GEN E, S, v;
   checkell_Q(e);
   if (gr) *gr = NULL;
   if ((S = obj_check(e, Q_GLOBALRED)))
-  {
-    v = gel(S,2); /* FIXME: add a better way to tell that e has been reduced */
-    if (is_trivial_change(v)) return e;
+  { /* FIXME: add cleaner way to tell if e is reduced? */
+    v = gel(S,2); if (is_trivial_change(v)) return e;
     E = coordch(e,v);
-    S = leafcopy(S);
   }
   else
-  {
+  { /* faster than ellglobalred(e) + ellchangecurve */
     E = ellglobalred_all(e, &S);
-    ell_reset(E);
+    (void)obj_insert(e, Q_GLOBALRED, S);
     v = gel(S,2);
   }
   if (gr) *gr = v;
+  ell_reset(E);
+  S = leafcopy(S);
   gel(S,2) = init_ch();
-  obj_insert(E, Q_GLOBALRED, S);
+  obj_insert_shallow(E, Q_GLOBALRED, S);
+  S = obj_check(e, Q_ROOTNO);
+  if (!S)
+  {
+    (void)ellrootno_global(e);
+    S = obj_check(e, Q_ROOTNO);
+  }
+  obj_insert_shallow(E, Q_ROOTNO, S);
   return E;
 }
 
@@ -3096,7 +3103,7 @@ neron(GEN e, long p, long* ptkod)
 {
   long kod, v4, v6, vd;
   pari_sp av = avma;
-  GEN glob = ellglobalred(e), listp = gmael(glob,4,1), L = gel(glob,5);
+  GEN glob = ellglobalred_i(e), listp = gmael(glob,4,1), L = gel(glob,5);
   GEN nv = equaliu(gel(listp,1), p)? gel(L,1): gel(L,2); /* localred(p) */
   *ptkod = kod = itos(gel(nv,2));
   v4 = val_aux(ell_get_c4(e), p);
@@ -3348,7 +3355,7 @@ ellrootno_global(GEN e)
   GEN v, V, S = obj_check(e, Q_ROOTNO);
   long s;
   if (S) return itos(gel(S,1));
-  v = ellglobalred(e);
+  v = ellglobalred_i(e);
   V = allellrootno(e, gel(v,4), &s);
   obj_insert(e, Q_ROOTNO, mkvec2(stoi(s), V));
   avma = av; return s;
@@ -3560,10 +3567,10 @@ akell(GEN e, GEN n)
 
 GEN
 ellQ_get_N(GEN e)
-{ GEN v = ellglobalred(e); return gel(v,1); }
+{ GEN v = ellglobalred_i(e); return gel(v,1); }
 void
 ellQ_get_Nfa(GEN e, GEN *N, GEN *faN)
-{ GEN v = ellglobalred(e); *N = gel(v,1); *faN = gel(v,4); }
+{ GEN v = ellglobalred_i(e); *N = gel(v,1); *faN = gel(v,4); }
 
 GEN
 elllseries(GEN e, GEN s, GEN A, long prec)
@@ -3583,7 +3590,7 @@ elllseries(GEN e, GEN s, GEN A, long prec)
   if (isint(s, &s) && signe(s) <= 0) { avma = av; return gen_0; }
   flun = gequal1(A) && gequal1(s);
   checkell_Q(e);
-  e = ell_apply_globalred(e, NULL);
+  e = ellanal_globalred(e, NULL);
   N = ellQ_get_N(e);
   eps = ellrootno_global(e);
   if (flun && eps < 0) { avma = av; return real_0(prec); }
