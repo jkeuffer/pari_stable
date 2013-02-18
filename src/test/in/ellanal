@@ -1,11 +1,14 @@
 default(realprecision,38);
-ellanalyticrank(ellinit([0, -1, 1, -10, -20]))
-ellanalyticrank(ellinit([0, 0, 1, -1, 0]))
-ellanalyticrank(ellinit([0, 1, 1, -2, 0]))
-ellanalyticrank(ellinit([0, 0, 1, -7, 6]))
-ellanalyticrank(ellinit([-5187, 176830]))
+rk(x)=x=ellinit(x);ellanalyticrank(x);
+rk([0, -1, 1, -10, -20])
+rk([0, 0, 1, -1, 0])
+rk([0, 1, 1, -2, 0])
+rk([0, 0, 1, -7, 6])
+rk([-5187, 176830])
 
-ellheegner(ellinit([1, 1, 0, -1297, -18530]))
-ellheegner(ellinit([0, -1, 1, -33, 93]))
-ellheegner(ellinit([-157^2,0]))
-ellheegner(ellinit([0,0,-9/484,0,-27/234256]))
+he(x)=x=ellinit(x);ellheegner(x);
+he([1, 1, 0, -1297, -18530])
+he([0, -1, 1, -33, 93])
+he([-157^2,0])
+he([0,0,-9/484,0,-27/234256])
+getheap()[1]

@@ -956,11 +956,12 @@ twistcurve(GEN e, GEN D)
 }
 
 static GEN
-ltwist1(GEN ell, GEN D, long bitprec)
+ltwist1(GEN E, GEN d, long bitprec)
 {
   pari_sp av = avma;
-  GEN ed = twistcurve(ell, D);
-  return gerepileuptoleaf(av, ellL1_bitprec(ed, 0, bitprec));
+  GEN Ed = twistcurve(E, d);
+  GEN z = ellL1_bitprec(Ed, 0, bitprec);
+  obj_free(Ed); return gerepileuptoleaf(av, z);
 }
 
 /* Return O_re*c(E)/(4*O_vol*|E_t|^2) */
