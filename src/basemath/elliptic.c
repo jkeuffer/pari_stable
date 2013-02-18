@@ -3036,6 +3036,7 @@ is_trivial_change(GEN v)
   return isint1(u) && isintzero(r) && isintzero(s) && isintzero(t);
 }
 
+static GEN doellrootno(GEN e);
 /* only update E[1..14] */
 GEN
 ellanal_globalred(GEN e, GEN *gr)
@@ -3062,10 +3063,10 @@ ellanal_globalred(GEN e, GEN *gr)
   S = obj_check(e, Q_ROOTNO);
   if (!S)
   {
-    (void)ellrootno_global(e);
-    S = obj_check(e, Q_ROOTNO);
+    S = doellrootno(E); /* E is a minimal model */
+    obj_insert(e, Q_ROOTNO, S); /* insert in e */
   }
-  obj_insert_shallow(E, Q_ROOTNO, S);
+  obj_insert_shallow(E, Q_ROOTNO, S); /* ... and in E */
   return E;
 }
 
@@ -3348,17 +3349,20 @@ allellrootno(GEN e, GEN fa, long *ps)
   }
   *ps = s; return V;
 }
+static GEN
+doellrootno(GEN e)
+{
+  long s;
+  GEN v = ellglobalred_i(e);
+  GEN V = allellrootno(e, gel(v,4), &s);
+  return mkvec2(stoi(s), V);
+}
 long
 ellrootno_global(GEN e)
 {
   pari_sp av = avma;
-  GEN v, V, S = obj_check(e, Q_ROOTNO);
-  long s;
-  if (S) return itos(gel(S,1));
-  v = ellglobalred_i(e);
-  V = allellrootno(e, gel(v,4), &s);
-  obj_insert(e, Q_ROOTNO, mkvec2(stoi(s), V));
-  avma = av; return s;
+  GEN S = obj_checkbuild(e, Q_ROOTNO, &doellrootno);
+  avma = av; return itos(gel(S,1));
 }
 
 /* local epsilon factor at p (over Q), including p=0 for the infinite place.
