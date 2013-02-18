@@ -185,7 +185,7 @@ d_ellLHS(GEN e, GEN z)
 static GEN
 initsmall(GEN x, long n)
 {
-  GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D, j, a11, a13, a33, b22;
+  GEN a1,a2,a3,a4,a6, b2,b4,b6,b8, c4,c6, D, j;
   GEN y = obj_init(15, n);
   switch(lg(x))
   {
@@ -199,44 +199,48 @@ initsmall(GEN x, long n)
       a1 = a2 = a3 = gen_0;
       a4 = gel(x,1);
       a6 = gel(x,2);
+      b2 = gen_0;
+      b4 = gmul2n(a4,1);
+      b6 = gmul2n(a6,2);
+      b8 = gneg(gsqr(a4));
+      c4 = gmulgs(a4,-48);
+      c6 = gmulgs(a6,-864);
+      D = gadd(gmul(gmulgs(a4,-64), gsqr(a4)), gmulsg(-432,gsqr(a6)));
       break;
-    default :  /* l > 5 */
+    default: /* l > 5 */
+    { GEN a11, a13, a33, b22;
       a1 = gel(x,1);
       a2 = gel(x,2);
       a3 = gel(x,3);
       a4 = gel(x,4);
       a6 = gel(x,5);
+      a11= gsqr(a1);
+      b2 = gadd(a11, gmul2n(a2,2));
+      a13= gmul(a1, a3);
+      b4 = gadd(a13, gmul2n(a4,1));
+      a33= gsqr(a3);
+      b6 = gadd(a33, gmul2n(a6,2));
+      b8 = gsub(gadd(gmul(a11,a6), gmul(b6, a2)), gmul(a4, gadd(a4,a13)));
+      b22= gsqr(b2);
+      c4 = gadd(b22, gmulsg(-24,b4));
+      c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)), gmulsg(-216,b6));
+      D  = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
+                gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
       break;
+    }
   }
   gel(y,1) = a1;
   gel(y,2) = a2;
   gel(y,3) = a3;
   gel(y,4) = a4;
   gel(y,5) = a6;
-  a11 = gsqr(a1);
-  b2 = gadd(a11, gmul2n(a2,2));
   gel(y,6) = b2; /* a1^2 + 4a2 */
-
-  a13 = gmul(a1, a3);
-  b4 = gadd(a13, gmul2n(a4,1));
   gel(y,7) = b4; /* a1 a3 + 2a4 */
-
-  a33 = gsqr(a3);
-  b6 = gadd(a33, gmul2n(a6,2));
   gel(y,8) = b6; /* a3^2 + 4 a6 */
-  b8 = gsub(gadd(gmul(a11,a6), gmul(b6, a2)), gmul(a4, gadd(a4,a13)));
   gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 - a4(a4 + a1 a3) */
-
-  b22 = gsqr(b2);
-  c4 = gadd(b22, gmulsg(-24,b4));
-  gel(y,10) = c4; /* b2^2 - 24 b4 */
-
-  c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)), gmulsg(-216,b6));
-  gel(y,11) = c6; /* 36 b2 b4 - b2^3 - 216 b6 */
-
-  D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
-           gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
-  gel(y,12) = D;
+  gel(y,10)= c4; /* b2^2 - 24 b4 */
+  gel(y,11)= c6; /* 36 b2 b4 - b2^3 - 216 b6 */
+  gel(y,12)= D;
   if (gequal0(D)) { gel(y, 13) = gen_0; return NULL; }
 
   if (typ(D) == t_POL && typ(c4) == t_POL && varn(D) == varn(c4))
