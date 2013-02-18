@@ -3052,7 +3052,7 @@ ellanal_globalred(GEN e, GEN *gr)
   { /* faster than ellglobalred(e) + ellchangecurve */
     E = ellglobalred_all(e, &S);
     (void)obj_insert(e, Q_GLOBALRED, S);
-    v = gel(S,2);
+    v = gel(S,2); if (is_trivial_change(v)) return e;
   }
   if (gr) *gr = v;
   ell_reset(E);
