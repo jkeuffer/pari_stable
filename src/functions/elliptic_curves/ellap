@@ -12,8 +12,11 @@ Doc:
  defined by the equation $\#E(\F_q) = q+1 - t$.
 
  If the curve is defined over $\Q$, $p$ must be explicitly given and the
- function computes the trace of the reduction over $\F_p$. The equation
- need not be minimal at $p$, but a minimal model will be more efficient.
+ function computes the trace of the reduction over $\F_p$.
+ The trace of Frobenius is also the $a_p$ coefficient in the curve $L$-series
+ $L(E,s) = \sum_n a_n n^{-s}$, whence the function name. The equation must be
+ integral at $p$ but need not be minimal at $p$; of course, a minimal model
+ will be more efficient.
  \bprog
  ? E = ellinit([0,1]);  \\ y^2 = x^3 + 0.x + 1, defined over Q
  ? ellap(E, 7) \\ 7 necessary here
