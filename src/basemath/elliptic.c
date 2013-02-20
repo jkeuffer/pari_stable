@@ -3515,14 +3515,14 @@ anellsmall(GEN e, long n0)
   {
     if (an[p] != LONG_MAX) continue; /* p not prime */
 START:
-    if (!umodiu(D,p)) /* bad reduction, p | D */
+    if (!umodiu(D,p)) /* p | D, bad reduction or non-minimal model */
       switch (tab[p&3] * kroiu(c6,p)) /* (-c6/p) */
       {
-        case -1: /* non deployee */
+        case -1: /* non split */
           for (m=p; m<=n; m+=p)
             if (an[m/p] != LONG_MAX) an[m] = -an[m/p];
           continue;
-        case 0: /* additive */
+        case 0: /* additive or non-minimal model */
           if (!umodiu(c4,p))
           {
             GEN v = localred(e, utoipos(p), 1);
@@ -3748,6 +3748,9 @@ hell(GEN e, GEN a, long prec)
   return gerepileupto(av, gneg(p1));
 }
 
+static GEN
+Q_numer(GEN x) { return typ(x) == t_INT? x: gel(x,1); }
+
 /* h' := h_oo(x) + 1/2 log(denom(x)) */
 static GEN
 hells(GEN e, GEN Q, long prec)
@@ -3759,7 +3762,7 @@ hells(GEN e, GEN Q, long prec)
   GEN x = gel(Q,1), w, z, t, mu, b42, b62;
   long n, lim;
 
-  mu = gmul2n(glog(numer(x),prec),-1);
+  mu = gmul2n(glog(Q_numer(x),prec),-1);
   t = ginv(gtofp(x, prec));
   b42 = gmul2n(b4,1);
   b62 = gmul2n(b6,1);
@@ -3896,6 +3899,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   long i, tx = typ(a), lx;
   pari_sp av = avma;
   GEN Lp, x, y, z, phi2, psi2, psi3;
+  GEN b2, b4, b6, b8, a1, a2, a4, c4, D;
 
   if (flag > 2 || flag < 0) pari_err_FLAG("ellheight");
   checkell_Q(e); if (!is_matvec_t(tx)) pari_err_TYPE("ellheight",a);
@@ -3910,7 +3914,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   if (ell_is_inf(a)) return gen_0;
   if (!oncurve(e,a))
     pari_err_DOMAIN("ellheight", "point", "not on", strtoGENstr("E"),a);
-  psi2 = numer(d_ellLHS(e,a));
+  psi2 = Q_numer(d_ellLHS(e,a));
   if (!signe(psi2)) { avma = av; return gen_0; }
   switch(flag)
   {
@@ -3926,24 +3930,31 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   }
   x = gel(a,1);
   y = gel(a,2);
-  psi3 = numer( /* b8 + 3x b6 + 3x^2 b4 + x^3 b2 + 3 x^4 */
-     gadd(ell_get_b8(e), gmul(x,
-     gadd(gmulsg(3,ell_get_b6(e)), gmul(x,
-     gadd(gmulsg(3,ell_get_b4(e)), gmul(x, gadd(ell_get_b2(e), gmulsg(3,x)))))))) );
+  b2 = ell_get_b2(e);
+  b4 = ell_get_b4(e);
+  b6 = ell_get_b6(e);
+  b8 = ell_get_b8(e);
+  psi3 = Q_numer( /* b8 + 3x b6 + 3x^2 b4 + x^3 b2 + 3 x^4 */
+    poleval(mkvec5(b8, mului(3,b6), mului(3,b4), b2, utoipos(3)), x)
+  );
   if (!signe(psi3)) { avma=av; return gen_0; }
-
-  phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
-    gsub(gadd(ell_get_a4(e),gmul(x,gadd(shifti(ell_get_a2(e),1),gmulsg(3,x)))),
-         gmul(ell_get_a1(e),y)) );
+  a1 = ell_get_a1(e);
+  a2 = ell_get_a2(e);
+  a4 = ell_get_a4(e);
+  phi2 = Q_numer( /* a4 + 2a2 x + 3x^2 - y a1*/
+    poleval(mkvec3(gsub(a4,gmul(a1,y)), shifti(a2,1), utoipos(3)), x)
+  );
+  c4 = ell_get_c4(e);
+  D = ell_get_disc(e);
   Lp = gel(Z_factor(gcdii(psi2,phi2)),1);
   lx = lg(Lp);
   for (i=1; i<lx; i++)
   {
     GEN p = gel(Lp,i);
     long u, v, n, n2;
-    if (signe(remii(ell_get_c4(e),p)))
+    if (signe(remii(c4,p)))
     { /* p \nmid c4 */
-      long N = Z_pval(ell_get_disc(e),p);
+      long N = Z_pval(D,p);
       if (!N) continue;
       n2 = Z_pval(psi2,p); n = n2<<1;
       if (n > N) n = N;
