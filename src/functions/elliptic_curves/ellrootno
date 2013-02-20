@@ -10,4 +10,5 @@ Doc: $E$ being an \var{ell} structure over $\Q$ as output by \kbd{ellinit},
  $p$ (at the infinite place if $p = 0$). If $p$ is omitted, return the global
  root number. Note that the global root number is the sign of the functional
  equation and conjecturally is the parity of the rank of the \idx{Mordell-Weil
- group}. The equation for $E$ needs \emph{not} be minimal.
+ group}. The equation for $E$ needs \emph{not} be minimal at $p$, but if the
+ model is already minimal the function will run faster.

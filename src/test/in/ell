@@ -167,3 +167,4 @@ e=ellinit(ellfromj(1/4), O(2^10)); x=1/2; y=ellordinate(e,x)[1];
 ellpointtoz(e,[x,y])
 
 ellinit([1,1], Mod(1,11))
+ellrootno(ellinit([31^4,31^6]), 31)

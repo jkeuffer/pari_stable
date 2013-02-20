@@ -2573,6 +2573,7 @@ localredbug(GEN p, const char *s)
 static long
 j_pval(GEN E, GEN p) { return Z_pval(Q_denom(ell_get_j(E)), p); }
 
+#if 0
 /* Here p > 3. e assumed integral, return v_p(N). Simplified version of
  * localred_p */
 static long
@@ -2585,6 +2586,7 @@ localred_p_get_f(GEN e, GEN p)
   if (nuj == 0) return (nuD % 12)? 2 : 0;
   return (nuD - nuj) % 12 ? 2: 1;
 }
+#endif
 /* Here p > 3. e assumed integral, minim = 1 if we only want a minimal model */
 static GEN
 localred_p(GEN e, GEN p, int minim)
@@ -2596,7 +2598,7 @@ localred_p(GEN e, GEN p, int minim)
   c6 = ell_get_c6(e);
   nuj = j_pval(e, p);
   nuD = Z_pval(D, p);
-  k = (nuj > 0 ? nuD - nuj : nuD) / 12;
+  k = (nuD - nuj) / 12;
   if (k <= 0)
   {
     v = init_ch();
@@ -3011,7 +3013,8 @@ ellglobalred_all(GEN E, GEN *gr)
       gel(NP, iN) = p;
       gel(NE, iN) = ex;
       gel(L, iN) = q; iN++;
-      gel(q,3) = gen_0; /*delete variable change*/
+      /*delete variable change if p != 2,3*/
+      if (cmpiu(p,3) > 0) gel(q,3) = gen_0;
       c = mulii(c, gel(q,4));
     }
     E_compose(&v, &E, w);
@@ -3045,7 +3048,8 @@ static GEN doellrootno(GEN e);
 GEN
 ellanal_globalred(GEN e, GEN *gr)
 {
-  GEN E, S, v;
+  GEN E, S, v, L;
+  long i, l;
   checkell_Q(e);
   if (gr) *gr = NULL;
   if ((S = obj_check(e, Q_GLOBALRED)))
@@ -3062,7 +3066,15 @@ ellanal_globalred(GEN e, GEN *gr)
   if (gr) *gr = v;
   ell_reset(E);
   S = leafcopy(S);
-  gel(S,2) = init_ch();
+  gel(S,2) = init_ch(); /* replace by trivial change */
+  L = leafcopy(gel(S,5)); /* vector of localreds */
+  l = minss(lg(L), 3); /* we'll touch at most the first 2 components (p=2,3) */
+  for (i = 1; i < l; i++)
+  { /* delete local variable change for p = 2,3 */
+    GEN q = gel(L,i), w = gel(q,3);
+    if (typ(w) != t_INT) gel(q,3) = gen_0;
+  }
+  gel(S,5) = L;
   obj_insert_shallow(E, Q_GLOBALRED, S);
   S = obj_check(e, Q_ROOTNO);
   if (!S)
@@ -3108,8 +3120,17 @@ neron(GEN e, long p, long* ptkod)
 {
   long kod, v4, v6, vd;
   pari_sp av = avma;
-  GEN glob = ellglobalred_i(e), listp = gmael(glob,4,1), L = gel(glob,5);
-  GEN nv = equaliu(gel(listp,1), p)? gel(L,1): gel(L,2); /* localred(p) */
+  GEN S, nv, ch;
+
+  if ((S = obj_check(e, Q_GLOBALRED)))
+  {
+    GEN listp = gmael(S,4,1), L = gel(S,5);
+    nv = equaliu(gel(listp,1), p)? gel(L,1): gel(L,2); /* localred(p) */
+  }
+  else
+    nv = localred(e, utoipos(p), 0);
+  ch = gel(nv,3);
+  if (typ(ch) != t_INT && !isint1(gel(ch,1))) e = coordch(e,ch);
   *ptkod = kod = itos(gel(nv,2));
   v4 = val_aux(ell_get_c4(e), p);
   v6 = val_aux(ell_get_c6(e), p);
@@ -3319,15 +3340,31 @@ ellrootno_3(GEN e)
   }
 }
 
-/* assume p > 3, p^ex || N(E) */
+/* assume p > 3, don't assume that e is minimal at p */
 static long
-ellrootno_p(GEN e, GEN p, ulong ex)
+ellrootno_p(GEN e, GEN p)
 {
-  long ep,z;
-  if (!ex) return 1;
-  if (ex == 1) return -kronecker(negi(ell_get_c6(e)),p);
-  if (j_pval(e, p)) return krosi(-1,p);
-  ep = 12 / ugcd(12, Z_pval(ell_get_disc(e),p));
+  long nuj, nuD, nu;
+  GEN D = ell_get_disc(e);
+  long ep, z, k;
+
+  nuj = j_pval(e, p);
+  nuD = Z_pval(D, p);
+  nu = nuD - nuj;
+  k = nu / 12; /* minimal at p iff k <= 0 */
+  nu %= 12;
+  if (nu == 0)
+  {
+    if (nuj)
+    { /* p || N */
+      GEN c6 = ell_get_c6(e);
+      if (k > 0) c6 = diviiexact(c6, powiu(p,6*k)); /* c6 in minimal model */
+      return -kronecker(negi(c6),p);
+    }
+    return 1; /* good reduction */
+  }
+  if (nuj) return krosi(-1,p);
+  ep = 12 / ugcd(12, nu);
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);
 }
@@ -3335,7 +3372,7 @@ ellrootno_p(GEN e, GEN p, ulong ex)
 static GEN
 allellrootno(GEN e, GEN fa, long *ps)
 {
-  GEN P = gel(fa,1), E = gel(fa,2), V;
+  GEN P = gel(fa,1), V;
   long i, l = lg(P), s = -1;
 
   V = cgetg(l, t_VECSMALL);
@@ -3347,7 +3384,7 @@ allellrootno(GEN e, GEN fa, long *ps)
     {
       case 2: t = ellrootno_2(e); break;
       case 3: t = ellrootno_3(e); break;
-      default:t = ellrootno_p(e, p, itou(gel(E,i)));
+      default:t = ellrootno_p(e, p);
     }
     V[i] = t; s *= t;
   }
@@ -3386,7 +3423,7 @@ ellrootno(GEN e, GEN p)
   {
     case 2: s = ellrootno_2(e); break;
     case 3: s = ellrootno_3(e); break;
-    default: s = ellrootno_p(e,p, localred_p_get_f(e,p)); break;
+    default: s = ellrootno_p(e,p); break;
   }
   avma = av; return s;
 }
@@ -4737,7 +4774,7 @@ elltatepairing(GEN E, GEN P, GEN Q, GEN m)
 }
 
 static GEN ellcard_ram(GEN E, GEN p);
-static GEN /*assume p | disc(e), e not necessarily minimal */
+static GEN /* E/Q; assume p | disc(e), e not necessarily minimal */
 ellcard_bad_red(GEN e, GEN p)
 {
   pari_sp av = avma;
@@ -4759,7 +4796,7 @@ ellcard_bad_red(GEN e, GEN p)
   if (mod4(p) == 3) s = -s;
   avma = av; return addis(p,1-s);
 }
-/* Cardinal including the ramified point */
+/* E/Q, return cardinal including the (possible) ramified point */
 static GEN
 ellcard_ram(GEN E, GEN p)
 {

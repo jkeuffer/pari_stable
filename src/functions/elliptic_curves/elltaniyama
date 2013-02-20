@@ -2,8 +2,7 @@ Function: elltaniyama
 Section: elliptic_curves
 C-Name: elltaniyama
 Prototype: GDP
-Help: elltaniyama(E, {d = seriesprecision}): modular parametrization of elliptic curve E (minimal
- model).
+Help: elltaniyama(E, {d = seriesprecision}): modular parametrization of elliptic curve E.
 Doc:
  computes the modular parametrization of the
  elliptic curve $E$, where $E$ is an \var{ell} structure as output by
@@ -17,5 +16,4 @@ Doc:
  conductor of the curve. The variable used in the power series for $u$ and $v$
  is $x$, which is implicitly understood to be equal to $\exp(2i\pi z)$. It is
  assumed that the curve is a \emph{strong} \idx{Weil curve}, and that the
- Manin constant is equal to 1. The equation of the curve $E$ must be minimal
- (use \kbd{ellminimalmodel} to get a minimal equation).
+ Manin constant is equal to 1.
