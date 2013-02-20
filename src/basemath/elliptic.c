@@ -2955,28 +2955,115 @@ c4c6_primes(GEN E)
   return gel(Z_factor(gcdii(c4,c6)),1);
 }
 
+/* FIXME: export ? */
+static ulong
+Mod32(GEN x) {
+  long s = signe(x);
+  ulong m;
+  if (!s) return 0;
+  m = mod32(x); if (!m) return m;
+  if (s < 0) m = 32 - m;
+  return m;
+}
+#define Mod16(x) Mod32(x)&15
+#define Mod2(x) Mod32(x)&1
 
-/* E/Q */
+/* E/Q, Laska-Kraus-Connell algorithm */
 GEN
 ellminimalmodel(GEN E, GEN *ptv)
 {
   pari_sp av = avma;
-  GEN v, v0, P;
+  long a2, b2;
+  ulong a1, a3, a11, a13, b22;
+  GEN y, v, v0, P, c4, c6, g, u, u2, u4;
+  GEN a4, a6, b4, b6, b8, u6, D;
   long l, k;
 
   E = ellintegralmodel(E, &v0);
-  v = init_ch();
   P = c4c6_primes(E); l = lg(P);
+  c4 = ell_get_c4(E);
+  c6 = ell_get_c6(E);
+  D = ell_get_disc(E);
+  g = gcdii(sqri(c6), D);
+  u = gen_1;
   for (k = 1; k < l; k++)
   {
-    GEN w = localred(E, gel(P,k), 1);
-    E_compose(&v, &E, w);
+    GEN p = gel(P, k);
+    long d = Z_pval(g, p) / 12;
+    if (!d) continue;
+    switch(itou_or_0(p))
+    {
+      case 2:
+      {
+        long a, b;
+        a = Mod16( shifti(c4, -4*d) );
+        b = Mod32( shifti(c6, -6*d) );
+        if ((b & 3) != 3 && (a || (b && b!=8))) d--;
+        break;
+      }
+      case 3:
+        if (Z_lval(c6,3) == 6*d+2) d--;
+        break;
+    }
+    if (d) u = mulii(u, powiu(p, d));
   }
-  standard_model(&v, &E);
-  if (v0) { gcomposev(&v0, v); v = v0; }
-  if (ptv) { gerepileall(av, 2, &E, &v); *ptv = v; }
-  else E = gerepilecopy(av, E);
-  return E;
+  u2 = sqri(u); u4 = sqri(u2); u6 = mulii(u2,u4);
+  c4 = diviiexact(c4, u4);
+  c6 = diviiexact(c6, u6);
+  D = diviiexact(D, sqri(u6));
+
+  /* centermod(-c6, 12), in [-5,6] */
+  b2 = Fl_center(12 - umodiu(c6,12), 12, 6);
+  b22 = b2*b2; /* in [0,36] */
+  b4 = diviuexact(subui(b22, c4), 24);
+  b6 = diviuexact(subii(mulsi(b2, subiu(mului(36,b4),b22)), c6), 216);
+  if (odd(b2))
+  {
+    a1 = 1;
+    a2 = (b2 - 1) >> 2; /* in {-1,0,1} */
+  }
+  else
+  {
+    a1 = 0;
+    a2 = b2 >> 2; /* in {-1,0,1} */
+  }
+  a3 = Mod2(b6)? 1: 0;
+  a13= (a1 && a3)? 1: 0;
+  a4 = shifti(subiu(b4, a13), -1);
+  a6 = shifti(subiu(b6, a3), -2);
+
+  y = obj_init(15, 7);
+  gel(y,1) = a1? gen_1: gen_0;
+  gel(y,2) = stoi(a2);
+  gel(y,3) = a3? gen_1: gen_0;
+  gel(y,4) = a4;
+  gel(y,5) = a6;
+  gel(y,6) = stoi(b2);
+  gel(y,7) = b4;
+  gel(y,8) = b6;
+  a11= a1;
+  b8 = subii(addii(mului(a11,a6), mulis(b6, a2)), mulii(a4, addiu(a4,a13)));
+  gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 - a4(a4 + a1 a3) */
+  gel(y,10)= c4;
+  gel(y,11)= c6;
+  gel(y,12)= D;
+  gel(y,13)= gel(E,13);
+  gel(y,14)= gel(E,14);
+  gel(y,15)= gel(E,15);
+
+  if (ptv) {
+    GEN r, s, t, u3;
+    r = diviuexact(subii(muliu(u2,b2), ell_get_b2(E)), 12);
+    s = shifti(subii(muliu(u,a1), ell_get_a1(E)), -1);
+    u3 = mulii(u2,u);
+    t = shifti(subii(muliu(u3,a3), ellLHS0(E,r)), -1);
+    v = mkvec4(u,r,s,t);
+    if (v0) { gcomposev(&v0, v); v = v0; }
+    gerepileall(av, 2, &y, &v); *ptv = v;
+  }
+  else
+    y = gerepilecopy(av, y);
+  return y;
 }
 
 /* Reduction of a rational curve E to its standard minimal model
