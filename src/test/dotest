@@ -34,7 +34,7 @@ dotestSUF=${dotestSUF:-"sta dyn"}
 for arg in $dotestSUF; do
   if test $x $execdir/gp-$arg; then
     SUF="$SUF $arg"
-    datadir=`echo 'print(default(datadir))' | $execdir/gp-$arg -q -f`
+    datadir=`echo 'print(default(datadir))' | $RUNTEST $execdir/gp-$arg -q -f`
   fi
 done
 file_test=gp.out
