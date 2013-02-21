@@ -481,20 +481,18 @@ carberkowitz(GEN x, long v)
 {
   long lx, i, j, k, r;
   GEN V, S, C, Q;
-  pari_sp av0;
+  pari_sp av0, lim;
   if ((V = easychar(x,v,NULL))) return V;
 
-  lx = lg(x); av0 = avma;
+  lx = lg(x); av0 = avma; lim = stack_lim(av0,1);
   V = cgetg(lx+1, t_VEC);
   S = cgetg(lx+1, t_VEC);
   C = cgetg(lx+1, t_VEC);
   Q = cgetg(lx+1, t_VEC);
-  gel(V,1) = gen_m1;
-  gel(V,2) = gcoeff(x,1,1);
-  for (i=2;i<=lx; i++) gel(S,i) = gen_0;
-  for (i=2;i<=lx; i++) gel(C,i) = gen_0;
-  for (i=2;i<=lx; i++) gel(Q,i) = gen_0;
   gel(C,1) = gen_m1;
+  gel(V,1) = gen_m1;
+  for (i=2;i<=lx; i++) gel(C,i) = gel(Q,i) = gel(S,i) = gel(V,i) = gen_0;
+  gel(V,2) = gcoeff(x,1,1);
   for (r = 2; r < lx; r++)
   {
     pari_sp av;
@@ -527,6 +525,11 @@ carberkowitz(GEN x, long v)
       gel(Q,i) = gerepileupto(av, t);
     }
     for (i = 1; i <= r+1; i++) gel(V,i) = gel(Q,i);
+    if (low_stack(lim, stack_lim(av0,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"carberkowitz");
+      gerepileall(4, av0, &C, &Q, &S, &V);
+    }
   }
   V = RgV_to_RgX(vecreverse(V), v); /* not gtopoly: fail if v > gvar(V) */
   V = odd(lx)? gcopy(V): RgX_neg(V);
