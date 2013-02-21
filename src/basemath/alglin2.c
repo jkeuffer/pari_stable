@@ -327,7 +327,6 @@ hess(GEN x)
 GEN
 Flm_hess(GEN x, ulong p)
 {
-  pari_sp av = avma;
   long lx = lg(x), m, i, j;
 
   if (typ(x) != t_MAT) pari_err_TYPE("hess",x);
@@ -355,7 +354,7 @@ Flm_hess(GEN x, ulong p)
         ucoeff(x,j,m) = Fl_add(ucoeff(x,j,m), Fl_mul(c,ucoeff(x,j,i), p), p);
     }
   }
-  return gerepilecopy(av,x);
+  return x;
 }
 
 GEN
