@@ -26,17 +26,12 @@ Doc:
  The speed should be comparable for other $n$:
  \bprog
  ? for(i=1,10^6, ellak(E,5))
- time = 877 ms.
+ time = 820 ms.
  ? for(i=1,10^6, ellak(e,5)) \\ 5 is bad, markedly slower
- time = 2,632 ms.
+ time = 1,249 ms.
 
  ? for(i=1,10^5,ellak(E,5*i))
- time = 1,080 ms.
+ time = 977 ms.
  ? for(i=1,10^5,ellak(e,5*i)) \\ still slower but not so much on average
- time = 1,208 ms.
-
- ? for(i=1,10^5,ellak(E,i))
- time = 1,048 ms.
- ? for(i=1,10^5,ellak(e,i)) \\ almost the same on average
- time = 1,084 ms.
+ time = 1,008 ms.
  @eprog
