@@ -2968,6 +2968,7 @@ static void
 get_b(GEN c4, GEN c6, long *pb2, GEN *pb4, GEN *pb6)
 {
   long b2, b22;
+  /* centermod(-c6, 12), in [-5,6] */
   *pb2 = b2 = Fl_center(12 - umodiu(c6,12), 12, 6);
   b22 = b2*b2; /* in [0,36] */
   *pb4 = diviuexact(subui(b22, c4), 24);
@@ -3226,7 +3227,6 @@ ellminimalmodel(GEN E, GEN *ptv)
   c6 = diviiexact(c6, u6);
   D = diviiexact(D, sqri(u6));
 
-  /* centermod(-c6, 12), in [-5,6] */
   get_b(c4,c6, &b2, &b4, &b6);
   get_a(b2,b4,b6,&a1,&a2,&a3,&a4,&a6);
 
