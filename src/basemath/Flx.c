@@ -2484,6 +2484,7 @@ smoothness_vec(ulong p, long r, long n)
     {
       long l = j/k;
       GEN s = gen_0;
+      pari_sp av2 = avma;
       if (l*k == j)
       {
         s = binomial(addis(Ik,l-1), l);
@@ -2491,7 +2492,7 @@ smoothness_vec(ulong p, long r, long n)
       }
       for (i = 0; i <= l; ++i)
         s = addii(s, mulii(gel(V, j-k*i), binomial(addis(Ik,i-1), i)));
-      gel(W, j) = s;
+      gel(W, j) = gerepileuptoint(av2, s);
     }
     V = W;
     gel(R, k) = gel(V, n);
