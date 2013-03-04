@@ -997,6 +997,7 @@ compilemy(GEN arg, const char *str)
   long i, j, k, l = lg(arg);
   long n = countvar(arg);
   GEN vep = cgetg(n+1,t_VECSMALL);
+  GEN ver = cgetg(n+1,t_VECSMALL);
   for(k=0, i=1; i<l; i++)
   {
     long a=arg[i];
@@ -1008,11 +1009,16 @@ compilemy(GEN arg, const char *str)
          GEN vars = listtogen(tree[x].x,Fmatrixelts);
          long nv = lg(vars)-1;
          for (j=1; j<=nv; j++)
-           vep[++k] = (long)getvar(vars[j]);
-       } else vep[++k] = (long)getvar(x);
-    } else vep[++k] = (long)getvar(a);
+         {
+           ver[++k] = vars[j];
+           vep[k] = (long)getvar(ver[k]);
+         }
+         continue;
+       } else ver[++k] = x;
+    } else ver[++k] = a;
+    vep[k] = (long)getvar(ver[k]);
   }
-  checkdups(arg,vep);
+  checkdups(ver,vep);
   for(i=1; i<=n; i++) var_push(NULL,Lmy);
   op_push_loc(OCnewframe,n,str);
   frame_push(vep);
@@ -1066,6 +1072,7 @@ compilelocal(GEN arg)
   long i, j, k, l = lg(arg);
   long n = countvar(arg);
   GEN vep = cgetg(n+1,t_VECSMALL);
+  GEN ver = cgetg(n+1,t_VECSMALL);
   for(k=0, i=1; i<l; i++)
   {
     long a=arg[i];
@@ -1084,18 +1091,23 @@ compilelocal(GEN arg)
           op_push(OCpushlong,j,v);
           op_push(OCcompo1,Ggen,v);
           vep[++k] = localpush(OClocalvar, v);
+          ver[k] = v;
         }
+        continue;
       } else if (!is_node_zero(tree[a].y))
       {
         compilenode(tree[a].y,Ggen,FLnocopy);
-        vep[++k] = localpush(OClocalvar, x);
+        ver[++k] = x;
+        vep[k] = localpush(OClocalvar, ver[k]);
+        continue;
       }
       else
-        vep[++k] = localpush(OClocalvar0, x);
+        ver[++k] = x;
     } else
-      vep[++k] = localpush(OClocalvar0, a);
+      ver[++k] = a;
+    vep[k] = localpush(OClocalvar0, ver[k]);
   }
-  checkdups(arg,vep);
+  checkdups(ver,vep);
 }
 
 static void
