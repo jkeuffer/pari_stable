@@ -762,7 +762,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_var_init();
   (void)getabstime();
   try_to_recover = 1;
-  pari_mt_init();
+  if (!(init_opts&INIT_noIMTm)) pari_mt_init();
 }
 
 void

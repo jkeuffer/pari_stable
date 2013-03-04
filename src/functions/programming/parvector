@@ -7,9 +7,9 @@ Help: parvector(N,i,expr): as vector(N,i,expr) but the evaluation of expr are
 Doc: As \kbd{vector(N,i,expr)} but the evaluation of \kbd{expr} are done in
  parallel. The expression \kbd{expr} must not access global variables and local
  variables declared with \kbd{local()}, and must be free of side effect.
- @bcode
+ \bprog
  parvector(10,i,quadclassunit(2^(100+i)+1).no)
- \ecode
+ @eprog
  compute the class numbers in parallel.
 Function: _parvector_worker
 Section: programming/internals

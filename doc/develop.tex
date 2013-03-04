@@ -724,7 +724,9 @@ it is actually valid. This is used by GP2C -C.
 
 \chapter{Parallelism}
 
-PARI provide an abstraction for doing parallel computations.
+\section{The PARI MT interface}
+
+PARI provides an abstraction for doing parallel computations.
 
 \fun{void}{mt_queue_start}{struct pari\_mt *pt, GEN worker} Let worker be a
 \typ{CLOSURE} object of arity $1$.  Initialize the structure \kbd{pt} for
@@ -759,6 +761,27 @@ The parameter \kbd{workid} can be chosen arbitrarily. It is associated to a
 work but is not available to \kbd{worker}.  It provides an efficient way to
 identify a result with its work. It is meaningless when the parameter
 \kbd{work} is \kbd{NULL}.
+
+\section{Initialization}
+
+This section is technical.
+
+\fun{void}{pari_mt_init}{void} \label{pari_mt_init}
+In some situation, when using MPI, it is necessary to
+run initialization code on the child nodes after PARI is initialized.
+This can be done as follow:
+
+\item call \tet{pari_init_opts} with the flag \kbd{INIT\_noIMTm}.
+This initializes PARI, but not the MT engine.
+
+\item call the required initialization code.
+
+\item call \kbd{pari\_mt\_init} to initialize the MT engine.
+Note that under MPI, this function only returns on the master node. On the
+child nodes, it enters slave mode. Thus it is no more possible to run
+initialization code on the child nodes.
+
+See the file \kbd{examples/pari-mt.c} for an example.
 
 \vfill\eject
 \input index\end

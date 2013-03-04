@@ -80,6 +80,11 @@ restored.
   \kbd{maxprime} argument). The user \emph{must} call
   \tet{initprimetable} later.
 
+  \kbd{INIT\_noIMTm}: (technical, see \kbd{pari\_mt\_init} in the Developer's
+Guide for detail). Do not call \tet{pari_mt_init} to initialize the
+multi-thread engine. If this flag is set, \kbd{pari\_mt\_init()} will need to
+be called manually. See \kbd{examples/pari-mt.c} for an example.
+
 \fun{void}{pari_close_opts}{ulong init_opts} as \kbd{pari\_close},
 for a library initialized with a mask of options using
 \kbd{pari\_init\_opts}. \kbd{opts} is a mask of flags among

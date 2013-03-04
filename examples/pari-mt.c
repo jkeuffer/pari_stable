@@ -16,16 +16,18 @@ main(void)
   GEN done, worker;
   long workid, pending;
   entree ep_worker={"_worker",0,(void*)my_worker,14,"GL",""};
-  /* Initialise the main PARI stack and global objects (gen_0, etc.) */
-  pari_init(8000000,500000);
+  /* Initialize the main PARI stack and global objects (gen_0, etc.)
+     Postpone initialization of parallelism */
+  pari_init_opts(8000000,500000,INIT_JMPm | INIT_SIGm | INIT_DFTm | INIT_noIMTm);
   /* Add my_worker function to gp */
   pari_add_function(&ep_worker);
-
+  /* Initialize parallelism, now that my_worker is registered */
+  pari_mt_init();
   /* Compute in the main PARI stack */
   N1 = addis(int2n(256), 1); /* 2^256 + 1 */
   N2 = subis(int2n(193), 1); /* 2^193 - 1 */
   M = mathilbert(80);
-  /* Create input and output data*/
+  /* Create input and output vectors */
   input  = mkvec3(N1,N2,M);
   output = cgetg(4,t_VEC);
   /* Initialize parallel evaluation of my_worker */
