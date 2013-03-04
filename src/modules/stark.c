@@ -253,7 +253,7 @@ get_prdiff(GEN bnr, GEN condc)
   long nd, i, l  = lg(D);
   prdiff = cgetg(l, t_COL);
   for (nd=1, i=1; i < l; i++)
-    if (!idealval(nf, M, gel(D,i))) prdiff[nd++] = D[i];
+    if (!idealval(nf, M, gel(D,i))) gel(prdiff,nd++) = gel(D,i);
   setlg(prdiff, nd); return prdiff;
 }
 
@@ -872,7 +872,7 @@ static GEN
 ComputeAChi(GEN dtcr, long *r, long flag, long prec)
 {
   long l, i;
-  GEN p1, A, diff, chi, bnrc;
+  GEN A, diff, chi, bnrc;
 
   bnrc = ch_bnr(dtcr);
   diff = ch_diff(dtcr); l = lg(diff);
@@ -883,20 +883,38 @@ ComputeAChi(GEN dtcr, long *r, long flag, long prec)
   for (i = 1; i < l; i++)
   {
     GEN pr = gel(diff,i), B;
-    p1  = ComputeImagebyChar(chi, isprincipalray(bnrc, pr));
+    GEN z = ComputeImagebyChar(chi, isprincipalray(bnrc, pr));
 
     if (flag)
-      B = gsubsg(1, gdiv(p1, pr_norm(pr)));
-    else if (gequal1(p1))
+      B = gsubsg(1, gdiv(z, pr_norm(pr)));
+    else if (gequal1(z))
     {
       B = glog(pr_norm(pr), prec);
       (*r)++;
     }
     else
-      B = gsubsg(1, p1);
+      B = gsubsg(1, z);
     A = gmul(A, B);
   }
   return A;
+}
+/* simplified version of ComputeAchi: return 1 if L(0,chi) = 0 */
+static int
+L_vanishes_at_0(GEN dtcr)
+{
+  long l, i;
+  GEN diff, chi, bnrc;
+
+  bnrc = ch_bnr(dtcr);
+  diff = ch_diff(dtcr); l = lg(diff);
+  chi  = ch_CHI0(dtcr);
+  for (i = 1; i < l; i++)
+  {
+    GEN pr = gel(diff,i);
+    GEN z = ComputeImagebyChar(chi, isprincipalray(bnrc, pr));
+    if (gequal1(z)) return 1;
+  }
+  return 0;
 }
 
 static GEN
@@ -2052,17 +2070,16 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 
     for (k = 1; k <= nChar; k++)
     {
-      const long t = LChar[k], d = degs[t];
-      const GEN dtcr = gel(dataCR, t), z = gel(ch_CHI(dtcr), 2);
-      GEN p1 = gen_0, p2 = gen_0;
-      int **matan;
-      long c = 0;
-
+      const long t = LChar[k];
       if (DEBUGLEVEL>1)
         err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
-      if (ch_comp(gel(dataCR, t)))
+      if (!isintzero( ch_comp(gel(dataCR, t)) ))
       {
-        matan = computean(gel(dataCR,t), &LIST, NN, d);
+        const GEN dtcr = gel(dataCR, t), z = gel(ch_CHI(dtcr), 2);
+        const long d = degs[t];
+        GEN p1 = gen_0, p2 = gen_0;
+        int **matan = computean(gel(dataCR,t), &LIST, NN, d);
+        long c = 0;
         for (n = 1; n <= NN; n++)
           if ((an = EvalCoeff(z, matan[n], d)))
           {
@@ -2248,18 +2265,17 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     av2 = avma;
     for (k = 1; k <= nChar; k++)
     {
-      const long t = LChar[k], d = degs[t];
-      const GEN dtcr = gel(dataCR, t), z = gel(ch_CHI(dtcr), 2);
-      GEN p1 = gen_0, p2 = gen_0;
-      long c = 0;
-      int **matan;
-
+      const long t = LChar[k];
       if (DEBUGLEVEL>1)
         err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
 
-      if (ch_comp(gel(dataCR, t)))
+      if (!isintzero( ch_comp(gel(dataCR, t)) ))
       {
-        matan = ComputeCoeff(gel(dataCR,t), &LIST, NN, d);
+        const long d = degs[t];
+        const GEN dtcr = gel(dataCR, t), z = gel(ch_CHI(dtcr), 2);
+        GEN p1 = gen_0, p2 = gen_0;
+        long c = 0;
+        int **matan = ComputeCoeff(gel(dataCR,t), &LIST, NN, d);
         for (n = 1; n <= NN; n++)
           if ((an = EvalCoeff(z, matan[n], d)))
           {
@@ -2272,11 +2288,8 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
         gaffect(gconj(p2), gel(T,t));
         FreeMat(matan, NN); avma = av2;
       }
-      else
-      {
-        if (DEBUGLEVEL>1)
-          err_printf("\t  no need to compute this character\n");
-      }
+      else if (DEBUGLEVEL>1)
+        err_printf("\t  no need to compute this character\n");
     }
     if (DEBUGLEVEL>1) err_printf("\n");
     avma = av1;
@@ -2360,7 +2373,7 @@ static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
   const long BND = 300;
-  long cl, i, j, cpt = 0, N, h, v, n, r, r1, r2, den;
+  long cl, i, j, cpt = 0, N, h, v, n, r1, r2, den;
   pari_sp av, av2;
   int **matan;
   GEN bnr = gel(data,1), p1, p2, S, T, polrelnum, polrel, Lp, W, veczeta;
@@ -2388,8 +2401,8 @@ LABDOUB:
   /* characters with rank > 1 should not be computed */
   for (i = 1; i <= cl; i++)
   {
-    ComputeAChi(gel(dataCR, i), &r, 0, DEFAULTPREC);
-    if (r) ch_comp(gel(dataCR, i)) = NULL;
+    GEN chi = gel(dataCR, i);
+    if (L_vanishes_at_0(chi)) ch_comp(chi) = gen_0;
   }
 
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
@@ -2401,11 +2414,10 @@ LABDOUB:
     if (DEBUGLEVEL) timer_printf(&ti, "S&T");
     for (i = 1; i <= cl; i++)
     {
-      if (ch_comp(gel(dataCR, i)))
-        gel(Lp, i) = gel(GetValue(gel(dataCR,i), gel(W,i), gel(S,i), gel(T,i),
-                                  2, newprec), 2);
-      else
-        gel(Lp, i) = gen_0;
+      GEN chi = gel(dataCR, i), v = gen_0;
+      if (!isintzero( ch_comp(chi) ))
+        v = gel(GetValue(chi, gel(W,i), gel(S,i), gel(T,i), 2, newprec), 2);
+      gel(Lp, i) = v;
     }
   }
   else
