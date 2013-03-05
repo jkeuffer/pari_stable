@@ -62,7 +62,7 @@ esac
 
 PLOTCFLAGS=
 PLOTLIBS=
-postconfig="@: "
+postconfig=:
 case "$which_graphic_lib" in
 none)
   graph=plotnull;;
