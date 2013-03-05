@@ -588,7 +588,6 @@ int     uisprime_661(ulong n);
 
 /* init.c */
 
-void    err_recover(long numerr);
 void    pari_init_defaults(void);
 void    pari_init_stack(size_t size, size_t old);
 

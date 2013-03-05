@@ -863,7 +863,7 @@ gp_context_restore(struct gp_context* rec)
   try_to_recover = 1;
 }
 
-void
+static void
 err_recover(long numerr)
 {
   evalstate_reset();

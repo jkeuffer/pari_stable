@@ -1818,11 +1818,9 @@ gp_handle_exception(long numerr)
 {
   if (disable_exception_handler) disable_exception_handler = 0;
   else if ((GP_DATA->breakloop) && break_loop(numerr)) return 1;
-  if (s_env.n>=1) {
-    err_printf("\n"); err_flush();
-    gp_err_recover(numerr>=0? numerr: e_MISC);
-  }
-  return 0;
+  err_printf("\n"); err_flush();
+  gp_err_recover(numerr>=0? numerr: e_MISC);
+  return 0; /*NOT REACHED*/
 }
 
 #ifdef SIGALRM
