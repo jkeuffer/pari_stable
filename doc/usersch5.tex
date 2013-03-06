@@ -294,6 +294,12 @@ the components as they become available: this time the downside is that we do
 not obtain a correct \kbd{GEN} until the vector is complete. Almost no PARI
 function will be able to operate on it.
 
+\fun{void}{vectrunc_append_batch}{GEN x, GEN y} successively apply 
+\bprog
+  vectrunc_append(x, gel(y, i))
+@eprog
+for all elements of the vector $y$.
+
 \fun{GEN}{vecsmalltrunc_init}{long l}
 
 \fun{void}{vecsmalltrunc_append}{GEN x, long t} analog to the above for a

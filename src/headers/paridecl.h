@@ -3769,6 +3769,7 @@ INLINE GEN    vecsmall_to_vec(GEN z);
 INLINE void   vecsmalltrunc_append(GEN x, long t);
 INLINE GEN    vecsmalltrunc_init(long l);
 INLINE void   vectrunc_append(GEN x, GEN t);
+INLINE void   vectrunc_append_batch(GEN x, GEN y);
 INLINE GEN    vectrunc_init(long l);
 INLINE GEN    zc_to_ZC(GEN x);
 INLINE GEN    zero_F2m(long n, long m);

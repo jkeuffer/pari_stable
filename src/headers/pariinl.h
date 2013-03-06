@@ -410,6 +410,14 @@ vectrunc_init(long l)
 INLINE void
 vectrunc_append(GEN x, GEN t)
 { long l = lg(x); gel(x,l) = t; setlg(x, l+1); }
+INLINE void
+vectrunc_append_batch(GEN x, GEN y)
+{
+  long i, l = lg(x), ly = lg(y);
+  GEN z = x + l-1;
+  for (i = 1; i < ly; i++) gel(z,i) = gel(y,i);
+  setlg(x, l+ly-1);
+}
 INLINE GEN
 vecsmalltrunc_init(long l)
 {
