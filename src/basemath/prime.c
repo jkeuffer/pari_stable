@@ -753,9 +753,9 @@ BPSW_isprime(GEN N)
   }
   /* N-1 = F U, F factored, U possibly composite */
   if (U == gen_1) /* smooth */
-    res = isprimeSelfridge(N, P, 1);
-  else if (cmpii(F, U) >= 0) /* 1/2-smooth */
     res = isprimeSelfridge(N, P, 0);
+  else if (cmpii(F, U) >= 0) /* 1/2-smooth */
+    res = isprimeSelfridge(N, P, 1);
   else if (cmpii(sqri(F), U) >= 0) /* 1/3-smooth */
   {
     res = BLS_test(N, F);

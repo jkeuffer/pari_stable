@@ -126,6 +126,9 @@ BA 101- znorder(Mod(5,16),200) -> 5 instead of 4
 JD 106- galoisinit(x^3+x^2-2*x-1) -> uninitialized read [#1389]
 BA 107- polhermite(66) -> corrupted result [#1393]
    108- nfhnf() would only accept matrices of maximal rank
+   109- isprime(p, 0) would return 0 for primes p such that p-1 was
+        sufficiently but not completely factored [ incorrect call to Selfridge
+        test asking to certify the unfactored par as well ]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
