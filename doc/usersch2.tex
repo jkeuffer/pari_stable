@@ -883,9 +883,8 @@ error is printed immediately, the computation is aborted, and GP enters the
 
 @eprog\noindent Here the computation is aborted as soon as we try to evaluate
 $1/0$, and $1 + 1$ is never executed. Exceptions can be trapped
-using \tet{iferr} or \tet{iferrname}, however: we can evaluate some
-expression and either recover an ordinary result (no error occurred), or an
-exception (an error did occur).
+using \tet{iferr}, however: we can evaluate some expression and either recover
+an ordinary result (no error occurred), or an exception (an error did occur).
 \bprog
   ? i = Mod(6,12); iferr(1/i, E, print(E)); 1 + 1
   error("impossible inverse modulo: Mod(6, 12).")
@@ -2253,8 +2252,8 @@ the computation at a slightly higher precision.
 
 We now describe \tev{error trapping}, a useful mechanism which alleviates
 much of the pain in the first situation (the break loop debugger), and
-provides satisfactory ways out of the second one (the \tet{iferr} and
-\tet{iferrname} exception handlers).
+provides satisfactory ways out of the second one (the \tet{iferr} exception
+handler).
 
 \subsec{Break loop}\label{se:break_loop}
 
@@ -2383,9 +2382,10 @@ stack would immediately overflow again! Still, as explained above, you do not
 lose the value of any \kbd{gp} variable in the process.
 
 \subsec{Protecting code}
- The \tet{iferr} and \tet{iferrname} functions allow to define a temporary
-handler used within the scope of a code fragment, protecting it from errors,
-by providing replacement code should the trap be activated. The expression
+%TODO: remove reference to handler/trap, and use catch/throw/exception
+ The \tet{iferr} function allow to define a temporary handler used within the
+scope of a code fragment, protecting it from errors, by providing replacement
+code should the trap be activated. The expression
 
   \kbd{iferr(\var{statements}, ERR, \var{recovery})}
 
@@ -2434,14 +2434,13 @@ mistakenly trapped. Since the recovery code should always check whether the
 error is the one expected, this construction is very common and can be
 simplified as:
 \bprog
-? inv3(x) = iferrname("e_INV", 1/x, ERR, "oo")
+? inv3(x) = iferr("e_INV", 1/x, ERR, "oo", errname(ERR) == "e_INV")
 @eprog\noindent Rather than trapping everything, then rethrowing whatever we
 do not like, we advise to only trap errors of a specific kind, as above. Of
 course, sometimes, one just want to trap \emph{everything}:
 
- Here is a
-final example, to check in a safe way whether \tet{install} works correctly
-in your \kbd{gp}:
+Here is a final example, to check in a safe way whether \tet{install} works
+correctly in your \kbd{gp}:
 \bprog
 broken_install() =
 { \\ can we install?

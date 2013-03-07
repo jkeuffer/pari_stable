@@ -17,18 +17,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "paripriv.h"
 #include "anal.h"
 
-static GEN
-iferrnum(long errnum, GEN a, GEN b)
+GEN
+iferrpari(GEN a, GEN b, GEN c)
 {
   GEN res;
   struct pari_evalstate state;
   evalstate_save(&state);
-  pari_CATCH(errnum)
+  pari_CATCH(CATCH_ALL)
   {
     GEN E;
+    if (!b&&!c) return gnil;
     evalstate_restore(&state);
-    if (!b) return gnil;
     E = gerepilecopy(avma, pari_err_last());
+    if (c)
+    {
+      push_lex(E,c);
+      res = closure_evalgen(c);
+      pop_lex(1);
+      if (gequal0(res))
+        pari_err(0, E);
+    }
+    if (!b) return gnil;
     push_lex(E,b);
     res = closure_evalgen(b);
     pop_lex(1);
@@ -37,18 +46,6 @@ iferrnum(long errnum, GEN a, GEN b)
     res = closure_evalgen(a);
   } pari_ENDCATCH;
   return res;
-}
-
-GEN
-iferrpari(GEN a, GEN b)
-{
-  return iferrnum(CATCH_ALL, a, b);
-}
-
-GEN
-iferrnamepari(const char *err, GEN a, GEN b)
-{
-  return iferrnum(name_numerr(err), a, b);
 }
 
 /********************************************************************/

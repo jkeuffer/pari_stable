@@ -580,4 +580,4 @@
   ***   at top-level: solve(x=0,1,x^2+1)
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
-Total time spent: 24
+Total time spent: 35
