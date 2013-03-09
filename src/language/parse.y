@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
          (Current).end    = (Rhs)[N].end)
 #include "parsec.h"
 #define NOARG(x) newnode(Fnoarg,-1,-1,&(x))
-
 %}
 %error-verbose
 %name-prefix="pari_"
@@ -81,8 +80,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 %type <val> matrixelts matrixlines arg listarg definition
 %type <val> funcid memberid
 %type <val> backticks history
-%type <val> compr in
-%destructor { pari_discarded++; } seq matrix range matrix_index expr lvalue matrixelts matrixlines arg listarg definition funcid memberid backticks history compr in
+%type <val> compr in inseq
+%destructor { pari_discarded++; } seq matrix range matrix_index expr lvalue matrixelts matrixlines arg listarg definition funcid memberid backticks history compr in inseq
 %%
 
 sequnused: seq       {$$=$1;}
@@ -198,8 +197,13 @@ matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
 in: lvalue '<' '-' expr {$$=newnode(Flistarg,$4,$1,&@$);}
 ;
 
-compr: '[' expr '|' in ']' {$$=newopcall(OPcompr,$4,$2,&@$);}
-     | '[' expr '|' in ',' expr ']' {$$=newopcall3(OPcompr, $4,$2,$6,&@$);}
+inseq: in                    {$$=newopcall(OPcompr,$1,-2,&@$);}
+     | in ',' expr           {$$=newopcall3(OPcompr,$1,-2,$3,&@$);}
+     | in ';' inseq          {$$=newopcall(OPcomprc,$1,$3,&@$);}
+     | in ',' expr ';' inseq {$$=newopcall3(OPcomprc,$1,$5,$3,&@$);}
+;
+
+compr: '[' expr '|' inseq ']' {$$=addcurrexpr($4,$2,&@$);}
 ;
 
 arg: seq        {$$=$1;}

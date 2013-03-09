@@ -114,6 +114,7 @@ GEN  sumnumalt0(GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN  sumnuminit0(GEN a, GEN tab, long sgn, long prec);
 GEN  sumpos0(GEN a, GEN code, long flag,long prec);
 GEN  vecexpr0(GEN nmax, GEN code, GEN pred);
+GEN  vecexpr1(GEN nmax, GEN code, GEN pred);
 GEN  vecteursmall(GEN nmax, GEN code);
 GEN  vecteur(GEN nmax, GEN n);
 GEN  vvecteur(GEN nmax, GEN n);

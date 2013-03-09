@@ -1233,6 +1233,14 @@ vecexpr0(GEN vec, GEN code, GEN pred)
 }
 
 GEN
+vecexpr1(GEN vec, GEN code, GEN pred)
+{
+  pari_sp av = avma;
+  GEN z = shallowconcat1(vecexpr0(vec, code, pred));
+  return gerepilecopy(av, z);
+}
+
+GEN
 vecteur(GEN nmax, GEN code)
 {
   GEN y,p1;

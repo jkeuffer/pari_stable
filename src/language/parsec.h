@@ -40,7 +40,7 @@ void
 pari_init_parser(void)
 {
   long i;
-  const char *opname[]={"_||_", "_&&_", "_===_", "_==_", "_!=_", "_>=_", "_>_", "_<=_", "_<_", "_-_","_+_","_<<_", "_>>_", "_%_", "_\\/_", "_\\_", "_/_", "_*_","_^_","__","_--","_++","_-=_", "_+=_", "_<<=_", "_>>=_", "_%=_", "_\\/=_", "_\\=_", "_/=_", "_*=_","+_","-_","!_","_!","_'","_~","[_.._]","[_|_<-_,_]","%","#_",""};
+  const char *opname[]={"_||_", "_&&_", "_===_", "_==_", "_!=_", "_>=_", "_>_", "_<=_", "_<_", "_-_","_+_","_<<_", "_>>_", "_%_", "_\\/_", "_\\_", "_/_", "_*_","_^_","__","_--","_++","_-=_", "_+=_", "_<<=_", "_>>=_", "_%=_", "_\\/=_", "_\\=_", "_/=_", "_*=_","+_","-_","!_","_!","_'","_~","[_.._]","[_|_<-_,_]","[_|_<-_,_;_]","%","#_",""};
 
   pari_stack_init(&s_node,sizeof(*pari_tree),(void **)&pari_tree);
   pari_stack_alloc(&s_node,OPnboperator);
@@ -172,6 +172,31 @@ static long
 newopcall3(OPerator op, long x, long y, long z, struct node_loc *loc)
 {
   return newopcall(op,newnode(Flistarg,x,y,loc),z,loc);
+}
+
+static long
+countarg(long n)
+{
+  long i;
+  for(i=1; pari_tree[n].f==Flistarg; i++)
+    n = pari_tree[n].x;
+  return i;
+}
+
+static long
+addcurrexpr(long n, long currexpr, struct node_loc *loc)
+{
+  long y, m = n;
+  while (pari_tree[m].x==OPcomprc)
+  {
+    y = pari_tree[m].y; if (countarg(y)==4) y = pari_tree[y].x;
+    m = pari_tree[y].y;
+  }
+  y = pari_tree[m].y; if (countarg(y)==4) y = pari_tree[y].x;
+  pari_tree[y].y = currexpr;
+  pari_tree[n].str=loc->start;
+  pari_tree[n].len=loc->end-loc->start;
+  return n;
 }
 
 static long

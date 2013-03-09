@@ -553,6 +553,15 @@ vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
   for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
   settyp(y, t_VEC); return y;
 }
+
+GEN
+veccatapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
+{
+  pari_sp av = avma;
+  GEN z = shallowconcat1(vecapply(E, f, x));
+  return gerepilecopy(av, z);
+}
+
 GEN
 genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {
@@ -600,7 +609,8 @@ apply0(GEN f, GEN x)
 }
 
 GEN
-vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A)
+vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun,
+                         GEN (*fun)(void* E, GEN x), GEN A)
 {
   GEN y;
   long i, l = lg(A), nb=1;
@@ -610,6 +620,15 @@ vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(vo
       gel(y,nb++) = fun(Efun, gel(A,i));
   fixlg(y,nb);
   return y;
+}
+
+GEN
+veccatselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun,
+                            GEN (*fun)(void* E, GEN x), GEN A)
+{
+  pari_sp av = avma;
+  GEN z = shallowconcat1(vecselapply(Epred, pred, Efun, fun, A));
+  return gerepilecopy(av, z);
 }
 
 /*******************************************************************/

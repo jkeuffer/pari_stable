@@ -1,3 +1,13 @@
+Function: [_|_<-_,_;_]
+Section: programming/internals
+C-Name: vecexpr1
+Prototype: GVDEDE
+Help: [a(x)|x<-b,c(x);...]
+Wrapper: (,,G,bG)
+Description:
+ (gen,,closure):gen         veccatapply(${3 cookie}, ${3 wrapper}, $1)
+ (gen,,closure,closure):gen veccatselapply(${4 cookie}, ${4 wrapper}, ${3 cookie}, ${3 wrapper}, $1)
+
 Function: [_|_<-_,_]
 Section: programming/internals
 C-Name: vecexpr0

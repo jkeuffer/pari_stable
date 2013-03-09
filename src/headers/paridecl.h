@@ -980,9 +980,13 @@ GEN     select0(GEN A, GEN f, long flag);
 GEN     shallowextract(GEN x, GEN L);
 GEN     shallowtrans(GEN x);
 GEN     vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x);
+GEN     veccatapply(void *E, GEN (*f)(void* E, GEN x), GEN x);
+GEN     veccatselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun,
+                            GEN (*fun)(void* E, GEN x), GEN A);
 GEN     vecrange(GEN a, GEN b);
 GEN     vecrangess(long a, long b);
-GEN     vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun, GEN (*fun)(void* E, GEN x), GEN A);
+GEN     vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun,
+                            GEN (*fun)(void* E, GEN x), GEN A);
 GEN     vecselect(void *E, long (*f)(void* E, GEN x), GEN A);
 GEN     vecslice0(GEN A, long y1, long y2);
 
