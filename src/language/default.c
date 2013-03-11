@@ -551,6 +551,10 @@ sd_strictmatch(const char *v, long flag)
 { return sd_toggle(v,flag,"strictmatch", &(GP_DATA->strictmatch)); }
 
 GEN
+sd_strictargs(const char *v, long flag)
+{ return sd_toggle(v,flag,"strictargs", &(GP_DATA->strictargs)); }
+
+GEN
 sd_string(const char *v, long flag, const char *s, char **pstr)
 {
   char *old = *pstr;
@@ -782,6 +786,7 @@ default_gp_data(void)
   D->recover     = 1;
   D->chrono      = 0;
 
+  D->strictargs  = 0;
   D->strictmatch = 1;
   D->simplify    = 1;
   D->secure      = 0;

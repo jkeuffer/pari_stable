@@ -1721,6 +1721,7 @@ GEN sd_secure(const char *v, long flag);
 GEN sd_seriesprecision(const char *v, long flag);
 GEN sd_simplify(const char *v, long flag);
 GEN sd_sopath(char *v, int flag);
+GEN sd_strictargs(const char *v, long flag);
 GEN sd_strictmatch(const char *v, long flag);
 GEN sd_toggle(const char *v, long flag, const char *s, int *ptn);
 GEN sd_string(const char *v, long flag, const char *s, char **f);

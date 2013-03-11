@@ -652,6 +652,13 @@ get_next_label(const char *s, int member, char **next_fun)
   *u++ = 0; return next_label;
 }
 
+static const char *
+get_arg_name(GEN C, long i)
+{
+  GEN e = gmael(closure_get_dbg(C), 3, 1);
+  return ((entree*)e[i])->name;
+}
+
 void
 closure_err(long level)
 {
@@ -1260,6 +1267,12 @@ closure_eval(GEN C)
         }
       }
       break;
+    case OCcheckuserargs:
+      for (j=0; j<operand; j++)
+        if (var[s_var.n-operand+j].flag==DEFAULT_VAL)
+          pari_err(e_MISC,"missing mandatory argument"
+                   " '%s' in user function",get_arg_name(C,j+1));
+      break;
     case OCcheckargs:
       for (j=sp-1;operand;operand>>=1UL,j--)
         if ((operand&1L) && gel(st,j)==NULL)
@@ -1692,6 +1705,9 @@ closure_disassemble(GEN C)
     case OCcheckargs0:
       pari_printf("checkargs0\t0x%lx\n",operand);
       break;
+    case OCcheckuserargs:
+      pari_printf("checkuserargs\t%ld\n",operand);
+      break;
     case OCdefaultlong:
       pari_printf("defaultlong\t%ld\n",operand);
       break;
@@ -1825,6 +1841,7 @@ opcode_need_relink(op_code opcode)
   case OCcompoLptr:
   case OCcheckargs:
   case OCcheckargs0:
+  case OCcheckuserargs:
   case OCgetargs:
   case OCdefaultarg:
   case OCdefaultgen:

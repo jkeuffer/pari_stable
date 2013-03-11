@@ -353,7 +353,7 @@ typedef struct {
   pariout_t *fmt;
   ulong lim_lines, flags, linewrap;
   int echo, breakloop, recover, use_readline; /* GP-specific */
-  int secure, simplify, strictmatch, chrono; /* libpari ? */
+  int secure, simplify, strictmatch, strictargs, chrono; /* libpari ? */
   pari_timer *T;
   long last_time; /* duration of last interactive gp command */
 } gp_data;

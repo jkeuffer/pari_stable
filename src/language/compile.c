@@ -1916,6 +1916,7 @@ compilenode(long n, int mode, long flag)
       struct codepos pos;
       GEN arg=listtogen(x,Flistarg);
       long nb, lgarg, nbmvar, gap;
+      long strict = GP_DATA->strictargs;
       GEN vep = cgetg_copy(arg, &lgarg);
       GEN text=cgetg(3,t_VEC);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
@@ -1941,7 +1942,7 @@ compilenode(long n, int mode, long flag)
         {
           long a=arg[i];
           long y = tree[a].y;
-          if (tree[a].f==Fassign && !is_node_zero(y))
+          if (tree[a].f==Fassign && (strict || !is_node_zero(y)))
           {
             if (tree[y].f==Fsmall)
               compilenode(y,Ggen,a);
@@ -1957,6 +1958,8 @@ compilenode(long n, int mode, long flag)
           localvars[s_lvar.n-nb+i-1].ep=(entree*)vep[i];
         }
       }
+      if (strict)
+        op_push(OCcheckuserargs,nb,x);
       dbgstart=tree[y].str;
       if (y>=0 && tree[y].f!=Fnoarg)
         compilenode(y,Ggen,FLsurvive|FLreturn);
