@@ -85,6 +85,6 @@ sub getnames
 
 sub filter_c {
   return unless /\.[chy]\Z/ && -f;
-  return if (/(tune|kerntest|parse)\.c/);
+  return if (/(dummy|tune|kerntest|parse)\.c/);
   push @files, "$File::Find::name";
 }
