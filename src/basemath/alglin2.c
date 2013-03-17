@@ -462,7 +462,7 @@ ZM_charpoly(GEN M)
     {
       int stable = ZX_incremental_CRT(&H, Hp, &q,p);
       if (DEBUGLEVEL>5)
-        timer_printf(&T, "charpoly mod %lu (stable=%ld), bound = 2^%ld\n",
+        timer_printf(&T, "charpoly mod %lu (stable=%ld), bound = 2^%ld",
                      p, stable, expi(q));
       if (stable && expi(q) > bit) break;
     }
