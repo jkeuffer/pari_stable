@@ -220,7 +220,8 @@ BA 48- agm now returns the optimal AGM
    58- faster forparii() [ for() with t_INT lower bound ]
    59- forprime(p = a, b, ...) now iterates over arbitrary ranges of primes,
        independently of 'primelimit'. Parameter 'b' can be omitted (no upper
-       limit)
+       limit). More generally primelimit is no longer a true limit to iterate
+       over primes: all libpari functions use the forprime_t interface
    60- rename ggval -> gvaluation
 BA 70- GP function ellpow is renamed to ellmul
 BA 71- rename powell->ellmul, addell->elladd, subell->ellsub

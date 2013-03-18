@@ -4011,7 +4011,7 @@ Z_issmooth(GEN m, ulong lim)
 /**                                                                   **/
 /***********************************************************************/
 static GEN
-aux_end(GEN n, long nb)
+aux_end(GEN M, GEN n, long nb)
 {
   GEN P,E, z = (GEN)avma;
   long i;
@@ -4020,13 +4020,14 @@ aux_end(GEN n, long nb)
   P = cgetg(nb+1,t_COL);
   E = cgetg(nb+1,t_COL);
   for (i=nb; i; i--)
-  {
+  { /* allow a stackdummy in the middle */
+    while (typ(z) != t_INT) z += lg(z);
     gel(E,i) = z; z += lg(z);
     gel(P,i) = z; z += lg(z);
   }
-  gel(z,1) = P;
-  gel(z,2) = E;
-  return sort_factor(z, (void*)&absi_cmp, cmp_nodata);
+  gel(M,1) = P;
+  gel(M,2) = E;
+  return sort_factor(M, (void*)&absi_cmp, cmp_nodata);
 }
 
 static void
@@ -4061,10 +4062,11 @@ static GEN
 ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
         GEN state, ulong all, long hint)
 {
+  GEN M;
   pari_sp av;
   long nb = 0, i;
-  ulong p, k, lim;
-  byteptr d = diffptr+1; /* start at p = 3 */
+  ulong p, lim;
+  forprime_t T;
 
   i = signe(n);
   if (!i) retmkmat2(mkcol(gen_0), mkcol(gen_1));
@@ -4100,52 +4102,64 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     }
     return F;
   }
-  (void)cgetg(3,t_MAT);
+  M = cgetg(3,t_MAT);
   if (i < 0) STORE(&nb, utoineg(1), 1);
-  if (is_pm1(n)) return aux_end(NULL,nb);
+  if (is_pm1(n)) return aux_end(M,NULL,nb);
 
   n = gclone(n); setabssign(n);
   /* trial division bound */
-  if (all) {
-    if (all > maxprime() + 1) pari_err_MAXPRIME(all);
-    lim = all; /* use supplied limit */
-  }
-  else
-    lim = tridiv_bound(n);
-
+  lim = all; if (!lim) lim = tridiv_bound(n);
   if (lim > 2)
   {
+    ulong maxp = maxprime();
+    pari_sp av2;
     i = vali(n);
     if (i)
     {
       STOREu(&nb, 2, i);
       av = avma; affii(shifti(n,-i), n); avma = av;
     }
-    if (is_pm1(n)) return aux_end(n,nb);
-  }
-
-  /* trial division */
-  p = 2;
-  for(;;)
-  {
-    int stop;
-    if (!*d) break;
-    NEXT_PRIME_VIADIFF(p,d);
-    if (p >= lim) break;
-
-    k = Z_lvalrem_stop(n, p, &stop);
-    if (k) STOREu(&nb, p, k);
-    if (stop)
+    if (is_pm1(n)) return aux_end(M,n,nb);
+    /* trial division */
+    maxp = maxprime();
+    av = avma; u_forprime_init(&T, 3, minss(lim, maxp)); av2 = avma;
+    /* first pass: known to fit in private prime table */
+    while ((p = u_forprime_next_fast(&T)))
     {
-      if (!is_pm1(n)) STOREi(&nb, n, 1);
-      return aux_end(n,nb);
+      int stop;
+      long k = Z_lvalrem_stop(n, p, &stop);
+      if (k) STOREu(&nb, p, k);
+      if (stop)
+      {
+        if (!is_pm1(n)) STOREi(&nb, n, 1);
+        stackdummy(av, av2);
+        return aux_end(M,n,nb);
+      }
+    }
+    stackdummy(av, av2);
+    if (lim > maxp)
+    { /* second pass, usually empty: outside private prime table */
+      av = avma; u_forprime_init(&T, maxp+1, lim); av2 = avma;
+      while ((p = u_forprime_next(&T)))
+      {
+        int stop;
+        long k = Z_lvalrem_stop(n, p, &stop);
+        if (k) STOREu(&nb, p, k);
+        if (stop)
+        {
+          if (!is_pm1(n)) STOREi(&nb, n, 1);
+          stackdummy(av, av2);
+          return aux_end(M,n,nb);
+        }
+      }
+      stackdummy(av, av2);
     }
   }
   /* trial divide by the special primes */
   if (special_primes(n, p, &nb, primetab))
   {
     if (!is_pm1(n)) STOREi(&nb, n, 1);
-    return aux_end(n,nb);
+    return aux_end(M,n,nb);
   }
 
   if (all)
@@ -4160,11 +4174,11 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
       pari_warn(warner, "IFAC: untested integer declared prime");
       err_printf("\t%Ps\n", n);
     }
-    return aux_end(n,nb);
+    return aux_end(M,n,nb);
   }
 
   /* test primality */
-  if (lazy_isprime(n)) { STOREi(&nb, n, 1); return aux_end(n,nb); }
+  if (lazy_isprime(n)) { STOREi(&nb, n, 1); return aux_end(M,n,nb); }
 
   /* now we have a large composite */
   if (ifac_break && (*ifac_break)(n,NULL,NULL,state)) /*initialize ifac_break*/
@@ -4175,7 +4189,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   else
     nb += ifac_decomp(n, ifac_break, state, hint);
 
-  return aux_end(n, nb);
+  return aux_end(M,n, nb);
 }
 
 /* state[1]: current unfactored part.
@@ -4250,4 +4264,3 @@ Z_factor_until(GEN n, GEN limit)
   gel(state,2) = gcopy(limit);
   return ifactor(n, &ifac_break_limit, state, 0, decomp_default_hint);
 }
-
