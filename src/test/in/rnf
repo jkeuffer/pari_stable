@@ -32,7 +32,7 @@ rnfisabelian(y^2+23,x^3+x^2-1)
 pol = y^3+y^2-2*y-1;
 bnf = bnfinit(pol);
 T=rnfisnorminit(bnf, x^3-y);
-do(T,u,flag)=lift(lift(rnfisnorm(T,u,flag)));
+do(T,u,flag=0)=lift(lift(rnfisnorm(T,u,flag)));
 do(T,y)
 do(T,2,100)
 do(T,2,-2*3*5*7)
