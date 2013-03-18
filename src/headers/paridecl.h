@@ -726,6 +726,9 @@ GEN     gen_bkeval_powers(GEN P, long d, GEN V, void *E,
 
 /* ZV.c */
 
+void    Flc_lincomb1_inplace(GEN X, GEN Y, ulong v, ulong q);
+void    RgM_check_ZM(GEN A, const char *s);
+void    RgV_check_ZV(GEN A, const char *s);
 GEN     ZC_ZV_mul(GEN x, GEN y);
 GEN     ZC_Z_add(GEN x, GEN y);
 GEN     ZC_Z_divexact(GEN X, GEN c);
@@ -736,12 +739,9 @@ GEN     ZC_copy(GEN x);
 GEN     ZC_hnfremdiv(GEN x, GEN y, GEN *Q);
 GEN     ZC_lincomb(GEN u, GEN v, GEN X, GEN Y);
 void    ZC_lincomb1_inplace(GEN X, GEN Y, GEN v);
-void    Flc_lincomb1_inplace(GEN X, GEN Y, ulong v, ulong q);
 GEN     ZC_neg(GEN M);
 GEN     ZC_reducemodlll(GEN x,GEN y);
 GEN     ZC_reducemodmatrix(GEN v, GEN y);
-GEN     ZM_reducemodlll(GEN x,GEN y);
-GEN     ZM_reducemodmatrix(GEN v, GEN y);
 GEN     ZC_sub(GEN x, GEN y);
 GEN     ZC_z_mul(GEN X, long c);
 GEN     ZM_ZC_mul(GEN x, GEN y);
@@ -752,11 +752,15 @@ GEN     ZM_copy(GEN x);
 GEN     ZM_det_triangular(GEN mat);
 int     ZM_equal(GEN A, GEN B);
 GEN     ZM_hnfremdiv(GEN x, GEN y, GEN *Q);
+int     ZM_ishnf(GEN x);
+int     ZM_isidentity(GEN x);
 long    ZM_max_lg(GEN x);
 GEN     ZM_mul(GEN x, GEN y);
-GEN     ZM_nm_mul(GEN x, GEN y);
 GEN     ZM_neg(GEN x);
+GEN     ZM_nm_mul(GEN x, GEN y);
 GEN     ZM_pow(GEN x, GEN n);
+GEN     ZM_reducemodlll(GEN x,GEN y);
+GEN     ZM_reducemodmatrix(GEN v, GEN y);
 GEN     ZM_sub(GEN x, GEN y);
 GEN     ZM_supnorm(GEN x);
 GEN     ZM_to_Flm(GEN x, ulong p);
@@ -768,11 +772,11 @@ GEN     ZMrow_ZC_mul(GEN x, GEN y, long i);
 GEN     ZV_ZM_mul(GEN x, GEN y);
 int     ZV_abscmp(GEN x, GEN y);
 int     ZV_cmp(GEN x, GEN y);
-int     ZV_equal0(GEN V);
 GEN     ZV_content(GEN x);
 GEN     ZV_dotproduct(GEN x,GEN y);
 GEN     ZV_dotsquare(GEN x);
 int     ZV_equal(GEN V, GEN W);
+int     ZV_equal0(GEN V);
 long    ZV_max_lg(GEN x);
 void    ZV_neg_inplace(GEN M);
 GEN     ZV_prod(GEN v);
@@ -780,6 +784,7 @@ GEN     ZV_sum(GEN v);
 GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
+GEN     nm_Z_mul(GEN X, GEN c);
 GEN     zm_to_ZM(GEN z);
 int     zv_equal0(GEN V);
 long    zv_content(GEN x);
@@ -789,11 +794,6 @@ long    zv_prod(GEN v);
 GEN     zv_prod_Z(GEN v);
 long    zv_sum(GEN v);
 int     zvV_equal(GEN V, GEN W);
-int     ZM_ishnf(GEN x);
-int     ZM_isidentity(GEN x);
-void    RgM_check_ZM(GEN A, const char *s);
-void    RgV_check_ZV(GEN A, const char *s);
-GEN     nm_Z_mul(GEN X, GEN c);
 
 /* ZX.c */
 
