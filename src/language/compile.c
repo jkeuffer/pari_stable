@@ -167,7 +167,7 @@ compilestate_restore(struct pari_compilestate *comp)
 }
 
 static GEN
-getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
+getfunction(struct codepos *pos, long arity, long nbmvar, GEN text, long gap)
 {
   long lop =s_opcode.n+1-pos->opcode;
   long ldat=s_data.n+1-pos->data;
@@ -192,6 +192,7 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
     s[i] = opcode[i+pos->opcode-1];
     mael(cl, 3, i) = operand[i+pos->opcode-1];
     dbg[i] = dbginfo[i+pos->opcode-1]-dbgstart;
+    if (dbg[i]<0) dbg[i]+=gap;
   }
   s[i]=0;
   s_opcode.n=pos->opcode;
@@ -221,7 +222,7 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
 static GEN
 getclosure(struct codepos *pos)
 {
-  return getfunction(pos,0,0,NULL);
+  return getfunction(pos,0,0,NULL,0);
 }
 
 static void
@@ -1698,7 +1699,7 @@ genclosure(entree *ep, const char *loc, long  nbdata, int check)
   op_push_loc(ret_op, (long) ep, loc);
   if (ret_flag==FLnocopy) op_push_loc(OCcopy,0,loc);
   compilecast_loc(ret_typ, Ggen, loc);
-  return getfunction(&pos,nb+arity,0,strtoGENstr(ep->name));
+  return getfunction(&pos,nb+arity,0,strtoGENstr(ep->name),0);
 }
 
 GEN
@@ -1914,13 +1915,14 @@ compilenode(long n, int mode, long flag)
       pari_sp ltop=avma;
       struct codepos pos;
       GEN arg=listtogen(x,Flistarg);
-      long nb, lgarg, nbmvar;
+      long nb, lgarg, nbmvar, gap;
       GEN vep = cgetg_copy(arg, &lgarg);
       GEN text=cgetg(3,t_VEC);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
       dbgstart=tree[x].str+tree[x].len;
+      gap = tree[y].str-dbgstart;
       nbmvar=ctxmvar();
       nb = lgarg-1;
       if (nb)
@@ -1933,7 +1935,7 @@ compilenode(long n, int mode, long flag)
           var_push(NULL,Lmy);
         }
         checkdups(arg,vep);
-        op_push(OCgetargs,nb,y);
+        op_push(OCgetargs,nb,x);
         frame_push(vep);
         for (i=1;i<=nb;i++)
         {
@@ -1942,12 +1944,12 @@ compilenode(long n, int mode, long flag)
           if (tree[a].f==Fassign && !is_node_zero(y))
           {
             if (tree[y].f==Fsmall)
-              compilenode(y,Ggen,0);
+              compilenode(y,Ggen,a);
             else
             {
               struct codepos lpos;
               getcodepos(&lpos);
-              compilenode(y,Ggen,0);
+              compilenode(y,Ggen,a);
               op_push(OCpushgen, data_push(getclosure(&lpos)),a);
             }
             op_push(OCdefaultarg,-nb+i-1,a);
@@ -1960,7 +1962,7 @@ compilenode(long n, int mode, long flag)
         compilenode(y,Ggen,FLsurvive|FLreturn);
       else
         compilecast(n,Gvoid,Ggen);
-      op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)),n);
+      op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text,gap)),n);
       if (nbmvar) op_push(OCsaveframe,!!(flag&FLsurvive),n);
       compilecast(n, Gclosure, mode);
       avma=ltop;
@@ -1984,7 +1986,7 @@ gp_closure(long n)
   getcodepos(&pos);
   dbgstart=tree[n].str;
   compilenode(n,Ggen,FLsurvive|FLreturn);
-  return getfunction(&pos,0,0,strntoGENstr(tree[n].str,tree[n].len));
+  return getfunction(&pos,0,0,strntoGENstr(tree[n].str,tree[n].len),0);
 }
 
 GEN
@@ -2021,7 +2023,7 @@ closure_deriv(GEN G)
   op_push_loc(OCpop,1,code);
   op_push_loc(OCprecreal,0,code);
   op_push_loc(OCcallgen,(long)is_entry("_derivfun"),code);
-  return gerepilecopy(ltop, getfunction(&pos,arity,0,text));
+  return gerepilecopy(ltop, getfunction(&pos,arity,0,text,0));
 }
 
 static long
