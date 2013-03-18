@@ -270,6 +270,9 @@ BA 97- zv_cmp0 renamed to zv_equal0
   101- renamed library function divsum() => sumdivexpr()
   102- listpop(empty list) => no-op [ was "domain error" ]
   103- ellap, ellak, ellan: allow non-minimal model
+  104- when timer = 1, no longer print timing if the time is negligible;
+       in particular, no timing should be printed when defining a user function
+       or and alias.
 
   Added
     1- mathnf for matrices over K[X] [#41]

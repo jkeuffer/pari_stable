@@ -1650,7 +1650,7 @@ gp_main_loop(long flag)
     if (!pari_last_was_newline()) pari_putc('\n');
 
     GP_DATA->last_time = timer_delay(GP_DATA->T);
-    if (GP_DATA->chrono)
+    if (GP_DATA->chrono && GP_DATA->last_time)
     {
       pari_puts( "time = " );
       pari_puts( gp_format_time(GP_DATA->last_time) );

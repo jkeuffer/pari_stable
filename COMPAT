@@ -36,6 +36,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - ellinit(E / Qp).tate : the u component is now always a square root
     of u2, also in the non-split case (in which case it lives in a
     quadratic extension of Qp)
+  - when timer = 1, no longer print timing if the time is negligible;
+    in particular, no timing should be printed when defining a user function
+    or and alias.
 
 * Specific to the PARI library:
 ===============================
