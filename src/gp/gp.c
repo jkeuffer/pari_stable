@@ -1559,25 +1559,6 @@ END:
   return res;
 }
 
-/* kill all history entries since loc */
-static void
-prune_history(gp_hist *H, long loc)
-{
-  long i, j;
-  i = (H->total-1) % H->size;
-  j = H->total - loc;
-  for ( ; j > 0; i--,j--)
-  {
-    if (H->res[i])
-    {
-      gunclone(H->res[i]);
-      H->res[i] = NULL;
-    }
-    if (!i) i = H->size;
-  }
-  H->total = loc;
-}
-
 static int
 is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
@@ -1605,10 +1586,10 @@ gp_main_loop(long flag)
   {
     if (dorecover)
     { /* set a recovery point */
-      static long tloc, outtyp;
+      static long outtyp;
       long er;
       outtyp = GP_DATA->fmt->prettyp;
-      tloc = pari_nb_hist(); gp_context_save(&rec);
+      gp_context_save(&rec);
       /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
       if ((er = setjmp(env[s_env.n-1])))
       {
@@ -1618,7 +1599,6 @@ gp_main_loop(long flag)
           /* true error not from main instance, let caller sort it out */
           if (!ismain) { kill_buffers_upto_including(b); return NULL; }
           GP_DATA->fmt->prettyp = outtyp;
-          prune_history(GP_DATA->hist, tloc);
         } else { /* allocatemem */
           filestate_restore(rec.file);
           gp_context_save(&rec);
