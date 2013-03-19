@@ -1659,15 +1659,15 @@ parameters, or for example
 \+& \kbd{f(2)}  & equivalent to &\kbd{f(2,0)},\cr
 \+& \kbd{f()}   & & \kbd{f(0,0)},\cr
 \+& \kbd{f(,3)} & &\kbd{f(0,3)}.  (``Empty argument'' trick)\cr
-\noindent
-More generally, the argument list is filled with user supplied values, in
-order. A comma or closing parenthesis, where a value should have been,
-signals we must use a default value. When no input arguments are left, the
-defaults are used instead to fill in remaining formal parameters.
+\noindent This \emph{implicit} default value of $0$, is actually deprecated
+and setting
+\bprog
+  default(strictargs, 1)
+@eprog\noindent allows to disable it (see \secref{se:def,strictargs}).\kbdsidx{strictargs}
 
-Of course, you can change these default values to something more useful than
-$0$. In the function definition, you can append \kbd{=}\var{expr} to a formal
-parameter, to give that variable an explicit default value. The expression
+The recommended practice is to \emph{explicitly} set a default value:
+in the function definition, you can append \kbd{=}\var{expr} to a formal
+parameter, to give that variable a default value. The expression
 gets evaluated the moment the function is called, and may involve the
 preceding function parameters: a default value for $x_i$ may involve $x_j$
 for $j < i$. For instance, after
@@ -1680,7 +1680,11 @@ they stand, use the ``empty argument'' trick: \kbd{f(6,,1)} would yield
 \kbd{f(6,2,1)}. Of course, \kbd{f()} by itself yields \kbd{f(1,2,3)} as was
 to be expected.
 
-More specifically,
+In short, the argument list is filled with user supplied values, in
+order. A comma or closing parenthesis, where a value should have been,
+signals we must use a default value. When no input arguments are left, the
+defaults are used instead to fill in remaining formal parameters.
+A final example:
 \bprog
 f(x, y=2, z=3) = print(x, ":", y, ":", z);
 @eprog
@@ -1693,6 +1697,18 @@ them), separated by colons.
 0:5:3
 ? f()
 0:2:3
+@eprog\noindent If \kbd{strictargs} is set (recommended), $x$ is now a
+mandatory argument, and the above becomes:
+\bprog
+? default(strictargs,1)
+? f(6,7)
+6:7:3
+? f(,5)
+  ***   at top-level: f(,5)
+  ***                 ^-----
+  ***   in function f: x,y=2,z=3
+  ***                  ^---------
+  ***   missing mandatory argument 'x' in user function.
 @eprog
 
 \misctitle{Example} We conclude with an amusing example, intended to
