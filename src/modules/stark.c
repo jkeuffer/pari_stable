@@ -369,7 +369,7 @@ Order(GEN cyc, GEN x)
    dividing cond(bnr) is totally split in this field. Return 0
    otherwise. */
 static long
-IsGoodSubgroup(GEN H, GEN bnr, GEN sbg, GEN map)
+IsGoodSubgroup(GEN H, GEN bnr, GEN map)
 {
   pari_sp av = avma;
   long j, f;
@@ -565,7 +565,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
                     p1 = RgM_mul(IK, RgM_inv_upper(H));
                     if (RgM_is_ZM(p1)) continue;
                   }
-                  if (IsGoodSubgroup(H, bnrm, D, map))
+                  if (IsGoodSubgroup(H, bnrm, map))
                   {
                     if (!IK)
                       IK = H;
