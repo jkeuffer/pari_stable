@@ -5,14 +5,24 @@ C-Name: sd_primelimit
 Prototype:
 Help:
 Doc: \kbd{gp} precomputes a list of
- all primes less than \kbd{primelimit} at initialization time. These are used
- by many arithmetic functions, usually for trial division purposes. If you do
- not plan to invoke any of them, you can just set this to 1. The maximal value
- is $2^{32} - 2049$ (resp $2^{64} - 2049$) on a 32-bit (resp.~64-bit)
- machine.
+ all primes less than \kbd{primelimit} at initialization time, and can build
+ fast sieves on demand to quickly iterate over primes up to the \emph{square}
+ of \kbd{primelimit}. These are used by many arithmetic functions, usually for
+ trial division purposes. The maximal value is $2^{32} - 2049$ (resp $2^{64} -
+ 2049$) on a 32-bit (resp.~64-bit) machine, but values beyond $10^8$,
+ allowing to iterate over primes up to $10^{16}$, do not seem useful.
 
  Since almost all arithmetic functions eventually require some table of prime
- numbers, PARI currently guarantees that the first 6547 primes, up to and
+ numbers, PARI guarantees that the first 6547 primes, up to and
  including 65557, are precomputed, even if \kbd{primelimit} is $1$.
+
+ \misctitle{Deprecated feature} \kbd{primelimit} was used in some
+ situations by algebraic number theory functions using the
+ \tet{nf_PARTIALFACT} flag (\tet{nfbasis}, \tet{nfdisc}, \tet{nfinit}, \dots):
+ this assumes that all primes $p > \kbd{primelimit}$ have a certain
+ property (the equation order is $p$-maximal). This is never done by default,
+ and must be explicitly set by the user of such functions. Nevertheless,
+ these functions now provide a more flexible interface, and their use
+ of the global default \kbd{primelimit} is deprecated.
 
  The default value is \kbd{500k}.

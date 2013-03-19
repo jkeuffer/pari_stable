@@ -5,20 +5,20 @@ Prototype: GD0,L,DG
 Help: nfdisc(T,{flag=0},{fa}): discriminant of the number field defined by
  the polynomial T using round 4. Optional args flag and fa are as in nfbasis.
 Doc: \idx{field discriminant} of the number field defined by the integral,
- preferably monic, irreducible polynomial $T$. $\fl$ and \kbd{fa} are exactly as
- in \kbd{nfbasis}. That is, \kbd{fa} is the matrix of a partial
- factorization of the discriminant of $T$ or a prime $p$, and binary digits
- of $\fl$ are as follows:
+ preferably monic, irreducible polynomial $T$. $\fl$ and \kbd{fa} are as
+ in \kbd{nfbasis}.
 
- 1: assume that no square of a prime greater than \kbd{primelimit}
- divides the discriminant.
+ \item $\fl$ is a deprecated flag.
 
- 2: use the round 2 algorithm, instead of the default \idx{round 4}. This
- should be slower except maybe for polynomials of small degree and
- coefficients.
+ \item \kbd{fa} is a vector of primes, or the matrix of a partial
+ factorization of the discriminant of $T$ or a prime $p$. In that case, the
+ function returns the discriminant of an order whose basis is given by
+ \kbd{nfbasis(T,,fa)}, which need not be the maximal order, but its valuation
+ at a prime entry in \kbd{fa} is the same as the valuation of the field
+ discriminant.
 
- If \kbd{fa} is a prime $p$, return the $p$-adic discriminant of the maximal
- order of $\Z_p[X]/(T)$, as a power of $p$:
+ In particular, if \kbd{fa} is a prime $p$, return the $p$-adic discriminant
+ of the maximal order of $\Z_p[X]/(T)$, as a power of $p$:
  \bprog
  ? nfdisc(x^2 + 6)
  %1 = -24

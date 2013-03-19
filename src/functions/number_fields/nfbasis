@@ -3,50 +3,84 @@ Section: number_fields
 C-Name: nfbasis0
 Prototype: GD0,L,DG
 Help: nfbasis(T,{flag=0},{fa}): integral basis of the field Q[a], where a is
- a root of the polynomial T, using the round 4 algorithm. Second and third
- args are optional. Binary digits of flag mean 1: assume that no square of a
- prime>primelimit divides the discriminant of T, 2: use round 2 algorithm
- instead. If present, fa is the matrix of a partial factorization of the
- discriminant of T or a prime p (useful if one wants only an order maximal
- at certain primes only).
-
+ a root of the polynomial T, using the round 4 algorithm. Second argument
+ is deprecated. The third argument fa, if present, is the matrix of a
+ partial factorization of the discriminant of T or a prime p (useful if one
+ wants only an order maximal at certain primes only).
 Doc:
- Let $T$ be an irreducible polynomial with integral coefficients. This
- function returns an \idx{integral basis} of the number field defined by
- $T$, that is a $\Z$-basis of its maximal order.
+ Let $T(X)$ be an irreducible polynomial with integral coefficients. This
+ function returns an \idx{integral basis} of the number field defined by $T$,
+ that is a $\Z$-basis of its maximal order. The basis elements are given as
+ elements in $\Q[X]/(T)$:
+ \bprog
+ ? nfbasis(x^2 + 1)
+ %1 = [1, x]
+ @eprog
+ This function uses a modified version of the \idx{round 4} algorithm,
+ due to David \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}.
 
- It uses a modified version of the \idx{round 4} algorithm by default, due to
- David \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary
- digits of $\fl$ have the following meaning:
+ The argument $\fl$ is deprecated and should no longer be used.
 
- 1: assume that no square of a prime greater than the default \kbd{primelimit}
- divides the discriminant of $T$, i.e.~that the index of $T$ has only small
- prime divisors.
+ If \var{fa} is present it must be either a factorization matrix, a vector of
+ pairwise coprime integers or a single integer:
 
- 2: use \idx{round 2} algorithm. This is usually much slower. (This program is
- the translation into C of a program written by David \idx{Ford} in Algeb.)
+ \item If \var{fa} is a vector, the function assumes that it contains
+ distinct \emph{prime} numbers.
 
- Thus for instance, if $\fl=3$, this uses the round 2 algorithm and outputs
- an order which will be maximal at all the small primes.
+ \item If \var{fa} is a matrix, the function assumes that it is a two-column
+ matrix of a (partial) factorization of $D$; namely the first column contains
+ \emph{primes} and the second one the valuation of $D$ at each of these
+ primes.
 
- If \var{fa} is present it must be either a factorization matrix
- or a prime number. If it is a matrix, we assume (without checking!) that
- it is a two-column matrix of a (partial) factorization of the discriminant
- $D$ of $T$; namely the first column contains prime divisors of $D$, and the
- second one the valuation of $D$ at each of these primes. Returns a
- $\Z$-basis of an order whose index is not divisible by any of these prime
- numbers. Note that it does \emph{not} have to be a complete factorization.
- This is useful if only a local integral basis for some small set
- of places is desired.
+ \item If \var{fa} is an integer, the function assumes that it is a prime
+ number.
 
- If \var{fa} is a prime number $p$, return a local integral basis for
- $\Z_p[X]/(T)$:
+ In all these cases, the integers may or may not divide the discriminant $D$
+ of $T$. The function then returns a $\Z$-basis of an order whose index is
+ not divisible by any of these prime numbers.
+ This is useful if only a local integral basis for some small
+ set of places is desired, but the result is actually a global integral basis
+ if all prime divisors of the \emph{field} discriminant are included! This is
+ helpful in order to create an \kbd{nf} structure associated to the number
+ field $K = \Q[X]/(T)$, when the discriminant of $T$ cannot be factored
+ completely, whereas the prime divisors of $\disc K$ are known. Let $P$
+ contain such primes:
+ \bprog
+ ? b = nfbasis(T,, P);
+ ? nf = nfinit([T, b]);
+ @eprog
+
+ Of course, if \var{fa} is a prime number $p$, the function returns a local
+ integral basis for $\Z_p[X]/(T)$:
  \bprog
  ? nfbasis(x^2+x-1001)
  %1 = [1, 1/3*x - 1/3]
  ? nfbasis(x^2+x-1001,, 2)
  %2 = [1, x]
  @eprog
+
+ \misctitle{The Buchmann-Lenstra algorithm}
+ It is also allowed to include \emph{composite} numbers instead of primes,
+ the result will still be a correct integral basis if the field discriminant
+ factors completely over the actual primes in the list. Adding a
+ composite $C$ \emph{dividing} $D$ may help because when we consider $C$
+ as a prime and run
+ the algorithm, two good things can happen: either we succed in proving that
+ no prime dividing $C$ can divide the index (without actually needing to find
+ those primes), or we succeed in factoring $C$ and go on with the refined
+ factorization. (Note that including a $D$ not dividing $C$ is useless.)
+ It may also happen that neither happen, and the computed basis
+ need not generate the maximal order:
+ \bprog
+ ? B = 10^7;
+ ? P = factor(poldisc(T), B)[,1]; \\ primes <= B dividing D + cofactor
+ ? nf = nfinit( [T, nfbasis(T,, P)] );
+ ? check = abs(nf.disc); for (i=1, #P-1, check /= valuation(check, P[i]));
+ ? check == 1
+ @eprog The nf structure is correct if $\kbd{check} = 1$,
+ i.e. if the field discriminant factors completely over the \emph{primes}
+ in $P$: we removed the last element of $P$, which is not a priori a prime
+ number due to the partial factorization request.
 
 Variant: An extended version is
  \fun{GEN}{nfbasis}{GEN T, GEN *d, long flag, GEN fa = NULL}, where \kbd{*d}

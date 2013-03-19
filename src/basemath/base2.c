@@ -24,23 +24,64 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define compat_PARTIAL 1
 #define compat_ROUND2  2
 
+/* allow p = -1 from factorizations */
+static long
+safe_Z_pvalrem(GEN x, GEN p, GEN *z)
+{
+  if (signe(p) < 0) { *z = absi(x); return 1; }
+  return Z_pvalrem(x, p, z);
+}
+/* D an integer, P a ZV, return a factorization matrix for D over P, removing
+ * entries with 0 exponent. Replace D by its cofactor */
+static GEN
+fact_from_factors(GEN *D, GEN P, long flag)
+{
+  long i, l = lg(P), iq = 1;
+  GEN Q = cgetg(l,t_COL);
+  GEN E = cgetg(l,t_COL);
+  for (i=1; i<l; i++)
+  {
+    GEN p = gel(P,i);
+    long k;
+    if (flag && !equalim1(p))
+    {
+      p = gcdii(p, *D);
+      if (is_pm1(p)) continue;
+    }
+    k = safe_Z_pvalrem(*D, p, D);
+    if (k) { gel(Q,iq) = p; gel(E,iq) = utoipos(k); iq++; }
+  }
+  setlg(Q,iq);
+  setlg(E,iq); return mkmat2(Q,E);
+}
+
 static void
 nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
   GEN dT, E, P;
-  long l, v;
+  long l;
 
   if (typ(T)!=t_POL) pari_err_TYPE("nfmaxord",T);
   if (degpol(T) <= 0) pari_err_CONSTPOL("nfmaxord");
 
   if (fa) {
+    ulong v;
+    GEN d;
     switch(typ(fa))
     {
-      case t_MAT: dT = factorback(fa); break;
-      case t_INT: v = ZpX_disc_val(T, fa);
-                  dT = powis(fa, v);
-                  fa = to_famat_shallow(fa, stoi(v));
-                  break;
+      case t_MAT:
+        dT = factorback(fa); break;
+      case t_VEC:
+        fa = leafcopy(fa); settyp(fa, t_COL);/*fall through*/
+      case t_COL:
+        d = dT = ZX_disc(T);
+        fa = fact_from_factors(&d, fa, 0);
+        break;
+      case t_INT:
+        v = ZpX_disc_val(T, fa);
+        dT = powiu(fa, v);
+        fa = to_famat_shallow(fa, utoi(v));
+        break;
       default: pari_err_TYPE("nfmaxord",fa);
                return; /*not reached*/
     }
@@ -101,13 +142,6 @@ get_coprimes(GEN a, GEN b)
   for (i = k = 1; i < lg(u); i++)
     if (!is_pm1(gel(u,i))) gel(u,k++) = gel(u,i);
   setlg(u, k); return u;
-}
-/* allow p = -1 from factorizations */
-static long
-safe_Z_pvalrem(GEN x, GEN p, GEN *z)
-{
-  if (signe(p) < 0) { *z = absi(x); return 1; }
-  return Z_pvalrem(x, p, z);
 }
 /* denominator of diagonal. All denominators are powers of a given integer */
 static GEN
@@ -604,43 +638,28 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
 
 /* d a t_INT; f a t_MAT factorisation of some t_INT sharing some divisors
  * with d, or a prime (t_INT). Return a factorization F of d: "primes"
- * entries in f _may_ be composite, and are included as is in d. IF the last
- * entry in f _is_ composite (BPSW_psp), also include the cofactor as is in
- * F, otherwise include its factorization */
+ * entries in f _may_ be composite, and are included as is in d. */
 static GEN
 update_fact(GEN d, GEN f)
 {
-  GEN fa, E, Q, P = gel(f,1);
-  long iq, i, k, l;
+  GEN P;
   switch (typ(f))
   {
     case t_INT: return f;
-    case t_MAT: if (lg(f) == 3) break; /*fall through*/
+    case t_VEC: case t_COL: P = f; break;
+    case t_MAT:
+      if (lg(f) == 3) { P = gel(f,1); break; }
+    /*fall through*/
     default: pari_err_TYPE("nfbasis [factorization expected]",f);
   }
-  l = lg(P);
-  if (l > 1 && is_pm1(gel(P,1))) P = vecslice(P, 2, --l); /* remove -1 */
-  Q = cgetg(l,t_COL);
-  E = cgetg(l,t_COL); iq = 1;
-  for (i=1; i<l; i++)
-  {
-    GEN p = gel(P,i);
-    k = safe_Z_pvalrem(d, p, &d);
-    if (k) { gel(Q,iq) = p; gel(E,iq) = utoipos(k); iq++; }
-  }
-  setlg(Q,iq);
-  setlg(E,iq); fa = mkmat2(Q,E);
-  if (is_pm1(d)) return fa;
-  if (signe(d) < 0) d = negi(d);
-  d = BPSW_psp(gel(P,l-1))? Z_factor(d): to_famat_shallow(d, gen_1);
-  return merge_factor_i(d, fa);
+  return fact_from_factors(&d, P, 1);
 }
 
 /* FIXME: have to deal with compatibility flags */
 static void
 _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
 {
-  GEN x, lead;
+  GEN x, L;
   nfmaxord_t S;
   long fl = 0;
 
@@ -648,12 +667,13 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   if (degpol(x0) <= 0) pari_err_CONSTPOL("nfbasis");
   RgX_check_ZX(x0, "nfbasis");
 
-  x = ZX_Q_normalize(x0, &lead);
-  if (fa && !isint1(lead)) fa = update_fact(ZX_disc(x), fa);
+  x = ZX_Q_normalize(x0, &L);
+  /* x = C x0(t/L); disc x = C^2(d - 1) L^-(d(d-1)) disc(x0), d = deg(x) */
+  if (fa && !isint1(L)) fa = update_fact(ZX_disc(x), fa);
   if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & compat_ROUND2)  fl |= nf_ROUND2;
   nfmaxord(&S, x, fl, fa);
-  if (pbas) *pbas = RgXV_unscale(S.basis, lead);
+  if (pbas) *pbas = RgXV_unscale(S.basis, L);
   if (pdK)  *pdK = S.dK;
 }
 
