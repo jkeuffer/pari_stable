@@ -1211,10 +1211,39 @@ Flxq_ellj(GEN a4, GEN a6, GEN T, ulong p)
 }
 
 static GEN
+F3xq_ellcardj(GEN a4, GEN a6, GEN T, GEN q, long n)
+{
+  const ulong p = 3;
+  ulong t;
+  GEN q1 = addis(q,1);
+  GEN na4 = Flx_neg(a4,p), ra4;
+  if (!Flxq_issquare(na4,T,p))
+    return q1;
+  ra4 = Flxq_sqrt(na4,T,p);
+  t = Flxq_trace(Flxq_div(a6,Flxq_mul(na4,ra4,T,p),T,p),T,p);
+  if (n%2==1)
+  {
+    GEN q3;
+    if (t==0) return q1;
+    q3 = powuu(p,(n+1)>>1);
+    return (t==1)^(n%4==1) ? subii(q1,q3): addii(q1,q3);
+  }
+  else
+  {
+    GEN q22, q2 = powuu(p,n>>1);
+    GEN W = Flxq_pow(a4,shifti(q,-2),T,p);
+    long s = (W[2]==1)^(n%4==2);
+    if (t!=0) return s ? addii(q1,q2): subii(q1, q2);
+    q22 = shifti(q2,1);
+    return s ? subii(q1,q22):  addii(q1, q22);
+  }
+}
+
+static GEN
 Flxq_ellcardj(GEN a4, GEN a6, ulong j, GEN T, GEN q, ulong p, long n)
 {
   GEN q1 = addis(q,1);
-  if (j==0 && p!=3)
+  if (j==0)
   {
     ulong w;
     GEN W, t, N;
@@ -1285,6 +1314,8 @@ Flxq_ellcard(GEN a4, GEN a6, GEN T, ulong p)
   GEN J, r, q = powuu(p,  n);
   if (typ(a4)==t_VEC)
     r = F3xq_ellcard(gel(a4,1), a6, T);
+  else if (p==3)
+    r = F3xq_ellcardj(a4, a6, T, q, n);
   else if (degpol(a4)<=0 && degpol(a6)<=0)
     r = Fp_ffellcard(utoi(Flx_eval(a4,0,p)),utoi(Flx_eval(a6,0,p)),q,n,utoi(p));
   else if (degpol(J=Flxq_ellj(a4,a6,T,p))<=0)
