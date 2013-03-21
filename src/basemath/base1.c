@@ -1796,7 +1796,6 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   else if (is_polbas(x))
   { /* monic integral polynomial + integer basis */
     bas = gel(x,2); x = gel(x,1);
-    if (typ(bas) == t_MAT) bas = RgM_to_RgXV(bas,varn(x));
     index = NULL;
     dx = NULL;
     dK = NULL;
@@ -2264,7 +2263,7 @@ ordred(GEN x)
   if (typ(x) != t_POL) pari_err_TYPE("ordred",x);
   if (!gequal1(leading_term(x))) pari_err_IMPL("ordred");
   if (!signe(x)) return RgX_copy(x);
-  y = mkvec2(x, matid(degpol(x)));
+  y = mkvec2(x, pol_x_powers(degpol(x), varn(x)));
   return gerepileupto(av, Polred(y, 0, NULL));
 }
 

@@ -957,8 +957,13 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     }
   }
   B = Q_remove_denom(B, &den);
-  if (den) { B = ZM_hnfmodid(B, den); B = RgM_Rg_div(B, den); }
-  else B = matid(nN);
+  if (den) {
+    B = ZM_hnfmodid(B, den);
+    B = RgM_Rg_div(B, den);
+    B = RgM_to_RgXV(B, varn(polabs));
+  }
+  else
+    B = pol_x_powers(nN, varn(polabs));
   return gerepilecopy(av, mkvec2(polabs, B));
 }
 
