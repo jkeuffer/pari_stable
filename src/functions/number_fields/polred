@@ -10,6 +10,8 @@ Doc: finds polynomials with reasonably
  small coefficients defining subfields of the number field defined by $x$.
  One of the polynomials always defines $\Q$ (hence is equal to $x-1$),
  and another always defines the same number field as $x$ if $x$ is irreducible.
+ This function is deprecated: please use \tet{polredbest}.
+
  All $x$ accepted by \tet{nfinit} are also allowed here (e.g. non-monic
  polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[x,Z\_K\_basis]}).
 

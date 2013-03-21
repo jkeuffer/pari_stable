@@ -1785,7 +1785,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     RgX_check_ZX(x, "nfinit");
     if (!ZX_is_irred(x)) pari_err_IRREDPOL("nfinit",x);
     if (flag & nf_RED || !equali1(gel(x,lg(x)-1)))
-      x = ZX_Q_normalize(x, &(T->lead));
+      x = ZX_Q_normalize_fact(x, &(T->lead), &fa);
     nfmaxord(&S, x, flag, fa);
     index = S.index;
     dx = S.dT;

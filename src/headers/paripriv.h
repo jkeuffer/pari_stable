@@ -470,6 +470,7 @@ GEN     nftohnfbasis(GEN nf, GEN x);
 
 /* base2.c */
 
+GEN     ZX_Q_normalize_fact(GEN x, GEN *L, GEN *fa);
 GEN     gen_if_principal(GEN bnf, GEN x);
 int     nfissquarefree(GEN nf, GEN x);
 GEN     nfreducemodpr_i(GEN x, GEN prh);

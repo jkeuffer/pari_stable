@@ -20,10 +20,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* FIXME: backward compatibility. Should use the proper nf_* equivalents */
-#define compat_PARTIAL 1
-#define compat_ROUND2  2
-
 /* allow p = -1 from factorizations */
 static long
 safe_Z_pvalrem(GEN x, GEN p, GEN *z)
@@ -659,24 +655,26 @@ update_fact(GEN d, GEN f)
   return fact_from_factors(&d, P, 1);
 }
 
-/* FIXME: have to deal with compatibility flags */
+GEN
+ZX_Q_normalize_fact(GEN x, GEN *L, GEN *fa)
+{
+  x = ZX_Q_normalize(x, L);
+  /* x = C x0(t/L); disc x = C^2(d - 1) L^-(d(d-1)) disc(x0), d = deg(x) */
+  if (*fa && !isint1(*L)) *fa = update_fact(ZX_disc(x), *fa);
+  return x;
+}
+
 static void
 _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
 {
   GEN x, L;
   nfmaxord_t S;
-  long fl = 0;
 
   if (typ(x0)!=t_POL) pari_err_TYPE("nfbasis",x0);
   if (degpol(x0) <= 0) pari_err_CONSTPOL("nfbasis");
   RgX_check_ZX(x0, "nfbasis");
-
-  x = ZX_Q_normalize(x0, &L);
-  /* x = C x0(t/L); disc x = C^2(d - 1) L^-(d(d-1)) disc(x0), d = deg(x) */
-  if (fa && !isint1(L)) fa = update_fact(ZX_disc(x), fa);
-  if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
-  if (flag & compat_ROUND2)  fl |= nf_ROUND2;
-  nfmaxord(&S, x, fl, fa);
+  x = ZX_Q_normalize_fact(x0, &L, &fa);
+  nfmaxord(&S, x, flag, fa);
   if (pbas) *pbas = RgXV_unscale(S.basis, L);
   if (pdK)  *pdK = S.dK;
 }
@@ -702,12 +700,25 @@ nfdisc_gp(GEN T, GEN P, GEN junk)
   if (typ(P) == t_INT && equali1(P)) P = utoipos(maxprime());
   return nfdisc0(T, 0, P);
 }
+/* backward compatibility */
+static long
+nfbasis_flag_translate(long flag)
+{
+  switch(flag) {
+    case 0: return 0;
+    case 1: return nf_PARTIALFACT;
+    case 2: return nf_ROUND2;
+    case 3: return nf_ROUND2|nf_PARTIALFACT;
+    default: pari_err_FLAG("nfbasis");
+             return 0;
+  }
+}
 /* deprecated */
 GEN
 nfbasis0(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
-  GEN bas; _nfbasis(x, flag, fa, &bas, NULL);
+  GEN bas; _nfbasis(x, nfbasis_flag_translate(flag), fa, &bas, NULL);
   return gerepilecopy(av, bas);
 }
 /* deprecated */
@@ -715,7 +726,7 @@ GEN
 nfdisc0(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
-  GEN dK; _nfbasis(x, flag, fa, NULL, &dK);
+  GEN dK; _nfbasis(x, nfbasis_flag_translate(flag), fa, NULL, &dK);
   dK = icopy_avma(dK, av); avma = (pari_sp)dK; return dK;
 }
 
@@ -727,7 +738,12 @@ nfbasis(GEN x, GEN *pdK, GEN fa)
   gerepileall(av, pdK? 2: 1, &bas, pdK); return bas;
 }
 GEN
-nfdisc(GEN x) { return nfdisc0(x, 0, NULL); }
+nfdisc(GEN x)
+{
+  pari_sp av = avma;
+  GEN dK; _nfbasis(x, 0, NULL, NULL, &dK);
+  dK = icopy_avma(dK, av); avma = (pari_sp)dK; return dK;
+}
 
 /* return U if Z[alpha] is not maximal or 2*dU < m-1; else return NULL */
 static GEN
