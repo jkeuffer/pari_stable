@@ -19,7 +19,7 @@ Doc:
  due to David \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}.
 
  If \var{listP} is present it must be a factorization matrix, a vector of
- pairwise coprime integers or a single integer:
+ integers or a single integer:
 
  \item Vector: the function assumes that it contains distinct \emph{prime}
  numbers.
@@ -59,8 +59,9 @@ Doc:
  @eprog
 
  \misctitle{The Buchmann-Lenstra algorithm}
- It is also allowed to include \emph{composite} numbers instead of primes,
- the result will still be a correct integral basis if the field discriminant
+ It is in fact allowed to include \emph{composite} numbers instead of primes
+ in \kbd{listP} (Vector or Matrix case), provided they are pairwise coprime.
+ The result will still be a correct integral basis if the field discriminant
  factors completely over the actual primes in the list. Adding a
  composite $C$ \emph{dividing} $D$ may help because when we consider $C$
  as a prime and run
@@ -69,15 +70,24 @@ Doc:
  those primes), or we succeed in factoring $C$ and go on with the refined
  factorization. (Note that including a $D$ not dividing $C$ is useless.)
  It may also happen that neither happen, and the computed basis
- need not generate the maximal order:
+ need not generate the maximal order. Here is an example:
  \bprog
- ? B = 10^7;
+ ? B = 10^5;
  ? P = factor(poldisc(T), B)[,1]; \\ primes <= B dividing D + cofactor
  ? nf = nfinit( [T, nfbasis(T, B)] );
- ? check = factor(nf.disc, B); check[-1..-1,1] <= B
- @eprog The nf structure is correct if $\kbd{check} = 1$,
- i.e. if the field discriminant factors completely over the primes
- less than $B$.
+ @eprog The nf structure is correct if the field discriminant factors
+ completely over the primes less than $B$ (together with the primes
+ contained in the \tet{addprimes} table). This can be tested as follows:
+ \bprog
+   check = factor(nf.disc, B);
+   lastp = check[-1..-1,1];
+   if (lastp > B && !setsearch(addprimes(), lastp),
+     warning("nf may be incorrect!"))
+ @eprog\noindent
+ This is a sufficient but not a necessary condition, hence the warning,
+ instead of an error. N.B. \kbd{lastp} is the last entry
+ in the first column of the \kbd{check} matrix, i.e. the largest prime
+ dividing \kbd{nf.disc} if $\leq B$ or if it belongs to the prime table.
 
  \synt{nfbasis}{GEN T, GEN *d, GEN listP = NULL}, which returns the order
  basis, and where \kbd{*d} receives the order discriminant.
