@@ -120,32 +120,31 @@ Doc: \var{pol} being a non-constant,
  or was computed conditionally.
  \bprog
  ? pol = polcompositum(x^5 - 101, polcyclo(7))[1];
- ? B = nfbasis(pol, 1);   \\ faster than nfbasis(pol), but conditional
+ ? y = 10^5; B = nfbasis(pol, y);  \\ faster than nfbasis(pol), but conditional
  ? nf = nfinit( [pol, B] );
- ? factor( abs(nf.disc) )
+ ? factor(abs(nf.disc), y)
  [5 18]
 
  [7 25]
 
  [101 24]
  @eprog
- \kbd{B} is conditional when its discriminant, which is \kbd{nf.disc}, can't be
- factored. In this example, the above factorization proves the correctness of
- the computation.
+ \kbd{B} is unconditional when its discriminant \kbd{nf.disc} is $y$-smooth.
+ In this example, the above factorization proves the correctness of the
+ computation.
  \medskip
 
  If $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the same
- number field, which is as simple as can easily be found using the \kbd{polred}
- algorithm, and all the subsequent computations are done using this new
- polynomial. In particular, the first component of the result is the modified
- polynomial.
+ number field, which is as simple as can easily be found using the
+ \tet{polredbest} algorithm, and all the subsequent computations are done
+ using this new polynomial. In particular, the first component of the result
+ is the modified polynomial.
 
- If $\fl=3$, does a \kbd{polred} as in case 2, but outputs
+ If $\fl=3$, apply \kbd{polredbest} as in case 2, but outputs
  $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as before and
  $\kbd{Mod}(a,P)=\kbd{Mod}(x,\var{pol})$ gives the change of
  variables. This is implicit when \var{pol} is not monic: first a linear change
- of variables is performed, to get a monic polynomial, then a \kbd{polred}
- reduction.
+ of variables is performed, to get a monic polynomial, then \kbd{polredbest}.
 Variant: Also available are
  \fun{GEN}{nfinit}{GEN x, long prec} ($\fl = 0$),
  \fun{GEN}{nfinitred}{GEN x, long prec} ($\fl = 2$),

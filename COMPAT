@@ -39,6 +39,14 @@ This file lists the incompatible changes between Version 2.x and older versions
   - when timer = 1, no longer print timing if the time is negligible;
     in particular, no timing should be printed when defining a user function
     or and alias.
+  - change nfbasis(T, flag, fa) to nfbasis(T, listP). flag was used to invoke
+    round2 instead of round4 (inefficient=> useless) OR to only
+    partially factor poldisc(T), up to primelimit (very dangerous since
+    primelimit is a global variable). Now listP describes a list of primes,
+    and we return a basis of an order which is p-maximal at all those primes:
+    either a vector of primes, a factorisation (as fa before) or an integer
+    B to indicated {p <= B} (a safe and flexible version of nfbasis(T, 1)).
+    nfdisc() was changed similarly.
 
 * Specific to the PARI library:
 ===============================
@@ -62,6 +70,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     znprimroot0
   - rename zv_cmp0 -> to zv_equal0
   - removed obsolete function weipell(). Use ellwpseries()
+  - the prototype of nfbasis() changed [ remove 'flag'; if you needed it, use
+    nfmaxord() ]. The old nfbasis0 / nfdisc0 are deprecated: don't use them.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

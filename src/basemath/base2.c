@@ -65,8 +65,6 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   if (degpol(T) <= 0) pari_err_CONSTPOL("nfmaxord");
 
   if (fa) {
-    ulong v;
-    GEN d;
     switch(typ(fa))
     {
       case t_MAT:
@@ -74,14 +72,18 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
       case t_VEC:
         fa = leafcopy(fa); settyp(fa, t_COL);/*fall through*/
       case t_COL:
-        d = dT = ZX_disc(T);
+      {
+        GEN d = dT = ZX_disc(T);
         fa = fact_from_factors(&d, fa, 0);
         break;
+      }
       case t_INT:
-        v = ZpX_disc_val(T, fa);
-        dT = powiu(fa, v);
-        fa = to_famat_shallow(fa, utoi(v));
+      {
+        ulong all = (signe(fa) <= 0)? 1: itou(fa);
+        dT = ZX_disc(T);
+        fa = Z_factor_limit(absi(dT), all);
         break;
+      }
       default: pari_err_TYPE("nfmaxord",fa);
                return; /*not reached*/
     }
@@ -650,7 +652,9 @@ update_fact(GEN d, GEN f)
     case t_MAT:
       if (lg(f) == 3) { P = gel(f,1); break; }
     /*fall through*/
-    default: pari_err_TYPE("nfbasis [factorization expected]",f);
+    default:
+      pari_err_TYPE("nfbasis [factorization expected]",f);
+      return NULL;
   }
   return fact_from_factors(&d, P, 1);
 }
@@ -677,13 +681,28 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   if (pdK)  *pdK = S.dK;
 }
 
+/* deprecated: backward compatibility only ! */
 GEN
-nfbasis(GEN x, GEN *pdK, long flag, GEN fa)
+nfbasis_gp(GEN T, GEN P, GEN junk)
 {
-  pari_sp av = avma;
-  GEN bas; _nfbasis(x, flag, fa, &bas, pdK);
-  gerepileall(av, pdK? 2: 1, &bas, pdK); return bas;
+  if (!P || isintzero(P)) return nfbasis(T, NULL, junk);
+  if (junk) pari_err_FLAG("nfbasis");
+  /* treat specially nfbasis(T, 1): the deprecated way to initialize an nf when
+   * disc(T) is hard to factor */
+  if (typ(P) == t_INT && equali1(P)) P = utoipos(maxprime());
+  return nfbasis(T, NULL, P);
 }
+/* deprecated */
+GEN
+nfdisc_gp(GEN T, GEN P, GEN junk)
+{
+  if (!P || isintzero(P)) return nfdisc0(T, 0, junk);
+  if (junk) pari_err_FLAG("nfdisc");
+  /* treat specially nfdisc(T, 1) */
+  if (typ(P) == t_INT && equali1(P)) P = utoipos(maxprime());
+  return nfdisc0(T, 0, P);
+}
+/* deprecated */
 GEN
 nfbasis0(GEN x, long flag, GEN fa)
 {
@@ -691,12 +710,21 @@ nfbasis0(GEN x, long flag, GEN fa)
   GEN bas; _nfbasis(x, flag, fa, &bas, NULL);
   return gerepilecopy(av, bas);
 }
+/* deprecated */
 GEN
 nfdisc0(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN dK; _nfbasis(x, flag, fa, NULL, &dK);
   dK = icopy_avma(dK, av); avma = (pari_sp)dK; return dK;
+}
+
+GEN
+nfbasis(GEN x, GEN *pdK, GEN fa)
+{
+  pari_sp av = avma;
+  GEN bas; _nfbasis(x, 0, fa, &bas, pdK);
+  gerepileall(av, pdK? 2: 1, &bas, pdK); return bas;
 }
 GEN
 nfdisc(GEN x) { return nfdisc0(x, 0, NULL); }

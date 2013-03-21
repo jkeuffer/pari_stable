@@ -2277,9 +2277,8 @@ feasible. The situation may be improved in many ways:
 type. For example, one may know in advance some prime divisors of the
 discriminant. Hence we can ``help'' PARI by giving it that information. More
 precisely, we can use the function \kbd{addprimes} to inform PARI to keep on
-eye for these prime numbers. Do it only for big primes (bigger than
-\kbd{primelimit}, whose value you can get using \kbd{default})~--- it is
-useless otherwise.
+eye for these prime numbers. Do it only for big primes ! (Say, larger than
+\kbd{primelimit}.)
 
 2) The second way in which the situation may be improved is that often we do
 not need the complete information on the maximal order, but only require that
@@ -2287,26 +2286,26 @@ the order be $p$-maximal for a certain number of primes $p$ (but then, we
 may not be able to use functions which require a genuine \kbd{nf}). The
 function \kbd{nfbasis} specifically computes the integral basis and is not
 much quicker than \kbd{nfinit} so is not very useful in its standard use. But
-you can provide a factorization of the discriminant as an optional third
-argument. And here we can cheat, and give on purpose an incomplete
-factorization involving only the primes we want. For example coming back to
+we can provide a list of primes as an optional second argument: this returns
+a basis of an order which is $p$-maximal at the given primes.
+For example coming back to
 our initial polynomial $T$, the discriminant of the polynomial is
 $3^7\cdot7^6\cdot19\cdot37$. If we only want a $7$-maximal order, we simply
 type
 \bprog
-  nfbasis(T, ,[7,6; 1537461,1])
-@eprog\noindent
-and the factors of 1537461 will not be looked at! (In this example it would
-be stupid to cheat, but if the discriminant has 2000 digits, this can be a
-handy trick.)
+  nfbasis(T, [7])
+@eprog\noindent Of course, \kbd{nfbasis(T, [2,3,5,7])} would return an
+order which is maximal at $2,3,5,7$. A variant offers a nice generalization:
+\bprog
+  nfbasis(T, 10^5)
+@eprog\noindent will return an order which is maximal at all primes less than
+$10^5$.
 
-3) A last way will work if the \emph{field} discriminant is smooth (never
-mind the polynomial discriminant). Simply call \kbd{B = nfbasis(T, 1)}, which
-will return a basis for an order which is possibly not maximal. In fact, it
-will be maximal if the field discriminant is smooth with respect to the
-precomputed prime table, including \kbd{addprimes} offsprings (assuming the
-later are genuine primes). You may then input the resulting basis to
-\kbd{nfinit}, as \kbd{nfinit([T, B])}.
+3) Building on the previous points, \emph{if} the field discriminant is
+$y$-smooth (never mind the polynomial discriminant), up to a few big primes
+known to \kbd{addprimes}, then \kbd{B = nfbasis(T, y)} returns a basis for
+the maximal order! We can then input the resulting basis to \kbd{nfinit}, as
+\kbd{nfinit([T, B])}.
 
 \subsec{Ideals}
 

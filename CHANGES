@@ -154,7 +154,14 @@ BA 12- [darwin] do not use dylib_ prefix to ld options [#1210]
        underlying (Z/N)^* is cyclic
    17- renamed gen_eltorder -> gen_order
    18- logfile: strip properly color escape sequences [#1225]
-   19- allow nfdisc / nfbasis(f,, p) for a p-adic discriminant / max. order
+   19- change nfbasis(T, flag, fa) to nfbasis(T, listP). flag was used to invoke
+       round2 instead of round4 (inefficient=> useless) OR to only
+       partially factor poldisc(T), up to primelimit (very dangerous since
+       primelimit is a global variable). Now listP describes a list of primes,
+       and we return a basis of an order which is p-maximal at all those primes:
+       either a vector of primes, a factorisation (as fa before) or an integer
+       B to indicated {p <= B} (a safe and flexible version of nfbasis(T, 1)).
+       nfdisc() was changed similarly.
    20- first call isanypower() in BPSP_psp_nosmalldiv() when input is > 2^512
        [ < 1% of required time, 1 order of magnitude faster when it succeeds ]
        [ #1074 ]

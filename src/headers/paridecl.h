@@ -1282,7 +1282,7 @@ GEN     nf_to_Fq(GEN nf, GEN x, GEN modpr);
 GEN     nfM_to_FqM(GEN z, GEN nf,GEN modpr);
 GEN     nfV_to_FqV(GEN z, GEN nf,GEN modpr);
 GEN     nfX_to_FqX(GEN x, GEN nf,GEN modpr);
-GEN     nfbasis(GEN x, GEN *y,long flag,GEN p);
+GEN     nfbasis(GEN x, GEN *y,GEN p);
 GEN     nfbasis0(GEN x,long flag,GEN p);
 GEN     nfdisc0(GEN x,long flag, GEN p);
 void    nfmaxord(nfmaxord_t *S, GEN f, long flag, GEN w);
