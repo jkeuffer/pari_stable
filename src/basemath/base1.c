@@ -2264,7 +2264,7 @@ ordred(GEN x)
   if (!gequal1(leading_term(x))) pari_err_IMPL("ordred");
   if (!signe(x)) return RgX_copy(x);
   y = mkvec2(x, pol_x_powers(degpol(x), varn(x)));
-  return gerepileupto(av, Polred(y, 0, NULL));
+  return gerepileupto(av, polred(y));
 }
 
 GEN
