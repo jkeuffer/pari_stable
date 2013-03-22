@@ -514,24 +514,12 @@ static GEN
 padicff(GEN x,GEN p,long pr)
 {
   pari_sp av = avma;
-  GEN q, nf, g, e;
-  long v = Z_pvalrem(absi(ZX_disc(x)), p, &q);
+  GEN nf = zerovec(9); /* dummy nf */
   nfmaxord_t S;
-
-  if (is_pm1(q)) {
-    e = mkcol(utoi(v));
-    g = mkcol(p);
-  } else {
-    e = mkcol2(utoi(v), gen_1);
-    g = mkcol2(p, q);
-  }
-  nfmaxord(&S, x, nf_ROUND2, mkmat2(g,e));
-
-  nf = cgetg(10,t_VEC);
+  nfmaxord(&S, x, nf_ROUND2, mkvec(p));
   gel(nf,1) = x;
   gel(nf,3) = S.dK;
   gel(nf,4) = dvdii(S.index, p)? p: gen_1;
-  gel(nf,2) = gel(nf,5) = gel(nf,6) = gen_0;
   nf_set_multable(nf, S.basis, NULL);
   return gerepileupto(av, padicff2(nf,p,pr));
 }
