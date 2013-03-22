@@ -120,6 +120,7 @@ struct pari_evalstate
 struct gp_context
 {
   long listloc;
+  long prettyp;
   struct pari_evalstate eval;
   struct pari_parsestate parse;
   pariFILE *file;

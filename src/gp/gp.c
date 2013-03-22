@@ -1582,32 +1582,28 @@ gp_main_loop(long flag)
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
   struct gp_context rec;
+
+  if (flag & gp_RECOVER) /* set recovery point */
+  {
+    long er;
+    if ((er = setjmp(env[s_env.n-1])))
+    { /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
+      if (er > 0) { /* true error */
+        if (!(GP_DATA->recover)) exit(1);
+        gp_context_restore(&rec);
+        /* true error not from main instance, let caller sort it out */
+        if (!ismain) { kill_buffers_upto_including(b); return NULL; }
+      } else { /* allocatemem */
+        filestate_restore(rec.file);
+        gp_context_save(&rec);
+      }
+      avma = av = top;
+      kill_buffers_upto(b);
+    }
+  }
   for(;;)
   {
-    if (dorecover)
-    { /* set a recovery point */
-      static long outtyp;
-      long er;
-      outtyp = GP_DATA->fmt->prettyp;
-      gp_context_save(&rec);
-      /* recover: jump from error [ > 0 ] or allocatemem [ -1 ] */
-      if ((er = setjmp(env[s_env.n-1])))
-      {
-        if (er > 0) { /* true error */
-          if (!(GP_DATA->recover)) exit(1);
-          gp_context_restore(&rec);
-          /* true error not from main instance, let caller sort it out */
-          if (!ismain) { kill_buffers_upto_including(b); return NULL; }
-          GP_DATA->fmt->prettyp = outtyp;
-        } else { /* allocatemem */
-          filestate_restore(rec.file);
-          gp_context_save(&rec);
-        }
-        avma = av = top;
-        kill_buffers_upto(b);
-      }
-    }
-
+    if (dorecover) gp_context_save(&rec);
     if (! gp_read_line(&F, NULL))
     {
       if (popinfile()) gp_quit(0);

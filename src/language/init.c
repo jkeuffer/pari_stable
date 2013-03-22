@@ -819,6 +819,7 @@ gp_context_save(struct gp_context* rec)
   rec->file = pari_last_tmp_file();
   if (DEBUGFILES>1)
     err_printf("gp_context_save: %s\n", rec->file ? rec->file->name: "NULL");
+  rec->prettyp = GP_DATA->fmt->prettyp;
   rec->listloc = next_block;
   rec->iferr_env = iferr_env;
   rec->err_data  = global_err_data;
@@ -841,6 +842,7 @@ gp_context_restore(struct gp_context* rec)
   filestate_restore(rec->file);
   global_err_data = rec->err_data;
   iferr_env = rec->iferr_env;
+  GP_DATA->fmt->prettyp = rec->prettyp;
 
   for (i = 0; i < functions_tblsz; i++)
   {
