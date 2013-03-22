@@ -3345,10 +3345,7 @@ GEN
 ZM_det(GEN a)
 {
   long n = lg(a)-1;
-  if (typ(a)!=t_MAT) pari_err_TYPE("ZM_det",a);
   if (!n) return gen_1;
-  if (n != nbrows(a)) pari_err_DIM("ZM_det");
-  RgM_check_ZM(a, "ZM_det");
   return ZM_det_i(a, n);
 }
 
