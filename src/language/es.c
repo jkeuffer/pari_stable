@@ -3127,6 +3127,14 @@ gen_output_fun(GEN x, pariout_t *T, OUT_FUN out)
 }
 
 void
+fputGEN_pariout(GEN x, pariout_t *T, FILE *out)
+{
+  char *s = GENtostr_fun(x, T, get_fun(T->prettyp));
+  if (*s) set_last_newline(s[strlen(s)-1]);
+  fputs(s, out); free(s);
+}
+
+void
 gen_output(GEN x, pariout_t *T)
 {
   if (!T) T = GP_DATA->fmt;
@@ -3972,29 +3980,31 @@ switchin(const char *name)
 
 static int is_magic_ok(FILE *f);
 
+static FILE *
+switchout_get_FILE(const char *name)
+{
+  FILE* f;
+  /* only for ordinary files (to avoid blocking on pipes). */
+  if (pari_is_file(name))
+  {
+    f = fopen(name, "r");
+    if (f)
+    {
+      int magic = is_magic_ok(f);
+      fclose(f);
+      if (magic) pari_err_FILE("binary output file [ use writebin ! ]", name);
+    }
+  }
+  f = fopen(name, "a");
+  if (!f) pari_err_FILE("output file",name);
+  return f;
+}
+
 void
 switchout(const char *name)
 {
   if (name)
-  {
-    FILE* f;
-
-    /* Only do the read-check for ordinary files
-     * (to avoid blocking on pipes for example). */
-    if (pari_is_file(name))
-    {
-      f = fopen(name, "r");
-      if (f)
-      {
-        if (is_magic_ok(f))
-          pari_err_FILE("binary output file [ use writebin ! ]", name);
-        fclose(f);
-      }
-    }
-    f = fopen(name, "a");
-    if (!f) pari_err_FILE("output file",name);
-    pari_outfile = f;
-  }
+    pari_outfile = switchout_get_FILE(name);
   else if (pari_outfile != stdout)
   {
     fclose(pari_outfile);
@@ -4344,6 +4354,17 @@ pari_sprint0(const char *s, GEN g, long flag)
   str_print0(&S, g, flag);
   *S.cur = 0; return S.string;
 }
+static void
+print0_file(FILE *out, GEN g, long flag)
+{
+  pari_sp av = avma;
+  outString S;
+  str_init(&S, 1);
+  str_print0(&S, g, flag);
+  *S.cur = 0;
+  fputs(S.string, out);
+  avma = av;
+}
 
 void
 print0(GEN g, long flag) { out_print0(pariOut, NULL, g, flag); }
@@ -4482,32 +4503,20 @@ wr_check(const char *s) {
   return t;
 }
 
-/* Store last_was_newline before writing to restore it after writing. */
-static int wr_last_was_newline;
-
-/* Start writing to file s */
+/* write to file s */
 static void
-wr_init(const char *s)
+wr(const char *s, GEN g, long flag, int addnl)
 {
   char *t = wr_check(s);
-  switchout(t); pari_free(t);
-  wr_last_was_newline = pari_last_was_newline();
+  FILE *out = switchout_get_FILE(t);
+  pari_free(t);
+  print0_file(out, g, flag);
+  if (addnl) fputc('\n', out);
+  fflush(out);
 }
-
-/* End writing to file s, go back to stdout */
-static void
-wr_finish(void)
-{
-  pari_flush(); switchout(NULL);
-  pari_set_last_newline(wr_last_was_newline);
-}
-
-static void WR_NL(void) { pari_putc('\n'); wr_finish(); }
-static void WR_NO(void) { wr_finish(); }
-void write0  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
-void writetex(const char *s, GEN g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
-void write1  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
-
+void write0  (const char *s, GEN g) { wr(s, g, f_RAW, 1); }
+void writetex(const char *s, GEN g) { wr(s, g, f_TEX, 1); }
+void write1  (const char *s, GEN g) { wr(s, g, f_RAW, 0); }
 void gpwritebin(const char *s, GEN x) { char *t=wr_check(s); writebin(t, x); pari_free(t);}
 
 /*******************************************************************/

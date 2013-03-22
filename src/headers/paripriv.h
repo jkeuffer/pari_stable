@@ -328,6 +328,7 @@ typedef struct {
 
 void lim_lines_output(char *s, long n, long max);
 void gen_output(GEN x, pariout_t *T);
+void fputGEN_pariout(GEN x, pariout_t *T, FILE *out);
 
 void parsestate_reset(void);
 void parsestate_save(struct pari_parsestate *state);

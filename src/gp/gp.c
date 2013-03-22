@@ -2181,14 +2181,14 @@ main(int argc, char **argv)
  * the output.  Fill the output buffer, wait until it is read.
  * Better than sleep(2): give possibility to print */
 static void
-prettyp_wait(void)
+prettyp_wait(FILE *out)
 {
   const char *s = "                                                     \n";
   long i = 2000;
 
-  pari_puts("\n\n"); pari_flush(); /* start translation */
-  while (--i) pari_puts(s);
-  pari_puts("\n"); pari_flush();
+  fputs("\n\n", out); fflush(out); /* start translation */
+  while (--i) fputs(s, out);
+  fputs("\n", out); fflush(out);
 }
 
 /* initialise external prettyprinter (tex2mail) */
@@ -2210,18 +2210,14 @@ static int
 tex2mail_output(GEN z, long n)
 {
   pariout_t T = *(GP_DATA->fmt); /* copy */
-  FILE *o_out, *o_logfile = pari_logfile;
+  FILE *log = pari_logfile, *out;
 
   if (!prettyp_init()) return 0;
-  o_out = pari_outfile; /* save state */
-
+  out = GP_DATA->pp->file->file;
   /* Emit first: there may be lines before the prompt */
   if (n) term_color(c_OUTPUT);
   pari_flush();
-  pari_outfile = GP_DATA->pp->file->file;
   T.prettyp = f_TEX;
-  pari_logfile = NULL;
-
   /* history number */
   if (n)
   {
@@ -2230,48 +2226,42 @@ tex2mail_output(GEN z, long n)
     const char *c_out = term_get_color(NULL, c_OUTPUT);
     if (!(GP_DATA->flags & gpd_QUIET))
     {
-      char s[128];
       if (*c_hist || *c_out)
-        sprintf(s, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
-                c_hist, n, c_out);
+        fprintf(out, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
+                     c_hist, n, c_out);
       else
-        sprintf(s, "\\%%%ld = ", n);
-      pari_puts(s);
+        fprintf(out, "\\%%%ld = ", n);
     }
-    if (o_logfile) {
+    if (log) {
       switch (logstyle) {
       case logstyle_plain:
-        fprintf(o_logfile, "%%%ld = ", n);
+        fprintf(log, "%%%ld = ", n);
         break;
       case logstyle_color:
-        fprintf(o_logfile, "%s%%%ld = %s", c_hist, n, c_out);
+        fprintf(log, "%s%%%ld = %s", c_hist, n, c_out);
         break;
       case logstyle_TeX:
-        fprintf(o_logfile, "\\PARIout{%ld}", n);
+        fprintf(log, "\\PARIout{%ld}", n);
         break;
       }
     }
     avma = av;
   }
   /* output */
-  gen_output(z, &T);
-
+  fputGEN_pariout(z, &T, out);
   /* flush and restore, output to logfile */
-  prettyp_wait();
-  if (o_logfile) {
-    pari_outfile = o_logfile;
+  prettyp_wait(out);
+  if (log) {
     if (logstyle == logstyle_TeX) {
       T.TeXstyle |= TEXSTYLE_BREAK;
-      gen_output(z, &T);
-      pari_putc('%');
+      fputGEN_pariout(z, &T, log);
+      fputc('%', log);
     } else {
       T.prettyp = f_RAW;
-      gen_output(z, &T);
+      fputGEN_pariout(z, &T, log);
     }
-    pari_putc('\n'); pari_flush();
+    fputc('\n', log); fflush(log);
   }
-  pari_logfile = o_logfile;
-  pari_outfile = o_out;
   if (n) term_color(c_NONE);
   return 1;
 }
