@@ -546,7 +546,6 @@ pariFILE* try_pipe(const char *cmd, int flag);
 
 GEN     galoiscosets(GEN O, GEN perm);
 long    intheadlong(GEN x, GEN mod);
-long    isomborne(GEN P, GEN den, GEN p);
 GEN     listznstarelts(long m, long p);
 GEN     matheadlong(GEN W, GEN mod);
 GEN     matrixnorm(GEN M, long prec);

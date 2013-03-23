@@ -2320,18 +2320,6 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
 }
 
 /******************************************************************************/
-/* Isomorphism between number fields                                          */
-/******************************************************************************/
-long
-isomborne(GEN P, GEN den, GEN p)
-{
-  pari_sp av = avma;
-  struct galois_borne gb;
-  gb.l = p; (void)galoisborne(P,den,&gb);
-  avma = av; return gb.valsol;
-}
-
-/******************************************************************************/
 /* Galois theory related algorithms                                           */
 /******************************************************************************/
 GEN
