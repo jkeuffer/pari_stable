@@ -1765,6 +1765,10 @@ static void
 compilenode(long n, int mode, long flag)
 {
   long x,y;
+#ifdef STACK_CHECK
+  if (PARI_stack_limit && (void*) &x <= PARI_stack_limit)
+    pari_err(e_MISC, "expression nested too deeply");
+#endif
   if (n<0) pari_err_BUG("compilenode");
   x=tree[n].x;
   y=tree[n].y;
@@ -2236,6 +2240,10 @@ void
 optimizenode(long n)
 {
   long x,y;
+#ifdef STACK_CHECK
+  if (PARI_stack_limit && (void*) &x <= PARI_stack_limit)
+    pari_err(e_MISC, "expression nested too deeply");
+#endif
   if (n<0)
     pari_err_BUG("optimizenode");
   x=tree[n].x;
