@@ -1116,7 +1116,9 @@ pari_err2str(GEN e)
   long numerr = err_get_num(e);
   switch ((enum err_list) numerr)
   {
-  case e_MISC: case e_ALARM:
+  case e_ALARM:
+    return pari_sprintf("alarm interrupt after %Ps.",gel(e,2));
+  case e_MISC:
     return pari_sprintf("%Ps.",gel(e,2));
 
   case e_ARCH:

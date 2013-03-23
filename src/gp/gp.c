@@ -1035,14 +1035,9 @@ escape(char *tch, int ismain)
   }
 }
 
-/* Format a time of 'delay' ms */
-static char *
-gp_format_time(long delay)
+static void
+convert_time(char *s, long delay)
 {
-  static char buf[64];
-  char *s = buf;
-
-  term_get_color(s, c_TIME); s+=strlen(s);
   if (delay >= 3600000)
   {
     sprintf(s, "%ldh, ", delay / 3600000); s+=strlen(s);
@@ -1064,7 +1059,20 @@ gp_format_time(long delay)
     }
   }
   sprintf(s, "%ld ms", delay); s+=strlen(s);
-  term_get_color(s, c_NONE); s+=strlen(s);
+}
+
+/* Format a time of 'delay' ms */
+static char *
+gp_format_time(long delay)
+{
+  static char buf[64];
+  char *s = buf;
+
+  term_get_color(s, c_TIME);
+  convert_time(s + strlen(s), delay);
+  s+=strlen(s);
+  term_get_color(s, c_NONE);
+  s+=strlen(s);
   *s++ = '.'; *s++ = '\n'; *s = 0; return buf;
 }
 
@@ -1583,7 +1591,7 @@ gp_main_loop(long flag)
   Buffer *b = filtered_buffer(&F);
   struct gp_context rec;
 
-  if (flag & gp_RECOVER) /* set recovery point */
+  if (dorecover) /* set recovery point */
   {
     long er;
     if ((er = setjmp(env[s_env.n-1])))
@@ -1646,15 +1654,19 @@ gp_main_loop(long flag)
 /********************************************************************/
 static void
 gp_sigint_fun(void) {
+  char buf[64];
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
-  pari_sigint( gp_format_time(timer_get(GP_DATA->T)) );
+  convert_time(buf, timer_get(GP_DATA->T));
+  pari_sigint(buf);
 }
 
 #ifdef SIGALRM
 static void
 gp_alarm_fun(void) {
+  char buf[64];
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
-  pari_err(e_ALARM, gp_format_time(timer_get(GP_DATA->T)));
+  convert_time(buf, timer_get(GP_DATA->T));
+  pari_err(e_ALARM, buf);
 }
 #endif /* SIGALRM */
 
