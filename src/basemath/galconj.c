@@ -2495,7 +2495,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
         err_printf("GaloisConj:increase p-adic prec by %ld.\n", Pgb.valabs-val);
       PL = ZpX_liftroots(P, PL, Pgb.l, Pgb.valabs);
       L  = ZpX_liftroots(T, L, Pgb.l, Pgb.valabs);
-      mod = Pgb.ladicabs;
+      mod = Pgb.ladicabs; mod2 = shifti(mod,-1);
     }
     PM = vandermondeinversemod(PL, P, Pden, mod);
     if (y < 0) y = fetch_user_var("y");
