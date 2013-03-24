@@ -326,7 +326,7 @@ matrixnorm(GEN M, long prec)
 }
 
 static GEN
-galoisborne(GEN T, GEN dn, struct galois_borne *gb)
+galoisborne(GEN T, GEN dn, struct galois_borne *gb, long d)
 {
   pari_sp ltop = avma, av2;
   GEN borne, borneroots, borneabs;
@@ -343,7 +343,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
   borne = matrixnorm(M, prec);
   borneroots = gsupnorm(L, prec); /*t_REAL*/
   n = degpol(T);
-  borneabs = addsr(1, gmulsg(n, powru(borneroots, n)));
+  borneabs = addsr(1, gmul(borne,gmulsg(d, powru(borneroots, d))));
   borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
@@ -1956,7 +1956,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     long j;
     if (!galoisanalysis(P, &Pga, 0)) return NULL;
     Pgb.l = gb->l;
-    Pden = galoisborne(P, NULL, &Pgb);
+    Pden = galoisborne(P, NULL, &Pgb, degpol(P));
 
     if (Pgb.valabs > gb->valabs)
     {
@@ -2206,7 +2206,7 @@ galoisconj4_main(GEN T, GEN den, long flag)
   }
   gb.l = utoipos(ga.l);
   if (DEBUGLEVEL >= 1) timer_start(&ti);
-  den = galoisborne(T, den, &gb);
+  den = galoisborne(T, den, &gb, degpol(T));
   if (DEBUGLEVEL >= 1) timer_printf(&ti, "galoisborne()");
   L = rootpadicfast(T, gb.l, gb.valabs);
   if (DEBUGLEVEL >= 1) timer_printf(&ti, "rootpadicfast()");
@@ -2476,7 +2476,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     struct galois_borne Pgb;
     long val = itos(gal_get_e(gal));
     Pgb.l = gal_get_p(gal);
-    Pden = galoisborne(P, NULL, &Pgb);
+    Pden = galoisborne(P, NULL, &Pgb, degpol(T)/degpol(P));
     if (Pgb.valabs > val)
     {
       if (DEBUGLEVEL>=4)

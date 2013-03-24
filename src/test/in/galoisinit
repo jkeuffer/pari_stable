@@ -31,3 +31,15 @@ nfgaloisapply(nf,s,idealhnf(nf,pr))
 nfgaloisapply(nf,s,pr)
 nfgaloisapply(nf,s,x^2+x)
 
+galoistest(P)=
+{
+  my(G,F,L);
+  G=galoisinit(P);
+  F=galoissubfields(G,2);
+  for (i=1,#F, my(L=F[i]);
+    if (subst(L[1],x,L[2])!=0,
+       error("galoissubfields1"));
+    if (factorback(L[3]*Mod(1,subst(L[1],x,y)))!=P,
+       error("galoissubfields2")));
+}
+galoistest(x^4 + 431452248691495692750746750*x^3+447244936830156353775324765*x^2+5580140636706480467906000*x - 238676773812533681600);

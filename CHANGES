@@ -129,6 +129,8 @@ BA 107- polhermite(66) -> corrupted result [#1393]
    109- isprime(p, 0) would return 0 for primes p such that p-1 was
         sufficiently but not completely factored [ incorrect call to Selfridge
         test asking to certify the unfactored par as well ]
+BA 110- galoisfixedfield() could return a wrong result for polynomials with large
+        roots [#1406]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
