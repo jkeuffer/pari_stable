@@ -49,7 +49,8 @@ typedef struct {
 } nfbasic_t;
 
 typedef struct {
-  GEN dT; /* discriminant of defining polynomial */
+  GEN T, dT; /* monic defining polynomial, disc(T) */
+  GEN leadT0; /* leading coefficient of ORIGINAL polynomial */
   GEN dK; /* field discriminant */
   GEN index; /* index of power basis in maximal order */
   GEN dTP, dTE; /* (possibly partial) factorization of dT, primes / exponents */

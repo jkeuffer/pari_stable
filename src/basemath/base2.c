@@ -51,15 +51,56 @@ fact_from_factors(GEN *D, GEN P, long flag)
   setlg(E,iq); return mkmat2(Q,E);
 }
 
-static void
-nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
+/* d a t_INT; f a t_MAT factorisation of some t_INT sharing some divisors
+ * with d, or a prime (t_INT). Return a factorization F of d: "primes"
+ * entries in f _may_ be composite, and are included as is in d. */
+static GEN
+update_fact(GEN d, GEN f)
 {
-  GEN dT, E, P;
-  long l;
+  GEN P;
+  switch (typ(f))
+  {
+    case t_INT: return f;
+    case t_VEC: case t_COL: P = f; break;
+    case t_MAT:
+      if (lg(f) == 3) { P = gel(f,1); break; }
+    /*fall through*/
+    default:
+      pari_err_TYPE("nfbasis [factorization expected]",f);
+      return NULL;
+  }
+  return fact_from_factors(&d, P, 1);
+}
+static GEN
+ZX_Q_normalize_fact(GEN x, GEN *L, GEN *fa)
+{
+  x = ZX_Q_normalize(x, L);
+  /* x = C x0(t/L); disc x = C^2(d - 1) L^-(d(d-1)) disc(x0), d = deg(x) */
+  if (*fa && !isint1(*L)) *fa = update_fact(ZX_disc(x), *fa);
+  return x;
+}
 
-  if (typ(T)!=t_POL) pari_err_TYPE("nfmaxord",T);
+static void
+nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
+{
+  GEN dT, E, P, fa = NULL;
+  pari_timer t;
+  long l, ty = typ(T);
+
+  if (DEBUGLEVEL) timer_start(&t);
+  if (ty == t_VEC) {
+    if (lg(T) != 3) pari_err_TYPE("nfmaxord",T);
+    fa = gel(T,2); T = gel(T,1); ty = typ(T);
+  }
+  if (ty != t_POL) pari_err_TYPE("nfmaxord",T);
+  T = Q_primpart(T);
   if (degpol(T) <= 0) pari_err_CONSTPOL("nfmaxord");
-
+  RgX_check_ZX(T, "nfmaxord");
+  if (flag & nf_RED || !equali1(gel(T,lg(T)-1)))
+    T = ZX_Q_normalize_fact(T, &(S->leadT0), &fa);
+  else
+    S->leadT0 = gen_1;
+  S->T = T;
   if (fa) {
     switch(typ(fa))
     {
@@ -102,6 +143,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   }
   S->dTP = P;
   S->dTE = vec_to_vecsmall(E);
+  if (DEBUGLEVEL) timer_printf(&t, "disc. factorisation");
 }
 
 static int
@@ -157,9 +199,9 @@ diag_denom(GEN M)
   return d;
 }
 static void
-allbase_from_maxord(nfmaxord_t *S, GEN maxord, GEN P, GEN f)
+allbase_from_maxord(nfmaxord_t *S, GEN maxord, GEN P)
 {
-  GEN a = NULL, da = NULL, index, P2, E2, D;
+  GEN f = S->T, a = NULL, da = NULL, index, P2, E2, D;
   long n = degpol(f), lP = lg(P), i, j, k;
   int centered = 0;
   for (i=1; i<lP; i++)
@@ -557,9 +599,9 @@ maxord2(GEN cf, GEN p, long epsilon)
  *  2) discriminant of K (in *y).
  */
 static void
-allbase2(nfmaxord_t *S, GEN f)
+allbase2(nfmaxord_t *S)
 {
-  GEN cf, maxord, P = S->dTP, E = S->dTE;
+  GEN cf, maxord, P = S->dTP, E = S->dTE, f = S->T;
   long i, lP = lg(P), n = degpol(f);
 
   cf = cgetg(n+1,t_VEC); gel(cf,2) = companion(f);
@@ -572,7 +614,7 @@ allbase2(nfmaxord_t *S, GEN f)
     if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n", p, e);
     gel(maxord,i) = e == 1? gen_1: maxord2(cf, p, e);
   }
-  allbase_from_maxord(S, maxord, P, f);
+  allbase_from_maxord(S, maxord, P);
 }
 
 /*******************************************************************/
@@ -587,18 +629,13 @@ static GEN maxord(GEN p,GEN f,long mf);
 /* return integer basis. If fa not NULL, taken to be the factorization
  * of disc(T) or a prime divisor thereof [no consistency check] */
 void
-nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
+nfmaxord(nfmaxord_t *S, GEN T, long flag)
 {
   VOLATILE GEN P, E, O;
   VOLATILE long lP, i, k;
 
-  {
-    pari_timer t;
-    if (DEBUGLEVEL) timer_start(&t);
-    nfmaxord_check_args(S, T, flag, fa);
-    if (DEBUGLEVEL) timer_printf(&t, "disc. factorisation");
-  }
-  if (flag & nf_ROUND2) { allbase2(S, T); return; }
+  nfmaxord_check_args(S, T, flag);
+  if (flag & nf_ROUND2) { allbase2(S); return; }
   P = S->dTP; lP = lg(P);
   E = S->dTE;
   O = cgetg(1, t_VEC);
@@ -628,54 +665,18 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
       for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
     } pari_RETRY {
       if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n",P[i],E[i]);
-      O = shallowconcat(O, mkvec( maxord(gel(P,i),T,E[i]) ));
+      O = shallowconcat(O, mkvec( maxord(gel(P,i),S->T,E[i]) ));
     } pari_ENDCATCH;
   }
-  allbase_from_maxord(S, O, P, T);
-}
-
-/* d a t_INT; f a t_MAT factorisation of some t_INT sharing some divisors
- * with d, or a prime (t_INT). Return a factorization F of d: "primes"
- * entries in f _may_ be composite, and are included as is in d. */
-static GEN
-update_fact(GEN d, GEN f)
-{
-  GEN P;
-  switch (typ(f))
-  {
-    case t_INT: return f;
-    case t_VEC: case t_COL: P = f; break;
-    case t_MAT:
-      if (lg(f) == 3) { P = gel(f,1); break; }
-    /*fall through*/
-    default:
-      pari_err_TYPE("nfbasis [factorization expected]",f);
-      return NULL;
-  }
-  return fact_from_factors(&d, P, 1);
-}
-
-GEN
-ZX_Q_normalize_fact(GEN x, GEN *L, GEN *fa)
-{
-  x = ZX_Q_normalize(x, L);
-  /* x = C x0(t/L); disc x = C^2(d - 1) L^-(d(d-1)) disc(x0), d = deg(x) */
-  if (*fa && !isint1(*L)) *fa = update_fact(ZX_disc(x), *fa);
-  return x;
+  allbase_from_maxord(S, O, P);
 }
 
 static void
-_nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
+_nfbasis(GEN x, long flag, GEN fa, GEN *pbas, GEN *pdK)
 {
-  GEN x, L;
   nfmaxord_t S;
-
-  if (typ(x0)!=t_POL) pari_err_TYPE("nfbasis",x0);
-  if (degpol(x0) <= 0) pari_err_CONSTPOL("nfbasis");
-  RgX_check_ZX(x0, "nfbasis");
-  x = ZX_Q_normalize_fact(x0, &L, &fa);
-  nfmaxord(&S, x, flag, fa);
-  if (pbas) *pbas = RgXV_unscale(S.basis, L);
+  nfmaxord(&S, fa? mkvec2(x,fa): x, flag & nf_RED);
+  if (pbas) *pbas = RgXV_unscale(S.basis, S.leadT0);
   if (pdK)  *pdK = S.dK;
 }
 

@@ -894,13 +894,13 @@ which is square and invertible over $\F_2$.
 A number field $K = \Q[X]/(T)$ is defined by a monic $T\in\Z[X]$. The
 low-level function computing a maximal order is
 
-\fun{void}{nfmaxord}{nfmaxord_t *S, GEN T, long flag, GEN fa}, where
+\fun{void}{nfmaxord}{nfmaxord_t *S, GEN T, long flag}, where
 the polynomial $T$ is as above.
 
 The structure \tet{nfmaxord_t} is initialized by the call; it has the
 following fields:
 \bprog
-  GEN dT, dK; /* discriminants of T and K */
+  GEN T, dT, dK; /* T, discriminants of T and K */
   GEN index; /* index of power basis in maximal order */
   GEN dTP, dTE; /* factorization of |dT|, primes / exponents */
   GEN dKP, dKE; /* factorization of |dK|, primes / exponents */
@@ -919,11 +919,9 @@ and \kbd{dKP} need not all be primes. But the resulting \kbd{dK},
 \tet{nf_ROUND2}: use the ROUND2 algorithm instead of the default ROUND4
 (do not use that, it is slower).
 
-If \kbd{fa} is not \kbd{NULL}, it is assumed to be the factorization of
-the absolute value of the discriminant of $T$. It is not mandatory that all
-entries in the first column be primes; this is useful if only a local  integral
-basis  for  some small set of places is desired: only factors with exponents
-greater or equal to $2$ will be considered.
+$T$ is the input polynomial (monic \kbd{ZX}). The format $[T, \kbd{listP}]$
+is also recognized, where \kbd{listP} is as in \tet{nfbasis} and is used to
+compute a local integral basis with respect to a specific set of primes.
 
 \fun{GEN}{indexpartial}{GEN T, GEN dT} $T$ a monic separable \kbd{ZX},
 \kbd{dT} is either \kbd{NULL} (no information) or a multiple of the

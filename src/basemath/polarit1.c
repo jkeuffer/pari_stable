@@ -516,7 +516,7 @@ padicff(GEN x,GEN p,long pr)
   pari_sp av = avma;
   GEN nf = zerovec(9); /* dummy nf */
   nfmaxord_t S;
-  nfmaxord(&S, x, nf_ROUND2, mkvec(p));
+  nfmaxord(&S, mkvec2(x, mkvec(p)), nf_ROUND2);
   gel(nf,1) = x;
   gel(nf,3) = S.dK;
   gel(nf,4) = dvdii(S.index, p)? p: gen_1;

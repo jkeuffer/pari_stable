@@ -1287,7 +1287,7 @@ GEN     nfX_to_FqX(GEN x, GEN nf,GEN modpr);
 GEN     nfbasis(GEN x, GEN *y,GEN p);
 GEN     nfbasis0(GEN x,long flag,GEN p);
 GEN     nfdisc0(GEN x,long flag, GEN p);
-void    nfmaxord(nfmaxord_t *S, GEN f, long flag, GEN w);
+void    nfmaxord(nfmaxord_t *S, GEN T, long flag);
 GEN     nfmodprinit(GEN nf, GEN pr);
 GEN     nfreducemodpr(GEN nf, GEN x, GEN modpr);
 GEN     polcompositum0(GEN P, GEN Q,long flag);

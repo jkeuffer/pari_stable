@@ -1754,12 +1754,30 @@ get_nfindex(GEN bas)
   return gerepileuptoint(av, D);
 }
 
-/* monic integral polynomial + integer basis */
-static int
-is_polbas(GEN x)
+/* Either nf type or ZX or [monic ZX, data], where data is either an integral
+ * basis (deprecated), or listP data (nfbasis input format) to specify
+ * a set of primes at with the basis order must be maximal.
+ * 1) nf type: return t_VEC
+ * 2) ZX or [ZX, listP]: return t_POL
+ * 3) [ZX, order basis]: return 0 (deprecated) */
+static long
+nf_input_type(GEN x)
 {
-  return (typ(x) == t_VEC && lg(x)==3
-          && typ(gel(x,1))==t_POL && lg(gel(x,2))-1 == degpol(gel(x,1)));
+  switch(typ(x))
+  {
+    case t_POL: return t_POL;
+    case t_VEC:
+      if (lg(x) == 3 && typ(gel(x,1)) == t_POL) {
+        GEN v = gel(x,2);
+        switch(typ(v))
+        {
+          case t_INT: case t_MAT: return t_POL;
+          case t_VEC: return RgV_is_ZV(v)? t_POL: 0;
+        }
+        if (lg(gel(x,2))-1 == degpol(gel(x,1))) return t_POL;
+      }
+    default: return t_VEC; /* nf */
+  }
 }
 
 static void
@@ -1771,48 +1789,47 @@ nfbasic_add_disc(nfbasic_t *T)
 }
 
 static void
-nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
+nfbasic_init(GEN x, long flag, nfbasic_t *T)
 {
-  GEN bas, dK, dx, index;
+  GEN bas, dK, dx, index, lead = gen_1;
   long r1;
 
   T->basden = NULL;
-  T->lead   = gen_1;
-  if (typ(x) == t_POL)
+  switch (nf_input_type(x))
   {
-    nfmaxord_t S;
-    x = Q_primpart(x);
-    RgX_check_ZX(x, "nfinit");
-    if (!ZX_is_irred(x)) pari_err_IRREDPOL("nfinit",x);
-    if (flag & nf_RED || !equali1(gel(x,lg(x)-1)))
-      x = ZX_Q_normalize_fact(x, &(T->lead), &fa);
-    nfmaxord(&S, x, flag, fa);
-    index = S.index;
-    dx = S.dT;
-    dK = S.dK;
-    bas = S.basis;
-    r1 = sturm(x);
+    case t_POL:
+    {
+      nfmaxord_t S;
+      nfmaxord(&S, x, flag);
+      lead = S.leadT0;
+      x = S.T; if (!ZX_is_irred(x)) pari_err_IRREDPOL("nfinit",x);
+      dK = S.dK;
+      index = S.index;
+      bas = S.basis;
+      dx = S.dT;
+      r1 = sturm(x);
+      break;
+    }
+    case t_VEC:
+    { /* nf, bnf, bnr */
+      GEN nf = checknf(x);
+      x     = nf_get_pol(nf);
+      dK    = nf_get_disc(nf);
+      index = nf_get_index(nf);
+      bas   = nf_get_zk(nf);
+      dx = NULL;
+      r1 = nf_get_r1(nf);
+      break;
+    }
+    default: /* DEPRECATED: monic integral polynomial + integer basis */
+      bas = gel(x,2); x = gel(x,1);
+      index = NULL;
+      dx = NULL;
+      dK = NULL;
+      r1 = sturm(x);
   }
-  else if (is_polbas(x))
-  { /* monic integral polynomial + integer basis */
-    bas = gel(x,2); x = gel(x,1);
-    index = NULL;
-    dx = NULL;
-    dK = NULL;
-    r1 = sturm(x);
-  }
-  else
-  { /* nf, bnf, bnr */
-    GEN nf = checknf(x);
-    x     = nf_get_pol(nf);
-    dK    = nf_get_disc(nf);
-    index = nf_get_index(nf);
-    bas   = nf_get_zk(nf);
-    dx = NULL;
-    r1 = nf_get_r1(nf);
-  }
-
   T->x     = x;
+  T->lead  = lead;
   T->r1    = r1;
   T->dx    = dx;
   T->dK    = dK;
@@ -1832,7 +1849,7 @@ nfinitall(GEN x, long flag, long prec)
   GEN nf, lead;
   nfbasic_t T;
 
-  nfbasic_init(x, flag, NULL, &T);
+  nfbasic_init(x, flag, &T);
   nfbasic_add_disc(&T); /* more expensive after set_LLL_basis */
   lead = T.lead;
   if (lead != gen_1 && !(flag & nf_RED))
@@ -2192,7 +2209,7 @@ Polred(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN ro;
-  nfbasic_t T; nfbasic_init(x, flag & nf_PARTIALFACT, fa, &T);
+  nfbasic_t T; nfbasic_init(fa? mkvec2(x,fa): x, flag & nf_PARTIALFACT, &T);
   return gerepilecopy(av, polred_aux(&T, &ro, flag & nf_ORIG));
 }
 
@@ -2232,7 +2249,7 @@ polredbest(GEN x, long flag)
     case 0: fl = nf_PARTIALFACT; break;
     case 1: fl = nf_PARTIALFACT|nf_ORIG; break;
   }
-  nfbasic_init(x, fl, NULL, &T);
+  nfbasic_init(x, fl, &T);
   polredbest_aux(&T, &ro, &x, &dx, &b);
   if (flag)
   {
@@ -2490,7 +2507,7 @@ polredabs0(GEN x, long flag)
   GEN y, a, u;
   nfbasic_t T;
 
-  nfbasic_init(x, flag & nf_PARTIALFACT, NULL, &T);
+  nfbasic_init(x, flag & nf_PARTIALFACT, &T);
   x = T.x; vx = varn(x);
 
   if (degpol(x) == 1)
