@@ -787,13 +787,14 @@ GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
 GEN     nm_Z_mul(GEN X, GEN c);
 GEN     zm_to_ZM(GEN z);
-int     zv_equal0(GEN V);
 long    zv_content(GEN x);
 int     zv_equal(GEN V, GEN W);
+int     zv_equal0(GEN V);
 GEN     zv_neg(GEN x);
 long    zv_prod(GEN v);
 GEN     zv_prod_Z(GEN v);
 long    zv_sum(GEN v);
+GEN     zv_z_mul(GEN v, long n);
 int     zvV_equal(GEN V, GEN W);
 
 /* ZX.c */

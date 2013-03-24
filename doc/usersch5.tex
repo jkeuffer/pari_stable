@@ -5842,6 +5842,9 @@ $x_{i,i}>x_{i,j} \ge 0$.
 \fun{GEN}{zv_neg}{GEN x} return $-x$. No check for overflow is done, which
 occurs in the fringe case where an entry is equal to $2^{\B-1}$.
 
+\fun{GEN}{zv_z_mul}{GEN x, long n} return $n\*x$. No check for overflow is
+done.
+
 \fun{long}{zv_content}{GEN x} returns the gcd of the entries of $x$.
 
 \fun{long}{zv_prod}{GEN x} returns the product of all the components

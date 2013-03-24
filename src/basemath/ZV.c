@@ -391,6 +391,15 @@ ZC_z_mul(GEN X, long c)
   return A;
 }
 
+GEN
+zv_z_mul(GEN M, long n)
+{
+  long l;
+  GEN N = cgetg_copy(M, &l);
+  while (--l > 0) N[l] = M[l]*n;
+  return N;
+}
+
 /* return a ZM */
 GEN
 nm_Z_mul(GEN X, GEN c)
