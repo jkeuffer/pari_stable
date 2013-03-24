@@ -1035,7 +1035,7 @@ FpMs_structelim_back(GEN M, GEN V, GEN prow, GEN p)
 GEN
 FpMs_leftkernel_elt(GEN M, long nbrow, GEN p)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   GEN pcol, prow;
   long nbi=lg(M)-1;
   long i, n;
@@ -1054,8 +1054,10 @@ FpMs_leftkernel_elt(GEN M, long nbrow, GEN p)
   W.E = (void*) Mp;
   W.f = wrap_relker;
   W.p = p;
+  av2 = avma;
   for(;;)
   {
+    avma = av2;
     B = cgetg(n+1,t_VEC);
     for(i=1; i<=n; i++)
       gel(B,i) = randomi(p);
