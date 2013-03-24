@@ -793,6 +793,21 @@ F2xq_pow(GEN x, GEN n, GEN pol)
   return gerepileupto(av, y);
 }
 
+GEN
+F2xq_powu(GEN x, ulong n, GEN pol)
+{
+  pari_sp av=avma;
+  GEN y;
+  switch(n)
+  {
+    case 0: return pol1_F2x(x[1]);
+    case 1: return vecsmall_copy(x);
+    case 2: return F2xq_sqr(x,pol);
+  }
+  y = gen_powu(x, n, (void*)pol, &_F2xq_sqr, &_F2xq_mul);
+  return gerepileupto(av, y);
+}
+
 /* generates the list of powers of x of degree 0,1,2,...,l*/
 GEN
 F2xq_powers(GEN x, long l, GEN T)

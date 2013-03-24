@@ -842,7 +842,7 @@ F2x_split(ulong m, GEN *t, long d)
   v=(*t)[1]; av0=avma;
   for(av=avma;;avma=av)
   {
-    GEN w0 = w = F2xq_pow(polx_F2x(v), utoi(m-1), *t); m += 2;
+    GEN w0 = w = F2xq_powu(polx_F2x(v), m-1, *t); m += 2;
     for (l=1; l<d; l++) w = F2x_add(w0, F2xq_sqr(w, *t));
     w = F2x_gcd(*t,w);
     l = F2x_degree(w); if (l && l!=dv) break;
