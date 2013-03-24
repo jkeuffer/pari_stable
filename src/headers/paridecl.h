@@ -1390,6 +1390,7 @@ GEN     famat_reduce(GEN fa);
 GEN     famat_to_nf(GEN nf, GEN f);
 GEN     famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX);
 GEN     famat_to_nf_moddivisor(GEN nf, GEN g, GEN e, GEN bid);
+GEN     famatsmall_reduce(GEN fa);
 GEN     idealtwoelt(GEN nf, GEN ix);
 GEN     idealtwoelt0(GEN nf, GEN ix, GEN a);
 GEN     idealtwoelt2(GEN nf, GEN x, GEN a);

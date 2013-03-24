@@ -1121,6 +1121,40 @@ famat_reduce(GEN fa)
 }
 
 GEN
+famatsmall_reduce(GEN fa)
+{
+  GEN E, G, L, g, e;
+  long i, k, l;
+  if (lg(fa) == 1) return fa;
+  g = gel(fa,1); l = lg(g);
+  e = gel(fa,2);
+  L = vecsmall_indexsort(g);
+  G = cgetg(l, t_VECSMALL);
+  E = cgetg(l, t_VECSMALL);
+  /* merge */
+  for (k=i=1; i<l; i++,k++)
+  {
+    G[k] = g[L[i]];
+    E[k] = e[L[i]];
+    if (k > 1 && G[k] == G[k-1])
+    {
+      E[k-1] += E[k];
+      k--;
+    }
+  }
+  /* kill 0 exponents */
+  l = k;
+  for (k=i=1; i<l; i++)
+    if (E[i])
+    {
+      G[k] = G[i];
+      E[k] = E[i]; k++;
+    }
+  setlg(G, k);
+  setlg(E, k); return mkmat2(G,E);
+}
+
+GEN
 ZM_famat_limit(GEN fa, GEN limit)
 {
   pari_sp av;
