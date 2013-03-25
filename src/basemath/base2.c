@@ -28,24 +28,30 @@ safe_Z_pvalrem(GEN x, GEN p, GEN *z)
   return Z_pvalrem(x, p, z);
 }
 /* D an integer, P a ZV, return a factorization matrix for D over P, removing
- * entries with 0 exponent. Replace D by its cofactor */
+ * entries with 0 exponent. */
 static GEN
-fact_from_factors(GEN *D, GEN P, long flag)
+fact_from_factors(GEN D, GEN P, long flag)
 {
   long i, l = lg(P), iq = 1;
-  GEN Q = cgetg(l,t_COL);
-  GEN E = cgetg(l,t_COL);
+  GEN Q = cgetg(l+1,t_COL);
+  GEN E = cgetg(l+1,t_COL);
   for (i=1; i<l; i++)
   {
     GEN p = gel(P,i);
     long k;
     if (flag && !equalim1(p))
     {
-      p = gcdii(p, *D);
+      p = gcdii(p, D);
       if (is_pm1(p)) continue;
     }
-    k = safe_Z_pvalrem(*D, p, D);
+    k = safe_Z_pvalrem(D, p, &D);
     if (k) { gel(Q,iq) = p; gel(E,iq) = utoipos(k); iq++; }
+  }
+  if (signe(D) < 0) D = absi(D);
+  if (!is_pm1(D))
+  {
+    long k = Z_isanypower(D, &D);
+    gel(Q,iq) = D; gel(E,iq) = utoipos(k ? k: 1);
   }
   setlg(Q,iq);
   setlg(E,iq); return mkmat2(Q,E);
@@ -69,7 +75,7 @@ update_fact(GEN d, GEN f)
       pari_err_TYPE("nfbasis [factorization expected]",f);
       return NULL;
   }
-  return fact_from_factors(&d, P, 1);
+  return fact_from_factors(d, P, 1);
 }
 static GEN
 ZX_Q_normalize_fact(GEN x, GEN *L, GEN *fa)
@@ -110,8 +116,8 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
         fa = leafcopy(fa); settyp(fa, t_COL);/*fall through*/
       case t_COL:
       {
-        GEN d = dT = ZX_disc(T);
-        fa = fact_from_factors(&d, fa, 0);
+        dT = ZX_disc(T);
+        fa = fact_from_factors(dT, fa, 0);
         break;
       }
       case t_INT:

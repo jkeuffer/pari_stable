@@ -1520,7 +1520,7 @@ GEN
 nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
 {
   GEN nf = cgetg(10,t_VEC);
-  GEN x = T->x, absdK, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
+  GEN x = T->x, absdK, Tr, D, TI, A, dA, MDI, mat = cgetg(9,t_VEC);
   long n = degpol(T->x);
   nffp_t F;
   get_nf_fp_compo(T, &F, ro, prec);
@@ -1557,7 +1557,25 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   gel(mat,3) = RM_round_maxrank(F.G);
   gel(mat,4) = Tr;
   gel(mat,5) = D;
+  gel(mat,8) = T->dKP? shallowtrans(T->dKP): cgetg(1,t_VEC);
   return nf;
+}
+
+GEN
+nfcertify(GEN nf)
+{
+  long i, l;
+  GEN dKP, v;
+  nf = checknf(nf);
+  dKP = gmael(nf, 5, 8);
+  l = lg(dKP);
+  v = vectrunc_init(l);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(dKP,i);
+    if (!isprime(p)) vectrunc_append(v, icopy(p));
+  }
+  fixlg(v, lg(v)); return v;
 }
 
 static GEN
@@ -1795,6 +1813,7 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
   long r1;
 
   T->basden = NULL;
+  T->dKP = NULL;
   switch (nf_input_type(x))
   {
     case t_POL:
@@ -1803,6 +1822,7 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
       nfmaxord(&S, x, flag);
       lead = S.leadT0;
       x = S.T; if (!ZX_is_irred(x)) pari_err_IRREDPOL("nfinit",x);
+      T->dKP = S.dKP;
       dK = S.dK;
       index = S.index;
       bas = S.basis;
@@ -1821,7 +1841,7 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
       r1 = nf_get_r1(nf);
       break;
     }
-    default: /* DEPRECATED: monic integral polynomial + integer basis */
+    default: /* monic integral polynomial + integer basis */
       bas = gel(x,2); x = gel(x,1);
       index = NULL;
       dx = NULL;

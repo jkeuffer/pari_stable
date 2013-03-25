@@ -283,6 +283,16 @@ BA 97- zv_cmp0 renamed to zv_equal0
   104- when timer = 1, no longer print timing if the time is negligible;
        in particular, no timing should be printed when defining a user function
        or and alias.
+  105- The proper way to initialize an nf structure when the polynomial
+       discriminant is hard to factor is nfinit([T, listP]), where listP
+       specifies a list of primes (see ??nfinit). nfdisc, nfbasis, all the
+       polred functions allow analogous arguments (see Changed-19). This is
+       cleaner and more flexible than old flags relying on the value
+       primelimit (e.g. nfinit([T, nfbasis(T, 1)]), now deprecated). Also,
+       the nfinit function now sees the local specifications and can
+       take steps to avoid problems (instead of taking for granted a basis,
+       without knowing whether it is correct or not). The result can
+       also be certified (nfcertify)
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -440,6 +450,7 @@ BA 139- mips and mips64 level0 inline assembly kernel
    141- PARI functions init_primepointer_geq, init_primepointer_gt,
         init_primepointer_leq, init_primepointer_lt
 BA 142- new default strictargs for mandatory arguments
+   143- GP function nfcertify
 
   Removed
     1- dropped DOS support

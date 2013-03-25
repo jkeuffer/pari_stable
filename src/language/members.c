@@ -210,7 +210,7 @@ nfmats(GEN x)
   GEN y;
   if (!x) return NULL;
   y = gel(x,5);
-  if (typ(y) == t_VEC && lg(y) != 8) return NULL;
+  if (typ(y) == t_VEC && lg(y) < 8) return NULL;
   return y;
 }
 

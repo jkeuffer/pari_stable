@@ -2,13 +2,17 @@ Function: nfdisc
 Section: number_fields
 C-Name: nfdisc_gp
 Prototype: GDGDG
-Help: nfdisc(T,{listP}): discriminant of the number field defined by
- the polynomial T. Optional arg listP is as in nfbasis.
+Help: nfdisc(T): discriminant of the number field defined by
+ the polynomial T. An argument [T,listP] is possible, where listP is a list
+ of primes or a prime bound.
 Doc: \idx{field discriminant} of the number field defined by the integral,
  preferably monic, irreducible polynomial $T(X)$. Returns the discriminant of
  the number field $\Q[X]/(T)$, using the Round $4$ algorithm.
 
- The optional argument \kbd{listP} is as in \kbd{nfbasis}: a vector of
+ \misctitle{Local discriminants, valuations at certain primes}
+
+ As in \kbd{nfbasis}, the argument $T$ can be replaced by $[T,\var{listP}]$,
+ where \kbd{listP} is as in \kbd{nfbasis}: a vector of
  pairwise coprime integers (usually distinct primes), a factorization matrix,
  or a single integer. In that case, the function returns the discriminant of
  an order whose basis is given by \kbd{nfbasis(T,listP)}, which need not be

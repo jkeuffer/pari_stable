@@ -42,6 +42,8 @@ typedef struct {
   long r1; /* number of real places of K */
 /* possibly NULL = irrelevant or not computed */
   GEN dK; /* disc(K) */
+  GEN dKP; /* "primes" dividing disc(K) [if we have a composite in the list
+              then the structure may not be correct] */
   GEN index; /* [O_K : Z[X]/(x)] */
   GEN lead; /* leading coeff of initial polynomial defining K if non monic */
   GEN dx;   /* disc(x) */
