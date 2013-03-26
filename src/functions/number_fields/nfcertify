@@ -13,4 +13,4 @@ Doc: $\var{nf}$ being as output by
  empty, then \kbd{nf.basis} and \kbd{nf.disc} are correct. Otherwise, the
  result is dubious. In order to obtain a certified result, one must
  completely factor each of the given integers, then \kbd{addprime} each of
- them, then check whether \kbd{nfdisc(nf.pol}} is equal to \kbd{nf.disc}.
+ them, then check whether \kbd{nfdisc(nf.pol)} is equal to \kbd{nf.disc}.

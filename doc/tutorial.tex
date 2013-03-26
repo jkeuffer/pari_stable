@@ -2264,14 +2264,14 @@ Final check: type \kbd{nfrootsof1(nf)}. Again we find that $K$ contains
 a cube root of unity, since the torsion subgroup of its unit group
 has order 6. The given generator happens to be equal to \kbd{u}.
 
-\misctitle{Additional comment} (you're no longer supposed to skip this,
+\misctitle{Additional comment} (you are no longer supposed to skip this,
 but do as you wish):
 
 Before working with ideals, let us note one more thing. The main part of the
-work of \kbd{polred} or \kbd{nfinit} is to compute an integral basis, i.e.~a
-$\Z$-basis of the maximal order $\Z_K$ of $K$. For a large polynomial, this
-implies factoring the discriminant of the polynomial, which is often not
-feasible. The situation may be improved in many ways:
+work of \kbd{polred} or \kbd{nfinit}$(T)$ is to compute an integral basis,
+i.e.~a $\Z$-basis of the maximal order $\Z_K$ of $K$. This implies factoring
+the discriminant of the polynomial $T$, which is often not feasible. The
+situation may be improved in many ways:
 
 1) First, it is often the case that our number field is of quite a special
 type. For example, one may know in advance some prime divisors of the
@@ -2282,30 +2282,43 @@ eye for these prime numbers. Do it only for big primes ! (Say, larger than
 
 2) The second way in which the situation may be improved is that often we do
 not need the complete information on the maximal order, but only require that
-the order be $p$-maximal for a certain number of primes $p$ (but then, we
-may not be able to use functions which require a genuine \kbd{nf}). The
+the order be $p$-maximal for a certain number of primes $p$ --- but then, we
+may not be able to use functions which require a genuine \kbd{nf}. The
 function \kbd{nfbasis} specifically computes the integral basis and is not
 much quicker than \kbd{nfinit} so is not very useful in its standard use. But
-we can provide a list of primes as an optional second argument: this returns
-a basis of an order which is $p$-maximal at the given primes.
-For example coming back to
-our initial polynomial $T$, the discriminant of the polynomial is
+we can optionnally provide a list of primes: this returns a basis of an order
+which is $p$-maximal at the given primes. For example coming back to our
+initial polynomial $T$, the discriminant of the polynomial is
 $3^7\cdot7^6\cdot19\cdot37$. If we only want a $7$-maximal order, we simply
 type
 \bprog
-  nfbasis(T, [7])
-@eprog\noindent Of course, \kbd{nfbasis(T, [2,3,5,7])} would return an
+  nfbasis([T, [7]])
+@eprog\noindent Of course, \kbd{nfbasis([T, [2,3,5,7]])} would return an
 order which is maximal at $2,3,5,7$. A variant offers a nice generalization:
 \bprog
-  nfbasis(T, 10^5)
+  nfbasis([T, 10^5])
 @eprog\noindent will return an order which is maximal at all primes less than
 $10^5$.
 
 3) Building on the previous points, \emph{if} the field discriminant is
 $y$-smooth (never mind the polynomial discriminant), up to a few big primes
-known to \kbd{addprimes}, then \kbd{B = nfbasis(T, y)} returns a basis for
+known to \kbd{addprimes}, then \kbd{bas = nfbasis(T, y)} returns a basis for
 the maximal order! We can then input the resulting basis to \kbd{nfinit}, as
-\kbd{nfinit([T, B])}.
+\kbd{nfinit([T, bas])}. Better: the $[T, \var{listP}]$ format can be
+directly used with nfinit, where \var{listP} specifies a finite list of
+primes in one of the above ways (explicit list or primes up to some bound),
+and the result can be unconditionnally certified, independently of the
+\var{listP} parameter:
+\bprog
+  T = polcompositum(x^7-2, polcyclo(5))[1];
+  K = nfinit( [T, [2,5,7]] );
+  nfcertify(K)
+@eprog\noindent The output is a list of composite integers whose complete
+factorization must be computed in order to certify the result (which may be
+very hard, hence is not done on the spot). When the list is empty, as here,
+the result is unconditionnal
+
+\kbd{nfcertify(nf)}
 
 \subsec{Ideals}
 

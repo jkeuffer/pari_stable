@@ -24,7 +24,7 @@ Doc:
  $D$ of $T$. Obtaining an order which is maximal at a finite explicit set of
  primes is easy, but if may then be a strict suborder of the maximal order. To
  specify that we are interested in a given set of places only, we can replace
- the argument $T$ by an argument $[T,\var{listP]]$, where \var{listP} encodes
+ the argument $T$ by an argument $[T,\var{listP}]$, where \var{listP} encodes
  the primes we are interested in: it must be a factorization matrix, a vector
  of integers or a single integer.
 
