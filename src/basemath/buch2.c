@@ -3277,6 +3277,7 @@ nfbasic_from_sbnf(GEN sbnf, nfbasic_t *T)
   T->index= get_nfindex(T->bas);
   T->r1   = itos(gel(sbnf,2));
   T->dx   = NULL;
+  T->dKP  = NULL;
   T->lead = NULL;
   T->basden = NULL;
 }
