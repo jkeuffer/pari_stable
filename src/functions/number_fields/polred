@@ -2,24 +2,27 @@ Function: polred
 Section: number_fields
 C-Name: polred0
 Prototype: GD0,L,DG
-Help: polred(x,{flag=0},{fa}): reduction of the polynomial x (gives minimal
- polynomials only). Second and third args are optional. The following binary
- digits of flag are significant 1: partial reduction, 2: gives also elements.
- fa, if present, contains the factorization matrix of the discriminant.
-Doc: finds polynomials with reasonably
- small coefficients defining subfields of the number field defined by $x$.
- One of the polynomials always defines $\Q$ (hence is equal to $x-1$),
- and another always defines the same number field as $x$ if $x$ is irreducible.
- This function is deprecated: please use \tet{polredbest}.
+Help: polred(T,{flag=0}): Deprecated, use polredbest. Reduction of the
+ polynomial T (gives minimal polynomials only). The following binary digits of
+ (optional) flag are significant 1: partial reduction, 2: gives also elements.
+Doc: This function is \emph{deprecated}, use \tet{polredbest} instead.
+ Finds polynomials with reasonably small coefficients defining subfields of
+ the number field defined by $T$. One of the polynomials always defines $\Q$
+ (hence is equal to $x-1$), and another always defines the same number field
+ as $T$ if $T$ is irreducible.
 
- All $x$ accepted by \tet{nfinit} are also allowed here (e.g. non-monic
- polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[x,Z\_K\_basis]}).
+ All $T$ accepted by \tet{nfinit} are also allowed here;
+ in particular, the format \kbd{[T, listP]} is recommended, e.g. with
+ $\kbd{listP} = 10^5$ or a vector containing all ramified primes. Otherwise,
+ the maximal order of $\Q[x]/(T)$ must be computed.
 
  The following binary digits of $\fl$ are significant:
 
- 1: possibly use a suborder of the maximal order. The primes dividing the
- index of the order chosen are larger than \tet{primelimit} or divide integers
- stored in the \tet{addprimes} table.
+ 1: Possibly use a suborder of the maximal order. The
+ primes dividing the index of the order chosen are larger than
+ \tet{primelimit} or divide integers stored in the \tet{addprimes} table.
+ This flag is \emph{deprecated}, the \kbd{[T, listP]} format is more
+ flexible.
 
  2: gives also elements. The result is a two-column matrix, the first column
  giving primitive elements defining these subfields, the second giving the
@@ -36,12 +39,8 @@ Doc: finds polynomials with reasonably
  [x x^4 + 8]
  ? minpoly(Mod(M[2,1], x^4+8))
  %2 = x^2 + 2
- @eprog\noindent
- If $fa$ is given, it is assumed that it is the two-column matrix of the
- factorization of the discriminant of the polynomial $x$.
-Variant: Also available is \fun{GEN}{polred}{GEN x} ($\fl = 0$). The function
- \kbd{polred0} is provided for backward compatibility; instead of the above
- hardcoded numerical flags (which happen to be inconsistent), one should use
- \fun{GEN}{Polred}{GEN x, long flag, GEN fa} where  flag  is  an or-ed
- combination of \tet{nf_PARTIALFACT} (partial factorization of the
- discriminant) and \tet{nf_ORIG} (give also elements).
+ @eprog
+
+ \synt{polred}{GEN T} ($\fl = 0$). Also available is
+ \fun{GEN}{polred2}{GEN T} ($\fl = 2$). The function \kbd{polred0} is
+ deprecated, provided for backward compatibility.

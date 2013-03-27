@@ -1562,14 +1562,11 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   return nf;
 }
 
-GEN
-nfcertify(GEN nf)
+static GEN
+primes_certify(GEN dKP)
 {
-  long i, l;
-  GEN dKP, v;
-  nf = checknf(nf);
-  dKP = gmael(nf, 5, 8);
-  l = lg(dKP);
+  long i, l = lg(dKP);
+  GEN v;
   v = vectrunc_init(l);
   for (i = 1; i < l; i++)
   {
@@ -1577,6 +1574,12 @@ nfcertify(GEN nf)
     if (!isprime(p)) vectrunc_append(v, icopy(p));
   }
   fixlg(v, lg(v)); return v;
+}
+GEN
+nfcertify(GEN nf)
+{
+  nf = checknf(nf);
+  return primes_certify(gmael(nf, 5, 8));
 }
 
 static GEN
@@ -2239,7 +2242,7 @@ polred_aux(nfbasic_t *T, GEN *pro, long orig)
   settyp(y, t_COL); return mkmat2(b, y);
 }
 
-GEN
+static GEN
 Polred(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
@@ -2554,7 +2557,9 @@ polredabs0(GEN x, long flag)
   }
   else
   {
-    GEN v = polredabs_aux(&T, &u);
+    GEN v;
+    if (T.dKP && lg(primes_certify(T.dKP)) != 1) return gen_0;
+    v = polredabs_aux(&T, &u);
     y = gel(v,1);
     a = gel(v,2); l = lg(a);
     for (i=1; i<l; i++)

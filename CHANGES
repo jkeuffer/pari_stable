@@ -293,6 +293,9 @@ BA 97- zv_cmp0 renamed to zv_equal0
        take steps to avoid problems (instead of taking for granted a basis,
        without knowing whether it is correct or not). The result can
        also be certified (nfcertify)
+  106- polredabs() with (deprecated) nf_PARTIALFACT flag (or new [T,listP]
+       argument) now returns 0 if the resulting order cannot be proven to be
+       maximal.
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -470,3 +473,4 @@ BA  6- [libpari] removed unusable functions dbg_close/dbg_release.
        formula ]
     9- Member function 'w' (this is technical, and no longer needed:-)
    10- obsolete function weipell(). Use ellwpseries()
+   11- [libpari] obsolete function Polred. Use polredbest

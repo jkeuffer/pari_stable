@@ -167,13 +167,9 @@ Variant: Also available are
 
  \item \tet{nf_ORIG}: if \tet{nf_RED} set, also return the change of variable,
 
- \item \tet{nf_ROUND2}: slow down the routine by using an obsolete
- normalization algorithm (do not use this one!),
+ \item \tet{nf_ROUND2}: \emph{Deprecated}. Slow down the routine by using an
+ obsolete normalization algorithm (do not use this one!),
 
- \item \tet{nf_PARTIALFACT}: lazy factorization of the polynomial discriminant.
- Result is conditional unless the \emph{field} discriminant obtained
- is fully factored by
- \bprog
-   Z_factor_limit(disc, 0)
- @eprog\noindent Namely the ``maximal order'' may not be maximal at any prime
- bigger than \kbd{primelimit} dividing the field discriminant.
+ \item \tet{nf_PARTIALFACT}: \emph{Deprecated}. Lazy factorization of the
+ polynomial discriminant. Result is conditional unless \kbd{nfcertify}
+ can certify it.

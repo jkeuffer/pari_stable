@@ -1206,7 +1206,6 @@ GEN     dirzetak(GEN nf, GEN b);
 /* base1.c */
 
 GEN     FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p);
-GEN     Polred(GEN x, long flag, GEN fa);
 GEN     T2_from_embed(GEN x, long r1);
 void    check_ZKmodule(GEN x, const char *s);
 void    checkbid(GEN bid);
