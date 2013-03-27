@@ -337,24 +337,25 @@ ZX_Z_normalize(GEN pol, GEN *ptk)
 }
 
 /* Assume pol != 0 in Z[X]. Find C in Q, L in Z such that POL = C pol(x/L) monic
- * in Z[X]. Return POL and set *ptlc = L. Wasteful (but correct) if pol is not
+ * in Z[X]. Return POL and set *pL = L. Wasteful (but correct) if pol is not
  * primitive: better if caller used Q_primpart already. No GC. */
 GEN
-ZX_primitive_to_monic(GEN pol, GEN *ptlc)
+ZX_primitive_to_monic(GEN pol, GEN *pL)
 {
   long i,j, n = degpol(pol);
-  GEN lc = leading_term(pol), fa, P, E, a, POL;
+  GEN lc = leading_term(pol), L, fa, P, E, a, POL;
 
+  if (is_pm1(lc))
+  {
+    if (pL) *pL = gen_1;
+    return signe(lc) < 0? ZX_neg(pol): pol;
+  }
   if (signe(lc) < 0)
     POL = ZX_neg(pol);
   else
     POL = leafcopy(pol);
   a = POL+2; lc = gel(a,n);
-  if (is_pm1(lc)) {
-    if (ptlc) *ptlc = gen_1;
-    return POL;
-  }
-  fa = Z_factor_limit(lc,0); lc = gen_1;
+  fa = Z_factor_limit(lc,0); L = gen_1;
   P = gel(fa,1);
   E = gel(fa,2);
   for (i = lg(P)-1; i > 0; i--)
@@ -371,7 +372,7 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
       while (v + d < k * j) { k++; d += n; }
     }
     pk = powiu(p,k); j0 = d/k;
-    lc = mulii(lc, pk);
+    L = mulii(L, pk);
 
     pku = powiu(p,d - k*j0);
     /* a[j] *= p^(d - kj) */
@@ -389,19 +390,19 @@ ZX_primitive_to_monic(GEN pol, GEN *ptlc)
       gel(a,j) = diviiexact(gel(a,j), pku);
     }
   }
-  if (ptlc) *ptlc = lc;
+  if (pL) *pL = L;
   return POL;
 }
 /* Assume pol != 0 in Z[X]. Find C,L in Q such that POL = C pol(x/L)
- * monic in Z[X]. Return POL and set *ptlc = L.
+ * monic in Z[X]. Return POL and set *pL = L.
  * Wasteful (but correct) if pol is not primitive: better if caller used
  * Q_primpart already. No GC. */
 GEN
-ZX_Q_normalize(GEN pol, GEN *ptlc)
+ZX_Q_normalize(GEN pol, GEN *pL)
 {
-  GEN lc = NULL, POL = ZX_primitive_to_monic(pol, ptlc? &lc : NULL);
-  POL = ZX_Z_normalize(POL, ptlc);
-  if (ptlc) *ptlc = gdiv(lc, *ptlc);
+  GEN lc, POL = ZX_primitive_to_monic(pol, &lc);
+  POL = ZX_Z_normalize(POL, pL);
+  if (pL) *pL = gdiv(lc, *pL);
   return POL;
 }
 /* pol != 0 in Z[x], returns a monic polynomial POL in Z[x] generating the
@@ -1809,10 +1810,9 @@ nfbasic_add_disc(nfbasic_t *T)
 static void
 nfbasic_init(GEN x, long flag, nfbasic_t *T)
 {
-  GEN bas, dK, dx, index, lead = gen_1;
+  GEN bas, dK, dx, index, unscale = gen_1;
   long r1;
 
-  T->basden = NULL;
   T->dKP = NULL;
   switch (nf_input_type(x))
   {
@@ -1820,13 +1820,14 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
     {
       nfmaxord_t S;
       nfmaxord(&S, x, flag);
-      lead = S.leadT0;
       x = S.T; if (!ZX_is_irred(x)) pari_err_IRREDPOL("nfinit",x);
+      T->x0 = S.T0;
       T->dKP = S.dKP;
       dK = S.dK;
       index = S.index;
       bas = S.basis;
       dx = S.dT;
+      unscale = S.unscale;
       r1 = sturm(x);
       break;
     }
@@ -1837,23 +1838,26 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
       dK    = nf_get_disc(nf);
       index = nf_get_index(nf);
       bas   = nf_get_zk(nf);
+      T->x0 = x;
       dx = NULL;
       r1 = nf_get_r1(nf);
       break;
     }
     default: /* monic integral polynomial + integer basis */
       bas = gel(x,2); x = gel(x,1);
+      T->x0 = x;
       index = NULL;
       dx = NULL;
       dK = NULL;
       r1 = sturm(x);
   }
   T->x     = x;
-  T->lead  = lead;
+  T->unscale = unscale;
   T->r1    = r1;
   T->dx    = dx;
   T->dK    = dK;
   T->bas   = bas;
+  T->basden= NULL;
   T->index = index;
 }
 
@@ -1866,32 +1870,43 @@ GEN
 nfinitall(GEN x, long flag, long prec)
 {
   const pari_sp av = avma;
-  GEN nf, lead;
+  GEN nf, unscale;
   nfbasic_t T;
 
   nfbasic_init(x, flag, &T);
-  nfbasic_add_disc(&T); /* more expensive after set_LLL_basis */
-  lead = T.lead;
-  if (lead != gen_1 && !(flag & nf_RED))
+  if (!equali1(leading_term(T.x0)) && !(flag & nf_RED))
   {
     pari_warn(warner,"non-monic polynomial. Result of the form [nf,c]");
     flag |= nf_RED | nf_ORIG;
   }
+  unscale = T.unscale;
+  if (!(flag & nf_RED) && !isint1(unscale))
+  { /* implies lc(x0) = 1 and L := 1/unscale is integral */
+    long d = degpol(T.x0);
+    GEN L = ginv(unscale); /* x = L^(-deg(x)) x0(L X) */
+    GEN f= powiu(L, (d*(d-1)) >> 1);
+    T.x = T.x0; /* restore original user-supplied x0, unscale data */
+    T.unscale = gen_1;
+    T.dx    = gmul(T.dx, sqri(f));
+    T.bas   = RgXV_unscale(T.bas, unscale);
+    T.index = gmul(T.index, f);
+  }
+  nfbasic_add_disc(&T); /* more expensive after set_LLL_basis */
   if (flag & nf_RED)
   {
     GEN ro, rev;
     /* lie to polred: more efficient to update *after* modreverse, than to
      * unscale in the polred subsystem */
-    T.lead = gen_1;
+    T.unscale = gen_1;
     rev = nfpolred(&T, &ro);
     nf = nfbasic_to_nf(&T, ro, prec);
     if (flag & nf_ORIG)
     {
       if (!rev) rev = pol_x(varn(T.x)); /* no improvement */
-      if (lead != gen_1) rev = RgX_Rg_div(rev, lead);
+      if (!isint1(unscale)) rev = RgX_Rg_div(rev, unscale);
       nf = mkvec2(nf, mkpolmod(rev, T.x));
     }
-    T.lead = lead; /* restore */
+    T.unscale = unscale; /* restore */
   } else {
     GEN ro; set_LLL_basis(&T, &ro, 0.99);
     nf = nfbasic_to_nf(&T, ro, prec);
@@ -2126,7 +2141,7 @@ update(GEN *pai, GEN *pch, nfbasic_t *T, long orig)
   }
   if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
   if (DEBUGLEVEL>3) err_printf("polred: generator %Ps\n", ch);
-  if (T->lead != gen_1 && orig) ai = RgX_unscale(ai, ginv(T->lead));
+  if (!isint1(T->unscale) && orig) ai = RgX_unscale(ai, T->unscale);
   *pch = ch; *pai = ai;
 }
 static GEN
@@ -2471,7 +2486,7 @@ store(GEN x, GEN z, GEN a, nfbasic_t *T, long flag, GEN u)
   if (flag & (nf_ORIG|nf_ADDZK))
   {
     b = QXQ_reverse(a, x);
-    if (T->lead != gen_1) b = RgX_Rg_div(b, T->lead);
+    if (!isint1(T->unscale)) b = RgX_Rg_div(b, T->unscale);
   }
   else
     b = NULL;

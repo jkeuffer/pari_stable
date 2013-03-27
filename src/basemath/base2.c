@@ -102,24 +102,21 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
   T = Q_primpart(T);
   if (degpol(T) <= 0) pari_err_CONSTPOL("nfmaxord");
   RgX_check_ZX(T, "nfmaxord");
-  if (flag & nf_RED || !equali1(gel(T,lg(T)-1)))
-    T = ZX_Q_normalize_fact(T, &(S->leadT0), &fa);
-  else
-    S->leadT0 = gen_1;
-  S->T = T;
+  S->T0 = T;
+  S->T = T = ZX_Q_normalize_fact(T, &(S->unscale), &fa);
   if (fa) {
     switch(typ(fa))
     {
       case t_MAT:
         dT = factorback(fa); break;
+
       case t_VEC:
         fa = leafcopy(fa); settyp(fa, t_COL);/*fall through*/
       case t_COL:
-      {
         dT = ZX_disc(T);
         fa = fact_from_factors(dT, fa, 0);
         break;
-      }
+
       case t_INT:
       {
         ulong all = (signe(fa) <= 0)? 1: itou(fa);
@@ -632,15 +629,16 @@ GEN maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
 
-/* return integer basis. If fa not NULL, taken to be the factorization
- * of disc(T) or a prime divisor thereof [no consistency check] */
+/* Warning: data computed for T = ZX_Q_normalize_fact(T0). If S.unscale !=
+ * gen_1, caller must take steps to correct the components if it wishes
+ * to stick to the original T0 */
 void
-nfmaxord(nfmaxord_t *S, GEN T, long flag)
+nfmaxord(nfmaxord_t *S, GEN T0, long flag)
 {
   VOLATILE GEN P, E, O;
   VOLATILE long lP, i, k;
 
-  nfmaxord_check_args(S, T, flag);
+  nfmaxord_check_args(S, T0, flag);
   if (flag & nf_ROUND2) { allbase2(S); return; }
   P = S->dTP; lP = lg(P);
   E = S->dTE;
@@ -681,8 +679,8 @@ static void
 _nfbasis(GEN x, long flag, GEN fa, GEN *pbas, GEN *pdK)
 {
   nfmaxord_t S;
-  nfmaxord(&S, fa? mkvec2(x,fa): x, flag & nf_RED);
-  if (pbas) *pbas = RgXV_unscale(S.basis, S.leadT0);
+  nfmaxord(&S, fa? mkvec2(x,fa): x, flag);
+  if (pbas) *pbas = RgXV_unscale(S.basis, S.unscale);
   if (pdK)  *pdK = S.dK;
 }
 

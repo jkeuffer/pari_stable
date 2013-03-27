@@ -38,6 +38,7 @@ enum {
 
 typedef struct {
   GEN x; /* defining polynomial (monic, integral) */
+  GEN x0; /* original defining polynomial (integral) */
   GEN bas;  /* Z-basis of O_K (t_VEC of t_POL) */
   long r1; /* number of real places of K */
 /* possibly NULL = irrelevant or not computed */
@@ -45,14 +46,15 @@ typedef struct {
   GEN dKP; /* "primes" dividing disc(K) [if we have a composite in the list
               then the structure may not be correct] */
   GEN index; /* [O_K : Z[X]/(x)] */
-  GEN lead; /* leading coeff of initial polynomial defining K if non monic */
+  GEN unscale; /* x = C*x0(X / unscale), rational */
   GEN dx;   /* disc(x) */
   GEN basden; /* [nums(bas), dens(bas)] */
 } nfbasic_t;
 
 typedef struct {
   GEN T, dT; /* monic defining polynomial, disc(T) */
-  GEN leadT0; /* leading coefficient of ORIGINAL polynomial */
+  GEN T0; /* ORIGINAL polynomial T0 */
+  GEN unscale; /* T = C*T0(x / unscale), rational */
   GEN dK; /* field discriminant */
   GEN index; /* index of power basis in maximal order */
   GEN dTP, dTE; /* (possibly partial) factorization of dT, primes / exponents */

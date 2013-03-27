@@ -478,7 +478,7 @@ cmp_padic(GEN x, GEN y)
 
 /* factor T = nf_get_pol(nf) in Zp to precision k */
 static GEN
-padicff2(GEN nf,GEN p,long k)
+padicff2(GEN nf, GEN unscale, GEN p, long k)
 {
   GEN z, mat, D, U, fa, pk, dec_p, Ui, mulx;
   GEN invzk = nf_get_invzk(nf);
@@ -506,30 +506,30 @@ padicff2(GEN nf,GEN p,long k)
   pk = gel(D,1); /* = p^k */
   z = cgetg(l,t_COL); pk = icopy(pk);
   for (i=1; i<l; i++)
-    gel(z,i) = ZX_to_ZpX_normalized(gel(fa,i),p,pk,k);
+  {
+    GEN t = gel(fa,i);
+    if (unscale != gen_1) t = Q_primpart(ZX_unscale(t, unscale));
+    gel(z,i) = ZX_to_ZpX_normalized(t,p,pk,k);
+  }
   return z;
 }
 
 static GEN
-padicff(GEN x,GEN p,long pr)
+padicff(GEN x, GEN p, long k)
 {
-  pari_sp av = avma;
   GEN nf = zerovec(9); /* dummy nf */
   nfmaxord_t S;
   nfmaxord(&S, mkvec2(x, mkvec(p)), nf_ROUND2);
-  gel(nf,1) = x;
+  gel(nf,1) = S.T;
   gel(nf,3) = S.dK;
   gel(nf,4) = dvdii(S.index, p)? p: gen_1;
   nf_set_multable(nf, S.basis, NULL);
-  return gerepileupto(av, padicff2(nf,p,pr));
+  return padicff2(nf, S.unscale, p, k);
 }
 
 static GEN
 padic_trivfact(GEN x, GEN p, long r)
-{
-  retmkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)),
-                mkcol(gen_1));
-}
+{ retmkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)), mkcol(gen_1)); }
 
 static GEN
 factorpadic2(GEN f, GEN p, long prec)
@@ -542,9 +542,6 @@ factorpadic2(GEN f, GEN p, long prec)
 
   f = QpX_to_ZX(f, p);
   if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
-  if (!gequal1(leading_term(f)))
-    pari_err_IMPL("factorpadic2 for non-monic polynomial");
-
   fa = ZX_squff(f, &ex);
   l = lg(fa); n = 0;
   for (i=1; i<l; i++)
@@ -554,7 +551,7 @@ factorpadic2(GEN f, GEN p, long prec)
   }
 
   y = fact_from_DDF(fa,ex,n);
-  return gerepileupto(av, sort_factor_pol(y, cmp_padic));
+  return gerepilecopy(av, sort_factor_pol(y, cmp_padic));
 }
 
 /***********************/

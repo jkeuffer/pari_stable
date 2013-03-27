@@ -894,19 +894,34 @@ which is square and invertible over $\F_2$.
 A number field $K = \Q[X]/(T)$ is defined by a monic $T\in\Z[X]$. The
 low-level function computing a maximal order is
 
-\fun{void}{nfmaxord}{nfmaxord_t *S, GEN T, long flag}, where
-the polynomial $T$ is as above.
+\fun{void}{nfmaxord}{nfmaxord_t *S, GEN T0, long flag}, where
+the polynomial $T_0$ is squarefree with integer coefficients. Let $K$ be the
+\'etale algebra $\Q[X]/(T_0)$ and let $T = \kbd{ZX\_Q\_normalize}(T_0)$,
+i.e. $T = C T_0(X/L)$ is monic and integral for some $C,Q\in \Q$.
 
 The structure \tet{nfmaxord_t} is initialized by the call; it has the
 following fields:
 \bprog
-  GEN T, dT, dK; /* T, discriminants of T and K */
+  GEN T0, T, dT, dK; /* T0, T, discriminants of T and K */
+  GEN unscale; /* the integer L */
   GEN index; /* index of power basis in maximal order */
   GEN dTP, dTE; /* factorization of |dT|, primes / exponents */
   GEN dKP, dKE; /* factorization of |dK|, primes / exponents */
-  GEN basis; /* Z-basis for maximal order */
+  GEN basis; /* Z-basis for maximal order of Q[X]/(T) */
 @eprog\noindent The exponent vectors are \typ{VECSMALL}. The primes
-in \kbd{dTP} and \kbd{dKP} are pseudoprimes, not proven primes.
+in \kbd{dTP} and \kbd{dKP} are pseudoprimes, not proven primes. We recommend
+restricting to $T = T_0$, i.e. either to pass the input polynomial through
+\tet{ZX_Q_normalize} \emph{before} the call, or to forget about $T_0$
+and go on with the polynomial $T$; otherwise $\kbd{unscale}\neq 1$, all data
+is expressed in terms of $T\neq T_0$, and needs to be converted to $T_0$. For
+instance to convert the basis to $\Q[X]/(T_0)$:
+\bprog
+  RgXV_unscale(S.basis, S.unscale)
+@eprog
+
+Instead of passing $T$, one can use the format $[T,\var{listP}]$ as in
+\kbd{nfbasis} or \kbd{nfinit}, which computes an order which is maximal
+at a set of primes, but need not be the maximal order.
 
 The \kbd{flag} is an or-ed combination of the binary flags:
 
@@ -914,10 +929,12 @@ The \kbd{flag} is an or-ed combination of the binary flags:
 primes less than \kbd{primelimit}. In that case, the elements in \kbd{dTP}
 and \kbd{dKP} need not all be primes. But the resulting \kbd{dK},
 \kbd{index} and \kbd{basis} are correct provided there exists no prime $p >
-\kbd{primelimit}$ with $p^2$ divides the field discriminant \kbd{dK}.
+\kbd{primelimit}$ such that $p^2$ divides the field discriminant \kbd{dK}.
+This flag is \emph{deprecated}: the $[T,\var{listP}]$ is safer and more
+flexible.
 
-\tet{nf_ROUND2}: use the ROUND2 algorithm instead of the default ROUND4
-(do not use that, it is slower).
+\tet{nf_ROUND2}: use the ROUND2 algorithm instead of the default ROUND4.
+This flag is \emph{deprecated}: this algorithm is consistently slower.
 
 $T$ is the input polynomial (monic \kbd{ZX}). The format $[T, \kbd{listP}]$
 is also recognized, where \kbd{listP} is as in \tet{nfbasis} and is used to
