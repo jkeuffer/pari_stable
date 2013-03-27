@@ -1590,7 +1590,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
 {
   pari_sp av = avma;
   long j, k, l, nz, flrel = flag & rnf_REL, flcond = flag & rnf_COND;
-  GEN bnf, nf, bid, ideal, archp, clhray, clhss, P, e, dlk, H;
+  GEN bnf, nf, bid, ideal, archp, clhray, clhss, P, e, dlk;
   zlog_S S;
 
   checkbnr(bnr);
@@ -1599,7 +1599,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   clhray = bnr_get_no(bnr);
   nf = bnf_get_nf(bnf);
   ideal= bid_get_ideal(bid);
-  H0 = H = check_subgroup(bnr, H0, &clhray, 0);
+  H0 = check_subgroup(bnr, H0, &clhray, 0);
   archp = S.archp;
   P     = S.P;
   e     = S.e; l = lg(e);
@@ -1607,7 +1607,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
              : powii(ZM_det_triangular(ideal),clhray);
   for (k = 1; k < l; k++)
   {
-    GEN pr = gel(P,k), sum = gen_0;
+    GEN pr = gel(P,k), sum = gen_0, H = H0;
     long ep = itos(gel(e,k));
     for (j = ep; j > 0; j--)
     {

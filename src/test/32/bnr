@@ -1,4 +1,5 @@
   ***   at top-level: bnrL1(bnrinit(bnfini
   ***                 ^--------------------
   *** bnrL1: incorrect type in bnrL1 [subgroup] (t_INT).
-Total time spent: 12
+[32, 0, 27656345068767491604576153420888539136]
+Total time spent: 24
