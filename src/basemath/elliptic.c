@@ -3193,6 +3193,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   GEN y, v, v0, P, c4, c6, g, u, u2, u4;
   GEN a4, a6, b4, b6, b8, u6, D;
   long l, k;
+  int do_ch_Q;
 
   E = ellintegralmodel(E, &v0);
   P = c4c6_primes(E); l = lg(P);
@@ -3250,7 +3251,8 @@ ellminimalmodel(GEN E, GEN *ptv)
   gel(y,14)= gel(E,14);
   gel(y,15)= gel(E,15);
 
-  if (ptv) {
+  do_ch_Q = !RgV_is_ZV(gel(E,16));
+  if (do_ch_Q || ptv) {
     GEN r, s, t, u3;
     r = diviuexact(subii(muliu(u2,b2), ell_get_b2(E)), 12);
     s = shifti(subii(muliu(u,a1), ell_get_a1(E)), -1);
@@ -3258,8 +3260,10 @@ ellminimalmodel(GEN E, GEN *ptv)
     t = shifti(subii(muliu(u3,a3), ellLHS0(E,r)), -1);
     v = mkvec4(u,r,s,t);
     if (v0) { gcomposev(&v0, v); v = v0; }
-    gerepileall(av, 2, &y, &v); *ptv = v;
+    if (do_ch_Q) ch_Q(y, E, v);
   }
+
+  if (ptv) { gerepileall(av, 2, &y, &v); *ptv = v; }
   else
     y = gerepilecopy(av, y);
   return y;
