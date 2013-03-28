@@ -8,4 +8,4 @@ Doc: finds polynomials with reasonably small
  order defined by $x$. One of the polynomials always defines $\Q$ (hence
  is equal to $(x-1)^n$, where $n$ is the degree), and another always defines
  the same order as $x$ if $x$ is irreducible. Useless function: try
- \kbd{polred(,1)} or \kbd{polredabs(,16)}.
+ \kbd{polredbest}.

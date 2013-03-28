@@ -2558,7 +2558,8 @@ polredabs0(GEN x, long flag)
   else
   {
     GEN v;
-    if (T.dKP && lg(primes_certify(T.dKP)) != 1) return gen_0;
+    if (!(flag & nf_PARTIALFACT)
+        && T.dKP && lg(primes_certify(T.dKP)) != 1) return gen_0;
     v = polredabs_aux(&T, &u);
     y = gel(v,1);
     a = gel(v,2); l = lg(a);

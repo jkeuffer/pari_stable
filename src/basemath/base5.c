@@ -975,11 +975,16 @@ GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
   pari_timer ti;
-  GEN red, bas, elt, pol, T, a;
-  long fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
+  GEN listP = NULL, red, bas, elt, pol, T, a;
+  long ty = typ(relpol), fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
   pari_sp av = avma;
 
-  if (typ(relpol)!=t_POL) pari_err_TYPE("rnfpolredabs",relpol);
+  if (ty == t_VEC) {
+    if (lg(relpol) != 3) pari_err_TYPE("rnfpolredabs",relpol);
+    listP = gel(relpol,2);
+    relpol = gel(relpol,1);
+  }
+  if (typ(relpol) != t_POL) pari_err_TYPE("rnfpolredabs",relpol);
   nf = checknf(nf);
   if (DEBUGLEVEL>1) timer_start(&ti);
   T = nf_get_pol(nf);
@@ -991,6 +996,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     long sa;
     fl |= nf_PARTIALFACT;
     bas = rnfequationall(nf, relpol, &sa, NULL);
+    if (listP) bas = mkvec2(bas, listP);
     a = stoi(sa);
   }
   else
