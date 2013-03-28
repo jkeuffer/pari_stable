@@ -1511,7 +1511,7 @@ static void
 get_nf_fp_compo(nfbasic_t *T, nffp_t *F, GEN ro, long prec)
 {
   nffp_init(F,T,ro,prec);
-  make_M_G(F, 1);
+  make_M_G(F, 0);
 }
 
 static GEN
