@@ -1508,10 +1508,10 @@ nffp_init(nffp_t *F, nfbasic_t *T, GEN ro, long prec)
 }
 
 static void
-get_nf_fp_compo(nfbasic_t *T, nffp_t *F, GEN ro, long prec)
+get_nf_fp_compo(nfbasic_t *T, nffp_t *F, GEN ro, int trunc, long prec)
 {
   nffp_init(F,T,ro,prec);
-  make_M_G(F, 0);
+  make_M_G(F, trunc);
 }
 
 static GEN
@@ -1524,7 +1524,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   GEN x = T->x, absdK, Tr, D, TI, A, dA, MDI, mat = cgetg(9,t_VEC);
   long n = degpol(T->x);
   nffp_t F;
-  get_nf_fp_compo(T, &F, ro, prec);
+  get_nf_fp_compo(T, &F, ro, 0, prec);
 
   gel(nf,1) = T->x;
   gel(nf,2) = get_sign(T->r1, n);
@@ -2129,7 +2129,7 @@ polred_init(nfbasic_t *T, nffp_t *F, CG_data *d)
   e = n * (long)(log2rho + log2((double)n)) + 1;
   if (e < 0) e = 0; /* can occur if n = 1 */
   prec = chk_gen_prec(n, e);
-  get_nf_fp_compo(T, F, ro, prec);
+  get_nf_fp_compo(T, F, ro, 1, prec);
   d->v = varn(T->x);
   d->r1= T->r1; return prec;
 }
@@ -2357,6 +2357,18 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
   gel(V,k) = Mk; return Mk;
 }
 
+static GEN
+ZM_image_shallow(GEN M, long *pr)
+{
+  long j, k, r;
+  GEN y, d = ZM_pivots(M, &k);
+  r = lg(M)-1 - k;
+  y = cgetg(r+1,t_MAT);
+  for (j=k=1; j<=r; k++)
+    if (d[k]) gel(y,j++) = gel(M,k);
+  *pr = r; return y;
+}
+
 /* U = base change matrix, R = Cholesky form of the quadratic form [matrix
  * Q from algo 2.7.6] */
 static GEN
@@ -2375,14 +2387,15 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   S = cgetg(N+1, t_VECSMALL);
   for (i = 1; i <= N; i++)
   {
+    pari_sp av2 = avma;
     P = get_polmin_w(d, i); if (!P) pari_err_PREC("chk_gen_init");
     S[i] = degpol(P);
     if (S[i] == N)
     { /* primitive element */
       GEN B = T2_from_embed(gel(d->ZKembed,i), r1);
-      if (gcmp(B,bound) < 0) bound = B ;
       if (!firstprim) firstprim = i; /* index of first primitive element */
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
+      if (gcmp(B,bound) < 0) bound = gerepileuptoleaf(av2, B);
     }
     else
     {
@@ -2450,10 +2463,9 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       for (h = 1; h < dP; h++)
       {
         long r; /* add to M2 the elts of M * nf.zk[i]  */
-        for (j = 1; j <= rkM; j++) gel(M2,k++) = RgM_RgC_mul(Mx, gel(M,j));
+        for (j = 1; j <= rkM; j++) gel(M2,k++) = ZM_ZC_mul(Mx, gel(M,j));
         setlg(M2, k); k = 1;
-        M = image(shallowconcat(M, M2));
-        r = lg(M) - 1;
+        M = ZM_image_shallow(shallowconcat(M,M2), &r);
         if (r == rkM) break;
         if (r > rkM)
         {
@@ -2531,7 +2543,7 @@ polredabs_aux(nfbasic_t *T, GEN *u)
       if (v) break;
     }
     prec = precdbl(prec);
-    get_nf_fp_compo(T, &F, NULL, prec);
+    get_nf_fp_compo(T, &F, NULL, 1, prec);
     if (DEBUGLEVEL) pari_warn(warnprec,"polredabs0",prec);
   }
   *u = d.u; return v;

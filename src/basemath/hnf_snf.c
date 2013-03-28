@@ -1114,9 +1114,9 @@ zlm_echelon(GEN x, long early_abort, ulong p, ulong pm)
 
 /* x a ZM, dm a t_INT */
 GEN
-ZM_hnfmodall(GEN x, GEN dm, long flag)
+ZM_hnfmodall_i(GEN x, GEN dm, long flag)
 {
-  pari_sp av0 = avma, av, lim;
+  pari_sp av, lim;
   const long modid = (flag & hnf_MODID);
   const long center = (flag & hnf_CENTER);
   long li, co, i, j, k, def, ldef, ldm;
@@ -1252,7 +1252,13 @@ ZM_hnfmodall(GEN x, GEN dm, long flag)
       }
     }
   }
-  return gerepilecopy(av0, x);
+  return x;
+}
+GEN
+ZM_hnfmodall(GEN x, GEN dm, long flag)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, ZM_hnfmodall_i(x, dm, flag));
 }
 GEN
 ZM_hnfmod(GEN x, GEN d) { return ZM_hnfmodall(x,d,0); }

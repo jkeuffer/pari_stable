@@ -204,6 +204,7 @@ diag_denom(GEN M)
 static void
 allbase_from_maxord(nfmaxord_t *S, GEN maxord, GEN P)
 {
+  pari_sp av = avma;
   GEN f = S->T, a = NULL, da = NULL, index, P2, E2, D;
   long n = degpol(f), lP = lg(P), i, j, k;
   int centered = 0;
@@ -230,7 +231,8 @@ allbase_from_maxord(nfmaxord_t *S, GEN maxord, GEN P)
       for (  ; j<=n;     j++) gel(M,j) = ZC_Z_mul(gel(a,j), db);
       for (  ; j<=2*n-k; j++) gel(M,j) = ZC_Z_mul(gel(b,j+k-n), da);
       da = mulii(da,db);
-      a = ZM_hnfmodall(M, da, hnf_MODID|hnf_CENTER);
+      a = ZM_hnfmodall_i(M, da, hnf_MODID|hnf_CENTER);
+      gerepileall(av, 2, &a, &da);
       centered = 1;
     }
     if (DEBUGLEVEL>5) err_printf("Result for prime %Ps is:\n%Ps\n",P[i],b);
