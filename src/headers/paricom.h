@@ -81,6 +81,7 @@ extern void (*cb_pari_ask_confirm)(const char *);
 extern int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 extern void (*cb_pari_sigint)(void);
 extern int (*cb_pari_handle_exception)(long);
+extern void (*cb_pari_pre_recover)(long);
 extern void (*cb_pari_err_recover)(long);
 
 enum manage_var_t {

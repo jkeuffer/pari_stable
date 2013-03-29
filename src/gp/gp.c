@@ -1607,6 +1607,7 @@ gp_main_loop(long flag)
       }
       avma = av = top;
       kill_buffers_upto(b);
+      alarm0(0);
     }
   }
   for(;;)
@@ -1765,6 +1766,17 @@ BR_EXIT:
 
 /* numerr < 0: from SIGINT */
 static void
+gp_pre_recover(long numerr)
+{
+  if (numerr>=0)
+  {
+    out_puts(pariErr, "\n"); pariErr->flush();
+  }
+  longjmp(env[s_env.n-1], numerr);
+}
+
+/* numerr < 0: from SIGINT */
+static void
 gp_err_recover(long numerr)
 {
   longjmp(env[s_env.n-1], numerr);
@@ -1806,9 +1818,7 @@ gp_handle_exception(long numerr)
 {
   if (disable_exception_handler) disable_exception_handler = 0;
   else if ((GP_DATA->breakloop) && break_loop(numerr)) return 1;
-  err_printf("\n"); err_flush();
-  gp_err_recover(numerr>=0? numerr: e_MISC);
-  return 0; /*NOT REACHED*/
+  return 0;
 }
 
 #ifdef SIGALRM
@@ -2141,6 +2151,7 @@ main(int argc, char **argv)
   pari_stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   cb_pari_err_recover = gp_err_recover;
   pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
+  cb_pari_pre_recover = gp_pre_recover;
   pari_add_defaults_module(functions_gp_default);
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
   (void)sd_graphcolors("[4, 5]", d_SILENT);

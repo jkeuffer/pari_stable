@@ -95,6 +95,7 @@ void (*cb_pari_ask_confirm)(const char *);
 int  (*cb_pari_handle_exception)(long);
 int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 void (*cb_pari_sigint)(void);
+void (*cb_pari_pre_recover)(long);
 void (*cb_pari_err_recover)(long);
 
 static THREAD GEN global_err_data;
@@ -508,6 +509,7 @@ allocatemem(ulong newsize)
   pari_init_stack(newsize, old);
   s = top - bot;
   pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
+  if (cb_pari_pre_recover) cb_pari_pre_recover(-1);
   pari_init_errcatch();
   cb_pari_err_recover(-1);
 }
@@ -730,6 +732,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   ulong u;
 
   cb_pari_whatnow = NULL;
+  cb_pari_pre_recover = NULL;
   cb_pari_sigint = dflt_sigint_fun;
   if ((init_opts&INIT_JMPm)) cb_pari_err_recover = dflt_err_recover;
 
@@ -868,8 +871,9 @@ gp_context_restore(struct gp_context* rec)
 static void
 err_recover(long numerr)
 {
+  if (cb_pari_pre_recover)
+    cb_pari_pre_recover(numerr);
   evalstate_reset();
-  initout(0);
   killallfiles();
   pari_init_errcatch();
   out_puts(pariErr, "\n");
@@ -956,6 +960,8 @@ pari_sigint(const char *time_s)
   pariErr->flush();
   if (cb_pari_handle_exception)
     recover = cb_pari_handle_exception(-1);
+  if (!recover && !block)
+    PARI_SIGINT_pending = 0;
   BLOCK_SIGINT_END
   if (!recover) err_recover(e_MISC);
 }
