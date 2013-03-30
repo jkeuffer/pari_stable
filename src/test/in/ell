@@ -68,7 +68,7 @@ a=ffgen(ffinit(3,5),'a);ellinit(ellfromj(a)).j
 elldivpol(ellinit([1,2,3,5,7]),4)
 elldivpol(ellinit([0,0,0,0,1]),8)
 
-e = ellinit([1,2,3,4,5]); ellglobalred(E); e.eta; e.roots;
+e = ellinit([1,2,3,4,5]); e.eta; e.roots;
 E = ellchangecurve(e, [2,3,4,5]);
 E.omega
 E.eta

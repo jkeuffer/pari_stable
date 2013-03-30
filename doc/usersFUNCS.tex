@@ -672,14 +672,23 @@ as an abelian group structure.
 
 \subsubsec{Curves over $\Q$}
 
-\item \tet{gen} returns the generators of $E(\Q)$, if known (from John
-  Cremona's database)
-
-Some functions, in particular those relative to height computations (see
-\kbd{ellheight}) require also that the curve be in minimal Weierstrass
-form, which is duly stressed in their description below. This is achieved by
-the function \kbd{ellminimalmodel}. \emph{Using a non-minimal model in such a
-routine will yield a wrong result!}
+Functions relative to height computations (\kbd{ellheight}, \kbd{ellbil} and
+\kbd{ellheighmatrix}) require that the curve be in \emph{minimal} Weierstrass
+form: this is achieved by the function \kbd{ellminimalmodel}. Using a
+non-minimal model in such a routine will raise an exception. Even if other
+functions do not require a minimal model, it is a good idea to stick
+to minimal models, whenever $\gcd(c_4,c_6)$ is easy to factor (otherwise
+\kbd{ellminimalmodel} will be slow). The
+construction
+\bprog
+  E = ellminimalmodel(E0, &v)
+@eprog\noindent replaces the original model $E_0$ by a minimal model $E$,
+and the variable change $v$ allows to go between the two models:
+\bprog
+  ellchangepoint(P0, v)
+  ellchangepointinv(P, v)
+@eprog\noindent respectively map the point $P_0$ on $E_0$ to its image on
+$E$, and the point $P$ on $E$ to its pre-image on $E_0$.
 
 A few routines --- namely \tet{ellgenerators}, \tet{ellidentify},
 \tet{ellsearch}, \tet{forell} --- require the optional package \tet{elldata}
@@ -687,6 +696,9 @@ A few routines --- namely \tet{ellgenerators}, \tet{ellidentify},
 \tet{ellinit} will allow alternative inputs, e.g.~\kbd{ellinit("11a1")}.
 Functions using this package need to load chunks of a large database in
 memory and require at least 2MB stack to avoid stack overflows.
+
+\item \tet{gen} returns the generators of $E(\Q)$, if known (from John
+  Cremona's database)
 
 %SECTION: elliptic_curves
 

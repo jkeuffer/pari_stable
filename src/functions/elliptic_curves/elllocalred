@@ -18,6 +18,6 @@ Doc:
  respectively, $4+\nu$ with $\nu>0$ means type I$_\nu$;
  finally the opposite values $-1$, $-2$, etc.~refer to the starred types
  I$_0^*$, II$^*$, etc. The third component $v$ is itself a vector $[u,r,s,t]$
- giving the coordinate changes done during the local reduction. Normally, this
- has no use if $u$ is 1, that is, if the given equation was already minimal.
+ giving the coordinate changes done during the local reduction;
+ $u = 1$ if and only if the given equation was already minimal at $p$.
  Finally, the last component $c$ is the local \idx{Tamagawa number} $c_p$.

@@ -1837,14 +1837,7 @@ obj_init(long d, long n)
 /* insert O in S [last position] at position K, return it */
 GEN
 obj_insert(GEN S, long K, GEN O)
-{
-  GEN o, v = gel(S, lg(S)-1);
-  if (typ(v) != t_VEC) pari_err_TYPE("obj_insert", S);
-  o = gel(v,K);
-  gel(v,K) = gclone(O); /*SIGINT: before unclone(o)*/
-  if (isclone(o)) gunclone(o);
-  return gel(v,K);
-}
+{ return obj_insert_shallow(S, K, gclone(O)); }
 /* as obj_insert. WITHOUT cloning (for libpari, when creating a *new* obj
  * from an existing one) */
 GEN

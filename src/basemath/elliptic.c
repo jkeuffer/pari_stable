@@ -103,6 +103,17 @@ ellff_get_p(GEN E)
   return typ(fg)==t_INT? fg: FF_p_i(fg);
 }
 
+static int
+ell_is_integral(GEN E)
+{
+  return typ(ell_get_a1(E)) == t_INT
+      && typ(ell_get_a2(E)) == t_INT
+      && typ(ell_get_a3(E)) == t_INT
+      && typ(ell_get_a4(E)) == t_INT
+      && typ(ell_get_a6(E)) == t_INT;
+}
+
+
 static void
 checkcoordch(GEN z)
 { if (typ(z)!=t_VEC || lg(z) != 5) pari_err_TYPE("checkcoordch",z); }
@@ -485,7 +496,7 @@ ellinit_Q(GEN x, long prec)
   pari_sp av=avma;
   GEN y;
   long s;
-  if (!(y = initsmall(x, 7))) return NULL;
+  if (!(y = initsmall(x, 8))) return NULL;
   s = gsigne( ell_get_disc(y) );
   gel(y,14) = mkvecsmall(t_ELL_Q);
   gel(y,15) = mkvec(mkvecsmall2(prec2nbits(prec), s));
@@ -578,15 +589,26 @@ ellinit(GEN x, GEN p, long prec)
 /* [1,0,0,0] */
 static GEN
 init_ch(void) { return mkvec4(gen_1,gen_0,gen_0,gen_0); }
+static int
+is_trivial_change(GEN v)
+{
+  GEN u, r, s, t;
+  if (typ(v) == t_INT) return 1;
+  u = gel(v,1); r = gel(v,2); s = gel(v,3); t = gel(v,4);
+  return isint1(u) && isintzero(r) && isintzero(s) && isintzero(t);
+}
 
 /* compose coordinate changes, *vtotal = v is a ZV */
 /* v = [u,0,0,0] o v, u t_INT */
 static void
 composev_u(GEN *vtotal, GEN u)
 {
-  if (!equali1(u))
+  GEN v = *vtotal;
+  if (typ(v) == t_INT)
+    *vtotal = mkvec4(u,gen_0,gen_0,gen_0);
+  else if (!equali1(u))
   {
-    GEN v = *vtotal, U = gel(v,1);
+    GEN U = gel(v,1);
     GEN uU = equali1(U)? u: mulii(u, U);
     gel(v,1) = uU;
   }
@@ -595,9 +617,12 @@ composev_u(GEN *vtotal, GEN u)
 static void
 composev_r(GEN *vtotal, GEN r)
 {
-  if (signe(r))
+  GEN v = *vtotal;
+  if (typ(v) == t_INT)
+    *vtotal = mkvec4(gen_1,r,gen_0,gen_0);
+  else if (signe(r))
   {
-    GEN v = *vtotal, U = gel(v,1), R = gel(v,2), S = gel(v,3), T = gel(v,4);
+    GEN U = gel(v,1), R = gel(v,2), S = gel(v,3), T = gel(v,4);
     GEN rU2 = equali1(U)? r: mulii(r, sqri(U));
     gel(v,2) = addii(R, rU2);
     gel(v,4) = addii(T, mulii(rU2, S));
@@ -607,9 +632,12 @@ composev_r(GEN *vtotal, GEN r)
 static void
 composev_s(GEN *vtotal, GEN s)
 {
-  if (signe(s))
+  GEN v = *vtotal;
+  if (typ(v) == t_INT)
+    *vtotal = mkvec4(gen_1,gen_0,s,gen_0);
+  else if (signe(s))
   {
-    GEN v = *vtotal, U = gel(v,1), S = gel(v,3);
+    GEN U = gel(v,1), S = gel(v,3);
     GEN sU = equali1(U)? s: mulii(s,U);
     gel(v,3) = addii(S, sU);
   }
@@ -618,9 +646,12 @@ composev_s(GEN *vtotal, GEN s)
 static void
 composev_t(GEN *vtotal, GEN t)
 {
-  if (signe(t))
+  GEN v = *vtotal;
+  if (typ(v) == t_INT)
+    *vtotal = mkvec4(gen_1,gen_0,gen_0,t);
+  else if (signe(t))
   {
-    GEN v = *vtotal, U = gel(v,1), T = gel(v,4);
+    GEN U = gel(v,1), T = gel(v,4);
     GEN tU3 = equali1(U)? t: mulii(t, powiu(U,3));
     gel(v,4) = addii(T, tU3);
   }
@@ -629,25 +660,30 @@ composev_t(GEN *vtotal, GEN t)
 static void
 composev_st(GEN *vtotal, GEN s, GEN t)
 {
-  GEN v, U, S, T;
-  if (!signe(t)) { composev_s(vtotal, s); return; }
-  if (!signe(s)) { composev_t(vtotal, t); return; }
-  v = *vtotal;
-  U = gel(v,1); S = gel(v,3); T = gel(v,4);
-  if (!equali1(U))
+  GEN v = *vtotal;
+  if (typ(v) == t_INT)
+    *vtotal = mkvec4(gen_1,gen_0,s,t);
+  else if (!signe(t)) composev_s(vtotal, s);
+  else if (!signe(s)) composev_t(vtotal, t);
+  else
   {
-    GEN U3 = mulii(sqri(U), U);
-    t = mulii(U3, t);
-    s = mulii(U, s);
+    GEN U = gel(v,1), S = gel(v,3), T = gel(v,4);
+    if (!equali1(U))
+    {
+      GEN U3 = mulii(sqri(U), U);
+      t = mulii(U3, t);
+      s = mulii(U, s);
+    }
+    gel(v,3) = addii(S, s);
+    gel(v,4) = addii(T, t);
   }
-  gel(v,3) = addii(S, s);
-  gel(v,4) = addii(T, t);
 }
 /* v = [1,r,s,t] o v, r,s,t t_INT */
 static void
 composev_rst(GEN *vtotal, GEN r, GEN s, GEN t)
 {
-  GEN v, U, R, S, T;
+  GEN v = *vtotal, U, R, S, T;
+  if (typ(v) == t_INT) { *vtotal = mkvec4(gen_1,r,s,t); return; }
   if (!signe(r)) { composev_st(vtotal, s,t); return; }
   v = *vtotal;
   U = gel(v,1); R = gel(v,2); S = gel(v,3); T = gel(v,4);
@@ -671,9 +707,12 @@ static void
 gcomposev(GEN *vtotal, GEN w)
 {
   GEN v = *vtotal;
-  GEN U = gel(v,1), R = gel(v,2), S = gel(v,3), T = gel(v,4);
-  GEN u = gel(w,1), r = gel(w,2), s = gel(w,3), t = gel(w,4);
-  GEN U2 = gsqr(U);
+  GEN U2, U, R, S, T, u, r, s, t;
+
+  if (typ(v) == t_INT) { *vtotal = w; return; }
+  U = gel(v,1); R = gel(v,2); S = gel(v,3); T = gel(v,4);
+  u = gel(w,1); r = gel(w,2); s = gel(w,3); t = gel(w,4);
+  U2 = gsqr(U);
   gel(v,1) = gmul(U, u);
   gel(v,2) = gadd(R, gmul(U2, r));
   gel(v,3) = gadd(S, gmul(U, s));
@@ -684,10 +723,17 @@ gcomposev(GEN *vtotal, GEN w)
 GEN
 ellchangeinvert(GEN w)
 {
-  GEN u = gel(w,1), r = gel(w,2), s = gel(w,3), t = gel(w,4);
-  GEN u2 = gsqr(u), u3 = gmul(u2,u);
-  GEN U = ginv(u), R = gdiv(gneg(r), u2), S = gdiv(gneg(s), u);
-  GEN T = gdiv(gsub(gmul(r,s), t), u3);
+  GEN u,r,s,t, u2,u3, U,R,S,T;
+  if (typ(w) == t_INT) return w;
+  u = gel(w,1);
+  r = gel(w,2);
+  s = gel(w,3);
+  t = gel(w,4);
+  u2 = gsqr(u); u3 = gmul(u2,u);
+  U = ginv(u);
+  R = gdiv(gneg(r), u2);
+  S = gdiv(gneg(s), u);
+  T = gdiv(gsub(gmul(r,s), t), u3);
   return mkvec4(U,R,S,T);
 }
 
@@ -819,6 +865,7 @@ coordch_rst(GEN e, GEN r, GEN s, GEN t)
 static GEN
 coordch(GEN e, GEN w)
 {
+  if (typ(w) == t_INT) return e;
   e = coordch_rst(e, gel(w,2), gel(w,3), gel(w,4));
   return coordch_u(e, gel(w,1));
 }
@@ -880,20 +927,27 @@ static GEN
 ch_Q(GEN E, GEN e, GEN w)
 {
   long prec = ellR_get_prec(E);
-  GEN S, p = NULL;
+  GEN S, v = NULL, p = NULL;
   if (base_ring(E, &p, &prec) != t_FRAC) return ellinit(E, p, prec);
   ch_R(E, e, w);
   if ((S = obj_check(e, Q_GROUPGEN)))
     S = obj_insert(E, Q_GROUPGEN, ellchangepoint(S, w));
-  if ((S = obj_check(e, Q_GLOBALRED)))
+  if ((S = obj_check(e, Q_MINIMALMODEL)))
   {
-    GEN v = gel(S,2);
-    if (gequal(v, w)) v = init_ch(); /* most useful case! */
+    v = gel(S,1);
+    if (gequal(v, w) || (is_trivial_change(v) && is_trivial_change(w)))
+      v = gen_1; /* most useful case! */
     else
     {
       w = ellchangeinvert(w);
       gcomposev(&w, v); v = w;
     }
+    S = leafcopy(S); /* don't modify S in place: would corrupt e */
+    gel(S,1) = v;
+    S = obj_insert(E, Q_MINIMALMODEL, S);
+  }
+  if ((S = obj_check(e, Q_GLOBALRED)))
+  {
     S = leafcopy(S); /* don't modify S in place: would corrupt e */
     gel(S,2) = v;
     S = obj_insert(E, Q_GLOBALRED, S);
@@ -946,7 +1000,9 @@ ellchangecurve(GEN e, GEN w)
 {
   pari_sp av = avma;
   GEN E;
-  checkcoordch(w); checkell5(e);
+  checkell5(e);
+  if (equali1(w)) return gcopy(e);
+  checkcoordch(w);
   E = coordch(leafcopy(e), w);
   if (lg(E) == 6) return gerepilecopy(av, E);
   ell_reset(E); E = gerepilecopy(av, E);
@@ -974,19 +1030,6 @@ E_compose_t(GEN *vtotal, GEN *e, GEN t) {*e=coordch_t(*e,t); composev_t(vtotal,t
 static void
 E_compose_rst(GEN *vtotal, GEN *e, GEN r, GEN s, GEN t)
 { *e=coordch_rst(*e,r,s,t); composev_rst(vtotal,r,s,t); }
-/* assume E over Q, w = [u,r,s,t], both integral. Replace E by E o w
- * and compose *vtotal := w o *vtotal. Only apply if u != 1 */
-static void
-E_compose(GEN *vtotal, GEN *E, GEN w)
-{
-  GEN u = gel(w,1);
-  if (!equali1(u))
-  {
-    GEN r = gel(w,2), s = gel(w,3), t = gel(w,4);
-    E_compose_rst(vtotal, E, r,s,t);
-    E_compose_u(vtotal, E, u);
-  }
-}
 
 /* apply [1,r,0,0] to P */
 static GEN
@@ -1017,6 +1060,7 @@ ellchangepoint(GEN x, GEN ch)
   pari_sp av = avma;
 
   if (typ(x) != t_VEC) pari_err_TYPE("ellchangepoint",x);
+  if (equali1(ch)) return gcopy(x);
   checkcoordch(ch);
   if (lx == 1) return cgetg(1, t_VEC);
   u = gel(ch,1); r = gel(ch,2); s = gel(ch,3); t = gel(ch,4);
@@ -1051,6 +1095,7 @@ ellchangepointinv(GEN x, GEN ch)
   pari_sp av = avma;
 
   if (typ(x) != t_VEC) pari_err_TYPE("ellchangepointinv",x);
+  if (equali1(ch)) return gcopy(x);
   checkcoordch(ch);
   if (lx == 1) return cgetg(1, t_VEC);
   u = gel(ch,1); r = gel(ch,2); s = gel(ch,3); t = gel(ch,4);
@@ -2932,25 +2977,6 @@ ellintegralmodel(GEN e, GEN *pv)
   return coordch_u(e, u);
 }
 
-/* e integral model */
-static void
-standard_model(GEN *pv, GEN *pe)
-{
-  GEN e = *pe, a1 = ell_get_a1(e), a2 = ell_get_a2(e);
-  GEN r, t, s = truedivis(a1, -2);
-  r = truedivis(addiu(subii(a2, mulii(s,addii(s,a1))), 1), -3);
-  t = truedivis(ellLHS0_i(e,r), -2);
-  E_compose_rst(pv, pe, r, s, t);
-}
-
-/* primes dividing gcd(c4,c6) */
-static GEN
-c4c6_primes(GEN E)
-{
-  GEN c4 = ell_get_c4(E), c6 = ell_get_c6(E);
-  return gel(Z_factor(gcdii(c4,c6)),1);
-}
-
 /* FIXME: export ? */
 static ulong
 Mod32(GEN x) {
@@ -2964,37 +2990,115 @@ Mod32(GEN x) {
 #define Mod16(x) Mod32(x)&15
 #define Mod2(x) Mod32(x)&1
 
+/* structure to hold incremental computation of standard minimal model/Q */
+typedef struct {
+  long a1; /*{0,1}*/
+  long a2; /*{-1,0,1}*/
+  long a3; /*{0,1}*/
+  long b2; /* centermod(-c6, 12), in [-5,6] */
+  GEN u, u2, u3, u4, u6;
+  GEN a4, a6, b4, b6, b8, c4, c6, D;
+} ellmin_t;
+
+/* u from [u,r,s,t] */
 static void
-get_b(GEN c4, GEN c6, long *pb2, GEN *pb4, GEN *pb6)
+min_set_u(ellmin_t *M, GEN u)
 {
-  long b2, b22;
-  /* centermod(-c6, 12), in [-5,6] */
-  *pb2 = b2 = Fl_center(12 - umodiu(c6,12), 12, 6);
-  b22 = b2*b2; /* in [0,36] */
-  *pb4 = diviuexact(subui(b22, c4), 24);
-  *pb6 = diviuexact(subii(mulsi(b2, subiu(mului(36,*pb4),b22)), c6), 216);
+  M->u = u;
+  if (is_pm1(u))
+    M->u2 = M->u3 = M->u4 = M->u6 = gen_1;
+  else
+  {
+    M->u2 = sqri(u);
+    M->u3 = mulii(M->u2, u);
+    M->u4 = sqri(M->u2);
+    M->u6 = sqri(M->u3);
+  }
+}
+/* E = original curve */
+static void
+min_set_c(ellmin_t *M, GEN E)
+{
+  GEN c4 = ell_get_c4(E), c6 = ell_get_c6(E);
+  if (!is_pm1(M->u4)) {
+    c4 = diviiexact(c4, M->u4);
+    c6 = diviiexact(c6, M->u6);
+  }
+  M->c4 = c4;
+  M->c6 = c6;
 }
 static void
-get_a(long b2, GEN b4, GEN b6, long *pa1, long *pa2, long *pa3,
-      GEN *pa4, GEN *pa6)
+min_set_D(ellmin_t *M, GEN E)
 {
-  long a1, a2, a3, a13;
+  GEN D = ell_get_disc(E);
+  if (!is_pm1(M->u6)) D = diviiexact(D, sqri(M->u6));
+  M->D = D;
+}
+static void
+min_set_b(ellmin_t *M)
+{
+  long b2 = Fl_center(12 - umodiu(M->c6,12), 12, 6);
+  long b22 = b2*b2; /* in [0,36] */
+  M->b2 = b2;
+  M->b4 = diviuexact(subui(b22, M->c4), 24);
+  M->b6 = diviuexact(subii(mulsi(b2, subiu(mului(36,M->b4),b22)), M->c6), 216);
+}
+static void
+min_set_a(ellmin_t *M)
+{
+  long a1, a2, a3, a13, b2 = M->b2;
+  GEN b4 = M->b4, b6 = M->b6;
   if (odd(b2))
   {
     a1 = 1;
-    a2 = (b2 - 1) >> 2; /* in {-1,0,1} */
+    a2 = (b2 - 1) >> 2;
   }
   else
   {
     a1 = 0;
-    a2 = b2 >> 2; /* in {-1,0,1} */
+    a2 = b2 >> 2;
   }
-  *pa1 = a1;
-  *pa2 = a2;
-  *pa3 = a3 = Mod2(b6)? 1: 0;
-  a13= (a1 && a3)? 1: 0;
-  *pa4 = shifti(subiu(b4, a13), -1);
-  *pa6 = shifti(subiu(b6, a3), -2);
+  M->a1 = a1;
+  M->a2 = a2;
+  M->a3 = a3 = Mod2(b6)? 1: 0;
+  a13 = a1 & a3; /* a1 * a3 */
+  M->a4 = shifti(subiu(b4, a13), -1);
+  M->a6 = shifti(subiu(b6, a3), -2);
+}
+static GEN
+min_to_ell(ellmin_t *M, GEN E)
+{
+  GEN b8, y = obj_init(15, 8);
+  long a11, a13;
+  gel(y,1) = M->a1? gen_1: gen_0;
+  gel(y,2) = stoi(M->a2);
+  gel(y,3) = M->a3? gen_1: gen_0;
+  gel(y,4) = M->a4;
+  gel(y,5) = M->a6;
+  gel(y,6) = stoi(M->b2);
+  gel(y,7) = M->b4;
+  gel(y,8) = M->b6;
+  a11 = M->a1;
+  a13 = M->a1 & M->a3;
+  b8 = subii(addii(mului(a11,M->a6), mulis(M->b6, M->a2)),
+             mulii(M->a4, addiu(M->a4,a13)));
+  gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 - a4(a4 + a1 a3) */
+  gel(y,10)= M->c4;
+  gel(y,11)= M->c6;
+  gel(y,12)= M->D;
+  gel(y,13)= gel(E,13);
+  gel(y,14)= gel(E,14);
+  gel(y,15)= gel(E,15);
+  return y;
+}
+static GEN
+min_get_v(ellmin_t *M, GEN E)
+{
+  GEN r, s, t;
+  r = diviuexact(subii(mulis(M->u2,M->b2), ell_get_b2(E)), 12);
+  s = shifti(subii(M->a1? M->u: gen_0, ell_get_a1(E)), -1);
+  t = shifti(subii(M->a3? M->u3: gen_0, ellLHS0(E,r)), -1);
+  return mkvec4(M->u,r,s,t);
 }
 
 static long
@@ -3033,117 +3137,107 @@ cardmod3(GEN e)
   return F3_card(b2,b4,b6);
 }
 
-/* cf ellminimalmodel, call when 2 | D */
+/* return v_p(u), where [u,r,s,t] is the variable change to minimal model */
 static long
-is_minimal_ap_2(GEN E, int *good_red)
+get_vu_p_small(GEN E, ulong p, long *pv6, long *pvD)
 {
-  GEN c4 = ell_get_c4(E), c6 = ell_get_c6(E), D = ell_get_disc(E);
-  long vc6 = Z_lval(c6,2), vD = Z_lval(D,2);
-  long b2, a1, a2, a3;
-  GEN b4, b6, a4, a6;
-  long d = minss(2*vc6, vD) / 12;
-  if (d)
+  GEN c6 = ell_get_c6(E), D = ell_get_disc(E);
+  long d, v6, vD = Z_lval(D,p);
+  if (!signe(c6))
   {
-    long a, b;
-    a = Mod16( shifti(c4, -4*d) );
-    b = Mod32( shifti(c6, -6*d) );
-    if ((b & 3) != 3 && (a || (b && b!=8))) d--;
-    /* non minimal model */
-    if (d) { vc6 -= 6*d; vD -= 12*d; }
-  }
-  if (vD) /* bad reduction */
-  {
-    *good_red = 0;
-    if (vc6) return 0;
-    if (d) c6 = shifti(c6, -6*d);
-    return kroiu(c6, 2);
-  }
-  *good_red = 1;
-  /* model was minimal */
-  if (!d) return 3 - cardmod2(E);
-  if (d)
-  {
-    c4 = shifti(c4, -4*d);
-    c6 = shifti(c6, -6*d);
-  }
-  get_b(c4,c6,&b2,&b4,&b6);
-  get_a(b2,b4,b6,&a1,&a2,&a3,&a4,&a6);
-  return F2_card(a1 & 1, a2 & 1, a3 & 1, mpodd(a4)? 1: 0, mpodd(a6)? 1: 0);
-}
-/* cf ellminimalmodel, call when 3 | D */
-static long
-is_minimal_ap_3(GEN E, int *good_red)
-{
-  GEN c4, c6 = ell_get_c6(E), D = ell_get_disc(E);
-  long vc6 = Z_lval(c6,3), vD = Z_lval(D,3);
-  long d = minss(2*vc6, vD) / 12;
-  long b2;
-  GEN u2, u4, u6, b4, b6;
-  if (d)
-  {
-    if (vc6 == 6*d+2) d--;
-    /* non minimal model */
-    if (d) { vc6 -= 6*d; vD -= 12*d; }
-  }
-  if (vD) /* bad reduction */
-  {
-    *good_red = 0;
-    if (vc6) return 0;
+    d = vD / 12;
     if (d)
     {
-      u6 = powuu(3, 6*d);
-      c6 = diviiexact(c6, u6);
+      if (p == 2)
+      {
+        GEN c4 = ell_get_c4(E);
+        long a = Mod16( shifti(c4, -4*d) );
+        if (a) d--;
+      }
+      if (d) vD -= 12*d; /* non minimal model */
     }
-    return (umodiu(c6, 3) == 1)? -1 : 1;
+    v6 = 12; /* +oo */
   }
-  *good_red = 1;
-  /* model was minimal */
-  if (!d) return 4 - cardmod3(E);
-  c4 = ell_get_c4(E);
-  u2 = powuu(3, 2*d); u4 = sqri(u2); u6 = mulii(u2,u4);
-  c4 = diviiexact(c4, u4);
-  c6 = diviiexact(c6, u6);
-  get_b(c4,c6, &b2, &b4, &b6);
-  return 4 - F3_card(b2, umodiu(b4,3), umodiu(b6,3));
+  else
+  {
+    v6 = Z_lval(c6,p);
+    d = minss(2*v6, vD) / 12;
+    if (d) {
+      if (p == 2) {
+        GEN c4 = ell_get_c4(E);
+        long a = Mod16( shifti(c4, -4*d) );
+        long b = Mod32( shifti(c6, -6*d) );
+        if ((b & 3) != 3 && (a || (b && b!=8))) d--;
+      } else if (p == 3) {
+        if (v6 == 6*d+2) d--;
+      }
+      if (d) { v6 -= 6*d; vD -= 12*d; } /* non minimal model */
+    }
+  }
+  *pv6 = v6; *pvD = vD; return d;
 }
 
-static GEN
+static ulong
+ZtoF2(GEN x) { return (ulong)mpodd(x); }
+
+/* complete local reduction at 2, u = 2^d */
+static void
+min_set_2(ellmin_t *M, GEN E, long d)
+{
+  min_set_u(M, int2n(d));
+  min_set_c(M, E);
+  min_set_b(M);
+  min_set_a(M);
+}
+/* local reduction at 3, u = 3^d, don't compute the a_i */
+static void
+min_set_3(ellmin_t *M, GEN E, long d)
+{
+  min_set_u(M, powuu(3, d));
+  min_set_c(M, E);
+  min_set_b(M);
+}
+
+static long
 is_minimal_ap_small(GEN E, ulong p, int *good_red)
 {
-  GEN pp, a4,a6, c4, c6, D;
-  long vc6, vD, d;
-  if (p == 2) return stoi( is_minimal_ap_2(E, good_red) );
-  if (p == 3) return stoi( is_minimal_ap_3(E, good_red) );
-  c6 = ell_get_c6(E);
-  D = ell_get_disc(E);
-  vc6 = Z_lval(c6,p); vD = Z_lval(D,p);
-  d = minss(2*vc6, vD) / 12;
-  if (d) { vc6 -= 6*d; vD -= 12*d; } /* non minimal model */
+  long vc6, vD, d = get_vu_p_small(E, p, &vc6, &vD);
   if (vD) /* bad reduction */
   {
+    GEN c6;
     long s;
     *good_red = 0;
-    if (vc6) return gen_0;
-    if (d)
-    {
-      GEN u6 = powuu(p, 6*d);
-      c6 = diviiexact(c6, u6);
-    }
+    if (vc6) return 0;
+    c6 = ell_get_c6(E);
+    if (d) c6 = diviiexact(c6, powuu(p, 6*d));
     s = kroiu(c6,p);
     if ((p & 3) == 3) s = -s;
-    return s < 0? gen_m1: gen_1;
+    return s;
   }
   *good_red = 1;
-  c4 = ell_get_c4(E);
-  if (d)
+  if (p == 2)
   {
-    GEN u2 = powuu(p, 2*d), u4 = sqri(u2), u6 = mulii(u2,u4);
-    c4 = diviiexact(c4, u4);
-    c6 = diviiexact(c6, u6);
+    ellmin_t M;
+    if (!d) return 3 - cardmod2(E);
+    min_set_2(&M, E, d);
+    return 3 - F2_card(M.a1, M.a2 & 1, M.a3, ZtoF2(M.a4), ZtoF2(M.a6));
   }
-  pp = utoipos(p);
-  c4c6_to_a4a6(c4, c6, pp, &a4,&a6);
-  return subui(p+1, Fp_ellcard(a4, a6, pp));
+  else if (p == 3)
+  {
+    ellmin_t M;
+    if (!d) return 4 - cardmod3(E);
+    min_set_3(&M, E, d);
+    return 4 - F3_card(M.b2, umodiu(M.b4,3), umodiu(M.b6,3));
+  }
+  else
+  {
+    ellmin_t M;
+    GEN a4, a6, pp = utoipos(p);
+    min_set_u(&M, powuu(p,d));
+    min_set_c(&M, E);
+    c4c6_to_a4a6(M.c4, M.c6, pp, &a4,&a6);
+    return itos( subui(p+1, Fp_ellcard(a4, a6, pp)) );
+  }
 }
 
 static GEN
@@ -3151,7 +3245,7 @@ is_minimal_ap(GEN E, GEN p, int *good_red)
 {
   GEN a4,a6, c4, c6, D;
   long vc6, vD, d;
-  if (lgefint(p) == 3) return is_minimal_ap_small(E, p[2], good_red);
+  if (lgefint(p) == 3) return stoi( is_minimal_ap_small(E, p[2], good_red) );
   c6 = ell_get_c6(E);
   D = ell_get_disc(E);
   vc6 = Z_pval(c6,p); vD = Z_pval(D,p);
@@ -3162,11 +3256,7 @@ is_minimal_ap(GEN E, GEN p, int *good_red)
     long s;
     *good_red = 0;
     if (vc6) return gen_0;
-    if (d)
-    {
-      GEN u6 = powiu(p, 6*d);
-      c6 = diviiexact(c6, u6);
-    }
+    if (d) c6 = diviiexact(c6, powiu(p, 6*d));
     s = kronecker(c6,p);
     if (mod4(p) == 3) s = -s;
     return s < 0? gen_m1: gen_1;
@@ -3183,30 +3273,28 @@ is_minimal_ap(GEN E, GEN p, int *good_red)
   return subii(addiu(p,1), Fp_ellcard(a4, a6, p));
 }
 
-/* E/Q, Laska-Kraus-Connell algorithm */
-GEN
-ellminimalmodel(GEN E, GEN *ptv)
+/* E/Q, integral model, Laska-Kraus-Connell algorithm */
+static GEN
+get_u(GEN E, GEN *pc4c6P, GEN P)
 {
-  pari_sp av = avma;
-  long a1, a2, a3, b2;
-  ulong a11, a13;
-  GEN y, v, v0, P, c4, c6, g, u, u2, u4;
-  GEN a4, a6, b4, b6, b8, u6, D;
+  pari_sp av;
+  GEN c4, c6, g, u, D, c4c6P;
   long l, k;
-  int do_ch_Q;
 
-  E = ellintegralmodel(E, &v0);
-  P = c4c6_primes(E); l = lg(P);
+  D = ell_get_disc(E);
   c4 = ell_get_c4(E);
   c6 = ell_get_c6(E);
-  D = ell_get_disc(E);
+  if (!P) P = gel(Z_factor(gcdii(c4,c6)),1); /* primes dividing gcd(c4,c6) */
+  l = lg(P);
+  c4c6P = vectrunc_init(l); settyp(c4c6P,t_COL);
+  av = avma;
   g = gcdii(sqri(c6), D);
   u = gen_1;
   for (k = 1; k < l; k++)
   {
     GEN p = gel(P, k);
-    long d = Z_pval(g, p) / 12;
-    if (!d) continue;
+    long vg = Z_pval(g, p), d = vg / 12, r = vg % 12;
+    if (!d) { vectrunc_append(c4c6P, p); continue; }
     switch(itou_or_0(p))
     {
       case 2:
@@ -3214,58 +3302,59 @@ ellminimalmodel(GEN E, GEN *ptv)
         long a, b;
         a = Mod16( shifti(c4, -4*d) );
         b = Mod32( shifti(c6, -6*d) );
-        if ((b & 3) != 3 && (a || (b && b!=8))) d--;
+        if ((b & 3) != 3 && (a || (b && b!=8))) { d--; r += 12; }
         break;
       }
       case 3:
-        if (Z_lval(c6,3) == 6*d+2) d--;
+        if (Z_lval(c6,3) == 6*d+2) { d--; r += 12; }
         break;
     }
+    if (r) vectrunc_append(c4c6P, p);
     if (d) u = mulii(u, powiu(p, d));
   }
-  u2 = sqri(u); u4 = sqri(u2); u6 = mulii(u2,u4);
-  c4 = diviiexact(c4, u4);
-  c6 = diviiexact(c6, u6);
-  D = diviiexact(D, sqri(u6));
+  *pc4c6P = c4c6P;
+  return gerepileuptoint(av, u);
+}
 
-  get_b(c4,c6, &b2, &b4, &b6);
-  get_a(b2,b4,b6,&a1,&a2,&a3,&a4,&a6);
+GEN
+ellminimalmodel(GEN E, GEN *ptv)
+{
+  pari_sp av = avma;
+  GEN S, y, e, v, v0, u;
+  GEN c4c6P;
+  ellmin_t M;
 
-  y = obj_init(15, 7);
-  gel(y,1) = a1? gen_1: gen_0;
-  gel(y,2) = stoi(a2);
-  gel(y,3) = a3? gen_1: gen_0;
-  gel(y,4) = a4;
-  gel(y,5) = a6;
-  gel(y,6) = stoi(b2);
-  gel(y,7) = b4;
-  gel(y,8) = b6;
-  a11= a1;
-  a13 = (a1 && a3)? 1: 0;
-  b8 = subii(addii(mului(a11,a6), mulis(b6, a2)), mulii(a4, addiu(a4,a13)));
-  gel(y,9) = b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 - a4(a4 + a1 a3) */
-  gel(y,10)= c4;
-  gel(y,11)= c6;
-  gel(y,12)= D;
-  gel(y,13)= gel(E,13);
-  gel(y,14)= gel(E,14);
-  gel(y,15)= gel(E,15);
-
-  do_ch_Q = !RgV_is_ZV(gel(E,16));
-  if (do_ch_Q || ptv) {
-    GEN r, s, t, u3;
-    r = diviuexact(subii(muliu(u2,b2), ell_get_b2(E)), 12);
-    s = shifti(subii(muliu(u,a1), ell_get_a1(E)), -1);
-    u3 = mulii(u2,u);
-    t = shifti(subii(muliu(u3,a3), ellLHS0(E,r)), -1);
-    v = mkvec4(u,r,s,t);
-    if (v0) { gcomposev(&v0, v); v = v0; }
-    if (do_ch_Q) ch_Q(y, E, v);
+  S = obj_check(E, Q_MINIMALMODEL);
+  if (S)
+  {
+    GEN v = gel(S,1);
+    if (typ(v) != t_INT) E = ellchangecurve(E, v);
+    else
+    {
+      E = gcopy(E);
+      v = init_ch();
+    }
+    if (ptv) *ptv = v;
+    return E;
   }
 
+  e = ellintegralmodel(E, &v0);
+  u = get_u(e, &c4c6P, NULL);
+  min_set_u(&M, u);
+  min_set_c(&M, e);
+  min_set_D(&M, e);
+  min_set_b(&M);
+  min_set_a(&M);
+  y = min_to_ell(&M, e);
+  v = min_get_v(&M, e);
+  if (v0) { gcomposev(&v0, v); v = v0; }
+  S = gclone(mkvec2(v, c4c6P));
   if (ptv) { gerepileall(av, 2, &y, &v); *ptv = v; }
   else
     y = gerepilecopy(av, y);
+  if (!is_trivial_change(v)) ch_Q(y, E, v);
+  obj_insert_shallow(E, Q_MINIMALMODEL, S);
+  obj_insert(y, Q_MINIMALMODEL, mkvec2(gen_1, gel(S,2)));
   return y;
 }
 
@@ -3282,11 +3371,12 @@ static GEN
 ellglobalred_all(GEN E, GEN *gr)
 {
   long k, l, iN;
-  GEN c, L, P, NP, NE, v, v0, D;
+  GEN S, c, L, P, NP, NE, v, D;
 
-  E = ellintegralmodel(E, &v0);
-  v = init_ch();
-  P = c4c6_primes(E); l = lg(P);
+  E = ellminimalmodel(E, &v);
+  S = obj_check(E, Q_MINIMALMODEL);
+  P = gel(S,2); /* prime divisors of (c4,c6) */
+  l = lg(P);
   D  = ell_get_disc(E);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
   if (!is_pm1(D)) P = ZV_sort( shallowconcat(P, gel(Z_factor(absi(D)),1)) );
@@ -3297,23 +3387,19 @@ ellglobalred_all(GEN E, GEN *gr)
   L = cgetg(l, t_VEC);
   for (k = 1; k < l; k++)
   {
-    GEN p = gel(P,k), q = localred(E, p), ex = gel(q,1), w = gel(q,3);
+    GEN p = gel(P,k), q = localred(E, p), ex = gel(q,1);
     if (signe(ex))
     {
       gel(NP, iN) = p;
       gel(NE, iN) = ex;
       gel(L, iN) = q; iN++;
-      /*delete variable change if p != 2,3*/
-      if (cmpiu(p,3) > 0) gel(q,3) = gen_0;
+      gel(q,3) = gen_0; /*delete variable change*/
       c = mulii(c, gel(q,4));
     }
-    E_compose(&v, &E, w);
   }
   setlg(L, iN);
   setlg(NP, iN);
   setlg(NE, iN);
-  standard_model(&v, &E);
-  if (v0) { gcomposev(&v0, v); v = v0; }
   *gr = mkvec5(factorback2(NP,NE), v,c, mkmat2(NP,NE), L);
   return E;
 }
@@ -3326,24 +3412,16 @@ GEN
 ellglobalred(GEN E)
 { checkell_Q(E); return ellglobalred_i(E); }
 
-static int
-is_trivial_change(GEN v)
-{
-  GEN u = gel(v,1), r = gel(v,2), s = gel(v,3), t = gel(v,4);
-  return isint1(u) && isintzero(r) && isintzero(s) && isintzero(t);
-}
-
 static GEN doellrootno(GEN e);
 /* only update E[1..14] */
 GEN
 ellanal_globalred(GEN e, GEN *gr)
 {
-  GEN E, S, v, L;
-  long i, l;
+  GEN E, S, v;
   checkell_Q(e);
   if (gr) *gr = NULL;
   if ((S = obj_check(e, Q_GLOBALRED)))
-  { /* FIXME: add cleaner way to tell if e is reduced? */
+  {
     v = gel(S,2); if (is_trivial_change(v)) return e;
     E = coordch(e,v);
   }
@@ -3357,14 +3435,6 @@ ellanal_globalred(GEN e, GEN *gr)
   ell_reset(E);
   S = leafcopy(S);
   gel(S,2) = init_ch(); /* replace by trivial change */
-  L = leafcopy(gel(S,5)); /* vector of localreds */
-  l = minss(lg(L), 3); /* we'll touch at most the first 2 components (p=2,3) */
-  for (i = 1; i < l; i++)
-  { /* delete local variable change for p = 2,3 */
-    GEN q = gel(L,i), w = gel(q,3);
-    if (typ(w) != t_INT) gel(q,3) = gen_0;
-  }
-  gel(S,5) = L;
   obj_insert_shallow(E, Q_GLOBALRED, S);
   S = obj_check(e, Q_ROOTNO);
   if (!S)
@@ -3383,10 +3453,8 @@ ellanal_globalred(GEN e, GEN *gr)
 /********************************************************************/
 /* x a t_INT */
 static long
-val_aux(GEN x, long p)
-{ return signe(x)? Z_lval(x,p): 12; }
-static long
-val_auxrem(GEN x, long p, long pk, long *u) {
+val_aux(GEN x, long p, long pk, long *u)
+{
   long v;
   GEN z;
   if (!signe(x)) { *u = 0; return 12; }
@@ -3395,125 +3463,136 @@ val_auxrem(GEN x, long p, long pk, long *u) {
 }
 static void
 val_init(GEN e, long p, long pk,
-         long *v4, long *u, long *v6, long *v, long *vd, long *d1)
+         long *v4, long *u, long *v6, long *v, long *vD, long *d1)
 {
   GEN c4 = ell_get_c4(e), c6 = ell_get_c6(e), D = ell_get_disc(e);
   pari_sp av = avma;
-  *v4 = val_auxrem(c4, p,pk, u);
-  *v6 = val_auxrem(c6, p,pk, v);
-  *vd = val_auxrem(D , p,pk, d1); avma = av;
+  *v4 = val_aux(c4, p,pk, u);
+  *v6 = val_aux(c6, p,pk, v);
+  *vD = val_aux(D , p,pk, d1); avma = av;
 }
 
-/* p = 2 or 3, p | N */
 static long
-neron(GEN e, long p, long* ptkod)
+kod_23(GEN e, long p)
 {
-  long kod, v4, v6, vd;
-  pari_sp av = avma;
-  GEN S, nv, ch;
-
+  GEN S, nv;
   if ((S = obj_check(e, Q_GLOBALRED)))
   {
-    GEN listp = gmael(S,4,1), L = gel(S,5);
-    nv = equaliu(gel(listp,1), p)? gel(L,1): gel(L,2); /* localred(p) */
+    GEN NP = gmael(S,4,1), L = gel(S,5);
+    nv = equaliu(gel(NP,1), p)? gel(L,1): gel(L,2); /* localred(p) */
   }
   else
-    nv = localred(e, utoipos(p));
-  ch = gel(nv,3);
-  if (typ(ch) != t_INT && !isint1(gel(ch,1))) e = coordch(e,ch);
-  *ptkod = kod = itos(gel(nv,2));
-  v4 = val_aux(ell_get_c4(e), p);
-  v6 = val_aux(ell_get_c6(e), p);
-  vd = Z_lval(ell_get_disc(e), p); avma = av;
-  if (p == 2) {
-    if (kod > 4) return 1;
-    switch(kod)
-    {
-      case 1: return (v6>0) ? 2 : 1;
-      case 2:
-        if (vd==4) return 1;
-        else
-        {
-          if (vd==7) return 3;
-          else return v4==4 ? 2 : 4;
-        }
-      case 3:
-        switch(vd)
-        {
-          case 6: return 3;
-          case 8: return 4;
-          case 9: return 5;
-          default: return v4==5 ? 2 : 1;
-        }
-      case 4: return v4>4 ? 2 : 1;
-      case -1:
-        switch(vd)
-        {
-          case 9: return 2;
-          case 10: return 4;
-          default: return v4>4 ? 3 : 1;
-        }
-      case -2:
-        switch(vd)
-        {
-          case 12: return 2;
-          case 14: return 3;
-          default: return 1;
-        }
-      case -3:
-        switch(vd)
-        {
-          case 12: return 2;
-          case 14: return 3;
-          case 15: return 4;
-          default: return 1;
-        }
-      case -4: return v6==7 ? 2 : 1;
-      case -5: return (v6==7 || v4==6) ? 2 : 1;
-      case -6:
-        switch(vd)
-        {
-          case 12: return 2;
-          case 13: return 3;
-          default: return v4==6 ? 2 : 1;
-        }
-      case -7: return (vd==12 || v4==6) ? 2 : 1;
-      default: return v4==6 ? 2 : 1;
-    }
-  } else {
-    if (labs(kod) > 4) return 1;
-    switch(kod)
-    {
-      case -1: case 1: return v4&1 ? 2 : 1;
-      case -3: case 3: return (2*v6>vd+3) ? 2 : 1;
-      case -4: case 2:
-        switch (vd%6)
-        {
-          case 4: return 3;
-          case 5: return 4;
-          default: return v6%3==1 ? 2 : 1;
-        }
-      default: /* kod = -2 et 4 */
-        switch (vd%6)
-        {
-          case 0: return 2;
-          case 1: return 3;
-          default: return 1;
-        }
-    }
+    nv = localred_23(e, p);
+  return itos(gel(nv,2));
+}
+
+/* v(c4), v(c6), v(D) for minimal model, +oo is coded by 12 */
+static long
+neron_2(long v4, long v6, long vD, long kod)
+{
+  if (kod > 4) return 1;
+  switch(kod)
+  {
+    case 1: return (v6>0) ? 2 : 1;
+    case 2:
+      if (vD==4) return 1;
+      else
+      {
+        if (vD==7) return 3;
+        else return v4==4 ? 2 : 4;
+      }
+    case 3:
+      switch(vD)
+      {
+        case 6: return 3;
+        case 8: return 4;
+        case 9: return 5;
+        default: return v4==5 ? 2 : 1;
+      }
+    case 4: return v4>4 ? 2 : 1;
+    case -1:
+      switch(vD)
+      {
+        case 9: return 2;
+        case 10: return 4;
+        default: return v4>4 ? 3 : 1;
+      }
+    case -2:
+      switch(vD)
+      {
+        case 12: return 2;
+        case 14: return 3;
+        default: return 1;
+      }
+    case -3:
+      switch(vD)
+      {
+        case 12: return 2;
+        case 14: return 3;
+        case 15: return 4;
+        default: return 1;
+      }
+    case -4: return v6==7 ? 2 : 1;
+    case -5: return (v6==7 || v4==6) ? 2 : 1;
+    case -6:
+      switch(vD)
+      {
+        case 12: return 2;
+        case 13: return 3;
+        default: return v4==6 ? 2 : 1;
+      }
+    case -7: return (vD==12 || v4==6) ? 2 : 1;
+    default: return v4==6 ? 2 : 1;
+  }
+}
+/* p = 3; v(c4), v(c6), v(D) for minimal model, +oo is coded by 12 */
+static long
+neron_3(long v4, long v6, long vD, long kod)
+{
+  if (labs(kod) > 4) return 1;
+  switch(kod)
+  {
+    case -1: case 1: return v4&1 ? 2 : 1;
+    case -3: case 3: return (2*v6>vD+3) ? 2 : 1;
+    case -4: case 2:
+      switch (vD%6)
+      {
+        case 4: return 3;
+        case 5: return 4;
+        default: return v6%3==1 ? 2 : 1;
+      }
+    default: /* kod = -2 et 4 */
+      switch (vD%6)
+      {
+        case 0: return 2;
+        case 1: return 3;
+        default: return 1;
+      }
   }
 }
 
 static long
 ellrootno_2(GEN e)
 {
-  long n2, kod, u, v, x1, y1, d1, vd, v4, v6;
+  long n2, kod, u, v, x1, y1, D1, vD, v4, v6;
+  long d = get_vu_p_small(e, 2, &v6, &vD);
 
-  val_init(e, 2, 64, &v4, &u, &v6, &v, &vd, &d1);
-  if (!vd) return 1;
-  n2 = neron(e,2,&kod);
+  if (!vD) return 1;
+  if (d) { /* not minimal */
+    ellmin_t M;
+    min_set_2(&M, e, d);
+    e = min_to_ell(&M, e);
+  }
+  val_init(e, 2,64,&v4,&u, &v6,&v, &vD,&D1);
+  kod = kod_23(e,2);
+  n2 = neron_2(v4,v6,vD, kod);
   if (kod>=5)
-    return odd(umodiu(ell_get_a2(e),2) + umodiu(ell_get_a3(e),2)) ? 1 : -1;
+  {
+    long a2, a3;
+    a2 = ZtoF2(ell_get_a2(e));
+    a3 = ZtoF2(ell_get_a3(e));
+    return odd(a2 + a3) ? 1 : -1;
+  }
   if (kod<-9) return (n2==2) ? -kross(-1,v) : -1;
   x1 = u+v+v;
   switch(kod)
@@ -3581,8 +3660,8 @@ ellrootno_2(GEN e)
         if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
         else return (y1==9 || y1==5) ? 1 : -1;
       }
-    case -8: return n2==2 ? kross(-1,v*d1) : -1;
-    case -9: return n2==2 ? -kross(-1,d1) : -1;
+    case -8: return n2==2 ? kross(-1,v*D1) : -1;
+    case -9: return n2==2 ? -kross(-1,D1) : -1;
     default: return -1;
   }
 }
@@ -3590,12 +3669,20 @@ ellrootno_2(GEN e)
 static long
 ellrootno_3(GEN e)
 {
-  long n2, kod, u, v, d1, r6, K4, K6, vd, v4, v6;
+  long n2, kod, u, v, D1, r6, K4, K6, vD, v4, v6;
+  long d = get_vu_p_small(e, 3, &v6, &vD);
 
-  val_init(e, 3, 81, &v4, &u, &v6, &v, &vd, &d1);
-  if (!vd) return 1;
-  n2 = neron(e,3,&kod);
+  if (!vD) return 1;
+  if (d) { /* not minimal */
+    ellmin_t M;
+    min_set_3(&M, e, d);
+    min_set_a(&M, e, d);
+    e = min_to_ell(&M, e);
+  }
+  val_init(e, 3,81, &v4,&u, &v6,&v, &vD,&D1);
+  kod = kod_23(e,3);
   K6 = kross(v,3); if (kod>4) return K6;
+  n2 = neron_3(v4,v6,vD,kod);
   r6 = v%9; K4 = kross(u,3);
   switch(kod)
   {
@@ -3611,7 +3698,7 @@ ellrootno_3(GEN e)
     case 4:
       switch(n2)
       {
-        case 1: return K6*kross(d1,3);
+        case 1: return K6*kross(D1,3);
         case 2: return -K4;
         case 3: return -K6;
       }
@@ -3630,28 +3717,35 @@ ellrootno_3(GEN e)
   }
 }
 
-/* assume p > 3, don't assume that e is minimal at p */
+/* p > 3. Don't assume that e is minimal or even integral at p */
 static long
 ellrootno_p(GEN e, GEN p)
 {
   long nuj, nuD, nu;
   GEN D = ell_get_disc(e);
-  long ep, z, k;
+  long ep, z;
 
+  nuD = Q_pval(D, p);
+  if (!nuD) return 1;
   nuj = j_pval(e, p);
-  nuD = Z_pval(D, p);
-  nu = nuD - nuj;
-  k = nu / 12; /* minimal at p iff k <= 0 */
-  nu %= 12;
+  nu = (nuD - nuj) % 12;
   if (nu == 0)
   {
-    if (nuj)
-    { /* p || N */
-      GEN c6 = ell_get_c6(e);
-      if (k > 0) c6 = diviiexact(c6, powiu(p,6*k)); /* c6 in minimal model */
-      return -kronecker(negi(c6),p);
+    GEN c6;
+    long d, vg;
+    if (!nuj) return 1; /* good reduction */
+   /* p || N */
+    c6 = ell_get_c6(e); /* != 0 */
+    vg = minss(2*Q_pval(c6, p), nuD);
+    d = vg / 12;
+    if (d)
+    {
+      GEN q = powiu(p,6*d);
+      c6 = (typ(c6) == t_INT)? diviiexact(c6, q): gdiv(c6, q);
     }
-    return 1; /* good reduction */
+    if (typ(c6) != t_INT) c6 = Rg_to_Fp(c6,p);
+    /* c6 in minimal model */
+    return -kronecker(negi(c6), p);
   }
   if (nuj) return krosi(-1,p);
   ep = 12 / ugcd(12, nu);
@@ -3660,11 +3754,12 @@ ellrootno_p(GEN e, GEN p)
 }
 
 static GEN
-allellrootno(GEN e, GEN fa, long *ps)
+doellrootno(GEN e)
 {
-  GEN P = gel(fa,1), V;
-  long i, l = lg(P), s = -1;
-
+  GEN V, v, P;
+  long i, l, s = -1;
+  e = ellglobalred_all(e, &v);
+  P = gmael(v,4,1); l = lg(P);
   V = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++)
   {
@@ -3678,14 +3773,6 @@ allellrootno(GEN e, GEN fa, long *ps)
     }
     V[i] = t; s *= t;
   }
-  *ps = s; return V;
-}
-static GEN
-doellrootno(GEN e)
-{
-  long s;
-  GEN v = ellglobalred_i(e);
-  GEN V = allellrootno(e, gel(v,4), &s);
   return mkvec2(stoi(s), V);
 }
 long
@@ -3702,18 +3789,34 @@ long
 ellrootno(GEN e, GEN p)
 {
   pari_sp av = avma;
+  GEN S;
   long s;
   checkell_Q(e);
   if (!p || isint1(p)) return ellrootno_global(e);
   if (typ(p) != t_INT) pari_err_TYPE("ellrootno", p);
   if (signe(p) < 0) pari_err_PRIME("ellrootno",p);
   if (!signe(p)) return -1; /* local factor at infinity */
-  e = ellintegralmodel(e, NULL);
+  if ( (S = obj_check(e, Q_ROOTNO)) )
+  {
+    GEN T = obj_check(e, Q_GLOBALRED), NP = gmael(T,4,1);
+    long i, l = lg(NP);
+    for (i = 1; i < l; i++)
+    {
+      GEN q = gel(NP,i);
+      if (equalii(p, q)) { GEN V = gel(S,2); return V[i]; }
+    }
+    return 1;
+  }
   switch(itou_or_0(p))
   {
-    case 2: s = ellrootno_2(e); break;
-    case 3: s = ellrootno_3(e); break;
-    default: s = ellrootno_p(e,p); break;
+    case 2:
+      e = ellintegralmodel(e, NULL);
+      s = ellrootno_2(e); break;
+    case 3:
+      e = ellintegralmodel(e, NULL);
+      s = ellrootno_3(e); break;
+    default:
+      s = ellrootno_p(e,p); break;
   }
   avma = av; return s;
 }
@@ -3778,7 +3881,7 @@ anellsmall(GEN e, long n0)
     if (!umodiu(D,p)) /* p | D, bad reduction or non-minimal model */
     {
       int good_red;
-      ap = itos( is_minimal_ap_small(e, p, &good_red) );
+      ap = is_minimal_ap_small(e, p, &good_red);
       if (good_red) goto GOOD_RED;
       switch (ap) /* (-c6/p) */
       {
@@ -4141,6 +4244,28 @@ ellheightoo(GEN E, GEN z, long prec)
   return gerepileuptoleaf(av, gmul2n(mplog(h), -2));
 }
 
+/* assume e integral, check whether we have a global minimal model.
+ * If not, insert the Q_MINIMALMODEL component */
+static int
+is_minimal(GEN e)
+{
+  pari_sp av = avma;
+  GEN S, c4c6P, u, v;
+  ellmin_t M;
+  if ((S = obj_check(e, Q_MINIMALMODEL)))
+  {
+    v = gel(S,1);
+    return typ(v) == t_INT || isint1(gel(v,1));
+  }
+  u = get_u(e, &c4c6P, NULL);
+  min_set_u(&M, u);
+  min_set_c(&M, e);
+  min_set_b(&M);
+  min_set_a(&M);
+  v = min_get_v(&M, e);
+  obj_insert(e, Q_MINIMALMODEL, mkvec2(v, c4c6P));
+  avma = av; return is_pm1(u);
+}
 /* Assume e integral, given by a minimal model */
 GEN
 ellheight0(GEN e, GEN a, long flag, long prec)
@@ -4152,6 +4277,8 @@ ellheight0(GEN e, GEN a, long flag, long prec)
 
   if (flag > 2 || flag < 0) pari_err_FLAG("ellheight");
   checkell_Q(e); if (!is_matvec_t(tx)) pari_err_TYPE("ellheight",a);
+  if (!ell_is_integral(e) || !is_minimal(e))
+    pari_err_DOMAIN("elleight", "curve", "not", strtoGENstr("minimal"), e);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(gel(a,1));
   if (is_matvec_t(tx))
@@ -4496,16 +4623,6 @@ elllog(GEN E, GEN a, GEN g, GEN o)
     r = FpE_log(Pp, Qp, o, gel(e,1), p);
   }
   return gerepileuptoint(av, r);
-}
-
-static int
-ell_is_integral(GEN E)
-{
-  return typ(ell_get_a1(E)) == t_INT
-      && typ(ell_get_a2(E)) == t_INT
-      && typ(ell_get_a3(E)) == t_INT
-      && typ(ell_get_a4(E)) == t_INT
-      && typ(ell_get_a6(E)) == t_INT;
 }
 
 /* assume e is defined over Q (use Mazur's theorem) */

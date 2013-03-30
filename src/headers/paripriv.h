@@ -237,7 +237,7 @@ GEN FF_elldata(GEN E, GEN fg);
 enum { R_PERIODS = 1, R_ETA, R_ROOTS, R_AB };
 
 enum { Qp_ROOT = 1, Qp_TATE };
-enum { Q_GROUPGEN = 5, Q_GLOBALRED, Q_ROOTNO };
+enum { Q_GROUPGEN = 5, Q_GLOBALRED, Q_ROOTNO, Q_MINIMALMODEL };
 
 /* common to Fp and Fq */
 enum { FF_CARD = 1, FF_GROUP, FF_GROUPGEN, FF_O };
