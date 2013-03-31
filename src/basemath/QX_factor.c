@@ -1136,6 +1136,7 @@ ZX_gcd_all(GEN A, GEN B, GEN *Anew)
   }
   init_modular(&S);
   av = avma; avlim = stack_lim(av, 1);
+  R = NULL;/*-Wall*/
   H = NULL;
   while ((p = u_forprime_next(&S)))
   {

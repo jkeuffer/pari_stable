@@ -330,7 +330,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long d)
 {
   pari_sp ltop = avma, av2;
   GEN borne, borneroots, borneabs;
-  long n, prec;
+  long prec;
   GEN L, M, prep, den;
   pari_timer ti;
 
@@ -342,7 +342,6 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long d)
   if (DEBUGLEVEL>=4) timer_printf(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
   borneroots = gsupnorm(L, prec); /*t_REAL*/
-  n = degpol(T);
   borneabs = addsr(1, gmul(borne,gmulsg(d, powru(borneroots, d))));
   borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
