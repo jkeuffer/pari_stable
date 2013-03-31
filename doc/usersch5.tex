@@ -793,13 +793,17 @@ while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 }
 @eprog
 
-\fun{bytepr}{initprimes}{ulong maxprime} computes a ``prime table'' on the fly.
-In fact a table of all prime differences for $p < \kbd{maxprime}$.
+\fun{bytepr}{initprimes}{ulong maxprime, long *L, ulong *lastp}
+computes a (malloc'ed) ``prime table'', in fact a table of all prime
+differences for $p < \kbd{maxprime}$ (and possibly a little beyond). Set $L$
+to the table length (argument to \kbd{malloc}), and \var{lastp} to the last
+prime in the table.
 
 \fun{void}{initprimetable}{ulong maxprime} computes a prime table (of all prime
 differences for $p < \kbd{maxprime}$) and assign it to the global variable
 \kbd{diffptr}. Don't change \kbd{diffptr} directly, call this function
-instead.
+instead. This calls \kbd{initprimes} and updates internal data recording the
+table size.
 
 \fun{ulong}{init_primepointer_geq}{ulong a, byteptr *pd}
 returns the smallest prime $p \geq a$, and sets \kbd{*pd} to the proper offset

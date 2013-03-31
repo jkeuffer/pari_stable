@@ -558,22 +558,17 @@ init_primepointer_gt(ulong a, byteptr *pd)
   return p;
 }
 
-static byteptr
-initprimes_i(ulong maxnum, long *lenp, ulong *lastp)
-{ /* The algorithm must see the next prime beyond maxnum, whence the +512. */
-  ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
-
-  if ((maxnum>>1) > LONG_MAX - 1024)
-    pari_err_OVERFLOW("initprimes [primelimit]");
-  return initprimes0(maxnum1, lenp, lastp);
-}
-
 byteptr
-initprimes(ulong maxnum)
-{
-  long len;
-  ulong last;
-  return initprimes_i(maxnum, &len, &last);
+initprimes(ulong maxnum, long *lenp, ulong *lastp)
+{ /* the algorithm must see the next prime beyond maxnum, whence the +512. */
+  if (maxnum < 65302)
+    maxnum = 65302 + 512;
+  else
+  {
+    maxnum += 512;
+    if (maxnum < 512UL) pari_err_OVERFLOW("initprimes [primelimit]");
+  }
+  return initprimes0(maxnum, lenp, lastp);
 }
 
 void
@@ -581,7 +576,7 @@ initprimetable(ulong maxnum)
 {
   long len;
   ulong last;
-  byteptr p = initprimes_i(maxnum, &len, &last), old = diffptr;
+  byteptr p = initprimes(maxnum, &len, &last), old = diffptr;
   diffptrlen = minss(diffptrlen, len);
   _maxprime  = minss(_maxprime,last); /*Protect against ^C*/
   diffptr = p; diffptrlen = len; _maxprime = last;
