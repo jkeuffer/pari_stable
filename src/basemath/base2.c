@@ -651,19 +651,40 @@ nfmaxord(nfmaxord_t *S, GEN T0, long flag)
     /* includes the silly case where P[i] = -1 */
     if (E[i] <= 1) { O = shallowconcat(O, gen_1); continue; }
     av = avma;
-    pari_CATCH(e_INV) { /* caught false prime, update factorization */
-      GEN x, N, p, u, ERR = pari_err_last();
-      long l;
-      x = err_get_compo(ERR, 2);
-      if (typ(x) != t_INTMOD) pari_err(0, ERR);
-      p = gcdii(gel(x,1), gel(x,2));
-      u = diviiexact(gel(x,1),p);
-      if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);
-      gerepileall(av, 2, &p, &u);
+    pari_CATCH(CATCH_ALL) {
+      GEN N, u, ERR = pari_err_last();
+      long l, te = err_get_num(ERR);
+      if (te == e_INV)
+      { /* caught false prime, update factorization */
+        GEN p, x = err_get_compo(ERR, 2);
+        if (typ(x) != t_INTMOD) pari_err(0, ERR);
+        p = gcdii(gel(x,1), gel(x,2));
+        u = diviiexact(gel(x,1),p);
+        if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);
+        gerepileall(av, 2, &p, &u);
 
-      u = get_coprimes(p, u); l = lg(u);
-      /* no small factors, but often a prime power */
-      for (k = 1; k < l; k++) (void)Z_isanypower(gel(u,k), &gel(u,k));
+        u = get_coprimes(p, u); l = lg(u);
+        /* no small factors, but often a prime power */
+        for (k = 1; k < l; k++) (void)Z_isanypower(gel(u,k), &gel(u,k));
+      }
+      else if (te == e_PRIME || te == e_IRREDPOL)
+      { /* we're here because we failed BPSW_isprime(), no point in
+         * reporting a possible counter-example to the BPSW test */
+        GEN p = gel(P,i);
+        avma = av;
+        if (DEBUGLEVEL)
+          pari_warn(warner,"large composite in nfmaxord:loop(), %Ps", p);
+        if (expi(p) < 100) /* factor should require ~20ms for this */
+          u = gel(Z_factor(p), 1);
+        else
+        { /* give up, probably not maximal */
+          O = shallowconcat(O, gen_1);
+          pari_CATCH_reset(); continue;
+        }
+      }
+      else
+        pari_err(0, E);
+      l = lg(u);
       gel(P,i) = gel(u,1);
       P = shallowconcat(P, vecslice(u, 2, l-1));
       av = avma;
