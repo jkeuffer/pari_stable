@@ -2938,7 +2938,6 @@ ellintegralmodel(GEN e, GEN *pv)
   GEN a = cgetg(6,t_VEC), t, u, L;
   long i, l, k;
 
-  checkell_Q(e);
   L = cgetg(1, t_VEC);
   for (i = 1; i < 6; i++)
   {
@@ -3324,6 +3323,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   GEN c4c6P;
   ellmin_t M;
 
+  checkell_Q(E);
   S = obj_check(E, Q_MINIMALMODEL);
   if (S)
   {
@@ -3337,7 +3337,6 @@ ellminimalmodel(GEN E, GEN *ptv)
     if (ptv) *ptv = v;
     return E;
   }
-
   e = ellintegralmodel(E, &v0);
   u = get_u(e, &c4c6P, NULL);
   min_set_u(&M, u);
@@ -4560,8 +4559,8 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     p = best_in_cycle(e,p,k);
     if (v)
     {
-      p = ellchangepoint(p,v);
-      q = ellchangepoint(q,v);
+      p = ellchangepointinv(p,v);
+      q = ellchangepointinv(q,v);
     }
     r = cgetg(4,t_VEC);
     gel(r,1) = utoipos(2*k);
@@ -4573,7 +4572,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     if (p)
     {
       p = best_in_cycle(e,p,k);
-      if (v) p = ellchangepoint(p,v);
+      if (v) p = ellchangepointinv(p,v);
       r = cgetg(4,t_VEC);
       gel(r,1) = utoipos(k);
       gel(r,2) = mkvec( gel(r,1) );
@@ -4894,7 +4893,6 @@ elltors_doud(GEN e)
   prec = DEFAULTPREC + ((lgefint(ell_get_disc(e))-2) >> 1);
   om = ellR_omega(e, prec);
   w1 = gel(om,1);
-  if (v) gel(v,1) = ginv(gel(v,1));
   w22 = gmul2n(gel(om,2),-1);
   if (B % 4)
   { /* cyclic of order 1, p, 2p, p <= 5 */
@@ -5022,7 +5020,6 @@ elltors_divpol(GEN E)
   v2 = vals(B); /* bound for v_2(point order) */
   B >>= v2;
   p = const_vec(9, NULL);
-  if (v) gel(v,1) = ginv(gel(v,1));
   r2 = 0;
   if (v2) {
     GEN f;
@@ -5096,12 +5093,14 @@ GEN
 elltors(GEN e)
 {
   pari_sp av = avma;
+  checkell_Q(e);
   return gerepileupto(av, elltors_divpol(e));
 }
 
 GEN
 elltors0(GEN e, long flag)
 {
+  checkell_Q(e);
   switch(flag)
   {
     case 0: return elltors(e);
