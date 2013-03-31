@@ -456,6 +456,7 @@ BA 139- mips and mips64 level0 inline assembly kernel
         init_primepointer_leq, init_primepointer_lt
 BA 142- new default strictargs for mandatory arguments
    143- GP function nfcertify
+   144- GP function ellchangepointinv
 
   Removed
     1- dropped DOS support

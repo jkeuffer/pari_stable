@@ -173,3 +173,5 @@ E=ellchangecurve(e,[1/(2^4*3^4*5^2*7),2,3,4]);
 forprime(p=2,11, if (ellap(e,p) != ellap(E,p),error(p)));
 for(k=2,50, if (ellak(e,k) != ellak(E,k),error(k)));
 if (ellan(e,100) != ellan(E,100),error("ellan"));
+P=ellchangepoint([0,1],[1,2,3,4])
+ellchangepointinv(P,[1,2,3,4])
