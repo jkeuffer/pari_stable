@@ -366,6 +366,33 @@ vecslice_i(GEN A, long t, long lB, long y1, long skip)
   }
   return B;
 }
+
+static GEN
+rowslice_i(GEN A, long lB, long x1, long y1, long skip)
+{
+  GEN B = cgetg(lB, t_VEC);
+  long i;
+  for (i=1; i<lB; i++, y1++)
+  {
+    if (y1 == skip) { i--; continue; }
+    gel(B,i) = gcopy(gcoeff(A,x1,y1));
+  }
+  return B;
+}
+
+static GEN
+rowsmallslice_i(GEN A, long lB, long x1, long y1, long skip)
+{
+  GEN B = cgetg(lB, t_VECSMALL);
+  long i;
+  for (i=1; i<lB; i++, y1++)
+  {
+    if (y1 == skip) { i--; continue; }
+    B[i] = coeff(A,x1,y1);
+  }
+  return B;
+}
+
 static GEN
 vecsmallslice_i(GEN A, long t, long lB, long y1, long skip)
 {
@@ -400,13 +427,17 @@ matslice0(GEN A, long x1, long x2, long y1, long y2)
 {
   GEN B;
   long i, lB, lA = lg(A), t, skip, rskip, rlB;
+  long is_col = y1 && !y2, is_row = x1 && !x2;
   GEN (*slice)(GEN A, long t, long lB, long y1, long skip);
   if (typ(A)!=t_MAT) pari_err_TYPE("_[_.._,_.._]",A);
   lB = vecslice_parse_arg(lA, &y1, &y2, &skip);
+  if (is_col) return vecslice0(gel(A, y1), x1, x2);
 
   /* lA > 1 */
   rlB = vecslice_parse_arg(lg(gel(A,1)), &x1, &x2, &rskip);
   t = typ(gel(A,1));
+  if (is_row) return t_COL ? rowslice_i(A, lB, x1, y1, skip):
+                             rowsmallslice_i(A, lB, x1, y1, skip);
   slice = t == t_COL? &vecslice_i: &vecsmallslice_i;
 
   B = cgetg(lB, t_MAT);
