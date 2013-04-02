@@ -1768,7 +1768,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   }
   ff = get_Fp_field(&E,p);
   u = gen_Gauss(a,b,E,ff);
-  return gerepilecopy(av, iscol? gel(u,1): u);
+  return u ? gerepilecopy(av, iscol? gel(u,1): u): u;
 }
 GEN
 FqM_gauss(GEN a, GEN b, GEN T, GEN p)
@@ -1784,7 +1784,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
   ff= get_Fq_field(&E,T,p);
   u = gen_Gauss(a,b,E,ff);
-  return gerepilecopy(av, iscol? gel(u,1): u);
+  return u ? gerepilecopy(av, iscol? gel(u,1): u): u;
 }
 
 /* Dixon p-adic lifting algorithm.
