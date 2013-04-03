@@ -38,7 +38,12 @@ Doc: replaces in $x$ the formal variables by the values that
  ? 1a
   ***   unused characters: 1a
   ***                       ^-
- ? E(expr) = iferrname(e_SYNTAX, eval(expr), e, print("syntax error"));
+ ? E(expr) =
+   {
+     iferr(eval(expr),
+           e, print("syntax error"),
+           errname(e) == "e_SYNTAX");
+   }
  ? E("1+1")
  %1 = 2
  ? E("1a")

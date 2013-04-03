@@ -27,7 +27,7 @@ Doc:
  \item a character string: return the vector of individual characters.
 
  \item an error context (\typ{ERROR}): return the error components, see
- \tet{iferrname}.
+ \tet{iferr}.
 
  In the last three cases (matrix, character string, error), $n$ is
  meaningless and must be omitted or an error is raised. Otherwise, if $n$ is
