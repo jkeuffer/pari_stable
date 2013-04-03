@@ -3314,6 +3314,15 @@ ZM_det_i(GEN M, long n)
   return gerepileuptoint(av, mulii(comp, D));
 }
 
+static long
+det_init_max(long n)
+{
+  if (n > 100) return 0;
+  if (n > 50) return 1;
+  if (n > 30) return 4;
+  return 7;
+}
+
 GEN
 det(GEN a)
 {
@@ -3338,7 +3347,7 @@ det(GEN a)
   pivot = get_pivot_fun(a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
   B = (double)n;
-  return det_develop(a, 7, B*B*B);
+  return det_develop(a, det_init_max(n), B*B*B);
 }
 
 GEN
