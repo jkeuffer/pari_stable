@@ -2786,8 +2786,9 @@ long    sturmpart(GEN x, GEN a, GEN b);
 GEN     subresext(GEN x, GEN y, GEN *U, GEN *V);
 GEN     sylvestermatrix(GEN x,GEN y);
 GEN     trivial_fact(void);
-GEN     vecbezout(GEN x, GEN y);
-GEN     vecbezoutres(GEN x, GEN y);
+GEN     gcdext0(GEN x, GEN y);
+GEN     polresultantext0(GEN x, GEN y, long v);
+GEN     polresultantext(GEN x, GEN y);
 GEN     prime_fact(GEN x);
 
 /* polarit3.c */

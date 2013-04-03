@@ -1955,13 +1955,12 @@ subres_step(GEN *u, GEN *v, GEN *g, GEN *h, GEN *uze, GEN *um1, long *signh)
 }
 
 /* compute U, V s.t Ux + Vy = resultant(x,y) */
-GEN
-subresext(GEN x, GEN y, GEN *U, GEN *V)
+static GEN
+subresext_i(GEN x, GEN y, GEN *U, GEN *V)
 {
-  pari_sp av, av2, tetpil, lim;
+  pari_sp av, av2, lim;
   long dx, dy, du, signh, tx = typ(x), ty = typ(y);
   GEN r, z, g, h, p1, cu, cv, u, v, um1, uze, vze;
-  GEN *gptr[3];
 
   if (!is_extscalar_t(tx)) pari_err_TYPE("subresext",x);
   if (!is_extscalar_t(ty)) pari_err_TYPE("subresext",y);
@@ -2018,15 +2017,18 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   if (cv) p1 = gmul(p1, gpowgs(cv,dx));
   cu = cu? gdiv(p1,cu): p1;
   cv = cv? gdiv(p1,cv): p1;
-
-  tetpil = avma;
   z = gmul(z,p1);
   *U = RgX_Rg_mul(uze,cu);
   *V = RgX_Rg_mul(vze,cv);
-  gptr[0] = &z;
-  gptr[1] = U;
-  gptr[2] = V;
-  gerepilemanysp(av,tetpil,gptr,3); return z;
+  return z;
+}
+GEN
+subresext(GEN x, GEN y, GEN *U, GEN *V)
+{
+  pari_sp av = avma;
+  GEN z = subresext_i(x, y, U, V);
+  gerepileall(av, 3, &z, U, V);
+  return z;
 }
 
 static GEN
@@ -2463,6 +2465,30 @@ polresultant0(GEN x, GEN y, long v, long flag)
   if (m) x = gsubst(x,MAXVARN,pol_x(0));
   return gerepileupto(av,x);
 }
+GEN
+polresultantext0(GEN x, GEN y, long v)
+{
+  GEN R, U, V;
+  long m = 0;
+  pari_sp av = avma;
+
+  if (v >= 0)
+  {
+    x = fix_pol(x,v, &m);
+    y = fix_pol(y,v, &m);
+  }
+  R = subresext_i(x,y, &U,&V);
+  if (m)
+  {
+    U = gsubst(gsubst(U, 0, pol_x(v)), MAXVARN, pol_x(0));
+    V = gsubst(gsubst(V, 0, pol_x(v)), MAXVARN, pol_x(0));
+
+    R = gsubst(R,MAXVARN,pol_x(0));
+  }
+  return gerepilecopy(av, mkvec3(U,V,R));
+}
+GEN
+polresultantext(GEN x, GEN y) { return polresultantext0(x,y,-1); }
 
 /*******************************************************************/
 /*                                                                 */
@@ -2906,7 +2932,7 @@ RgXQ_inv(GEN x, GEN y)
   }
   if (isinexact(x) || isinexact(y)) return RgXQ_inv_inexact(x,y);
 
-  av = avma; d = subresext(x,y,&u,&v/*junk*/);
+  av = avma; d = subresext_i(x,y,&u,&v/*junk*/);
   if (gequal0(d)) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
   if (typ(d) == t_POL && varn(d) == vx)
   {
@@ -2961,18 +2987,10 @@ gbezout(GEN x, GEN y, GEN *u, GEN *v)
 }
 
 GEN
-vecbezout(GEN x, GEN y)
+gcdext0(GEN x, GEN y)
 {
   GEN z=cgetg(4,t_VEC);
   gel(z,3) = gbezout(x,y,(GEN*)(z+1),(GEN*)(z+2));
-  return z;
-}
-
-GEN
-vecbezoutres(GEN x, GEN y)
-{
-  GEN z=cgetg(4,t_VEC);
-  gel(z,3) = subresext(x,y,(GEN*)(z+1),(GEN*)(z+2));
   return z;
 }
 

@@ -55,6 +55,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     (e.g. nfinit([T, nfbasis(T, 1)]), now deprecated). Also, the nfinit
     function now sees the local specifications directly and can take steps
     to fix problems. The result can also be certified (nfcertify)
+  - renamed bezout() -> gcdext(), polresultant() -> polresultantext()
 
 * Specific to the PARI library:
 ===============================

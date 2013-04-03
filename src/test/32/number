@@ -3,7 +3,7 @@
 [1000000007, 10000000019]
 ? bestappr(Pi,10000)
 355/113
-? bezout(123456789,987654321)
+? gcdext(123456789,987654321)
 [-8, 1, 9]
 ? bigomega(12345678987654321)
 8
@@ -270,4 +270,4 @@ Mod(391, 3120), Mod(2081, 3120)]]
 ? getheap
 [87, 2731]
 ? print("Total time spent: ",gettime);
-Total time spent: 28
+Total time spent: 32
