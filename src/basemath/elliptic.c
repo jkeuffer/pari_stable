@@ -934,7 +934,7 @@ ch_Q(GEN E, GEN e, GEN w)
     S = obj_insert(E, Q_GROUPGEN, ellchangepoint(S, w));
   if ((S = obj_check(e, Q_MINIMALMODEL)))
   {
-    v = gel(S,1);
+    v = (lg(S) == 2)? gen_1: gel(S,2);
     if (gequal(v, w) || (is_trivial_change(v) && is_trivial_change(w)))
       v = gen_1; /* most useful case! */
     else
@@ -947,11 +947,7 @@ ch_Q(GEN E, GEN e, GEN w)
     S = obj_insert(E, Q_MINIMALMODEL, S);
   }
   if ((S = obj_check(e, Q_GLOBALRED)))
-  {
-    S = leafcopy(S); /* don't modify S in place: would corrupt e */
-    gel(S,2) = v;
     S = obj_insert(E, Q_GLOBALRED, S);
-  }
   if ((S = obj_check(e, Q_ROOTNO)))
     S = obj_insert(E, Q_ROOTNO, S);
   return E;
@@ -3315,27 +3311,26 @@ get_u(GEN E, GEN *pc4c6P, GEN P)
   return gerepileuptoint(av, u);
 }
 
-GEN
-ellminimalmodel(GEN E, GEN *ptv)
+/* update Q_MINIMALMODEL entry in E, but don't update type-specific data on
+ * ellminimalmodel(E) */
+static GEN
+ellminimalmodel_i(GEN E, GEN *ptv)
 {
   pari_sp av = avma;
   GEN S, y, e, v, v0, u;
   GEN c4c6P;
   ellmin_t M;
-
-  checkell_Q(E);
-  S = obj_check(E, Q_MINIMALMODEL);
-  if (S)
+  if ((S = obj_check(E, Q_MINIMALMODEL)))
   {
-    GEN v = gel(S,1);
-    if (typ(v) != t_INT) E = ellchangecurve(E, v);
-    else
+    if (lg(S) != 2)
     {
-      E = gcopy(E);
-      v = init_ch();
+      E = gel(S,3);
+      v = gel(S,2);
     }
+    else
+      v = init_ch();
     if (ptv) *ptv = v;
-    return E;
+    return gcopy(E);
   }
   e = ellintegralmodel(E, &v0);
   u = get_u(e, &c4c6P, NULL);
@@ -3347,35 +3342,47 @@ ellminimalmodel(GEN E, GEN *ptv)
   y = min_to_ell(&M, e);
   v = min_get_v(&M, e);
   if (v0) { gcomposev(&v0, v); v = v0; }
-  S = gclone(mkvec2(v, c4c6P));
-  if (ptv) { gerepileall(av, 2, &y, &v); *ptv = v; }
+  if (is_trivial_change(v))
+    S = mkvec(c4c6P);
   else
-    y = gerepilecopy(av, y);
-  if (!is_trivial_change(v)) ch_Q(y, E, v);
+    S = mkvec3(c4c6P, v, y);
+  S = gclone(S);
+  y = gerepilecopy(av, y);
   obj_insert_shallow(E, Q_MINIMALMODEL, S);
-  obj_insert(y, Q_MINIMALMODEL, mkvec2(gen_1, gel(S,2)));
+  *ptv = lg(S) == 2? init_ch(): gel(S,2);
+  return y;
+}
+GEN
+ellminimalmodel(GEN E, GEN *ptv)
+{
+  GEN S, y, v;
+  checkell_Q(E);
+  y = ellminimalmodel_i(E, &v);
+  if (!is_trivial_change(v)) ch_Q(y, E, v);
+  if (ptv) *ptv = gcopy(v);
+  S = obj_check(E, Q_MINIMALMODEL);
+  obj_insert(y, Q_MINIMALMODEL, mkvec(gel(S,1)));
   return y;
 }
 
-/* Reduction of a rational curve E to its standard minimal model
- * (a1,a3 = 0 or 1, a2 = -1, 0 or 1).
- *
- * Return [N, [u,r,s,t], c, fa, L], where
+/* Reduction of a rational curve E to its standard minimal model, don't
+ * update type-dependant components.
+ * Set v = [u, r, s, t] = change of variable E -> minimal model, with u > 0
+ * Set gr = [N, [u,r,s,t], c, fa, L], where
  *   N = arithmetic conductor of E
  *   c = product of the local Tamagawa numbers cp
- *   [u, r, s, t] = change of variable E -> minimal model, with u > 0
  *   fa = factorization of N
- *   L = list of localred(E,p) for p | N */
+ *   L = list of localred(E,p) for p | N.
+ * Return standard minimal model (a1,a3 = 0 or 1, a2 = -1, 0 or 1) */
 static GEN
-ellglobalred_all(GEN E, GEN *gr)
+ellglobalred_all(GEN e, GEN *pgr, GEN *pv)
 {
   long k, l, iN;
-  GEN S, c, L, P, NP, NE, v, D;
+  GEN S, E, c, L, P, NP, NE, D;
 
-  E = ellminimalmodel(E, &v);
-  S = obj_check(E, Q_MINIMALMODEL);
-  P = gel(S,2); /* prime divisors of (c4,c6) */
-  l = lg(P);
+  E = ellminimalmodel_i(e, pv);
+  S = obj_check(e, Q_MINIMALMODEL);
+  P = gel(S,1); l = lg(P); /* prime divisors of (c4,c6) */
   D  = ell_get_disc(E);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
   if (!is_pm1(D)) P = ZV_sort( shallowconcat(P, gel(Z_factor(absi(D)),1)) );
@@ -3399,49 +3406,60 @@ ellglobalred_all(GEN E, GEN *gr)
   setlg(L, iN);
   setlg(NP, iN);
   setlg(NE, iN);
-  *gr = mkvec5(factorback2(NP,NE), v,c, mkmat2(NP,NE), L);
+  *pgr = mkvec4(factorback2(NP,NE), c, mkmat2(NP,NE), L);
   return E;
 }
 static GEN
-doellglobalred(GEN E) { GEN gr; (void)ellglobalred_all(E, &gr); return gr; }
+doellglobalred(GEN E)
+{
+  GEN v, gr;
+  E = ellglobalred_all(E, &gr, &v);
+  return gr;
+}
 static GEN
 ellglobalred_i(GEN E)
 { return obj_checkbuild(E, Q_GLOBALRED, &doellglobalred); }
 GEN
 ellglobalred(GEN E)
-{ checkell_Q(E); return ellglobalred_i(E); }
+{
+  pari_sp av = avma;
+  GEN S, gr, v;
+  checkell_Q(E); gr = ellglobalred_i(E);
+  S = obj_check(E, Q_MINIMALMODEL);
+  v = (lg(S) == 2)? init_ch(): gel(S,2);
+  return gerepilecopy(av, mkvec5(gel(gr,1), v, gel(gr,2),gel(gr,3),gel(gr,4)));
+}
 
 static GEN doellrootno(GEN e);
 /* only update E[1..14] */
 GEN
-ellanal_globalred(GEN e, GEN *gr)
+ellanal_globalred(GEN e, GEN *ch)
 {
-  GEN E, S, v;
+  GEN E, S, v = NULL;
   checkell_Q(e);
-  if (gr) *gr = NULL;
-  if ((S = obj_check(e, Q_GLOBALRED)))
+  if (!(S = obj_check(e, Q_MINIMALMODEL)))
   {
-    v = gel(S,2); if (is_trivial_change(v)) return e;
-    E = coordch(e,v);
+    E = ellminimalmodel_i(e, &v);
+    S = obj_check(e, Q_MINIMALMODEL);
+    obj_insert_shallow(E, Q_MINIMALMODEL, mkvec(gel(S,1)));
   }
+  else if (lg(S) == 2) /* trivial change */
+    E = e;
   else
-  { /* faster than ellglobalred(e) + ellchangecurve */
-    E = ellglobalred_all(e, &S);
-    (void)obj_insert(e, Q_GLOBALRED, S);
-    v = gel(S,2); if (is_trivial_change(v)) return e;
+  {
+    v = gel(S,2);
+    E = gcopy(gel(S,3));
   }
-  if (gr) *gr = v;
-  ell_reset(E);
-  S = leafcopy(S);
-  gel(S,2) = init_ch(); /* replace by trivial change */
-  obj_insert_shallow(E, Q_GLOBALRED, S);
+  if (ch) *ch = v;
+  S = ellglobalred_i(e);
+  if (E != e) obj_insert_shallow(E, Q_GLOBALRED, S);
   S = obj_check(e, Q_ROOTNO);
   if (!S)
   {
-    S = doellrootno(E); /* E is a minimal model */
+    S = doellrootno(E);
     obj_insert(e, Q_ROOTNO, S); /* insert in e */
   }
-  obj_insert_shallow(E, Q_ROOTNO, S); /* ... and in E */
+  if (E != e) obj_insert_shallow(E, Q_ROOTNO, S); /* ... and in E */
   return E;
 }
 
@@ -3477,7 +3495,7 @@ kod_23(GEN e, long p)
   GEN S, nv;
   if ((S = obj_check(e, Q_GLOBALRED)))
   {
-    GEN NP = gmael(S,4,1), L = gel(S,5);
+    GEN NP = gmael(S,3,1), L = gel(S,4);
     nv = equaliu(gel(NP,1), p)? gel(L,1): gel(L,2); /* localred(p) */
   }
   else
@@ -3755,10 +3773,19 @@ ellrootno_p(GEN e, GEN p)
 static GEN
 doellrootno(GEN e)
 {
-  GEN V, v, P;
+  GEN S, V, v, P;
   long i, l, s = -1;
-  e = ellglobalred_all(e, &v);
-  P = gmael(v,4,1); l = lg(P);
+  if ((S = obj_check(e, Q_GLOBALRED)))
+  {
+    GEN S2 = obj_check(e, Q_MINIMALMODEL);
+    if (lg(S2) != 2) e = gel(S2,3);
+  }
+  else
+  {
+    e = ellglobalred_all(e, &S, &v);
+    obj_insert(e, Q_GLOBALRED, S);
+  }
+  P = gmael(S,3,1); l = lg(P);
   V = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++)
   {
@@ -4001,7 +4028,7 @@ ellQ_get_N(GEN e)
 { GEN v = ellglobalred_i(e); return gel(v,1); }
 void
 ellQ_get_Nfa(GEN e, GEN *N, GEN *faN)
-{ GEN v = ellglobalred_i(e); *N = gel(v,1); *faN = gel(v,4); }
+{ GEN v = ellglobalred_i(e); *N = gel(v,1); *faN = gel(v,3); }
 
 GEN
 elllseries(GEN e, GEN s, GEN A, long prec)
@@ -4243,43 +4270,29 @@ ellheightoo(GEN E, GEN z, long prec)
   return gerepileuptoleaf(av, gmul2n(mplog(h), -2));
 }
 
-/* assume e integral, check whether we have a global minimal model.
- * If not, insert the Q_MINIMALMODEL component */
-static int
-is_minimal(GEN e)
-{
-  pari_sp av = avma;
-  GEN S, c4c6P, u, v;
-  ellmin_t M;
-  if ((S = obj_check(e, Q_MINIMALMODEL)))
-  {
-    v = gel(S,1);
-    return typ(v) == t_INT || isint1(gel(v,1));
-  }
-  u = get_u(e, &c4c6P, NULL);
-  min_set_u(&M, u);
-  min_set_c(&M, e);
-  min_set_b(&M);
-  min_set_a(&M);
-  v = min_get_v(&M, e);
-  obj_insert(e, Q_MINIMALMODEL, mkvec2(v, c4c6P));
-  avma = av; return is_pm1(u);
-}
-/* Assume e integral, given by a minimal model */
 GEN
 ellheight0(GEN e, GEN a, long flag, long prec)
 {
   long i, tx = typ(a), lx;
   pari_sp av = avma;
   GEN Lp, x, y, z, phi2, psi2, psi3;
-  GEN b2, b4, b6, b8, a1, a2, a4, c4, D;
+  GEN v, S, b2, b4, b6, b8, a1, a2, a4, c4, D;
 
   if (flag > 2 || flag < 0) pari_err_FLAG("ellheight");
   checkell_Q(e); if (!is_matvec_t(tx)) pari_err_TYPE("ellheight",a);
-  if (!ell_is_integral(e) || !is_minimal(e))
-    pari_err_DOMAIN("elleight", "curve", "not", strtoGENstr("minimal"), e);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(gel(a,1));
+  if ((S = obj_check(e, Q_MINIMALMODEL)))
+  { /* switch to minimal model if needed */
+    if (lg(S) != 2)
+    {
+      v = gel(S,2);
+      e = gel(S,3);
+      a = ellchangepoint(a, v);
+    }
+  }
+  else
+    e = ellminimalmodel_i(e, &v);
   if (is_matvec_t(tx))
   {
     z = cgetg(lx,tx);

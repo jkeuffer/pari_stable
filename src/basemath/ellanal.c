@@ -1274,7 +1274,7 @@ ell_apply_globalred_all(GEN e, GEN *N, GEN *cb, GEN *tam)
 {
   GEN E = ellanal_globalred(e, cb), red = obj_check(E, Q_GLOBALRED);
   *N = gel(red, 1);
-  *tam = gel(red,3);
+  *tam = gel(red,2);
   if (signe(ell_get_disc(E))>0) *tam = shifti(*tam,1);
   return E;
 }

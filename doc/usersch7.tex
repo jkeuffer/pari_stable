@@ -138,8 +138,8 @@ contains \kbd{ellglobalred} data, as well as global and local root numbers. If
 \kbd{ellchangecurve(e,v)}$ otherwise. Compared to the direct use of
 \kbd{ellchangecurve} followed by \kbd{ellrootno}, this function avoids
 converting unneeded dynamic data and avoids potential memory leaks
-(the changed curve must be deleted using \tet{obj_free}). The original
-curve $e$ is updated as well with the same information.
+(the changed curve would have had to be deleted using \tet{obj_free}). The
+original curve $e$ is updated as well with the same information.
 
 \subsubsec{Curves over $\Q_p$}
 
