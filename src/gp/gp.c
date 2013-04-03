@@ -425,7 +425,7 @@ gentypes(void)
   t_STR    : string            [ code ] [ man_1 ] ... [ man_k ]\n\
   t_VECSMALL: vec. small ints  [ code ] [ x_1 ] ... [ x_k ]\n\
   t_CLOSURE: functions [ code ] [ arity ] [ code ] [ operand ] [ data ] [ text ]\n\
-  t_ERROR  : errors messages   [ code ] [ errnum ] [ dat_1 ] ... [ dat_k ]\n\
+  t_ERROR  : error context     [ code ] [ errnum ] [ dat_1 ] ... [ dat_k ]\n\
 \n");
 }
 
