@@ -10288,6 +10288,9 @@ is non empty, return it. Otherwhise return \kbd{NULL}. The \typ{INT} $0$
 as \emph{tag}-component of $S$. Any previous value is deleted, and
 data pointing to it become invalid.
 
+\fun{GEN}{obj_insert_shallow}{GEN S, long K, GEN O} as \tet{obj_insert},
+inserting $O$ as-is, not via a clone.
+
 \fun{GEN}{obj_checkbuild}{GEN S, long tag, GEN (*build)(GEN)} if the
 \emph{tag}-component of $S$ is non empty, return it. Otherwise insert
 (a clone of) \kbd{build(S)} as \emph{tag}-component in $S$, and return it.
