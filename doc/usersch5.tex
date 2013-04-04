@@ -182,28 +182,28 @@ initialized to \kbd{NULL}. Called with argument $s$ whenever PARI wants
 confirmation for action $s$, for instance in \tet{secure} mode.
 
 \doc{cb_pari_handle_exception}{extern int (*cb_pari_handle_exception)(long)}
-initialized to \kbd{NULL}. If not \kbd{NULL} called with argument $-1$
-on \kbd{SIGINT}, and argument \kbd{err} on error \kbd{err}. If it returns a
-non-zero value, the error or signal handler returns, in effect further
-ignoring the error or signal, otherwise it raises a fatal error.
+initialized to \kbd{NULL}. If not \kbd{NULL}, this routine is called with
+argument $-1$ on \kbd{SIGINT}, and argument \kbd{err} on error \kbd{err}. If
+it returns a non-zero value, the error or signal handler returns, in effect
+further ignoring the error or signal, otherwise it raises a fatal error.
 
 \doc{cb_pari_sigint}{void (*cb_pari_sigint)(void)}.
-Function called when \kbd{SIGINT} is raised. By default, raises
+Function called when we receive \kbd{SIGINT}. By default, raises
 \bprog
   pari_err(e_MISC, "user interrupt");
 @eprog
 
 \doc{cb_pari_pre_recover}{extern void (*cb_pari_err_recover)(long)}
-initialized to \kbd{NULL}. If not \kbd{NULL}, it is called just before PARI
-clean-up from an error. It is not required to return.  The error number is
-passed as argument, unless the PARI stack has been destroyed, in which case it
-is called with argument $-1$.
+initialized to \kbd{NULL}. If not \kbd{NULL}, this routine is called just
+before PARI cleans up from an error. It is not required to return.  The error
+number is passed as argument, unless the PARI stack has been destroyed
+(\kbd{allocatemem}), in which case $-1$ is passed.
 
 \doc{cb_pari_err_recover}{extern void (*cb_pari_err_recover)(long)}
-initialized to \kbd{pari\_exit()}. This call-back must not return.
-This call-back is called after PARI has cleaned-up from an error.
-The error number is passed as argument, unless the PARI stack
-has been destroyed, in which case it is called with argument $-1$.
+initialized to \kbd{pari\_exit()}. This callback must not return.
+It is called after PARI has cleaned-up from an error. The error number is
+passed as argument, unless the PARI stack has been destroyed, in which case
+it is called with argument $-1$.
 
 \doc{cb_pari_whatnow}{int (*cb_pari_whatnow)(PariOUT *out, const char *s, int
 flag)} initialized to \kbd{NULL}. If not \kbd{NULL}, must check whether $s$
