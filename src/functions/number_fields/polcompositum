@@ -51,13 +51,14 @@ Doc: \sidx{compositum} $P$ and $Q$
  - 320*x + 256
  ? a^5 - 5         \\@com a fifth root of $5$
  %4 = 0
- ? [T, x] = polredbest(R, 1);
- ? T     \\@com simpler defining polynomial for $\Q[X]/(R(X))$
+ ? [T, X] = polredbest(R, 1);
+ ? T     \\@com simpler defining polynomial for $\Q[x]/(R)$
  %6 = x^20 + 25*x^10 + 5
  ? X     \\ @com root of $R$ in $\Q[y]/(T(y))$
- %7 =  Mod(-1/11*x^15 - 1/11*x^14 + 1/22*x^10 - 47/22*x^5 - 29/11*x^4 + 7/22, x^20 + 25*x^10 + 5)
+ %7 = Mod(-1/11*x^15 - 1/11*x^14 + 1/22*x^10 - 47/22*x^5 - 29/11*x^4 + 7/22,\
+ x^20 + 25*x^10 + 5)
  ? a = subst(a.pol, 'x, X)  \\@com \kbd{a} in the new coordinates
- %8 =  Mod(1/11*x^14 + 29/11*x^4, x^20 + 25*x^10 + 5)
+ %8 = Mod(1/11*x^14 + 29/11*x^4, x^20 + 25*x^10 + 5)
  ? a^5 - 5
  %9 = 0
  @eprog
