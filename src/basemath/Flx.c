@@ -3285,7 +3285,7 @@ FlxY_evalx(GEN Q, ulong x, ulong p)
 {
   GEN z;
   long i, lb = lg(Q);
-  z = cgetg(lb,t_VECSMALL); z[1]=mael(Q,2,1);
+  z = cgetg(lb,t_VECSMALL); z[1] = evalvarn(varn(Q));
   for (i=2; i<lb; i++) z[i] = Flx_eval(gel(Q,i), x, p);
   return Flx_renormalize(z, lb);
 }
