@@ -64,10 +64,9 @@ forparii(GEN a, GEN b, GEN code)
   aa = a = setloop(a);
   av=avma; lim = stack_lim(av,1);
   push_lex(a,code);
-  for(;;)
+  while (gcmp(a,b) <= 0)
   {
     closure_evalvoid(code); if (loop_break()) break;
-    if (cmpii(a,b) >= 0) break;
     a = get_lex(-1);
     if (a == aa)
     {
