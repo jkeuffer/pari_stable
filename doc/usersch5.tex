@@ -6144,7 +6144,11 @@ It is not possible to derive the space dimension (number of rows) from the
 above data. Thus most functions take an argument \kbd{nbrow} which is the
 number of rows of the corresponding column/matrix in dense representation.
 
-%\fun{GEN}{FpCs_to_FpC}{GEN C}
+\fun{GEN}{zCs_to_ZC}{GEN C, long nbrow} convert the sparse vector $C$
+to a dense \kbd{ZC} of dimension \kbd{nbrow}.
+
+\fun{GEN}{zMs_to_ZM}{GEN M, long nbrow} convert the sparse matrix $M$
+to a dense \kbd{ZM} whose columns have dimension \kbd{nbrow}.
 
 \fun{GEN}{FpMs_FpC_mul}{GEN M, GEN B, GEN p} multiply the sparse matrix $M$
 (over $\F_p$) by the sparse vector $B$. The result is an \kbd{FpC}, i.e.~a
@@ -6154,11 +6158,13 @@ dense vector.
 by the sparse vector $B$ (over $\Z$). The result is an \kbd{ZC}, i.e.~a
 dense vector.
 
-\fun{GEN}{zCs_to_ZC}{GEN C, long nbrow} convert the sparse vector $C$
-to a dense \kbd{ZC} of dimension \kbd{nbrow}.
+\fun{GEN}{FpV_FpMs_mul}{GEN B, GEN M, GEN p} multiply the sparse vector $B$
+by the sparse matrix $M$ (over $\F_p$). The result is an \kbd{FpV}, i.e.~a
+dense vector.
 
-\fun{GEN}{zMs_to_ZM}{GEN M, long nbrow} convert the sparse matrix $M$
-to a dense \kbd{ZM} whose columns have dimension \kbd{nbrow}.
+\fun{GEN}{ZV_zMs_mul}{GEN B, GEN M, GEN p} multiply the sparse vector $B$ (over
+$\Z$) by the sparse matrix $M$. The result is an \kbd{ZV}, i.e.~a
+dense vector.
 
 \fun{GEN}{FpMs_FpCs_solve}{GEN M, GEN B, long nbrow, GEN p}
 solve the equation $MX = B$, where $M$ is a sparse matrix and $B$ is a sparse

@@ -810,6 +810,41 @@ GEN
 FpMs_FpC_mul(GEN M, GEN B, GEN p) { return FpC_red(zMs_ZC_mul(M, B), p); }
 
 GEN
+ZV_zMs_mul(GEN B, GEN M)
+{
+  long i, j;
+  long m = lg(M)-1;
+  GEN V = cgetg(m+1,t_VEC);
+  for (i = 1; i <= m; ++i)
+  {
+    GEN R = gel(M, i), C = gel(R, 1), E = gel(R, 2);
+    long l = lg(C);
+    GEN z = mulis(gel(B, C[1]), E[1]);
+    for (j = 2; j < l; ++j)
+    {
+      long k = C[j];
+      switch(E[j])
+      {
+      case 1:
+        z = addii(z, gel(B,k));
+        break;
+      case -1:
+        z = subii(z, gel(B,k));
+        break;
+      default:
+        z = addii(z, mulis(gel(B,k), E[j]));
+        break;
+      }
+    }
+    gel(V,i) = z;
+  }
+  return V;
+}
+
+GEN
+FpV_FpMs_mul(GEN B, GEN M, GEN p) { return FpV_red(ZV_zMs_mul(B, M), p); }
+
+GEN
 ZlM_gauss(GEN a, GEN b, ulong p, long e, GEN C)
 {
   pari_sp av = avma, lim = stack_lim(av, 2), av2;
