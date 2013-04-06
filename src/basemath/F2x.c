@@ -458,10 +458,31 @@ F2x_addshiftip(GEN x, GEN y, ulong d)
       x[i+dl] ^= y[i];
 }
 
-#if 0
-/* assume d>=0 */
 static GEN
-F2x_shift(GEN y, ulong d)
+F2x_shiftneg(GEN y, ulong d)
+{
+  long db, dl=dvmdsBIL(d, &db);
+  long i, ly = lg(y), lx = ly-dl;
+  GEN x = cgetg(lx, t_VECSMALL);
+  x[1] = y[1];
+  if (db)
+  {
+    ulong dc=BITS_IN_LONG-db;
+    ulong r=0;
+    for(i=lx-1; i>=2; i--)
+    {
+      x[i] = (((ulong)y[i+dl])>>db)|r;
+      r = ((ulong)y[i+dl])<<dc;
+    }
+  }
+  else
+    for(i=2; i<lx; i++)
+      x[i] = y[i+dl];
+  return F2x_renormalize(x,lx);
+}
+
+static GEN
+F2x_shiftpos(GEN y, ulong d)
 {
   long db, dl=dvmdsBIL(d, &db);
   long i, ly = lg(y), lx = ly+dl+(!!db);
@@ -483,7 +504,12 @@ F2x_shift(GEN y, ulong d)
       x[i+dl] = y[i];
   return F2x_renormalize(x,lx);
 }
-#endif
+
+GEN
+F2x_shift(GEN y, long d)
+{
+  return d<0 ? F2x_shiftneg(y,-d): F2x_shiftpos(y,d);
+}
 
 /* separate from F2x_divrem for maximal speed. */
 GEN

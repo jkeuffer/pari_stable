@@ -64,6 +64,7 @@ GEN     F2x_halfgcd(GEN a, GEN b);
 int     F2x_issquare(GEN a);
 GEN     F2x_mul(GEN x, GEN y);
 GEN     F2x_rem(GEN x, GEN y);
+GEN     F2x_shift(GEN y, long d);
 GEN     F2x_sqr(GEN x);
 GEN     F2x_sqrt(GEN x);
 GEN     F2x_to_F2v(GEN x, long n);
