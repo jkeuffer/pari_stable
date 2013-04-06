@@ -889,6 +889,9 @@ wrap_relcomb_modp(void *E, GEN x)
 static GEN
 wrap_relcomb(void*E, GEN x) { return zMs_ZC_mul((GEN)E, x); }
 
+static GEN
+wrap_relker(void*E, GEN x) { return ZV_zMs_mul(x, (GEN)E); }
+
 /* Solve f(X) = B (mod p^e); blackbox version of ZlM_gauss */
 GEN
 gen_ZpM_Dixon(void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e)
@@ -988,4 +991,95 @@ FpMs_FpCs_solve_safe(GEN M, GEN A, long nbrow, GEN p)
     res = ZpMs_ZpCs_solve(M, A, nbrow, p, 1);
   } pari_ENDCATCH
   return res;
+}
+
+static GEN
+FpMs_structelim_back(GEN M, GEN V, GEN prow, GEN p)
+{
+  long i, j, oldf = 0, f = 0;
+  long lrow = lg(prow), lM = lg(M);
+  GEN W = const_vecsmall(lM-1,1);
+  GEN R = cgetg(lrow, t_VEC);
+  for (i=1; i<lrow; i++)
+    gel(R,i) = prow[i]==0 ? NULL: gel(V,prow[i]);
+  do
+  {
+    oldf = f;
+    for(i=1; i<lM; i++)
+      if (W[i])
+      {
+        GEN C = gel(M,i), F = gel(C,1), E = gel(C,2);
+        long c=0, cj=0, lF = lg(F);
+        for(j=1; j<lF; j++)
+          if (!gel(R,F[j]))
+          { c++; cj=j; }
+        if (c>=2) continue;
+        if (c==1)
+        {
+          pari_sp av = avma;
+          GEN s = gen_0;
+          for(j=1; j<lF; j++)
+            if (j!=cj) s = Fp_add(s, mulis(gel(R,F[j]), E[j]), p);
+          gel(R,F[cj]) = gerepileupto(av, Fp_div(Fp_neg(s, p), stoi(E[cj]), p));
+          f++;
+        }
+        W[i]=0;
+      }
+  } while(oldf!=f);
+  for (i=1; i<lrow; i++)
+    if (!gel(R,i)) gel(R,i) = gen_0;
+  return R;
+}
+
+/* Return a linear form Y such that YM is essentially 0 */
+GEN
+FpMs_leftkernel_elt(GEN M, long nbrow, GEN p)
+{
+  pari_sp av = avma;
+  GEN pcol, prow;
+  long nbi=lg(M)-1;
+  long i, n;
+  GEN Mp, B, MB, R, Rp;
+  pari_timer ti;
+  struct wrapper_modp_s W;
+  if (DEBUGLEVEL) timer_start(&ti);
+  RgMs_structelim(M, nbrow, cgetg(1,t_VECSMALL), &pcol, &prow);
+  if (!pcol) { avma = av; return NULL; }
+  if (DEBUGLEVEL)
+    timer_printf(&ti,"structured elimination (%ld -> %ld)",nbi,lg(pcol)-1);
+  n = lg(pcol)-1;
+  Mp = cgetg(n+1, t_MAT);
+  for(i=1; i<=n; i++)
+    gel(Mp, i) = vecprow(gel(M,pcol[i]), prow);
+  W.E = (void*) Mp;
+  W.f = wrap_relker;
+  W.p = p;
+  for(;;)
+  {
+    B = cgetg(n+1,t_VEC);
+    for(i=1; i<=n; i++)
+      gel(B,i) = randomi(p);
+    MB = FpV_FpMs_mul(B, Mp, p);
+    if (DEBUGLEVEL) timer_start(&ti);
+    pari_CATCH(e_INV)
+    {
+      GEN E = pari_err_last();
+      GEN x = err_get_compo(E,2);
+      if (typ(x) != t_INTMOD) pari_err(0,E);
+      if (DEBUGLEVEL)
+        pari_warn(warner,"FpMs_leftkernel_elt, impossible inverse %Ps", x);
+      Rp = NULL;
+    } pari_TRY {
+      Rp = gen_FpM_Wiedemann((void*)&W, wrap_relcomb_modp, MB, p);
+    } pari_ENDCATCH
+    if (!Rp) continue;
+    if (typ(Rp)==t_COL)
+    {
+      Rp = FpC_sub(Rp,B,p);
+      if (ZV_equal0(Rp)) continue;
+    }
+    R = FpMs_structelim_back(M, Rp, prow, p);
+    if (DEBUGLEVEL) timer_printf(&ti,"Wiedemann left kernel");
+    return gerepilecopy(av, R);
+  }
 }
