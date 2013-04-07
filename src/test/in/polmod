@@ -20,3 +20,11 @@ modp(p) = {
 modp(17); test();
 modp(18446744073709551629); test();
 (Mod(1/2, 't)*'x + Mod(1, 't)) ^ 2
+Mod(Mod(x,x^2+1),x)
+Mod(y,x)
+Mod(1/y,x)
+Mod(O(y),x)
+Mod(x,y)
+Mod(1/x,y)
+Mod(1+O(y),y)
+Mod(1+O(y),y+1)

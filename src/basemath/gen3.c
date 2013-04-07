@@ -773,14 +773,6 @@ gmodulss(long x, long y)
   gel(z,2) = modss(x, y); return z;
 }
 
-static GEN
-specialmod(GEN x, GEN y)
-{
-  GEN z = gmod(x,y);
-  if (varncmp(gvar(z), varn(y)) < 0) z = gen_0;
-  return z;
-}
-
 GEN
 gmodulo(GEN x,GEN y)
 {
@@ -795,23 +787,19 @@ gmodulo(GEN x,GEN y)
   }
   switch(typ(y))
   {
-    case t_INT: z = cgetg(3,t_INTMOD);
-      gel(z,1) = absi(y);
-      gel(z,2) = Rg_to_Fp(x,y); return z;
+    case t_INT: retmkintmod(Rg_to_Fp(x,y), absi(y));
 
-    case t_POL: z = cgetg(3,t_POLMOD);
+    case t_POL:
       if (tx == t_POLMOD)
       {
         long vx = varn(gel(x,1)), vy = varn(y);
         if (vx == vy) return polmod_mod(x,y);
-        if (varncmp(vx, vy) < 0)
-          gel(z,2) = gen_0;
-        else if (vx > vy)
-          gel(z,2) = (lg(y) > 3)? gcopy(x): gen_0;
+        z = cgetg(3,t_POLMOD);
         gel(z,1) = RgX_copy(y);
+        gel(z,2) =  (varncmp(vx, vy) > 0 && lg(y) > 3)? gcopy(x): gen_0;
         return z;
       }
-
+      z = cgetg(3,t_POLMOD);
       gel(z,1) = RgX_copy(y);
       if (is_const_t(tx))
       {
@@ -821,7 +809,8 @@ gmodulo(GEN x,GEN y)
       switch(tx)
       {
         case t_POL: case t_RFRAC: case t_SER:
-          gel(z,2) = specialmod(x,y); return z;
+          gel(z,2) = (varncmp(gvar(x), varn(y)) >= 0)? gmod(x,y): gen_0;
+          return z;
       }
   }
   pari_err_TYPE2("%",x,y);
