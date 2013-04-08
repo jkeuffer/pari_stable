@@ -133,6 +133,7 @@ BA 110- galoisfixedfield() could return a wrong result for polynomials with
         large roots [#1406]
    111- bnrdisc could return a wrong result if the modulus had more than
         2 prime divisors [#1399]
+   112- a = Mod(1,2)*x; gcd(a,a) return x instead of Mod(1,2)*x
 
   Changed
     1- mathnf: swapped flag 3 and 5.

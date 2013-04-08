@@ -1520,7 +1520,7 @@ content(GEN x)
       t = typ(d); if (is_matvec_t(t)) d = content(d);
       c = ggcd(c, d);
     }
-    if (typ(c) == t_INTMOD || isinexact(c)) { avma=av; return gen_1; }
+    if (isinexact(c)) { avma=av; return gen_1; }
   }
   switch(typ(c))
   {

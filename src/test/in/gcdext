@@ -11,3 +11,4 @@ GG=Mod((O(2^4)*T^3+O(2^4)*T^2+O(2^4)*T+O(2^4))*z^7+((2+2^3+O(2^4))*T^3+O(2^4)*T^
 AA=truncate(lift(lift(FF)));
 BB=truncate(lift(lift(GG)));
 gcdext(AA,BB)
+gcd(x*Mod(1,7),x*Mod(1,7))
