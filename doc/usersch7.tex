@@ -390,6 +390,24 @@ Weil pairing of the points of $m$-torsion $P$ and $Q$.
 \fun{GEN}{RgE_to_FpE}{GEN P, GEN p} returns the \kbd{FpE} obtained by applying
 \kbd{Rg\_to\_Fp} coefficientwise.
 
+\subsec{\kbd{Fle}}
+Let $p$ be a prime \kbd{ulong}, and $E$ the elliptic curve given by the
+equation $E:y^2=x^3+a_4\*x+a_6$, where $a_4$ and $a_6$ are \kbd{ulong}.
+A \kbd{Fle} is either the point at infinity (\kbd{ellinf()}), or a \kbd{Flv}
+with two components.
+
+\fun{GEN}{Fle_add}{GEN P, GEN Q, ulong a4, ulong p}
+
+\fun{GEN}{Fle_sub}{GEN P, GEN Q, ulong a4, ulong p}
+
+\fun{GEN}{Fle_mul}{GEN P, GEN n, ulong a4, ulong p}
+
+\fun{GEN}{Fle_mulu}{GEN P, ulong n, ulong a4, ulong p}
+
+\fun{GEN}{Fle_order}{GEN P, GEN o, ulong a4, ulong p}
+
+\fun{GEN}{random_Fle}{ulong a4, ulong a6, ulong p}
+
 \subsec{Elliptic curves over $\F_{2^n}$}
 Let $T$ be an irreducible \kbd{F2x} and $E$ the
 elliptic curve given by either the equation

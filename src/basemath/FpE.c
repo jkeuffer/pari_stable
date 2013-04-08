@@ -20,6 +20,193 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /***********************************************************************/
 /**                                                                   **/
+/**                              Fle                                  **/
+/**                                                                   **/
+/***********************************************************************/
+
+static GEN
+Fle_dbl_slope(GEN P, ulong a4, ulong p, ulong *slope)
+{
+  ulong x, y, Qx, Qy;
+  if (ell_is_inf(P) || !P[2]) return ellinf();
+  x = P[1]; y = P[2];
+  *slope = Fl_div(Fl_add(Fl_mul(Fl_sqr(x,p), 3, p), a4, p),
+                  Fl_mul(y, 2, p), p);
+  Qx = Fl_sub(Fl_sqr(*slope, p), Fl_mul(x, 2, p), p);
+  Qy = Fl_sub(Fl_mul(*slope, Fl_sub(x, Qx, p), p), y, p);
+  return mkvecsmall2(Qx, Qy);
+}
+
+GEN
+Fle_dbl(GEN P, ulong a4, ulong p)
+{
+  ulong slope;
+  return Fle_dbl_slope(P,a4,p,&slope);
+}
+
+static GEN
+Fle_add_slope(GEN P, GEN Q, ulong a4, ulong p, ulong *slope)
+{
+  ulong Px, Py, Qx, Qy, Rx, Ry;
+  if (ell_is_inf(P)) return Q;
+  if (ell_is_inf(Q)) return P;
+  Px = P[1]; Py = P[2];
+  Qx = Q[1]; Qy = Q[2];
+  if (Px==Qx)
+    return Py==Qy ? Fle_dbl_slope(P, a4, p, slope): ellinf();
+  *slope = Fl_div(Fl_sub(Py, Qy, p), Fl_sub(Px, Qx, p), p);
+  Rx = Fl_sub(Fl_sub(Fl_sqr(*slope, p), Px, p), Qx, p);
+  Ry = Fl_sub(Fl_mul(*slope, Fl_sub(Px, Rx, p), p), Py, p);
+  return mkvecsmall2(Rx, Ry);
+}
+
+GEN
+Fle_add(GEN P, GEN Q, ulong a4, ulong p)
+{
+  ulong slope;
+  return Fle_add_slope(P,Q,a4,p,&slope);
+}
+
+static long
+Fle_dbl_inplace(GEN P, ulong a4, ulong p)
+{
+  ulong x, y, slope;
+  if (!P[2]) return 1;
+  x = P[1]; y = P[2];
+  slope = Fl_div(Fl_add(Fl_mul(Fl_sqr(x,p), 3, p), a4, p),
+                 Fl_mul(y, 2, p), p);
+  P[1] = Fl_sub(Fl_sqr(slope, p), Fl_mul(x, 2, p), p);
+  P[2] = Fl_sub(Fl_mul(slope, Fl_sub(x, P[1], p), p), y, p);
+  return 0;
+}
+
+static long
+Fle_add_inplace(GEN P, GEN Q, ulong a4, ulong p)
+{
+  ulong Px, Py, Qx, Qy, slope;
+  if (ell_is_inf(Q)) return 0;
+  Px = P[1]; Py = P[2];
+  Qx = Q[1]; Qy = Q[2];
+  if (Px==Qx)
+    return Py==Qy ? Fle_dbl_inplace(P, a4, p): 1;
+  slope = Fl_div(Fl_sub(Py, Qy, p), Fl_sub(Px, Qx, p), p);
+  P[1] = Fl_sub(Fl_sub(Fl_sqr(slope, p), Px, p), Qx, p);
+  P[2] = Fl_sub(Fl_mul(slope, Fl_sub(Px, P[1], p), p), Py, p);
+  return 0;
+}
+
+static GEN
+Fle_neg(GEN P, ulong p)
+{
+  if (ell_is_inf(P)) return P;
+  return mkvecsmall2(P[1], Fl_neg(P[2], p));
+}
+
+GEN
+Fle_sub(GEN P, GEN Q, ulong a4, ulong p)
+{
+  pari_sp av = avma;
+  ulong slope;
+  return gerepileupto(av, Fle_add_slope(P, Fle_neg(Q, p), a4, p, &slope));
+}
+
+struct _Fle
+{
+  ulong a4,a6;
+  ulong p;
+};
+
+static GEN
+_Fle_dbl(void *E, GEN P)
+{
+  struct _Fle *ell = (struct _Fle *) E;
+  return Fle_dbl(P, ell->a4, ell->p);
+}
+
+static GEN
+_Fle_add(void *E, GEN P, GEN Q)
+{
+  struct _Fle *ell=(struct _Fle *) E;
+  return Fle_add(P, Q, ell->a4, ell->p);
+}
+
+static GEN
+_Fle_mulu(void *E, GEN P, ulong n)
+{
+  pari_sp av = avma;
+  struct _Fle *e=(struct _Fle *) E;
+  if (!n || ell_is_inf(P)) return ellinf();
+  if (n==1) return zv_copy(P);
+  if (n==2) return Fle_dbl(P,e->a4, e->p);
+  return gerepileupto(av, gen_powu(P, n, (void*)e, &_Fle_dbl, &_Fle_add));
+}
+
+GEN
+Fle_mulu(GEN P, ulong n, ulong a4, ulong p)
+{
+  struct _Fle E;
+  E.a4= a4; E.p = p;
+  return _Fle_mulu(&E, P, n);
+}
+
+static GEN
+_Fle_mul(void *E, GEN P, GEN n)
+{
+  pari_sp av = avma;
+  struct _Fle *e=(struct _Fle *) E;
+  long s = signe(n);
+  if (!s || ell_is_inf(P)) return ellinf();
+  if (s<0) P = Fle_neg(P, e->p);
+  if (is_pm1(n)) return s>0? zv_copy(P): P;
+  return gerepileupto(av, gen_pow(P, n, (void*)e, &_Fle_dbl, &_Fle_add));
+}
+
+GEN
+Fle_mul(GEN P, GEN n, ulong a4, ulong p)
+{
+  struct _Fle E;
+  E.a4 = a4; E.p = p;
+  return _Fle_mul(&E, P, n);
+}
+
+/* Finds a random non-singular point on E */
+
+GEN
+random_Fle(ulong a4, ulong a6, ulong p)
+{
+  ulong x, x2, y, rhs;
+  do
+  {
+    x   = random_Fl(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
+    x2  = Fl_sqr(x, p);
+    rhs = Fl_add(Fl_mul(x, Fl_add(x2, a4, p), p), a6, p);
+  } while ((!rhs && !Fl_add(Fl_mul(x2,3,p),a4,p))
+          || krouu(rhs, p) < 0);
+  y = Fl_sqrt(rhs, p);
+  return mkvecsmall2(x, y);
+}
+
+static GEN
+_Fle_rand(void *E)
+{
+  struct _Fle *e=(struct _Fle *) E;
+  return random_Fle(e->a4, e->a6, e->p);
+}
+
+static const struct bb_group Fle_group={_Fle_add,_Fle_mul,_Fle_rand,hash_GEN,zv_equal,ell_is_inf,NULL};
+
+GEN
+Fle_order(GEN z, GEN o, ulong a4, ulong p)
+{
+  pari_sp av = avma;
+  struct _Fle e;
+  e.a4=a4;
+  e.p=p;
+  return gerepileuptoint(av, gen_order(z, o, (void*)&e, &Fle_group));
+}
+
+/***********************************************************************/
+/**                                                                   **/
 /**                              FpE                                  **/
 /**                                                                   **/
 /***********************************************************************/
@@ -690,83 +877,11 @@ FOUND: /* found a point of exponent h on E_u */
 
 typedef struct
 {
-  int isnull;
-  long x,y;
-} sellpt;
-
-/* P <-- P + Q, safe with P = Q */
-static void
-s_elladd(sellpt *P, sellpt *Q, long c4, long p)
-{
-  ulong num, den, lambda;
-
-  if (P->isnull) { *P = *Q; return; }
-  if (Q->isnull) return;
-  if (P->x == Q->x)
-  {
-    if (! P->y || P->y != Q->y) { P->isnull = 1; return; }
-    num = Fl_add(c4, Fl_mul(3, Fl_mul(P->x, P->x, p), p), p);
-    den = Fl_add(P->y, P->y, p);
-  }
-  else
-  {
-    num = Fl_sub(P->y, Q->y, p);
-    den = Fl_sub(P->x, Q->x, p);
-  }
-  lambda = Fl_div(num, den, p);
-  num = Fl_sub(Fl_mul(lambda, lambda, p), Fl_add(P->x, Q->x, p), p);
-  P->y = Fl_sub(Fl_mul(lambda, Fl_sub(Q->x, num, p), p), Q->y, p);
-  P->x = num; /* necessary in case P = Q: we need Q->x above */
-}
-
-/* Q <-- P^n */
-static void
-s_ellmul(sellpt *Q, sellpt *P, long n, long c4, long p)
-{
-  sellpt R = *P;
-
-  if (n < 0) { n = -n; if (R.y) R.y = p - R.y; }
-  Q->isnull = 1;
-  Q->x = Q->y = 0; /* -Wall */
-  for(;;)
-  {
-    if (n&1) s_elladd(Q, &R, c4, p);
-    n >>= 1; if (!n) return;
-    s_elladd(&R, &R, c4, p);
-  }
-}
-
-/* assume H.f = 0, return exact order of f, cf. exact_order */
-static long
-sexact_order(long H, sellpt *f, long c4, long p)
-{
-  GEN P, e, fa = factoru(H);
-  long h = H, pp, i, j, l;
-  sellpt fh;
-
-  P = gel(fa,1); l = lg(P);
-  e = gel(fa,2);
-  for (i=1; i<l; i++)
-  {
-    pp = P[i];
-    for (j=e[i]; j; j--)
-    {
-      long n = h / pp;
-      s_ellmul(&fh, f, n, c4, p);
-      if (!fh.isnull) break;
-      h = n;
-    }
-  }
-  return h;
-}
-
-typedef struct
-{
-  long x,y,i;
+  ulong x,y,i;
 } multiple;
 
 static int
-compare_multiples(multiple *a, multiple *b) { return a->x - b->x; }
+compare_multiples(multiple *a, multiple *b) { return a->x > b->x? 1:a->x<b->x?-1:0; }
 
 static long
 sclosest_lift(long A, long B, ulong p2p)
@@ -779,15 +894,14 @@ sclosest_lift(long A, long B, ulong p2p)
 static long
 Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
 {
-  sellpt f, fh, fg, ftest, F;
+  GEN f, fh, fg, ftest, F;
   ulong x, u, cp4, p1p, p2p, h;
   long pordmin,A,B;
   long i, s, KRO, KROold, l, r, m;
-  pari_sp av;
-  multiple *table = NULL;
+  pari_sp av = avma;
+  multiple *table;
 
-  av = avma;
-  pordmin = (long)(1 + 4*sqrt((float)p));
+  pordmin = (long)(1 + 4*sqrt((double)p));
   p1p = p+1;
   p2p = p1p << 1;
   x = 0; u = c6; KRO = krouu(u, p); KROold = -KRO;
@@ -807,53 +921,48 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
       if (++x >= p) pari_err_PRIME("ellap",utoi(p));
       t = Fl_add(c4, Fl_mul(x,x,p), p);
       u = Fl_add(c6, Fl_mul(x, t, p), p);
-      KRO = kross(u,p);
+      KRO = krouu(u,p);
     }
     KROold = KRO;
-    f.isnull = 0;
-    f.x = Fl_mul(x, u, p);
-    f.y = Fl_mul(u, u, p);
-    cp4 = Fl_mul(c4, f.y, p);
-    s_ellmul(&fh, &f, h, cp4, p);
-    s = (long) (sqrt(((float)pordmin)/B) / 2);
+    f = mkvecsmall2(Fl_mul(x, u, p), Fl_mul(u, u, p));
+    cp4 = Fl_mul(c4, f[2], p);
+    fh = Fle_mulu(f, h, cp4, p);
+    s = (long) (sqrt(((double)pordmin)/B) / 2);
     if (!s) s = 1;
-    if (!table)
-    {
-      table = (multiple *) pari_malloc((s+1) * sizeof(multiple));
-      F = f;
-    }
-    s_ellmul(&F, &f, B, cp4, p);
+    table = (multiple *) stack_malloc((s+1) * sizeof(multiple));
+    F = Fle_mulu(f, B, cp4, p);
+    if (ell_is_inf(fh)) goto FOUND;
     for (i=0; i < s; i++)
     {
-      if (fh.isnull) { h += B*i; goto FOUND; }
-      table[i].x = fh.x;
-      table[i].y = fh.y;
+      table[i].x = fh[1];
+      table[i].y = fh[2];
       table[i].i = i;
-      s_elladd(&fh, &F, cp4, p);
+      if (Fle_add_inplace(fh, F, cp4, p)) { h += B*(i+1); goto FOUND; }
     }
     qsort(table,s,sizeof(multiple),(QSCOMP)compare_multiples);
-    s_ellmul(&fg, &F, s, cp4, p); ftest = fg;
+    fg = Fle_mulu(F, s, cp4, p); ftest = zv_copy(fg);
+    if (ell_is_inf(ftest)) {
+      if (!uisprime(p)) pari_err_PRIME("ellap",utoi(p));
+      pari_err_BUG("ellap (f^(i*s) = 1)");
+    }
     for (i=1; ; i++)
     {
-      if (ftest.isnull) {
-        if (!uisprime(p)) pari_err_PRIME("ellap",utoi(p));
-        pari_err_BUG("ellap (f^(i*s) = 1)");
-      }
       l=0; r=s;
       while (l<r)
       {
         m = (l+r) >> 1;
-        if (table[m].x < ftest.x) l=m+1; else r=m;
+        if (table[m].x < ftest[1]) l=m+1; else r=m;
       }
-      if (r < s && table[r].x == ftest.x) break;
-      s_elladd(&ftest, &fg, cp4, p);
+      if (r < s && table[r].x == ftest[1]) break;
+      if (Fle_add_inplace(ftest, fg, cp4, p))
+        pari_err_PRIME("ellap",utoi(p));
     }
     h += table[r].i * B;
-    if (table[r].y == ftest.y) i = -i;
+    if (table[r].y == ftest[2]) i = -i;
     h += s * i * B;
 
 FOUND:
-    h = sexact_order(h, &f, cp4, p);
+    h = itou(Fle_order(f, utoi(h), cp4, p));
     if (B == 1) B = h;
     else
     {
@@ -873,7 +982,6 @@ FOUND:
     h = sclosest_lift(A, B, p2p);
     avma = av; if (!i) break;
   }
-  if (table) pari_free(table);
   return KRO==1? h: 2*p1p-h;
 }
 
@@ -1028,10 +1136,10 @@ Fp_ellcard(GEN a4, GEN a6, GEN p)
   if (lp < 7)
     return utoi(Fl_ellcard_naive(itou(a4), itou(a6), pp));
   { GEN a = Fp_ellcard_CM(a4,a6,p); if (a) return a; }
-  if (lp < 30)
-    return utoi(Fl_ellcard_Shanks(itou(a4), itou(a6), pp));
-  if (lp >= 62)
+  if (lp >= 56)
   { GEN a = Fp_ellcard_SEA(a4, a6, p, 0); if (a) return a; }
+  if (lp <= BITS_IN_LONG-2)
+    return utoi(Fl_ellcard_Shanks(itou(a4), itou(a6), pp));
   if (lp >= 90) pari_err_PACKAGE("seadata");
   return Fp_ellcard_Shanks(a4, a6, p);
 }

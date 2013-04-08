@@ -295,6 +295,11 @@ GEN     random_FlxqE(GEN a4, GEN a6, GEN T, ulong p);
 
 /* FpE.c */
 
+GEN     Fle_add(GEN P, GEN Q, ulong a4, ulong p);
+GEN     Fle_mul(GEN P, GEN n, ulong a4, ulong p);
+GEN     Fle_mulu(GEN P, ulong n, ulong a4, ulong p);
+GEN     Fle_order(GEN z, GEN o, ulong a4, ulong p);
+GEN     Fle_sub(GEN P, GEN Q, ulong a4, ulong p);
 GEN     Fp_ellcard(GEN a4, GEN a6, GEN p);
 GEN     Fp_elldivpol(GEN a4, GEN a6, long n, GEN p);
 GEN     Fp_ellgens(GEN a4, GEN a6, GEN ch, GEN D, GEN m, GEN p);
@@ -335,6 +340,7 @@ GEN     RgE_to_FpXQE(GEN x, GEN T, GEN p);
 const struct bb_group * get_FpE_group(void **E, GEN a4, GEN a6, GEN p);
 const struct bb_group * get_FpXQE_group(void **E, GEN a4, GEN a6, GEN T, GEN p);
 GEN     elltrace_extension(GEN t, long n, GEN p);
+GEN     random_Fle(ulong a4, ulong a6, ulong p);
 GEN     random_FpE(GEN a4, GEN a6, GEN p);
 GEN     random_FpXQE(GEN a4, GEN a6, GEN T, GEN p);
 
