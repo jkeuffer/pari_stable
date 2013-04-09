@@ -107,7 +107,7 @@ hash_insert(hashtable *h, void *k, void *v)
         E->next = newtable[index];
         newtable[index] = E;
       }
-    if (!h->use_stack) free(h->table);
+    if (!h->use_stack) pari_free(h->table);
     h->table = newtable;
     setlen(h, newlen);
   }
@@ -156,9 +156,9 @@ hash_destroy(hashtable *h)
   for (i = 0; i < h->len; i++)
   {
     hashentry *e = h->table[i];
-    while (e) { hashentry *f = e; e = e->next; free(f); }
+    while (e) { hashentry *f = e; e = e->next; pari_free(f); }
   }
-  free(h->table); free(h);
+  pari_free(h->table); pari_free(h);
 }
 
 static

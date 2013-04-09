@@ -49,7 +49,7 @@ galoisgetpol(long a, long b, long sig)
       return NULL;
   }
   s = pari_sprintf("%s/galpol/%ld/%ld/%s", pari_datadir, a,b,si);
-  F = pari_fopengz(s); free(s);
+  F = pari_fopengz(s); pari_free(s);
   if (!F)
   {
     long n = itos(galoisnbpol(a));

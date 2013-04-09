@@ -2785,7 +2785,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       {
         char *s = pari_err2str(g);
         str_puts(S, "error(");
-        quote_string(S, s); free(s);
+        quote_string(S, s); pari_free(s);
         str_puts(S, ")"); break;
       }
     case t_CLOSURE:
@@ -3123,7 +3123,7 @@ static void
 gen_output_fun(GEN x, pariout_t *T, OUT_FUN out)
 {
   char *s = GENtostr_fun(x, T, out);
-  pari_puts(s); free(s);
+  pari_puts(s); pari_free(s);
 }
 
 void
@@ -3131,7 +3131,7 @@ fputGEN_pariout(GEN x, pariout_t *T, FILE *out)
 {
   char *s = GENtostr_fun(x, T, get_fun(T->prettyp));
   if (*s) set_last_newline(s[strlen(s)-1]);
-  fputs(s, out); free(s);
+  fputs(s, out); pari_free(s);
 }
 
 void
@@ -3679,7 +3679,7 @@ _path_expand(const char *s)
     char *user = (char*)pari_malloc(len+1);
     (void)strncpy(user,s,len); user[len] = 0;
     dir = pari_get_homedir(user);
-    free(user);
+    pari_free(user);
   }
   if (!dir) return pari_strdup(s);
   ret = (char*)pari_malloc(strlen(dir) + strlen(t) + 1);
@@ -3749,7 +3749,7 @@ path_expand(const char *s)
   for (p = ss; *p != 0; ++p)
     if (*p == '\\') *p = '/';
   p = _expand_env(_path_expand(ss));
-  free(ss);
+  pari_free(ss);
   return p;
 #else
   return _expand_env(_path_expand(s));
@@ -4338,7 +4338,7 @@ str_print0(outString *S, GEN g, long flag)
     else
     {
       char *s = GENtostr_fun(x, GP_DATA->fmt, f);
-      str_puts(S, s); free(s);
+      str_puts(S, s); pari_free(s);
     }
   }
 }
@@ -4390,18 +4390,18 @@ dopr_arg_vector(GEN arg_vector, const char* fmt, ...)
 void
 printf0(const char *fmt, GEN args)
 { char *s = dopr_arg_vector(args, fmt);
-  pari_puts(s); free(s); pari_flush(); }
+  pari_puts(s); pari_free(s); pari_flush(); }
 /* GP only */
 GEN
 Strprintf(const char *fmt, GEN args)
 { char *s = dopr_arg_vector(args, fmt);
-  GEN z = strtoGENstr(s); free(s); return z; }
+  GEN z = strtoGENstr(s); pari_free(s); return z; }
 
 void
 out_vprintf(PariOUT *out, const char *fmt, va_list ap)
 {
   char *s = sm_dopr(fmt, NULL, ap);
-  out_puts(out, s); free(s);
+  out_puts(out, s); pari_free(s);
 }
 void
 pari_vprintf(const char *fmt, va_list ap) { out_vprintf(pariOut, fmt, ap); }
@@ -4429,7 +4429,7 @@ gvsprintf(const char *fmt, va_list ap)
 {
   char *s = sm_dopr(fmt, NULL, ap);
   GEN z = strtoGENstr(s);
-  free(s); return z;
+  pari_free(s); return z;
 }
 
 char *
@@ -4451,7 +4451,7 @@ stack_sprintf(const char *fmt, ...)
   s = pari_vsprintf(fmt, ap);
   va_end(ap);
   t = stack_strdup(s);
-  free(s); return t;
+  pari_free(s); return t;
 }
 
 GEN
@@ -4469,7 +4469,7 @@ void
 pari_vfprintf(FILE *file, const char *fmt, va_list ap)
 {
   char *s = sm_dopr(fmt, NULL, ap);
-  fputs(s, file); free(s);
+  fputs(s, file); pari_free(s);
 }
 void
 pari_fprintf(FILE *file, const char *fmt, ...)

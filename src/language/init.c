@@ -652,7 +652,7 @@ pari_mainstack_alloc(struct pari_mainstack *st, size_t s)
 static void
 pari_mainstack_free(struct pari_mainstack *st)
 {
-  free((void*)st->bot);
+  pari_free((void*)st->bot);
   st->avma = st->top = st->bot = 0;
 }
 

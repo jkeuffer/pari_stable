@@ -891,7 +891,7 @@ License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
 void
 gp_quit(long exitcode)
 {
-  if (Help) free((void*)Help);
+  if (Help) pari_free((void*)Help);
   free_graph();
   pari_close();
   kill_buffers_upto(NULL);
@@ -2325,7 +2325,7 @@ normal_output(GEN z, long n)
     lim_lines_output(s, l, GP_DATA->lim_lines);
   else
     pari_puts(s);
-  free(s);
+  pari_free(s);
   term_color(c_NONE); pari_putc('\n');
 }
 
@@ -2430,7 +2430,7 @@ sd_graphcolormap(const char *v, long flag)
       default:
         pari_err(e_SYNTAX, "incorrect value for graphcolormap", p, t);
       }
-    free(t);
+    pari_free(t);
   }
   if (flag == d_RETURN || flag == d_ACKNOWLEDGE)
   {
@@ -2477,7 +2477,7 @@ sd_graphcolors(const char *v, long flag)
       }
       pari_graphcolors[++i] = n;
     }
-    free(t);
+    pari_free(t);
   }
   switch(flag)
   {

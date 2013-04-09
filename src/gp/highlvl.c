@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /* see try_name() */
 static void *
 try_dlopen(char *s, int flag)
-{ void *h = dlopen(s, flag); free((void*)s); return h; }
+{ void *h = dlopen(s, flag); pari_free((void*)s); return h; }
 
 /* like dlopen, but using default(sopath) */
 static void *
@@ -90,7 +90,7 @@ install0(char *name, char *code, char *gpname, char *lib)
 #  include <windows.h>
 static HMODULE
 try_LoadLibrary(char *s)
-{ void *h = LoadLibrary(s); free((void*)s); return h; }
+{ void *h = LoadLibrary(s); pari_free((void*)s); return h; }
 
 /* like LoadLibrary, but using default(sopath) */
 static HMODULE
