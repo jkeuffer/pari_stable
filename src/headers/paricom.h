@@ -71,6 +71,7 @@ extern const double LOG2, LOG10_2, LOG2_10;
 /* Common global variables: */
 extern int new_galois_format, factor_add_primes, factor_proven;
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
+extern long DEBUGVAR;
 extern THREAD GEN  bernzone;
 extern GEN primetab;
 extern GEN gen_m1,gen_1,gen_2,gen_m2,ghalf,gen_0,gnil,err_e_STACK;

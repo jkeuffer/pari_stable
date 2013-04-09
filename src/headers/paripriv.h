@@ -247,6 +247,7 @@ enum { FF_CARD = 1, FF_GROUP, FF_GROUPGEN, FF_O };
 enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI };
 
 /* Allocation / gerepile */
+void   setdebugvar(long n);
 void   debug_stack(void);
 void   fill_stack(void);
 void   init_dalloc(void);

@@ -70,6 +70,7 @@ char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
 int     disable_color;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
+long    DEBUGVAR;
 ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
 
@@ -2081,6 +2082,9 @@ debug_stack(void)
   for (z = ((GEN)top)-1; z >= (GEN)avma; z--)
     err_printf("%p:\t0x%lx\t%lu\n",z,*z,*z);
 }
+
+void
+setdebugvar(long n) { DEBUGVAR=n; }
 
 long
 getstack(void) { return top-avma; }
