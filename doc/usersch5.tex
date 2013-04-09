@@ -6166,6 +6166,14 @@ dense vector.
 $\Z$) by the sparse matrix $M$. The result is an \kbd{ZV}, i.e.~a
 dense vector.
 
+\fun{void}{RgMs_structelim}{GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row}
+$M$ being a RgMs with \kbd{nbrow} rows, $A$ being a list of row indices,
+Perform structured elimination on $M$ by removing some rows and columns until
+the number of effectively present rows is equal to the number of columns.
+the result is stored in two \typ{VECSMALL}s, \kbd{*p\_col} and \kbd{*p\_row}:
+\kbd{*p\_col} is a map from the new columns indices to the old one.
+\kbd{*p\_row} is a map from the old rows indices to the new one ($0$ if removed).
+
 \fun{GEN}{FpMs_leftkernel_elt}{GEN M, long nbrow, GEN p}
 $M$ being a sparse matrix over $\F_p$, return a non-zero kbd{FpV} $X$ such
 that $X\*M$ components are almost all $0$.
