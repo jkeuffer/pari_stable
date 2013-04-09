@@ -50,7 +50,7 @@ FlxX_equal(GEN x, GEN y) { return gequal(x,y); }
 
 static char *
 seadata_filename(ulong ell)
-{ return pari_sprintf("%s/seadata/sea%ld", pari_datadir, ell); }
+{ return stack_sprintf("%s/seadata/sea%ld", pari_datadir, ell); }
 
 static GEN
 get_seadata(ulong ell)
@@ -59,7 +59,7 @@ get_seadata(ulong ell)
   GEN eqn;
   char *s = seadata_filename(ell);
   pariFILE *F = pari_fopengz(s);
-  free(s); if (!F) return NULL;
+  if (!F) return NULL;
   if (ell==0)
   {
     eqn = gp_readvec_stream(F->file);
@@ -106,7 +106,7 @@ static void
 err_modular_eqn(long ell)
 {
   char *s = seadata_filename(ell), *t = stack_strdup(s);
-  free(s); pari_err_FILE("seadata file", t);
+  pari_err_FILE("seadata file", t);
 }
 
 GEN
