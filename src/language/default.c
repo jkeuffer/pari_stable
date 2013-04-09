@@ -562,7 +562,7 @@ sd_string(const char *v, long flag, const char *s, char **pstr)
   {
     char *str, *ev = path_expand(v);
     long l = strlen(ev) + 256;
-    str = (char *) malloc(l);
+    str = (char *) pari_malloc(l);
     strftime_expand(ev,str, l-1); pari_free(ev);
     if (GP_DATA->secure)
     {
