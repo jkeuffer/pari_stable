@@ -1257,7 +1257,7 @@ check_kernel(long N, GEN M, GEN T, GEN m)
   return gerepileupto(av, K);
 }
 
-GEN
+static GEN
 F2xq_log_index(GEN a0, GEN b0, GEN m, GEN T0)
 {
   pari_sp av = avma;
