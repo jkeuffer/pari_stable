@@ -878,7 +878,8 @@ gp_head(void)
 License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
   pari_puts("\nType ? for help, \\q to quit.\n");
   print_text("Type ?12 for how to get moral (and possibly technical) support.");
-  pari_printf("\nparisize = %lu, primelimit = %lu\n", top - bot, maxprime());
+  pari_printf("\nparisize = %lu, primelimit = %lu\n",
+              top - bot, GP_DATA->primelimit);
 }
 
 /********************************************************************/
@@ -2150,7 +2151,7 @@ main(int argc, char **argv)
   pari_stack_init(&s_A,sizeof(*A),(void**)&A);
   pari_stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   cb_pari_err_recover = gp_err_recover;
-  pari_init_opts(1000000 * sizeof(long), 500000, INIT_SIGm);
+  pari_init_opts(1000000 * sizeof(long), 0, INIT_SIGm | INIT_noPRIMEm);
   cb_pari_pre_recover = gp_pre_recover;
   pari_add_defaults_module(functions_gp_default);
   (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
@@ -2160,6 +2161,7 @@ main(int argc, char **argv)
   Help = init_help();
 
   read_opt(&s_A, argc,argv);
+  initprimetable(GP_DATA->primelimit);
 #ifdef SIGALRM
   (void)os_signal(SIGALRM,gp_alarm_handler);
 #endif

@@ -357,6 +357,7 @@ typedef struct {
   int echo, breakloop, recover, use_readline; /* GP-specific */
   int secure, simplify, strictmatch, strictargs, chrono; /* libpari ? */
   pari_timer *T;
+  ulong primelimit; /* deprecated */
   long last_time; /* duration of last interactive gp command */
 } gp_data;
 extern gp_data *GP_DATA;
@@ -463,7 +464,6 @@ int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 /* arith2.c */
 
 int     divisors_init(GEN n, GEN *pP, GEN *pE);
-byteptr initprimes0(ulong maxnum, long *lenp, ulong *lastp);
 long    set_optimize(long what, GEN g);
 
 /* base1.c */

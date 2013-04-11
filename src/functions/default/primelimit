@@ -16,6 +16,9 @@ Doc: \kbd{gp} precomputes a list of
  numbers, PARI guarantees that the first 6547 primes, up to and
  including 65557, are precomputed, even if \kbd{primelimit} is $1$.
 
+ This default is only used on startup: changing it will not recompute a new
+ table.
+
  \misctitle{Deprecated feature} \kbd{primelimit} was used in some
  situations by algebraic number theory functions using the
  \tet{nf_PARTIALFACT} flag (\tet{nfbasis}, \tet{nfdisc}, \tet{nfinit}, \dots):
@@ -24,5 +27,10 @@ Doc: \kbd{gp} precomputes a list of
  and must be explicitly set by the user of such functions. Nevertheless,
  these functions now provide a more flexible interface, and their use
  of the global default \kbd{primelimit} is deprecated.
+
+ \misctitle{Deprecated feature} \kbd{factor(N, 0)} was used to partially
+ factor integers by removing all prime factors $\leq$ \kbd{primelimit}.
+ Don't use this, supply an explicit bound: \kbd{factor(N, bound)},
+ which avoids relying on an unpredictable global variable.
 
  The default value is \kbd{500k}.

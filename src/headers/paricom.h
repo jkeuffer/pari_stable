@@ -97,7 +97,8 @@ enum manage_var_t {
 enum {
   INIT_JMPm = 1,
   INIT_SIGm = 2,
-  INIT_DFTm = 4
+  INIT_DFTm = 4,
+  INIT_noPRIMEm = 8
 };
 
 #ifndef HAS_EXP2
@@ -112,10 +113,7 @@ enum {
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
 
-#define DIFFPTR_SKIP        255                /* Skip these entries */
-#define NEXT_PRIME_VIADIFF(p,d)         STMT_START \
-  { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
-#define PREC_PRIME_VIADIFF(p,d)         STMT_START \
-  { (d)--; while (*(d) == DIFFPTR_SKIP) (p) -= *(d)--; (p) -= *(d); } STMT_END
+#define NEXT_PRIME_VIADIFF(p,d) STMT_START { (p) += *(d)++; } STMT_END
+#define PREC_PRIME_VIADIFF(p,d) STMT_START { (p) -= *--(d); } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
   { if (!*(d)) pari_err_MAXPRIME(0); NEXT_PRIME_VIADIFF(p,d); } STMT_END

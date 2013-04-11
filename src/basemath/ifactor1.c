@@ -4112,7 +4112,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   lim = all; if (!lim) lim = tridiv_bound(n);
   if (lim > 2)
   {
-    ulong maxp = maxprime();
+    ulong maxp;
     pari_sp av2;
     i = vali(n);
     if (i)
@@ -4230,7 +4230,7 @@ factorint(GEN n, long flag)
 GEN
 Z_factor_limit(GEN n, ulong all)
 {
-  if (!all) all = maxprime() + 1;
+  if (!all) all = GP_DATA->primelimit + 1;
   return ifactor(n,NULL,NULL, all,decomp_default_hint); }
 GEN
 Z_factor(GEN n)

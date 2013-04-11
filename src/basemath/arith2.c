@@ -144,7 +144,7 @@ initprimes1(ulong size, long *lenp, long *lastp, byteptr p1)
   /* SLOW2_IN_ROOTS below 3: some slowdown starts to be noticable
    * when things fit into the cache on Sparc.
    * The choice of 2.6 gives a slowdown of 1-2% on UltraSparcII,
-   * but makes calculations for "maximum" of 436273009 (not applicable anymore)
+   * but makes calculations for "maximum" of 436273009
    * fit into 256K cache (still common for some architectures).
    *
    * One may change it when small caches become uncommon, but the gain
@@ -180,7 +180,7 @@ static cache_model_t cache_model = { CACHE_ARENA, CACHE_ALPHA, CACHE_CUTOFF };
 /* Assume that some calculation requires a chunk of memory to be
    accessed often in more or less random fashion (as in sieving).
    Assume that the calculation can be done in steps by subdividing the
-   chunk into smaller subchunks (arenas) and treathing them
+   chunk into smaller subchunks (arenas) and treating them
    separately.  Assume that the overhead of subdivision is equivalent
    to the number of arenas.
 
@@ -197,7 +197,7 @@ static cache_model_t cache_model = { CACHE_ARENA, CACHE_ALPHA, CACHE_CUTOFF };
  */
 static ulong
 good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
-                cache_model_t *cache_model, long model_type)
+                cache_model_t *cache_model)
 {
   ulong asize, cache_arena = cache_model->arena;
   double Xmin, Xmax, A, B, C1, C2, D, V;
@@ -213,21 +213,16 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
      [The latter is hard to substantiate theoretically, but this
      function describes benchmarks pretty close; it does not hurt that
      one can minimize it explicitly too ;-).  The switch between
-     diffenent choices of max() happens whe overhead=0.018.]
+     different choices of max() happens when overhead=0.018.]
 
      Thus the problem is minimizing (1 + slow2_size/arena)*overhead**0.29.
      This boils down to F=((X+A)/(X+B))X^alpha, X=overhead,
      B = (1 - fixed_to_cache/cache_arena), A = B +
-     slow2_size/cache_arena, alpha = 0.38, and X>=0.018, X>-B.  It
-     turns out that the minimization problem is not very nasty.  (As
-     usual with minimization problems which depend on parameters,
-     different values of A,B lead to different algorithms.  However,
-     the boundaries between the domains in (A,B) plane where different
-     algorithms work are explicitly calculatable.)
+     slow2_size/cache_arena, alpha = 0.38, and X>=0.018, X>-B.
 
-     Thus we need to find the rightmost root of (X+A)*(X+B) -
-     alpha(A-B)X to the right of 0.018 (if such exists and is below
-     Xmax).  Then we manually check the remaining region [0, 0.018].
+     We need to find the rightmost root of (X+A)*(X+B) - alpha(A-B)X to the
+     right of 0.018 (if such exists and is below Xmax).  Then we manually
+     check the remaining region [0, 0.018].
 
      Since we cannot trust the purely-experimental cache-hit slowdown
      function, as a sanity check always prefer fitting into the
@@ -235,8 +230,6 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
      value of the arena provides less than 10% speedup.
 
    */
-
-  if (model_type != 0) pari_err_IMPL("this cache model"); /* Future expansion */
 
   /* The simplest case: we fit into cache */
   if (total + fixed_to_cache <= cache_arena)
@@ -343,181 +336,135 @@ set_optimize(long what, GEN g)
   return ret;
 }
 
+/* s is odd; prime differences (starting from 5-3=2) start at known_primes[2],
+  terminated by a 0 byte. Checks n odd numbers starting at 'start', setting
+  bytes starting at data to 0 (composite) or 1 (prime) */
 static void
-sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
-{   /* start must be odd;
-       prime differences (starting from (5-3)=2) start at known_primes[2],
-       are terminated by a 0 byte;
+sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong n)
+{
+  ulong p, cnt = n-1, start = s, delta = 1;
+  byteptr q;
 
-       Checks cnt odd numbers starting at 'start', setting bytes
-       starting at data to 0 or 1 depending on whether the
-       corresponding odd number is prime or not */
-    ulong p;
-    byteptr q;
-    register byteptr write_to = data;   /* Better code with gcc 2.8.1 */
-    register ulong   cnt      = count;  /* Better code with gcc 2.8.1 */
-    register ulong   start    = s;      /* Better code with gcc 2.8.1 */
-    register ulong   delta    = 1;      /* Better code with gcc 2.8.1 */
-
-    memset(data, 0, cnt);
-    start >>= 1;                        /* (start - 1)/2 */
-    start += cnt;                       /* Corresponds to the end */
-    cnt -= 1;
-    /* data corresponds to start.  q runs over primediffs.  */
-    /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
-    for (q = known_primes + 1, p = 3; delta; delta = *++q, p += delta) {
-        /* first odd number which is >= start > p and divisible by p
-           = last odd number which is <= start + 2p - 1 and 0 (mod p)
-           = p + the last even number which is <= start + p - 1 and 0 (mod p)
-           = p + the last even number which is <= start + p - 2 and 0 (mod p)
-           = p + start + p - 2 - (start + p - 2) % 2p
-           = start + 2(p - 1 - ((start-1)/2 + (p-1)/2) % p). */
-      long off = cnt - ((start+(p>>1)) % p);
-
-      while (off >= 0) {
-          write_to[off] = 1;
-          off -= p;
-      }
-    }
+  memset(data, 0, n);
+  start >>= 1;  /* (start - 1)/2 */
+  start += n; /* Corresponds to the end */
+  /* data corresponds to start, q runs over primediffs */
+  for (q = known_primes + 1, p = 3; delta; delta = *++q, p += delta)
+  { /* first odd number >= start > p and divisible by p
+       = last odd number <= start + 2p - 2 and 0 (mod p)
+       = p + last number <= start + p - 2 and 0 (mod 2p)
+       = p + start+p-2 - (start+p-2) % 2p
+       = start + 2(p - 1 - ((start-1)/2 + (p-1)/2) % p). */
+    long off = cnt - ((start+(p>>1)) % p);
+    while (off >= 0) { data[off] = 1; off -= p; }
+  }
 }
 
-/* Here's the workhorse.  This is recursive, although normally the first
-   recursive call will bottom out and invoke initprimes1() at once. */
+/* Recursive workhorse */
 static byteptr
-initprimes0_i(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
+initprimes0(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
 {
   pari_sp av = avma;
   long alloced, psize;
-  byteptr q, fin, p, fin1, plast, curdiff;
+  byteptr q, end, p, end1, plast, curdiff;
   ulong last, remains, curlow, rootnum, asize, maxpr = maxprime();
   ulong prime_above = 3;
   byteptr p_prime_above;
 
   maxnum |= 1; /* make it odd. */
-  if (maxnum > maxpr && maxnum <= maxpr+512) maxnum = uprecprime(maxnum);
-  if (maxnum <= maxpr)
-  {
-    long last;
-    ulong lastprime = 0;
-    byteptr d;
-    if (maxnum == maxpr)
-    {
-      memcpy(p1, diffptr, diffptrlen);
-      lastprime = maxnum;
-      last = diffptrlen;
-    }
-    else
-    {
-      ulong q;
-      p = diffptr; lastprime = 0; /* -Wall */
-      for (q = 2, d = diffptr+1; q < maxnum; )
-      {
-        p = d; lastprime = q;
-        NEXT_PRIME_VIADIFF(q,d);
-      }
-      if (q == maxnum) { p = d; lastprime = q; }
-      last = p-diffptr;
-      memcpy(p1, diffptr, last);
-      p1[last++] = 0;
-    }
-    *lastp = lastprime;
-    *lenp = last;
-    return p1;
-  }
-  if (maxnum <= 1ul<<17)        /* Arbitrary. */
-    return initprimes1(maxnum>>1, lenp, (long*)lastp, p1); /* Break recursion */
+  if (maxnum <= 1ul<<17) /* Arbitrary; break recursion */
+    return initprimes1(maxnum>>1, lenp, (long*)lastp, p1);
 
   /* Checked to be enough up to 40e6, attained at 155893 */
-  rootnum = (ulong) sqrt((double)maxnum); /* cast it back to a long */
+  rootnum = (ulong) sqrt((double)maxnum);
   rootnum |= 1;
   /* recursive call (remember that maxnum > maxpr) */
-  (void) initprimes0_i(maxss(rootnum, maxpr), &psize, &last, p1);
-  fin1 = p1 + psize - 1;
+  (void) initprimes0(maxss(rootnum, maxpr), &psize, &last, p1);
+  end1 = p1 + psize - 1;
   remains = (maxnum - last) >> 1; /* number of odd numbers to check */
 
-  /* Actually, we access primes array of psize too; but we access it
-     consequently, thus we do not include it in fixed_to_cache */
-  asize = good_arena_size((ulong)(rootnum * slow2_in_roots), remains + 1, 0,
-                          &cache_model, 0) - 1;
+  /* we access primes array of psize too; but we access it consecutively,
+   * thus we do not include it in fixed_to_cache */
+  asize = good_arena_size((ulong)(rootnum * slow2_in_roots), remains+1, 0,
+                          &cache_model) - 1;
   /* enough room on the stack ? */
   alloced = (((byteptr)avma) <= ((byteptr)bot) + asize);
   if (alloced)
-    p = (byteptr) pari_malloc(asize + 1);
+    p = (byteptr)pari_malloc(asize+1);
   else
-    p = (byteptr) stack_malloc(asize + 1);
-  fin = p + asize;              /* the 0 sentinel goes at fin. */
+    p = (byteptr)stack_malloc(asize+1);
+  end = p + asize; /* the 0 sentinel goes at end. */
   curlow = last + 2; /* First candidate: know primes up to last (odd). */
-  curdiff = fin1;
+  curdiff = end1;
 
-  /* During each iteration p..fin-1 represents a range of odd
+  /* During each iteration p..end-1 represents a range of odd
      numbers.  plast is a pointer which represents the last prime seen,
-     it may point before p..fin-1. */
+     it may point before p..end-1. */
   plast = p - 1;
   p_prime_above = p1 + 2;
-  while (remains)       /* Cycle over arenas.  Performance is not crucial */
-  {
+  while (remains)
+  { /* cycle over arenas; performance not crucial */
     unsigned char was_delta;
-
-    if (asize > remains) {
-      asize = remains;
-      fin = p + asize;
-    }
+    if (asize > remains) { asize = remains; end = p + asize; }
     /* Fake the upper limit appropriate for the given arena */
     while (prime_above*prime_above <= curlow + (asize << 1) && *p_prime_above)
-        prime_above += *p_prime_above++;
+      prime_above += *p_prime_above++;
     was_delta = *p_prime_above;
-    *p_prime_above = 0;                 /* Put a 0 sentinel for sieve_chunk */
-
+    *p_prime_above = 0; /* sentinel for sieve_chunk */
     sieve_chunk(p1, curlow, p, asize);
+    *p_prime_above = was_delta; /* restore */
 
-    *p_prime_above = was_delta;         /* Restore */
-    p[asize] = 0;                       /* Put a 0 sentinel for ZZZ */
-    /* now q runs over addresses corresponding to primes */
+    p[asize] = 0; /* sentinel */
     for (q = p; ; plast = q++)
-    {
-      long d;
-
-      while (*q) q++;                   /* use ZZZ 0-sentinel at end */
-      if (q >= fin) break;
-      d = (q - plast) << 1;
-      while (d >= DIFFPTR_SKIP)
-        *curdiff++ = DIFFPTR_SKIP, d -= DIFFPTR_SKIP;
-      *curdiff++ = (unsigned char)d;
+    { /* q runs over addresses corresponding to primes */
+      while (*q) q++; /* use sentinel at end */
+      if (q >= end) break;
+      *curdiff++ = (unsigned char)(q-plast) << 1; /* < 255 for q < 436273291 */
     }
     plast -= asize;
     remains -= asize;
     curlow += (asize<<1);
-  } /* while (remains) */
+  }
   last = curlow - ((p - plast) << 1);
-  *curdiff++ = 0;               /* sentinel */
+  *curdiff++ = 0; /* sentinel */
   *lenp = curdiff - p1;
   *lastp = last;
   if (alloced) pari_free(p); else avma = av;
   return p1;
 }
-byteptr
-initprimes0(ulong maxnum, long *lenp, ulong *lastp)
-{
-  /* Due to multibyte representation of large gaps, this estimate will
-     be broken by large enough maxnum.  However, assuming exponential
-     distribution of gaps with the average log(n), we are safe up to
-     circa exp(-256/log(1/0.09)) = 1.5e46.  OK with LONG_BITS <= 128. ;-) */
-  long size = (long) (1.09 * maxnum/log((double)maxnum)) + 146;
-  byteptr p1 = initprimes0_i(maxnum, lenp, lastp, (byteptr)pari_malloc(size));
-  return (byteptr) pari_realloc(p1, *lenp);
-}
-/* The diffptr table will contain at least 6548 entries (up to and including
-   the 6547th prime, 65557, and the terminal null byte), because the isprime/
-   small-factor-extraction machinery wants to depend on everything up to 65539
-   being in the table, and we might as well go to a multiple of 4 Bytes.--GN */
 
 ulong
 maxprime(void) { return diffptr ? _maxprime : 0; }
 
 void
-maxprime_check(ulong c)
+maxprime_check(ulong c) { if (_maxprime < c) pari_err_MAXPRIME(c); }
+
+/* We ensure 65302 <= maxnum <= 436273290: the LHS ensures modular function
+ * have enough fast primes to work, the RHS ensures that p_{n+1} - p_n < 255 */
+byteptr
+initprimes(ulong maxnum, long *lenp, ulong *lastp)
 {
-  if (_maxprime < c) pari_err_MAXPRIME(c);
+  long size;
+  byteptr t;
+  if (maxnum < 65537)
+    maxnum = 65537;
+  else if (maxnum > 436273290)
+    maxnum = 436273290;
+  size = (long) (1.09 * maxnum/log((double)maxnum)) + 146;
+  t = initprimes0(maxnum, lenp, lastp, (byteptr)pari_malloc(size));
+  return (byteptr)pari_realloc(t, *lenp);
+}
+
+void
+initprimetable(ulong maxnum)
+{
+  long len;
+  ulong last;
+  byteptr p = initprimes(maxnum, &len, &last), old = diffptr;
+  diffptrlen = minss(diffptrlen, len);
+  _maxprime  = minss(_maxprime,last); /*Protect against ^C*/
+  diffptr = p; diffptrlen = len; _maxprime = last;
+  if (old) free(old);
 }
 
 /* all init_primepointer_xx routines set *ptr to the corresponding place
@@ -556,31 +503,6 @@ init_primepointer_gt(ulong a, byteptr *pd)
   prime_table_next_p(a, pd, &p, &n);
   if (p == a) NEXT_PRIME_VIADIFF(p, *pd);
   return p;
-}
-
-byteptr
-initprimes(ulong maxnum, long *lenp, ulong *lastp)
-{ /* the algorithm must see the next prime beyond maxnum, whence the +512. */
-  if (maxnum < 65302)
-    maxnum = 65302 + 512;
-  else
-  {
-    maxnum += 512;
-    if (maxnum < 512UL) pari_err_OVERFLOW("initprimes [primelimit]");
-  }
-  return initprimes0(maxnum, lenp, lastp);
-}
-
-void
-initprimetable(ulong maxnum)
-{
-  long len;
-  ulong last;
-  byteptr p = initprimes(maxnum, &len, &last), old = diffptr;
-  diffptrlen = minss(diffptrlen, len);
-  _maxprime  = minss(_maxprime,last); /*Protect against ^C*/
-  diffptr = p; diffptrlen = len; _maxprime = last;
-  if (old) free(old);
 }
 
 GEN

@@ -535,12 +535,8 @@ sd_parisize(const char *v, long flag)
 
 GEN
 sd_primelimit(const char *v, long flag)
-{
-  ulong max = maxprime(), n = max;
-  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)(LONG_MAX-1024) + 1,NULL);
-  if (n != max) initprimetable(n);
-  return r;
-}
+{ return sd_ulong(v,flag,"primelimit",&(GP_DATA->primelimit),
+                  0,2*(ulong)(LONG_MAX-1024) + 1,NULL); }
 
 GEN
 sd_simplify(const char *v, long flag)
@@ -777,6 +773,7 @@ default_gp_data(void)
   static pari_timer __T;
 
   D->flags       = 0;
+  D->primelimit  = 500000;
 
   /* GP-specific */
   D->breakloop   = 1;

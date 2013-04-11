@@ -134,6 +134,8 @@ BA 110- galoisfixedfield() could return a wrong result for polynomials with
    111- bnrdisc could return a wrong result if the modulus had more than
         2 prime divisors [#1399]
    112- a = Mod(1,2)*x; gcd(a,a) return x instead of Mod(1,2)*x
+   113  changing primelimit from within forprime loop yielded unpredictable
+        results (potential SEGV)
 
   Changed
     1- mathnf: swapped flag 3 and 5.
@@ -300,6 +302,14 @@ BA 97- zv_cmp0 renamed to zv_equal0
        argument) now returns 0 if the resulting order cannot be proven to be
        maximal.
   107- rename bezout() -> gcdext(), polresultant() -> polresultantext()
+  108- the prime table is now computed once and for all on startup and can
+       no longer be increased by modifying primelimit: the dynamic forprime
+       machinery allows fast primes up to primelimit^2 which is more than
+       enough even with a small table. The default value of 500.000 is already
+       larger than necessary
+  109- removed the mechanism allowing prime gaps larger than 255 in the
+       prime table: as a result it now limited to 436273290, allowing fast
+       primes up to 1.9 10^17
 
   Added
     1- mathnf for matrices over K[X] [#41]

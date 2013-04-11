@@ -32,18 +32,18 @@ Doc: if \var{code} is omitted, trigger an \var{e\_ALARM} exception after $s$
  seconds, returning a partial factorisation.
  \bprog
  \\ Time-bounded partial factorization
- default(primelimit,2^24);
  default(factor_add_primes,1);
  timefact(N,sec)=
  {
    F = alarm(sec, factor(N));
-   if (type(F) == "t_ERROR", factor(N,0), F);
+   if (type(F) == "t_ERROR", factor(N, 2^24), F);
  }
  @eprog\noindent We either return the factorization directly, or replace the
- \typ{ERROR} result by a simple bounded factorization \kbd{factor(N,0)}. Note
- the \tet{factor_add_primes} trick: any prime larger than $2^24$ discovered
- while attempting the initial factorization is stored and remembered. When the
- alarm rings, the subsequent bounded factorization finds it right away.
+ \typ{ERROR} result by a simple bounded factorization \kbd{factor(N, 2\pow 24)}.
+ Note the \tet{factor_add_primes} trick: any prime larger than $2^24$
+ discovered while attempting the initial factorization is stored and
+ remembered. When the alarm rings, the subsequent bounded factorization finds
+ it right away.
 
  It is not possible to set a new alarm \emph{within} another \kbd{alarm}
  code: the new timer erases the parent one.

@@ -734,20 +734,21 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   cb_pari_whatnow = NULL;
   cb_pari_pre_recover = NULL;
   cb_pari_sigint = dflt_sigint_fun;
-  if ((init_opts&INIT_JMPm)) cb_pari_err_recover = dflt_err_recover;
+  if (init_opts&INIT_JMPm) cb_pari_err_recover = dflt_err_recover;
 
   pari_stackcheck_init(&u);
   pari_init_homedir();
-  if ((init_opts&INIT_DFTm)) {
+  if (init_opts&INIT_DFTm) {
     pari_init_defaults();
     GP_DATA = default_gp_data();
     gp_expand_path(GP_DATA->path);
   }
 
-  if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
+  if (init_opts&INIT_SIGm) pari_sig_init(pari_sighandler);
   pari_init_stack(parisize, 0);
   init_universal_constants();
-  diffptr = NULL; initprimetable(maxprime);
+  diffptr = NULL;
+  if (!(init_opts&INIT_noPRIMEm)) initprimetable(maxprime);
   pari_kernel_init();
 
   primetab = cgetalloc(t_VEC, 1);
@@ -790,7 +791,7 @@ pari_close_opts(ulong init_opts)
   free((void*)functions_hash);
   free((void*)defaults_hash);
   free((void*)bot);
-  free((void*)diffptr);
+  if (diffptr) free((void*)diffptr);
   free(current_logfile);
   free(current_psfile);
   pari_stack_delete(&s_MODULES);

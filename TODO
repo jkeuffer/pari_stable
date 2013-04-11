@@ -34,8 +34,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
-4  changing primelimit from within forprime loop yields unpredictable results
-
 2  external prettyprinter tex2mail: on a fast machine with a slow 'perl',
    the external prettyprinter does not return quickly enough and a new prompt
    has already been printed.

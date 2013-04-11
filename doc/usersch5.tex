@@ -77,6 +77,9 @@ This one \emph{must} be enabled once. If you close pari, then restart it,
 you need not reinitialize \kbd{GP\_DATA}; if you do not, then old values are
 restored.
 
+  \kbd{INIT\_noPRIMEm}: do not compute the prime table (ignore the
+  \kbd{maxprime} argument).
+
 \fun{void}{pari_close_opts}{ulong init_opts} as \kbd{pari\_close},
 for a library initialized with a mask of options using
 \kbd{pari\_init\_opts}. \kbd{opts} is a mask of flags among

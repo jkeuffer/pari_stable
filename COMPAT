@@ -56,6 +56,11 @@ This file lists the incompatible changes between Version 2.x and older versions
     function now sees the local specifications directly and can take steps
     to fix problems. The result can also be certified (nfcertify)
   - renamed bezout() -> gcdext(), polresultant() -> polresultantext()
+  - the prime table is now computed once and for all on startup and can
+    no longer be increased by modifying primelimit: the dynamic forprime
+    machinery allows fast primes up to primelimit^2 which is more than
+    enough even with a small table. The default value of 500.000 is already
+    larger than necessary
 
 * Specific to the PARI library:
 ===============================
