@@ -25,25 +25,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 void postdraw0(long *w, long *x, long *y, long lw, long scale);
 static void PARI_get_psplot(void);
 
-#define NUMRECT 18
-
 /* no need for THREAD: OK to share this */
 static hashtable *rgb_colors = NULL;
-PariRect *rectgraph[NUMRECT];
+PariRect *rectgraph[18]; /*NUMRECT*/
 
 /* no need for THREAD: gp-specific */
-static long current_color[NUMRECT];
+static long current_color[18]; /*NUMRECT*/
 
 PARI_plot pari_plot, pari_psplot;
 PARI_plot *pari_plot_engine = &pari_plot;
 long rectpoint_itype = 0, rectline_itype  = 0;
 
-const long STRINGRECT = NUMRECT-2, DRAWRECT = NUMRECT-1;
-
-const long PLOTH_NUMPOINTS = 1000, PARAM_NUMPOINTS = 1500, RECUR_NUMPOINTS = 8;
+const long NUMRECT = 18;
 const long RECUR_MAXDEPTH = 10;
 const double RECUR_PREC = 0.001;
-
 const long DEFAULT_COLOR = 1, AXIS_COLOR = 2;
 
 INLINE long
@@ -1373,8 +1368,8 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 
   if (!testpoints)
   {
-    if (recur) testpoints = RECUR_NUMPOINTS;
-    else       testpoints = param? PARAM_NUMPOINTS : PLOTH_NUMPOINTS;
+    if (recur) testpoints = 8;
+    else       testpoints = param? 1500: 1000;
   }
   x = gtofp(a, prec);
   if (typ(code) == t_CLOSURE) push_lex(x, code);
@@ -1793,7 +1788,7 @@ ploth0(GEN a,GEN b,GEN code, long prec,ulong flags,long testpoints)
 {
   PARI_plot *output = init_output(flags);
   dblPointList *pl=rectplothin(a,b, code, prec, flags,testpoints);
-  return rectplothrawin(STRINGRECT,DRAWRECT, pl, flags, output);
+  return rectplothrawin(NUMRECT-2,NUMRECT-1, pl, flags, output);
 }
 
 static GEN
@@ -1807,7 +1802,7 @@ plothraw0(GEN listx, GEN listy, long flags)
   gel(data,2) = listy;
   pl=gtodblList(data,PLOT_PARAMETRIC|(flags&PLOT_COMPLEX));
   if (!pl) return cgetg(1,t_VEC);
-  return rectplothrawin(STRINGRECT,DRAWRECT,pl,flags | PLOT_PARAMETRIC,output);
+  return rectplothrawin(NUMRECT-2,NUMRECT-1,pl,flags | PLOT_PARAMETRIC,output);
 }
 
 GEN
