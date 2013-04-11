@@ -40,7 +40,7 @@ Doc: general factorization function, where $x$ is a
  prime factors $p < \var{lim}$. The limit \var{lim} must be non-negative.
  In this case, all but the last factor are proven primes, but the remaining
  factor may actually be a proven composite! If the remaining factor is less
-than $\var{lim}^2$, then it is prime.
+ than $\var{lim}^2$, then it is prime.
  \bprog
  ? factor(2^2^7 +1, 10^5)
  %3 =
