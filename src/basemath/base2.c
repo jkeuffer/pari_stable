@@ -794,7 +794,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
   return dk? NULL: f;
 }
 
-/* p-maximal order of Af; mf = v_p(Disc(f)) */
+/* p-maximal order of Z[x]/f; mf = v_p(Disc(f)). Return gen_1 if p-maximal */
 static GEN
 maxord(GEN p,GEN f,long mf)
 {
@@ -809,7 +809,9 @@ maxord(GEN p,GEN f,long mf)
     g = FpXV_prod(w, p);
   }
   res = dedek(f, mf, p, g);
-  if (res)
+  if (res == f)
+    res = gen_1;
+  else if (res)
     res = dbasis(p, f, mf, pol_x(varn(f)), res);
   else
   {
@@ -1139,8 +1141,9 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
 static GEN
 get_partial_order_as_pols(GEN p, GEN f)
 {
-  long v = ZpX_disc_val(f, p);
-  return RgM_to_RgXV(maxord(p,f, v), varn(f));
+  GEN O = maxord(p,f,ZpX_disc_val(f,p));
+  long v = varn(f);
+  return O == gen_1? pol_x_powers(degpol(f), v): RgM_to_RgXV(O, v);
 }
 
 typedef struct __decomp {
