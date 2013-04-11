@@ -790,8 +790,8 @@ dedek(GEN f, long mf, GEN p,GEN g)
     err_printf("  dedek: gcd has degree %ld\n", dk);
     if (DEBUGLEVEL>5) err_printf("initial parameters p=%Ps,\n  f=%Ps\n",p,f);
   }
-  if (2*dk >= mf-1) return FpX_div(f,k,p);
-  return dk? NULL: f;
+  if (!dk) return f;
+  return (2*dk < mf-1)? NULL: FpX_div(f, FpX_normalize(k, p), p);
 }
 
 /* p-maximal order of Z[x]/f; mf = v_p(Disc(f)). Return gen_1 if p-maximal */
@@ -799,9 +799,10 @@ static GEN
 maxord(GEN p,GEN f,long mf)
 {
   const pari_sp av = avma;
+  long n = degpol(f);
   GEN w = NULL, g, res, fp = FpX_red(f, p);
 
-  if (cmpui(degpol(f),p) < 0)
+  if (cmpui(n,p) < 0)
     g = FpX_div(fp, FpX_gcd(fp,ZX_deriv(fp), p), p);
   else
   {
@@ -809,10 +810,8 @@ maxord(GEN p,GEN f,long mf)
     g = FpXV_prod(w, p);
   }
   res = dedek(f, mf, p, g);
-  if (res == f)
-    res = gen_1;
-  else if (res)
-    res = dbasis(p, f, mf, pol_x(varn(f)), res);
+  if (res)
+    res = (res == f)? gen_1: dbasis(p, f, mf, NULL, res);
   else
   {
     if (!w) w = gel(FpX_factor(fp,p),1);
@@ -1103,39 +1102,73 @@ compmod(GEN p, GEN f, GEN g, GEN T, GEN q, long v)
   return z;
 }
 
+/* fast implementation of ZM_hnfmodid(M, D) / D, D = p^k */
+static GEN
+ZpM_hnfmodid(GEN M, GEN p, GEN D)
+{
+  long i, l = lg(M);
+  M = RgM_Rg_div(ZpM_echelon(M,0,p,D), D);
+  for (i = 1; i < l; i++)
+    if (gcmp0(gcoeff(M,i,i))) gcoeff(M,i,i) = gen_1;
+  return M;
+}
+
+/* Return Z-basis for Z[a] + U(a)/p Z[a] in Z[t]/(f), mf = v_p(disc f), U
+ * a ZX. Special cases: a = t is coded as NULL, U = 0 is coded as NULL */
 static GEN
 dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
 {
-  long n = degpol(f), dU, i, vda;
-  GEN D, da, b, ha, pd, pdp;
+  long n = degpol(f), i, dU;
+  GEN b, h;
 
-  if (n == 1) return scalarmat(gen_1, 1);
+  if (n == 1) return matid(1);
+  if (a && gcmpX(a)) a = NULL;
   if (DEBUGLEVEL>5)
   {
     err_printf("  entering Dedekind Basis with parameters p=%Ps\n",p);
-    err_printf("  f = %Ps,\n  a = %Ps\n",f,a);
+    err_printf("  f = %Ps,\n  a = %Ps\n",f, a? a: pol_x(varn(f)));
   }
-  pd = powiu(p, mf >> 1); pdp = mulii(pd,p);
-  dU = U ? degpol(U): 0;
-  b = cgetg(n, t_MAT); /* Z[a] + U/p Z[a] is maximal */
-  ha = scalarpol(pd, varn(f));
-  a = QpX_remove_denom(a, p, &da, &vda);
-  D = da? mulii(pdp, da): pdp;
-  /* skip first column = [pd, 0,...,0] */
-  for (i=1; i<n; i++)
+  if (a)
   {
-    if (i == dU)
-      ha = compmod(p, U, mkvec3(a,da,stoi(vda)), f, pdp, (mf>>1) - 1);
-    else
+    GEN pd = powiu(p, mf >> 1);
+    GEN da, pdp = mulii(pd,p), D = pdp;
+    long vda;
+    dU = U ? degpol(U): 0;
+    b = cgetg(n+1, t_MAT);
+    h = scalarpol(pd, varn(f));
+    a = QpX_remove_denom(a, p, &da, &vda);
+    if (da) D = mulii(D, da);
+    gel(b,1) = scalarcol_shallow(pd, n);
+    for (i=2; i<=n; i++)
     {
-      ha = FpXQ_mul(ha, a, f, D);
-      if (da) ha = ZX_Z_divexact(ha, da);
+      if (i == dU+1)
+        h = compmod(p, U, mkvec3(a,da,stoi(vda)), f, pdp, (mf>>1) - 1);
+      else
+      {
+        h = FpXQ_mul(h, a, f, D);
+        if (da) h = ZX_Z_divexact(h, da);
+      }
+      gel(b,i) = RgX_to_RgV(h,n);
     }
-    gel(b,i) = RgX_to_RgV(ha,n);
+    return ZpM_hnfmodid(b, p, pd);
   }
-  b = ZM_hnfmodid(b,pd);
-  if (DEBUGLEVEL>5) err_printf("  new order: %Ps\n",b);
-  return RgM_Rg_div(b, pd);
+  else
+  {
+    if (!U) return matid(n);
+    dU = degpol(U);
+    if (dU == n) return matid(n);
+    U = FpX_normalize(U, p);
+    b = cgetg(n+1, t_MAT);
+    for (i = 1; i <= dU; i++) gel(b,i) = vec_ei(n, i);
+    h = RgX_Rg_div(U, p);
+    for ( ; i <= n; i++)
+    {
+      gel(b, i) = RgX_to_RgV(h,n);
+      if (i == n) break;
+      h = RgX_shift_shallow(h,1);
+    }
+    return b;
+  }
 }
 
 static GEN
@@ -1171,7 +1204,7 @@ static GEN
 Decomp(decomp_t *S, long flag)
 {
   pari_sp av = avma;
-  GEN fred, res, pr, pk, ph, b1, b2, a, e, de, f1, f2, dt, th;
+  GEN fred, pr, pk, ph, b1, b2, a, e, de, f1, f2, dt, th;
   GEN p = S->p, chip;
   long k, r = flag? flag: 2*S->df + 1;
   long vde, vdt;
@@ -1241,29 +1274,27 @@ Decomp(decomp_t *S, long flag)
     return famat_mul_shallow(ZX_monic_factorpadic(f1, p, flag),
                              ZX_monic_factorpadic(f2, p, flag));
   } else {
-    GEN D, Dov2, d1, d2, ib1, ib2;
+    GEN D, d1, d2, B1, B2, M;
     long n, n1, n2, i;
     gerepileall(av, 4, &f1, &f2, &e, &de);
     D = de;
-    ib1 = get_partial_order_as_pols(p,f1); n1 = lg(ib1)-1;
-    ib2 = get_partial_order_as_pols(p,f2); n2 = lg(ib2)-1; n = n1+n2;
-    d1 = QpXV_denom(ib1);
-    d2 = QpXV_denom(ib2); if (cmpii(d1, d2) < 0) d1 = d2;
+    B1 = get_partial_order_as_pols(p,f1); n1 = lg(B1)-1;
+    B2 = get_partial_order_as_pols(p,f2); n2 = lg(B2)-1; n = n1+n2;
+    d1 = QpXV_denom(B1);
+    d2 = QpXV_denom(B2); if (cmpii(d1, d2) < 0) d1 = d2;
     if (d1 != gen_1) {
-      ib1 = Q_muli_to_int(ib1, d1);
-      ib2 = Q_muli_to_int(ib2, d1);
+      B1 = Q_muli_to_int(B1, d1);
+      B2 = Q_muli_to_int(B2, d1);
       D = mulii(d1, D);
     }
-    Dov2 = shifti(D,-1);
-    fred = centermod_i(S->f, D, Dov2);
-    res = cgetg(n+1, t_VEC);
+    fred = centermod_i(S->f, D, shifti(D,-1));
+    M = cgetg(n+1, t_MAT);
     for (i=1; i<=n1; i++)
-      gel(res,i) = FpX_center(FpX_rem(FpX_mul(gel(ib1,i),e,D), fred, D), D, Dov2);
-    e = Z_ZX_sub(de, e); ib2 -= n1;
+      gel(M,i) = RgX_to_RgV(FpX_rem(FpX_mul(gel(B1,i),e,D), fred, D), n);
+    e = Z_ZX_sub(de, e); B2 -= n1;
     for (   ; i<=n; i++)
-      gel(res,i) = FpX_center(FpX_rem(FpX_mul(gel(ib2,i),e,D), fred, D), D, Dov2);
-    res = RgXV_to_RgM(res, n);
-    return RgM_Rg_div(ZM_hnfmodid(res,D), D); /* normalized integral basis */
+      gel(M,i) = RgX_to_RgV(FpX_rem(FpX_mul(gel(B2,i),e,D), fred, D), n);
+    return ZpM_hnfmodid(M, p, D);
   }
 }
 
