@@ -202,10 +202,10 @@ diag_denom(GEN M)
   return d;
 }
 static void
-allbase_from_maxord(nfmaxord_t *S, GEN maxord, GEN P)
+allbase_from_maxord(nfmaxord_t *S, GEN maxord)
 {
   pari_sp av = avma;
-  GEN f = S->T, a = NULL, da = NULL, index, P2, E2, D;
+  GEN f = S->T, P = S->dTP, a = NULL, da = NULL, index, P2, E2, D;
   long n = degpol(f), lP = lg(P), i, j, k;
   int centered = 0;
   for (i=1; i<lP; i++)
@@ -263,6 +263,23 @@ allbase_from_maxord(nfmaxord_t *S, GEN maxord, GEN P)
   setlg(P2, k); S->dKP = P2;
   setlg(E2, k); S->dKE = P2;
   S->basis = RgM_to_RgXV(a, varn(f));
+}
+static GEN
+disc_from_maxord(nfmaxord_t *S, GEN O)
+{
+  long n = degpol(S->T), lP = lg(O), i, j;
+  GEN index = gen_1;
+  for (i=1; i<lP; i++)
+  {
+    GEN b = gel(O,i);
+    if (b == gen_1) continue;
+    for (j = 1; j <= n; j++)
+    {
+      GEN c = gcoeff(b,j,j);
+      if (typ(c) == t_FRAC) index = mulii(index, gel(c,2)) ;
+    }
+  }
+  return diviiexact(S->dT, sqri(index));
 }
 
 /*******************************************************************/
@@ -590,36 +607,23 @@ maxord2(GEN cf, GEN p, long epsilon)
   return gerepileupto(av, RgM_Rg_div(ZM_hnfmodid(m, delta), delta));
 }
 
-/* Input:
- *  x normalized integral polynomial of degree n, defining K=Q(theta).
- *
- *  code 0, 1 or (long)p if we want base, smallbase ou factoredbase (resp.).
- *  y is GEN *, which will receive the discriminant of K.
- *
- * Output
- *  1) A t_COL whose n components are rationnal polynomials (with degree
- *     0,1...n-1) : integral basis for K (putting x=theta).
- *     Rem: common denominator is in da.
- *
- *  2) discriminant of K (in *y).
- */
-static void
+static GEN
 allbase2(nfmaxord_t *S)
 {
-  GEN cf, maxord, P = S->dTP, E = S->dTE, f = S->T;
+  GEN cf, O, P = S->dTP, E = S->dTE, f = S->T;
   long i, lP = lg(P), n = degpol(f);
 
   cf = cgetg(n+1,t_VEC); gel(cf,2) = companion(f);
   for (i=3; i<=n; i++) gel(cf,i) = ZM_mul(gel(cf,2), gel(cf,i-1));
-  maxord = cgetg(lP, t_VEC);
+  O = cgetg(lP, t_VEC);
   for (i=1; i<lP; i++)
   {
     GEN p = gel(P, i);
     long e = E[i];
     if (DEBUGLEVEL) err_printf("Treating p^k = %Ps^%ld\n", p, e);
-    gel(maxord,i) = e == 1? gen_1: maxord2(cf, p, e);
+    gel(O,i) = e == 1? gen_1: maxord2(cf, p, e);
   }
-  allbase_from_maxord(S, maxord, P);
+  return O;
 }
 
 /*******************************************************************/
@@ -634,14 +638,14 @@ static GEN maxord(GEN p,GEN f,long mf);
 /* Warning: data computed for T = ZX_Q_normalize_fact(T0). If S.unscale !=
  * gen_1, caller must take steps to correct the components if it wishes
  * to stick to the original T0 */
-void
-nfmaxord(nfmaxord_t *S, GEN T0, long flag)
+static GEN
+get_maxord(nfmaxord_t *S, GEN T0, long flag)
 {
   VOLATILE GEN P, E, O;
   VOLATILE long lP, i, k;
 
   nfmaxord_check_args(S, T0, flag);
-  if (flag & nf_ROUND2) { allbase2(S); return; }
+  if (flag & nf_ROUND2) return allbase2(S);
   P = S->dTP; lP = lg(P);
   E = S->dTE;
   O = cgetg(1, t_VEC);
@@ -695,7 +699,13 @@ nfmaxord(nfmaxord_t *S, GEN T0, long flag)
       O = shallowconcat(O, mkvec( maxord(gel(P,i),S->T,E[i]) ));
     } pari_ENDCATCH;
   }
-  allbase_from_maxord(S, O, P);
+  S->dTP = P; return O;
+}
+void
+nfmaxord(nfmaxord_t *S, GEN T0, long flag)
+{
+  GEN O = get_maxord(S, T0, flag);
+  allbase_from_maxord(S, O);
 }
 
 static void
@@ -705,6 +715,15 @@ _nfbasis(GEN x, long flag, GEN fa, GEN *pbas, GEN *pdK)
   nfmaxord(&S, fa? mkvec2(x,fa): x, flag);
   if (pbas) *pbas = RgXV_unscale(S.basis, S.unscale);
   if (pdK)  *pdK = S.dK;
+}
+static GEN
+_nfdisc(GEN x, long flag, GEN fa)
+{
+  pari_sp av = avma;
+  nfmaxord_t S;
+  GEN O = get_maxord(&S, fa? mkvec2(x,fa): x, flag);
+  GEN D = disc_from_maxord(&S, O);
+  D = icopy_avma(D, av); avma = (pari_sp)D; return D;
 }
 
 /* deprecated: backward compatibility only ! */
@@ -722,11 +741,11 @@ nfbasis_gp(GEN T, GEN P, GEN junk)
 GEN
 nfdisc_gp(GEN T, GEN P, GEN junk)
 {
-  if (!P || isintzero(P)) return nfdisc0(T, 0, junk);
+  if (!P || isintzero(P)) return _nfdisc(T, 0, junk);
   if (junk) pari_err_FLAG("nfdisc");
   /* treat specially nfdisc(T, 1) */
   if (typ(P) == t_INT && equali1(P)) P = utoipos(maxprime());
-  return nfdisc0(T, 0, P);
+  return _nfdisc(T, 0, P);
 }
 /* backward compatibility */
 static long
@@ -752,11 +771,7 @@ nfbasis0(GEN x, long flag, GEN fa)
 /* deprecated */
 GEN
 nfdisc0(GEN x, long flag, GEN fa)
-{
-  pari_sp av = avma;
-  GEN dK; _nfbasis(x, nfbasis_flag_translate(flag), fa, NULL, &dK);
-  dK = icopy_avma(dK, av); avma = (pari_sp)dK; return dK;
-}
+{ return _nfdisc(x, nfbasis_flag_translate(flag), fa); }
 
 GEN
 nfbasis(GEN x, GEN *pdK, GEN fa)
@@ -766,12 +781,7 @@ nfbasis(GEN x, GEN *pdK, GEN fa)
   gerepileall(av, pdK? 2: 1, &bas, pdK); return bas;
 }
 GEN
-nfdisc(GEN x)
-{
-  pari_sp av = avma;
-  GEN dK; _nfbasis(x, 0, NULL, NULL, &dK);
-  dK = icopy_avma(dK, av); avma = (pari_sp)dK; return dK;
-}
+nfdisc(GEN x) { return _nfdisc(x, 0, NULL); }
 
 /* return U if Z[alpha] is not maximal or 2*dU < m-1; else return NULL */
 static GEN
