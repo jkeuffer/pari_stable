@@ -1567,6 +1567,7 @@ GEN     lexsort(GEN x);
 GEN     mathilbert(long n);
 GEN     matqpascal(long n, GEN q);
 GEN     merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN));
+GEN     merge_sort_uniq(GEN x, GEN y, void *data, int (*cmp)(void *,GEN,GEN));
 GEN     modreverse(GEN x);
 GEN     numtoperm(long n, GEN x);
 GEN     permtonum(GEN x);

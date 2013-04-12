@@ -7855,6 +7855,10 @@ assuming \kbd{y} is a factorization matrix, sorts its rows in place (no copy
 is made) according to the comparison function \kbd{cmp} applied to its first
 column.
 
+\fun{GEN}{merge_sort_uniq}{GEN x,GEN y, void *data, int (*cmp)(void *,GEN,GEN)}
+assuming \kbd{x} and \kbd{y} are sorted vectors, with respect to the \kbd{cmp}
+comparison function, return a sorted concatenation, with duplicates removed.
+
 \fun{GEN}{merge_factor}{GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN)}
 let \kbd{fx} and \kbd{fy} be factorization matrices for $X$ and $Y$
 sorted with respect to the comparison function \kbd{cmp} (see

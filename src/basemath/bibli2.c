@@ -1683,6 +1683,30 @@ merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN))
   setlg(M, m);
   setlg(E, m); return mkmat2(M, E);
 }
+/* merge two sorted vectors, removing duplicates. Shallow */
+GEN
+merge_sort_uniq(GEN x, GEN y, void *data, int (*cmp)(void *,GEN,GEN))
+{
+  long ix, iy, m, lx = lg(x), ly = lg(y), l = lx+ly-1;
+  GEN M;
+
+  M = cgetg(l, t_COL);
+  m = ix = iy = 1;
+  while (ix<lx && iy<ly)
+  {
+    int s = cmp(data, gel(x,ix), gel(y,iy));
+    if (s < 0)
+    { gel(M,m) = gel(x,ix); ix++; }
+    else if (s == 0)
+    { gel(M,m) = gel(x,ix); iy++; ix++; }
+    else
+    { gel(M,m) = gel(y,iy); iy++; }
+    m++;
+  }
+  while (ix<lx) { gel(M,m) = gel(x,ix); ix++; m++; }
+  while (iy<ly) { gel(M,m) = gel(y,iy); iy++; m++; }
+  setlg(M, m); return M;
+}
 
 /* sort generic factorization, in place */
 GEN
