@@ -783,51 +783,133 @@ nfbasis(GEN x, GEN *pdK, GEN fa)
 GEN
 nfdisc(GEN x) { return _nfdisc(x, 0, NULL); }
 
-/* return U if Z[alpha] is not maximal or 2*dU < m-1; else return NULL */
-static GEN
-dedek(GEN f, long mf, GEN p,GEN g)
+static ulong
+Flx_checkdeflate(GEN x)
 {
-  GEN k,h;
-  long dk;
-
-  h = FpX_div(f,g,p);
-  k = ZX_Z_divexact(ZX_sub(f, ZX_mul(g,h)), p);
-  k = FpX_gcd(k, FpX_gcd(g,h, p), p);
-
-  dk = degpol(k);
-  if (DEBUGLEVEL>2)
-  {
-    err_printf("  dedek: gcd has degree %ld\n", dk);
-    if (DEBUGLEVEL>5) err_printf("initial parameters p=%Ps,\n  f=%Ps\n",p,f);
-  }
-  if (!dk) return f;
-  return (2*dk < mf-1)? NULL: FpX_div(f, FpX_normalize(k, p), p);
+  ulong d = 0, i, lx = (ulong)lg(x);
+  for (i=3; i<lx; i++)
+    if (x[i]) { d = ugcd(d,i-2); if (d == 1) break; }
+  return d;
 }
 
-/* p-maximal order of Z[x]/f; mf = v_p(Disc(f)). Return gen_1 if p-maximal */
+/* product of (monic) irreducible factors of f over Fp[X]
+ * Assume f reduced mod p, otherwise valuation at x may be wrong */
 static GEN
-maxord(GEN p,GEN f,long mf)
+Flx_core(GEN f, ulong p)
+{
+  long du, v0 = Flx_valrem(f, &f);
+  ulong d, e;
+  GEN u;
+
+  d = Flx_checkdeflate(f);
+  if (!d) return v0? polx_Flx(f[1]): pol1_Flx(f[1]);
+  (void)u_lvalrem(d,p, &e);
+  if (d != e) f = Flx_deflate(f, d/e);
+  u = Flx_gcd(f,Flx_deriv(f, p), p);
+  du = degpol(u);
+  if (du)
+  {
+    if (du == degpol(f))
+      f = Flx_core(Flx_deflate(f,p), p);
+    else
+    {
+      u = Flx_normalize(u, p);
+      f = Flx_div(f, u, p);
+      if (p <= du)
+      {
+        GEN w = Flxq_powu(f, du, u, p);
+        w = Flx_div(u, Flx_gcd(w,u,p), p); /* u / gcd(u, v^(deg u-1)) */
+        f = Flx_mul(f, Flx_core(Flx_deflate(w,p), p), p);
+      }
+    }
+  }
+  if (v0) f = Flx_shift(f, 1);
+  return f;
+}
+/* Assume f reduced mod p, otherwise valuation at x may be wrong */
+static GEN
+FpX_core(GEN f, GEN p)
+{
+  GEN u;
+  long v0;
+  if (lgefint(p) == 3)
+  {
+    ulong q = p[2];
+    return Flx_to_ZX( Flx_core(ZX_to_Flx(f, q), q) );
+  }
+  v0 = ZX_valrem(f, &f);
+  u = FpX_gcd(f,FpX_deriv(f, p), p);
+  if (degpol(u)) f = FpX_div(f, u, p);
+  if (v0) f = RgX_shift(f, 1);
+  return f;
+}
+/* f / a */
+static GEN
+zx_z_div(GEN f, ulong a)
+{
+  long i, l = lg(f);
+  GEN g = cgetg(l, t_VECSMALL);
+  g[1] = f[1];
+  for (i = 2; i < l; i++) g[i] = f[i] / a;
+  return g;
+}
+/* Dedekind criterion; return k = gcd(g,h, (f-gh)/p), where
+ *   f = \prod f_i^e_i, g = \prod f_i, h = \prod f_i^{e_i-1}
+ * k = 1 iff Z[X]/(f) is p-maximal */
+static GEN
+ZX_Dedekind(GEN F, GEN *pg, GEN p)
+{
+  GEN k, h, g, f, f2;
+  ulong q = p[2];
+  if (lgefint(p) == 3 && q < (1UL << BITS_IN_HALFULONG))
+  {
+    ulong q = p[2], q2 = q*q;
+    f2 = ZX_to_Flx(F, q2);
+    f = Flx_red(f2, q);
+    g = Flx_core(f, q);
+    h = Flx_div(f, g, q);
+    k = zx_z_div(Flx_sub(f2, Flx_mul(g,h,q2), q2), q);
+    k = Flx_gcd(k, Flx_gcd(g,h,q), q);
+    k = Flx_to_ZX(k);
+    g = Flx_to_ZX(g);
+  }
+  else
+  {
+    f2 = FpX_red(F, sqri(p));
+    f = FpX_red(f2, p);
+    g = FpX_core(f, p);
+    h = FpX_div(f, g, p);
+    k = ZX_Z_divexact(ZX_sub(f2, ZX_mul(g,h)), p);
+    k = FpX_gcd(FpX_red(k, p), FpX_gcd(g,h,p), p);
+  }
+  *pg = g; return k;
+}
+
+/* p-maximal order of Z[x]/f; mf = v_p(Disc(f)) or < 0 [unknown].
+ * Return gen_1 if p-maximal */
+static GEN
+maxord(GEN p, GEN f, long mf)
 {
   const pari_sp av = avma;
-  long n = degpol(f);
-  GEN w = NULL, g, res, fp = FpX_red(f, p);
-
-  if (cmpui(n,p) < 0)
-    g = FpX_div(fp, FpX_gcd(fp,ZX_deriv(fp), p), p);
-  else
+  GEN res, g, k = ZX_Dedekind(f, &g, p);
+  long dk = degpol(k);
+  if (DEBUGLEVEL>2) err_printf("  ZX_dedekind: gcd has degree %ld\n", dk);
+  if (!dk) { avma = av; return gen_1; }
+  if (mf < 0) mf = ZpX_disc_val(f, p);
+  if (2*dk >= mf-1)
   {
-    w = gel(FpX_factor(fp,p),1);
-    g = FpXV_prod(w, p);
+    k = FpX_normalize(k, p);
+    res = dbasis(p, f, mf, NULL, FpX_div(f,k,p));
   }
-  res = dedek(f, mf, p, g);
-  if (res)
-    res = (res == f)? gen_1: dbasis(p, f, mf, NULL, res);
   else
   {
-    if (!w) w = gel(FpX_factor(fp,p),1);
+    GEN w, F1, F2;
+    F1 = FpX_factor(k,p);
+    F2 = FpX_factor(FpX_div(g,k,p),p);
+    w = merge_sort_uniq(gel(F1,1),gel(F2,1),(void*)cmpii,&gen_cmp_RgX);
     res = maxord_i(p, f, mf, w, 0);
   }
-  return gerepileupto(av,res);
+  return gerepilecopy(av,res);
 }
 
 static GEN
@@ -1184,7 +1266,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
 static GEN
 get_partial_order_as_pols(GEN p, GEN f)
 {
-  GEN O = maxord(p,f,ZpX_disc_val(f,p));
+  GEN O = maxord(p, f, -1);
   long v = varn(f);
   return O == gen_1? pol_x_powers(degpol(f), v): RgM_to_RgXV(O, v);
 }
