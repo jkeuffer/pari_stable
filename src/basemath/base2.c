@@ -634,6 +634,7 @@ allbase2(nfmaxord_t *S)
 GEN maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
+static GEN ZX_Dedekind(GEN F, GEN *pg, GEN p);
 
 /* Warning: data computed for T = ZX_Q_normalize_fact(T0). If S.unscale !=
  * gen_1, caller must take steps to correct the components if it wishes
@@ -657,37 +658,47 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
     av = avma;
     pari_CATCH(CATCH_ALL) {
       GEN N, u, ERR = pari_err_last();
-      long l, te = err_get_num(ERR);
-      if (te == e_INV)
-      { /* caught false prime, update factorization */
-        GEN p, x = err_get_compo(ERR, 2);
-        if (typ(x) != t_INTMOD) pari_err(0, ERR);
-        p = gcdii(gel(x,1), gel(x,2));
-        u = diviiexact(gel(x,1),p);
-        if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);
-        gerepileall(av, 2, &p, &u);
+      long l;
+      switch(err_get_num(ERR))
+      {
+        case e_INV:
+        {
+          GEN p, x = err_get_compo(ERR, 2);
+          if (typ(x) == t_INTMOD)
+          { /* caught false prime, update factorization */
+            p = gcdii(gel(x,1), gel(x,2));
+            u = diviiexact(gel(x,1),p);
+            if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Ps", x);
+            gerepileall(av, 2, &p, &u);
 
-        u = get_coprimes(p, u); l = lg(u);
-        /* no small factors, but often a prime power */
-        for (k = 1; k < l; k++) (void)Z_isanypower(gel(u,k), &gel(u,k));
-      }
-      else if (te == e_PRIME || te == e_IRREDPOL)
-      { /* we're here because we failed BPSW_isprime(), no point in
-         * reporting a possible counter-example to the BPSW test */
-        GEN p = gel(P,i);
-        avma = av;
-        if (DEBUGLEVEL)
-          pari_warn(warner,"large composite in nfmaxord:loop(), %Ps", p);
-        if (expi(p) < 100) /* factor should require ~20ms for this */
-          u = gel(Z_factor(p), 1);
-        else
-        { /* give up, probably not maximal */
-          O = shallowconcat(O, gen_1);
-          pari_CATCH_reset(); continue;
+            u = get_coprimes(p, u); l = lg(u);
+            /* no small factors, but often a prime power */
+            for (k = 1; k < l; k++) (void)Z_isanypower(gel(u,k), &gel(u,k));
+            break;
+          }
+          /* fall through */
         }
+        case e_PRIME: case e_IRREDPOL:
+        { /* we're here because we failed BPSW_isprime(), no point in
+           * reporting a possible counter-example to the BPSW test */
+          GEN p = gel(P,i);
+          avma = av;
+          if (DEBUGLEVEL)
+            pari_warn(warner,"large composite in nfmaxord:loop(), %Ps", p);
+          if (expi(p) < 100) /* factor should require ~20ms for this */
+            u = gel(Z_factor(p), 1);
+          else
+          { /* give up, probably not maximal */
+            GEN B, g, k = ZX_Dedekind(S->T, &g, p);
+            k = FpX_normalize(k, p);
+            B = dbasis(p, S->T, E[i], NULL, FpX_div(S->T,k,p));
+            O = shallowconcat(O, mkvec(B));
+            pari_CATCH_reset(); continue;
+          }
+          break;
+        }
+        default: pari_err(0, E);
       }
-      else
-        pari_err(0, E);
       l = lg(u);
       gel(P,i) = gel(u,1);
       P = shallowconcat(P, vecslice(u, 2, l-1));
