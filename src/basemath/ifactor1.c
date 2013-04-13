@@ -4157,7 +4157,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     }
   }
   /* trial divide by the special primes */
-  if (special_primes(n, p, &nb, primetab))
+  if (special_primes(n, lim, &nb, primetab))
   {
     if (!is_pm1(n)) STOREi(&nb, n, 1);
     return aux_end(M,n,nb);
