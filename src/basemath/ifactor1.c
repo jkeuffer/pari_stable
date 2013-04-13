@@ -4065,7 +4065,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   GEN M;
   pari_sp av;
   long nb = 0, i;
-  ulong p, lim;
+  ulong lim;
   forprime_t T;
 
   i = signe(n);
@@ -4106,13 +4106,12 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if (i < 0) STORE(&nb, utoineg(1), 1);
   if (is_pm1(n)) return aux_end(M,NULL,nb);
 
-  p = 0; /* if lim <= 2 */
   n = gclone(n); setabssign(n);
   /* trial division bound */
   lim = all; if (!lim) lim = tridiv_bound(n);
   if (lim > 2)
   {
-    ulong maxp;
+    ulong maxp, p;
     pari_sp av2;
     i = vali(n);
     if (i)
