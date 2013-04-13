@@ -814,8 +814,7 @@ Flx_core(GEN f, ulong p)
 
   d = Flx_checkdeflate(f);
   if (!d) return v0? polx_Flx(f[1]): pol1_Flx(f[1]);
-  (void)u_lvalrem(d,p, &e);
-  if (d != e) f = Flx_deflate(f, d/e);
+  if (u_lvalrem(d,p, &e)) f = Flx_deflate(f, d/e);
   u = Flx_gcd(f,Flx_deriv(f, p), p);
   du = degpol(u);
   if (du)
