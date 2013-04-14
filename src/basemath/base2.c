@@ -1786,13 +1786,6 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
 }
 
-static GEN
-ch_var(GEN x, long v)
-{
-  if (typ(x) == t_POL) { x = leafcopy(x); setvarn(x, v); }
-  return x;
-}
-
 /* x p^-eq nu^-er mod p */
 static GEN
 get_gamma(decomp_t *S, GEN x, long eq, long er)
@@ -1821,19 +1814,29 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
   return g;
 }
 
+static GEN
+fix_charpoly(decomp_t *S, GEN e, GEN chie)
+{
+  if (dvdii(constant_term(chie), S->psc))
+  {
+    chie = mycaract(S, S->chi, e, S->pmf, S->prc);
+    if (dvdii(constant_term(chie), S->pmf))
+      chie = ZXQ_charpoly(e, S->chi, varn(chie));
+  }
+  return chie;
+}
 /* return 1 if at least 2 factors mod p ==> chi can be split */
 static int
-loop(decomp_t *S, long nv, long Ea, long Fa)
+loop(decomp_t *S, long Ea)
 {
-  pari_sp av2 = avma, limit = stack_lim(av2, 1);
-  GEN w, chib, beta, gamm, chig, nug, delt = NULL;
-  long L, E, i, l, Fg, eq = 0, er = 0, N = degpol(S->f), v = varn(S->f);
-
-  beta  = FpXQ_powu(S->nu, Ea, S->chi, S->p);
+  pari_sp av = avma, limit = stack_lim(av, 1);
+  GEN beta = FpXQ_powu(S->nu, Ea, S->chi, S->p);
+  long N = degpol(S->f), v = varn(S->f);
   S->invnu = NULL;
-  chib = chig = NULL; /* -Wall */
   for (;;)
   { /* beta tends to a factor of chi */
+    long L, E, i, l, Fg, eq, er;
+    GEN chib, chig, d, g, nug;
     if (DEBUGLEVEL>4) err_printf("  beta = %Ps\n", beta);
 
     L = ZpX_resultant_val(S->chi, beta, S->p, S->mf+1);
@@ -1847,97 +1850,95 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     er = (long)(L*Ea / E - eq*Ea);
     if (DEBUGLEVEL>4) err_printf("  (eq,er) = (%ld,%ld)\n", eq,er);
     if (er || !chib)
-    { /* gamm might not be an integer ==> chig = NULL */
-      gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
-      chig = mycaract(S, S->chi, gamm, S->psc, S->prc);
+    { /* g might not be an integer ==> chig = NULL */
+      g = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
+      chig = mycaract(S, S->chi, g, S->psc, S->prc);
     }
     else
-    { /* gamm = beta/p^eq, special case of the above */
+    { /* g = beta/p^eq, special case of the above */
       GEN h = powiu(S->p, eq);
-      gamm = RgX_Rg_div(beta, h);
+      g = RgX_Rg_div(beta, h);
       chig = RgX_Rg_div(RgX_unscale(chib, h), powiu(h, N));
       chig = gequal1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
     }
 
     if (!chig)
-    { /* Valuation of beta was wrong ==> gamma fails the v*-test */
+    { /* Valuation of beta was wrong ==> ga fails the v*-test */
       chib = ZXQ_charpoly(beta, S->chi, v);
       vstar(S->p, chib, &L, &E);
       eq = (long)(L / E);
       er = (long)(L*Ea / E - eq*Ea);
 
-      gamm = get_gamma(S, beta, eq, er); /* an integer */
-      chig = mycaract(S, S->chi, gamm, S->psc, S->prc);
+      g = get_gamma(S, beta, eq, er); /* an integer */
+      chig = mycaract(S, S->chi, g, S->psc, S->prc);
     }
-
+    /* chig = charpoly(g) */
     nug = get_nu(chig, S->p, &l);
     if (l > 1)
     {
       S->chi = chig;
-      S->nu  = nug; composemod(S, gamm, S->phi); return 1;
+      S->nu  = nug; composemod(S, g, S->phi); return 1;
     }
 
     Fg = degpol(nug);
-    if (Fa % Fg) return testb2(S, clcm(Fa,Fg), gamm);
-
-    /* nug irreducible mod p */
-    w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
-    if (degpol(gel(w,1)) != 1)
-    {
-      if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
-      pari_err_BUG("nilord (no root)");
+    if (Fg == 1)
+    { /* frequent special case */
+      long Le, Ee;
+      GEN chie, nue, e, pie;
+      d = gneg(gel(nug,2));
+      chie = RgX_translate(chig, d);
+      nue = pol_x(v);
+      e = RgX_Rg_sub(g, d);
+      chie = fix_charpoly(S, e, chie);
+      pie = getprime(S, e, chie, nue, &Le, &Ee,  0,Ea);
+      if (pie) return testc2(S, S->nu, Ea, pie, Ee);
     }
-
-    for (i = 1; i < lg(w); i++)
-    { /* Look for a root delt of nug in Fp[phi] such that vp(gamma - delta) > 0
-         Can be used to improve beta */
-      GEN eta, chie, nue, W = gel(w,i); /* monic linear polynomial */
-      delt = gneg_i( ch_var(gel(W,2), v) );
-      eta  = gsub(gamm, delt);
-
-      if (typ(delt) == t_INT)
-        chie = RgX_translate(chig, delt); /* frequent special case */
+    else
+    {
+      long Fa = degpol(S->nu);
+      if (Fa % Fg) return testb2(S, clcm(Fa,Fg), g);
+      /* nu & nug irreducible mod p, deg nug | deg nu. To improve beta, look
+       * for a root d of nug in Fp[phi] such that v_p(g - d) > 0 */
+      if (RgX_equal(nug, S->nu))
+        d = pol_x(v);
       else
+        d = FpX_ffisom(nug, S->nu, S->p);
+      for (i = 1; i <= Fg; i++)
       {
-        if (!dvdii(QXQ_intnorm(eta, S->chi), S->p)) continue;
-        chie = mycaract(S, S->chi, eta, S->psc, S->prc);
-      }
-      nue = get_nu(chie, S->p, &l);
-      if (l > 1) {
-        S->nu = nue;
-        S->chi= chie; composemod(S, eta, S->phi); return 1;
-      }
-
-      if (RgX_is_monomial(nue))
-      { /* vp(eta) = vp(gamma - delta) > 0 */
-        long Le, Ee;
-        GEN pie;
-
-        if (dvdii(constant_term(chie), S->psc))
-        {
-          chie = mycaract(S, S->chi, eta, S->pmf, S->prc);
-          if (dvdii(constant_term(chie), S->pmf))
-            chie = ZXQ_charpoly(eta, S->chi, v);
+        GEN chie, nue, e;
+        if (i != 1) d = FpXQ_pow(d, S->p, S->nu, S->p); /* next root */
+        e = gsub(g, d);
+        if (!dvdii(QXQ_intnorm(e, S->chi), S->p)) continue;
+        chie = mycaract(S, S->chi, e, S->psc, S->prc);
+        nue = get_nu(chie, S->p, &l);
+        if (l > 1) {
+          S->nu = nue;
+          S->chi= chie; composemod(S, e, S->phi); return 1;
         }
-
-        pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
-        if (pie) return testc2(S, S->nu, Ea, pie, Ee);
-        break;
+        if (RgX_is_monomial(nue))
+        { /* v_p(e) = v_p(g - d) > 0 */
+          long Le, Ee;
+          GEN pie;
+          chie = fix_charpoly(S, e, chie);
+          pie = getprime(S, e, chie, nue, &Le, &Ee,  0,Ea);
+          if (pie) return testc2(S, S->nu, Ea, pie, Ee);
+          break;
+        }
+      }
+      if (i > Fg)
+      {
+        if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
+        pari_err_BUG("nilord (no root)");
       }
     }
-    if (i == lg(w))
-    {
-      if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
-      pari_err_BUG("nilord (no root II)");
-    }
-    if (eq) delt = gmul(delt, powiu(S->p,  eq));
-    if (er) delt = gmul(delt, gpowgs(S->nu, er));
-    beta = gsub(beta, delt);
+    if (eq) d = gmul(d, powiu(S->p,  eq));
+    if (er) d = gmul(d, gpowgs(S->nu, er));
+    beta = gsub(beta, d);
 
-    if (low_stack(limit,stack_lim(av2,1)))
+    if (low_stack(limit,stack_lim(av,1)))
     {
       if (DEBUGMEM > 1) pari_warn(warnmem, "nilord");
-      gerepileall(av2, S->invnu? 5: 3, &beta, &(S->precns), &(S->ns), &(S->invnu), &(S->Dinvnu));
+      gerepileall(av, S->invnu? 5: 3, &beta, &(S->precns), &(S->ns), &(S->invnu), &(S->Dinvnu));
     }
   }
 }
@@ -1948,7 +1949,7 @@ static GEN
 nilord(decomp_t *S, GEN dred, long flag)
 {
   GEN p = S->p;
-  long Fa, oE, l, N  = degpol(S->f), v = varn(S->f), nv = fetch_var();
+  long Fa, oE, l, N  = degpol(S->f), v = varn(S->f);
   GEN opa; /* t_INT or QX */
 
   if (DEBUGLEVEL>2)
@@ -2004,11 +2005,10 @@ nilord(decomp_t *S, GEN dred, long flag)
       S->chi = NULL; l = 1; goto DONE;
     }
     l = 2;
-    if (loop(S, nv, oE, Fa)) goto DONE;
+    if (loop(S, oE)) goto DONE;
     if (!update_phi(S, &l, flag)) goto DONE;
   }
 DONE:
-  (void)delete_var();
   if (l == 1) return flag? NULL: dbasis(p, S->f, S->mf, S->phi, S->chi);
   return Decomp(S, flag);
 }
