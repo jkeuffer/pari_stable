@@ -1294,6 +1294,7 @@ get_partial_order_as_pols(GEN p, GEN f)
 
 typedef struct __decomp {
   /* constants */
+  long pisprime; /* -1: unknown, 1: prime,  0: composite */
   GEN p, f; /* goal: factor f p-adically */
   long df; /* p^df = reduced discriminant of f */
   long mf; /* */
@@ -1312,6 +1313,13 @@ typedef struct __decomp {
   long vpsc; /* v_p(p_c) */
   GEN ns, precns; /* cached Newton sums and their precision */
 } decomp_t;
+
+static long
+p_is_prime(decomp_t *S)
+{
+  if (S->pisprime < 0) S->pisprime = BPSW_psp(S->p);
+  return S->pisprime;
+}
 
 /* if flag = 0, maximal order, else factorization to precision r = flag */
 static GEN
@@ -1332,7 +1340,7 @@ Decomp(decomp_t *S, long flag)
   chip = FpX_red(S->chi, p);
   if (!FpX_valrem(chip, S->nu, p, &b1))
   {
-    if (!BPSW_psp(p)) pari_err_PRIME("Decomp",p);
+    if (!p_is_prime(S)) pari_err_PRIME("Decomp",p);
     pari_err_BUG("Decomp (not a factor)");
   }
   b2 = FpX_div(chip, b1, p);
@@ -1903,7 +1911,10 @@ loop(decomp_t *S, long Ea)
       if (RgX_equal(nug, S->nu))
         d = pol_x(v);
       else
+      {
+        if (!p_is_prime(S)) pari_err_PRIME("FpX_ffisom",S->p);
         d = FpX_ffisom(nug, S->nu, S->p);
+      }
       /* write g = numg / deng, e = nume / deng */
       numg = QpX_remove_denom(g, S->p, &deng, &vdeng);
       for (i = 1; i <= Fg; i++)
@@ -1933,7 +1944,7 @@ loop(decomp_t *S, long Ea)
       }
       if (i > Fg)
       {
-        if (!BPSW_psp(S->p)) pari_err_PRIME("nilord",S->p);
+        if (!p_is_prime(S)) pari_err_PRIME("nilord",S->p);
         pari_err_BUG("nilord (no root)");
       }
     }
@@ -2028,6 +2039,7 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
   decomp_t S;
 
   S.f = f;
+  S.pisprime = -1;
   S.p = p;
   S.mf = mf;
   S.nu = h;
