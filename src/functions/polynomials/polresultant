@@ -12,8 +12,8 @@ Doc: resultant of the two
  polynomials $x$ and $y$ with exact entries, with respect to the main
  variables of $x$ and $y$ if $v$ is omitted, with respect to the variable $v$
  otherwise. The algorithm assumes the base ring is a domain. If you also need
- the $u$ and $v$ such that $x*u + y*v = res(x,y)$, use the \tet{bezoutres}
- function.
+ the $u$ and $v$ such that $x*u + y*v = \text{Res}(x,y)$, use the
+ \tet{polresultantext} function.
 
  If $\fl=0$ (default), uses the the algorithm best suited to the inputs,
  either the \idx{subresultant algorithm} (Lazard/Ducos variant, generic case),
