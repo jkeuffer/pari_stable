@@ -5423,6 +5423,13 @@ and that $p$ is a prime number. Proceeds by dynamically increasing the
 $p$-adic accuracy; infinite loop if the discriminant of $f$ is
 $0$.
 
+\fun{long}{ZpX_resultant_val}{GEN f, GEN g, GEN p, long M} returns the
+valuation at $p$ of $\Res(f,g)$. Assume $f,g$ are both \kbd{ZX},
+and that $p$ is a prime number coprime to the leading coefficient of $f$.
+Proceeds by dynamically increasing the $p$-adic accuracy.
+To avoid an infinite loop when the resultant is $0$, we return $M$ if
+the Sylvester matrix mod $p^M$ still does not have maximal rank.
+
 \fun{GEN}{ZpX_gcd}{GEN f,GEN g, GEN p, GEN pm} $f$ a monic \kbd{ZX},
 $g$ a \kbd{ZX}, $\kbd{pm} = p^m$ a prime power. There is a unique integer
 $r\geq 0$ and a monic $h\in \Q_p[X]$ such that

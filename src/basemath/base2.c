@@ -697,7 +697,7 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
           }
           break;
         }
-        default: pari_err(0, E);
+        default: pari_err(0, ERR);
       }
       l = lg(u);
       gel(P,i) = gel(u,1);
@@ -1051,9 +1051,9 @@ ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M)
   R = ZpX_reduced_resultant(f,g, p, q); return signe(R)? R: q;
 }
 
-/* discriminant valuation mod p^m (assumes x monic, dx = x') */
+/* v_p(Res(x,y) mod p^m), assumes (lc(x),p) = 1 */
 static long
-ZpX_disc_val_i(GEN x, GEN dx, GEN p, GEN pm)
+ZpX_resultant_val_i(GEN x, GEN y, GEN p, GEN pm)
 {
   pari_sp av = avma;
   GEN z;
@@ -1061,35 +1061,46 @@ ZpX_disc_val_i(GEN x, GEN dx, GEN p, GEN pm)
   if (lgefint(pm) == 3)
   {
     ulong q = pm[2], pp = p[2];
-    z = Zlx_sylvester_echelon(ZX_to_Flx(x,q), ZX_to_Flx(dx,q), 1, pp, q);
+    z = Zlx_sylvester_echelon(ZX_to_Flx(x,q), ZX_to_Flx(y,q), 1, pp, q);
     if (!z) { avma = av; return -1; } /* failure */
     v = 0; l = lg(z);
     for (i = 1; i < l; i++) v += u_lval(ucoeff(z,i,i), pp);
   }
   else
   {
-    z = ZpX_sylvester_echelon(x, dx, 1, p, pm);
+    z = ZpX_sylvester_echelon(x, y, 1, p, pm);
     if (!z) { avma = av; return -1; } /* failure */
     v = 0; l = lg(z);
     for (i = 1; i < l; i++) v += Z_pval(gcoeff(z,i,i), p);
   }
   return v;
 }
-/* assume f monic */
+
+/* assume (lc(f),p) = 1; no assumption on g */
+long
+ZpX_resultant_val(GEN f, GEN g, GEN p, long M)
+{
+  pari_sp av = avma;
+  GEN q = NULL;
+  long v, m;
+  m = init_m(p); if (m < 2) m = 2;
+  for(;; m <<= 1) {
+    if (m > M) m = M;
+    q = q? sqri(q): powiu(p, m); /* p^m */
+    v = ZpX_resultant_val_i(f,g, p, q); if (v >= 0) break;
+    if (m == M) return M;
+  }
+  avma = av; return v;
+}
+
+/* assume f separable and (lc(f),p) = 1 */
 long
 ZpX_disc_val(GEN f, GEN p)
 {
   pari_sp av = avma;
-  GEN q = NULL, df;
-  long v, m;
-
+  long v;
   if (degpol(f) == 1) return 0;
-  df = ZX_deriv(f);
-  m = init_m(p); if (m < 2) m = 2;
-  for(;; m <<= 1) {
-    q = q? sqri(q): powiu(p, m); /* p^m */
-    v = ZpX_disc_val_i(f,df, p, q); if (v >= 0) break;
-  }
+  v = ZpX_resultant_val(f, ZX_deriv(f), p, LONG_MAX);
   avma = av; return v;
 }
 
@@ -1285,6 +1296,7 @@ typedef struct __decomp {
   /* constants */
   GEN p, f; /* goal: factor f p-adically */
   long df; /* p^df = reduced discriminant of f */
+  long mf; /* */
   GEN psf, pmf; /* stability precision for f, wanted precision for f */
   long vpsf; /* v_p(p_f) */
   /* these are updated along the way */
@@ -1814,7 +1826,7 @@ static int
 loop(decomp_t *S, long nv, long Ea, long Fa)
 {
   pari_sp av2 = avma, limit = stack_lim(av2, 1);
-  GEN R, w, chib, beta, gamm, chig, nug, delt = NULL;
+  GEN w, chib, beta, gamm, chig, nug, delt = NULL;
   long L, E, i, l, Fg, eq = 0, er = 0, N = degpol(S->f), v = varn(S->f);
 
   beta  = FpXQ_powu(S->nu, Ea, S->chi, S->p);
@@ -1824,15 +1836,10 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
   { /* beta tends to a factor of chi */
     if (DEBUGLEVEL>4) err_printf("  beta = %Ps\n", beta);
 
-    R = modii(ZX_resultant(beta, S->chi), S->pmf);
-    if (signe(R))
-    {
-      chib = NULL;
-      L = Z_pval(R, S->p);
-      E = N;
-    }
+    L = ZpX_resultant_val(S->chi, beta, S->p, S->mf+1);
+    if (L <= S->mf) { chib = NULL; E = N; }
     else
-    { /* pmf | norm(beta) ==> useless */
+    { /* v_p(norm(beta)) > mf ==> useless */
       chib = ZXQ_charpoly(beta, S->chi, v);
       vstar(S->p, chib, &L, &E);
     }
@@ -1938,7 +1945,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
 /* flag != 0 iff we're looking for the p-adic factorization,
    in which case it is the p-adic precision we want */
 static GEN
-nilord(decomp_t *S, GEN dred, long mf, long flag)
+nilord(decomp_t *S, GEN dred, long flag)
 {
   GEN p = S->p;
   long Fa, oE, l, N  = degpol(S->f), v = varn(S->f), nv = fetch_var();
@@ -1962,7 +1969,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   S->vpsf = S->vpsc;
   S->chi = FpX_red(S->f, S->psc);
   S->phi = pol_x(v);
-  S->pmf = powiu(p, mf+1);
+  S->pmf = powiu(p, S->mf+1);
   S->precns = NULL;
   oE = 0;
   opa = NULL; /* -Wall */
@@ -2002,7 +2009,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   }
 DONE:
   (void)delete_var();
-  if (l == 1) return flag? NULL: dbasis(p, S->f, mf, S->phi, S->chi);
+  if (l == 1) return flag? NULL: dbasis(p, S->f, S->mf, S->phi, S->chi);
   return Decomp(S, flag);
 }
 
@@ -2016,9 +2023,10 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
 
   S.f = f;
   S.p = p;
+  S.mf = mf;
   S.nu = h;
   S.df = Z_pval(D, p);
-  if (l == 1) return nilord(&S, D, mf, flag);
+  if (l == 1) return nilord(&S, D, flag);
   if (flag && flag <= mf) flag = mf + 1;
   S.phi = pol_x(varn(f));
   S.chi = f; return Decomp(&S, flag);

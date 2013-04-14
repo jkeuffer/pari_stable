@@ -1279,6 +1279,7 @@ long    ZpX_disc_val(GEN f, GEN p);
 GEN     ZpX_gcd(GEN f1,GEN f2,GEN p, GEN pm);
 GEN     ZpX_reduced_resultant(GEN x, GEN y, GEN p, GEN pm);
 GEN     ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M);
+long    ZpX_resultant_val(GEN f, GEN g, GEN p, long M);
 void    checkmodpr(GEN modpr);
 GEN     ZX_compositum_disjoint(GEN A, GEN B);
 GEN     compositum(GEN P, GEN Q);
