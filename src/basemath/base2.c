@@ -1859,7 +1859,7 @@ loop(decomp_t *S, long Ea)
       GEN h = powiu(S->p, eq);
       g = RgX_Rg_div(beta, h);
       chig = RgX_Rg_div(RgX_unscale(chib, h), powiu(h, N));
-      chig = gequal1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
+      chig = gequal1(QpX_denom(chig))? FpX_red(chig, S->pmf): NULL;
     }
 
     if (!chig)
@@ -1885,7 +1885,7 @@ loop(decomp_t *S, long Ea)
     { /* frequent special case */
       long Le, Ee;
       GEN chie, nue, e, pie;
-      d = gneg(gel(nug,2));
+      d = negi(gel(nug,2));
       chie = RgX_translate(chig, d);
       nue = pol_x(v);
       e = RgX_Rg_sub(g, d);
@@ -1895,7 +1895,8 @@ loop(decomp_t *S, long Ea)
     }
     else
     {
-      long Fa = degpol(S->nu);
+      long Fa = degpol(S->nu), vdeng;
+      GEN deng, numg, nume;
       if (Fa % Fg) return testb2(S, clcm(Fa,Fg), g);
       /* nu & nug irreducible mod p, deg nug | deg nu. To improve beta, look
        * for a root d of nug in Fp[phi] such that v_p(g - d) > 0 */
@@ -1903,12 +1904,17 @@ loop(decomp_t *S, long Ea)
         d = pol_x(v);
       else
         d = FpX_ffisom(nug, S->nu, S->p);
+      /* write g = numg / deng, e = nume / deng */
+      numg = QpX_remove_denom(g, S->p, &deng, &vdeng);
       for (i = 1; i <= Fg; i++)
       {
         GEN chie, nue, e;
         if (i != 1) d = FpXQ_pow(d, S->p, S->nu, S->p); /* next root */
-        e = gsub(g, d);
-        if (!dvdii(QXQ_intnorm(e, S->chi), S->p)) continue;
+        nume = ZX_sub(numg, ZX_Z_mul(d, deng));
+        /* test e = nume / deng */
+        if (ZpX_resultant_val(S->chi, nume, S->p, vdeng*N+1) <= vdeng*N)
+          continue;
+        e = RgX_Rg_div(nume, deng);
         chie = mycaract(S, S->chi, e, S->psc, S->prc);
         nue = get_nu(chie, S->p, &l);
         if (l > 1) {
