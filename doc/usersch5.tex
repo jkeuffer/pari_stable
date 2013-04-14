@@ -3880,6 +3880,9 @@ of~\kbd{x}.
 This function is not memory-clean, but nevertheless suitable for
 \kbd{gerepileupto}.
 
+\fun{GEN}{FpX_translate}{GEN P, GEN c, GEN p} let $c$ be an \kbd{Fp} and let
+$P$ be an \kbd{FpX}; returns the translated \kbd{FpX} of $P(X+c)$.
+
 \fun{GEN}{FpX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$.
 
@@ -5424,7 +5427,7 @@ $p$-adic accuracy; infinite loop if the discriminant of $f$ is
 $0$.
 
 \fun{long}{ZpX_resultant_val}{GEN f, GEN g, GEN p, long M} returns the
-valuation at $p$ of $\Res(f,g)$. Assume $f,g$ are both \kbd{ZX},
+valuation at $p$ of $\text{Res}(f,g)$. Assume $f,g$ are both \kbd{ZX},
 and that $p$ is a prime number coprime to the leading coefficient of $f$.
 Proceeds by dynamically increasing the $p$-adic accuracy.
 To avoid an infinite loop when the resultant is $0$, we return $M$ if

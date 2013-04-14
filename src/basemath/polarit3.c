@@ -614,6 +614,31 @@ const struct bb_field *get_Fq_field(void **E, GEN T, GEN p)
 /*                             Fq[X]                               */
 /*                                                                 */
 /*******************************************************************/
+/* P(X + c) */
+GEN
+FpX_translate(GEN P, GEN c, GEN p)
+{
+  pari_sp av = avma, lim;
+  GEN Q, *R;
+  long i, k, n;
+
+  if (!signe(P) || !signe(c)) return ZX_copy(P);
+  Q = leafcopy(P);
+  R = (GEN*)(Q+2); n = degpol(P);
+  lim = stack_lim(av, 2);
+  for (i=1; i<=n; i++)
+  {
+    for (k=n-i; k<n; k++)
+      R[k] = Fp_add(R[k], Fp_mul(c, R[k+1], p), p);
+
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"FpX_translate, i = %ld/%ld", i,n);
+      Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+    }
+  }
+  return gerepilecopy(av, FpX_renormalize(Q, lg(Q)));
+}
 /* P(X + c), c an Fq */
 GEN
 FqX_translate(GEN P, GEN c, GEN T, GEN p)
