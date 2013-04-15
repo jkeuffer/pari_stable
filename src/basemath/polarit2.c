@@ -2934,11 +2934,6 @@ RgXQ_inv(GEN x, GEN y)
 
   av = avma; d = subresext_i(x,y,&u,&v/*junk*/);
   if (gequal0(d)) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
-  if (typ(d) == t_POL && varn(d) == vx)
-  {
-    if (lg(d) > 3) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
-    d = gel(d,2);
-  }
   d = gdiv(u,d);
   if (typ(d) != t_POL || varn(d) != vy) d = scalarpol(d, vy);
   return gerepileupto(av, d);
