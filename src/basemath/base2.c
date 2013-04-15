@@ -1437,6 +1437,7 @@ vstar(GEN p,GEN h, long *L, long *E)
       first = 0;
     }
   }
+  /* v/k = max_j ( v_p(h_{m-j}) / j ) */
   w = (long)ugcd(v,k);
   *L = v/w;
   *E = k/w;
@@ -1794,6 +1795,24 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
 }
 
+/* Return h^(-degpol(P)) P(x * h) if result is integral, NULL otherwise */
+static GEN
+ZX_rescale_inv(GEN P, GEN h)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l,t_POL), hi = h;
+  gel(Q,l-1) = gel(P,l-1);
+  for (i=l-2; i>=2; i--)
+  {
+    GEN r;
+    gel(Q,i) = dvmdii(gel(P,i), hi, &r);
+    if (signe(r)) return NULL;
+    if (i == 2) break;
+    hi = mulii(hi,h);
+  }
+  Q[1] = P[1]; return Q;
+}
+
 /* x p^-eq nu^-er mod p */
 static GEN
 get_gamma(decomp_t *S, GEN x, long eq, long er)
@@ -1804,7 +1823,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
   {
     if (!S->invnu)
     {
-      while (gdvd(S->chi, S->nu)) S->nu = gadd(S->nu, S->p);
+      while (gdvd(S->chi, S->nu)) S->nu = RgX_Rg_add(S->nu, S->p);
       S->invnu = QXQ_inv(S->nu, S->chi);
       S->invnu = redelt_i(S->invnu, S->psc, S->p, &S->Dinvnu, &S->vDinvnu);
     }
@@ -1820,6 +1839,40 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
   }
   if (!is_pm1(Dg)) g = RgX_Rg_div(g, Dg);
   return g;
+}
+static void
+get_g(decomp_t *S, long Ea, long L, long E, GEN beta,
+      GEN *pg, GEN *pchig, long *peq, long *per)
+{
+  long eq, er;
+  GEN g, chig, chib = NULL;
+  for(;;) /* at most twice */
+  {
+    if (L < 0)
+    {
+      chib = ZXQ_charpoly(beta, S->chi, varn(S->chi));
+      vstar(S->p, chib, &L, &E);
+    }
+    eq = L / E; er = L*Ea / E - eq*Ea;
+    /* floor(L Ea/E) = eq Ea + er */
+    if (er || !chib)
+    { /* g might not be an integer ==> chig = NULL */
+      g = get_gamma(S, beta, eq, er);
+      chig = mycaract(S, S->chi, g, S->psc, S->prc);
+    }
+    else
+    { /* g = beta/p^eq, special case of the above */
+      GEN h = powiu(S->p, eq);
+      g = RgX_Rg_div(beta, h);
+      chig = ZX_rescale_inv(chib, h); /* chib(x h) / h^N */
+      if (chig) chig = FpX_red(chig, S->pmf);
+    }
+    /* either success or second consecutive failure */
+    if (chig || chib) break;
+    /* if g fails the v*-test, v(beta) was wrong. Retry once */
+    L = -1;
+  }
+  *pg = g; *pchig = chig; *peq = eq; *per = er;
 }
 
 static GEN
@@ -1843,44 +1896,15 @@ loop(decomp_t *S, long Ea)
   S->invnu = NULL;
   for (;;)
   { /* beta tends to a factor of chi */
-    long L, E, i, l, Fg, eq, er;
-    GEN chib, chig, d, g, nug;
+    long L, i, l, Fg, eq, er;
+    GEN chig = NULL, d, g, nug;
+
     if (DEBUGLEVEL>4) err_printf("  beta = %Ps\n", beta);
-
     L = ZpX_resultant_val(S->chi, beta, S->p, S->mf+1);
-    if (L <= S->mf) { chib = NULL; E = N; }
-    else
-    { /* v_p(norm(beta)) > mf ==> useless */
-      chib = ZXQ_charpoly(beta, S->chi, v);
-      vstar(S->p, chib, &L, &E);
-    }
-    eq = (long)(L / E);
-    er = (long)(L*Ea / E - eq*Ea);
+    if (L > S->mf) L = -1; /* from scratch */
+    get_g(S, Ea, L, N, beta, &g, &chig, &eq, &er);
     if (DEBUGLEVEL>4) err_printf("  (eq,er) = (%ld,%ld)\n", eq,er);
-    if (er || !chib)
-    { /* g might not be an integer ==> chig = NULL */
-      g = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
-      chig = mycaract(S, S->chi, g, S->psc, S->prc);
-    }
-    else
-    { /* g = beta/p^eq, special case of the above */
-      GEN h = powiu(S->p, eq);
-      g = RgX_Rg_div(beta, h);
-      chig = RgX_Rg_div(RgX_unscale(chib, h), powiu(h, N));
-      chig = gequal1(QpX_denom(chig))? FpX_red(chig, S->pmf): NULL;
-    }
-
-    if (!chig)
-    { /* Valuation of beta was wrong ==> ga fails the v*-test */
-      chib = ZXQ_charpoly(beta, S->chi, v);
-      vstar(S->p, chib, &L, &E);
-      eq = (long)(L / E);
-      er = (long)(L*Ea / E - eq*Ea);
-
-      g = get_gamma(S, beta, eq, er); /* an integer */
-      chig = mycaract(S, S->chi, g, S->psc, S->prc);
-    }
-    /* chig = charpoly(g) */
+    /* g = beta p^-eq  nu^-er (a unit), chig = charpoly(g) */
     nug = get_nu(chig, S->p, &l);
     if (l > 1)
     {
@@ -1908,7 +1932,7 @@ loop(decomp_t *S, long Ea)
       if (Fa % Fg) return testb2(S, clcm(Fa,Fg), g);
       /* nu & nug irreducible mod p, deg nug | deg nu. To improve beta, look
        * for a root d of nug in Fp[phi] such that v_p(g - d) > 0 */
-      if (RgX_equal(nug, S->nu))
+      if (ZX_equal(nug, S->nu))
         d = pol_x(v);
       else
       {
