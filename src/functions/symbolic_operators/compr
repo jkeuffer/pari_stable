@@ -1,7 +1,7 @@
 Function: [_|_<-_,_;_]
 Section: programming/internals
 C-Name: vecexpr1
-Prototype: GVDEDE
+Prototype: mGVDEDE
 Help: [a(x)|x<-b,c(x);...]
 Wrapper: (,,G,bG)
 Description:
