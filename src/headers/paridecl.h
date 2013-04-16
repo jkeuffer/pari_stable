@@ -296,6 +296,7 @@ GEN     random_FlxqE(GEN a4, GEN a6, GEN T, ulong p);
 /* FpE.c */
 
 GEN     Fle_add(GEN P, GEN Q, ulong a4, ulong p);
+GEN     Fle_dbl(GEN P, ulong a4, ulong p);
 GEN     Fle_mul(GEN P, GEN n, ulong a4, ulong p);
 GEN     Fle_mulu(GEN P, ulong n, ulong a4, ulong p);
 GEN     Fle_order(GEN z, GEN o, ulong a4, ulong p);
