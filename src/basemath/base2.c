@@ -819,7 +819,7 @@ Flx_core(GEN f, ulong p)
   du = degpol(u);
   if (du)
   {
-    if (du == degpol(f))
+    if (du == (ulong)degpol(f))
       f = Flx_core(Flx_deflate(f,p), p);
     else
     {
