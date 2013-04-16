@@ -303,7 +303,7 @@ typedef struct matcomp
 typedef struct gp_pointer
 {
   matcomp c;
-  GEN x;
+  GEN x, ox;
   entree *ep;
   long vn;
   long sp;
@@ -730,6 +730,30 @@ st_alloc(long n)
   }
 }
 
+INLINE void
+clone_lock(GEN C)
+{
+  if (isclone(C)) ++bl_refc(C);
+}
+
+INLINE void
+clone_unlock(GEN C)
+{
+  if (isclone(C)) gunclone(C);
+}
+
+INLINE void
+ptr_proplock(gp_pointer *g, GEN C)
+{
+  g->x = C;
+  if (isclone(g->x))
+  {
+    clone_unlock(g->ox);
+    g->ox = g->x;
+    ++bl_refc(g->ox);
+  }
+}
+
 static void
 closure_eval(GEN C)
 {
@@ -741,7 +765,7 @@ closure_eval(GEN C)
   long saved_rp=rp;
   long j, nbmvar=0, nblvar=0;
   long pc, t;
-  if (isclone(C)) ++bl_refc(C);
+  clone_lock(C);
   t = trace_push(0, C);
   if (lg(C)==8)
   {
@@ -806,6 +830,7 @@ closure_eval(GEN C)
         g->ep = (entree*) operand;
         checkvalue(g->ep);
         g->x = (GEN) g->ep->value;
+        g->ox = g->x; clone_lock(g->ox);
         g->sp = sp;
         gel(st,sp++) = (GEN)&(g->x);
         break;
@@ -816,6 +841,7 @@ closure_eval(GEN C)
         g->vn=operand;
         g->ep=(entree *)0x1L;
         g->x = (GEN) var[s_var.n+operand].value;
+        g->ox = g->x; clone_lock(g->ox);
         g->sp = sp;
         gel(st,sp++) = (GEN)&(g->x);
         break;
@@ -828,6 +854,7 @@ closure_eval(GEN C)
         checkvalue(ep);
         g->sp = -1;
         g->x = copyvalue(ep);
+        g->ox = g->x; clone_lock(g->ox);
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
@@ -842,6 +869,7 @@ closure_eval(GEN C)
         matcomp *C;
         g->sp = -1;
         g->x = copylex(operand);
+        g->ox = g->x; clone_lock(g->ox);
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
@@ -869,6 +897,7 @@ closure_eval(GEN C)
             changevalue(g->ep, g->x);
         }
         else change_compo(&(g->c), g->x);
+        clone_unlock(g->ox);
       }
       break;
     case OCstoredyn:
@@ -885,6 +914,7 @@ closure_eval(GEN C)
       {
         gp_pointer *g = &ptrs[--rp];
         change_compo(&(g->c), gel(st,--sp));
+        clone_unlock(g->ox);
         break;
       }
     case OCstackgen:
@@ -995,7 +1025,7 @@ closure_eval(GEN C)
         case t_VEC: case t_COL:
           check_array_index(c, lg(p));
           C->ptcell = (GEN *) p+c;
-          g->x = *(C->ptcell);
+          ptr_proplock(g, *(C->ptcell));
           break;
         case t_VECSMALL:
           check_array_index(c, lg(p));
@@ -1006,7 +1036,7 @@ closure_eval(GEN C)
           p = list_data(p); lx = p? lg(p): 1;
           check_array_index(c,lx);
           C->ptcell = (GEN *) p+c;
-          g->x = *(C->ptcell);
+          ptr_proplock(g, *(C->ptcell));
           break;
         default:
           pari_err_TYPE("&_[_] OCcompo1ptr [not a vector]", p);
@@ -1040,7 +1070,7 @@ closure_eval(GEN C)
         check_array_index(c, lg(gel(p,d)));
         C->ptcell = (GEN *) gel(p,d)+c;
         C->parent   = p;
-        g->x = *(C->ptcell);
+        ptr_proplock(g, *(C->ptcell));
         break;
       }
     case OCcompoC:
@@ -1067,7 +1097,7 @@ closure_eval(GEN C)
         C->ptcell = (GEN *) p+c;
         C->full_col = c;
         C->parent   = p;
-        g->x = *(C->ptcell);
+        ptr_proplock(g, *(C->ptcell));
         break;
       }
     case OCcompoL:
@@ -1331,11 +1361,15 @@ closure_eval(GEN C)
   {
 endeval:
     sp = saved_sp;
-    rp = saved_rp;
+    for(  ; rp>saved_rp ;  )
+    {
+      gp_pointer *g = &ptrs[--rp];
+      clone_unlock(g->ox);
+    }
   }
   s_trace.n--;
   restore_vars(nbmvar, nblvar);
-  if (isclone(C)) gunclone(C);
+  clone_unlock(C);
 }
 
 GEN
