@@ -3287,6 +3287,13 @@ pari_fopen(const char *s, const char *mode)
   return f? pari_open_file(f, s, mode): NULL;
 }
 
+void
+pari_fread_chars(void *b, size_t n, FILE *f)
+{
+  if (fread(b, sizeof(char), n, f) < n)
+    pari_err_FILE("input file [fread]", "FILE*");
+}
+
 /* FIXME: HAS_FDOPEN & allow standard open() flags */
 #ifdef UNIX
 /* open tmpfile s (a priori for writing) avoiding symlink attacks */
@@ -4018,12 +4025,9 @@ switchout(const char *name)
 /**                                                               **/
 /*******************************************************************/
 static void
-_fread(void *a, size_t b, size_t c, FILE *d)
-{ if (fread(a,b,c,d) < c) pari_err_FILE("input file [fread]", "FILE*"); }
-static void
-_lfread(void *a, size_t b, FILE *c) { _fread(a,sizeof(long),b,c); }
-static void
-_cfread(void *a, size_t b, FILE *c) { _fread(a,sizeof(char),b,c); }
+pari_fread_longs(void *a, size_t c, FILE *d)
+{ if (fread(a,sizeof(long),c,d) < c)
+    pari_err_FILE("input file [fread]", "FILE*"); }
 
 static void
 _fwrite(const void *a, size_t b, size_t c, FILE *d)
@@ -4036,7 +4040,7 @@ _cfwrite(const void *a, size_t b, FILE *c) { _fwrite(a,sizeof(char),b,c); }
 enum { BIN_GEN, NAM_GEN, VAR_GEN, RELINK_TABLE };
 
 static long
-rd_long(FILE *f) { long L; _lfread(&L, 1UL, f); return L; }
+rd_long(FILE *f) { long L; pari_fread_longs(&L, 1UL, f); return L; }
 static void
 wr_long(long L, FILE *f) { _lfwrite(&L, 1UL, f); }
 
@@ -4072,7 +4076,7 @@ rdstr(FILE *f)
   char *s;
   if (!L) return NULL;
   s = (char*)pari_malloc(L);
-  _cfread(s, L, f); return s;
+  pari_fread_chars(s, L, f); return s;
 }
 
 static void
@@ -4103,7 +4107,7 @@ rdGEN(FILE *f)
   p->x    = (GEN)rd_long(f);
   p->base = (GEN)rd_long(f);
   p->canon= 1;
-  _lfread(GENbinbase(p), L,f);
+  pari_fread_longs(GENbinbase(p), L,f);
   return bin_copy(p);
 }
 

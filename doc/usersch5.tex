@@ -9167,6 +9167,10 @@ file (in the \tet{writebin} sense), $0$ otherwise.
 \fun{void}{pari_unlink}{const char *s} deletes the file named $s$. Warn
 if the operation fails.
 
+\fun{void}{pari_fread_chars}{void *b, size_t n, FILE *f} read $n$ chars from
+stream $f$, storing the result in pre-allocated buffer $b$ (assumed to be
+large enough).
+
 \fun{char*}{path_expand}{const char *s} perform tilde and environment expansion
 on $s$. Returns a \kbd{malloc}'ed buffer.
 

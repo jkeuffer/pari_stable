@@ -1894,6 +1894,7 @@ pariFILE* pari_fopen(const char *s, const char *mode);
 pariFILE* pari_fopen_or_fail(const char *s, const char *mode);
 pariFILE* pari_fopengz(const char *s);
 void    pari_fprintf(FILE *file, const char *fmt, ...);
+void    pari_fread_chars(void *b, size_t n, FILE *f);
 GEN     pari_get_hist(long p);
 char*   pari_get_homedir(const char *user);
 int     pari_is_dir(const char *name);

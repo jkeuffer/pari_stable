@@ -306,9 +306,9 @@ galopen(const char *pre, long n, long n1, long n2)
 static char
 bin(char c)
 {
-  if (c>='0' && c<='9') c=c-'0';
-  else if (c>='A' && c<='Z') c=c-'A'+10;
-  else if (c>='a' && c<='z') c=c-'a'+36;
+  if (c>='0' && c<='9') c -= '0';
+  else if (c>='A' && c<='Z') c -= 'A'-10;
+  else if (c>='a' && c<='z') c -= 'a'-36;
   else pari_err_TYPE("bin [not alphanumeric]", stoi(c));
   return c;
 }
@@ -318,16 +318,11 @@ bin(char c)
 static void
 read_obj(PERM *g, pariFILE *f, long n, long m)
 {
-  char ch[BUFFS];
-  long i,j, k = BUFFS;
-
-  i = j = 1;
-  for(;;)
-  {
-    if (k==BUFFS) { (void)fread(ch,sizeof(char),BUFFS, f->file); k=0; }
-    g[i][j] = bin(ch[k++]);
-    if (++j>m) { j=1; if (++i>n) break; }
-  }
+  long i, j, k, N = m*n;
+  char *ch = stack_malloc(N);
+  pari_fread_chars(ch, N, f->file);
+  for (k = 0, i = 1; i <= n; i++)
+    for (j = 1; j <= m; j++,k++) g[i][j] = bin(ch[k]);
   pari_fclose(f);
 }
 #undef BUFFS
@@ -340,9 +335,9 @@ lirecoset(long n1, long n2, long n)
   char c, ch[8];
   long m, cardgr;
   pariFILE *f = galopen("COS", n, n1, n2);
-  (void)fread(&c,sizeof(char), 1, f->file); m=bin(c);
-  (void)fread(&c,sizeof(char), 1, f->file);
-  (void)fread(ch,sizeof(char), 6, f->file); cardgr=atol(ch);
+  pari_fread_chars(&c, 1, f->file); m=bin(c);
+  pari_fread_chars(&c, 1, f->file);
+  pari_fread_chars(ch, 6, f->file); cardgr=atol(ch);
   gr=allocgroup(m,cardgr);
   read_obj(gr, f,cardgr,m); return gr;
 }
@@ -353,8 +348,8 @@ lireresolv(long n1, long n2, long n, resolv *R)
   char ch[5];
   long nm, nv;
   pariFILE *f = galopen("RES", n, n1, n2);
-  (void)fread(ch,sizeof(char),5,f->file); nm = atol(ch);
-  (void)fread(ch,sizeof(char),3,f->file); nv = atol(ch);
+  pari_fread_chars(ch,5,f->file); nm = atol(ch);
+  pari_fread_chars(ch,3,f->file); nv = atol(ch);
   R->a = alloc_pobj(nv,nm);
   read_obj(R->a, f,nm,nv);
   R->nm = nm;
