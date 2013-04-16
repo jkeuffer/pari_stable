@@ -883,6 +883,20 @@ mpdiv(GEN x, GEN y)
 /*                                                                 */
 /*******************************************************************/
 INLINE ulong
+Fl_double(ulong a, ulong p)
+{
+  ulong res = a << 1;
+  return (res >= p || res < a) ? res - p : res;
+}
+INLINE ulong
+Fl_triple(ulong a, ulong p)
+{
+  ulong res = a << 1;
+  if (res >= p || res < a) res -= p;
+  res += a;
+  return (res >= p || res < a)? res - p: res;
+}
+INLINE ulong
 Fl_add(ulong a, ulong b, ulong p)
 {
   ulong res = a + b;
@@ -906,21 +920,17 @@ INLINE ulong
 Fl_mul(ulong a, ulong b, ulong p)
 {
   LOCAL_HIREMAINDER;
-  {
-    register ulong x = mulll(a,b);
-    (void)divll(x,p);
-  }
-  return hiremainder;
+  register ulong x = mulll(a,b);
+  if (!hiremainder) return x % p;
+  (void)divll(x,p); return hiremainder;
 }
 INLINE ulong
 Fl_sqr(ulong a, ulong p)
 {
   LOCAL_HIREMAINDER;
-  {
-    register ulong x = mulll(a,a);
-    (void)divll(x,p);
-  }
-  return hiremainder;
+  register ulong x = mulll(a,a);
+  if (!hiremainder) return x % p;
+  (void)divll(x,p); return hiremainder;
 }
 INLINE ulong
 Fl_div(ulong a, ulong b, ulong p) { return Fl_mul(a, Fl_inv(b, p), p); }

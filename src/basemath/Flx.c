@@ -435,6 +435,22 @@ Flx_neg_inplace(GEN x, ulong p)
 }
 
 GEN
+Flx_double(GEN y, ulong p)
+{
+  long i, l;
+  GEN z = cgetg_copy(y, &l); z[1] = y[1];
+  for(i=2; i<l; i++) z[i] = Fl_double(y[i], p);
+  return Flx_renormalize(z, l);
+}
+GEN
+Flx_triple(GEN y, ulong p)
+{
+  long i, l;
+  GEN z = cgetg_copy(y, &l); z[1] = y[1];
+  for(i=2; i<l; i++) z[i] = Fl_triple(y[i], p);
+  return Flx_renormalize(z, l);
+}
+GEN
 Flx_Fl_mul(GEN y, ulong x, ulong p)
 {
   GEN z;
@@ -3220,6 +3236,26 @@ FlxX_Fl_mul(GEN x, ulong y, ulong p)
   GEN z = cgetg(lx, t_POL);
   z[1]=x[1];
   for (i=2; i<lx; i++) gel(z,i) = Flx_Fl_mul(gel(x,i), y, p);
+  return FlxX_renormalize(z, lx);
+}
+
+GEN
+FlxX_triple(GEN x, ulong p)
+{
+  long i, lx=lg(x);
+  GEN z = cgetg(lx, t_POL);
+  z[1]=x[1];
+  for (i=2; i<lx; i++) gel(z,i) = Flx_triple(gel(x,i), p);
+  return FlxX_renormalize(z, lx);
+}
+
+GEN
+FlxX_double(GEN x, ulong p)
+{
+  long i, lx=lg(x);
+  GEN z = cgetg(lx, t_POL);
+  z[1]=x[1];
+  for (i=2; i<lx; i++) gel(z,i) = Flx_double(gel(x,i), p);
   return FlxX_renormalize(z, lx);
 }
 

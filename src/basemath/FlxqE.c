@@ -81,11 +81,11 @@ FlxqE_dbl_slope(GEN P, GEN a4, GEN T, ulong p, GEN *slope)
                             : Flxq_div(a4, Flx_neg(y, p), T, p);
   else
   {
-    GEN sx = Flx_add(Flx_Fl_mul(Flxq_sqr(x, T, p), 3, p), a4, p);
-    *slope = Flxq_div(sx, Flx_Fl_mul(y, 2, p), T, p);
+    GEN sx = Flx_add(Flx_triple(Flxq_sqr(x, T, p), p), a4, p);
+    *slope = Flxq_div(sx, Flx_double(y, p), T, p);
   }
   Q = cgetg(3,t_VEC);
-  gel(Q, 1) = Flx_sub(Flxq_sqr(*slope, T, p), Flx_Fl_mul(x, 2, p), p);
+  gel(Q, 1) = Flx_sub(Flxq_sqr(*slope, T, p), Flx_double(x, p), p);
   if (typ(a4)==t_VEC) gel(Q, 1) = Flx_sub(gel(Q, 1), gel(a4, 1), p);
   gel(Q, 2) = Flx_sub(Flxq_mul(*slope, Flx_sub(x, gel(Q, 1), p), T, p), y, p);
   return Q;
@@ -228,7 +228,7 @@ random_FlxqE(GEN a4, GEN a6, GEN T, ulong p)
     x   = random_Flx(get_Flx_degree(T),get_Flx_var(T),p);
     x2  = Flxq_sqr(x, T, p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     rhs = Flx_add(Flxq_mul(x, Flx_add(x2, a4, p), T, p), a6, p);
-  } while ((!lgpol(rhs) && !lgpol(Flx_add(Flx_Fl_mul(x2, 3, p), a4, p)))
+  } while ((!lgpol(rhs) && !lgpol(Flx_add(Flx_triple(x2, p), a4, p)))
           || !Flxq_issquare(rhs, T, p));
   y = Flxq_sqrt(rhs, T, p);
   if (!y) pari_err_PRIME("random_FlxqE", T);
@@ -1176,11 +1176,11 @@ Flxq_ellcard_Satoh(GEN a4, GEN a6, GEN T, ulong p)
       GEN q = powuu(p,dP);
       GEN k = mkvecsmall3(T[1], 1728%p, p-1);
       GEN kj = Flx_shift(k, 1), k2j = Flxq_mul(kj, k, P, p);
-      GEN A4 = Flx_Fl_mul(kj,3,p), A6 = Flx_Fl_mul(k2j,2,p);
+      GEN A4 = Flx_triple(kj,p), A6 = Flx_double(k2j,p);
       GEN tP = addis(q, 1 - Flxq_ellcard_naive(A4, A6, P, p));
       t = elltrace_extension(tP, n/dP, q);
       sk = Flx_Fl_add(Flx_neg(j,p),1728%p,p);
-      sA4 = Flx_Fl_mul(Flxq_mul(sk,j,T,p),3,p);
+      sA4 = Flx_triple(Flxq_mul(sk,j,T,p),p);
       u = Flxq_div(a4,sA4, T, p);
       return Flxq_is2npower(u, 2, T, p) ? subii(q1,t): addii(q1,t);
     }
@@ -1299,8 +1299,8 @@ Flxq_ellcardj(GEN a4, GEN a6, ulong j, GEN T, GEN q, ulong p, long n)
   } else
   {
     ulong g = Fl_div(j, Fl_sub(1728%p, j, p), p);
-    GEN l = Flxq_div(Flx_Fl_mul(a6,3,p),Flx_Fl_mul(a4,2,p),T,p);
-    GEN N = Fp_ffellcard(utoi(Fl_mul(g,3,p)),utoi(Fl_mul(g,2,p)),q,n,utoi(p));
+    GEN l = Flxq_div(Flx_triple(a6,p),Flx_double(a4,p),T,p);
+    GEN N = Fp_ffellcard(utoi(Fl_triple(g,p)),utoi(Fl_double(g,p)),q,n,utoi(p));
     if (Flxq_issquare(l,T,p)) return N;
     return subii(shifti(q1,1),N);
   }

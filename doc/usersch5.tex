@@ -1717,6 +1717,10 @@ $\kbd{mo2}  = m >> 1$.
 \fun{ulong}{Fl_mul}{ulong x, ulong y, ulong m} returns the smallest positive
 representative of $x y$ modulo $m$.
 
+\fun{ulong}{Fl_double}{ulong x, ulong m} returns $2x$ modulo $m$.
+
+\fun{ulong}{Fl_triple}{ulong x, ulong m} returns $3x$ modulo $m$.
+
 \fun{ulong}{Fl_sqr}{ulong x, ulong m} returns the smallest positive
 representative of $x^2$ modulo $m$.
 
@@ -4609,6 +4613,10 @@ non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
 \fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
 
+\fun{GEN}{Flx_double}{GEN y, ulong p} returns $2y$.
+
+\fun{GEN}{Flx_triple}{GEN y, ulong p} returns $3y$.
+
 \fun{GEN}{Flx_mulu}{GEN y, ulong x, ulong p} as \kbd{Flx\_Fl\_mul} but do not
 assume that $x<p$.
 
@@ -4861,6 +4869,10 @@ its factorization.
 \fun{GEN}{FlxX_sub}{GEN P, GEN Q, ulong p}
 
 \fun{GEN}{FlxX_Fl_mul}{GEN x, ulong y, ulong p}
+
+\fun{GEN}{FlxX_double}{GEN x, ulong p}
+
+\fun{GEN}{FlxX_triple}{GEN x, ulong p}
 
 \fun{GEN}{FlxX_neg}{GEN x, ulong p}
 

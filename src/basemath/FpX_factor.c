@@ -279,12 +279,16 @@ FpX_otherroot(GEN x, GEN r, GEN p)
   return s;
 }
 
+/* disc(x^2+bx+c) = b^2 - 4c */
+static ulong
+Fl_disc_bc(ulong b, ulong c, ulong p)
+{ return Fl_sub(Fl_sqr(b,p), Fl_double(Fl_double(c,p),p), p); }
 /* p > 2 */
 static ulong
 Flx_quad_root(GEN x, ulong p, int unknown)
 {
   ulong s, u, b = x[3], c = x[2];
-  ulong D = Fl_sub(Fl_sqr(b,p), Fl_mul(c,4,p), p);
+  ulong D = Fl_disc_bc(b, c, p);
   if (unknown && krouu(D,p) == -1) return p;
   s = Fl_sqrt(D,p);
   if (s==~0UL) return p;
@@ -1158,9 +1162,8 @@ Flx_roots(GEN f, ulong p)
 static int
 Flx_quad_factortype(GEN x, ulong p)
 {
-  ulong b = x[3], c = x[2], D;
-  D = Fl_sub(Fl_sqr(b, p), Fl_mul(c, 4, p), p);
-  return krouu(D, p);
+  ulong b = x[3], c = x[2];
+  return krouu(Fl_disc_bc(b, c, p), p);
 }
 static GEN
 Flx_is_irred_2(GEN f, ulong p, long d)

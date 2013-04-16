@@ -263,7 +263,7 @@ init_eigenu(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN T, ulong p)
   GEN DRHS = FlxqX_rem(mkpoln(3, Fl_to_Flx(3, T[1]), g0, a4), h, T, p);
   GEN lambda = FlxqXQ_div(DRHS, FlxX_Fl_mul(RHS, 4, p), h, T, p);
   GEN C = FlxX_sub(FlxqXQ_mul(lambda, DRHS, h, T, p), monomial(Fl_to_Flx(2,T[1]),1,0), p);
-  GEN D = FlxqXQ_mul(FlxX_Fl_mul(lambda, 2, p),FlxX_sub(pol_x(0), C, p), h, T, p);
+  GEN D = FlxqXQ_mul(FlxX_double(lambda, p),FlxX_sub(pol_x(0), C, p), h, T, p);
   GEN X12 = mkvec2(C, FlxX_Flx_add(D, Fl_to_Flx(p-1,T[1]), p));
   GEN Gr = FlxqXQ_halfFrobenius(RHS,h,T,p);
   GEN nGr = FlxX_neg(Gr, p);
@@ -345,11 +345,11 @@ eigenu_elldbl(void *E, GEN P)
     return Edat->X12;
   else
   {
-    GEN t1 = FlxX_Flx_add(FlxX_Fl_mul(FlxqXQ_sqr(x,h,T,p),3,p), Edat->a4, p);
-    GEN t2 = FlxqXQ_mul(FlxX_Fl_mul(y, 2, p), Edat->RHS, h, T, p);
+    GEN t1 = FlxX_Flx_add(FlxX_triple(FlxqXQ_sqr(x,h,T,p),p), Edat->a4, p);
+    GEN t2 = FlxqXQ_mul(FlxX_double(y, p), Edat->RHS, h, T, p);
     GEN lambda = FlxqXQ_div(t1, t2, h, T, p);
     GEN C = FlxX_sub(FlxqXQ_mul(FlxqXQ_sqr(lambda, h, T, p), Edat->RHS, h, T, p),
-                    FlxX_Fl_mul(x, 2, p), p);
+                     FlxX_double(x, p), p);
     GEN D = FlxX_sub(FlxqXQ_mul(lambda, FlxX_sub(x, C, p), h, T, p), y, p);
     return gerepilecopy(ltop, mkvec2(C,D));
   }
@@ -915,7 +915,7 @@ find_trace_Atkin(ulong ell, long r, GEN q)
 static GEN
 find_trace_one_root(ulong ell, GEN q)
 {
-  ulong a = Fl_mul(Fl_sqrt(umodiu(q,ell), ell), 2, ell);
+  ulong a = Fl_double(Fl_sqrt(umodiu(q,ell), ell), ell);
   return mkvecsmall2(a, ell - a);
 }
 

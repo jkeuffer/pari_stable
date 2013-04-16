@@ -23,16 +23,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                              Fle                                  **/
 /**                                                                   **/
 /***********************************************************************/
-
 static GEN
 Fle_dbl_slope(GEN P, ulong a4, ulong p, ulong *slope)
 {
   ulong x, y, Qx, Qy;
   if (ell_is_inf(P) || !P[2]) return ellinf();
   x = P[1]; y = P[2];
-  *slope = Fl_div(Fl_add(Fl_mul(Fl_sqr(x,p), 3, p), a4, p),
-                  Fl_mul(y, 2, p), p);
-  Qx = Fl_sub(Fl_sqr(*slope, p), Fl_mul(x, 2, p), p);
+  *slope = Fl_div(Fl_add(Fl_triple(Fl_sqr(x,p), p), a4, p),
+                  Fl_double(y, p), p);
+  Qx = Fl_sub(Fl_sqr(*slope, p), Fl_double(x, p), p);
   Qy = Fl_sub(Fl_mul(*slope, Fl_sub(x, Qx, p), p), y, p);
   return mkvecsmall2(Qx, Qy);
 }
@@ -73,9 +72,9 @@ Fle_dbl_inplace(GEN P, ulong a4, ulong p)
   ulong x, y, slope;
   if (!P[2]) return 1;
   x = P[1]; y = P[2];
-  slope = Fl_div(Fl_add(Fl_mul(Fl_sqr(x,p), 3, p), a4, p),
-                 Fl_mul(y, 2, p), p);
-  P[1] = Fl_sub(Fl_sqr(slope, p), Fl_mul(x, 2, p), p);
+  slope = Fl_div(Fl_add(Fl_triple(Fl_sqr(x,p), p), a4, p),
+                 Fl_double(y, p), p);
+  P[1] = Fl_sub(Fl_sqr(slope, p), Fl_double(x, p), p);
   P[2] = Fl_sub(Fl_mul(slope, Fl_sub(x, P[1], p), p), y, p);
   return 0;
 }
@@ -180,7 +179,7 @@ random_Fle(ulong a4, ulong a6, ulong p)
     x   = random_Fl(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     x2  = Fl_sqr(x, p);
     rhs = Fl_add(Fl_mul(x, Fl_add(x2, a4, p), p), a6, p);
-  } while ((!rhs && !Fl_add(Fl_mul(x2,3,p),a4,p))
+  } while ((!rhs && !Fl_add(Fl_triple(x2,p),a4,p))
           || krouu(rhs, p) < 0);
   y = Fl_sqrt(rhs, p);
   return mkvecsmall2(x, y);
