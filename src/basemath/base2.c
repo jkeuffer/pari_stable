@@ -808,8 +808,8 @@ Flx_checkdeflate(GEN x)
 static GEN
 Flx_core(GEN f, ulong p)
 {
-  long du, v0 = Flx_valrem(f, &f);
-  ulong d, e;
+  long v0 = Flx_valrem(f, &f);
+  ulong du, d, e;
   GEN u;
 
   d = Flx_checkdeflate(f);
