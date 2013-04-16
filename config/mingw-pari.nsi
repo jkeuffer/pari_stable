@@ -104,6 +104,7 @@ LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop
 Section "Uninstall"
   Delete "$INSTDIR\gp.exe"
   Delete "$INSTDIR\gphelp.pl"
+  Delete "$INSTDIR\gprc_dft.txt"
   Delete "$INSTDIR\${dll}"
 
   RMDir /r "$INSTDIR\perl"

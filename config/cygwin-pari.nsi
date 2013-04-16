@@ -1,9 +1,14 @@
+#! /bin/sh
+. config/version
+release=`echo "$pari_release"|sed  's/\./-/g'`
+cat << EOT
 ;--- PARI/GP: NullSoft Installer configuration file
 !include "MUI.nsh"
-Name "PARI 2.6 (TESTING)"
-!define dll "libpari-gmp-2.6.dll"
-!define PARIver "PARI-2-6"
-
+Name "PARI $pari_release_verbose"
+!define dll "libpari.dll"
+!define PARIver "Pari-$release"
+EOT
+cat << 'EOT'
 ;--No need to modify things below --
 !define top ".."
 !define cfgdir "${top}\config"
@@ -191,3 +196,4 @@ Section "Uninstall"
   RMDir "$INSTDIR\..\bin"
   RMDir "$INSTDIR"
 SectionEnd
+EOT
