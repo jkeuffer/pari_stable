@@ -3550,7 +3550,7 @@ automorphism_perms(GEN M, GEN auts, GEN cyclic, long N)
   for (l = 1; l < nauts; l++)
     gel(perms, l) = cgetg(r1plusr2, t_VECSMALL);
   av = avma;
-  Mt = shallowtrans(M);
+  Mt = shallowtrans(gprec_w(M, 3)); /* need little accuracy */
   Mt = shallowconcat(Mt, gconj(vecslice(Mt, r1+1, r1+r2)));
   for (l = 1; l < ncyc; l++)
   {
@@ -3558,7 +3558,8 @@ automorphism_perms(GEN M, GEN auts, GEN cyclic, long N)
     long k = thiscyc[1];
     GEN Nt = RgM_mul(shallowtrans(gel(auts, k)), Mt);
     GEN perm = gel(perms, k), permprec;
-    for (i = 1; i < r1plusr2; i++)
+    pari_sp av2 = avma;
+    for (i = 1; i < r1plusr2; i++, avma = av2)
     {
       GEN vec = gel(Nt, i), minnorm;
       minnorm = gnorml2(gsub(vec, gel(Mt, 1)));
