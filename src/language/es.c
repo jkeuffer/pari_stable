@@ -468,7 +468,7 @@ void
 err_flush(void) { pariErr->flush(); }
 
 static GEN
-log10_2()
+log10_2(void)
 { return divrr(mplog2(LOWDEFAULTPREC), mplog(utor(10,LOWDEFAULTPREC))); }
 
 /* e binary exponent, return exponent in base ten */

@@ -1572,7 +1572,7 @@ static int
 is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
 static void
-reset_ctrlc()
+reset_ctrlc(void)
 {
 #if defined(_WIN32) || defined(__CYGWIN32__)
   win32ctrlc = 0;
