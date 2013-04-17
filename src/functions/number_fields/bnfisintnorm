@@ -13,7 +13,7 @@ Doc: computes a complete system of
  the correctness of the result depends on the validity of \idx{GRH}.
 
  See also \tet{bnfisnorm}.
-Variant: The function \fun{GEN}{bnfisintnormabs}{GEN bnf, GEN a} 
+Variant: The function \fun{GEN}{bnfisintnormabs}{GEN bnf, GEN a}
  returns a complete system of solutions modulo units of the absolute norm
  equation $|\Norm(x)| = |a|$. As fast as \kbd{bnfisintnorm}, but solves
  the two equations $\Norm(x) = \pm a$ simultaneously.
