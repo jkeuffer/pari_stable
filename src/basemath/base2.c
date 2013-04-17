@@ -806,7 +806,7 @@ Flx_checkdeflate(GEN x)
 /* product of (monic) irreducible factors of f over Fp[X]
  * Assume f reduced mod p, otherwise valuation at x may be wrong */
 static GEN
-Flx_core(GEN f, ulong p)
+Flx_radical(GEN f, ulong p)
 {
   long v0 = Flx_valrem(f, &f);
   ulong du, d, e;
@@ -820,7 +820,7 @@ Flx_core(GEN f, ulong p)
   if (du)
   {
     if (du == (ulong)degpol(f))
-      f = Flx_core(Flx_deflate(f,p), p);
+      f = Flx_radical(Flx_deflate(f,p), p);
     else
     {
       u = Flx_normalize(u, p);
@@ -829,7 +829,7 @@ Flx_core(GEN f, ulong p)
       {
         GEN w = Flxq_powu(f, du, u, p);
         w = Flx_div(u, Flx_gcd(w,u,p), p); /* u / gcd(u, v^(deg u-1)) */
-        f = Flx_mul(f, Flx_core(Flx_deflate(w,p), p), p);
+        f = Flx_mul(f, Flx_radical(Flx_deflate(w,p), p), p);
       }
     }
   }
@@ -838,14 +838,14 @@ Flx_core(GEN f, ulong p)
 }
 /* Assume f reduced mod p, otherwise valuation at x may be wrong */
 static GEN
-FpX_core(GEN f, GEN p)
+FpX_radical(GEN f, GEN p)
 {
   GEN u;
   long v0;
   if (lgefint(p) == 3)
   {
     ulong q = p[2];
-    return Flx_to_ZX( Flx_core(ZX_to_Flx(f, q), q) );
+    return Flx_to_ZX( Flx_radical(ZX_to_Flx(f, q), q) );
   }
   v0 = ZX_valrem(f, &f);
   u = FpX_gcd(f,FpX_deriv(f, p), p);
@@ -876,7 +876,7 @@ ZX_Dedekind(GEN F, GEN *pg, GEN p)
     ulong q = p[2], q2 = q*q;
     f2 = ZX_to_Flx(F, q2);
     f = Flx_red(f2, q);
-    g = Flx_core(f, q);
+    g = Flx_radical(f, q);
     h = Flx_div(f, g, q);
     k = zx_z_div(Flx_sub(f2, Flx_mul(g,h,q2), q2), q);
     k = Flx_gcd(k, Flx_gcd(g,h,q), q);
@@ -887,7 +887,7 @@ ZX_Dedekind(GEN F, GEN *pg, GEN p)
   {
     f2 = FpX_red(F, sqri(p));
     f = FpX_red(f2, p);
-    g = FpX_core(f, p);
+    g = FpX_radical(f, p);
     h = FpX_div(f, g, p);
     k = ZX_Z_divexact(ZX_sub(f2, ZX_mul(g,h)), p);
     k = FpX_gcd(FpX_red(k, p), FpX_gcd(g,h,p), p);
