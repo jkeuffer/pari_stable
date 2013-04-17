@@ -1028,13 +1028,13 @@ static GEN
 F2xq_log_Coppersmith_d(GEN W, GEN g, long r, long n, GEN T, GEN mo)
 {
   pari_sp av = avma, av2;
-  long h = ((F2x_degree(T)-1)>>n)+1;
   long dg = F2x_degree(g), k = r-1, m = maxss((dg-k)/2,0);
   long i, j, l = dg-m, N;
-  GEN C = F2x_shift(pol1_F2x(T[1]), h);
-  GEN R = F2xq_powu(C, 1UL<<n, T);
   GEN v = cgetg(k+m+1,t_MAT);
-  GEN z = F2x_rem(C, g);
+  long dT = F2x_degree(T);
+  long h = dT>>n, d = dT-(h<<n);
+  GEN R = F2x_add(F2x_shift(pol1_F2x(T[1]), dT), T);
+  GEN z = F2x_rem(F2x_shift(pol1_F2x(T[1]),h), g);
   for(i=1; i<=k+m; i++)
   {
     gel(v,i) = F2x_to_F2v(F2x_shift(z,-l),m);
@@ -1055,7 +1055,7 @@ F2xq_log_Coppersmith_d(GEN W, GEN g, long r, long n, GEN T, GEN mo)
         q = F2x_add(q, gel(v,j+1));
     qh= F2x_shift(q,h);
     p = F2x_rem(qh,g);
-    b = F2x_add(F2x_mul(R, F2x_pow2n(q, n)), F2x_pow2n(p, n));
+    b = F2x_add(F2x_mul(R, F2x_pow2n(q, n)), F2x_shift(F2x_pow2n(p, n), d));
     if (lgpol(b)==0 || !F2x_issmooth(b, r)) continue;
     a = F2x_div(F2x_add(qh,p),g);
     if (F2x_degree(F2x_gcd(a,q)) &&  F2x_degree(F2x_gcd(a,p))) continue;
@@ -1063,8 +1063,9 @@ F2xq_log_Coppersmith_d(GEN W, GEN g, long r, long n, GEN T, GEN mo)
     {
       GEN F = F2x_factorel(b);
       GEN G = F2x_factorel(a);
-      GEN FG = vecsmall_concat(gel(F, 1), gel(G, 1));
-      GEN E  = vecsmall_concat(gel(F, 2), zv_z_mul(gel(G, 2),-(1L<<n)));
+      GEN FG = vecsmall_concat(vecsmall_append(gel(F, 1), 2), gel(G, 1));
+      GEN E  = vecsmall_concat(vecsmall_append(gel(F, 2), -d),
+                               zv_z_mul(gel(G, 2),-(1L<<n)));
       GEN R  = famatsmall_reduce(mkmat2(FG, E));
       GEN l  = F2xq_log_from_rel(W, R, r, n, T, mo);
       if (!l) continue;
@@ -1163,26 +1164,26 @@ F2xq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, long n, GEN T, GEN m)
 */
 
 static GEN
-rel_Coppersmith(GEN u, GEN v, long h, GEN R, long r, long n)
+rel_Coppersmith(GEN u, GEN v, long h, GEN R, long r, long n, long d)
 {
   GEN b, F, G, M;
   GEN a = F2x_add(F2x_shift(u, h), v);
   if (!F2x_issmooth(a, r)) return NULL;
-  b = F2x_add(F2x_mul(R, F2x_pow2n(u, n)), F2x_pow2n(v, n));
+  b  = F2x_add(F2x_mul(R, F2x_pow2n(u, n)), F2x_shift(F2x_pow2n(v, n),d));
   if (!F2x_issmooth(b, r)) return NULL;
   F = F2x_factorel(a);
   G = F2x_factorel(b);
-  M = mkmat2(vecsmall_concat(gel(F, 1), gel(G, 1)),
-             vecsmall_concat(zv_z_mul(gel(F, 2),1UL<<n), zv_neg(gel(G, 2))));
+  M = mkmat2(vecsmall_concat(gel(F, 1), vecsmall_append(gel(G, 1), 2)),
+             vecsmall_concat(zv_z_mul(gel(F, 2),1UL<<n), vecsmall_append(zv_neg(gel(G, 2)),d)));
   return famatsmall_reduce(M);
 }
 
 static GEN
 F2xq_log_Coppersmith(long nbrel, long r, long n, GEN T)
 {
-  long h = ((F2x_degree(T)-1)>>n)+1;
-  GEN C = F2x_shift(pol1_F2x(T[1]), h);
-  GEN R = F2xq_powu(C, 1UL<<n, T);
+  long dT = F2x_degree(T);
+  long h = dT>>n, d = dT-(h<<n);
+  GEN R = F2x_add(F2x_shift(pol1_F2x(T[1]), dT), T);
   GEN u = mkF2(0,T[1]), v = mkF2(0,T[1]);
   long rel = 1, nbtest = 0;
   GEN M = cgetg(nbrel+1, t_VEC);
@@ -1198,7 +1199,7 @@ F2xq_log_Coppersmith(long nbrel, long r, long n, GEN T)
       avma = av;
       if (F2x_degree(F2x_gcd(u,v))==0)
       {
-        GEN z = rel_Coppersmith(u, v, h, R, r, n);
+        GEN z = rel_Coppersmith(u, v, h, R, r, n, d);
         nbtest++;
         if (z)
         {
@@ -1208,7 +1209,7 @@ F2xq_log_Coppersmith(long nbrel, long r, long n, GEN T)
         }
         if (rel>nbrel) break;
         if (i==j) continue;
-        z = rel_Coppersmith(v, u, h, R, r, n);
+        z = rel_Coppersmith(v, u, h, R, r, n, d);
         nbtest++;
         if (!z) continue;
         gel(M,rel++) = gerepilecopy(av, z); av = avma;
