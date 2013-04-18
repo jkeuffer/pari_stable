@@ -3229,24 +3229,6 @@ ifac_totient(GEN n)
   }
 }
 
-static GEN
-ifac_numdiv(GEN n)
-{
-  GEN m = gen_1, tau = cgeti(lgefint(n));
-  pari_sp av=avma, lim=stack_lim(av,1);
-  GEN part = ifac_start(n, 0);
-
-  for(;;)
-  {
-    long v;
-    GEN p;
-    if (!ifac_next(&part,&p,&v)) return m;
-    m = muliu(m, 1+v);
-    ifac_memcheck_extra(av, lim, &part, &m,tau);
-  }
-  return gerepileuptoint(av, tau);
-}
-
 /* 1 + p + ... + p^v, p != 2^BIL - 1 */
 static GEN
 u_euler_sumdiv(GEN m, ulong p, long v)
@@ -3814,42 +3796,23 @@ GEN
 numdiv(GEN n)
 {
   pari_sp av = avma;
-  GEN m;
-  long i, l, v;
-  ulong p;
-  forprime_t S;
-
-  chk_arith(n,"numdiv"); if (is_pm1(n)) return gen_1;
-  v = vali(n); n = shifti(n,-v); setabssign(n);
-  m = utoipos(v+1);
-  if (is_pm1(n)) return gerepileuptoint(av,m);
-
-  u_forprime_init(&S, 3, tridiv_bound(n));
-  while ((p = u_forprime_next_fast(&S)))
+  GEN F, E;
+  long i, l;
+  chk_arith(n,"numdiv");
+  if (lgefint(n) == 3)
   {
-    int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
-    if (v) m = muliu(m, v+1);
-    if (stop)
-    {
-      if (!is_pm1(n)) m = shifti(m,1);
-      return gerepileuptoint(av,m);
-    }
+    F = factoru(n[2]);
+    E = gel(F,2); l = lg(E);
+    for (i=1; i<l; i++) E[i]++;
   }
-  l = lg(primetab);
-  for (i = 1; i < l; i++)
+  else
   {
-    GEN p = gel(primetab,i);
-    v = Z_pvalrem(n, p, &n);
-    if (v)
-    {
-      m = muliu(m, 1 + v);
-      if (is_pm1(n)) return gerepileuptoint(av,m);
-    }
+    if (signe(n) < 0) n = absi(n);
+    F = Z_factor(n);
+    E = gel(F,2); l = lg(E);
+    for (i=1; i<l; i++) E[i] = gel(E,i)[2] + 1;
   }
-  if(ifac_isprime(n)) return gerepileuptoint(av, shifti(m,1));
-  m = mulii(m, ifac_numdiv(n));
-  return gerepileuptoint(av,m);
+  return gerepileuptoint(av, zv_prod_Z(E));
 }
 
 GEN
