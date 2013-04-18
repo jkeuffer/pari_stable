@@ -3231,42 +3231,24 @@ ifac_totient(GEN n)
 
 /* 1 + p + ... + p^v, p != 2^BIL - 1 */
 static GEN
-u_euler_sumdiv(GEN m, ulong p, long v)
+u_euler_sumdiv(ulong p, long v)
 {
   GEN u = utoipos(1 + p); /* can't overflow */
   for (; v > 1; v--) u = addsi(1, mului(p, u));
-  return mulii(m, u);
+  return u;
 }
 /* 1 + q + ... + q^v */
 static GEN
-euler_sumdiv(GEN m, GEN q, long v)
+euler_sumdiv(GEN q, long v)
 {
-  GEN u = addsi(1, q);
-  for (; v > 1; v--) u = addsi(1, mulii(q, u));
-  return mulii(m, u);
+  GEN u = addui(1, q);
+  for (; v > 1; v--) u = addui(1, mulii(q, u));
+  return u;
 }
 static GEN
-u_euler_sumdivk(GEN m, ulong p, long v, long k)
-{ return euler_sumdiv(m, powuu(p,k), v); }
+u_euler_sumdivk(ulong p, long v, long k) { return euler_sumdiv(powuu(p,k), v); }
 static GEN
-euler_sumdivk(GEN m, GEN p, long v, long k)
-{ return euler_sumdiv(m, powiu(p,k), v); }
-static GEN
-ifac_sumdivk(GEN n, long k)
-{
-  GEN m = gen_1, S = cgeti(k * lgefint(n)+1); /* S < n^k (log n+1)^{k == 1} */
-  pari_sp av=avma, lim=stack_lim(av,1);
-  GEN part = ifac_start(n, 0);
-
-  for(;;)
-  {
-    long v;
-    GEN p;
-    if (!ifac_next(&part,&p,&v)) return m;
-    m = euler_sumdivk(m, p, v, k);
-    ifac_memcheck_extra(av, lim, &part, &m,S);
-  }
-}
+euler_sumdivk(GEN p, long v, long k) { return euler_sumdiv(powiu(p,k), v); }
 
 /* Where to stop trial dividing in factorization. Guaranteed >= 2^14 */
 ulong
@@ -3818,106 +3800,62 @@ numdiv(GEN n)
 GEN
 sumdiv(GEN n)
 {
-  pari_sp av = avma, av2, limit;
-  GEN m;
-  ulong p;
-  long i, l, v;
-  forprime_t S;
+  pari_sp av = avma;
+  GEN F, P, E;
+  long i, l;
 
   chk_arith(n,"sumdiv"); if (is_pm1(n)) return gen_1;
-  v = vali(n); n = shifti(n,-v); setabssign(n);
-  m = v ? addsi(-1, int2n(v+1)) : gen_1;
-  if (is_pm1(n)) return gerepileuptoint(av,m);
-
-  u_forprime_init(&S, 3, tridiv_bound(n));
-  av2 = avma; limit = stack_lim(av2,3);
-  while ((p = u_forprime_next_fast(&S)))
+  if (lgefint(n) == 3)
   {
-    int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
-    if (v) m = u_euler_sumdiv(m, p, v);
-    if (low_stack(limit, stack_lim(av2,3)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"sumdiv");
-      m = gerepileuptoint(av2, m);
-    }
-    if (stop)
-    {
-      if (!is_pm1(n)) m = euler_sumdiv(m, n, 1);
-      goto end;
-    }
+    F = factoru(n[2]);
+    P = gel(F,1);
+    E = gel(F,2); l = lg(P);
+    for (i=1; i<l; i++) gel(P,i) = u_euler_sumdiv(P[i], E[i]);
+    return gerepileuptoint(av, ZV_prod(P));
   }
-  l = lg(primetab);
-  for (i = 1; i < l; i++)
+  else
   {
-    GEN p = gel(primetab,i);
-    v = Z_pvalrem(n, p, &n);
-    if (v)
-    {
-      m = euler_sumdiv(m, p, v);
-      if (is_pm1(n)) return gerepileuptoint(av,m);
-    }
+    if (signe(n) < 0) n = absi(n);
+    F = Z_factor(n);
+    P = gel(F,1);
+    E = gel(F,2); l = lg(P);
+    for (i=1; i<l; i++) gel(P,i) = euler_sumdiv(gel(P,i), gel(E,i)[2]);
+    return gerepileuptoint(av, ZV_prod(P));
   }
-  if(ifac_isprime(n)) { m = euler_sumdiv(m, n, 1); goto end; }
-  m = mulii(m, ifac_sumdivk(n, 1));
-end:
-  return gerepileuptoint(av,m);
 }
 
 GEN
 sumdivk(GEN n, long k)
 {
-  pari_sp av = avma, av2, limit;
-  GEN n1, m;
-  ulong p;
-  long i, l, k1, v;
-  forprime_t S;
+  pari_sp av = avma;
+  GEN E, F, P;
+  long i, l, k1;
 
   if (!k) return numdiv(n);
   if (k == 1) return sumdiv(n);
-  chk_arith(n,"sumdivk"); if (is_pm1(n)) return gen_1;
-  k1 = k; n1 = n;
+  if (is_pm1(n)) return gen_1;
+  if (k ==-1) return gerepileupto(av, gdiv(sumdiv(n), n));
+  chk_arith(n,"sumdivk");
+  k1 = k;
   if (k < 0)  k = -k;
-  if (k == 1) { m = sumdiv(n); goto fin; }
-  v = vali(n); n = shifti(n,-v); setabssign(n);
-  m = gen_1;
-  while (v--)  m = addsi(1,shifti(m,k));
-  if (is_pm1(n)) goto fin;
-
-  u_forprime_init(&S, 3, tridiv_bound(n));
-  av2 = avma; limit = stack_lim(av2,3);
-  while ((p = u_forprime_next_fast(&S)))
+  if (lgefint(n) == 3)
   {
-    int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
-    if (v) m = u_euler_sumdivk(m, p, v, k);
-    if (low_stack(limit, stack_lim(av2,3)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"sumdiv");
-      m = gerepileuptoint(av2, m);
-    }
-    if (stop)
-    {
-      if (!is_pm1(n)) m = euler_sumdivk(m, n, 1, k);
-      goto fin;
-    }
+    F = factoru(n[2]);
+    P = gel(F,1);
+    E = gel(F,2); l = lg(P);
+    for (i=1; i<l; i++) gel(P,i) = u_euler_sumdivk(P[i], E[i], k);
   }
-  l = lg(primetab);
-  for (i = 1; i < l; i++)
+  else
   {
-    GEN p = gel(primetab,i);
-    v = Z_pvalrem(n, p, &n);
-    if (v)
-    {
-      m = euler_sumdivk(m, p, v, k);
-      if (is_pm1(n)) goto fin;
-    }
+    if (signe(n) < 0) n = absi(n);
+    F = Z_factor(n);
+    P = gel(F,1);
+    E = gel(F,2); l = lg(P);
+    for (i=1; i<l; i++) gel(P,i) = euler_sumdivk(gel(P,i), gel(E,i)[2], k);
   }
-  if (ifac_isprime(n)) { m = euler_sumdivk(m, n, 1, k); goto fin; }
-  m = mulii(m, ifac_sumdivk(n, k));
- fin:
-  if (k1 < 0) m = gdiv(m, powiu(n1,k));
-  return gerepileupto(av,m);
+  P = ZV_prod(P);
+  if (k1 > 0) return gerepileuptoint(av, P);
+  return gerepileupto(av, gdiv(P, powiu(n,k)));
 }
 
 long
