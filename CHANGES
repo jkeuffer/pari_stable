@@ -134,7 +134,7 @@ BA 110- galoisfixedfield() could return a wrong result for polynomials with
    111- bnrdisc could return a wrong result if the modulus had more than
         2 prime divisors [#1399]
    112- a = Mod(1,2)*x; gcd(a,a) return x instead of Mod(1,2)*x
-   113  changing primelimit from within forprime loop yielded unpredictable
+   113- changing primelimit from within forprime loop yielded unpredictable
         results (potential SEGV)
 
   Changed
@@ -311,6 +311,8 @@ BA 97- zv_cmp0 renamed to zv_equal0
        prime table: as a result it now limited to 436273290, allowing fast
        primes up to 1.9 10^17
 BA110- permtonum/numtoperm now use the standard lexicographic numbering
+  111- issquare(t_INTMOD), ispower(t_INTMOD): factor modulus incrementally,
+       in case we hit a local non-residue -> early abort [#1376]
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -471,6 +473,8 @@ BA 142- new default strictargs for mandatory arguments
    143- GP function nfcertify
    144- GP function ellchangepointinv
    145- optional 'variable' argument to polresultantext()
+   146- export part of the ifac_* interface (ifact_start, ifact_next,
+        ifac_read, ifac_skip, ifac_isprime)
 
   Removed
     1- dropped DOS support

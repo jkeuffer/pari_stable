@@ -2938,6 +2938,53 @@ is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
 \typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
 and the $p^{v_p(n)}$.
 
+\fun{ulong}{tridiv_bound}{GEN n} returns the trial division bound used by
+\tet{Z_factor}$(n)$.
+
+\subsec{Incremental integer factorization}
+
+Routines associated to the dynamic factorization of an integer $n$, iterating
+over successive prime divisors. This is useful to implement high-level
+routines allowed to take shortcuts given enough partial information: e.g.
+\kbd{moebius}$(n)$ can be trivially computed if we hit $p$ such that $p^2
+\mid n$. For efficiency, trial division by small primes should have already
+taken place. In any case, the functions below assume that no prime $< 2^{14}$
+divides $n$.
+
+\fun{GEN}{ifac_start}{GEN n, int moebius} schedules a new factorization
+attempt for the integer $n$. If \kbd{moebius} is non-zero, the factorization
+will be aborted as soon as a repeated factor is detected (Moebius mode).
+The function assumes that $n > 1$ is a \emph{composite} \typ{INT} whose prime
+divisors satisfy $p > 2^{14}$ \emph{and} that one can write to $n$ in place.
+
+This function stores data on the stack, no \kbd{gerepile} call should
+delete this data until the factorization is complete. Returns \kbd{partial},
+a data structure recording the partial factorization state.
+
+\fun{int}{ifac_next}{GEN *partial, GEN *p, long *e} deletes a primary factor
+$p^e$ from \kbd{partial} and sets \kbd{p} (prime) and \kbd{e} (exponent), and
+normally returns $1$. Whatever remains in the \kbd{partial} structure is now
+coprime to $p$.
+
+Returns $0$ if all primary factors have been used already, so we are done
+with the factorization. In this case $p$ is set to \kbd{NULL}. If we ran in
+Moebius mode and the factorization was in fact aborted, we have $e = 1$,
+otherwise $e = 0$.
+
+\fun{int}{ifac_read}{GEN part, GEN *k, long *e} peeks at the next integer
+to be factored in the list $k^e$, where $k$ is not necessarily prime
+and can be a perfect power as well, but will be factored by the next call to
+\tet{ifac_next}. You can remove this factorization from the schedule by
+calling:
+
+\fun{void}{ifac_skip}{GEN part} removes the next scheduled factorization.
+
+\fun{int}{ifac_isprime}{GEN n} given $n$ whose prime divisors are $> 2^{14}$,
+returns the decision the factoring engine would take abount the compositeness
+of $n$: $0$ if $n$ is a proven composite, and $1$ if we believe it to be
+prime; more precisely, $n$ is a proven prime if \tet{factor_proven} is
+set, and only a BPSW-pseudoprime otherwise.
+
 \subsec{Primality and compositeness tests}
 
 \fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and

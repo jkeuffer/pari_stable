@@ -653,10 +653,132 @@ END:
   return 1;
 }
 
+/* b unit mod p */
+static int
+Up_ispower(GEN b, GEN K, GEN p, long d, GEN *pt)
+{
+  if (d == 1)
+  { /* mod p: faster */
+    if (!Fp_ispower(b, K, p)) return 0;
+    if (pt) *pt = Fp_sqrtn(b, K, p, NULL);
+  }
+  else
+  { /* mod p^{2 +} */
+    if (!ispower(cvtop(b, p, d), K, pt)) return 0;
+    if (pt) *pt = gtrunc(*pt);
+  }
+  return 1;
+}
+
+/* We're studying whether a mod (q*p^e) is a K-th power, (q,p) = 1.
+ * Decide mod p^e, then reduce a mod q. */
+static int
+handle_pe(GEN *pa, GEN q, GEN L, GEN K, GEN p, long e)
+{
+  GEN t, A;
+  long v = Z_pvalrem(*pa, p, &A), d = e - v;
+  if (d <= 0) t = gen_0;
+  else
+  {
+    ulong r;
+    v = udivui_rem(v, K, &r);
+    if (r || !Up_ispower(A, K, p, d, L? &t: NULL)) return 0;
+    if (L && v) t = mulii(t, powiu(p, v));
+  }
+  *pa = modii(*pa, q);
+  if (L) vectrunc_append(L, mkintmod(t, powiu(p, e)));
+  return 1;
+}
+long
+Zn_ispower(GEN a, GEN K, GEN q, GEN *pt)
+{
+  GEN L, N;
+  pari_sp av;
+  long e, i, l;
+  ulong pp;
+  forprime_t S;
+
+  if (!signe(a))
+  {
+    if (pt) {
+      GEN t = cgetg(3, t_INTMOD);
+      gel(t,1) = gen_0; gel(t,2) = icopy(q); *pt = t;
+    }
+    return 1;
+  }
+  /* a != 0 */
+  av = avma;
+  if (equaliu(K,2)) K = gen_2;
+  q = icopy(q);
+  L = pt? vectrunc_init(expi(q)+1): NULL;
+  u_forprime_init(&S, 2, tridiv_bound(q));
+  while ((pp = u_forprime_next(&S)))
+  {
+    int stop;
+    e = Z_lvalrem_stop(q, pp, &stop);
+    if (!e) continue;
+    if (!handle_pe(&a, q, L, K, utoipos(pp), e)) { avma = av; return 0; }
+    if (stop) goto END;
+  }
+  l = lg(primetab);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(primetab,i);
+    e = Z_pvalrem(q, p, &q);
+    if (!e) continue;
+    if (!handle_pe(&a, q, L, K, p, e)) { avma = av; return 0; }
+    if (is_pm1(q)) goto END;
+  }
+  N = gcdii(a,q);
+  if (!is_pm1(N))
+  {
+    if (ifac_isprime(N))
+    {
+      e = Z_pvalrem(q, N, &q);
+      if (!handle_pe(&a, q, L, K, N, e)) { avma = av; return 0; }
+    }
+    else
+    {
+      GEN part = ifac_start(N, 0);
+      for(;;)
+      {
+        long e;
+        GEN p;
+        if (!ifac_next(&part, &p, &e)) break;
+        e = Z_pvalrem(q, p, &q);
+        if (!handle_pe(&a, q, L, K, p, e)) { avma = av; return 0; }
+      }
+    }
+  }
+  if (!is_pm1(q))
+  {
+    if (ifac_isprime(q))
+    {
+      if (!handle_pe(&a, q, L, K, q, 1)) { avma = av; return 0; }
+    }
+    else
+    {
+      GEN part;
+      if (!mod2(K) && kronecker(a,q) == -1) { avma = av; return 0; }
+      part = ifac_start(q, 0);
+      for(;;)
+      {
+        long e;
+        GEN p;
+        if (!ifac_next(&part, &p, &e)) break;
+        if (!handle_pe(&a, q, L, K, p, e)) { avma = av; return 0; }
+      }
+    }
+  }
+END:
+  if (pt) *pt = gerepileupto(av, chinese1_coprime_Z(L));
+  return 1;
+}
+
 long
 issquareall(GEN x, GEN *pt)
 {
-  long l, tx = typ(x);
+  long tx = typ(x);
   GEN F;
   pari_sp av;
 
@@ -682,30 +804,7 @@ issquareall(GEN x, GEN *pt)
       *pt = gsqrt(x, DEFAULTPREC); return 1;
 
     case t_INTMOD:
-    {
-      GEN L, P, E, q = gel(x,1), a = gel(x,2);
-      long i;
-      if (!signe(a)) { *pt = gcopy(x); return 1; }
-      av = avma;
-      L = Z_factor(q);
-      P = gel(L,1); l = lg(P);
-      E = gel(L,2);
-      L = cgetg(l, t_VEC);
-      for (i = 1; i < l; i++)
-      {
-        GEN p = gel(P,i), t, b;
-        long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
-        if (v >= e) { gel(L, i) = mkintmod(gen_0, powiu(p, e)); continue; }
-        if (odd(v)) { avma = av; return 0; }
-        t = cvtop(b, gel(P,i), e - v);
-        if (!issquare(t)) { avma = av; return 0; }
-        t = gtrunc(Qp_sqrt(t));
-        if (v) t = mulii(t, powiu(p, v>>1));
-        gel(L,i) = mkintmod(t, powiu(p, e));
-      }
-      *pt = gerepileupto(av, chinese1_coprime_Z(L));
-      return 1;
-    }
+      return Zn_ispower(gel(x,2), gen_2, gel(x,1), pt);
 
     case t_FFELT: return FF_issquareall(x, pt);
 
@@ -718,8 +817,8 @@ long
 issquare(GEN x)
 {
   pari_sp av;
-  GEN p1,a,p;
-  long l, i, v;
+  GEN a, p;
+  long i, v;
 
   switch(typ(x))
   {
@@ -730,52 +829,7 @@ issquare(GEN x)
       return (signe(x)>=0);
 
     case t_INTMOD:
-    {
-      GEN b, q;
-      long w;
-      a = gel(x,2); if (!signe(a)) return 1;
-      av = avma;
-      q = gel(x,1); v = vali(q);
-      if (v) /* > 0 */
-      {
-        long dv;
-        w = vali(a); dv = v - w;
-        if (dv > 0)
-        {
-          if (w & 1) { avma = av; return 0; }
-          if (dv >= 2)
-          {
-            b = w? shifti(a,-w): a;
-            if ((dv>=3 && mod8(b) != 1) ||
-                (dv==2 && mod4(b) != 1)) { avma = av; return 0; }
-          }
-        }
-        q = shifti(q, -v);
-      }
-      /* q is now odd */
-      i = kronecker(a,q);
-      if (i < 0) { avma = av; return 0; }
-      if (i==0)
-      {
-        GEN d = gcdii(a,q);
-        p = gel(Z_factor(d),1); l = lg(p);
-        for (i=1; i<l; i++)
-        {
-          v = Z_pvalrem(a,gel(p,i),&p1);
-          w = Z_pvalrem(q,gel(p,i), &q);
-          if (v < w && (v&1 || kronecker(p1,gel(p,i)) == -1))
-            { avma = av; return 0; }
-        }
-        a = modii(a, q);
-        if (kronecker(a,q) == -1) { avma = av; return 0; }
-      }
-      /* kro(a,q) = 1, q odd: need to factor q and check all p|q
-       * (can't use product formula in case v_p(q) is even for some p) */
-      p = gel(Z_factor(q),1); l = lg(p);
-      for (i=1; i<l; i++)
-        if (kronecker(a,gel(p,i)) == -1) { avma = av; return 0; }
-      return 1;
-    }
+      return Zn_ispower(gel(x,2), gen_2, gel(x,1), NULL);
 
     case t_FRAC:
       return Z_issquare(gel(x,1)) && Z_issquare(gel(x,2));
@@ -934,11 +988,46 @@ Fp_ispower(GEN x, GEN K, GEN p)
   long r;
   x = modii(x, p);
   if (!signe(x) || equali1(x)) { avma = av; return 1; }
-  p_1 = subis(p,1);
+  /* implies p > 2 */
+  p_1 = subiu(p,1);
   K = gcdii(K, p_1);
   if (equaliu(K, 2)) { r = kronecker(x,p); avma = av; return r; }
   x = Fp_pow(x, diviiexact(p_1,K), p);
   avma = av; return equali1(x);
+}
+
+/* x unit defined modulo 2^e, e > 0, p prime */
+static int
+U2_issquare(GEN x, long e)
+{
+  long r = signe(x)>=0?mod8(x):8-mod8(x);
+  if (e==1) return 1;
+  if (e==2) return (r&3L) == 1;
+  return r == 1;
+}
+/* x unit defined modulo p^e, e > 0, p prime */
+static int
+Up_issquare(GEN x, GEN p, long e)
+{ return (equaliu(p,2))? U2_issquare(x, e): kronecker(x,p)==1; }
+
+long
+Zn_issquare(GEN d, GEN fn)
+{
+  long j, np;
+  if (typ(d) != t_INT) pari_err_TYPE("Zn_issquare",d);
+  if (typ(fn) == t_INT)
+    fn = Z_factor(absi(fn));
+  else if (!is_Z_factor(fn))
+    pari_err_TYPE("Zn_issquare",fn);
+  np = nbrows(fn);
+  for (j = 1; j <= np; ++j)
+  {
+    GEN  r, p = gcoeff(fn, j, 1);
+    long e = itos(gcoeff(fn, j, 2));
+    long v = Z_pvalrem(d,p,&r);
+    if (v < e && (odd(v) || !Up_issquare(r, p, e-v))) return 0;
+  }
+  return 1;
 }
 
 long
@@ -967,50 +1056,7 @@ ispower(GEN x, GEN K, GEN *pt)
       return Z_ispower(a, k) && Z_ispower(b, k);
     }
     case t_INTMOD:
-    {
-      GEN L, P, E, q = gel(x,1), a = gel(x,2);
-      pari_sp av;
-      long i, l;
-      if (!signe(a)) {
-        if (pt) *pt = gcopy(x);
-        return 1;
-      }
-      /* a != 0 */
-      av = avma;
-      L = Z_factor(q);
-      P = gel(L,1); l = lg(P);
-      E = gel(L,2);
-      L = cgetg(l, t_VEC);
-      for (i = 1; i < l; i++)
-      {
-        GEN p = gel(P,i), t, b;
-        long w, e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
-        ulong r;
-        if (v >= e) { gel(L, i) = mkintmod(gen_0, powiu(p, e)); continue; }
-        w = udivui_rem(v, K, &r);
-        if (r) { avma = av; return 0; }
-        /* b unit mod p */
-        if (e - v == 1)
-        { /* mod p: faster */
-          if (!Fp_ispower(b, K, p)) { avma = av; return 0; }
-          if (pt) t = Fp_sqrtn(b, K, p, NULL);
-        }
-        else
-        {
-          /* mod p^{2 +} */
-          t = cvtop(b, gel(P,i), e - v);
-          if (!ispower(t, K, &t)) { avma = av; return 0; }
-          t = gtrunc(t);
-        }
-        if (pt)
-        {
-          if (w) t = mulii(t, powiu(p, w));
-          gel(L,i) = mkintmod(t, powiu(p, e));
-        }
-      }
-      if (pt) *pt = gerepileupto(av, chinese1_coprime_Z(L));
-      return 1;
-    }
+      return Zn_ispower(gel(x,2), K, gel(x,1), pt);
     case t_FFELT:
       return FF_ispower(x, K, pt);
 

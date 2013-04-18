@@ -54,3 +54,12 @@ for (k = 1, #v,
 
 isprimepower(541^121)
 ispowerful(4)
+
+p = 10^6+3; q = 10^6+33; r = 10^6+37;
+v = [Mod(p, p^2*q), Mod(6*p, q*(p*r)^2), Mod(6, p^2*q), Mod(4*p, 8*p^2*q)];
+[ispower(a,2) | a<-v]
+[ispower(a,3) | a<-v]
+[if(ispower(a,2,&b), b) | a<-v]
+[if(ispower(a,3,&b), b) | a<-v]
+[if(issquare(a^2,&b), b) | a<-v]
+[if(ispower(a^3,3,&b), b) | a<-v]
