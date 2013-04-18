@@ -2115,18 +2115,14 @@ is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
  *  The routine decomposes n nontrivially into a product of two factors except
  *  in squarefreeness ('Moebius') mode.
  *
- *  ifac_start(n,moebus) same using default hint.
+ *  ifac_start(n,moebius) same using default hint.
  *
  *  ifac_primary_factor()  returns a prime divisor (not necessarily the
  *    smallest) and the corresponding exponent.
  *
- * Encapsulated user interface:
- *  - ifac_decomp()  [ to be called by Z_factor_limit() ]: puts a succession of
- *  prime divisor / exponent pairs onto the stack, unsorted.
- *
- *  - Many arithmetic functions have a 'contributor' ifac_xxx, to be called on
- *  any large composite cofactor left over after trial division by small
- *  primes: xxx is one of moebius, issquarefree, totient, etc.
+ * Encapsulated user interface: Many arithmetic functions have a 'contributor'
+ * ifac_xxx, to be called on any large composite cofactor left over after trial
+ * division by small primes: xxx is one of moebius, issquarefree, totient, etc.
  *
  * We never test whether the input number is prime or composite, since
  * presumably it will have come out of the small factors finder stage
@@ -3034,19 +3030,9 @@ ifac_main(GEN *partial)
  * pairs space to the old one. This whole affair translates into a surprisingly
  * compact routine. */
 
-/* ifac_decomp: find primary factors of n until ifac_break() return true, or n
- * is factored if ifac_break is NULL.
- *
- * ifac_break: return 1: stop factoring, 0 continue.
- *
- * state is private data for ifac_break, which must not leave anything on
- * the stack (except in state).
- * ifac_break is called in ifactor with here = NULL to register n, then
- * whenever a new factor is found. */
-
+/* find primary factors of n */
 static long
-ifac_decomp(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
-            GEN state, long hint)
+ifac_decomp(GEN n, long hint)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   long nb = 0;
@@ -3078,11 +3064,6 @@ ifac_decomp(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
     nb++;
     pairs = icopy_avma(VALUE(here), (pari_sp)pairs);
     pairs = icopy_avma(EXPON(here), (pari_sp)pairs);
-    if (ifac_break && ifac_break(n,pairs,here,state))
-    {
-      if (DEBUGLEVEL >= 3) err_printf("IFAC: (Partial fact.)Stop requested.\n");
-      break;
-    }
     ifac_delete(here);
   }
   avma = (pari_sp)pairs;
@@ -4050,8 +4031,7 @@ special_primes(GEN n, ulong p, long *nb, GEN T)
 
 /* all != 0 : only look for prime divisors < all */
 static GEN
-ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
-        GEN state, ulong all, long hint)
+ifactor(GEN n, ulong all, long hint)
 {
   GEN M;
   pari_sp av;
@@ -4167,19 +4147,8 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     }
     return aux_end(M,n,nb);
   }
-
-  /* test primality */
   if (ifac_isprime(n)) { STOREi(&nb, n, 1); return aux_end(M,n,nb); }
-
-  /* now we have a large composite */
-  if (ifac_break && ifac_break(n,NULL,NULL,state)) /*initialize ifac_break*/
-  {
-    if (DEBUGLEVEL>2)
-      err_printf("IFAC: (Partial fact.) Initial stop requested.\n");
-  }
-  else
-    nb += ifac_decomp(n, ifac_break, state, hint);
-
+  nb += ifac_decomp(n, hint);
   return aux_end(M,n, nb);
 }
 
@@ -4194,46 +4163,22 @@ ifac_next(GEN *part, GEN *p, long *e)
   ifac_delete(here); return 1;
 }
 
-/* state[1]: current unfactored part.
- * state[2]: limit. */
-static long
-ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
-{
-  pari_sp ltop = avma;
-  GEN N;
-  int res;
-  (void)pairs;
-  if (!here) /* initial call */
-    N = n; /*small primes have been removed, n = new unfactored part.*/
-  else
-  {
-    GEN q = powii(VALUE(here), EXPON(here)); /* primary factor found.*/
-    if (DEBUGLEVEL>2) err_printf("IFAC: Stop: Primary factor: %Ps\n",q);
-    N = diviiexact(gel(state,1),q); /* divide unfactored part by q */
-  }
-  affii(N, gel(state,1)); /* affect()ed to state[1] to preserve stack. */
-  if (DEBUGLEVEL>2) err_printf("IFAC: Stop: remaining %Ps\n",state[1]);
-  /* check the stopping criterion, then restore stack */
-  res = cmpii(gel(state,1),gel(state,2)) <= 0;
-  avma = ltop; return res;
-}
-
 /* see before ifac_crack for current semantics of 'hint' (factorint's 'flag') */
 GEN
 factorint(GEN n, long flag)
 {
   if (typ(n) != t_INT) pari_err_TYPE("factorint",n);
-  return ifactor(n,NULL,NULL, 0,flag);
+  return ifactor(n,0,flag);
 }
 
 GEN
 Z_factor_limit(GEN n, ulong all)
 {
   if (!all) all = GP_DATA->primelimit + 1;
-  return ifactor(n,NULL,NULL, all,decomp_default_hint); }
+  return ifactor(n,all,decomp_default_hint); }
 GEN
 Z_factor(GEN n)
-{ return ifactor(n,NULL,NULL, 0,decomp_default_hint); }
+{ return ifactor(n,0,decomp_default_hint); }
 
 int
 is_Z_factor(GEN f)
@@ -4257,10 +4202,40 @@ is_Z_factor(GEN f)
 GEN
 Z_factor_until(GEN n, GEN limit)
 {
-  GEN state = cgetg(3,t_VEC);
- /* icopy is mainly done to allocate memory for affect().
-  * Currently state[1] is discarded in initial call to ifac_break_limit */
-  gel(state,1) = icopy(n);
-  gel(state,2) = gcopy(limit);
-  return ifactor(n, &ifac_break_limit, state, 0, decomp_default_hint);
+  pari_sp av2, av = avma;
+  ulong B = tridiv_bound(n);
+  GEN q, part, F = ifactor(n, B, decomp_default_hint);
+  GEN P = gel(F,1), E = gel(F,2), P2, E2, F2;
+  long l = lg(P), l2;
+
+  av2 = avma;
+  q = gel(P,l-1);
+  if (cmpiu(q, B) <= 0 || cmpii(q, sqru(B)) < 0 || ifac_isprime(q))
+  {
+    avma = av2; return F;
+  }
+  /* q = composite unfactored part, remove from P/E */
+  setlg(E,l-1);
+  setlg(P,l-1);
+  if (cmpii(q, limit) > 0)
+  { /* factor further */
+    l2 = expi(q)+1;
+    P2 = vectrunc_init(l2);
+    E2 = vectrunc_init(l2);
+    F2 = mkmat2(P2,E2);
+    part = ifac_start(q, 0);
+    for(;;)
+    {
+      long e;
+      GEN p;
+      if (!ifac_next(&part,&p,&e)) break;
+      vectrunc_append(P2, p);
+      vectrunc_append(E2, utoipos(e));
+      q = diviiexact(q, powiu(p, e));
+      if (cmpii(q, limit) <= 0) break;
+    }
+    F2 = sort_factor(F2, (void*)&absi_cmp, cmp_nodata);
+    F = merge_factor(F, F2, (void*)&absi_cmp, cmp_nodata);
+  }
+  return gerepilecopy(av, F);
 }
