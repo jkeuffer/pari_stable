@@ -1816,17 +1816,18 @@ compilenode(long n, int mode, long flag)
     {
       entree *ep=getlvalue(x);
       long vn=getmvar(ep);
+      if (tree[x].f!=Fentry)
+      {
+        compilenewptr(vn,ep,n);
+        compilelvalue(x);
+      }
       compilenode(y,Ggen,mode==Gvoid?FLnocopy:flag&FLsurvive);
       if (mode!=Gvoid)
         op_push(OCdup,1,n);
       if (tree[x].f==Fentry)
         compilestore(vn,ep,n);
       else
-      {
-        compilenewptr(vn,ep,n);
-        compilelvalue(x);
         op_push(OCstoreptr,0,x);
-      }
       if (mode!=Gvoid)
         compilecast(n,Ggen,mode);
     }
