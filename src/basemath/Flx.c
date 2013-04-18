@@ -2549,18 +2549,19 @@ smooth_best(long p, long n, long *pt_r, long *pt_nb)
     GEN prC = gdiv(gel(smoothC,r), powuu(p,dC));
     ulong rels = 0;
     av2 = avma;
-    for(d=0; d<dC; d++)
+    for(d=0; d<dC && rels < ULONG_MAX; d++)
     {
       GEN c;
       long dt = dC+2*d;
       GEN smooth = smoothness_vec(p,r,dt);
       GEN pr = gdiv(gel(smooth,r), powuu(p,dt));
       GEN FB = addii(fb,powuu(p,d));
-      GEN N = smooth_cost(subis(FB,rels),pr,prC);
+      GEN N = smooth_cost(subiu(FB,rels),pr,prC);
       GEN Nmax = powuu(p,d+1);
       if (gcmp(N,Nmax) >= 0)
       {
-        rels += gtos(gceil(gmul(gdivgs(sqri(Nmax),6),pr)));
+        rels = itou_or_0(addui(rels, gceil(gmul(gdivgs(sqri(Nmax),6),pr))));
+        if (!rels) rels = ULONG_MAX;
         avma = av2;
         continue;
       }
@@ -2568,7 +2569,9 @@ smooth_best(long p, long n, long *pt_r, long *pt_nb)
       FB = addii(FB,N);
       if ((!bestc || gcmp(gmul2n(c,r), gmul2n(bestc,bestr)) < 0))
       {
-        if (DEBUGLEVEL) err_printf("d=%ld r=%ld fb=%Ps rels=%lu P=%.5Pe -> C=%.5Pe \n",d,r,FB,rels,pr, c);
+        if (DEBUGLEVEL)
+          err_printf("d=%ld r=%ld fb=%Ps early rels=%lu P=%.5Pe -> C=%.5Pe \n"
+                     ,dt,r,FB,rels,pr,c);
         bestc = c;
         bestr = r;
         bestFB = itos_or_0(FB);
