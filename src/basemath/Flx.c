@@ -2372,13 +2372,6 @@ factorel(GEN h, ulong p)
   return mkmat2(p2, e2);
 }
 
-static GEN
-rel21(GEN z, long off, long u, long v)
-{
-  retmkmat2(vecsmall_concat(gel(z,1),mkvecsmall2(off+u,off+v)),
-            vecsmall_concat(gel(z,2),mkvecsmall2(-2,-1)));
-}
-
 static long
 Flx_addifsmooth3(pari_sp *av, struct Flxq_log_rel *r, GEN h, long u, long v, long w, ulong p)
 {
@@ -2389,21 +2382,10 @@ Flx_addifsmooth3(pari_sp *av, struct Flxq_log_rel *r, GEN h, long u, long v, lon
     GEN z = factorel(h, p);
     if (v<0)
       z = mkmat2(vecsmall_append(gel(z,1),off+u),vecsmall_append(gel(z,2),-1));
-    else if (u==v)
-    {
-      if (v==w)
-        z = mkmat2(vecsmall_concat(gel(z,1),mkvecsmall(off+u)),
-            vecsmall_concat(gel(z,2),mkvecsmall(-3)));
-      else
-        z = rel21(z,off,u,w);
-    }
-    else if (u==w)
-        z = rel21(z,off,w,v);
-    else if (v==w)
-        z = rel21(z,off,v,u);
     else
-      z = mkmat2(vecsmall_concat(gel(z,1),mkvecsmall3(off+u,off+v,off+w)),
-          vecsmall_concat(gel(z,2),mkvecsmall3(-1,-1,-1)));
+      z = famatsmall_reduce(mkmat2(
+            vecsmall_concat(gel(z,1),mkvecsmall3(off+u,off+v,off+w)),
+            vecsmall_concat(gel(z,2),mkvecsmall3(-1,-1,-1))));
     gel(r->rel,++r->nbrel) = gerepilecopy(*av,z);
     *av = avma;
   } else avma = *av;
