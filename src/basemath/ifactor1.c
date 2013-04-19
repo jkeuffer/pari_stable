@@ -3172,63 +3172,6 @@ ifac_core(GEN n)
   }
 }
 
-static long
-ifac_omega(GEN n)
-{
-  long omega = 0;
-  pari_sp av = avma, lim = stack_lim(av,1);
-  GEN part = ifac_start(n, 0);
-  for(;;)
-  {
-    long e;
-    GEN p;
-    if (!ifac_next(&part,&p,&e)) { avma = av; return omega; }
-    omega++;
-    ifac_memcheck(av, lim, &part);
-  }
-}
-
-static long
-ifac_bigomega(GEN n)
-{
-  long Omega=0;
-  pari_sp av=avma, lim=stack_lim(av,1);
-  GEN part = ifac_start(n, 0);
-
-  for(;;)
-  {
-    long e;
-    GEN p;
-    if (!ifac_next(&part,&p,&e)) { avma = av; return Omega; }
-    Omega += e;
-    ifac_memcheck(av, lim, &part);
-  }
-}
-
-static GEN
-euler_totient(GEN m, GEN p, long v)
-{
-  m = mulii(m, addsi(-1, p));
-  if (v != 1) m = mulii(m, v == 2? p: powiu(p, v-1));
-  return m;
-}
-static GEN
-ifac_totient(GEN n)
-{
-  GEN m = gen_1, phi = cgeti(lgefint(n));
-  pari_sp av=avma, lim=stack_lim(av,1);
-  GEN part = ifac_start(n, 0);
-
-  for(;;)
-  {
-    long v;
-    GEN p;
-    if (!ifac_next(&part,&p,&v)) return m;
-    m = euler_totient(m, p, v);
-    ifac_memcheck_extra(av, lim, &part, &m,phi);
-  }
-}
-
 /* 1 + p + ... + p^v, p != 2^BIL - 1 */
 static GEN
 u_euler_sumdiv(ulong p, long v)
@@ -3631,73 +3574,36 @@ long
 omega(GEN n)
 {
   pari_sp av = avma;
-  long i, l, nb, v;
-  ulong p;
-  forprime_t S;
-
-  chk_arith(n,"omega"); if (is_pm1(n)) return 0;
-  v = vali(n); nb = v ? 1 : 0;
-  n = shifti(n, -v);
-  if (is_pm1(n)) return nb;
-  setabssign(n);
-  u_forprime_init(&S, 3, tridiv_bound(n));
-  while ((p = u_forprime_next_fast(&S)))
+  GEN F, P;
+  chk_arith(n,"omega");
+  if (lgefint(n) == 3)
   {
-    int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
-    if (v) nb++;
-    if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
+    if (n[2] == 1) return 0;
+    F = factoru(n[2]);
   }
-  l = lg(primetab);
-  for (i = 1; i < l; i++)
-  {
-    v = Z_pvalrem(n, gel(primetab,i), &n);
-    if (v)
-    {
-      nb++;
-      if (is_pm1(n)) { avma = av; return nb; }
-    }
-  }
-  if (ifac_isprime(n)) { avma = av; return nb+1; }
-  /* large composite without small factors */
-  nb += ifac_omega(n);
-  avma = av; return nb;
+  else
+    F = absi_factor(n);
+  P = gel(F,1); avma = av; return lg(P)-1;
 }
 
 long
 bigomega(GEN n)
 {
   pari_sp av = avma;
-  ulong p;
-  long i, l, nb, v;
-  forprime_t S;
-
-  chk_arith(n,"bigomega"); if (is_pm1(n)) return 0;
-  nb = v = vali(n); n = shifti(n, -v);
-  if (is_pm1(n)) { avma = av; return nb; }
-  setabssign(n);
-
-  u_forprime_init(&S, 3, tridiv_bound(n));
-  while ((p = u_forprime_next_fast(&S)))
+  GEN F, E;
+  chk_arith(n,"bigomega");
+  if (lgefint(n) == 3)
   {
-    int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
-    nb += v;
-    if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
+    if (n[2] == 1) return 0;
+    F = factoru(n[2]);
+    E = gel(F,2);
   }
-  l = lg(primetab);
-  for (i = 1; i < l; i++)
+  else
   {
-    v = Z_pvalrem(n, gel(primetab,i), &n);
-    if (v)
-    {
-      nb += v;
-      if (is_pm1(n)) { avma = av; return nb; }
-    }
+    F = absi_factor(n);
+    E = ZV_to_zv(gel(F,2));
   }
-  if (ifac_isprime(n)) { avma = av; return nb+1; }
-  nb += ifac_bigomega(n);
-  avma = av; return nb;
+  avma = av; return zv_sum(E);
 }
 
 /* assume f = factoru(n), possibly with 0 exponents. Return phi(n) */
@@ -3725,53 +3631,30 @@ ulong
 eulerphiu(ulong n)
 {
   pari_sp av = avma;
-  GEN f = factoru(n);
-  avma = av; return eulerphiu_fact(f);
+  GEN F = factoru(n);
+  avma = av; return eulerphiu_fact(F);
 }
 GEN
 eulerphi(GEN n)
 {
   pari_sp av = avma;
-  GEN m;
-  ulong p;
-  long i, l, v;
-  forprime_t T;
+  GEN F, P, E;
+  long i, l;
 
   chk_arith(n,"eulerphi");
   if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
-  v = vali(n); n = shifti(n,-v); setabssign(n);
-  m = v > 1 ? int2n(v-1) : gen_1;
-  if (is_pm1(n)) return gerepileuptoint(av,m);
-
-  u_forprime_init(&T, 3, tridiv_bound(n));
-  while ( (p = u_forprime_next_fast(&T)) )
-  {
-    int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
-    if (v) {
-      m = muliu(m, p-1);
-      if (v > 2) m = mulii(m, powuu(p, v-1));
-      else if (v == 2) m = muliu(m, p);
-    }
-    if (stop) {
-      if (!is_pm1(n)) m = mulii(m, addis(n,-1));
-      return gerepileuptoint(av,m);
-    }
-  }
-  l = lg(primetab);
+  F = absi_factor(n);
+  P = gel(F,1);
+  E = gel(F,2); l = lg(P);
   for (i = 1; i < l; i++)
   {
-    GEN p = gel(primetab,i);
-    v = Z_pvalrem(n, p, &n);
-    if (v)
-    {
-      m = euler_totient(m, p, v);
-      if (is_pm1(n)) return gerepileuptoint(av,m);
-    }
+    GEN p = gel(P,i), q;
+    ulong v = itou(gel(E,i));
+    q = subiu(p,1);
+    if (v != 1) q = mulii(q, v == 2? p: powiu(p, v-1));
+    gel(P,i) = q;
   }
-  if (ifac_isprime(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
-  m = mulii(m, ifac_totient(n));
-  return gerepileuptoint(av,m);
+  return gerepileuptoint(av, ZV_prod(P));
 }
 
 GEN
@@ -3783,6 +3666,7 @@ numdiv(GEN n)
   chk_arith(n,"numdiv");
   if (lgefint(n) == 3)
   {
+    if (n[2] == 1) return gen_1;
     F = factoru(n[2]);
     E = gel(F,2); l = lg(E);
     for (i=1; i<l; i++) E[i]++;
@@ -3803,9 +3687,10 @@ sumdiv(GEN n)
   GEN F, P, E;
   long i, l;
 
-  chk_arith(n,"sumdiv"); if (is_pm1(n)) return gen_1;
+  chk_arith(n,"sumdiv");
   if (lgefint(n) == 3)
   {
+    if (n[2] == 1) return gen_1;
     F = factoru(n[2]);
     P = gel(F,1);
     E = gel(F,2); l = lg(P);
@@ -3831,13 +3716,13 @@ sumdivk(GEN n, long k)
 
   if (!k) return numdiv(n);
   if (k == 1) return sumdiv(n);
-  if (is_pm1(n)) return gen_1;
   if (k ==-1) return gerepileupto(av, gdiv(sumdiv(n), n));
   chk_arith(n,"sumdivk");
   k1 = k;
   if (k < 0)  k = -k;
   if (lgefint(n) == 3)
   {
+    if (n[2] == 1) return gen_1;
     F = factoru(n[2]);
     P = gel(F,1);
     E = gel(F,2); l = lg(P);
