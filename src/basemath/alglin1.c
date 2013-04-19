@@ -3011,6 +3011,7 @@ RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
     if (Wrow[i])
       rrow++;
   rem_singleton(M, iscol, Wrow, &rcol, &rrow);
+  if (rcol<rrow) pari_err_BUG("RgMs_structelim, rcol<rrow");
   for (; rcol>rrow;)
   {
     long w;

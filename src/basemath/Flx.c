@@ -2289,8 +2289,6 @@ _Flxq_rand(void *data)
   return z;
 }
 
-GEN Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p);
-
 static GEN
 Flxq_easylog(void* E, GEN a, GEN g, GEN ord)
 {
