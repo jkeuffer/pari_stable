@@ -1034,6 +1034,7 @@ RgV_polint(GEN X, GEN Y, long v)
       P = gerepileupto(av, P);
     }
   }
+  if (!P) { avma = av; return zeropol(v); }
   return gerepileupto(av0, P);
 }
 /* X,Y are "spec" GEN vectors with n > 1 components ( at X[0], ... X[n-1] ) */
