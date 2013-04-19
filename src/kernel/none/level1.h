@@ -919,16 +919,18 @@ Fl_center(ulong u, ulong p, ulong ps2) { return (long) (u > ps2)? u - p: u; }
 INLINE ulong
 Fl_mul(ulong a, ulong b, ulong p)
 {
+  register ulong x;
   LOCAL_HIREMAINDER;
-  register ulong x = mulll(a,b);
+  x = mulll(a,b);
   if (!hiremainder) return x % p;
   (void)divll(x,p); return hiremainder;
 }
 INLINE ulong
 Fl_sqr(ulong a, ulong p)
 {
+  register ulong x;
   LOCAL_HIREMAINDER;
-  register ulong x = mulll(a,a);
+  x = mulll(a,a);
   if (!hiremainder) return x % p;
   (void)divll(x,p); return hiremainder;
 }
