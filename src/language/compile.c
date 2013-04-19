@@ -68,6 +68,7 @@ typedef enum {Llocal, Lmy} Ltype;
 struct vars_s
 {
   Ltype type; /*Only Llocal and Lmy are allowed */
+  int inl;
   entree *ep;
 };
 
@@ -204,7 +205,8 @@ getfunction(const struct codepos *pos, long arity, long nbmvar, GEN text, long g
       gunclone(data[i+pos->data-1]);
     }
   s_data.n=pos->data;
-  s_lvar.n=pos->localvars;
+  while (s_lvar.n>pos->localvars && !localvars[s_lvar.n-1].inl)
+    s_lvar.n--;
   for(i=1;i<lfram;i++)
   {
     long j=i+pos->frames-1;
@@ -272,6 +274,7 @@ var_push(entree *ep, Ltype type)
 {
   long n=pari_stack_new(&s_lvar);
   localvars[n].ep   = ep;
+  localvars[n].inl  = 0;
   localvars[n].type = type;
 }
 
@@ -1009,35 +1012,41 @@ countvar(GEN arg)
 }
 
 static void
-compilemy(GEN arg, const char *str)
+compilemy(GEN arg, const char *str, int inl)
 {
   long i, j, k, l = lg(arg);
   long n = countvar(arg);
   GEN vep = cgetg(n+1,t_VECSMALL);
   GEN ver = cgetg(n+1,t_VECSMALL);
+  if (inl)
+  {
+    for(j=0; j<s_lvar.n; j++)
+      if(!localvars[j].inl)
+        pari_err(e_MISC,"inline is only valid at top level");
+  }
   for(k=0, i=1; i<l; i++)
   {
     long a=arg[i];
     if (tree[a].f==Fassign)
     {
-       long x = detag(tree[a].x);
-       if (tree[x].f==Fvec && tree[x].x>=0)
-       {
-         GEN vars = listtogen(tree[x].x,Fmatrixelts);
-         long nv = lg(vars)-1;
-         for (j=1; j<=nv; j++)
-         {
-           ver[++k] = vars[j];
-           vep[k] = (long)getvar(ver[k]);
-         }
-         continue;
-       } else ver[++k] = x;
+      long x = detag(tree[a].x);
+      if (tree[x].f==Fvec && tree[x].x>=0)
+      {
+        GEN vars = listtogen(tree[x].x,Fmatrixelts);
+        long nv = lg(vars)-1;
+        for (j=1; j<=nv; j++)
+        {
+          ver[++k] = vars[j];
+          vep[k] = (long)getvar(ver[k]);
+        }
+        continue;
+      } else ver[++k] = x;
     } else ver[++k] = a;
     vep[k] = (long)getvar(ver[k]);
   }
   checkdups(ver,vep);
   for(i=1; i<=n; i++) var_push(NULL,Lmy);
-  op_push_loc(OCnewframe,n,str);
+  op_push_loc(OCnewframe,inl?-n:n,str);
   frame_push(vep);
   for (k=0, i=1; i<l; i++)
   {
@@ -1059,6 +1068,7 @@ compilemy(GEN arg, const char *str)
           k++;
           op_push(OCstorelex,-n+k-1,a);
           localvars[s_lvar.n-n+k-1].ep=(entree*)vep[k];
+          localvars[s_lvar.n-n+k-1].inl=inl;
         }
         continue;
       }
@@ -1070,6 +1080,7 @@ compilemy(GEN arg, const char *str)
     }
     k++;
     localvars[s_lvar.n-n+k-1].ep=(entree*)vep[k];
+    localvars[s_lvar.n-n+k-1].inl=inl;
   }
 }
 
@@ -1177,9 +1188,16 @@ compilefunc(entree *ep, long n, int mode, long flag)
     avma=ltop;
     return;
   }
+  else if (is_func_named(ep,"inline"))
+  {
+    compilemy(arg, str, 1);
+    compilecast(n,Gvoid,mode);
+    avma=ltop;
+    return;
+  }
   else if (is_func_named(ep,"my"))
   {
-    compilemy(arg, str);
+    compilemy(arg, str, 0);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;

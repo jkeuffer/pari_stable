@@ -1,0 +1,3 @@
+Function: inline
+Section: programming/specific
+Help: inline(x,...,z): declare x,...,z as inline variables.

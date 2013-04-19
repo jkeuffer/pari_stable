@@ -1261,9 +1261,10 @@ closure_eval(GEN C)
         break;
       }
     case OCnewframe:
+      if (operand>0) nbmvar+=operand;
+      else operand=-operand;
       pari_stack_alloc(&s_var,operand);
       s_var.n+=operand;
-      nbmvar+=operand;
       for(j=1;j<=operand;j++)
       {
         var[s_var.n-j].flag=PUSH_VAL;
