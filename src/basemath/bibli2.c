@@ -950,8 +950,8 @@ numtoperm(long n, GEN x)
   {
     ulong a;
     x = diviu_rem(x, n+1-r,&a);
-    for (i=r+1; i<=n; i++)
-      if(v[i]>a) v[i]++;
+    for (i=r+1; i<=(ulong)n; i++)
+      if((ulong)v[i]>a) v[i]++;
     v[r] = a+1;
     if (low_stack(lim, stack_lim(av,2)))
       x = gerepileuptoint(av, x);
