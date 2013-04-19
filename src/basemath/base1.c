@@ -307,8 +307,7 @@ ZX_Z_normalize(GEN pol, GEN *ptk)
   }
   sk = signe(k);
   if (!sk) { if (ptk) *ptk = gen_1; return pol; /* monomial! */ }
-  if (sk < 0) k = absi(k);
-  fa = Z_factor_limit(k, 0); k = gen_1;
+  fa = absi_factor_limit(k, 0); k = gen_1;
   P = gel(fa,1);
   E = gel(fa,2);
   POL = leafcopy(pol); a = POL+2;
@@ -1134,7 +1133,7 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   if (fliso) return issquare(gdiv(da,db));
 
   if (odd(q) && signe(da) != signe(db)) return 0;
-  fa = Z_factor_limit(absi(da), 0);
+  fa = absi_factor_limit(da, 0);
   P = gel(fa,1);
   E = gel(fa,2); nP = lg(P) - 1;
   for (i=1; i<nP; i++)

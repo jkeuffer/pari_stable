@@ -2347,7 +2347,7 @@ GenusFieldQuadImag(GEN disc)
   pari_sp av = avma;
   GEN T = NULL, P;
 
-  P = gel(Z_factor(absi(disc)), 1);
+  P = gel(absi_factor(disc), 1);
   l = lg(P);
   l--; /* remove last prime */
   for (i = 1; i < l; i++)

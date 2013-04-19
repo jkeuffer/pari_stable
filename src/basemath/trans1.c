@@ -1273,7 +1273,7 @@ Zn_sqrt(GEN d, GEN fn)
   long j, np;
   if (typ(d) != t_INT) pari_err_TYPE("Zn_sqrt",d);
   if (typ(fn) == t_INT)
-    fn = Z_factor(absi(fn));
+    fn = absi_factor(fn);
   else if (!is_Z_factor(fn))
     pari_err_TYPE("Zn_sqrt",fn);
   np = nbrows(fn);

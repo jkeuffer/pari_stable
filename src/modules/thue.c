@@ -1234,7 +1234,7 @@ static int
 get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPR)
 {
   GEN nf = bnf_get_nf(bnf);
-  GEN fact = Z_factor(a), P = gel(fact,1), E = gel(fact,2), PR;
+  GEN fact = absi_factor(a), P = gel(fact,1), E = gel(fact,2), PR;
   long N = nf_get_degree(nf), nP = lg(P)-1, Ngen, max, nPR, i, j;
 
   max = nP*N; /* upper bound for T->nPR */
@@ -1340,7 +1340,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   if (!signe(a)) return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);
 
-  if (!get_sol_abs(&T, bnf, absi(a), &PR)) return cgetg(1, t_VEC);
+  if (!get_sol_abs(&T, bnf, a, &PR)) return cgetg(1, t_VEC);
   /* |a| > 1 => T.nPR > 0 */
   res = cgetg(T.sindex+1, t_VEC);
   for (i=1; i<=T.sindex; i++)

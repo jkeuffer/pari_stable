@@ -1016,7 +1016,7 @@ Zn_issquare(GEN d, GEN fn)
   long j, np;
   if (typ(d) != t_INT) pari_err_TYPE("Zn_issquare",d);
   if (typ(fn) == t_INT)
-    fn = Z_factor(absi(fn));
+    fn = absi_factor(fn);
   else if (!is_Z_factor(fn))
     pari_err_TYPE("Zn_issquare",fn);
   np = nbrows(fn);
@@ -3918,7 +3918,7 @@ static void
 corediscfact(GEN x, long xmod4, GEN *ptD, GEN *ptP, GEN *ptE)
 {
   long s = signe(x), l, i;
-  GEN fa = Z_factor(s < 0? absi(x): x);
+  GEN fa = absi_factor(x);
   GEN d, P = gel(fa,1), E = gtovecsmall(gel(fa,2));
 
   l = lg(P); d = gen_1;
@@ -3974,7 +3974,7 @@ conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
 static long
 two_rank(GEN x)
 {
-  GEN p = gel(Z_factor(absi(x)),1);
+  GEN p = gel(absi_factor(x),1);
   long l = lg(p)-1;
 #if 0 /* positive disc not needed */
   if (signe(x) > 0)

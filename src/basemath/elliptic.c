@@ -3385,7 +3385,7 @@ ellglobalred_all(GEN e, GEN *pgr, GEN *pv)
   P = gel(S,1); l = lg(P); /* prime divisors of (c4,c6) */
   D  = ell_get_disc(E);
   for (k = 1; k < l; k++) (void)Z_pvalrem(D, gel(P,k), &D);
-  if (!is_pm1(D)) P = ZV_sort( shallowconcat(P, gel(Z_factor(absi(D)),1)) );
+  if (!is_pm1(D)) P = ZV_sort( shallowconcat(P, gel(absi_factor(D),1)) );
   l = lg(P); c = gen_1;
   iN = 1;
   NP = cgetg(l, t_COL);
@@ -4784,7 +4784,7 @@ nagelllutz(GEN e)
     GEN x = gel(lr,i), y = gmul2n(gneg(ellLHS0(e,x)), -1);
     gel(r,++t) = mkvec2(x, y);
   }
-  ld = Z_factor(gmul2n(absi(ell_get_disc(e)), 4));
+  ld = absi_factor(gmul2n(ell_get_disc(e), 4));
   p1 = gel(ld,2); k = lg(p1);
   for (i=1; i<k; i++) gel(p1,i) = shifti(gel(p1,i), -1);
   ld = divisors(ld);

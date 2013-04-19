@@ -296,7 +296,7 @@ get_den(GEN *pnf, GEN T)
     *pnf = nfinitall(T, nf_PARTIALFACT, DEFAULTPREC);
     D = nf_get_disc(proper_nf(*pnf));
     if (is_pm1(D)) return gen_1;
-    fa = Z_factor_limit(D, 0);
+    fa = absi_factor_limit(D, 0);
     P = gel(fa,1); q = gel(P, lg(P)-1);
     if (!BPSW_psp(q)) den = q; /* nf_get_disc(nf) may be incorrect */
   }

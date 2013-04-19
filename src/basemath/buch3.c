@@ -660,16 +660,16 @@ static long
 isprimitive(GEN nf)
 {
   long p, i, l, ep, N = nf_get_degree(nf);
-  GEN d,fa;
+  GEN D, fa;
 
   p = ucoeff(factoru(N), 1,1); /* smallest prime | N */
   if (p == N) return 1; /* prime degree */
 
   /* N = [L:Q] = product of primes >= p, same is true for [L:K]
    * d_L = t d_K^[L:K] --> check that some q^p divides d_L */
-  d = absi(nf_get_disc(nf));
-  fa = gel(Z_factor_limit(d,0),2); /* list of v_q(d_L). Don't check large primes */
-  if (mod2(d)) i = 1;
+  D = nf_get_disc(nf);
+  fa = gel(absi_factor_limit(D,0),2); /* list of v_q(d_L). Don't check large primes */
+  if (mod2(D)) i = 1;
   else
   { /* q = 2 */
     ep = itos(gel(fa,1));
@@ -1926,7 +1926,7 @@ discrayabslist(GEN bnf, GEN L)
   nf = bnf_get_nf(bnf);
   h = bnf_get_no(bnf);
   ID.degk = nf_get_degree(nf);
-  ID.fadk = Z_factor(absi(nf_get_disc(nf)));
+  ID.fadk = absi_factor(nf_get_disc(nf));
   ID.idealrelinit = trivial_fact();
   V = cgetg(l, t_VEC);
   D = cgetg(l, t_VEC);
@@ -2122,7 +2122,7 @@ discrayabslistarch(GEN bnf, GEN arch, ulong bound)
   bnf = checkbnf(bnf);
   nf = bnf_get_nf(bnf); r1 = nf_get_r1(nf);
   degk = nf_get_degree(nf);
-  fadkabs = Z_factor(absi(nf_get_disc(nf)));
+  fadkabs = absi_factor(nf_get_disc(nf));
   h = bnf_get_no(bnf);
   U = init_units(bnf);
   sgnU = nfsign_units(bnf, NULL, 1);

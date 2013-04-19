@@ -121,7 +121,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
       {
         ulong all = (signe(fa) <= 0)? 1: itou(fa);
         dT = ZX_disc(T);
-        fa = Z_factor_limit(absi(dT), all);
+        fa = absi_factor_limit(dT, all);
         break;
       }
       default: pari_err_TYPE("nfmaxord",fa);
@@ -131,9 +131,9 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
   } else {
     dT = ZX_disc(T);
     if (flag & nf_PARTIALFACT)
-      fa = Z_factor_limit(absi(dT), 0);
+      fa = absi_factor_limit(dT, 0);
     else
-      fa = Z_factor(absi(dT));
+      fa = absi_factor(dT);
   }
   S->dT = dT;
   P = gel(fa,1); l = lg(P);
@@ -2085,8 +2085,7 @@ indexpartial(GEN T, GEN DT)
   GEN fa, E, P, res = gen_1, dT = ZX_deriv(T);
 
   if (!DT) DT = ZX_disc(T);
-  DT = absi(DT);
-  fa = Z_factor_limit(DT, 0);
+  fa = absi_factor_limit(DT, 0);
   P = gel(fa,1);
   E = gel(fa,2); nb = lg(P)-1;
   for (i = 1; i <= nb; i++)

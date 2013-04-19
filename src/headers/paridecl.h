@@ -2372,6 +2372,8 @@ GEN     Z_factor_limit(GEN n, ulong all);
 GEN     Z_factor_until(GEN n, GEN limit);
 long    Z_issmooth(GEN m, ulong lim);
 long    Z_issquarefree(GEN x);
+GEN     absi_factor(GEN n);
+GEN     absi_factor_limit(GEN n, ulong all);
 long    bigomega(GEN n);
 GEN     core(GEN n);
 ulong   coreu(ulong n);

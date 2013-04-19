@@ -3789,8 +3789,7 @@ numdiv(GEN n)
   }
   else
   {
-    if (signe(n) < 0) n = absi(n);
-    F = Z_factor(n);
+    F = absi_factor(n);
     E = gel(F,2); l = lg(E);
     for (i=1; i<l; i++) E[i] = gel(E,i)[2] + 1;
   }
@@ -3815,8 +3814,7 @@ sumdiv(GEN n)
   }
   else
   {
-    if (signe(n) < 0) n = absi(n);
-    F = Z_factor(n);
+    F = absi_factor(n);
     P = gel(F,1);
     E = gel(F,2); l = lg(P);
     for (i=1; i<l; i++) gel(P,i) = euler_sumdiv(gel(P,i), gel(E,i)[2]);
@@ -3847,8 +3845,7 @@ sumdivk(GEN n, long k)
   }
   else
   {
-    if (signe(n) < 0) n = absi(n);
-    F = Z_factor(n);
+    F = absi_factor(n);
     P = gel(F,1);
     E = gel(F,2); l = lg(P);
     for (i=1; i<l; i++) gel(P,i) = euler_sumdivk(gel(P,i), gel(E,i)[2], k);
@@ -3930,9 +3927,10 @@ special_primes(GEN n, ulong p, long *nb, GEN T)
   return 0;
 }
 
-/* all != 0 : only look for prime divisors < all */
+/* factor(sn*|n|), where sn = -1,1 or 0.
+ * all != 0 : only look for prime divisors < all */
 static GEN
-ifactor(GEN n, ulong all, long hint)
+ifactor_sign(GEN n, ulong all, long hint, long sn)
 {
   GEN M;
   pari_sp av;
@@ -3940,8 +3938,7 @@ ifactor(GEN n, ulong all, long hint)
   ulong lim;
   forprime_t T;
 
-  i = signe(n);
-  if (!i) retmkmat2(mkcol(gen_0), mkcol(gen_1));
+  if (!sn) retmkmat2(mkcol(gen_0), mkcol(gen_1));
   if (lgefint(n) == 3)
   { /* small integer */
     GEN f, Pf, Ef, P, E, F = cgetg(3, t_MAT);
@@ -3954,7 +3951,7 @@ ifactor(GEN n, ulong all, long hint)
     Pf = gel(f,1);
     Ef = gel(f,2);
     l = lg(Pf);
-    if (i < 0)
+    if (sn < 0)
     { /* add sign */
       long L = l+1;
       gel(F,1) = P = cgetg(L, t_COL);
@@ -3975,7 +3972,7 @@ ifactor(GEN n, ulong all, long hint)
     return F;
   }
   M = cgetg(3,t_MAT);
-  if (i < 0) STORE(&nb, utoineg(1), 1);
+  if (sn < 0) STORE(&nb, utoineg(1), 1);
   if (is_pm1(n)) return aux_end(M,NULL,nb);
 
   n = gclone(n); setabssign(n);
@@ -4053,6 +4050,10 @@ ifactor(GEN n, ulong all, long hint)
   return aux_end(M,n, nb);
 }
 
+static GEN
+ifactor(GEN n, ulong all, long hint)
+{ return ifactor_sign(n, all, hint, signe(n)); }
+
 int
 ifac_next(GEN *part, GEN *p, long *e)
 {
@@ -4076,10 +4077,21 @@ GEN
 Z_factor_limit(GEN n, ulong all)
 {
   if (!all) all = GP_DATA->primelimit + 1;
-  return ifactor(n,all,decomp_default_hint); }
+  return ifactor(n,all,decomp_default_hint);
+}
+GEN
+absi_factor_limit(GEN n, ulong all)
+{
+  if (!all) all = GP_DATA->primelimit + 1;
+  return ifactor_sign(n,all,decomp_default_hint, signe(n)?1 : 0);
+}
 GEN
 Z_factor(GEN n)
 { return ifactor(n,0,decomp_default_hint); }
+GEN
+absi_factor(GEN n)
+{ return ifactor_sign(n, 0, decomp_default_hint, signe(n)? 1: 0); }
+
 
 int
 is_Z_factor(GEN f)
