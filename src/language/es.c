@@ -2099,7 +2099,7 @@ dbg(GEN x, long nb, long bl)
       blancs(bl); pari_puts("code = "); dbg(closure_get_code(x),nb,bl);
       blancs(bl); pari_puts("operand = "); dbg(closure_get_oper(x),nb,bl);
       blancs(bl); pari_puts("data = "); dbg(closure_get_data(x),nb,bl);
-      blancs(bl); pari_puts("debug = "); dbg(closure_get_dbg(x),nb,bl);
+      blancs(bl); pari_puts("dbg/frpc/fram = "); dbg(closure_get_dbg(x),nb,bl);
       if (lg(x)>=7)
       {
         blancs(bl); pari_puts("text = "); dbg(closure_get_text(x),nb,bl);
@@ -2621,17 +2621,21 @@ print_context(GEN g, pariout_t *T, outString *S, long tex)
   if (lg(g)>=8 && lg(gel(g,7))>1 && lg(gmael(g,5,3))>=2)
   {
     GEN v = gel(g,7), d = gmael3(g,5,3,1);
-    long i, l = lg(v);
+    long i, l = lg(v), n=0;
+    for(i=1; i<l; i++)
+      if (gel(d,i))
+        n++;
+    if (n==0) return;
     str_puts(S,"my(");
     for(i=1; i<l; i++)
       if (gel(d,i))
       {
         entree *ep = (entree*) gel(d,i);
-        if (i>1)
-          str_putc(S,',');
         str_puts(S,ep->name);
         str_putc(S,'=');
         if (tex) texi(gel(v,l-i),T,S); else bruti(gel(v,l-i),T,S);
+        if (--n)
+          str_putc(S,',');
       }
     str_puts(S,");");
   }
