@@ -595,6 +595,13 @@ zv_neg(GEN M)
   return N;
 }
 GEN
+zv_neg_inplace(GEN M)
+{
+  long l = lg(M);
+  while (--l > 0) M[l] = -M[l];
+  return M;
+}
+GEN
 ZM_neg(GEN x)
 {
   long l;

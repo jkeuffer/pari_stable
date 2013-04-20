@@ -2870,7 +2870,12 @@ of a positive integer, and $0$ otherwise. Useful for sanity checks but not
 matrix all of whose entries are positive integers.
 
 \fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
-prime factors of the \typ{INT} \kbd{n} are less or equal to $lim$.
+prime factors of the \typ{INT} $n$ are less or equal to $lim$.
+
+\fun{GEN}{Z_issmooth}{GEN n, ulong lim} returns \kbd{NULL} if a prime
+factor of the \typ{INT} $n$ is $> lim$, and returns the factorization
+of $n$ otherwise, as a \typ{MAT} with \typ{VECSMALL} columns (word-size
+primes and exponents).
 
 \fun{long}{Z_issquarefree}{GEN n} returns $1$ if the \typ{INT} \kbd{n}
 is square-free, and $0$ otherwise.
@@ -5930,6 +5935,10 @@ $x_{i,i}>x_{i,j} \ge 0$.
 
 \fun{GEN}{zv_neg}{GEN x} return $-x$. No check for overflow is done, which
 occurs in the fringe case where an entry is equal to $2^{\B-1}$.
+
+\fun{GEN}{zv_neg}{GEN x} negates $x$ in place and return it. No check for
+overflow is done, which occurs in the fringe case where an entry is equal to
+$2^{\B-1}$.
 
 \fun{GEN}{zv_z_mul}{GEN x, long n} return $n\*x$. No check for overflow is
 done.

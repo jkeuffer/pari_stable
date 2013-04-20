@@ -3750,14 +3750,46 @@ Z_issmooth(GEN m, ulong lim)
   u_forprime_init(&S, 2, lim);
   while ((p = u_forprime_next_fast(&S)))
   {
-    if (!umodiu(m,p))
-    {
-      int stop;
-      Z_lvalrem_stop(m, p, &stop);
-      if (stop) { avma = av; return cmpiu(m,lim)<=0; }
-    }
+    int stop;
+    Z_lvalrem_stop(m, p, &stop);
+    if (stop) { avma = av; return cmpiu(m,lim)<=0; }
   }
   avma = av; return 0;
+}
+
+GEN
+Z_issmooth_fact(GEN m, ulong lim)
+{
+  pari_sp av=avma;
+  GEN F, P, E;
+  ulong p;
+  long i = 1, l = expi(m)+1;
+  forprime_t S;
+  m = absi(m);
+  P = cgetg(l, t_VECSMALL);
+  E = cgetg(l, t_VECSMALL);
+  F = mkmat2(P,E);
+  u_forprime_init(&S, 2, lim);
+  while ((p = u_forprime_next_fast(&S)))
+  {
+    long v;
+    int stop;
+    if ((v = Z_lvalrem_stop(m, p, &stop)))
+    {
+      P[i] = p;
+      E[i] = v; i++;
+      if (stop)
+      {
+        if (cmpiu(m,lim) > 0) break;
+        P[i] = m[2];
+        E[i] = 1; i++;
+        setlg(P, i);
+        setlg(E, i);
+        return F;
+      }
+    }
+  }
+  avma = av; return NULL;
 }
 
 /***********************************************************************/
