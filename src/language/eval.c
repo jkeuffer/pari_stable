@@ -1919,11 +1919,12 @@ closure_relink(GEN C, hashtable *table)
   GEN fram = gel(closure_get_dbg(C),3);
   long i, j;
   for(i=1;i<lg(oper);i++)
-    if (opcode_need_relink((op_code)code[i]))
+    if (oper[i] && opcode_need_relink((op_code)code[i]))
       oper[i] = (long) hash_search(table,(void*) oper[i])->val;
   for (i=1;i<lg(fram);i++)
     for (j=1;j<lg(gel(fram,i));j++)
-      mael(fram,i,j) = (long) hash_search(table,(void*) mael(fram,i,j))->val;
+      if (mael(fram,i,j))
+        mael(fram,i,j) = (long) hash_search(table,(void*) mael(fram,i,j))->val;
 }
 
 void
@@ -1954,17 +1955,18 @@ closure_unlink(GEN C)
   GEN fram = gel(closure_get_dbg(C),3);
   long i, j;
   for(i=1;i<lg(oper);i++)
-    if (opcode_need_relink((op_code) code[i]))
+    if (oper[i] && opcode_need_relink((op_code) code[i]))
     {
       long n = pari_stack_new(&s_relocs);
       relocs[n] = (entree *) oper[i];
     }
   for (i=1;i<lg(fram);i++)
     for (j=1;j<lg(gel(fram,i));j++)
-    {
-      long n = pari_stack_new(&s_relocs);
-      relocs[n] = (entree *) mael(fram,i,j);
-    }
+      if (mael(fram,i,j))
+      {
+        long n = pari_stack_new(&s_relocs);
+        relocs[n] = (entree *) mael(fram,i,j);
+      }
 }
 
 static void
