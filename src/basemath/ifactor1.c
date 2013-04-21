@@ -2684,8 +2684,8 @@ update_pow(GEN where, GEN factor, long exp, pari_sp *av)
  * factor below *where, and *where is updated. Two cases:
  * - entry = factor^k is a pure power: factor^k is inserted, leaving *where
  *   unchanged;
- * - entry = factor * cofactor (coprime): both factors are inserted in the
- *   correct order, updating *where
+ * - entry = factor * cofactor (not necessarily coprime): both factors are
+ *   inserted in the correct order, updating *where
  * The inserted factors class is set to unknown, they inherit the exponent
  * (or a multiple thereof) of their ancestor.
  *
@@ -3399,22 +3399,25 @@ moebius(GEN n)
   {
     int stop;
     v = Z_lvalrem_stop(n, p, &stop);
-    if (v > 1) { avma = av; return 0; }
-    if (v) s = -s;
-    if (stop) { avma = av; return is_pm1(n)? s: -s; }
+    if (v)
+    {
+      if (v > 1) { avma = av; return 0; }
+      s = -s;
+      if (stop) { avma = av; return is_pm1(n)? s: -s; }
+    }
   }
   l = lg(primetab);
   for (i = 1; i < l; i++)
   {
     v = Z_pvalrem(n, gel(primetab,i), &n);
-    if (v > 1) { avma = av; return 0; }
     if (v)
     {
+      if (v > 1) { avma = av; return 0; }
       s = -s;
       if (is_pm1(n)) { avma = av; return s; }
     }
   }
-  if (ifac_isprime(n)) { avma=av; return -s; }
+  if (ifac_isprime(n)) { avma = av; return -s; }
   /* large composite without small factors */
   v = ifac_moebius(n);
   avma = av; return (s<0 ? -v : v); /* correct also if v==0 */
