@@ -137,6 +137,7 @@ BA 110- galoisfixedfield() could return a wrong result for polynomials with
    113- changing primelimit from within forprime loop yielded unpredictable
         results (potential SEGV)
    114- polinterpolate(anything, 0 vector) -> SEGV
+   115- log(t_FRAC close to 1) => junk (idem lngamma) [#1238]
 
   Changed
     1- mathnf: swapped flag 3 and 5.

@@ -2583,6 +2583,19 @@ glog(GEN x, long prec)
       gel(y,1) = logr_abs(x);
       gel(y,2) = mppi(realprec(x)); return y;
 
+    case t_FRAC:
+    {
+      GEN a, b;
+      long e1, e2;
+      av = avma;
+      a = gel(x,1);
+      b = gel(x,2);
+      e1 = expi(subii(a,b)); e2 = expi(b);
+      if (e2 > e1) prec += nbits2nlong(e2 - e1);
+      x = fractor(x, prec);
+      return gerepileupto(av, glog(x, prec));
+    }
+
     case t_COMPLEX:
       if (ismpzero(gel(x,2))) return glog(gel(x,1), prec);
       l = precision(x); if (l > prec) prec = l;

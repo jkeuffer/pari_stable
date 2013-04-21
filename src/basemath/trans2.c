@@ -1085,6 +1085,16 @@ cxgamma(GEN s0, int dolog, long prec)
     double st = typ(s) == t_REAL? 0.0: rtodbl(imag_i(s));
     double la, l,l2,u,v, rlogs, ilogs;
 
+    if (dolog)
+    {
+      /* loggamma(1+u) ~ - Euler * u: cancellation if u is small */
+      if (fabs(ssig-1) + fabs(st) < 0.0001)
+      { /* s ~ 1, take care */
+        long e = gexpo(gsubgs(s,1));
+        prec += nbits2nlong(-e);
+        s = gprec_w(s, prec);
+      }
+    }
     dcxlog(ssig,st, &rlogs,&ilogs);
     /* Re (s - 1/2) log(s) */
     u = (ssig - 0.5)*rlogs - st * ilogs;
@@ -1222,7 +1232,7 @@ cxgamma(GEN s0, int dolog, long prec)
       if (gsigne(imag_i(s)) > 0) togglesign(b);
       /* z = 2Pi round( Im(z)/2Pi - b ) */
       z = gmul(roundr(gsub(gdiv(imag_i(z), pi2), b)), pi2);
-      if (signe(z)) {
+      if (signe(z)) { /* y += I*z */
         if (typ(y) == t_COMPLEX)
           gel(y,2) = gadd(gel(y,2), z);
         else
@@ -1488,6 +1498,18 @@ glngamma(GEN x, long prec)
         return cxgamma(x, 1, prec);
       av = avma;
       return gerepileuptoleaf(av, logr_abs( itor(mpfact(itos(x) - 1), prec) ));
+    case t_FRAC:
+    {
+      GEN a, b;
+      long e1, e2;
+      av = avma;
+      a = gel(x,1);
+      b = gel(x,2);
+      e1 = expi(subii(a,b)); e2 = expi(b);
+      if (e2 > e1) prec += nbits2nlong(e2 - e1);
+      x = fractor(x, prec);
+      return gerepileupto(av, cxgamma(x, 1, prec));
+    }
 
     case t_REAL: case t_COMPLEX:
       return cxgamma(x, 1, prec);
