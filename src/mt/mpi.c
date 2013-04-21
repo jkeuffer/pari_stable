@@ -146,6 +146,7 @@ pari_MPI_child(void)
   long size;
   GEN worker = NULL, work, done;
   struct gp_context rec;
+  if (!diffptr) initprimetable(500000);
   gp_context_save(&rec);
   if (setjmp(child_env))
   {
