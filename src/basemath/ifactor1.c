@@ -3082,7 +3082,7 @@ ifac_decomp(GEN n, long hint)
  * housekeeping etc. Call them on any large composite left over after trial
  * division, and multiply/add the result onto whatever you already have from
  * the small factors. */
-void
+static void
 ifac_memcheck(pari_sp av,pari_sp lim, GEN *part)
 {
   if (low_stack(lim, stack_lim(av,1)))
