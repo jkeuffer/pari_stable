@@ -1794,7 +1794,7 @@ ZM_gauss(GEN a, GEN b0)
 {
   pari_sp av = avma, av2;
   int iscol;
-  long n, ncol, i, m;
+  long n, ncol, i, m, elim;
   ulong p;
   GEN N, C, delta, xb, nb, nmin, res, b = b0;
 
@@ -1817,7 +1817,8 @@ ZM_gauss(GEN a, GEN b0)
     else
       delta = mulii(delta, ni);
   }
-  if (!signe(nmin)) { avma = av; return NULL; }
+  if (!signe(nmin)) return NULL;
+  elim = expi(delta)+1;
   av2 = avma;
 #ifdef LONG_IS_64BIT
   p = 1000000000000000000;
@@ -1829,6 +1830,8 @@ ZM_gauss(GEN a, GEN b0)
     p = unextprime(p+1);
     C = Flm_inv(ZM_to_Flm(a, p), p);
     if (C) break;
+    elim -= expu(p);
+    if (elim < 0) return NULL;
     avma = av2;
   }
   /* N.B. Our delta/lambda are SQUARES of those in the paper
