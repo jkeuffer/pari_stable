@@ -671,7 +671,7 @@ Up_ispower(GEN b, GEN K, GEN p, long d, GEN *pt)
 }
 
 /* We're studying whether a mod (q*p^e) is a K-th power, (q,p) = 1.
- * Decide mod p^e, then reduce a mod q. */
+ * Decide mod p^e, then reduce a mod q unless q = NULL. */
 static int
 handle_pe(GEN *pa, GEN q, GEN L, GEN K, GEN p, long e)
 {
@@ -685,12 +685,12 @@ handle_pe(GEN *pa, GEN q, GEN L, GEN K, GEN p, long e)
     if (r || !Up_ispower(A, K, p, d, L? &t: NULL)) return 0;
     if (L && v) t = mulii(t, powiu(p, v));
   }
-  *pa = modii(*pa, q);
+  if (q) *pa = modii(*pa, q);
   if (L) vectrunc_append(L, mkintmod(t, powiu(p, e)));
   return 1;
 }
 long
-Zn_ispower(GEN a, GEN K, GEN q, GEN *pt)
+Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
 {
   GEN L, N;
   pari_sp av;
@@ -708,9 +708,22 @@ Zn_ispower(GEN a, GEN K, GEN q, GEN *pt)
   }
   /* a != 0 */
   av = avma;
-  if (equaliu(K,2)) K = gen_2;
-  q = icopy(q);
+
+  if (typ(q) != t_INT) /* integer factorization */
+  {
+    GEN P = gel(q,1), E = gel(q,2);
+    l = lg(P);
+    L = pt? vectrunc_init(l): NULL;
+    for (i = 1; i < l; i++)
+    {
+      GEN p = gel(P,i);
+      long e = itos(gel(E,i));
+      if (!handle_pe(&a, NULL, L, K, p, e)) { avma = av; return 0; }
+    }
+    goto END;
+  }
   L = pt? vectrunc_init(expi(q)+1): NULL;
+  q = icopy(q);
   u_forprime_init(&S, 2, tridiv_bound(q));
   while ((pp = u_forprime_next(&S)))
   {
@@ -718,7 +731,11 @@ Zn_ispower(GEN a, GEN K, GEN q, GEN *pt)
     e = Z_lvalrem_stop(q, pp, &stop);
     if (!e) continue;
     if (!handle_pe(&a, q, L, K, utoipos(pp), e)) { avma = av; return 0; }
-    if (stop) goto END;
+    if (stop)
+    {
+      if (!handle_pe(&a, q, L, K, q, 1)) { avma = av; return 0; }
+      goto END;
+    }
   }
   l = lg(primetab);
   for (i = 1; i < l; i++)
@@ -804,7 +821,7 @@ issquareall(GEN x, GEN *pt)
       *pt = gsqrt(x, DEFAULTPREC); return 1;
 
     case t_INTMOD:
-      return Zn_ispower(gel(x,2), gen_2, gel(x,1), pt);
+      return Zn_ispower(gel(x,2), gel(x,1), gen_2, pt);
 
     case t_FFELT: return FF_issquareall(x, pt);
 
@@ -829,7 +846,7 @@ issquare(GEN x)
       return (signe(x)>=0);
 
     case t_INTMOD:
-      return Zn_ispower(gel(x,2), gen_2, gel(x,1), NULL);
+      return Zn_ispower(gel(x,2), gel(x,1), gen_2, NULL);
 
     case t_FRAC:
       return Z_issquare(gel(x,1)) && Z_issquare(gel(x,2));
@@ -1015,10 +1032,8 @@ Zn_issquare(GEN d, GEN fn)
 {
   long j, np;
   if (typ(d) != t_INT) pari_err_TYPE("Zn_issquare",d);
-  if (typ(fn) == t_INT)
-    fn = absi_factor(fn);
-  else if (!is_Z_factor(fn))
-    pari_err_TYPE("Zn_issquare",fn);
+  if (typ(fn) == t_INT) return Zn_ispower(d, fn, gen_2, NULL);
+  /* integer factorization */
   np = nbrows(fn);
   for (j = 1; j <= np; ++j)
   {
@@ -1056,7 +1071,7 @@ ispower(GEN x, GEN K, GEN *pt)
       return Z_ispower(a, k) && Z_ispower(b, k);
     }
     case t_INTMOD:
-      return Zn_ispower(gel(x,2), K, gel(x,1), pt);
+      return Zn_ispower(gel(x,2), gel(x,1), K, pt);
     case t_FFELT:
       return FF_ispower(x, K, pt);
 

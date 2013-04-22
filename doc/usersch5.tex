@@ -3234,6 +3234,12 @@ a $p$-adic square, $0$ otherwise.
 a square modulo \kbd{n} (possibly not prime), where $n$ is either a \typ{INT}
 or is given by its factorisation matrix. Return $0$ otherwise.
 
+\fun{long}{Zn_ispower}{GEN x, GEN n, GEN K, GEN *py} returns 1 if \typ{INT}
+$x$ is a $K$-th power modulo \kbd{n} (possibly not prime), where $n$ is
+either a \typ{INT} or is given by its factorisation matrix. Return $0$
+otherwise. If \kbd{py} is not \kbd{NULL}, set it to $y$ such that $y^K = x$
+modulo $n$.
+
 \fun{GEN}{pgener_Fp_local}{GEN p, GEN L}, \kbd{L} being a vector of
 primes dividing $p - 1$, returns an integer $x$ which is a generator of the
 $\ell$-Sylow of $\F_p^*$ for every $\ell$ in \kbd{L}. In other words,
