@@ -2349,10 +2349,10 @@ ifac_find(GEN partial)
   return NULL;
 }
 
-/* Defragment: collect and squeeze out any unoccupied slots above *where
- * during a downward sweep. Unoccupied slots arise when a composite factor
- * dissolves completely whilst dividing off a prime, or when ifac_resort()
- * spots a coincidence and merges two factors. *where is updated */
+/* Defragment: squeeze out unoccupied slots above *where. Unoccupied slots
+ * arise when a composite factor dissolves completely whilst dividing off a
+ * prime, or when ifac_resort() spots a coincidence and merges two factors.
+ * Update *where */
 static void
 ifac_defrag(GEN *partial, GEN *where)
 {
@@ -2431,18 +2431,13 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
  * this to re-sort several unknowns must proceed upward, see ifac_resort().
  * Bubble-sort-of-thing sort. Won't be exercised frequently, so this is ok */
 static void
-ifac_sort_one(GEN *partial, GEN *where, GEN washere)
+ifac_sort_one(GEN *where, GEN washere)
 {
   GEN old, scan = washere - 3;
   GEN value, exponent, class0, class1;
   long cmp_res;
 
   if (scan < *where) return; /* nothing to do, washere==*where */
-#ifdef IFAC_DEBUG
-  ifac_check(*partial, *where);
-  if (!washere || washere < *where || washere > LAST(*partial))
-    pari_err_BUG("ifac_sort_one ['washere' out of bounds]");
-#endif
   value    = VALUE(washere);
   exponent = EXPON(washere);
   class0 = CLASS(washere);
@@ -2512,14 +2507,15 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
 
 /* Sort all current unknowns downward to where they belong. Sweeps in the
  * upward direction. Not needed after ifac_crack(), only when ifac_divide()
- * returned true. May update *where. */
+ * returned true. Update *where. */
 static void
 ifac_resort(GEN *partial, GEN *where)
 {
-  GEN scan, scan_end = LAST(*partial);
-  for (scan = *where; scan <= scan_end; scan += 3)
-    if (VALUE(scan) && !CLASS(scan)) /* slot occupied with an unknown */
-      ifac_sort_one(partial, where, scan);
+  GEN scan, end;
+  ifac_defrag(partial, where); end = LAST(*partial);
+  for (scan = *where; scan <= end; scan += 3)
+    if (VALUE(scan) && !CLASS(scan)) ifac_sort_one(where, scan); /*unknown*/
+  ifac_defrag(partial, where); /* remove newly created gaps */
 }
 
 /* Let x be a t_INT known not to have small divisors (< 2^14). Return 0 if x
@@ -2950,13 +2946,11 @@ ifac_main(GEN *partial)
   while (CLASS(here) != gen_2)
   {
     if (CLASS(here) == gen_0) /* composite: crack it */
-    {
-      /* make sure there's room for another factor */
+    { /* make sure there's room for another factor */
       if (here < *partial + 6)
       {
-        ifac_defrag(partial, &here); /* try defrag first */
-        if (here < *partial + 6) /* no luck */
-          ifac_realloc(partial, &here, 1); /* guaranteed to work */
+        ifac_defrag(partial, &here);
+        if (here < *partial + 6) ifac_realloc(partial, &here, 1); /* no luck */
       }
       nf = ifac_crack(partial, &here, moebius_mode);
       if (moebius_mode && EXPON(here) != gen_1) /* that was a power */
@@ -2980,9 +2974,7 @@ ifac_main(GEN *partial)
                        "\t%Ps\n", *here);
           return gen_0;
         }
-        ifac_defrag(partial, &here);
         ifac_resort(partial, &here); /* sort new cofactors down */
-        ifac_defrag(partial, &here); /* resort may have created new gaps */
         ifac_whoiswho(partial, &here, -1);
       }
       continue;
