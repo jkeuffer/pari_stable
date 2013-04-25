@@ -2022,17 +2022,16 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   avma = av; return an;
 }
 
-/* return the vector of values (1/i)*exp(-iA) for i = 1...n */
+/* return the vector of A^i/i for i = 1...n */
 static GEN
-mpveciexp(GEN A, long n)
+mpvecpowdiv(GEN A, long n)
 {
-  GEN p1 = powruvec(invr(mpexp(A)), n);
+  GEN v = powruvec(A, n);
   pari_sp av = avma;
   long i;
 
-  for (i=2; i<=n; i++, avma = av)
-    affrr(divru(gel(p1,i), i), gel(p1,i));
-  return p1;
+  for (i=2; i<=n; i++) affrr(divru(gel(v,i), i), gel(v,i));
+  avma = av; return v;
 }
 
 static void GetST0(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec);
@@ -2047,7 +2046,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 {
   pari_sp av = avma, av1, av2;
   long ncond, n, j, k, n0;
-  GEN N0, C, T = *pT, S = *pS, cf0, cf1, an, degs, cs;
+  GEN N0, C, T = *pT, S = *pS, an, degs, cs;
   LISTray LIST;
 
   /* initializations */
@@ -2095,63 +2094,59 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   {
     GEN c0 = gel(C,j), c1 = divur(1, c0), c2 = divur(2, c0);
     GEN ec1 = mpexp(c1), ec2 = mpexp(c2), LChar = gel(vChar,j);
+    GEN vf0, vf1, cf0, cf1;
     const long nChar = lg(LChar)-1, NN = N0[j];
 
     if (DEBUGLEVEL>1)
       err_printf("* conductor no %ld/%ld (N = %ld)\n\tInit: ", j,ncond,NN);
     if (realprec(ec1) > prec) ec1 = rtor(ec1, prec);
     if (realprec(ec2) > prec) ec2 = rtor(ec2, prec);
+    switch(cs[j])
+    {
+    case 1:
+      cf0 = gen_1;
+      cf1 = c0;
+      vf0 = mpveceint1(rtor(c1, prec), ec1, NN);
+      vf1 = mpvecpowdiv(invr(ec1), NN); break;
+
+    case 3:
+      cf0 = sqrtr(mppi(prec));
+      cf1 = gmul2n(cf0, 1);
+      cf0 = gmul(cf0, c0);
+      vf0 = mpvecpowdiv(invr(ec2), NN);
+      vf1 = mpveceint1(rtor(c2, prec), ec2, NN); break;
+
+    default:
+      cf0 = cf1 = NULL; /* FIXME: not implemented */
+      vf0 = vf1 = NULL;
+    }
     for (k = 1; k <= nChar; k++)
     {
       const long t = LChar[k], d = degs[t];
       const GEN dtcr = gel(dataCR, t), z = gel(ch_CHI(dtcr), 2);
-      GEN vf0, vf1;
       GEN p1 = gen_0, p2 = gen_0;
       int **matan;
       long c = 0;
 
-      switch(cs[j])
-      {
-      case 1:
-        cf0 = gen_1;
-        cf1 = c0;
-        vf0 = mpveceint1(rtor(c1, prec), ec1, NN);
-        vf1 = mpveciexp(c1, NN); break;
-
-      case 3:
-        cf0 = sqrtr(mppi(prec));
-        cf1 = gmul2n(cf0, 1);
-        cf0 = gmul(cf0, c0);
-        vf0 = mpveciexp(c2, NN);
-        vf1 = mpveceint1(rtor(c2, prec), ec2, NN); break;
-
-      default:
-        cf0 = gen_0; cf1 = gen_0;
-        vf0 = gen_0; vf1 = gen_0;
-      }
-      av2 = avma;
-
       if (DEBUGLEVEL>1)
         err_printf("\tcharacter no: %ld (%ld/%ld)\n", t,k,nChar);
-      if (!isintzero( ch_comp(gel(dataCR, t)) ))
+      if (isintzero( ch_comp(gel(dataCR, t)) ))
       {
-        matan = computean(gel(dataCR,t), &LIST, NN, d);
-        for (n = 1; n <= NN; n++)
-          if ((an = EvalCoeff(z, matan[n], d)))
-          {
-            p1 = gadd(p1, gmul(an, gel(vf0,n)));
-            p2 = gadd(p2, gmul(an, gel(vf1,n)));
-            if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
-          }
-        gaffect(gmul(cf0, p1), gel(S,t));
-        gaffect(gmul(cf1,  gconj(p2)), gel(T,t));
-        FreeMat(matan,NN); avma = av2;
+        if (DEBUGLEVEL>1) err_printf("\t  no need to compute this character\n");
+        continue;
       }
-      else
-      {
-        if (DEBUGLEVEL>1)
-          err_printf("\t  no need to compute this character\n");
-      }
+      av2 = avma;
+      matan = computean(gel(dataCR,t), &LIST, NN, d);
+      for (n = 1; n <= NN; n++)
+        if ((an = EvalCoeff(z, matan[n], d)))
+        {
+          p1 = gadd(p1, gmul(an, gel(vf0,n)));
+          p2 = gadd(p2, gmul(an, gel(vf1,n)));
+          if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
+        }
+      gaffect(gmul(cf0, p1), gel(S,t));
+      gaffect(gmul(cf1,  gconj(p2)), gel(T,t));
+      FreeMat(matan,NN); avma = av2;
     }
     if (DEBUGLEVEL>1) err_printf("\n");
     avma = av1;
