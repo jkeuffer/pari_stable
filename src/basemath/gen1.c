@@ -2738,7 +2738,12 @@ gdiv(GEN x, GEN y)
       gel(z,2) = gdiv(gel(x,2), y); return z;
     }
     /* y is POL, SER or RFRAC */
-    av = avma; y = ginvmod(gmod(y,X), X);
+    av = avma;
+    switch(ty)
+    {
+      case t_RFRAC: y = gmod(ginv(y), X); break;
+      default: y = ginvmod(gmod(y,X), X);
+    }
     return gerepileupto(av, mul_polmod_same(X, gel(x,2), y));
   }
   /* x and y are not both is_scalar_t. If one of them is scalar, it's not a
