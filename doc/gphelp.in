@@ -197,6 +197,7 @@ sub open_viewer_then_quit {
   my $F = shift;
   my ($f, $viewer, $redirect);
   my $win32 = ($^O =~ /(cyg|ms)win/);
+  my $osx = ($^O =~ /darwin/);
 
   $f = "$F.dvi";
   $f = "$F.dvi.gz" if (! -f "$f");
@@ -217,6 +218,10 @@ sub open_viewer_then_quit {
     $F =~ s,/cygdrive/(.),$1:, ; # Reader can't cope with Cygwin paths
     $F      = "\"$F\"";
     $viewer = "\"$viewer\"";
+  }
+  elsif ($osx)
+  {
+    $viewer = "open";
   }
   else
   { # PDF generic

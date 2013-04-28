@@ -316,6 +316,7 @@ BA 97- zv_cmp0 renamed to zv_equal0
 BA110- permtonum/numtoperm now use the standard lexicographic numbering
   111- issquare(t_INTMOD), ispower(t_INTMOD): factor modulus incrementally,
        in case we hit a local non-residue -> early abort [#1376]
+  112- gphelp + OS/X : make "open" the default PDF viewer (was "acroread")
 
   Added
     1- mathnf for matrices over K[X] [#41]
