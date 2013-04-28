@@ -1298,7 +1298,7 @@ QM_ImQ_hnf(GEN x)
 
   n = lg(x); if (n==1) return gcopy(x);
   m = lgcols(x); x = RgM_shallowcopy(x);
-  c = const_vecsmall(n-1, 0);
+  c = zero_zv(n-1);
   av1 = avma; lim = stack_lim(av1,1);
   for (k=1; k<m; k++)
   {

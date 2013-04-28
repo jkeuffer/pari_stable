@@ -81,7 +81,7 @@ gen_BG_init(struct bg_data *bg, GEN E, GEN N, GEN bnd, GEN ap)
   for (  ; i <= bg->lp; i++, avma = av)
     bg->ap[i] = itos(ellap(E, utoipos(bg->p[i])));
   avma = av;
-  bg->an = const_vecsmall(bg->rootbnd, 0);
+  bg->an = zero_zv(bg->rootbnd);
   bg->an[1] = 1;
 }
 

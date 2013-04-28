@@ -1044,7 +1044,7 @@ F3xq_ellcard_naive(GEN a2, GEN a6, GEN T)
   pari_sp av = avma;
   long i, d = get_Flx_degree(T), lx = d+2;
   long q = upowuu(3, d), a;
-  GEN x = const_vecsmall(lx,0); x[1] = get_Flx_var(T);
+  GEN x = zero_zv(lx); x[1] = get_Flx_var(T);
   for(a=1, i=0; i<q; i++)
   {
     GEN rhs;
@@ -1063,7 +1063,7 @@ Flxq_ellcard_naive(GEN a4, GEN a6, GEN T, ulong p)
   pari_sp av = avma;
   long i, d = get_Flx_degree(T), lx = d+2;
   long q = upowuu(p, d), a;
-  GEN x = const_vecsmall(lx,0); x[1] = get_Flx_var(T);
+  GEN x = zero_zv(lx); x[1] = get_Flx_var(T);
   for(a=1, i=0; i<q; i++)
   {
     GEN x2, rhs;

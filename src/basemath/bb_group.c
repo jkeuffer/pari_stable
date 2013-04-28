@@ -625,7 +625,7 @@ gen_select_order(GEN o, void *E, const struct bb_group *grp)
   long lo = lg(o), nbo=lo-1;
   if (nbo == 1) return icopy(gel(o,1));
   so = ZV_indexsort(o); /* minimize max( o[i+1] - o[i] ) */
-  vo = const_vecsmall(lo, 0);
+  vo = zero_zv(lo);
   lastgood = gel(o, so[nbo]);
   btop = avma;
   for(;;)

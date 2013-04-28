@@ -1065,7 +1065,7 @@ nfsign_arch(GEN nf, GEN x, GEN arch)
   if (typ(x) == t_MAT)
   { /* factorisation */
     GEN g = gel(x,1), e = gel(x,2);
-    V = const_vecsmall(n, 0);
+    V = zero_zv(n);
     for (i=1; i<lg(g); i++)
       if (mpodd(gel(e,i)))
         Flv_add_inplace(V, nfsign_arch(nf,gel(g,i),archp), 2);
@@ -1671,7 +1671,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     prk = idealpow(nf, pr, gel(S->e,index));
     for (i = 1; i < l; i++)
     {
-      GEN G = gel(g,i), sgn = const_vecsmall(narchp,0); /*positive at f_oo*/
+      GEN G = gel(g,i), sgn = zero_zv(narchp); /*positive at f_oo*/
       y = zerocol(S->n);
       (void)zlog_pk(nf, G, y + yind, pr, prk, L2, &sgn);
       zlog_add_sign(y, sgn, S->lists);
@@ -1779,7 +1779,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
         { /* log(g^f) mod divisor */
           GEN g = gel(G,k), f = gel(F,k), a = nfpowmodideal(nf,g,f,x);
           GEN sgn = mpodd(f)? nfsign_arch(nf, g, S.archp)
-                            : const_vecsmall(lg(S.archp)-1, 0);
+                            : zero_zv(lg(S.archp)-1);
           gel(h,++cp) = ZC_neg(zlog_ind(nf, a, &S, sgn, i));
           gcoeff(h,cp,cp) = f;
         }

@@ -3267,7 +3267,7 @@ ginv(GEN x)
     case t_VECSMALL:
     {
       long i, lx = lg(x)-1;
-      y = const_vecsmall(lx,0);
+      y = zero_zv(lx);
       for (i=1; i<=lx; i++)
       {
         long xi = x[i];

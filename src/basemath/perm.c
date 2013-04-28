@@ -592,8 +592,8 @@ group_quotient(GEN G, GEN H)
   GEN used = zero_F2v(le+1);
   long l = le/o;
   p2 = cgetg(l+1, t_VEC);
-  p3 = const_vecsmall(n, 0);
-  el = const_vecsmall(n, 0);
+  p3 = zero_zv(n);
+  el = zero_zv(n);
   for (i = 1; i<=le; i++)
     el[mael(elt,i,1)]=i;
   for (i = 1; i <= l; ++i)

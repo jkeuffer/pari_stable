@@ -1621,8 +1621,8 @@ ZM_hnfperm(GEN A, GEN *ptU, GEN *ptperm)
     return cgetg(1, t_MAT);
   }
   m = nbrows(A);
-  c = const_vecsmall(m, 0);
-  l = const_vecsmall(n, 0);
+  c = zero_zv(m);
+  l = zero_zv(n);
   perm = cgetg(m+1, t_VECSMALL);
   av1 = avma; lim = stack_lim(av1,1);
   A = RgM_shallowcopy(A);
@@ -1749,7 +1749,7 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
     if (ptB) *ptB = cgetg(1,t_MAT);
     return cgetg(1,t_MAT);
   }
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   h = const_vecsmall(n, m);
   av1 = avma; lim = stack_lim(av1,1);
   A = RgM_shallowcopy(A);

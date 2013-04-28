@@ -1147,7 +1147,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_VECSMALL:
     case min_VECSMALL2:
       if (sBORNE <= 0) return cgetg(1, t_VECSMALL);
-      L = const_vecsmall(sBORNE, 0);
+      L = zero_zv(sBORNE);
       if (flag == min_VECSMALL2) sBORNE <<= 1;
       if (n == 1) return L;
       break;
@@ -1200,7 +1200,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_PERF:
       avma = av1;
       maxrank = (n*(n+1)) >> 1;
-      L = const_vecsmall(maxrank, 0);
+      L = zero_zv(maxrank);
       V = cgetg(1+maxrank, t_VECSMALL);
   }
 

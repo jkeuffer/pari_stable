@@ -1156,8 +1156,8 @@ champion(GEN atkin, long k, GEN bound_champ)
   cost_vec = get_lgatkin(atkin, k);
   if (k == 1) return mkvec2(gen_1, utoipos(cost_vec[1]));
 
-  B  = const_vecsmall(two_k, 0);
-  Bp = const_vecsmall(two_k, 0);
+  B  = zero_zv(two_k);
+  Bp = zero_zv(two_k);
   Bp[2] = 1;
   for (n = 2, j = 2; j <= k; j++)
   {

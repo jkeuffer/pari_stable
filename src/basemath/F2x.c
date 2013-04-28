@@ -562,7 +562,7 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
     if (pr) *pr = vecsmall_copy(x);
     return z;
   }
-  z = const_vecsmall(lg(x)-lg(y)+2, 0); z[1] = vs;
+  z = zero_zv(lg(x)-lg(y)+2); z[1] = vs;
   x = vecsmall_copy(x);
   while (dx>=dy)
   {
@@ -620,7 +620,7 @@ F2x_deflate(GEN x, long d)
   if (d <= 1) return Flx_copy(x);
   if (dx < 0) return leafcopy(x);
   dy = dx/d; /* dy+1 coefficients + 1 extra word for variable */
-  y = const_vecsmall(nbits2lg(dy+1)-1, 0); y[1] = x[1];
+  y = zero_zv(nbits2lg(dy+1)-1); y[1] = x[1];
   for (i=id=0; i<=dy; i++,id+=d)
     if (F2x_coeff(x,id)) F2x_set(y, i);
   return y;
@@ -636,8 +636,8 @@ F2x_even_odd(GEN p, GEN *pe, GEN *po)
   if (n <= 0) { *pe = leafcopy(p); *po = pol0_F2x(p[1]); return; }
 
   n0 = (n>>1)+1; n1 = n+1 - n0; /* n1 <= n0 <= n1+1 */
-  p0 = const_vecsmall(nbits2lg(n0+1)-1, 0); p0[1] = p[1];
-  p1 = const_vecsmall(nbits2lg(n1+1)-1, 0); p1[1] = p[1];
+  p0 = zero_zv(nbits2lg(n0+1)-1); p0[1] = p[1];
+  p1 = zero_zv(nbits2lg(n1+1)-1); p1[1] = p[1];
   for (i=0; i<n1; i++)
   {
     if (F2x_coeff(p,i<<1)) F2x_set(p0,i);
@@ -1227,7 +1227,7 @@ F2xq_log_Coppersmith(long nbrel, long r, long n, GEN T)
 static GEN
 smallirred_F2x(ulong n, long sv)
 {
-  GEN a = const_vecsmall(nbits2lg(n+1)-1,0);
+  GEN a = zero_zv(nbits2lg(n+1)-1);
   a[1] = sv; F2x_set(a,n); a[2]++;
   while (!F2x_is_irred(a)) a[2]+=2;
   return a;

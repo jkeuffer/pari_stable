@@ -669,7 +669,7 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   if (ly==1) return zero_Flx(vs);
   l = lgcols(x);
   y++;
-  z = const_vecsmall(l,0) + 1;
+  z = zero_zv(l) + 1;
   if (SMALL_ULONG(p))
   {
     for (k=1; k<ly; k++)
@@ -717,7 +717,7 @@ GEN
 Flx_nbfact_by_degree(GEN z, long *nb, ulong p)
 {
   long lgg, d = 0, e = degpol(z);
-  GEN D = const_vecsmall(e, 0);
+  GEN D = zero_zv(e);
   pari_sp av = avma;
   GEN g, w,  PolX = polx_Flx(z[1]);
   GEN XP = Flxq_powu(PolX,p,z,p);
@@ -1663,7 +1663,7 @@ F2x_split_Berlekamp(GEN *t)
       pol = F2v_to_F2x(gel(vker,2), sv);
     else
     {
-      GEN v = const_vecsmall(lb,0);
+      GEN v = zero_zv(lb);
       v[1] = du;
       v[2] = random_Fl(2); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
@@ -1740,7 +1740,7 @@ Flx_split_Berlekamp(GEN *t, ulong p)
   /* t[i] irreducible for i < ir, still to be treated for i < L */
   for (L=1; L<d; )
   {
-    GEN pol = const_vecsmall(l-2,0);
+    GEN pol = zero_zv(l-2);
     pol[1] = sv;
     pol[2] = random_Fl(p); /*Assume vker[1]=1*/
     for (i=2; i<=d; i++)

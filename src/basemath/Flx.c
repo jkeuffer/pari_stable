@@ -984,7 +984,7 @@ static GEN
 Flx_invBarrett_Newton(GEN T, ulong p)
 {
   long nold, lx, lz, lq, l = degpol(T), lQ;
-  GEN q, y, z, x = const_vecsmall(l+1, 0) + 2;
+  GEN q, y, z, x = zero_zv(l+1) + 2;
   ulong mask = quadratic_prec_mask(l-2); /* assume l > 2 */
   pari_sp av;
 
@@ -1271,7 +1271,7 @@ Flx_divrem_Barrett_noGC(GEN x, GEN mg, GEN T, ulong p, GEN *pr)
   if (lt <= 1)
     return Flx_divrem_basecase(x,T,p,pr);
   if (pr != ONLY_REM && l>lm)
-    q = const_vecsmall(l-lt+1, 0);
+    q = zero_zv(l-lt+1);
   r = Flx_copy(x);
   while (l>lm)
   {
@@ -2338,7 +2338,7 @@ static GEN
 smallirred_Flx(long p, ulong n, long sv)
 {
   long i;
-  GEN a = const_vecsmall(n+2,0);
+  GEN a = zero_zv(n+2);
   a[1] = sv; a[n+2] = 1;
   while (!Flx_is_irred(a, p))
    for(i=2;;i++)
@@ -2403,8 +2403,8 @@ static void
 Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, ulong p)
 {
   long l = lg(C)-2, la, lb;
-  GEN a = const_vecsmall(l+2,0); /*We allocate one extra word to catch overflow*/
-  GEN b = const_vecsmall(l+2,0);
+  GEN a = zero_zv(l+2); /*We allocate one extra word to catch overflow*/
+  GEN b = zero_zv(l+2);
   pari_sp av = avma;
   long i,j,k, dh=0;
   for(i=0; ; i++, Flx_cnext(a, p))
@@ -2592,7 +2592,7 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
   if (DEBUGLEVEL) timer_printf(&ti," model change");
   AV = 0; aa=a;
   M = cgetg(2*nb+1, t_VEC);
-  V = const_vecsmall(2*nb,0);
+  V = zero_zv(2*nb);
   e = 0; g = pol1_Flx(b[1]);
   gel(M, 1) = Flxq_log_find_rel(b, r, T, p, &g, &e);
   V[1] = e;

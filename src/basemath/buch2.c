@@ -369,7 +369,7 @@ subFB_change(FB_t *F)
 {
   long i, iyes, minsFB, lv = F->KC + 1, l = lg(F->subFB)-1;
   pari_sp av = avma;
-  GEN yes, L_jid = F->L_jid, present = const_vecsmall(lv-1, 0);
+  GEN yes, L_jid = F->L_jid, present = zero_zv(lv-1);
 
   switch (F->sfb_chg)
   {
@@ -1633,8 +1633,8 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
 
   fact = (FACT*)stack_malloc((F.KC+1)*sizeof(FACT));
   xar = split_ideal(nf, &F, x, Vbase, L, fact);
-  nW = lg(W)-1; Wex = const_vecsmall(nW, 0);
-  nB = lg(B)-1; Bex = const_vecsmall(nB, 0);
+  nW = lg(W)-1; Wex = zero_zv(nW);
+  nB = lg(B)-1; Bex = zero_zv(nB);
   for (i=1; i<=fact[0].pr; i++)
   {
     long k = fact[i].pr;
@@ -2681,7 +2681,7 @@ be_honest(FB_t *F, GEN nf, GEN auts, FACT *fact)
     /* all P|p in FB + last is unramified --> check all but last */
     if (isclone(P) && pr_get_e(gel(P,J-1)) == 1) J--;
     if (DEBUGLEVEL>1) err_printf("%ld ", p);
-    done_by_autom = const_vecsmall(J, 0);
+    done_by_autom = zero_zv(J);
 
     for (j=1; j<J; j++)
     {

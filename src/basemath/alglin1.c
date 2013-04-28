@@ -129,7 +129,7 @@ gen_ker(GEN x, long deplin, void *E, const struct bb_field *ff)
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
   m=nbrows(x); r=0;
   x = RgM_shallowcopy(x);
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -207,7 +207,7 @@ gen_Gauss_pivot(GEN x, long *rr, void *E, const struct bb_field *ff)
   m=nbrows(x); r=0;
   d = cgetg(n+1, t_VECSMALL);
   x = RgM_shallowcopy(x);
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
@@ -502,7 +502,7 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
   n = lg(x)-1;
   m=nbrows(x); r=0;
 
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   d = new_chunk(n+1);
   a = 0; /* for gcc -Wall */
   for (k=1; k<=n; k++)
@@ -782,7 +782,7 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
 
   m=nbrows(x); r=0;
   d=cgetg(n+1,t_VECSMALL);
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   for (k=1; k<=n; k++)
   {
     for (j=1; j<=m; j++)
@@ -1717,7 +1717,7 @@ matid_Flm(long n)
   GEN y = cgetg(n+1,t_MAT);
   long i;
   if (n < 0) pari_err_DOMAIN("matid_Flm", "dimension","<",gen_0,stoi(n));
-  for (i=1; i<=n; i++) { gel(y,i) = const_vecsmall(n, 0); ucoeff(y, i,i) = 1; }
+  for (i=1; i<=n; i++) { gel(y,i) = zero_zv(n); ucoeff(y, i,i) = 1; }
   return y;
 }
 
@@ -1954,7 +1954,7 @@ ZM_detmult(GEN A)
   if (!n) return gen_1;
   m = nbrows(A);
   if (n < m) return gen_0;
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   av1 = avma;
   B = zeromatcopy(m,m);
   v = cgetg(m+1, t_COL);
@@ -2061,7 +2061,7 @@ keri(GEN x)
   av0 = avma; m = nbrows(x);
   pp = cgetg(n+1,t_COL);
   x = RgM_shallowcopy(x);
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   l = cgetg(n+1, t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
   for (r=0, p=gen_1, k=1; k<=n; k++)
@@ -2139,7 +2139,7 @@ deplin(GEN x0)
   nc = lg(x)-1; if (!nc) { avma=av; return cgetg(1,t_COL); }
   nl = nbrows(x);
   d = const_vec(nl, gen_1); /* pivot list */
-  c = const_vecsmall(nl, 0);
+  c = zero_zv(nl);
   l = cgetg(nc+1, t_VECSMALL); /* not initialized */
   ck = NULL; /* gcc -Wall */
   for (k=1; k<=nc; k++)
@@ -2193,7 +2193,7 @@ gauss_pivot_ker(GEN x0, GEN *dd, long *rr)
   m=nbrows(x0); r=0;
   pivot = get_pivot_fun(x0, &data);
   x = RgM_shallowcopy(x0);
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   d = cgetg(n+1,t_VECSMALL);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -2246,7 +2246,7 @@ RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot)
   d = cgetg(n+1, t_VECSMALL);
   x = RgM_shallowcopy(x0);
   m = nbrows(x); r = 0;
-  c = const_vecsmall(m, 0);
+  c = zero_zv(m);
   av = avma; lim = stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
@@ -2516,7 +2516,7 @@ get_suppl(GEN x, GEN d, long r)
   n = nbrows(x);
   if (rx == n && r == 0) return gcopy(x);
   y = cgetg(n+1, t_MAT);
-  av = avma; c = const_vecsmall(n,0);
+  av = avma; c = zero_zv(n);
   /* c = lines containing pivots (could get it from gauss_pivot, but cheap)
    * In theory r = 0 and d[j] > 0 for all j, but why take chances? */
   for (k = j = 1; j<=rx; j++)
@@ -2826,11 +2826,11 @@ RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
   long i,j,k;
   long nbcol = lg(M)-1, lA = lg(A);
   GEN prow = cgetg(nbrow+1, t_VECSMALL);
-  GEN pcol = const_vecsmall(nbcol, 0);
+  GEN pcol = zero_zv(nbcol);
   pari_sp av = avma;
   long rcol = nbcol, rrow = 0, imin = nbcol - usqrt(nbcol);
   GEN iscol = const_vecsmall(nbcol, 1);
-  GEN Wrow  = const_vecsmall(nbrow, 0);
+  GEN Wrow  = zero_zv(nbrow);
   GEN wcol = cgetg(nbcol+1, t_VECSMALL);
   pari_sp av2=avma;
   for (i = 1; i <= nbcol; ++i)

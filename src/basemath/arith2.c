@@ -975,7 +975,7 @@ digits(GEN x, GEN B)
   else
   {
     ulong b = B[2];
-    z = const_vecsmall(lz,0);
+    z = zero_zv(lz);
     digits_dacsmall(x,b,lz,(ulong*)(z+1));
     return gerepileupto(av,vecsmall_to_vec(z));
   }

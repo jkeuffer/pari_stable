@@ -419,8 +419,8 @@ shallowmatconcat(GEN v)
       return M;
     case t_MAT:
       h = lgcols(v);
-      maxh = const_vecsmall(h-1, 0);
-      maxl = const_vecsmall(l-1, 0);
+      maxh = zero_zv(h-1);
+      maxl = zero_zv(l-1);
       for (j = 1; j < l; j++)
         for (i = 1; i < h; i++)
         {

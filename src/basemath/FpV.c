@@ -294,7 +294,7 @@ Flm_Flc_mul_i_2(GEN x, GEN y, long lx, long l)
     if (!z) z = Flv_copy(gel(x,j));
     else for (i = 1; i < l; i++) z[i] ^= coeff(x,i,j);
   }
-  if (!z) z = const_vecsmall(l-1, 0);
+  if (!z) z = zero_zv(l-1);
   return z;
 }
 
@@ -403,7 +403,7 @@ F2m_mul(GEN x, GEN y)
   z = cgetg(ly,t_MAT);
   if (lx==1)
   {
-    for (i=1; i<ly; i++) gel(z,i) = const_vecsmall(1,0);
+    for (i=1; i<ly; i++) gel(z,i) = mkvecsmall(0);
     return z;
   }
   l = coeff(x,1,1);

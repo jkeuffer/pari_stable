@@ -590,7 +590,7 @@ trivial_relations(struct buch_quad *B, GEN mat, GEN C)
   for (i = 1; i <= B->KC; i++)
   { /* ramified prime ==> trivial relation */
     if (umodiu(D, B->FB[i])) continue;
-    col = const_vecsmall(B->KC, 0);
+    col = zero_zv(B->KC);
     col[i] = 2; j++;
     gel(mat,j) = col;
     gel(C,j) = gen_0;
@@ -1089,13 +1089,13 @@ START:
     }
     if (BQ.PRECREG) {
       for (i = triv+1; i<=need; i++) {
-        gel(mat,i) = const_vecsmall(BQ.KC, 0);
+        gel(mat,i) = zero_zv(BQ.KC);
         gel(extraC,i) = cgetr(BQ.PRECREG);
       }
       real_relations(&BQ, need - triv, &current, s,LIMC,mat + triv,extraC + triv);
     } else {
       for (i = triv+1; i<=need; i++) {
-        gel(mat,i) = const_vecsmall(BQ.KC, 0);
+        gel(mat,i) = zero_zv(BQ.KC);
         gel(extraC,i) = gen_0;
       }
       imag_relations(&BQ, need - triv, &current, LIMC,mat + triv);

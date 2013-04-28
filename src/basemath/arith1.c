@@ -2854,7 +2854,7 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   }
   setlg(r.rel,r.nbrel+1); s.M = r.rel;
   gerepileall(av2, 2, &s.M, &s.g);
-  s.V = const_vecsmall(r.nbrel,0);
+  s.V = zero_zv(r.nbrel);
   s.V[1] = s.e;
   AV = 0; aa=a; BV = 0; bb=b; l=NULL;
   while (1)

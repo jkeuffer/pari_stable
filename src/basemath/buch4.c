@@ -592,7 +592,7 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   den  = gel(p1,3);
   cH = nbrows(HB);
   lB = lg(HB) - cH;
-  v = const_vecsmall(ls-1, 0);
+  v = zero_zv(ls-1);
   N0 = N;
   for (i=1; i<ls; i++)
   {

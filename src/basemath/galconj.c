@@ -698,7 +698,7 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   td->L = L;
   td->M = M;
   td->TM = shallowtrans(M);
-  td->PV = const_vecsmall(n, 0);
+  td->PV = zero_zv(n);
   gel(td->PV, 2) = Vmatrix(2, td);
 }
 
@@ -1188,7 +1188,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   forprime_t S;
   if (DEBUGLEVEL >= 1) timer_start(&ti);
   n = degpol(T);
-  O = const_vecsmall(n, 0);
+  O = zero_zv(n);
   F = factoru_pow(n);
   Fp = gel(F,1); np = lg(Fp)-1;
   Fe = gel(F,2);
@@ -1588,7 +1588,7 @@ s4galoisgen(struct galois_lift *gl)
   gel(res,2) = mkvecsmall4(2,2,3,2);
   ltop2 = avma;
   sg = identity_perm(6);
-  pj = const_vecsmall(6, 0);
+  pj = zero_zv(6);
   sigma = cgetg(n+1, t_VECSMALL);
   tau = cgetg(n+1, t_VECSMALL);
   phi = cgetg(n+1, t_VECSMALL);
@@ -1797,8 +1797,8 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   gt.C = cgetg(gf->fp+1,t_VEC);
   gt.Cd= cgetg(gf->fp+1,t_VEC);
   for (i = 1; i <= gf->fp; i++) {
-    gel(gt.C,i)  = const_vecsmall(gt.g, 0);
-    gel(gt.Cd,i) = const_vecsmall(gt.g, 0);
+    gel(gt.C,i)  = zero_zv(gt.g);
+    gel(gt.Cd,i) = zero_zv(gt.g);
   }
 
   F =factoru(gf->fp);
@@ -2381,7 +2381,7 @@ galoiscosets(GEN O, GEN perm)
   long i, j, k, u, f, l = lg(O);
   GEN RC, C = cgetg(l,t_VECSMALL), o = gel(O,1);
   pari_sp av = avma;
-  f = lg(o); u = o[1]; RC = const_vecsmall(lg(perm)-1, 0);
+  f = lg(o); u = o[1]; RC = zero_zv(lg(perm)-1);
   for(i=1,j=1; j<l; i++)
   {
     GEN p = gel(perm,i);

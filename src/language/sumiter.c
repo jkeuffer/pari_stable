@@ -1266,7 +1266,7 @@ vecteursmall(GEN nmax, GEN code)
 
   m = gtos(nmax);
   if (m < 0)  pari_err_DOMAIN("vectorsmall", "dimension", "<", gen_0, stoi(m));
-  if (!code) return const_vecsmall(m, 0);
+  if (!code) return zero_zv(m);
   y = cgetg(m+1,t_VECSMALL); push_lex(c,code);
   for (i=1; i<=m; i++)
   {

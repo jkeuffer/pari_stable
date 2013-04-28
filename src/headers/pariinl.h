@@ -350,7 +350,7 @@ INLINE GEN
 zero_F2v(long m)
 {
   long l = nbits2nlong(m);
-  GEN v  = const_vecsmall(l+1, 0);
+  GEN v  = zero_Flv(l+1);
   v[1] = m;
   return v;
 }
@@ -392,7 +392,7 @@ col_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
 vec_ei(long n, long i) { GEN e = zerovec(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
-vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
+vecsmall_ei(long n, long i) { GEN e = zero_zv(n); e[i] = 1; return e; }
 INLINE GEN
 Rg_col_ei(GEN x, long n, long i) { GEN e = zerocol(n); gel(e,i) = x; return e; }
 
