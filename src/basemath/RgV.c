@@ -547,26 +547,23 @@ matid(long n) {
   GEN y = cgetg(n+1, t_MAT);
   fill_scalmat(y, gen_1, gen_0, n); return y;
 }
-static void
-fill_scalcol(GEN y, GEN t, long n)
+
+INLINE GEN
+scalarcol_i(GEN x, long n, long c)
 {
   long i;
-  if (n < 0) pari_err_DOMAIN("fill_scalcol", "size", "<", 0, stoi(n));
-  if (n) {
-    gel(y,1) = t;
-    for (i=2; i<=n; i++) gel(y,i) = gen_0;
-  }
-}
-GEN
-scalarcol(GEN x, long n) {
   GEN y = cgetg(n+1,t_COL);
-  fill_scalcol(y, gcopy(x), n); return y;
+  if (!n) return y;
+  gel(y,1) = c? gcopy(x): x;
+  for (i=2; i<=n; i++) gel(y,i) = gen_0;
+  return y;
 }
+
 GEN
-scalarcol_shallow(GEN x, long n) {
-  GEN y = cgetg(n+1,t_COL);
-  fill_scalcol(y, x, n); return y;
-}
+scalarcol(GEN x, long n) { return scalarcol_i(x,n,1); }
+
+GEN
+scalarcol_shallow(GEN x, long n) { return scalarcol_i(x,n,0); }
 
 int
 RgM_isscalar(GEN x, GEN s)
