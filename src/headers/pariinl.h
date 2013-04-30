@@ -1793,6 +1793,8 @@ RgX_copy(GEN x)
   return y;
 }
 INLINE GEN
+RgX_renormalize(GEN x) { return RgX_renormalize_lg(x, lg(x)); }
+INLINE GEN
 RgX_div(GEN x, GEN y) { return RgX_divrem(x,y,NULL); }
 INLINE GEN
 RgX_rem(GEN x, GEN y) { return RgX_divrem(x,y,ONLY_REM); }

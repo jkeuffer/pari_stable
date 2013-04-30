@@ -6863,6 +6863,10 @@ where $n\geq 0$. Shallow function.
 \fun{GEN}{RgX_renormalize}{GEN x} remove leading terms in \kbd{x} which are
 equal to (necessarily inexact) zeros.
 
+\fun{GEN}{RgX_renormalize_lg}{GEN x, long lx} as \kbd{setlg(x, lx)}
+followed by \kbd{RgX\_renormalize(x)}. Assumes that $\kbd{lx} \leq
+\kbd{lg(x)}$.
+
 \fun{GEN}{RgX_gtofp}{GEN x, GEN prec} returns the polynomial obtained by
 applying
 \bprog

@@ -481,9 +481,9 @@ QXQV_to_mod(GEN V, GEN T)
 }
 
 GEN
-RgX_renormalize(GEN x)
+RgX_renormalize_lg(GEN x, long lx)
 {
-  long i, lx = lg(x);
+  long i;
   for (i = lx-1; i>1; i--)
     if (! gequal0(gel(x,i))) break; /* _not_ isexactzero */
   stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
@@ -1660,7 +1660,15 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   dy = degpol(y); y_lead = gel(y,dy+2);
   if (gequal1(y_lead)) return T? RgXQX_divrem(x,y, T, ptr): RgX_divrem(x,y, ptr);
   dx = degpol(x);
-  if (dx < dy) { *ptr = RgX_copy(x); return pol_0(varn(x)); }
+  if (dx < dy) { *ptr = RgX_copy(x); return pol_0(vx); }
+  if (dx == dy)
+  {
+    GEN x_lead = gel(x,lg(x)-1);
+    x = RgX_renormalize_lg(leafcopy(x), lg(x)-1);
+    y = RgX_renormalize_lg(leafcopy(y), lg(y)-1);
+    r = RgX_sub(RgX_Rg_mul(x, y_lead), RgX_Rg_mul(y, x_lead));
+    *ptr = gerepileupto(av, r); return scalarpol(x_lead, vx);
+  }
   (void)new_chunk(2);
   x = RgX_recip_shallow(x)+2;
   y = RgX_recip_shallow(y)+2;
