@@ -3750,7 +3750,7 @@ Z_issmooth(GEN m, ulong lim)
   while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    Z_lvalrem_stop(m, p, &stop);
+    (void)Z_lvalrem_stop(m, p, &stop);
     if (stop) { avma = av; return cmpiu(m,lim)<=0; }
   }
   avma = av; return 0;

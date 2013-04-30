@@ -2872,7 +2872,7 @@ matrix all of whose entries are positive integers.
 \fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
 prime factors of the \typ{INT} $n$ are less or equal to $lim$.
 
-\fun{GEN}{Z_issmooth}{GEN n, ulong lim} returns \kbd{NULL} if a prime
+\fun{GEN}{Z_issmooth_fact}{GEN n, ulong lim} returns \kbd{NULL} if a prime
 factor of the \typ{INT} $n$ is $> lim$, and returns the factorization
 of $n$ otherwise, as a \typ{MAT} with \typ{VECSMALL} columns (word-size
 primes and exponents).
