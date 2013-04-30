@@ -2511,7 +2511,7 @@ _Fp_equal0(GEN x) { return signe(x)==0; }
 static GEN
 _Fp_s(void *E, long x) { (void) E; return stoi(x); }
 
-const struct bb_field Fp_field={_Fp_red,_Fp_add,_Fp_rmul,_Fp_neg,
+static const struct bb_field Fp_field={_Fp_red,_Fp_add,_Fp_rmul,_Fp_neg,
                                         _Fp_inv,_Fp_equal0,_Fp_s};
 
 const struct bb_field *get_Fp_field(void **E, GEN p)
