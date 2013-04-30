@@ -1344,7 +1344,7 @@ match_and_sort(GEN compile_atkin, GEN Mu, GEN u, GEN q, void *E, const struct bb
     long s = zv_search(table, h);
     if (s) {
       while (table[s] == h && s) s--;
-      for (s++; table[s] == h && s < lbaby; s++)
+      for (s++; s < lbaby && table[s] == h; s++)
       {
         GEN B = gel(baby,table_ind[s]), G = gel(giant,i);
         GEN GMb = mulii(G, Mb), BMg = mulii(B, Mg);

@@ -805,21 +805,21 @@ Fp_ellcard_Shanks(GEN c4, GEN c6, GEN p)
     for (i=1,j=1; ; i++)
     {
       GEN ftest = gel(pts,j);
-      ulong m, l = 1, r = s+1;
+      long m, l = 1, r = s+1;
       long k, k2, j2;
 
       avma = av2;
       k = mod2BIL(gel(ftest,1));
-      while (l<r)
+      while (l < r)
       {
         m = (l+r) >> 1;
         if (tx[m] < k) l = m+1; else r = m;
       }
-      if (r <= (ulong)s && tx[r] == k)
+      if (r <= s && tx[r] == k)
       {
-        while (tx[r] == k && r) r--;
+        while (r && tx[r] == k) r--;
         k2 = mod2BIL(gel(ftest,2));
-        for (r++; tx[r] == k && r <= (ulong)s; r++)
+        for (r++; r <= s && tx[r] == k; r++)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == +/- ftest (= [i.s] f)? */
             j2 = ti[r] - 1;

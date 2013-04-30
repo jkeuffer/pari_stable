@@ -382,7 +382,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
     if (i)
     {
       while (table[i] == h && i) i--;
-      for (i++; table[i] == h && i <= lbaby; i++)
+      for (i++; i <= lbaby && table[i] == h; i++)
       {
         GEN v=addis(mulss(lbaby-1,k),perm[i]-1);
         if (grp->equal(grp->pow(E,g0,v),x))

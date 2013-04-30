@@ -993,8 +993,8 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
     long r = zv_search(tx, k);
     if (r)
     {
-      while (tx[r] == k && r) r--;
-      for (r++; tx[r] == k && r <= s; r++)
+      while (r && tx[r] == k) r--;
+      for (r++; r <= s && tx[r] == k; r++)
       {
         long j = ti[r]-1;
         GEN Q = FlxqE_add(FlxqE_mul(F, stoi(j), a4, T, p), fh, a4, T, p);
