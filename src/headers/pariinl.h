@@ -1134,17 +1134,6 @@ gerepilecoeffs(pari_sp av, GEN x, int n)
   for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
 }
 
-INLINE void
-gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
-{
-  int i;
-  for (i=0; i<n; i++) gel(x,i) = (GEN)copy_bin(gel(x,i));
-  for (i=0; i<o; i++) gel(y,i) = (GEN)copy_bin(gel(y,i));
-  avma = av;
-  for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
-  for (i=0; i<o; i++) gel(y,i) = bin_copy((GENbin*)y[i]);
-}
-
 /* p from copy_bin. Copy p->x back to stack, then destroy p */
 INLINE GEN
 bin_copy(GENbin *p)

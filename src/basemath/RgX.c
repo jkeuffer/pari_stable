@@ -1668,7 +1668,10 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   for (i = 1; i <= dy; i++)
     if (isexactzero(gel(y,i))) gel(y,i) = NULL;
   dz = dx-dy; p = dz+1;
-  lz = dz+3; z = cgetg(lz, t_POL) + 2;
+  lz = dz+3;
+  z = cgetg(lz, t_POL);
+  z[1] = evalsigne(1) | evalvarn(vx);
+  for (i = 2; i < lz; i++) gel(z,i) = gen_0;
   ypow = new_chunk(dz+1);
   gel(ypow,0) = gen_1;
   gel(ypow,1) = y_lead;
@@ -1678,7 +1681,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     gel(ypow,i) = rem(c,T);
   }
   av2 = avma; lim = stack_lim(av2,1);
-  for (iz=0;;)
+  for (iz=2;;)
   {
     p--;
     gel(z,iz++) = rem(gmul(gel(x,0), gel(ypow,p)), T);
@@ -1694,12 +1697,14 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
       gel(x,i) = rem(c,T);
     }
     x++; dx--;
-    while (dx >= dy && gequal0(gel(x,0))) { x++; dx--; gel(z,iz++) = gen_0; }
+    while (dx >= dy && gequal0(gel(x,0))) { x++; dx--; iz++; }
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_pseudodivrem dx = %ld >= %ld",dx,dy);
-      gerepilecoeffs2(av2,x,dx+1, z,iz);
+      GEN X = x-2;
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_pseudodivrem dx=%ld >= %ld",dx,dy);
+      X[0] = evaltyp(t_POL)|evallg(dx+3); X[1] = z[1]; /* hack */
+      gerepileall(av2,2, &X, &z); x = X+2;
     }
   }
   while (dx >= 0 && gequal0(gel(x,0))) { x++; dx--; }
@@ -1712,10 +1717,6 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     x[1] = evalsigne(1) | evalvarn(vx);
     x = RgX_recip_shallow(x);
   }
-
-  z -= 2;
-  z[0] = evaltyp(t_POL) | evallg(lz);
-  z[1] = evalsigne(1) | evalvarn(vx);
   z = RgX_recip_shallow(z);
   r = x;
   if (p)

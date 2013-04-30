@@ -252,7 +252,6 @@ void   debug_stack(void);
 void   fill_stack(void);
 void   init_dalloc(void);
 double *dalloc(size_t n);
-INLINE void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
 int    pop_entree_block(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
