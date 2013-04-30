@@ -3797,6 +3797,8 @@ INLINE long   vecsmall_coincidence(GEN u, GEN v);
 INLINE GEN    vecsmall_concat(GEN u, GEN v);
 INLINE GEN    vecsmall_copy(GEN x);
 INLINE GEN    vecsmall_ei(long n, long i);
+INLINE long   vecsmall_indexmax(GEN x);
+INLINE long   vecsmall_indexmin(GEN x);
 INLINE long   vecsmall_isin(GEN v, long x);
 INLINE GEN    vecsmall_lengthen(GEN v, long n);
 INLINE int    vecsmall_lexcmp(GEN x, GEN y);
