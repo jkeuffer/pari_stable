@@ -1,3 +1,4 @@
+default(realprecision,38);
 K=bnfinit(x^2+31);bnrL1(bnrinit(K,1,1))
 K=bnfinit(x^2-3);
 bnrL1(bnrinit(K,5,1))
