@@ -1317,7 +1317,7 @@ pari_err(int numerr, ...)
 }
 
 GEN
-pari_err_last() { return global_err_data; }
+pari_err_last(void) { return global_err_data; }
 
 const char *
 numerr_name(long numerr)
