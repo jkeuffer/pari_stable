@@ -3504,7 +3504,11 @@ core(GEN n)
     if (v)
     {
       if (v & 1) m = muliu(m, p);
-      if (stop) return gerepileuptoint(av, m);
+      if (stop)
+      {
+        if (!is_pm1(n)) m = mulii(m, n);
+        return gerepileuptoint(av, m);
+      }
     }
   }
   l = lg(primetab);
