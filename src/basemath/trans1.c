@@ -2121,7 +2121,7 @@ agm1r_abs(GEN x)
   affrr_fixlg(a1,y); avma = av; return y;
 }
 
-struct agmcx_gap_t { long L, ex, cnt; } agmcx_gap_t;
+struct agmcx_gap_t { long L, ex, cnt; };
 
 static void
 agmcx_init(GEN x, long *prec, struct agmcx_gap_t *S)
