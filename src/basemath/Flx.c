@@ -1897,24 +1897,14 @@ GEN
 Flv_roots_to_pol(GEN a, ulong p, long vs)
 {
   long i,k,lx = lg(a);
-  GEN p1,p2;
+  GEN p1;
   if (lx == 1) return pol1_Flx(vs);
   p1 = cgetg(lx, t_VEC);
   for (k=1,i=1; i<lx-1; i+=2)
-  {
-    p2 = cgetg(5,t_VECSMALL); gel(p1,k++) = p2;
-    p2[1] = vs;
-    p2[2] = Fl_mul(a[i], a[i+1], p);
-    p2[3] = Fl_neg(Fl_add(a[i],a[i+1],p),p);
-    p2[4] = 1;
-  }
+    gel(p1,k++) = mkvecsmall4(vs, Fl_mul(a[i], a[i+1], p),
+                              Fl_neg(Fl_add(a[i],a[i+1],p),p), 1);
   if (i < lx)
-  {
-    p2 = cgetg(4,t_VECSMALL); gel(p1,k++) = p2;
-    p2[1] = vs;
-    p2[2] = Fl_neg(a[i],p);
-    p2[3] = 1;
-  }
+    gel(p1,k++) = mkvecsmall3(vs, Fl_neg(a[i],p), 1);
   setlg(p1, k); return divide_conquer_assoc(p1, (void *)&p, _Flx_mul);
 }
 
