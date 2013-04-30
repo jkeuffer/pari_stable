@@ -499,7 +499,7 @@ add_space(int start)
   m[1] = NULL; return m;
 }
 
-char **
+static char **
 pari_completion(char *text, int START, int END)
 {
   int i, first=0, start=START;

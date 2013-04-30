@@ -1937,7 +1937,7 @@ system0(const char *s)
 #endif
 }
 
-GEN
+static GEN
 closure_alarmer(GEN C, long s)
 {
   struct pari_evalstate state;

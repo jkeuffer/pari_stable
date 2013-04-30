@@ -58,7 +58,7 @@ gp_dlopen(char *name, int flag)
   return NULL;
 }
 
-void
+static void
 install0(char *name, char *code, char *gpname, char *lib)
 {
   void *f, *handle;
@@ -112,7 +112,7 @@ gp_LoadLibrary(char *name)
   }
   return NULL;
 }
-void
+static void
 install0(char *name, char *code, char *gpname, char *lib)
 {
   FARPROC f;
@@ -146,7 +146,7 @@ install0(char *name, char *code, char *gpname, char *lib)
   install((void*)f,gpname,code);
 }
 #  else
-void
+static void
 install0(char *name, char *code, char *gpname, char *lib)
 { pari_err(e_ARCH,"install"); }
 #endif
