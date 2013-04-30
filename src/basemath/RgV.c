@@ -516,13 +516,12 @@ RgM_Rg_mul(GEN X, GEN c) {
 /********************************************************************/
 /* fill the square nxn matrix equal to t*Id */
 static void
-fill_scalmat(GEN y, GEN t, GEN _0, long n)
+fill_scalmat(GEN y, GEN t, long n)
 {
   long i;
-  if (n < 0) pari_err_DOMAIN("fill_scalmat", "size", "<", gen_0, stoi(n));
   for (i = 1; i <= n; i++)
   {
-    gel(y,i) = const_col(n, _0);
+    gel(y,i) = zerocol(n);
     gcoeff(y,i,i) = t;
   }
 }
@@ -530,22 +529,24 @@ fill_scalmat(GEN y, GEN t, GEN _0, long n)
 GEN
 scalarmat(GEN x, long n) {
   GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, gcopy(x), gen_0, n); return y;
+  if (!n) return y;
+  fill_scalmat(y, gcopy(x), n); return y;
 }
 GEN
 scalarmat_shallow(GEN x, long n) {
   GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, x, gen_0, n); return y;
+  fill_scalmat(y, x, n); return y;
 }
 GEN
 scalarmat_s(long x, long n) {
   GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, stoi(x), gen_0, n); return y;
+  if (!n) return y;
+  fill_scalmat(y, stoi(x), n); return y;
 }
 GEN
 matid(long n) {
   GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, gen_1, gen_0, n); return y;
+  fill_scalmat(y, gen_1, n); return y;
 }
 
 INLINE GEN
