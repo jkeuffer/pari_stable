@@ -163,8 +163,6 @@ GEN extendedgcd(GEN A);
 /* miscellaneous linear algebra */
 GEN  imagecomplspec(GEN x, long *nlze);
 GEN  ZM_imagecomplspec(GEN x, long *nlze);
-INLINE void rowselect_p(GEN A, GEN B, GEN p, long init);
-
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
 
@@ -454,7 +452,6 @@ GEN     redtausl2(GEN t, GEN *U);
 typedef long (*pivot_fun)(GEN,GEN,long,GEN);
 GEN ZM_pivots(GEN x0, long *rr);
 GEN RgM_pivots(GEN x0, GEN data, long *rr, pivot_fun pivot);
-INLINE void vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
 /* arith1.c */
 
