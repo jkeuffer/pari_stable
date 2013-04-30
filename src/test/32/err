@@ -522,7 +522,7 @@
   *** rnfeltdown: domain error in rnfelementdown: element not in the base field
   ***   at top-level: matid(-1)
   ***                 ^---------
-  *** matid: domain error in fill_scalmat: size < 0
+  *** matid: domain error in matid: size < 0
   ***   at top-level: polinterpolate([1,1]
   ***                 ^--------------------
   *** polinterpolate: domain error in polinterpolate: X[1] = X[2]
@@ -580,4 +580,4 @@
   ***   at top-level: solve(x=0,1,x^2+1)
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
-Total time spent: 35
+Total time spent: 37

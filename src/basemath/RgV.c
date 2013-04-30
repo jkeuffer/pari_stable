@@ -545,7 +545,9 @@ scalarmat_s(long x, long n) {
 }
 GEN
 matid(long n) {
-  GEN y = cgetg(n+1, t_MAT);
+  GEN y;
+  if (n < 0) pari_err_DOMAIN("matid", "size", "<", gen_0, stoi(n));
+  y = cgetg(n+1, t_MAT);
   fill_scalmat(y, gen_1, n); return y;
 }
 
