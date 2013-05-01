@@ -2112,13 +2112,13 @@ rootsof1(GEN nf)
     if (elt)
     {
       if (DEBUGLEVEL>2)
-        msgTIMER(&ti, "checking for cyclotomic polynomial [yes]");
+        timer_printf(&ti, "checking for cyclotomic polynomial [yes]");
       return gerepilecopy(av, mkvec2(utoipos(nbguessed), elt));
     }
     avma = av;
   }
   if (DEBUGLEVEL>2)
-    msgTIMER(&ti, "checking for cyclotomic polynomial [no]");
+    timer_printf(&ti, "checking for cyclotomic polynomial [no]");
 
   /* Step 2 : choose a prime ideal for local lifting */
   P.L = &L; nf_pick_prime_for_units(nf, &P);
