@@ -88,6 +88,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - the prototype of nfbasis() changed [ remove 'flag'; if you needed it, use
     nfmaxord() ]. The old nfbasis0 / nfdisc0 are deprecated: don't use them.
   - removed obsolete Polred(): use polred() or polredbest()
+  - rename exp_Ir -> expIr
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

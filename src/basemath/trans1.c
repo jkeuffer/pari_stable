@@ -1418,7 +1418,7 @@ rootsof1complex(GEN n, long prec)
   pari_sp av = avma;
   if (is_pm1(n)) return real_1(prec);
   if (equaliu(n, 2)) return stor(-1, prec);
-  return gerepileupto(av, exp_Ir( divri(Pi2n(1, prec), n) ));
+  return gerepileupto(av, expIr( divri(Pi2n(1, prec), n) ));
 }
 
 /*Only the O() of y is used*/
@@ -2958,7 +2958,7 @@ mpsincosm1(GEN x, GEN *s, GEN *c)
 
 /* return exp(ix), x a t_REAL */
 GEN
-exp_Ir(GEN x)
+expIr(GEN x)
 {
   pari_sp av = avma;
   GEN v = cgetg(3,t_COMPLEX);

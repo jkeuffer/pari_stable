@@ -8749,9 +8749,12 @@ function at the (possibly negative) integer $s\neq 1$, in relative accuracy
 \fun{void}{mpsincos}{GEN x, GEN *s, GEN *c} sets $s$ and $c$ to
 $\sin(x)$ and $\cos(x)$ respectively, where $x$ is a \typ{REAL}
 
-\fun{GEN}{exp_Ir}{GEN x} returns $\exp(ix)$, where $x$ is a \typ{REAL}.
+\fun{GEN}{expIr}{GEN x} returns $\exp(ix)$, where $x$ is a \typ{REAL}.
 The return type is \typ{COMPLEX} unless the imaginary part is equal to $0$
 to the current accuracy (its sign is $0$).
+
+\fun{GEN}{expIxy}{GEN x, GEN y, long prec} returns $\exp(ixy)$. Efficient
+when $x$ is real and $y$ pure imaginary.
 
 \fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
 

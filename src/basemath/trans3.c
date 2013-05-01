@@ -2390,7 +2390,7 @@ eiPi_frac(GEN z, long prec)
   if (!r) /* relatively frequent case */
     return e12(q * umodiu(n, 24), prec);
   n = centermodii(n, shifti(d,1), d);
-  return exp_Ir(divri(mulri(mppi(prec), n), d));
+  return expIr(divri(mulri(mppi(prec), n), d));
 }
 /* exp(i Pi z), z a t_INT or t_FRAC */
 static GEN
@@ -2416,7 +2416,7 @@ exp_IPiC(GEN z, long prec)
       return gmul(r, eiPi_frac(x, prec));
     default:
       pi = mpi; togglesign(mpi); /* pi = Pi */
-      return gmul(r, exp_Ir(gmul(pi, x)));
+      return gmul(r, expIr(gmul(pi, x)));
   }
 }
 

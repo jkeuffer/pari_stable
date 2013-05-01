@@ -317,6 +317,7 @@ BA110- permtonum/numtoperm now use the standard lexicographic numbering
   111- issquare(t_INTMOD), ispower(t_INTMOD): factor modulus incrementally,
        in case we hit a local non-residue -> early abort [#1376]
   112- gphelp + OS/X : make "open" the default PDF viewer (was "acroread")
+  113- renamed exp_Ir -> expIr
 
   Added
     1- mathnf for matrices over K[X] [#41]
@@ -479,6 +480,7 @@ BA 142- new default strictargs for mandatory arguments
    145- optional 'variable' argument to polresultantext()
    146- export part of the ifac_* interface (ifact_start, ifact_next,
         ifac_read, ifac_skip, ifac_isprime)
+   147- PARI function expIxy
 
   Removed
     1- dropped DOS support

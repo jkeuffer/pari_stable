@@ -899,7 +899,7 @@ RUgen(long N, long bit)
 {
   if (N == 2) return real_m1(nbits2prec(bit));
   if (N == 4) return gen_I();
-  return exp_Ir(divru(Pi2n(1, nbits2prec(bit)), N));
+  return expIr(divru(Pi2n(1, nbits2prec(bit)), N));
 }
 
 /* N=2^k. returns a vector RU which contains exp(2*i*k*Pi/N), k=0..N-1 */
