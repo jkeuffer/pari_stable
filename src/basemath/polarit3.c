@@ -1547,7 +1547,6 @@ Flx_resultant_set_dglist(GEN a, GEN b, GEN dglist, ulong p)
       if (DEBUGMEM>1) pari_warn(warnmem,"Flx_resultant_all");
       gerepileall(av, 2, &a,&b);
     }
-    da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
   if (ind+1 > lg(dglist)) setlg(dglist,ind+1);
