@@ -127,6 +127,7 @@ check_padic_p(GEN x, GEN p)
   GEN q = gel(x,2);
   if (p && !equalii(p, q)) pari_err_MODULUS("Zp_to_Z", p,q);
 }
+/* shallow */
 static GEN
 Zp_to_Z(GEN x, GEN p) {
   switch(typ(x))
@@ -139,6 +140,7 @@ Zp_to_Z(GEN x, GEN p) {
   }
   return x;
 }
+/* shallow */
 static GEN
 ZpX_to_ZX(GEN f, GEN p) {
   long i, l = lg(f);
@@ -159,7 +161,7 @@ get_padic_content(GEN f, GEN p)
   }
   return c;
 }
-/* make f suitable for [root|factor]padic */
+/* make f suitable for [root|factor]padic. Shallow */
 static GEN
 QpX_to_ZX(GEN f, GEN p)
 {
@@ -168,7 +170,7 @@ QpX_to_ZX(GEN f, GEN p)
   return ZpX_to_ZX(f, p);
 }
 
-/* x in Z return x + O(pr), pr = p^r */
+/* x in Z return x + O(pr), pr = p^r. Shallow */
 static GEN
 Z_to_Zp(GEN x, GEN p, GEN pr, long r)
 {
@@ -187,6 +189,7 @@ Z_to_Zp(GEN x, GEN p, GEN pr, long r)
   gel(y,3) = pr;
   gel(y,4) = modii(x,pr); return y;
 }
+/* shallow */
 static GEN
 ZV_to_ZpV(GEN z, GEN p, long prec)
 {
@@ -195,6 +198,7 @@ ZV_to_ZpV(GEN z, GEN p, long prec)
   for (i=1; i<lg(z); i++) gel(Z,i) = Z_to_Zp(gel(z,i),p,q,prec);
   return Z;
 }
+/* shallow */
 static GEN
 ZX_to_ZpX(GEN z, GEN p, GEN q, long prec)
 {
@@ -204,7 +208,7 @@ ZX_to_ZpX(GEN z, GEN p, GEN q, long prec)
   return Z;
 }
 /* return (x + O(p^r)) normalized (multiply by a unit such that leading coeff
- * is a power of p), x in Z[X] (or Z_p[X]) */
+ * is a power of p), x in Z[X] (or Z_p[X]). Shallow */
 static GEN
 ZX_to_ZpX_normalized(GEN x, GEN p, GEN pr, long r)
 {
@@ -226,7 +230,7 @@ ZXV_to_ZpXQV(GEN z, GEN T, GEN p, long prec)
   for (i=1; i<lg(z); i++) gel(Z,i) = mkpolmod(ZX_to_ZpX(gel(z,i),p,q,prec),T);
   return Z;
 }
-
+/* shallow */
 static GEN
 QpXQX_to_ZXY(GEN f, GEN p)
 {
@@ -301,7 +305,7 @@ Zp_appr(GEN f, GEN a)
   z = ZX_Zp_root(f, gtrunc(a), p, prec);
   return gerepilecopy(av, ZV_to_ZpV(z, p, prec));
 }
-/* vector of p-adic roots of the ZX f, leading term prime to p */
+/* vector of p-adic roots of the ZX f, leading term prime to p. Shallow */
 static GEN
 ZX_Zp_roots(GEN f, GEN p, long prec)
 {
@@ -476,7 +480,7 @@ cmp_padic(GEN x, GEN y)
 /*   Using Buchmann--Lenstra   */
 /*******************************/
 
-/* factor T = nf_get_pol(nf) in Zp to precision k */
+/* factor T = nf_get_pol(nf) in Zp to precision k. Shallow */
 static GEN
 padicff2(GEN nf, GEN unscale, GEN p, long k)
 {
@@ -527,6 +531,7 @@ padicff(GEN x, GEN p, long k)
   return padicff2(nf, S.unscale, p, k);
 }
 
+/* shallow */
 static GEN
 padic_trivfact(GEN x, GEN p, long r)
 { retmkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)), mkcol(gen_1)); }
