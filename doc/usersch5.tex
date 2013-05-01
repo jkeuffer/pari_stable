@@ -5942,9 +5942,9 @@ $x_{i,i}>x_{i,j} \ge 0$.
 \fun{GEN}{zv_neg}{GEN x} return $-x$. No check for overflow is done, which
 occurs in the fringe case where an entry is equal to $2^{\B-1}$.
 
-\fun{GEN}{zv_neg}{GEN x} negates $x$ in place and return it. No check for
-overflow is done, which occurs in the fringe case where an entry is equal to
-$2^{\B-1}$.
+\fun{GEN}{zv_neg_inplace}{GEN x} negates $x$ in place and return it. No check
+for overflow is done, which occurs in the fringe case where an entry is equal
+to $2^{\B-1}$.
 
 \fun{GEN}{zv_z_mul}{GEN x, long n} return $n\*x$. No check for overflow is
 done.
