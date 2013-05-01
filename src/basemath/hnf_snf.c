@@ -825,14 +825,14 @@ RgM_reduce(GEN A, GEN U, long i, long j0, long vx)
   for (j=j0+1; j<lA; j++)
   {
     GEN t = gcoeff(A,i,j), q;
-    if (gcmp0(t)) continue;
+    if (gequal0(t)) continue;
     if (T == gen_1)
       q = t;
     else if (is_RgX(t,vx))
       q = RgX_div(t, T);
     else continue;
 
-    if (gcmp0(q)) continue;
+    if (gequal0(q)) continue;
     gel(A,j) = RgC_sub(gel(A,j), RgC_Rg_mul(gel(A,j0), q));
     if (U) gel(U,j) = RgC_sub(gel(U,j), RgC_Rg_mul(gel(U,j0), q));
   }
@@ -2313,11 +2313,11 @@ gsnf_no_divide(GEN x, long i, long vx)
   GEN b = gcoeff(x,i,i);
   long j, k;
 
-  if (gcmp0(b))
+  if (gequal0(b))
   {
     for (k = 1; k < i; k++)
       for (j = 1; j < i; j++)
-        if (!gcmp0(gcoeff(x,k,j))) return k;
+        if (!gequal0(gcoeff(x,k,j))) return k;
     return 0;
   }
 
@@ -2369,13 +2369,13 @@ RgM_hnfall(GEN A, GEN *pB, long remove)
       RgC_elem(a,gcoeff(A,li,k), A,B, j,k, li, vx);
     }
     T = gcoeff(A,li,def);
-    if (gcmp0(T))
+    if (gequal0(T))
     { if (ldef) ldef--; }
     else
     {
       GEN d;
       gcoeff(A,li,def) = RgX_normalize(T, &d);
-      if (B && !gcmp1(d)) gel(B, def) = RgC_Rg_div(gel(B, def), d);
+      if (B && !gequal1(d)) gel(B, def) = RgC_Rg_div(gel(B, def), d);
       RgM_reduce(A, B, li, def, vx);
       def--;
     }

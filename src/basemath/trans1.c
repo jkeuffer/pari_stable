@@ -2986,8 +2986,8 @@ cxexp1(GEN z, long prec)
   GEN X, Y, x = real_i(z), y = imag_i(z);
   if (typ(x) != t_REAL) x = gtofp(x, prec);
   if (typ(y) != t_REAL) y = gtofp(y, prec);
-  if (gcmp0(y)) return mpexp1(x);
-  if (gcmp0(x)) return expm1_Ir(y);
+  if (gequal0(y)) return mpexp1(x);
+  if (gequal0(x)) return expm1_Ir(y);
   X = mpexp1(x); /* t_REAL */
   Y = expm1_Ir(y);
   /* exp(x+iy) - 1 = (exp(x)-1)(exp(iy)-1) + exp(x)-1 + exp(iy)-1 */

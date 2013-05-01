@@ -790,7 +790,7 @@ incgamspec(GEN s, GEN x, GEN g, long prec)
     }
     S = gmul(S, gneg(cox));
   }
-  if (k && gcmp0(sk))
+  if (k && gequal0(sk))
     return gerepileupto(av, gadd(S, gdiv(eint1(x, prec), P)));
 
   esk = gexpo(sk);

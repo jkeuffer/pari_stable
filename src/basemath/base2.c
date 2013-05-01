@@ -1222,7 +1222,7 @@ ZpM_hnfmodid(GEN M, GEN p, GEN D)
   long i, l = lg(M);
   M = RgM_Rg_div(ZpM_echelon(M,0,p,D), D);
   for (i = 1; i < l; i++)
-    if (gcmp0(gcoeff(M,i,i))) gcoeff(M,i,i) = gen_1;
+    if (gequal0(gcoeff(M,i,i))) gcoeff(M,i,i) = gen_1;
   return M;
 }
 

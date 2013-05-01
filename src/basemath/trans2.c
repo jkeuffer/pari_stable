@@ -945,7 +945,7 @@ sumformal(GEN T, long v)
   for (i = d; i >= 0; i--)
   {
     GEN c = polcoeff0(T, i, v);
-    if (gcmp0(c)) continue;
+    if (gequal0(c)) continue;
     R = gadd(R, gmul(c, faulhaber(i, v)));
     if (low_stack(lim,stack_lim(av2,3)))
     {

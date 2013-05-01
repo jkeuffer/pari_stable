@@ -676,7 +676,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     for (i=0; i<=d; i++)
     {
       GEN c = gel(POL,i);
-      if (gcmp0(c)) continue;
+      if (gequal0(c)) continue;
       c = gnorml2(arch_for_T2_prec(G, c, prec));
       if (!signe(c)) goto PRECPB;
       /* s += T2(POL[i]) / binomial(d,i) */

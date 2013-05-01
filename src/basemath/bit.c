@@ -454,7 +454,7 @@ hamming_slice(GEN x, long a, long b)
 {
   long i, nb = 0;
   for (i = a; i <= b; i++)
-    if (!gcmp0(gel(x,i))) nb++;
+    if (!gequal0(gel(x,i))) nb++;
   return nb;
 }
 static long

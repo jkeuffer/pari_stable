@@ -379,7 +379,7 @@ IsGoodSubgroup(GEN H, GEN bnr, GEN map)
   p1 = InitQuotient(H);
   p2 = gel(p1, 2);
   /* quotient is non cyclic */
-  if ((lg(p2) > 2) && !gcmp1(gel(p2, 2))) { avma = av; return 0; }
+  if ((lg(p2) > 2) && !gequal1(gel(p2, 2))) { avma = av; return 0; }
 
   bnf  = bnr_get_bnf(bnr);
   mod  = bnr_get_mod(bnr);
@@ -504,7 +504,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
   minnorm = 1;
 
   /* if the extension is cyclic then we _must_ find a suitable conductor */
-  if (lg(gel(dtQ,2)) == 2 || gcmp1(gmael(dtQ,2,2))) iscyc = 1;
+  if (lg(gel(dtQ,2)) == 2 || gequal1(gmael(dtQ,2,2))) iscyc = 1;
 
   if (DEBUGLEVEL>1)
     err_printf("Looking for a modulus of norm: ");
@@ -554,7 +554,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec)
               long ok = 0;
 
               /* if the extension is cyclic, then it's suitable */
-              if ((lg(cyc) > 2) && !gcmp1(gel(cyc, 2)))
+              if ((lg(cyc) > 2) && !gequal1(gel(cyc, 2)))
               {
                 for (j = 1; j < lg(lH); j++)
                 {

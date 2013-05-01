@@ -2225,7 +2225,7 @@ ellwpnum_all(GEN e, GEN z, long flall, long prec)
   u = expIxy(pi2, T.Z, prec);
   u1 = gsubsg(1,u);
   u2 = gsqr(u1); /* (1-u)^2 = -4u sin^2(Pi Z) */
-  if (gcmp0(u2)) return NULL; /* possible if loss of accuracy */
+  if (gequal0(u2)) return NULL; /* possible if loss of accuracy */
   y = gdiv(u,u2); /* -1/4(sin^2(Pi Z)) */
   if (T.abs_u_is_1) y = real_i(y);
   simple_case = T.abs_u_is_1 && T.q_is_real;
