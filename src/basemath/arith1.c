@@ -1931,8 +1931,6 @@ sqrt_Cipolla(GEN a, GEN p)
   u = utoipos(t);
   y = gen_pow_fold(mkvec2(u, gen_1), pov2, mkvec4(a,p,n,u),
                          sqrt_Cipolla_sqr, sqrt_Cipolla_msqr);
-  u = gel(y,1);
-  v = gel(y,2);
   /* Now u+vX = (t+X)^((p-1)/2); thus
    *   (u+vX)(t+X) = sqrt(a) + 0 X
    * Whence,
@@ -1940,7 +1938,7 @@ sqrt_Cipolla(GEN a, GEN p)
    *   0       = (u+vt)
    * Thus a square root is v*a */
 
-  v = Fp_mul(v,a, p);
+  v = Fp_mul(gel(y, 2), a, p);
   if (cmpii(v,pov2) > 0) v = subii(p,v);
   return v;
 }
