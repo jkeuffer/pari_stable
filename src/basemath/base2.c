@@ -1206,7 +1206,6 @@ compmod(GEN p, GEN f, GEN g, GEN T, GEN q, long v)
   update_den(p, &z, &D, &vD, NULL);
   qD = mulii(D,q);
   if (v) vD -= v;
-  D = gpowgs(p, vD);
   z = FpX_center(z, qD, shifti(qD,-1));
   if (vD > 0)
     z = RgX_Rg_div(z, powiu(p, vD));
