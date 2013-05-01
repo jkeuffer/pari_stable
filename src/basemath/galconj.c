@@ -1362,7 +1362,6 @@ a4galoisgen(struct galois_test *td)
         ar[1] = ar[2] + mael(MT,t[4],t[5]);
         break;
       case 11:
-        y = 10;
         x = t[0]; t[0] = t[8]; t[8] = t[7]; t[7] = t[5]; t[5] = t[1];
         t[1] = t[6]; t[6] = t[3]; t[3] = t[2]; t[2] = t[4]; t[4] = x;
         lswap(t[10], t[10-a]);
