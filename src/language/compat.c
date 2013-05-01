@@ -38,7 +38,7 @@ static long
 sturm0(GEN x) {return sturm(x);}
 
 static GEN
-sigmak0(long k, GEN x) {return gsumdivk(x,k);}
+sigmak0(long k, GEN x) {return sumdivk(x,k);}
 
 static GEN
 lseriesell0(GEN a, GEN b, GEN c, GEN d, long prec)
@@ -205,7 +205,7 @@ entree oldfonctions[]={
 {"abs",1,(void*)gabs,3,"Gp","abs(x)=absolute value (or modulus) of x."},
 {"acos",1,(void*)gacos,3,"Gp","acos(x)=inverse cosine of x."},
 {"acosh",1,(void*)gach,3,"Gp","acosh(x)=inverse hyperbolic cosine of x."},
-{"addell",3,(void*)addell,5,"GGG","addell(e,z1,z2)=sum of the points z1 and z2 on elliptic curve e."},
+{"addell",3,(void*)elladd,5,"GGG","addell(e,z1,z2)=sum of the points z1 and z2 on elliptic curve e."},
 {"addprimes",1,(void*)addprimes,4,"G","addprimes(x)=add primes in the vector x (with at most 20 components) to the prime table."},
 {"adj",1,(void*)adj,8,"G","adj(x)=adjoint matrix of x."},
 {"agm",2,(void*)agm,3,"GGp","agm(x,y)=arithmetic-geometric mean of x and y."},
@@ -229,8 +229,8 @@ entree oldfonctions[]={
 {"bernreal",11,(void*)bernreal,3,"Lp","bernreal(x)=Bernoulli number B_x, as a real number with the current precision."},
 {"bernvec",11,(void*)bernvec,3,"L","bernvec(x)=Vector of rational Bernoulli numbers B_0, B_2,... up to B_(2x)."},
 {"bestappr",2,(void*)bestappr,4,"GGp","bestappr(x,k)=gives the best approximation to the real x with denominator less or equal to k."},
-{"bezout",2,(void*)vecbezout,4,"GG","bezout(x,y)=gives a 3-dimensional row vector [u,v,d] such that d=gcd(x,y) and u*x+v*y=d."},
-{"bezoutres",2,(void*)vecbezoutres,4,"GG","bezoutres(x,y)=gives a 3-dimensional row vector [u,v,d] such that d=resultant(x,y) and u*x+v*y=d, where x and y are polynomials."},
+{"bezout",2,(void*)gcdext0,4,"GG","bezout(x,y)=gives a 3-dimensional row vector [u,v,d] such that d=gcd(x,y) and u*x+v*y=d."},
+{"bezoutres",2,(void*)polresultantext,4,"GG","bezoutres(x,y)=gives a 3-dimensional row vector [u,v,d] such that d=resultant(x,y) and u*x+v*y=d, where x and y are polynomials."},
 {"bigomega",1,(void*)bigomega,4,"lG","bigomega(x)=number of repeated prime divisors of x."},
 {"bilhell",3,(void*)bilhell,5,"GGGp","bilhell(e,z1,z2)=canonical bilinear form for the points z1,z2 on the elliptic curve e. Either z1 or z2 can also be a vector/matrix of points."},
 {"bin",21,(void*)binomial,4,"GL","bin(x,y)=binomial coefficient x*(x-1)...*(x-y+1)/y! defined for y in Z and any x."},
@@ -575,7 +575,7 @@ entree oldfonctions[]={
 {"polylogp",24,(void*)polylogp,3,"LGp","polylogp(m,x)=P_m-modified m-th polylog of x."},
 {"polyrev",14,(void*)gtopolyrev,2,"Gn","polyrev(x,v)=convert x (usually a vector or a power series) into a polynomial with variable v, starting with the constant term."},
 {"polzag",21,(void*)polzag,9,"LL","polzag(n,m)=Zagier's polynomials of index n,m."},
-{"powell",3,(void*)powell,5,"GGGp","powell(e,x,n)=n times the point x on elliptic curve e (n in Z)."},
+{"powell",3,(void*)ellmul,5,"GGGp","powell(e,x,n)=n times the point x on elliptic curve e (n in Z)."},
 {"powrealraw",23,(void*)qfrpowraw,4,"GL","powrealraw(x,n)=n-th power without reduction of the binary quadratic form x of positive discriminant."},
 {"prec",21,(void*)gprec,2,"GL","prec(x,n)=change the precision of x to be n (n C-integer)."},
 {"precision",1,(void*)precision0,2,"GD0,L,","precision(x)=real precision of object x."},
@@ -670,7 +670,7 @@ entree oldfonctions[]={
 {"sturm",10,(void*)sturm0,7,"lG","sturm(x)=number of real roots of the polynomial x."},
 {"sturmpart",30,(void*)sturmpart,7,"lGGG","sturmpart(x,a,b)=number of real roots of the polynomial x in the interval (a,b]."},
 {"subcyclo",2,(void*)polsubcyclo,6,"LLDn","subcyclo(p,d)=finds an equation for the d-th degree subfield of Q(zeta_p), where p must be a prime power."},
-{"subell",3,(void*)subell,5,"GGGp","subell(e,z1,z2)=difference of the points z1 and z2 on elliptic curve e."},
+{"subell",3,(void*)ellsub,5,"GGGp","subell(e,z1,z2)=difference of the points z1 and z2 on elliptic curve e."},
 {"subst",26,(void*)gsubst,7,"GnG","subst(x,y,z)=in expression x, replace the variable y by the expression z."},
 {"sum",48,(void*)sum0,9,"GV=GGE","sum(x,X=a,b,expr)=x plus the sum (X goes from a to b) of expression expr."},
 {"sumalt",27,(void*)sumalt0,9,"V=GED0,L,p","sumalt(X=a,expr)=Villegas-Zagier's acceleration of alternating series expr, X starting at a."},
