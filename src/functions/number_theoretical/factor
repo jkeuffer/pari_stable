@@ -97,16 +97,41 @@ Doc: general factorization function, where $x$ is a
  \misctitle{Rational functions}
  The polynomials or rational functions to be factored must have scalar
  coefficients. In particular PARI does not know how to factor
- \emph{multivariate} polynomials. See \tet{factormod} and \tet{factorff} for
+ \emph{multivariate} polynomials. The following domains are currently
+ supported: $\Q$, $\R$, $\C$, $\Q_p$, finite fields and number fields.
+ See \tet{factormod} and \tet{factorff} for
  the algorithms used over finite fields, \tet{factornf} for the algorithms
  over number fields. Over $\Q$, \idx{van Hoeij}'s method is used, which is
  able to cope with hundreds of modular factors.
 
- The routine guesses a sensible ring over which you want to factor: the
+ The routine guesses a sensible ring over which to factor: the
  smallest ring containing all coefficients, taking into account quotient
  structures induced by \typ{INTMOD}s and \typ{POLMOD}s (e.g.~if a coefficient
  in $\Z/n\Z$ is known, all rational numbers encountered are first mapped to
- $\Z/n\Z$; different moduli will produce an error).
+ $\Z/n\Z$; different moduli will produce an error). Factoring modulo a
+ non-prime number is not supported; to factor in $\Q_p$, use \typ{PADIC}
+ coefficients not \typ{INTMOD} modulo $p^n$.
+ \bprog
+ ? T = x^2+1;
+ ? factor(T);                         \\ over Q
+ ? factor(T*Mod(1,3))                 \\ over F_3
+ ? factor(T*ffgen(ffinit(3,2,'t))^0)  \\ over F_{3^2}
+ ? factor(T*Mod(Mod(1,3), t^2+t+2))   \\ over F_{3^2}, again
+ ? factor(T*(1 + O(3^6))              \\ over Q_3, precision 6
+ ? factor(T*1.)                       \\ over R, current precision
+ ? factor(T*(1.+0.*I))                \\ over C
+ ? factor(T*Mod(1, y^3-2))            \\ over Q(2^{1/3})
+ @eprog\noindent In most cases, it is clearer and simpler to call an
+ explicit variant than to rely on the generic \kbd{factor} function and
+ the above detection mechanism:
+ \bprog
+ ? factormod(T, 3)           \\ over F_3
+ ? factorff(T, 3, t^2+t+2))  \\ over F_{3^2}
+ ? factorpadic(T, 3,6)       \\ over Q_3, precision 6
+ ? nffactor(y^3-2, T)        \\ over Q(2^{1/3})
+ ? polroots(T)               \\ over C
+ @eprog
+
  Note that factorization of polynomials is done up to
  multiplication by a constant. In particular, the factors of rational
  polynomials will have integer coefficients, and the content of a polynomial
