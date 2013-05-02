@@ -2897,21 +2897,6 @@ sturmpart(GEN x, GEN a, GEN b)
 /**                        GENERIC EXTENDED GCD                       **/
 /**                                                                   **/
 /***********************************************************************/
-
-static GEN
-RgXQ_inv_inexact(GEN x, GEN y)
-{
-  pari_sp av = avma;
-  long i, dx = degpol(x), dy = degpol(y), dz = dx+dy;
-  GEN v, z;
-
-  if (dx < 0) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
-  v = RgM_solve(sylvestermatrix(y,x), col_ei(dz, dz));
-  if (!v) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
-  z = cgetg(dy+2,t_POL); z[1] = y[1];
-  for (i=2; i<dy+2; i++) z[i] = v[dz-i+2];
-  return gerepilecopy(av, normalizepol_lg(z, dy+2));
-}
 /* assume typ(x) = typ(y) = t_POL */
 GEN
 RgXQ_inv(GEN x, GEN y)
@@ -2930,8 +2915,6 @@ RgXQ_inv(GEN x, GEN y)
     if (lg(x)!=3) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
     x = gel(x,2); vx = gvar(x);
   }
-  if (isinexact(x) || isinexact(y)) return RgXQ_inv_inexact(x,y);
-
   av = avma; d = subresext_i(x,y,&u,&v/*junk*/);
   if (gequal0(d)) pari_err_INV("RgXQ_inv",mkpolmod(x,y));
   d = gdiv(u,d);
