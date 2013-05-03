@@ -1292,25 +1292,22 @@ FF_elltatepairing(GEN E, GEN P, GEN Q, GEN m)
 static GEN
 to_FF(GEN x, GEN ff)
 {
-  if (typ(x) == t_INT) return x;
-  else
+  ulong pp;
+  GEN r, T, p, z=_initFF(ff,&T,&p,&pp);
+  int is_int = typ(x)==t_INT;
+  switch(ff[1])
   {
-    ulong pp;
-    GEN r, T, p, z=_initFF(ff,&T,&p,&pp);
-    switch(ff[1])
-    {
-    case t_FF_FpXQ:
-      r=x;
-      break;
-    case t_FF_F2xq:
-      r=ZX_to_F2x(x);
-      break;
-    default:
-      r=ZX_to_Flx(x,pp);
-    }
-    setvarn(r, varn(T)); /* paranoia */
-    return _mkFF_i(ff,z,r);
+  case t_FF_FpXQ:
+    r= is_int ? scalarpol(x, varn(T)): x;
+    break;
+  case t_FF_F2xq:
+    r= is_int ? Z_to_F2x(x,T[1]): ZX_to_F2x(x);
+    break;
+  default:
+    r= is_int ? Z_to_Flx(x,pp,T[1]): ZX_to_Flx(x,pp);
   }
+  setvarn(r, varn(T)); /* paranoia */
+  return _mkFF_i(ff,z,r);
 }
 
 /* in place */
