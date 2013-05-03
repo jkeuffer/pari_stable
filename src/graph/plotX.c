@@ -230,6 +230,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
   plotX.ml = &DrawLines;
   plotX.st = &DrawString;
   plotX.pl = &pari_plot;
+  plotX.data = (void*)&dx;
 
   for(;;)
   {
@@ -274,7 +275,7 @@ EXIT:
         ys = ((double)height)/pari_plot.height;
       }
       case Expose:
-        gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
+        gen_rectdraw0(&plotX, w, x, y,lw,xs,ys);
     }
   }
 }

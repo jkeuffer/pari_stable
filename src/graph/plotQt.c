@@ -191,9 +191,10 @@ void Plotter::draw(QPainter *p){
   plotQt.ml=&DrawLines;
   plotQt.st=&DrawString;
   plotQt.pl=&pari_plot;
+  plotQt.data = (void *)&d;
   double xs = double(this->width()) / pari_plot.width,
          ys = double(this->height()) / pari_plot.height;
-  gen_rectdraw0(&plotQt, (void *)&d, this->w, this->x, this->y,this->lw,xs,ys);
+  gen_rectdraw0(&plotQt, this->w, this->x, this->y,this->lw,xs,ys);
 }
 
 void Plotter::save( const QString& s, const QString& f){

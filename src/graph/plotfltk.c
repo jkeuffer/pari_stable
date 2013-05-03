@@ -134,8 +134,8 @@ void Plotter::draw()
   pl.ml = &DrawLines;
   pl.st = &DrawString;
   pl.pl = &pari_plot;
-
-  gen_rectdraw0(&pl, (void*)color, my_w, my_x, my_y, my_lw, xs, ys);
+  pl.data = (void*)color;
+  gen_rectdraw0(&pl, my_w, my_x, my_y, my_lw, xs, ys);
 }
 
 int Plotter::handle(int event)

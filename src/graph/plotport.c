@@ -2036,8 +2036,7 @@ postdraw0(long *w, long *x, long *y, long lw, long scale)
     yscale *= psyscale;
   }
   psfile = fopen(current_psfile, "a");
-  if (!psfile)
-    pari_err_FILE("postscript file",current_psfile);
+  if (!psfile) pari_err_FILE("postscript file",current_psfile);
 
   /* Definitions taken from post terminal of Gnuplot. */
   fprintf(psfile,"%%!\n\
@@ -2056,16 +2055,18 @@ postdraw0(long *w, long *x, long *y, long lw, long scale)
   plot.ml = &ps_lines;
   plot.st = &ps_string;
   plot.pl = &pari_psplot;
+  plot.data = (void*)psfile;
 
-  gen_rectdraw0(&plot, (void*)psfile, w, x, y, lw, 1, 1);
+  gen_rectdraw0(&plot, w, x, y, lw, 1, 1);
   fprintf(psfile,"stroke showpage\n"); fclose(psfile);
 }
 
 #define RoColT(R) minss(numcolors,RoCol(R))
 
 void
-gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long lw, double xs, double ys)
+gen_rectdraw0(struct plot_eng *eng, long *w, long *x, long *y, long lw, double xs, double ys)
 {
+  void *data = eng->data;
   long i, j;
   long hgapsize = eng->pl->hunit, fheight = eng->pl->fheight;
   long vgapsize = eng->pl->vunit,  fwidth = eng->pl->fwidth;

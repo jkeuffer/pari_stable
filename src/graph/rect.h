@@ -98,6 +98,7 @@ struct plot_points { long x, y; };
 
 struct plot_eng {
   PARI_plot *pl;
+  void *data;
   void (*sc)(void *data, long col);
   void (*pt)(void *data, long x, long y);
   void (*ln)(void *data, long x1, long y1, long x2, long y2);
@@ -280,7 +281,7 @@ void  rectstring(long ne, char *x);
 void  rectstring3(long ne, char *x, long dir);
 void  rectclip(long rect);
 
-void gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long lw, double xs, double ys);
+void gen_rectdraw0(struct plot_eng *eng, long *w, long *x, long *y, long lw, double xs, double ys);
 
 /* architecture-dependent plot file (plotX.c ...) */
 void  PARI_get_plot(long fatal);

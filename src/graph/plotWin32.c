@@ -92,8 +92,9 @@ void rectdraw0(long *w, long *x, long *y, long lw)
   plotWin32.ml=&DrawLines;
   plotWin32.st=&DrawString;
   plotWin32.pl=&pari_plot;
+  plotWin32.data=(void*)hEmf;
 
-  gen_rectdraw0(&plotWin32, (void*)hEmf, w, x, y, lw, 1, 1);
+  gen_rectdraw0(&plotWin32, w, x, y, lw, 1, 1);
   DeleteEnhMetaFile(CloseEnhMetaFile(hEmf));
 
   ShellExecute(NULL,NULL,fname,NULL,NULL,SW_SHOWDEFAULT);
