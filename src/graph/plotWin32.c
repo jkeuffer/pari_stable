@@ -101,11 +101,10 @@ void rectdraw0(long *w, long *x, long *y, long lw)
 }
 
 void
-PARI_get_plot(long f)
+PARI_get_plot()
 {
   HDC hdc;
   TEXTMETRIC tm;
-  (void) f;
   if (pari_plot.init) return;      /* pari_plot is already set */
 
   pari_plot.init    = 1;

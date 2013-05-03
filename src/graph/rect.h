@@ -284,7 +284,7 @@ void  rectclip(long rect);
 void gen_rectdraw0(struct plot_eng *eng, long *w, long *x, long *y, long lw, double xs, double ys);
 
 /* architecture-dependent plot file (plotX.c ...) */
-void  PARI_get_plot(long fatal);
+void  PARI_get_plot();
 void  rectdraw0(long *w, long *x, long *y, long lw);
 
 ENDEXTERN

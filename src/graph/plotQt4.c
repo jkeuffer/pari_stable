@@ -568,7 +568,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
     if (pari_daemon()) return;  // parent process returns
 
     pari_close();
-    PARI_get_plot(1);
+    PARI_get_plot();
 
     // launch Qt window
     int argc = 1;                         // set argc = 2 for cross
@@ -595,10 +595,9 @@ rectdraw0(long *w, long *x, long *y, long lw)
 }
 
 void
-PARI_get_plot(long f)
+PARI_get_plot()
 /* This function initialises the structure rect.h: pari_plot */
 {
-    (void)f;
     if (pari_plot.init) return;      // pari_plot is already set
 #ifdef __QPE__
     pari_plot.width   = 240;         // width and

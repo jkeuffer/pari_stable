@@ -204,7 +204,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
     if (pari_daemon()) return;  // parent process returns
 
     pari_close();
-    PARI_get_plot(1);
+    PARI_get_plot();
 
     Fl::visual(FL_DOUBLE|FL_INDEX);
     win = new Plotter( w, x, y, lw);
@@ -217,10 +217,9 @@ rectdraw0(long *w, long *x, long *y, long lw)
 }
 
 void
-PARI_get_plot(long f)
+PARI_get_plot()
 /* This function initialises the structure rect.h: pari_plot */
 {
-    (void)f;
     if (pari_plot.init) return;      // pari_plot is already set
     pari_plot.width   = 400;         // width and
     pari_plot.height  = 300;         //  height of plot window

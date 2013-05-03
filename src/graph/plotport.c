@@ -259,7 +259,7 @@ check_rect_init(long ne)
 static long
 initrect_get_arg(GEN x, long flag, long *dft)
 { /* FIXME: gequal0(x) undocumented backward compatibility hack */
-  if (!x || gequal0(x) || flag) { PARI_get_plot(0); return *dft - 1; }
+  if (!x || gequal0(x) || flag) { PARI_get_plot(); return *dft - 1; }
   if (typ(x) != t_INT) pari_err_TYPE("initrect",x);
   return itos(x);
 }
@@ -820,7 +820,7 @@ rectcopy_gen(long source, long dest, GEN xoff, GEN yoff, long flag)
   if (flag & RECT_CP_RELATIVE) {
     double xd = gtodouble(xoff), yd = gtodouble(yoff);
 
-    PARI_get_plot(0);
+    PARI_get_plot();
     xi = pari_plot.width - 1;
     yi = pari_plot.height - 1;
     xi = DTOL(xd*xi);
@@ -1666,7 +1666,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   {
     int do_double = (flags & PLOT_NODOUBLETICK) ? TICKS_NODOUBLE : 0;
     PARI_plot *pl = WW;
-    if (!pl) { PARI_get_plot(0); pl = &pari_plot; }
+    if (!pl) { PARI_get_plot(); pl = &pari_plot; }
 
     rectlinetype(drawrect, -2); /* Frame. */
     current_color[drawrect] = DEFAULT_COLOR;
@@ -1780,7 +1780,7 @@ init_output(long flags)
   if (flags & PLOT_POSTSCRIPT)
     { PARI_get_psplot(); return &pari_psplot; }
   else
-    { PARI_get_plot(0); return &pari_plot; }
+    { PARI_get_plot(); return &pari_plot; }
 }
 
 static GEN
@@ -1840,7 +1840,7 @@ plothsizes_flag(long flag)
 {
   GEN vect = cgetg(1+6,t_VEC);
 
-  PARI_get_plot(0);
+  PARI_get_plot();
   gel(vect,1) = stoi(pari_plot.width);
   gel(vect,2) = stoi(pari_plot.height);
   if (flag) {
@@ -1914,8 +1914,7 @@ gendraw(GEN list, long ps, long flag)
   w = (long*)pari_malloc(n*sizeof(long));
   x = (long*)pari_malloc(n*sizeof(long));
   y = (long*)pari_malloc(n*sizeof(long));
-  if (flag)
-    PARI_get_plot(0);
+  if (flag) PARI_get_plot();
   for (i=0; i<n; i++)
   {
     GEN win = gel(list,3*i+1), x0 = gel(list,3*i+2), y0 = gel(list,3*i+3);
@@ -2028,7 +2027,7 @@ postdraw0(long *w, long *x, long *y, long lw, long scale)
   if (scale) {
     double psxscale, psyscale;
 
-    PARI_get_plot(0);
+    PARI_get_plot();
     psxscale = pari_psplot.width * 1.0/pari_plot.width ;
     psyscale = pari_psplot.height* 1.0/pari_plot.height;
     fontsize = (long) (fontsize/psxscale);

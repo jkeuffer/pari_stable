@@ -175,8 +175,8 @@ rectdraw0(long *w, long *x, long *y, long lw)
 
   if (pari_daemon()) return;  /* parent process returns */
 
+  PARI_get_plot();
   pari_close();
-  PARI_get_plot(1);
 
   display = XOpenDisplay(NULL);
   font_info = XLoadQueryFont(display, "9x15");
@@ -281,17 +281,13 @@ EXIT:
 }
 
 void
-PARI_get_plot(long fatal)
+PARI_get_plot()
 {
   Display *display;
   int screen;
 
   if (pari_plot.init) return;
-  if (!(display = XOpenDisplay(NULL)))
-  {
-    if (fatal) exiterr("no X server");
-    pari_err(e_MISC, "no X server");
-  }
+  if (!(display = XOpenDisplay(NULL))) pari_err(e_MISC, "no X server");
   screen = DefaultScreen(display);
   pari_plot.width  = DisplayWidth(display, screen) - 40;
   pari_plot.height = DisplayHeight(display, screen) - 60;
@@ -302,4 +298,3 @@ PARI_get_plot(long fatal)
   pari_plot.init = 1;
   XCloseDisplay(display);
 }
-
