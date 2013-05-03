@@ -2352,6 +2352,8 @@ isone(GEN g)
   {
     case t_INT:
       return (signe(g) && is_pm1(g))? signe(g): 0;
+    case t_FFELT:
+      return FF_equal1(g);
     case t_COMPLEX:
       return isnull(gel(g,2))? isone(gel(g,1)): 0;
     case t_QUAD:
