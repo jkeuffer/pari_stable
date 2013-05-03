@@ -66,6 +66,8 @@ postconfig=:
 case "$which_graphic_lib" in
 none)
   graph=plotnull;;
+ps)
+  graph=plotps;;
 Qt)
   PLOTCFLAGS='-D__FANCY_WIN__ -I$(QTDIR)/include'
   PLOTLIBS="-L\$(QTDIR)/lib $QTLIB"

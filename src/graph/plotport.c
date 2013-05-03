@@ -2016,29 +2016,11 @@ ps_string(void *data, long x, long y, char *s, long length)
 }
 
 void
-postdraw0(long *w, long *x, long *y, long lw, long scale)
+psplot_init(struct plot_eng *S, FILE *f, double xscale, double yscale, long fontsize)
 {
-  struct plot_eng plot;
-  FILE *psfile;
-  double xscale = 0.65, yscale = 0.65;
-  long fontsize = 16;
-
   PARI_get_psplot();
-  if (scale) {
-    double psxscale, psyscale;
-
-    PARI_get_plot();
-    psxscale = pari_psplot.width * 1.0/pari_plot.width ;
-    psyscale = pari_psplot.height* 1.0/pari_plot.height;
-    fontsize = (long) (fontsize/psxscale);
-    xscale *= psxscale;
-    yscale *= psyscale;
-  }
-  psfile = fopen(current_psfile, "a");
-  if (!psfile) pari_err_FILE("postscript file",current_psfile);
-
   /* Definitions taken from post terminal of Gnuplot. */
-  fprintf(psfile,"%%!\n\
+  fprintf(f, "%%!\n\
 50 50 translate\n\
 /p {moveto 0 2 rlineto 2 0 rlineto 0 -2 rlineto closepath fill} def\n\
 /l {lineto} def\n\
@@ -2046,16 +2028,38 @@ postdraw0(long *w, long *x, long *y, long lw, long scale)
 /Times-Roman findfont %ld scalefont setfont\n\
 %g %g scale\n", fontsize, yscale, xscale);
 
-  plot.sc = &ps_sc;
-  plot.pt = &ps_point;
-  plot.ln = &ps_line;
-  plot.bx = &ps_rect;
-  plot.mp = &ps_points;
-  plot.ml = &ps_lines;
-  plot.st = &ps_string;
-  plot.pl = &pari_psplot;
-  plot.data = (void*)psfile;
+  S->sc = &ps_sc;
+  S->pt = &ps_point;
+  S->ln = &ps_line;
+  S->bx = &ps_rect;
+  S->mp = &ps_points;
+  S->ml = &ps_lines;
+  S->st = &ps_string;
+  S->pl = &pari_psplot;
+  S->data = (void*)f;
+}
 
+void
+postdraw0(long *w, long *x, long *y, long lw, long scale)
+{
+  struct plot_eng plot;
+  FILE *psfile;
+  double xscale = 0.65, yscale = 0.65;
+  long fontsize = 16;
+
+  psfile = fopen(current_psfile, "a");
+  if (!psfile) pari_err_FILE("postscript file",current_psfile);
+  if (scale) {
+    double psxscale, psyscale;
+    PARI_get_psplot();
+    PARI_get_plot();
+    psxscale = pari_psplot.width * 1.0/pari_plot.width ;
+    psyscale = pari_psplot.height* 1.0/pari_plot.height;
+    fontsize = (long) (fontsize/psxscale);
+    xscale *= psxscale;
+    yscale *= psyscale;
+  }
+  psplot_init(&plot, psfile, xscale, yscale, fontsize);
   gen_rectdraw0(&plot, w, x, y, lw, 1, 1);
   fprintf(psfile,"stroke showpage\n"); fclose(psfile);
 }
