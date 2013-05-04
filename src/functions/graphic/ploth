@@ -18,14 +18,14 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  the coordinates of the bounding box in the form
  $[\var{xmin},\var{xmax},\var{ymin},\var{ymax}]$.
 
- \misctitle{Important note}: \kbd{ploth} may evaluate \kbd{expr} thousands of
+ \misctitle{Important note} \kbd{ploth} may evaluate \kbd{expr} thousands of
  times; given the relatively low resolution of plotting devices, few
  significant digits of the result will be meaningful. Hence you should keep
  the current precision to a minimum (e.g.~9) before calling this function.
 
  $n$ specifies the number of reference point on the graph, where a value of 0
  means we use the hardwired default values (1000 for general plot, 1500 for
- parametric plot, and 15 for recursive plot).
+ parametric plot, and 8 for recursive plot).
 
  If no $\fl$ is given, \var{expr} is either a scalar expression $f(X)$, in which
  case the plane curve $y=f(X)$ will be drawn, or a vector

@@ -214,9 +214,6 @@ struct plot_eng {
 #define PLOT_NODOUBLETICK 0x00800
 #define PLOT_COMPLEX      0x01000
 
-#define PLOT_POSTSCRIPT   0x80000
-#define PLOT_RECTWINDOW   0x100000
-
 #define RECT_CP_RELATIVE  0x1
 #define RECT_CP_NW        0x0
 #define RECT_CP_SW        0x2

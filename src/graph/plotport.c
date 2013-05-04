@@ -266,6 +266,7 @@ initrect_get_arg(GEN x, long flag, long *dft)
 void
 initrect_gen(long ne, GEN x, GEN y, long flag)
 {
+  const long m = NUMRECT-3;
   long xi, yi;
 
   xi = initrect_get_arg(x, flag, &pari_plot.width);
@@ -274,6 +275,8 @@ initrect_gen(long ne, GEN x, GEN y, long flag)
     if (x) xi = DTOL(xi * gtodouble(x));
     if (y) yi = DTOL(yi * gtodouble(y));
   }
+  if (ne > m)
+    pari_err_DOMAIN("graphic function", "rectwindow", ">", stoi(m), stoi(ne));
   initrect(ne, xi, yi);
 }
 
@@ -736,9 +739,12 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
 }
 
 static void
-put_string(long win, long x, long y, char *str, long dir)
+put_label(long ne, long x, long y, double d, long dir)
 {
-  rectmove0(win,(double)x,(double)y,0); rectstring3(win,str,dir);
+  char c[16];
+  sprintf(c,"%.5g", d);
+  rectmove0(ne,(double)x,(double)y,0);
+  rectstring3(ne, c, dir);
 }
 
 void
@@ -756,7 +762,7 @@ rectstring3(long ne, char *str, long dir) /* code = ROt_ST */
   long l = strlen(str);
   char *s = (char *) pari_malloc(l+1);
 
-  strcpy(s,str);
+  memcpy(s,str,l+1);
   RoType(z) = ROt_ST;
   RoSTl(z) = l;
   RoSTs(z) = s;
@@ -1200,7 +1206,7 @@ get_xy_from_vec2(long cplx, GEN X, GEN Y, long i, double *x, double *y)
   }
 }
 
-/* Convert data from GEN to double before we call rectplothrawin */
+/* Convert data from GEN to double before we call rectplothrawin. */
 static dblPointList*
 gtodblList(GEN data, long flags)
 {
@@ -1208,8 +1214,8 @@ gtodblList(GEN data, long flags)
   double xsml,xbig,ysml,ybig;
   long tx=typ(data), ty, nl=lg(data)-1, lx1,lx;
   long i, j;
-  long param=(flags & (PLOT_PARAMETRIC|PLOT_COMPLEX));
-  long cplx=(flags & PLOT_COMPLEX);
+  const long param=(flags & (PLOT_PARAMETRIC|PLOT_COMPLEX));
+  const long cplx=(flags & PLOT_COMPLEX);
   GEN x, y;
 
   if (! is_vec_t(tx)) pari_err_TYPE("gtodblList",data);
@@ -1350,8 +1356,7 @@ param_recursion(long cplx, dblPointList *pl,GEN code,GEN tleft,double xleft,
 /*  Pure graphing. If testpoints is 0, it is set to the default.
  *  Returns a dblPointList of (absolute) coordinates. */
 static dblPointList *
-rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
-            long testpoints)
+rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags, long testpoints)
 {
   long single_c;
   long param=flags & (PLOT_PARAMETRIC|PLOT_COMPLEX);
@@ -1504,7 +1509,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
         long k;
         t = cplx? READ_EXPR_VEC(code,x)
                 : READ_EXPR(code,x);
-        if (lg(t)!=nl+1) pari_err_DIM("rectplothin");
+        if (lg(t)!=nl+1) pari_err_DIM("rectploth");
         k = 0; j = 1;
         while (j <= nl)
         {
@@ -1520,7 +1525,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
         t = READ_EXPR(code,x);
-        if (lg(t) != nl) pari_err_DIM("rectplothin");
+        if (lg(t) != nl) pari_err_DIM("rectploth");
         pl[0].d[i] = gtodouble(x);
         for (j=1; j<nl; j++) Appendy(&pl[0],&pl[j], gtodouble(gel(t,j)));
       }
@@ -1574,8 +1579,17 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   avma = av0;
 }
 
+static void
+set_range(double m, double M, double *sml, double *big)
+{
+  if (M - m < 1.e-9)
+  {
+    double d = fabs(m)/10; if (!d) d = 0.1;
+    M += d; m -= d;
+  }
+  *sml = m; *big = M;
+}
 /* Plot a dblPointList. Complete with axes, bounding box, etc.
- * We use two drawing rectangles: one for strings, another for graphs.
  *
  * data is an array of structs. Its meaning depends on flags :
  *
@@ -1590,84 +1604,60 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
  *   curves to plot.
  *
  * + If there is no such flag, the first element is an array with
- *   x-coordinates and the following ones contain y-coordinates. */
+ *   x-coordinates and the following ones contain y-coordinates.
+ * If grect >= 0, output to this rectwindow. Otherwise draw immediately to
+ * screen (grect=-1) or to screen (grect=-2), using two drawing rectangles:
+ * one for labels, another for graphs.*/
 static GEN
-rectplothrawin(long stringrect, long drawrect, dblPointList *data, long flags)
+rectplothrawin(long grect, dblPointList *data, long flags)
 {
-  PARI_plot *W;
-  GEN res;
-  dblPointList y,x;
-  double xsml,xbig,ysml,ybig,tmp;
-  long ltype, max_graphcolors;
   const long param = flags & (PLOT_PARAMETRIC|PLOT_COMPLEX);
-  pari_sp ltop = avma;
+  const pari_sp av = avma;
+  PARI_plot *W;
+  dblPointList y,x;
+  double xsml, xbig, ysml, ybig;
+  long ltype, max_graphcolors;
   long i,nc,nbpoints, w[2], wx[2], wy[2];
 
   if (!data) return cgetg(1,t_VEC);
-
-  if (flags & PLOT_RECTWINDOW)
+  x = data[0]; nc = x.nb;
+  set_range(x.xsml, x.xbig, &xsml, &xbig);
+  set_range(x.ysml, x.ybig, &ysml, &ybig);
+  if (grect >= 0) /* output to rectwindow, no labels */
     W = NULL;
   else
   {
-    if (flags & PLOT_POSTSCRIPT)
-      { PARI_get_psplot(); W = &pari_psplot; }
-    else
-      { PARI_get_plot(); W = &pari_plot; }
+    const long srect = NUMRECT-2;
+    long lm, rm, tm, bm;
+
+    if (grect == -1) /* output to screen */
+    { W = &pari_plot; PARI_get_plot(); }
+    else /* output to file */
+    { W = &pari_psplot; PARI_get_psplot(); }
+    grect = NUMRECT-1;
+    /* left/right/top/bottom margin */
+    lm = W->fwidth*10;
+    rm = W->hunit-1;
+    tm = W->vunit-1;
+    bm = W->vunit+W->fheight-1;
+    w[0] = srect; wx[0] = 0;  wy[0] = 0;
+    w[1] = grect;   wx[1] = lm; wy[1] = tm;
+   /* Window (width x height) is given in pixels, correct pixels are 0..n-1,
+    * whereas rect functions work with windows whose pixel range is [0,n] */
+    initrect(srect, W->width - 1, W->height - 1);
+    rectlinetype(srect,-2); /* Frame */
+    current_color[srect] = DEFAULT_COLOR;
+    initrect(grect, W->width - (lm+rm) - 1, W->height - (tm+bm) - 1);
+    /* draw labels on srect */
+    put_label(srect, lm, 0, ybig, RoSTdirRIGHT|RoSTdirHGAP|RoSTdirTOP);
+    put_label(srect, lm, W->height-bm, ysml, RoSTdirRIGHT|RoSTdirHGAP|RoSTdirVGAP);
+    put_label(srect, lm, W->height - bm, xsml, RoSTdirLEFT|RoSTdirTOP);
+    put_label(srect, W->width-rm-1, W->height-bm, xbig, RoSTdirRIGHT|RoSTdirTOP);
   }
-
-  w[0] = stringrect;
-  w[1] = drawrect;
-  x = data[0]; nc = x.nb;
-  xsml = x.xsml; xbig = x.xbig;
-  ysml = x.ysml; ybig = x.ybig;
-  if (xbig-xsml < 1.e-9)
-  {
-    tmp=fabs(xsml)/10; if (!tmp) tmp=0.1;
-    xbig+=tmp; xsml-=tmp;
-  }
-  if (ybig-ysml < 1.e-9)
-  {
-    tmp=fabs(ysml)/10; if (!tmp) tmp=0.1;
-    ybig+=tmp; ysml-=tmp;
-  }
-
-  if (W)
-  { /* no rectwindow supplied ==> ps or screen output */
-    char c1[16],c2[16],c3[16],c4[16];
-    long lm = W->fwidth*10; /* left margin   */
-    long rm = W->hunit-1; /* right margin  */
-    long tm = W->vunit-1; /* top margin    */
-    long bm = W->vunit+W->fheight-1; /* bottom margin */
-    long is = W->width - (lm+rm);
-    long js = W->height - (tm+bm);
-
-    wx[0]=wy[0]=0; wx[1]=lm; wy[1]=tm;
-   /* Window size (width x height) is given in pixels, and
-    * correct pixels are 0..width-1.
-    * On the other hand, rect functions work with windows whose pixel
-    * range is [0,width]. */
-    initrect(stringrect, W->width-1, W->height-1);
-    if (drawrect != stringrect) initrect(drawrect, is-1, js-1);
-
-    /* draw labels on stringrect */
-    sprintf(c1,"%.5g",ybig); sprintf(c2,"%.5g",ysml);
-    sprintf(c3,"%.5g",xsml); sprintf(c4,"%.5g",xbig);
-
-    rectlinetype(stringrect,-2); /* Frame */
-    rectcolor(stringrect, DEFAULT_COLOR);
-    put_string(stringrect, lm, 0, c1,
-                RoSTdirRIGHT | RoSTdirHGAP | RoSTdirTOP);
-    put_string(stringrect, lm, W->height - bm, c2,
-                RoSTdirRIGHT | RoSTdirHGAP | RoSTdirVGAP);
-    put_string(stringrect, lm, W->height - bm, c3,
-                RoSTdirLEFT | RoSTdirTOP);
-    put_string(stringrect, W->width - rm - 1, W->height - bm, c4,
-                RoSTdirRIGHT | RoSTdirTOP);
-  }
-  RHasGraph(check_rect(drawrect)) = 1;
+  RHasGraph(check_rect(grect)) = 1;
 
   if (!(flags & PLOT_NO_RESCALE))
-    rectscale0(drawrect, xsml, xbig, ysml, ybig);
+    rectscale0(grect, xsml, xbig, ysml, ybig);
 
   if (!(flags & PLOT_NO_FRAME))
   {
@@ -1675,38 +1665,38 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data, long flags)
     PARI_plot *pl = W;
     if (!pl) { PARI_get_plot(); pl = &pari_plot; }
 
-    rectlinetype(drawrect, -2); /* Frame. */
-    current_color[drawrect] = DEFAULT_COLOR;
-    rectmove0(drawrect,xsml,ysml,0);
-    rectbox0(drawrect,xbig,ybig,0);
+    rectlinetype(grect, -2); /* Frame. */
+    current_color[grect] = DEFAULT_COLOR;
+    rectmove0(grect,xsml,ysml,0);
+    rectbox0(grect,xbig,ybig,0);
     if (!(flags & PLOT_NO_TICK_X)) {
-      rectticks(pl, drawrect, xsml, ysml, xbig, ysml, xsml, xbig,
+      rectticks(pl, grect, xsml, ysml, xbig, ysml, xsml, xbig,
         TICKS_CLOCKW | do_double);
-      rectticks(pl, drawrect, xbig, ybig, xsml, ybig, xbig, xsml,
+      rectticks(pl, grect, xbig, ybig, xsml, ybig, xbig, xsml,
         TICKS_CLOCKW | do_double);
     }
     if (!(flags & PLOT_NO_TICK_Y)) {
-      rectticks(pl, drawrect, xbig, ysml, xbig, ybig, ysml, ybig,
+      rectticks(pl, grect, xbig, ysml, xbig, ybig, ysml, ybig,
         TICKS_CLOCKW | do_double);
-      rectticks(pl, drawrect, xsml, ybig, xsml, ysml, ybig, ysml,
+      rectticks(pl, grect, xsml, ybig, xsml, ysml, ybig, ysml,
         TICKS_CLOCKW | do_double);
     }
   }
 
   if (!(flags & PLOT_NO_AXE_Y) && (xsml<=0 && xbig >=0))
   {
-    rectlinetype(drawrect, -1); /* Axes. */
-    current_color[drawrect] = AXIS_COLOR;
-    rectmove0(drawrect,0.0,ysml,0);
-    rectline0(drawrect,0.0,ybig,0);
+    rectlinetype(grect, -1); /* Axes. */
+    current_color[grect] = AXIS_COLOR;
+    rectmove0(grect,0.0,ysml,0);
+    rectline0(grect,0.0,ybig,0);
   }
 
   if (!(flags & PLOT_NO_AXE_X) && (ysml<=0 && ybig >=0))
   {
-    rectlinetype(drawrect, -1); /* Axes. */
-    current_color[drawrect] = AXIS_COLOR;
-    rectmove0(drawrect,xsml,0.0,0);
-    rectline0(drawrect,xbig,0.0,0);
+    rectlinetype(grect, -1); /* Axes. */
+    current_color[grect] = AXIS_COLOR;
+    rectmove0(grect,xsml,0.0,0);
+    rectline0(grect,xbig,0.0,0);
   }
 
   if (param) {
@@ -1717,14 +1707,14 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data, long flags)
   max_graphcolors = lg(pari_graphcolors)-1;
   for (ltype = 0; ltype < nc; ltype++)
   {
-    current_color[drawrect] = pari_graphcolors[1+(ltype%max_graphcolors)];
+    current_color[grect] = pari_graphcolors[1+(ltype%max_graphcolors)];
     if (param) x = data[i++];
 
     y = data[i++]; nbpoints = y.nb;
     if (flags & (PLOT_POINTS_LINES|PLOT_POINTS)) {
-      rectlinetype(drawrect, rectpoint_itype + ltype); /* Graphs */
-      rectpointtype(drawrect,rectpoint_itype + ltype); /* Graphs */
-      rectpoints0(drawrect,x.d,y.d,nbpoints);
+      rectlinetype(grect, rectpoint_itype + ltype); /* Graphs */
+      rectpointtype(grect,rectpoint_itype + ltype); /* Graphs */
+      rectpoints0(grect,x.d,y.d,nbpoints);
       if (!(flags & PLOT_POINTS_LINES)) continue;
     }
 
@@ -1733,11 +1723,11 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data, long flags)
       int old = rectline_itype;
 
       rectline_itype = rectline_itype + ltype;
-      rectsplines(drawrect,x.d,y.d,nbpoints,flags);
+      rectsplines(grect,x.d,y.d,nbpoints,flags);
       rectline_itype = old;
     } else {
-      rectlinetype(drawrect, rectline_itype + ltype); /* Graphs */
-      rectlines0(drawrect,x.d,y.d,nbpoints,0);
+      rectlinetype(grect, rectline_itype + ltype); /* Graphs */
+      rectlines0(grect,x.d,y.d,nbpoints,0);
     }
   }
   for (i--; i>=0; i--) pari_free(data[i].d);
@@ -1745,19 +1735,15 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data, long flags)
 
   if (W)
   {
-    if (flags & PLOT_POSTSCRIPT)
-      postdraw0(w,wx,wy,2, 0);
-    else
+    if (W == &pari_plot)
       rectdraw0(w,wx,wy,2);
-
-    killrect(drawrect); if (stringrect != drawrect) killrect(stringrect);
+    else
+      postdraw0(w,wx,wy,2, 0);
+    killrect(w[1]);
+    killrect(w[0]);
   }
-
-  avma=ltop;
-  res = cgetg(5,t_VEC);
-  gel(res,1) = dbltor(xsml); gel(res,2) = dbltor(xbig);
-  gel(res,3) = dbltor(ysml); gel(res,4) = dbltor(ybig);
-  return res;
+  avma = av;
+  retmkvec4(dbltor(xsml), dbltor(xbig), dbltor(ysml), dbltor(ybig));
 }
 
 /*************************************************************************/
@@ -1767,67 +1753,60 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data, long flags)
 /*************************************************************************/
 
 GEN
-rectploth(long drawrect,GEN a,GEN b,GEN code,
-          long prec,ulong flags,long testpoints)
+rectploth(long ne, GEN a,GEN b,GEN code, long prec,ulong flags,long tpts)
 {
-  dblPointList *pl=rectplothin(a,b, code, prec, flags,testpoints);
-  return rectplothrawin(0,drawrect, pl, flags | PLOT_RECTWINDOW);
+  dblPointList *pl = rectplothin(a,b, code, prec, flags, tpts);
+  return rectplothrawin(ne, pl, flags);
 }
 
 GEN
-rectplothraw(long drawrect, GEN data, long flags)
+rectplothraw(long ne, GEN data, long flags)
 {
-  dblPointList *pl=gtodblList(data,flags);
-  return rectplothrawin(0,drawrect,pl,flags | PLOT_RECTWINDOW);
+  dblPointList *pl = gtodblList(data,flags);
+  return rectplothrawin(ne, pl, flags);
 }
 
-static GEN
-ploth0(GEN a,GEN b,GEN code, long prec,ulong flags,long testpoints)
+static long
+plothraw_flags(long fl)
 {
-  dblPointList *pl=rectplothin(a,b, code, prec, flags,testpoints);
-  return rectplothrawin(NUMRECT-2,NUMRECT-1, pl, flags);
+  switch(fl)
+  {
+    case 0: return PLOT_PARAMETRIC|PLOT_POINTS;
+    case 1: return PLOT_PARAMETRIC;
+    default:return PLOT_PARAMETRIC|fl;
+  }
 }
-
 static GEN
-plothraw0(GEN listx, GEN listy, long flags)
+plothraw0(long ne, GEN listx, GEN listy, long flags)
 {
-  long data[] = {evaltyp(t_VEC) | _evallg(3), 0, 0};
-  dblPointList *pl;
-
-  gel(data,1) = listx;
-  gel(data,2) = listy;
-  pl=gtodblList(data,PLOT_PARAMETRIC|(flags&PLOT_COMPLEX));
-  if (!pl) return cgetg(1,t_VEC);
-  return rectplothrawin(NUMRECT-2,NUMRECT-1,pl,flags | PLOT_PARAMETRIC);
+  pari_sp av = avma;
+  GEN z = rectplothraw(ne, mkvec2(listx,listy), plothraw_flags(flags));
+  return gerepileupto(av, z);
 }
 
 GEN
 plothraw(GEN listx, GEN listy, long flags)
-{
-  if (flags <= 1) flags = flags? 0: PLOT_POINTS;
-  return plothraw0(listx, listy, flags);
-}
+{ return plothraw0(-1, listx, listy, flags); }
 
 GEN
 ploth(GEN a, GEN b, GEN code, long prec,long flags,long numpoints)
-{ return ploth0(a,b,code,prec,flags,numpoints); }
+{ return rectploth(-1, a,b,code,prec,flags,numpoints); }
 GEN
 ploth2(GEN a, GEN b, GEN code, long prec)
-{ return ploth0(a,b,code,prec,PLOT_PARAMETRIC,0); }
+{ return rectploth(-1, a,b,code,prec,PLOT_PARAMETRIC,0); }
 GEN
 plothmult(GEN a, GEN b, GEN code, long prec)
-{ return ploth0(a,b,code,prec,0,0); }
+{ return rectploth(-1, a,b,code,prec,0,0); }
 
 GEN
 postplothraw(GEN listx, GEN listy, long flags)
-{ return plothraw0(listx, listy, flags? PLOT_POSTSCRIPT
-                                      : PLOT_POINTS|PLOT_POSTSCRIPT); }
+{ return plothraw0(-2, listx, listy, flags); }
 GEN
 postploth(GEN a, GEN b, GEN code, long prec,long flags, long numpoints)
-{ return ploth0(a,b,code,prec,flags|PLOT_POSTSCRIPT, numpoints); }
+{ return rectploth(-2, a,b,code,prec, flags,numpoints); }
 GEN
 postploth2(GEN a, GEN b, GEN code, long prec, long numpoints)
-{ return ploth0(a,b,code,prec, PLOT_PARAMETRIC|PLOT_POSTSCRIPT,numpoints); }
+{ return rectploth(-2, a,b,code,prec, PLOT_PARAMETRIC,numpoints); }
 
 GEN
 plothsizes(void) { return plothsizes_flag(0); }
