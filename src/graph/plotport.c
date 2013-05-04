@@ -1590,22 +1590,30 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
  *   curves to plot.
  *
  * + If there is no such flag, the first element is an array with
- *   x-coordinates and the following ones contain y-coordinates.
- *
- * Additional flags: PLOT_NO_AXE_X, PLOT_NO_AXE_Y, PLOT_NO_FRAME. */
+ *   x-coordinates and the following ones contain y-coordinates. */
 static GEN
-rectplothrawin(long stringrect, long drawrect, dblPointList *data,
-               long flags, PARI_plot *WW)
+rectplothrawin(long stringrect, long drawrect, dblPointList *data, long flags)
 {
+  PARI_plot *W;
   GEN res;
   dblPointList y,x;
   double xsml,xbig,ysml,ybig,tmp;
   long ltype, max_graphcolors;
-  long param = flags & (PLOT_PARAMETRIC|PLOT_COMPLEX);
+  const long param = flags & (PLOT_PARAMETRIC|PLOT_COMPLEX);
   pari_sp ltop = avma;
   long i,nc,nbpoints, w[2], wx[2], wy[2];
 
   if (!data) return cgetg(1,t_VEC);
+
+  if (flags & PLOT_RECTWINDOW)
+    W = NULL;
+  else
+  {
+    if (flags & PLOT_POSTSCRIPT)
+      { PARI_get_psplot(); W = &pari_psplot; }
+    else
+      { PARI_get_plot(); W = &pari_plot; }
+  }
 
   w[0] = stringrect;
   w[1] = drawrect;
@@ -1623,23 +1631,22 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     ybig+=tmp; ysml-=tmp;
   }
 
-  if (WW)
+  if (W)
   { /* no rectwindow supplied ==> ps or screen output */
     char c1[16],c2[16],c3[16],c4[16];
-    PARI_plot W = *WW;
-    long lm = W.fwidth*10; /* left margin   */
-    long rm = W.hunit-1; /* right margin  */
-    long tm = W.vunit-1; /* top margin    */
-    long bm = W.vunit+W.fheight-1; /* bottom margin */
-    long is = W.width - (lm+rm);
-    long js = W.height - (tm+bm);
+    long lm = W->fwidth*10; /* left margin   */
+    long rm = W->hunit-1; /* right margin  */
+    long tm = W->vunit-1; /* top margin    */
+    long bm = W->vunit+W->fheight-1; /* bottom margin */
+    long is = W->width - (lm+rm);
+    long js = W->height - (tm+bm);
 
     wx[0]=wy[0]=0; wx[1]=lm; wy[1]=tm;
-   /* Window size (W.width x W.height) is given in pixels, and
-    * correct pixels are 0..W.width-1.
+   /* Window size (width x height) is given in pixels, and
+    * correct pixels are 0..width-1.
     * On the other hand, rect functions work with windows whose pixel
     * range is [0,width]. */
-    initrect(stringrect, W.width-1, W.height-1);
+    initrect(stringrect, W->width-1, W->height-1);
     if (drawrect != stringrect) initrect(drawrect, is-1, js-1);
 
     /* draw labels on stringrect */
@@ -1650,11 +1657,11 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     rectcolor(stringrect, DEFAULT_COLOR);
     put_string(stringrect, lm, 0, c1,
                 RoSTdirRIGHT | RoSTdirHGAP | RoSTdirTOP);
-    put_string(stringrect, lm, W.height - bm, c2,
+    put_string(stringrect, lm, W->height - bm, c2,
                 RoSTdirRIGHT | RoSTdirHGAP | RoSTdirVGAP);
-    put_string(stringrect, lm, W.height - bm, c3,
+    put_string(stringrect, lm, W->height - bm, c3,
                 RoSTdirLEFT | RoSTdirTOP);
-    put_string(stringrect, W.width - rm - 1, W.height - bm, c4,
+    put_string(stringrect, W->width - rm - 1, W->height - bm, c4,
                 RoSTdirRIGHT | RoSTdirTOP);
   }
   RHasGraph(check_rect(drawrect)) = 1;
@@ -1665,7 +1672,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   if (!(flags & PLOT_NO_FRAME))
   {
     int do_double = (flags & PLOT_NODOUBLETICK) ? TICKS_NODOUBLE : 0;
-    PARI_plot *pl = WW;
+    PARI_plot *pl = W;
     if (!pl) { PARI_get_plot(); pl = &pari_plot; }
 
     rectlinetype(drawrect, -2); /* Frame. */
@@ -1736,7 +1743,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   for (i--; i>=0; i--) pari_free(data[i].d);
   pari_free(data);
 
-  if (WW)
+  if (W)
   {
     if (flags & PLOT_POSTSCRIPT)
       postdraw0(w,wx,wy,2, 0);
@@ -1764,37 +1771,26 @@ rectploth(long drawrect,GEN a,GEN b,GEN code,
           long prec,ulong flags,long testpoints)
 {
   dblPointList *pl=rectplothin(a,b, code, prec, flags,testpoints);
-  return rectplothrawin(0,drawrect, pl, flags,NULL);
+  return rectplothrawin(0,drawrect, pl, flags | PLOT_RECTWINDOW);
 }
 
 GEN
 rectplothraw(long drawrect, GEN data, long flags)
 {
   dblPointList *pl=gtodblList(data,flags);
-  return rectplothrawin(0,drawrect,pl,flags,NULL);
-}
-
-static PARI_plot*
-init_output(long flags)
-{
-  if (flags & PLOT_POSTSCRIPT)
-    { PARI_get_psplot(); return &pari_psplot; }
-  else
-    { PARI_get_plot(); return &pari_plot; }
+  return rectplothrawin(0,drawrect,pl,flags | PLOT_RECTWINDOW);
 }
 
 static GEN
 ploth0(GEN a,GEN b,GEN code, long prec,ulong flags,long testpoints)
 {
-  PARI_plot *output = init_output(flags);
   dblPointList *pl=rectplothin(a,b, code, prec, flags,testpoints);
-  return rectplothrawin(NUMRECT-2,NUMRECT-1, pl, flags, output);
+  return rectplothrawin(NUMRECT-2,NUMRECT-1, pl, flags);
 }
 
 static GEN
 plothraw0(GEN listx, GEN listy, long flags)
 {
-  PARI_plot *output = init_output(flags);
   long data[] = {evaltyp(t_VEC) | _evallg(3), 0, 0};
   dblPointList *pl;
 
@@ -1802,7 +1798,7 @@ plothraw0(GEN listx, GEN listy, long flags)
   gel(data,2) = listy;
   pl=gtodblList(data,PLOT_PARAMETRIC|(flags&PLOT_COMPLEX));
   if (!pl) return cgetg(1,t_VEC);
-  return rectplothrawin(NUMRECT-2,NUMRECT-1,pl,flags | PLOT_PARAMETRIC,output);
+  return rectplothrawin(NUMRECT-2,NUMRECT-1,pl,flags | PLOT_PARAMETRIC);
 }
 
 GEN
