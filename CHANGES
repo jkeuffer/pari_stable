@@ -126,20 +126,17 @@ BA 101- znorder(Mod(5,16),200) -> 5 instead of 4
 JD 106- galoisinit(x^3+x^2-2*x-1) -> uninitialized read [#1389]
 BA 107- polhermite(66) -> corrupted result [#1393]
    108- nfhnf() would only accept matrices of maximal rank
-   109- isprime(p, 0) would return 0 for primes p such that p-1 was
-        sufficiently but not completely factored [ incorrect call to Selfridge
-        test asking to certify the unfactored par as well ]
-BA 110- galoisfixedfield() could return a wrong result for polynomials with
+BA 109- galoisfixedfield() could return a wrong result for polynomials with
         large roots [#1406]
-   111- bnrdisc could return a wrong result if the modulus had more than
+   110- bnrdisc could return a wrong result if the modulus had more than
         2 prime divisors [#1399]
-   112- a = Mod(1,2)*x; gcd(a,a) return x instead of Mod(1,2)*x
-   113- changing primelimit from within forprime loop yielded unpredictable
+   111- a = Mod(1,2)*x; gcd(a,a) return x instead of Mod(1,2)*x
+   112- changing primelimit from within forprime loop yielded unpredictable
         results (potential SEGV)
-   114- y;z;(x^2+y)*w/z/x -> significant pointers lost [#1248]
-   115- log(t_FRAC close to 1) => junk (idem lngamma) [#1238]
-   116- thue(thueinit(x^3-1493,1),3) -> error
-LGr117- typo in modr_safe -> precision error [#1413]
+   113- y;z;(x^2+y)*w/z/x -> significant pointers lost [#1248]
+   114- log(t_FRAC close to 1) => junk (idem lngamma) [#1238]
+   115- thue(thueinit(x^3-1493,1),3) -> error
+LGr116- typo in modr_safe -> precision error [#1413]
 
   Changed
     1- mathnf: swapped flag 3 and 5.
