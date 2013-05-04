@@ -1211,37 +1211,36 @@ static dblPointList*
 gtodblList(GEN data, long flags)
 {
   dblPointList *l;
-  double xsml,xbig,ysml,ybig;
-  long tx=typ(data), ty, nl=lg(data)-1, lx1,lx;
-  long i, j;
-  const long param=(flags & (PLOT_PARAMETRIC|PLOT_COMPLEX));
-  const long cplx=(flags & PLOT_COMPLEX);
-  GEN x, y;
+  double xsml, xbig, ysml, ybig;
+  long nl=lg(data)-1, lx1, i, j;
+  const long param = (flags & (PLOT_PARAMETRIC|PLOT_COMPLEX));
+  const long cplx = (flags & PLOT_COMPLEX);
 
-  if (! is_vec_t(tx)) pari_err_TYPE("gtodblList",data);
+  if (! is_vec_t(typ(data))) pari_err_TYPE("gtodblList",data);
   if (!nl) return NULL;
   lx1 = lg(gel(data,1));
+  if (!param && lx1 == 1) return NULL;
 
   if (nl == 1 && !cplx) pari_err_DIM("gtodblList");
   /* Allocate memory, then convert coord. to double */
-  l = (dblPointList*) pari_malloc((cplx ? 2*nl:nl)*sizeof(dblPointList));
-  for (i=0; i<nl-1; i+=2)
+  l = (dblPointList*)pari_malloc((cplx? 2*nl: nl)*sizeof(dblPointList));
+  for (i=0; i<nl; i += (cplx? 1: 2))
   {
     dblPointList *LX = l + i, *LY = l + (i+1);
-    x = gel(data,i+1);   tx = typ(x); lx = lg(x);
-    if (!is_vec_t(tx)) pari_err_TYPE("gtodblList",x);
-    if (cplx)
-      y = NULL;
+    GEN x = gel(data,i+1), y;
+    long lx = lg(x);
+    if (!is_vec_t(typ(x))) pari_err_TYPE("gtodblList",x);
+    if (cplx) y = NULL;
     else
     {
-      y = gel(data,i+2); ty = typ(y);
-      if (!is_vec_t(ty)) pari_err_TYPE("gtodblList",y);
+      y = gel(data,i+2);
+      if (!is_vec_t(typ(y))) pari_err_TYPE("gtodblList",y);
       if (lg(y) != lx || (!param && lx != lx1)) pari_err_DIM("gtodblList");
     }
 
     lx--;
-    LX->d = (double*) pari_malloc(lx*sizeof(double));
-    LY->d = (double*) pari_malloc(lx*sizeof(double));
+    LX->d = (double*)pari_malloc(lx*sizeof(double));
+    LY->d = (double*)pari_malloc(lx*sizeof(double));
     for (j=1; j<=lx; j++)
     {
       double xx, yy;
@@ -1255,49 +1254,42 @@ gtodblList(GEN data, long flags)
   /* Now compute extremas */
   if (param)
   {
-    l[0].nb = nl/2;
+    l[0].nb = cplx? nl: nl/2;
     for (i=0; i < l[0].nb; i+=2)
       if (l[i+1].nb) break;
     if (i >= l[0].nb) { pari_free(l); return NULL; }
     xsml = xbig = l[i  ].d[0];
     ysml = ybig = l[i+1].d[0];
-
-    for (i=0; i < l[0].nb; i+=2)
+    for (; i < l[0].nb; i+=2)
     {
       dblPointList *LX = l + i, *LY = l + (i+1);
       for (j=0; j < LY->nb; j++)
       {
-        if      (LX->d[j] < xsml) xsml = LX->d[j];
-        else if (LX->d[j] > xbig) xbig = LX->d[j];
-
-        if      (LY->d[j] < ysml) ysml = LY->d[j];
-        else if (LY->d[j] > ybig) ybig = LY->d[j];
+        double x = LX->d[j], y = LY->d[j];
+        if (x < xsml) xsml = x; else if (x > xbig) xbig = x;
+        if (y < ysml) ysml = y; else if (y > ybig) ybig = y;
       }
     }
   }
   else
   {
-    if (!l[0].nb) { pari_free(l); return NULL; }
     l[0].nb = nl-1;
-
     xsml = xbig = l[0].d[0];
     ysml = ybig = l[1].d[0];
-
     for (j=0; j < l[1].nb; j++)
     {
-      if      (l[0].d[j] < xsml) xsml = l[0].d[j];
-      else if (l[0].d[j] > xbig) xbig = l[0].d[j];
+      double x = l[0].d[j];
+      if (x < xsml) xsml = x; else if (x > xbig) xbig = x;
     }
     for (i=1; i <= l[0].nb; i++)
       for (j=0; j < l[i].nb; j++)
       {
-        if      (l[i].d[j] < ysml) ysml = l[i].d[j];
-        else if (l[i].d[j] > ybig) ybig = l[i].d[j];
+        double y = l[i].d[j];
+        if (y < ysml) ysml = y; else if (y > ybig) ybig = y;
       }
   }
   l[0].xsml = xsml; l[0].xbig = xbig;
-  l[0].ysml = ysml; l[0].ybig = ybig;
-  return l;
+  l[0].ysml = ysml; l[0].ybig = ybig; return l;
 }
 
 /* (x+y)/2 */
