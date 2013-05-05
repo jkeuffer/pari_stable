@@ -479,6 +479,10 @@ BA 142- new default strictargs for mandatory arguments
    146- export part of the ifac_* interface (ifact_start, ifact_next,
         ifac_read, ifac_skip, ifac_isprime)
    147- PARI function expIxy
+   148- poor man's graphic engine 'plotps' (Configure --graphic=ps) when
+        no graphic library is available; dumps the hi-res plot to a temporary
+        PostScript file, then opens a PostScript viewer ('open -W' by default,
+        $GP_POSTSCRIPT_VIEWER otherwise). Works around #1354 on OS/X.
 
   Removed
     1- dropped DOS support
