@@ -107,21 +107,12 @@ fill_gap(screen scr, long i, int jnew, int jpre)
 static double
 todbl(GEN x) { return rtodbl(gtofp(x, LOWDEFAULTPREC)); }
 
+/* code is either a t_CLOSURE (from GP: ploth, etc.) or a t_POL/t_VEC of
+ * two t_POLs from rectsplines */
 static GEN
 READ_EXPR(GEN code, GEN x) {
   if (typ(code)!=t_CLOSURE) return gsubst(code,0,x);
   set_lex(-1, x); return closure_evalgen(code);
-}
-/* as READ_EXPR, but make sure that result is a vector */
-static GEN
-READ_EXPR_VEC(GEN code, GEN x) {
-  GEN z;
-  if (typ(code)!=t_CLOSURE)
-    z = gsubst(code,0,x);
-  else
-  { set_lex(-1, x); z = closure_evalgen(code); }
-  if (typ(z) != t_VEC) z = mkvec(z);
-  return z;
 }
 
 void
@@ -1144,16 +1135,16 @@ static void
 Appendx(dblPointList *f, dblPointList *l,double x)
 {
   (l->d)[l->nb++]=x;
-  if (x < f->xsml) f->xsml=x;
-  else if (x > f->xbig) f->xbig=x;
+  if (x < f->xsml) f->xsml = x;
+  if (x > f->xbig) f->xbig = x;
 }
 
 static void
 Appendy(dblPointList *f, dblPointList *l,double y)
 {
   (l->d)[l->nb++]=y;
-  if (y < f->ysml) f->ysml=y;
-  else if (y > f->ybig) f->ybig=y;
+  if (y < f->ysml) f->ysml = y;
+  if (y > f->ybig) f->ybig = y;
 }
 
 static void
@@ -1161,24 +1152,30 @@ get_xy(long cplx, GEN t, double *x, double *y)
 {
   if (cplx)
   {
-    if (lg(t) != 2) pari_err_DIM("get_xy");
-    *x = gtodouble( real_i(gel(t,1)) );
-    *y = gtodouble( imag_i(gel(t,1)) );
+    if (typ(t) == t_VEC)
+    {
+      if (lg(t) != 2) pari_err_DIM("get_xy");
+      t = gel(t,1);
+    }
+    *x = gtodouble( real_i(t) );
+    *y = gtodouble( imag_i(t) );
   }
   else
   {
-    if (lg(t) != 3) pari_err_DIM("get_xy");
+    if (typ(t) != t_VEC || lg(t) != 3) pari_err_DIM("get_xy");
     *x = gtodouble( gel(t,1) );
     *y = gtodouble( gel(t,2) );
   }
 }
-/* t a t_VEC, get next (x,y) coordinate starting at index *i [update i] */
+/* t a t_VEC (possibly a scalar if cplx), get next (x,y) coordinate starting
+ * at index *i [update i] */
 static void
 get_xy_from_vec(long cplx, GEN t, long *i, double *x, double *y)
 {
   if (cplx)
   {
-    GEN z = gel(t,(*i)++);
+    GEN z;
+    if (typ(t) == t_VEC) z = gel(t,(*i)++); else { z = t; (*i)++; }
     *x = gtodouble( real_i(z) );
     *y = gtodouble( imag_i(z) );
   }
@@ -1331,7 +1328,7 @@ param_recursion(long cplx, dblPointList *pl,GEN code,GEN tleft,double xleft,
   if (depth==RECUR_MAXDEPTH) return;
 
   tt = rmiddle(tleft,tright);
-  p1 = READ_EXPR_VEC(code,tt);
+  p1 = READ_EXPR(code,tt);
   get_xy(cplx, p1, &xx,&yy);
 
   if (dx && dy && fabs(xleft+xright-2*xx) < dx*RECUR_PREC
@@ -1345,97 +1342,84 @@ param_recursion(long cplx, dblPointList *pl,GEN code,GEN tleft,double xleft,
   avma = av;
 }
 
-/*  Pure graphing. If testpoints is 0, it is set to the default.
- *  Returns a dblPointList of (absolute) coordinates. */
+/* Graph 'code' for parameter values in [a,b], using 'testpoints' sample
+ * points (0 = use a default value); code is either a t_CLOSURE (from GP:
+ * ploth, etc.) or a t_POL/t_VEC of two t_POLs from rectsplines. Returns a
+ * dblPointList of (absolute) coordinates. */
 static dblPointList *
 rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags, long testpoints)
 {
-  long single_c;
-  long param=flags & (PLOT_PARAMETRIC|PLOT_COMPLEX);
-  long recur=flags & PLOT_RECURSIVE;
-  long cplx=flags & PLOT_COMPLEX;
+  const double INF = 1./0.;
+  const long param = flags & (PLOT_PARAMETRIC|PLOT_COMPLEX);
+  const long recur = flags & PLOT_RECURSIVE;
+  const long cplx = flags & PLOT_COMPLEX;
   GEN t,dx,x;
   dblPointList *pl;
-  long tx, i, j, sig, nc, nl, nbpoints;
+  long tx, i, j, sig, nc, nl, ncoords, nbpoints, non_vec = 0;
   pari_sp av = avma;
-  double xsml,xbig,ysml,ybig,fx,fy;
 
   sig = gcmp(b,a); if (!sig) return NULL;
-  if (sig<0) swap(a, b);
-
-  if (!testpoints)
+  if (sig < 0) swap(a, b);
+  if (testpoints)
+  {
+    if (testpoints < 2)
+      pari_err_DOMAIN("ploth", "#points", "<", gen_2, stoi(testpoints));
+  }
+  else
   {
     if (recur) testpoints = 8;
     else       testpoints = param? 1500: 1000;
   }
+  /* compute F(a) to determine nc = #curves; nl = #coord. lists */
   x = gtofp(a, prec);
   if (typ(code) == t_CLOSURE) push_lex(x, code);
-  t = cplx? READ_EXPR_VEC(code,x)
-          : READ_EXPR(code,x);
-  tx = typ(t);
-  /* nc = nb of curves; nl = nb of coord. lists */
-  if (!is_matvec_t(tx))
+  t = READ_EXPR(code,x); tx = typ(t);
+  if (param)
   {
-    if (param && !cplx)
-      pari_err_TYPE("ploth [not a t_VEC with PLOT_PARAMETRIC]", t);
-    xsml = gtodouble(a);
-    xbig = gtodouble(b);
-    ysml = ybig = gtodouble(t);
-    nc=1; nl=2; single_c=1;
-  }
-  else
-  {
-    if (tx != t_VEC) pari_err_TYPE("ploth [not a row vector]",t);
-    nl = lg(t)-1;
-    if (!nl) { avma=av; return NULL; }
-    if (cplx)
-      nc = nl;
-    else if (param) {
+    if (cplx) nc = nl = (tx == t_VEC)? lg(t)-1: 1;
+    else
+    {
+      if (tx != t_VEC)
+        pari_err_TYPE("ploth [not a t_VEC with PLOT_PARAMETRIC]", t);
+      nl = lg(t)-1;
       nc = nl/2;
       if (odd(nl))
         pari_err_TYPE("ploth [parametric ploc with odd # of components]",t);
-    } else {
-      nc = nl;
-      nl++;
     }
-    if (recur && nc > 1)
-      pari_err_TYPE("ploth [multi-curves cannot be plot recursively]",t);
-    single_c=0;
-
-    if (param)
-    {
-      i = 1;
-      get_xy_from_vec(cplx,t, &i, &fx,&fy);
-      xbig = xsml = fx;
-      ybig = ysml = fy;
-      while (i<=nl)
-      {
-        get_xy_from_vec(cplx,t, &i, &fx,&fy);
-        if (xsml>fx) xsml=fx; else if (xbig<fx) xbig=fx;
-        if (ysml>fy) ysml=fy; else if (ybig<fy) ybig=fy;
-      }
-    }
+  }
+  else
+  {
+    if (!is_matvec_t(tx)) { nl = 2; non_vec = 1; }
     else
     {
-      xsml = gtodouble(a); ysml = gtodouble(vecmin(t));
-      xbig = gtodouble(b); ybig = gtodouble(vecmax(t));
+      if (tx != t_VEC) pari_err_TYPE("ploth [not a t_VEC]",t);
+      nl = lg(t);
     }
+    nc = nl-1;
   }
+  if (!nc) { avma = av; return NULL; }
+  if (recur && nc > 1)
+    pari_err_TYPE("ploth [multi-curves cannot be plot recursively]",t);
 
+  ncoords = cplx? 2*nl: nl;
   nbpoints = recur? testpoints << RECUR_MAXDEPTH: testpoints;
-  pl=(dblPointList*) pari_malloc((cplx?2*nl:nl)*sizeof(dblPointList));
-  for (i = 0; i < nl; i++)
+  pl=(dblPointList*) pari_malloc(ncoords*sizeof(dblPointList));
+  /* set [xy]sml,[xy]big to default values */
+  if (param)
   {
-    pl[i].d = (double*) pari_malloc((nbpoints+1)*sizeof(double));
-    pl[i].nb=0;
-    if (cplx)
-    {
-      pl[i+nl].d = (double*) pari_malloc((nbpoints+1)*sizeof(double));
-      pl[i+nl].nb=0;
-    }
+    pl[0].xsml = INF;
+    pl[0].xbig =-INF;
+  } else {
+    pl[0].xsml = gtodouble(a);
+    pl[0].xbig = gtodouble(b);
   }
-  pl[0].xsml=xsml; pl[0].ysml=ysml; pl[0].xbig=xbig; pl[0].ybig=ybig;
-
+  pl[0].ysml = INF;
+  pl[0].ybig =-INF;
+  for (i = 0; i < ncoords; i++)
+  {
+    pl[i].d = (double*)pari_malloc((nbpoints+1)*sizeof(double));
+    pl[i].nb=0;
+  }
   dx = divru(gtofp(gsub(b,a),prec), testpoints-1);
   if (recur) /* recursive plot */
   {
@@ -1446,15 +1430,13 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags, long testpoints)
       double xleft, xright = 0;
       pari_sp av2 = avma;
       affgr(a,tleft);
-      t = cplx? READ_EXPR_VEC(code,tleft)
-              : READ_EXPR(code,tleft);
+      t = READ_EXPR(code,tleft);
       get_xy(cplx,t, &xleft,&yleft);
       for (i=0; i<testpoints-1; i++, avma = av2)
       {
         if (i) { affrr(tright,tleft); xleft = xright; yleft = yright; }
         addrrz(tleft,dx,tright);
-        t = cplx? READ_EXPR_VEC(code,tright)
-                : READ_EXPR(code,tright);
+        t = READ_EXPR(code,tright);
         get_xy(cplx,t, &xright,&yright);
         Appendx(&pl[0],&pl[0],xleft);
         Appendy(&pl[0],&pl[1],yleft);
@@ -1463,7 +1445,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags, long testpoints)
       Appendx(&pl[0],&pl[0],xright);
       Appendy(&pl[0],&pl[1],yright);
     }
-    else /* single_c */
+    else /* single curve */
     {
       GEN xleft = cgetr(prec), xright = cgetr(prec);
       pari_sp av2 = avma;
@@ -1487,21 +1469,20 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags, long testpoints)
   else /* non-recursive plot */
   {
     pari_sp av2 = avma;
-    if (single_c)
-      for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
-      {
-        t = READ_EXPR(code,x);
-        pl[0].d[i] = gtodouble(x);
-        Appendy(&pl[0],&pl[1], gtodouble(t));
-      }
-    else if (param)
+    if (param)
     {
       for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
-        long k;
-        t = cplx? READ_EXPR_VEC(code,x)
-                : READ_EXPR(code,x);
-        if (lg(t)!=nl+1) pari_err_DIM("rectploth");
+        long k, nt;
+        t = READ_EXPR(code,x);
+        if (typ(t) != t_VEC)
+        {
+          if (cplx) nt = 1;
+          else nt = 0; /* trigger error */
+        }
+        else
+          nt = lg(t)-1;
+        if (nt != nl) pari_err_DIM("rectploth");
         k = 0; j = 1;
         while (j <= nl)
         {
@@ -1509,22 +1490,27 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags, long testpoints)
           get_xy_from_vec(cplx, t, &j, &xx, &yy);
           Appendx(&pl[0], &pl[k++], xx);
           Appendy(&pl[0], &pl[k++], yy);
-
         }
       }
     }
-    else /* plothmult */
+    else if (non_vec)
       for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
         t = READ_EXPR(code,x);
-        if (lg(t) != nl) pari_err_DIM("rectploth");
+        pl[0].d[i] = gtodouble(x);
+        Appendy(&pl[0],&pl[1], gtodouble(t));
+      }
+    else /* vector of non-parametric curves */
+      for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
+      {
+        t = READ_EXPR(code,x);
+        if (typ(t) != t_VEC || lg(t) != nl) pari_err_DIM("rectploth");
         pl[0].d[i] = gtodouble(x);
         for (j=1; j<nl; j++) Appendy(&pl[0],&pl[j], gtodouble(gel(t,j)));
       }
   }
-  pl[0].nb = nc;
   if (typ(code) == t_CLOSURE) pop_lex(1);
-  avma = av; return pl;
+  pl[0].nb = nc; avma = av; return pl;
 }
 
 /* Uses highlevel plotting functions to implement splines as
