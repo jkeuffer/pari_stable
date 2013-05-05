@@ -32,10 +32,11 @@ rectdraw0(long *w, long *x, long *y, long lw)
 
   if (pari_daemon()) return;  /* parent process returns */
   s = pari_unique_filename("plotps");
+  s = stack_strcat(s, ".ps");
   file = fopen(s, "w");
   if (!file) pari_err_FILE("postscript file", s);
   psplot_init(&plot, file, 1.0, 1.0, 9);
-  fprintf(file,"0 %ld translate -90 rotate\n", plot.pl->height);
+  fprintf(file,"0 %ld translate -90 rotate\n", plot.pl->height - 50);
   gen_rectdraw0(&plot, w, x, y, lw, 1, 1);
   fprintf(file,"stroke showpage\n"); (void)fclose(file);
   v = os_getenv("GP_POSTSCRIPT_VIEWER");
