@@ -328,8 +328,8 @@ $E(\F_p)$.
 \tet{ellsea} when only $[a_4,a_6]$ are given.
 
 \fun{GEN}{Fq_ellcard_SEA}{GEN a4, GEN a6, GEN q, GEN T, GEN p, long s} same
-when only $[a_4,a_6]$ are given, over $\F_p[t]/(T)$, assume $p\neq 2,3$.
-
+as \tet{ellsea} when only $[a_4,a_6]$ are given, over $\F_p[t]/(T)$.
+Assume $p\neq 2,3$.
 
 \fun{GEN}{Fp_ffellcard}{GEN a4, GEN a6, GEN q, long n, GEN p} returns the
 cardinal of the group $E(\F_q)$ where $q=p^n$.
@@ -486,7 +486,7 @@ $a_2$ and $a_6$ being \kbd{Flx} in $\F_3[X]/(T)$. In that case, the parameter
 returns the $j$-invariant of the curve $E$.
 
 \fun{GEN}{Flxq_ellcard}{GEN a4, GEN a6, GEN T, ulong p}
-returns the order of the group $E(\F_p[X]/(T))$.
+returns the order of $E(\F_p[X]/(T))$.
 
 \fun{GEN}{Flxq_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, ulong p, GEN *pt_m}
 returns the group structure $D$ of the group $E(\F_p[X]/(T))$,
@@ -546,7 +546,7 @@ in $\F_p[X]/(T)$.  A \kbd{FpXQE} is a point of $E(\F_p[X]/(T))$.
 returns the $j$-invariant of the curve $E$.
 
 \fun{GEN}{FpXQ_ellcard}{GEN a4, GEN a6, GEN T, GEN p}
-Return the order of the group $E(\F_p[X]/(T))$.
+returns the order of $E(\F_p[X]/(T))$.
 
 \fun{GEN}{FpXQ_ellgroup}{GEN a4, GEN a6, GEN N, GEN T, GEN p, GEN *pt_m}
 Return the group structure $D$ of the group $E(\F_p[X]/(T))$,
@@ -560,7 +560,7 @@ Returns generators of the group $E(\F_p[X]/(T))$ with the base change \kbd{ch}
 \fun{GEN}{FpXQ_elldivpol}{GEN a4, GEN a6, long n, GEN T, GEN p} returns the
 $n$-division polynomial of the elliptic curve $E$.
 
-\fun{GEN}{Fq_elldivpolmod}{GEN a4, GEN a6, long n, GEN h, GEN T, GEN p}
+\fun{GEN}{Fq_elldivpolmod}{GEN a4,GEN a6, long n, GEN h, GEN T, GEN p}
 returns the $n$-division polynomial of the elliptic curve $E$ modulo the
 polynomial $h$.
 
@@ -594,10 +594,10 @@ the result is currently undefined.
 of $P$ in the group $E(\F_p[X]/(T))$, where $o$ is a multiple of the order of
 $P$, or its factorization.
 
-\fun{GEN}{FpXQE_tatepairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p}
+\fun{GEN}{FpXQE_tatepairing}{GEN P,GEN Q, GEN m, GEN a4, GEN T, GEN p}
 returns the Tate pairing of the point of $m$-torsion $P$ and the point $Q$.
 
-\fun{GEN}{FpXQE_weilpairing}{GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p}
+\fun{GEN}{FpXQE_weilpairing}{GEN P,GEN Q, GEN m, GEN a4, GEN T, GEN p}
 returns the Weil pairing of the points of $m$-torsion $P$ and $Q$.
 
 \fun{GEN}{RgE_to_FpXQE}{GEN P, GEN T, GEN p} returns the \kbd{FpXQE} obtained

@@ -3061,12 +3061,11 @@ would be exhibited in this way, though.) This should be slower than
 \fun{GEN}{forprime_next}{forprime_t *T}
 
 \fun{void}{u_forprime_restrict}{forprime_t *T, ulong c} let $T$ an iterator
-initialized via \kbd{u\_forprime\_init(\&T, a, b)}, possibly followed by a
-number of calls to \tet{u_forprime_next}, and $a \leq c \leq b$. Restrict the
-range of primes considered to $[a,c]$.
+over primes initialized via \kbd{u\_forprime\_init(\&T, a, b)}, possibly
+followed by a number of calls to \tet{u_forprime_next}, and $a \leq c \leq
+b$. Restrict the range of primes considered to $[a,c]$.
 
-\fun{int}{u_forprime_arith_init}{forprime_t *T, ulong a, ulong b, ulong c,
-ulong q} initialize an iterator over primes in $[a,b]$, congruent to $c$
+\fun{int}{u_forprime_arith_init}{forprime_t *T, ulong a,ulong b, ulong c,ulong q} initialize an iterator over primes in $[a,b]$, congruent to $c$
 modulo $q$. Assume $0 \leq c < q$ and $(c,q) = 1$. Subsequent calls to
 \tet{u_forprime_next} will only return primes congruent to $c$ modulo $q$.
 
@@ -4496,9 +4495,9 @@ returning \kbd{NULL} if \kbd{x} is not invertible.
 \kbd{S} being \kbd{FpXQX}s, returns $[\kbd{x}^0, \dots, \kbd{x}^\kbd{n}]$ as a
 \typ{VEC} of \kbd{FpXQXQ}s.
 
-\fun{GEN}{FpXQXQ_matrix_pow}{GEN x, long m, long n, GEN S, GEN T, GEN p}, as
-\kbd{FpXQXQ\_powers}$(x, n-1,S, T, p)$, but returns the powers as a an
-$m\times n$ matrix.
+\fun{GEN}{FpXQXQ_matrix_pow}{GEN x, long m, long n, GEN S, GEN T, GEN p}
+returns the same powers of \kbd{x} as \kbd{FpXQXQ\_powers}$(x, n-1,S, T, p)$,
+but as an $m\times n$ matrix.
 
 \fun{GEN}{FpXQXQV_autpow}{GEN a, long n, GEN S, GEN T, GEN p}
 $\sigma$ being the automorphism defined by $\sigma(X)=a[1]\pmod{T(X)}$,
@@ -4540,9 +4539,9 @@ returning \kbd{NULL} if \kbd{x} is not invertible.
 \kbd{S} being \kbd{FqX}s, returns $[\kbd{x}^0, \dots, \kbd{x}^\kbd{n}]$ as a
 \typ{VEC} of \kbd{FqXQ}s.
 
-\fun{GEN}{FqXQ_matrix_pow}{GEN x, long m, long n, GEN S, GEN T, GEN p}, as
-\kbd{FqXQ\_powers}$(x, n-1,S, T, p)$, but returns the powers as a an
-$m\times n$ matrix.
+\fun{GEN}{FqXQ_matrix_pow}{GEN x, long m, long n, GEN S, GEN T, GEN p}
+returns the same powers of \kbd{x} as \kbd{FqXQ\_powers}$(x, n-1,S, T, p)$,
+but as an $m\times n$ matrix.
 
 \fun{GEN}{FqV_roots_to_pol}{GEN V, GEN T, GEN p, long v},
 \kbd{V} being a vector of \kbd{Fq}s, returns the monic \kbd{FqX}
@@ -4618,7 +4617,7 @@ $X^{q}\pmod{S(X)}$ over the finite field $\F_q$ defined by $T$ and $p$, thus
 $q=p^n$ where $n$ is the degree of $T$.
 
 \fun{GEN}{FpXQXQ_halfFrobenius}{GEN A, GEN S, GEN T, GEN p} returns
-$A(X)^{{q-1}\over 2}\pmod{S(X)}$ over the finite field $\F_q$ defined by $T$
+$A(X)^{(q-1)/2}\pmod{S(X)}$ over the finite field $\F_q$ defined by $T$
 and $p$, thus $q=p^n$ where $n$ is the degree of $T$.
 
 \subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
@@ -4810,8 +4809,9 @@ that the \kbd{Flx} $z$ is squarefree mod the prime $p$. Returns a
 irreducible factors of degree $i$. Set \kbd{nb} to the total number of
 irreducible factors (the sum of the $D[i]$).
 
-\fun{void}{Flx_ffintersect}{GEN P, GEN Q, long n, ulong p, GEN *SP,GEN *SQ, GEN
-MA,GEN MB}, as \kbd{FpX\_ffintersect}
+\fun{void}{Flx_ffintersect}{GEN P,GEN Q, long n, ulong p, GEN*SP, GEN*SQ, GEN
+MA,GEN MB},\hfil\break
+as \kbd{FpX\_ffintersect}
 
 \fun{GEN}{Flv_polint}{GEN x, GEN y, ulong p, long sv} as \kbd{FpV\_polint},
 returning an \kbd{Flx} in variable $v$.
@@ -5430,9 +5430,10 @@ $S[i]$ mod $p$.
 a root in the unramified extension of $\Q_p$ with residue field $\F_p[Y]/(T)$,
 assuming $v_p(f(a))>0$ and $v_p(f'(a))=0$.
 
-\fun{GEN}{ZpXQX_liftroot_vald}{GEN f, GEN a, long v, GEN T, GEN p, long e} as
-\tet{ZpXQX_liftroot}, when $v$ is the valuation of the content of $f'$ and it
-is required that $v_p(f(a))>v$ and $v_p(f'(a))=v$.
+\fun{GEN}{ZpXQX_liftroot_vald}{GEN f, GEN a, long v, GEN T, GEN p, long e}
+returns the foots of $f$ as \tet{ZpXQX_liftroot}, where $v$ is the valuation
+of the content of $f'$ and it is required that $v_p(f(a))>v$ and
+$v_p(f'(a))=v$.
 
 \fun{GEN}{ZpX_liftfact}{GEN A, GEN B, GEN T, GEN p, long e, GEN pe} is
 the routine underlying \tet{polhensellift}. Here, $p$ is prime, $T(Y)$
@@ -5540,8 +5541,8 @@ $\det U$ coprime to $p$ such that $E = MU$ modulo $p^m$. I
 the echelon form is divisible by $p^m$. The echelon form is an upper
 triangular HNF, we do not waste time to reduce it to Gauss-Jordan form.
 
-\fun{GEN}{zlm_echelon}{GEN M, long early_abort, ulong p, ulong pm} \kbd{Zlm}
-variant of \kbd{ZpM\_echelon}.
+\fun{GEN}{zlm_echelon}{GEN M, long early_abort, ulong p, ulong pm}
+variant of \kbd{ZpM\_echelon}, for a \kbd{Zlm} $M$.
 
 \fun{GEN}{ZpXQ_log}{GEN a, GEN T, GEN p, long e} $T$ being a \kbd{ZpX}
 irreducible modulo $p$, return the logarithm of $a$ in $\Z_p[X]/(T)$ to
@@ -6289,8 +6290,8 @@ vector), or the index of a column which is linearly dependent from the
 others as a \typ{VECSMALL} with a single component.
 
 \fun{GEN}{gen_FpM_Wiedemann}{void *E, GEN (*f)(void*, GEN), GEN B, GEN p}
-solve equation $f(X) = B$ over $\F_p$, where $B$ is a \kbd{FpV}, and $f$ is a
-blackbox endomorphism, where $f(E, X)$ computes the value of $f$ at the
+solve the equation $f(X) = B$ over $\F_p$, where $B$ is a \kbd{FpV}, and $f$
+is a blackbox endomorphism, where $f(E, X)$ computes the value of $f$ at the
 (dense) column vector $X$. Returns either a solution \typ{COL}, or a kernel
 vector as a \typ{VEC}.
 
@@ -7548,7 +7549,7 @@ returns the $3$-dimensional \typ{VEC} \kbd{[x,y,z]}.
 returns the $4$-dimensional \typ{VEC} \kbd{[x,y,z,t]}.
 
 \fun{GEN}{retmkvec5}{GEN x, GEN y, GEN z, GEN t, GEN u}
-returns the $5$-dimensional \typ{VEC} \kbd{[x,y,z,t,u]}.
+returns the $5$-dimensional row vector \kbd{[x,y,z,t,u]}.
 
 \fun{GEN}{retconst_vec}{long n, GEN x}
 returns the $n$-dimensional \typ{VEC} whose entries are constant and all
@@ -7567,7 +7568,7 @@ returns the $3$-dimensional \typ{COL} \kbd{[x,y,z]~}.
 returns the $4$-dimensional \typ{COL} \kbd{[x,y,z,t]~}.
 
 \fun{GEN}{retmkcol5}{GEN x, GEN y, GEN z, GEN t, GEN u}
-returns the $5$-dimensional \typ{COL} \kbd{[x,y,z,t,u]~}.
+returns the $5$-dimensional column vector \kbd{[x,y,z,t,u]~}.
 
 \fun{GEN}{retconst_col}{long n, GEN x}
 returns the $n$-dimensional \typ{COL} whose entries are constant and all
@@ -7580,13 +7581,16 @@ returns the $1$-column \typ{MAT} with colum \kbd{x}.
 returns the $2$-column \typ{MAT} with colums \kbd{x}, \kbd{y}.
 
 \fun{GEN}{retmkmat3}{GEN x, GEN y, GEN z}
-returns the $3$-dimensional \typ{MAT} \kbd{[x,y,z]}.
+returns the $3$-dimensional \typ{MAT} with columns
+\kbd{x}, \kbd{y}, \kbd{z}.
 
 \fun{GEN}{retmkmat4}{GEN x, GEN y, GEN z, GEN t}
-returns the $4$-dimensional \typ{MAT} \kbd{[x,y,z,t]}.
+returns the $4$-dimensional \typ{MAT} with columns
+\kbd{x}, \kbd{y}, \kbd{z}, \kbd{t}.
 
 \fun{GEN}{retmkmat5}{GEN x, GEN y, GEN z, GEN t, GEN u}
-returns the $5$-dimensional \typ{MAT} \kbd{[x,y,z,t,u]}.
+returns the $5$-dimensional \typ{MAT} with columns
+\kbd{x}, \kbd{y}, \kbd{z}, \kbd{t}, \kbd{u}.
 
 \fun{GEN}{retmkfrac}{GEN x, GEN y}
 returns the \typ{FRAC} \kbd{x / y}. Assume $x$ and $y$ are coprime and $y > 1$.
@@ -8320,29 +8324,30 @@ in the underlying monoid; \kbd{sqr} is a (presumably optimized) shortcut for
 returns $x^n$. See \tet{gen_pow}.
 
 \fun{GEN}{gen_pow_i}{GEN x, GEN n, void *E, F1 sqr, F2 mul}
-non-memory-clean variant of \tet{gen_pow}.
+internal variant of \tet{gen_pow}, not memory-clean.
 
 \fun{GEN}{gen_powu_i}{GEN x, ulong n, void *E, F1 sqr, F2 mul}
-non-memory-clean variant of \tet{gen_powu}.
+internal variant of \tet{gen_powu}, not memory-clean.
 
-\fun{GEN}{gen_pow_fold}{GEN x, GEN n, void *D, F1 sqr, F1 msqr} as
-\tet{gen_pow}, \kbd{mul} being replaced by \kbd{msqr}, with \kbd{msqr(D,
-$y$)} returning $xy^2$. In particular \kbd{D} must implicitly contain $x$.
+\fun{GEN}{gen_pow_fold}{GEN x, GEN n, void *D, F1 sqr, F1 msqr} variant
+of \tet{gen_pow}, where \kbd{mul} is replaced by \kbd{msqr}, with
+\kbd{msqr(D, $y$)} returning $xy^2$. In particular \kbd{D} must implicitly
+contain $x$.
 
 \fun{GEN}{gen_pow_fold_i}{GEN x, GEN n, void *E, F1 sqr, F1 msqr}
-non-memory-clean variant of \tet{gen_pow_fold}.
+internal variant of the function \tet{gen_pow_fold}, not memory-clean.
 
 \fun{GEN}{gen_powu_fold}{GEN x, ulong n, void *D, F1 sqr, F1 msqr}, see
-the previous \tet{gen_pow_fold}
+\tet{gen_pow_fold}.
 
 \fun{GEN}{gen_powu_fold_i}{GEN x, ulong n, void *E, F1 sqr, F1 msqr}
-non-memory-clean variant of \tet{gen_powu_fold}.
+see \tet{gen_pow_fold_i}.
 
-\fun{GEN}{gen_powers}{GEN x, long n, long use_sqr, void *D, F1 sqr, F2 mul, F0 one}
+\fun{GEN}{gen_powers}{GEN x, long n, long usesqr, void *D, F1 sqr, F2 mul, F0 one}
 returns $[\kbd{x}^0, \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC}; \kbd{mul(D,
 $x$, $y$)} implements the multiplication in the underlying monoid; \kbd{sqr}
 is a (presumably optimized) shortcut for \kbd{mul(D, $x$, $x$)}; \kbd{one}
-returns the monoid unit. The flag \kbd{use\_sqr} should be set to $1$ if
+returns the monoid unit. The flag \kbd{usesqr} should be set to $1$ if
 squaring are faster than multiplication by $x$.
 
 \fun{GEN}{gen_factorback}{GEN L, GEN e, F2 mul, F2 pow, void *D} generic form
@@ -9479,8 +9484,8 @@ message: \kbd{non-existent component: index \var{op} \var{lim}}.
 \subsubsec{e\_DOMAIN} An argument $x$ is not in the function's domain (as in
 \kbd{moebius(0)} or \kbd{zeta(1)}).
 \bprog
-  pari_err(e_DOMAIN, const char *f, const char *v, const char *op, GEN lim, GEN x)
-  pari_err_DOMAIN(const char *f, const char *v, const char *op, GEN lim, GEN x)
+  pari_err(e_DOMAIN, char *f, char *v, char *op, GEN lim, GEN x)
+  pari_err_DOMAIN(char *f, char *v, char *op, GEN lim, GEN x)
 @eprog\noindent prints the error message: \kbd{domain error in $f$: $v$
 \var{op} \var{lim}}. Special case: if \var{op} is the empty string, we ignore
 \var{lim} and print the error message: \kbd{domain error in $f$: $v$ out of
@@ -9661,11 +9666,17 @@ typedef struct {
 } hashtable;
 @eprog\noindent
 
-\fun{hashtable*}{hash_create}{ulong size, ulong (*hash)(void*), int
-(*eq)(void*,void*), int use_stack}\hfil\break
-creates a hashtable with enough room to contain \kbd{size} entries.
-The functions \kbd{hash} and \kbd{eq} will be used to compute the hash value
-of keys and test keys for equality, respectively. If \kbd{use\_stack}
+\fun{hashtable*}{hash_create}{size, hash, eq, use_stack}
+\vskip -1em % switch to K&R style to avoid atrocious line break
+\bprog
+  ulong size;
+  ulong (*hash)(void*);
+  int (*eq)(void*,void*);
+  int use_stack;
+@eprog\noindent
+creates a hashtable with enough room to contain
+\kbd{size} entries. The functions \kbd{hash} and \kbd{eq} compute the hash
+value of keys and test keys for equality, respectively. If \kbd{use\_stack}
 is non zero, the resulting table will use the PARI stack; otherwise, we use
 \kbd{malloc}.
 
