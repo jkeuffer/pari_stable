@@ -6,20 +6,25 @@ case "$with_qt" in
 yes)
    pth="/usr/local/lib /usr/local/share /usr/lib /usr/share"
    QTDIR=`locatedir qt4/bin $pth`
-   QTLIB="-lQtCore -lQtGui"
-   which_graphic_lib=Qt4
-   if test -z "$QTDIR"; then
-     QTDIR=`locatedir qt/bin $pth`
+   if test -n "$QTDIR"; then
      QTLIB="-lQtCore -lQtGui"
      which_graphic_lib=Qt4
-     if test -z "$QTDIR"; then
+   else
+     QTDIR=`locatedir qt/bin $pth`
+     if test -n "$QTDIR"; then
+       QTLIB="-lQtCore -lQtGui"
+       which_graphic_lib=Qt4
+     else
        QTDIR=`locatedir qt3/bin $pth`
-       QTLIB="-lqt-mt"
-       which_graphic_lib=Qt
-       if test -z "$QTDIR"; then
-         QTDIR=`locatedir qt2/bin $pth`
-         QTLIB="-lqt"
+       if test -n "$QTDIR"; then
+         QTLIB="-lqt-mt"
          which_graphic_lib=Qt
+       else
+         QTDIR=`locatedir qt2/bin $pth`
+         if test -n "$QTDIR"; then
+           QTLIB="-lqt"
+           which_graphic_lib=Qt
+         fi
        fi
      fi
    fi;
