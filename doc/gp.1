@@ -230,6 +230,14 @@ function for large base fields. This environment variable
 overrides PARI's 'datadir', defined at Configure time.
 
 .TP
+.I $GP_POSTSCRIPT_VIEWER
+an application able to display PostScript files, used by the 
+.I plotps
+graphic engine. This engine is a fallback used to output hi-res plots even
+when no compatible graphical library was available on your platform at
+Configure time. (Dumps the graph to a temporary file, then open the file.)
+
+.TP
 .I $GPHELP
 name of the external help program invoked by ?? and ??? shortcuts.
 
