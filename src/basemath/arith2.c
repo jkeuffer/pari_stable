@@ -674,11 +674,12 @@ divisors_init(GEN n, GEN *pP, GEN *pE)
     P = gel(n,1); l = lg(P);
     for (i = 1; i < l; i++)
       if (typ(gel(P,i)) != t_INT) { isint = 0; break; }
+    RgV_check_ZV(gel(n,2), "divisors");
   }
   else
   {
     if (tn == t_INT)
-      n = Z_factor(n);
+      n = absi_factor(n);
     else {
       if (is_matvec_t(tn)) pari_err_TYPE("divisors",n);
       isint = 0;
