@@ -19,5 +19,7 @@ Doc: returns the $n^{\text{th}}$
  If $n \geq 0$, then these polynomials have degree $n$.  For $n < 0$,
  $T_n$ is equal to $T_{-n}$ and $U_n$ is equal to $-U_{-2-n}$.
  In particular, $U_{-1} = 0$.
-Variant: Also available are \fun{GEN}{polchebyshev1}{long n, long v} and
+Variant: Also available are
+ \fun{GEN}{polchebyshev}{long n, long \fl, long v},
+ \fun{GEN}{polchebyshev1}{long n, long v} and
  \fun{GEN}{polchebyshev2}{long n, long v} for $T_n$ and $U_n$ respectively.
