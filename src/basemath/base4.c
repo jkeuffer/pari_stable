@@ -1504,8 +1504,10 @@ idealnorm(GEN nf, GEN x)
 static GEN
 idealinv_HNF_aux(GEN nf, GEN I)
 {
-  GEN dual, IZ = gcoeff(I,1,1); /* I \cap Z */
-  GEN J = idealmul_HNF(nf,I, gmael(nf,5,7));
+  GEN J, dual, IZ = gcoeff(I,1,1); /* I \cap Z */
+
+  if (isint1(IZ)) return matid(lg(I)-1);
+  J = idealmul_HNF(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
   dual = shallowtrans( hnf_divscale(J, gmael(nf,5,6), IZ) );
@@ -2674,7 +2676,7 @@ nfhnf(GEN nf, GEN x)
   {
     GEN d, di = NULL;
 
-    j=def; while (j>=1 && gequal0(gcoeff(A,i,j))) j--;
+    j=def; while (j>=1 && isintzero(gcoeff(A,i,j))) j--;
     if (!j)
     { /* no pivot on line i */
       if (idef) idef--;
@@ -2685,21 +2687,23 @@ nfhnf(GEN nf, GEN x)
       swap(gel(A,j), gel(A,def));
       swap(gel(I,j), gel(I,def));
     }
-
-    y = gcoeff(A,i,def);
-    gel(A,def) = nfC_nf_mul(nf, gel(A,def), nfinv(nf,y));
-    gel(I,def) = idealmul(nf, y, gel(I,def));
     for (  ; j; j--)
     {
-      GEN b, u,v,w, S, T, S0, T0 = gel(A,j);
+      GEN a,b, u,v,w, S, T, S0, T0 = gel(A,j);
       b = gel(T0,i); if (gequal0(b)) continue;
 
-      S0 = gel(A,def);
-      d = nfbezout(nf, gen_1,b, gel(I,def),gel(I,j), &u,&v,&w,&di);
-      S = colcomb(nf, u,v, S0,T0);     gel(S,i) = gen_1;
-      T = colcomb1(nf,gneg(b), T0,S0); gel(T,i) = gen_0;
+      S0 = gel(A,def); a = gel(S0,i);
+      d = nfbezout(nf, a,b, gel(I,def),gel(I,j), &u,&v,&w,&di);
+      S = colcomb(nf, u,v, S0,T0);       gel(S,i) = gen_1;
+      T = colcomb(nf, a,gneg(b), T0,S0); gel(T,i) = gen_0;
       gel(A,def) = S; gel(A,j) = T;
       gel(I,def) = d; gel(I,j) = w;
+    }
+    y = gcoeff(A,i,def);
+    if (!isint1(y))
+    {
+      gel(A,def) = nfC_nf_mul(nf, gel(A,def), nfinv(nf,y));
+      gel(I,def) = idealmul(nf, y, gel(I,def));
     }
     d = gel(I,def);
     if (!di) di = idealinv(nf,d);
