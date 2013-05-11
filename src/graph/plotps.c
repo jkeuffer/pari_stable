@@ -30,8 +30,8 @@ rectdraw0(long *w, long *x, long *y, long lw)
 {
   struct plot_eng plot;
   FILE *file;
-  char *s, *cmd, *v;
-
+  char *s, *cmd;
+  const char *v;
   if (pari_daemon()) return;  /* parent process returns */
   s = pari_unique_filename("plotps");
   pari_unlink(s);
@@ -43,7 +43,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
   gen_rectdraw0(&plot, w, x, y, lw, 1, 1);
   fprintf(file,"stroke showpage\n"); (void)fclose(file);
   v = os_getenv("GP_POSTSCRIPT_VIEWER");
-  if (!v) v = (char*)"open -W";
+  if (!v) v = "open -W";
   cmd = pari_sprintf("%s \"%s\" 2>/dev/null", v, s);
   system0(cmd);
   pari_unlink(s); exit(0);
