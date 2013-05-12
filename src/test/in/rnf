@@ -49,3 +49,5 @@ K = nfinit(z^3+z^2-2*z-1); rnf = rnfinit(K, x^2+Mod(-z,z^3+z^2-2*z-1)*x+1);
 a = rnfeltup(rnf,z^2)
 rnfeltdown(rnf, a)
 
+nf=nfinit(y); A = [[1,1/2;0,1],[1,1]];
+nfhnfmod(nf, A, nfdetint(nf,A))

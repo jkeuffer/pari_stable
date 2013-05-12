@@ -272,7 +272,7 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
     {
       long s = signe(x);
       if (!s) return zerocol(lg(v)-1);
-      if (is_pm1(x)) return s > 0? leafcopy(v): gneg(v);
+      if (is_pm1(x)) return s > 0? leafcopy(v): RgC_neg(v);
     }
     l = lg(v); y = cgetg(l, t_COL);
     for (i=1; i < l; i++)

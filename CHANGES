@@ -137,6 +137,9 @@ BA 109- galoisfixedfield() could return a wrong result for polynomials with
    114- log(t_FRAC close to 1) => junk (idem lngamma) [#1238]
    115- thue(thueinit(x^3-1493,1),3) -> error
 LGr116- typo in modr_safe -> precision error [#1413]
+   117- nfhnfmod(non-integral module) => wrong result
+        nf=nfinit(y); A = [[1,1/2;0,1],[1,1]];
+        nfhnfmod(nf, A, nfdetint(nf,A))
 
   Changed
     1- mathnf: swapped flag 3 and 5.

@@ -2512,26 +2512,20 @@ element_close(GEN nf, GEN x, GEN ideal)
   return gerepileupto(av, x);
 }
 
-/* u A + v B */
-static GEN
-colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
-{
-  GEN z;
-  if (gequal0(u))
-    z = nfC_nf_mul(nf,B,v);
-  else
-  {
-    z = u==gen_1? A: nfC_nf_mul(nf,A,u);
-    if (!gequal0(v)) z = RgC_add(z, nfC_nf_mul(nf,B,v));
-  }
-  return RgC_to_nfC(nf, z);
-}
 /* A + v B */
 static GEN
 colcomb1(GEN nf, GEN v, GEN A, GEN B)
 {
-  if (gequal0(v)) return A;
+  if (isintzero(v)) return A;
   return RgC_to_nfC(nf, RgC_add(A, nfC_nf_mul(nf,B,v)));
+}
+/* u A + v B */
+static GEN
+colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
+{
+  if (isintzero(u)) return nfC_nf_mul(nf,B,v);
+  if (u != gen_1) A = nfC_nf_mul(nf,A,u);
+  return colcomb1(nf, v, A, B);
 }
 
 /* return m[i,1..lim] * x */
@@ -2581,16 +2575,25 @@ rowcomb(GEN nf, GEN u, GEN v, long s, long t, GEN Z, long lim)
   return z;
 }
 
+/* nfbezout(0,b,A,B). Either bB = NULL or b*B */
 static GEN
-zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
+zero_nfbezout(GEN nf,GEN bB, GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 {
-  GEN d = idealmul(nf,b,B);
-  pari_sp av;
-
-  *di = idealinv(nf,d);
-  av = avma;
-  *w = gerepileupto(av, idealmul(nf, idealmul(nf,A,B), *di));
-  *v = nfinv(nf,b);
+  GEN d;
+  if (isint1(b))
+  {
+    *v = gen_1;
+    *w = A;
+    d = B;
+    *di = idealinv(nf,d);
+  }
+  else
+  {
+    *v = nfinv(nf,b);
+    *w = idealmul(nf,A,*v);
+    d = bB? bB: idealmul(nf,b,B);
+    *di = idealinv_HNF(nf,d);
+  }
   *u = gen_0; return d;
 }
 
@@ -2600,10 +2603,10 @@ zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 static GEN
 nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
 {
-  GEN w, u,v, d, di, aA, bB;
+  GEN w, u,v,uv, d, di, aA, bB;
 
-  if (gequal0(a)) return zero_nfbezout(nf,b,A,B,pu,pv,pw,pdi);
-  if (gequal0(b)) return zero_nfbezout(nf,a,B,A,pv,pu,pw,pdi);
+  if (isintzero(a)) return zero_nfbezout(nf,NULL,b,A,B,pu,pv,pw,pdi);
+  if (isintzero(b)) return zero_nfbezout(nf,NULL,a,B,A,pv,pu,pw,pdi);
 
   if (a != gen_1) /* frequently called with a = gen_1 */
   {
@@ -2613,40 +2616,20 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   aA = (a == gen_1)? A: idealmul(nf,a,A);
   bB = idealmul(nf,b,B);
   d = idealadd(nf,aA,bB);
+  if (gequal(aA, d)) return zero_nfbezout(nf,aA, a,B,A,pv,pu,pw,pdi);
+  if (gequal(bB, d)) return zero_nfbezout(nf,bB, b,A,B,pu,pv,pw,pdi);
+  /* general case is slow */
   di = idealinv_HNF(nf,d);
-  if (gequal(aA, d))
-  { /* aA | bB  (frequent) */
-    w = B;
-    v = gen_0;
-    if (a == gen_1)
-      u = gen_1;
-    else
-    {
-      u = nfinv(nf, a);
-      w = idealmul(nf, u, w); /* AB/d */
-    }
-  }
-  else if (gequal(bB, d))
-  { /* bB | aA  (slightly less frequent) */
-    w = A;
-    u = gen_0;
-    v = nfinv(nf, b);
-    w = idealmul(nf, v, w); /* AB/d */
-  }
-  else
-  { /* general case. Slow */
-    GEN uv;
-    w = idealmul(nf,aA,di); /* integral */
-    uv = idealaddtoone(nf, w, idealmul(nf,bB,di));
-    w = idealmul(nf,w,B);
-    u = gel(uv,1);
-    v = nfdiv(nf,gel(uv,2),b);
-    if (a != gen_1)
-    {
-      GEN inva = nfinv(nf, a);
-      u =  nfmul(nf,u,inva);
-      w = idealmul(nf, inva, w); /* AB/d */
-    }
+  w = idealmul(nf,aA,di); /* integral */
+  uv = idealaddtoone(nf, w, idealmul(nf,bB,di));
+  w = idealmul(nf,w,B);
+  u = gel(uv,1);
+  v = nfdiv(nf,gel(uv,2),b);
+  if (a != gen_1)
+  {
+    GEN inva = nfinv(nf, a);
+    u =  nfmul(nf,u,inva);
+    w = idealmul(nf, inva, w); /* AB/d */
   }
   *pu = u;
   *pv = v;
@@ -2690,12 +2673,12 @@ nfhnf(GEN nf, GEN x)
     for (  ; j; j--)
     {
       GEN a,b, u,v,w, S, T, S0, T0 = gel(A,j);
-      b = gel(T0,i); if (gequal0(b)) continue;
+      b = gel(T0,i); if (isintzero(b)) continue;
 
       S0 = gel(A,def); a = gel(S0,i);
       d = nfbezout(nf, a,b, gel(I,def),gel(I,j), &u,&v,&w,&di);
-      S = colcomb(nf, u,v, S0,T0);       gel(S,i) = gen_1;
-      T = colcomb(nf, a,gneg(b), T0,S0); gel(T,i) = gen_0;
+      S = colcomb(nf, u,v, S0,T0);
+      T = colcomb(nf, a,gneg(b), T0,S0);
       gel(A,def) = S; gel(A,j) = T;
       gel(I,def) = d; gel(I,j) = w;
     }
@@ -2704,13 +2687,15 @@ nfhnf(GEN nf, GEN x)
     {
       gel(A,def) = nfC_nf_mul(nf, gel(A,def), nfinv(nf,y));
       gel(I,def) = idealmul(nf, y, gel(I,def));
+      di = NULL;
     }
+    if (!di) di = idealinv(nf,gel(I,def));
     d = gel(I,def);
-    if (!di) di = idealinv(nf,d);
     gel(J,def) = di;
     for (j=def+1; j<=n; j++)
     {
-      GEN c = element_close(nf,gcoeff(A,i,j), idealmul(nf,d,gel(J,j)));
+      GEN c = gcoeff(A,i,j); if (isintzero(c)) continue;
+      c = element_close(nf, c, idealmul(nf,d,gel(J,j)));
       gel(A,j) = colcomb1(nf, gneg(c), gel(A,j),gel(A,def));
     }
     def--;
@@ -3022,7 +3007,13 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN D)
         GEN dc;
         c = Q_remove_denom(c, &dc);
         c = ZC_hnfrem(c, dc? ZM_Z_mul(D,dc): D);
-        if (dD) c = RgC_Rg_div(c, dD);
+        if (ZV_isscalar(c))
+        {
+          c = gel(c,1);
+          if (dD) c = gred_frac2(c,dD);
+        }
+        else
+          if (dD) c = RgC_Rg_div(c, dD);
         break;
       }
     }
@@ -3035,7 +3026,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
 {
   long li, co, i, j, def, ldef;
   pari_sp av0=avma, av, lim;
-  GEN d0, w, p1, d, u, v, A, I, J, di;
+  GEN dA, dI, d0, w, p1, d, u, v, A, I, J, di;
 
   nf = checknf(nf);
   check_ZKmodule(x, "nfhnfmod");
@@ -3044,17 +3035,21 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
 
   li = lgcols(A);
+  if (typ(detmat)!=t_MAT) detmat = idealhnf_shallow(nf, detmat);
   detmat = Q_remove_denom(detmat, NULL);
-  if (typ(detmat)!=t_MAT) pari_err_TYPE("nfhnfmod",detmat);
   RgM_check_ZM(detmat, "nfhnfmod");
 
   av = avma; lim = stack_lim(av,2);
   A = RgM_to_nfM(nf, A);
-  I = leafcopy(I);
+  A = Q_remove_denom(A, &dA);
+  I = Q_remove_denom(leafcopy(I), &dI);
+  dA = mul_denom(dA,dI);
+  if (dA) detmat = ZM_Z_mul(detmat, powiu(dA, minss(li,co)));
+
   def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
   {
-    def--; j=def; while (j>=1 && gequal0(gcoeff(A,i,j))) j--;
+    def--; j=def; while (j>=1 && isintzero(gcoeff(A,i,j))) j--;
     if (!j) continue;
     if (j==def) j--;
     else {
@@ -3064,7 +3059,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
     for (  ; j; j--)
     {
       GEN a, b, S, T, S0, T0 = gel(A,j);
-      b = gel(T0,i); if (gequal0(b)) continue;
+      b = gel(T0,i); if (isintzero(b)) continue;
 
       S0 = gel(A,def); a = gel(S0,i);
       d = nfbezout(nf, a,b, gel(I,def),gel(I,j), &u,&v,&w,&di);
@@ -3085,10 +3080,12 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   def--; d0 = detmat;
   A += def; A[0] = evaltyp(t_MAT)|evallg(li);
   I += def; I[0] = evaltyp(t_VEC)|evallg(li);
+  J = cgetg(li,t_VEC);
   for (i=li-1; i>=1; i--)
   {
-    d = nfbezout(nf, gen_1,gcoeff(A,i,i), d0,gel(I,i), &u,&v,&w,&di);
-    p1 = RgC_to_nfC(nf, nfC_nf_mul(nf,gel(A,i),v));
+    GEN b = gcoeff(A,i,i);
+    d = nfbezout(nf, gen_1,b, d0,gel(I,i), &u,&v,&w,&di);
+    p1 = nfC_nf_mul(nf,gel(A,i),v);
     if (i > 1)
     {
       d0 = idealmul(nf,d0,di);
@@ -3096,15 +3093,15 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
     }
     gel(A,i) = p1; gel(p1,i) = gen_1;
     gel(I,i) = d;
+    gel(J,i) = di;
   }
-  J = cgetg(li,t_VEC); gel(J,1) = gen_0;
-  for (j=2; j<li; j++) gel(J,j) = idealinv(nf,gel(I,j));
   for (i=li-2; i>=1; i--)
   {
     d = gel(I,i);
     for (j=i+1; j<li; j++)
     {
-      GEN c = element_close(nf, gcoeff(A,i,j), idealmul(nf,d,gel(J,j)));
+      GEN c = gcoeff(A,i,j); if (isintzero(c)) continue;
+      c = element_close(nf, c, idealmul(nf,d,gel(J,j)));
       gel(A,j) = colcomb1(nf, gneg(c), gel(A,j),gel(A,i));
     }
     if (low_stack(lim, stack_lim(av,2)))
@@ -3113,5 +3110,6 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
       gerepileall(av,3, &A,&I,&J);
     }
   }
+  if (dA) I = gdiv(I,dA);
   return gerepilecopy(av0, mkvec2(A, I));
 }
