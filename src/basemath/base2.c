@@ -698,6 +698,7 @@ get_maxord(nfmaxord_t *S, GEN T0, long flag)
           break;
         }
         default: pari_err(0, ERR);
+          return NULL;
       }
       l = lg(u);
       gel(P,i) = gel(u,1);
@@ -2803,6 +2804,7 @@ Rg_to_ff(GEN nf, GEN x0, GEN modpr)
       x = Q_remove_denom(x, &den);
       if (lg(x) == lg(nf_get_zk(nf))) break;
     default: pari_err_TYPE("Rg_to_ff",x);
+      return NULL;
   }
   if (den)
   {
