@@ -4,6 +4,6 @@ C-Name: sqrtnint
 Prototype: GL
 Help: sqrtnint(x,n): integer n-th root of x (x integer).
 Description:
- (gen):int sqrtnint($1)
+ (gen,small):int sqrtnint($1, $2)
 Doc: integer $n$-th root of $x$, which must be a non-negative integer. The
  result is rounded towards zero.
