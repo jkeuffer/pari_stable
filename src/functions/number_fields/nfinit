@@ -136,7 +136,7 @@ Doc: \var{pol} being a non-constant,
  ? nf = nfinit( [pol, 10^3] );
  ? nfcertify(nf)
  %3 = []
- @eprog\noindent A priori, \kbd{nf.basis} defines an order which is only known
+ @eprog\noindent A priori, \kbd{nf.zk} defines an order which is only known
  to be maximal at all primes $\leq 10^3$ (no prime $\leq 10^3$ divides
  \kbd{nf.index}). The certification step proves the correctness of the
  computation.
