@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.6.0 (released ??/??/20??):
+Done for version 2.6.0 (released 15/05/2013):
 
   Fixed
     1- Euclidean chains were confused by t_POLs with t_INTMOD/t_POLMOD coeffs

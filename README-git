@@ -77,7 +77,9 @@ To fetch a specific version of pari (2.0.17 or more recent), type for instance
 
     git checkout pari-2-0-20
 
-The branch pari-2-5 denotes the stable branch 2.5.* as a whole, and can be used to checkout up to date sources from that branch in between releases. For instance:
+The branch pari-2-5 denotes the stable branch 2.5.* as a whole, and can be
+used to checkout up to date sources from that branch in between releases.
+For instance:
 
     git checkout pari-2-5
 

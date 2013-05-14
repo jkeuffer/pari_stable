@@ -14,8 +14,8 @@ Typing 'make doc' typesets separate user's manual for GP and libpari,
 a tutorial and reference card in directory doc.
 
 See the files NEW and COMPAT for new features and incompatible changes
-respectively between 2.5 and older versions. See CHANGES for (a terse
-description of) subsequent patches.
+respectively between 2.6 and older versions. See CHANGES for a terse
+description of subsequent patches.
 
 For the adventurous:
 * If you want to check up-to-date, but possibly unstable, development
@@ -29,13 +29,13 @@ Afterwards, you're on your own.
 There are three mailing lists devoted to the PARI/GP package, and most
 feedback should be directed to those. They are:
 
--- pari-announce: to announce major version changes. You can't write to this
+* pari-announce: to announce major version changes. You can't write to this
 one, but you should probably subscribe.
 
--- pari-dev: for everything related to the development of PARI, including
+* pari-dev: for everything related to the development of PARI, including
 suggestions, technical questions, bug reports or patch submissions.
 
--- pari-users: for everything else.
+* pari-users: for everything else.
 
 To subscribe, send empty messages respectively to
 
@@ -76,10 +76,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 (*) Version numbers have the shape: MAJOR.MINOR.patchlevel.status. The status
 increases through {alpha, beta, release}. New features are introduced during
 the `alpha' phase, tested during `beta', and declared stable when `release'
-is reached. The MAJOR version number (currently 2) won't change for a while.
-The MINOR version number (1) increases by 2 when a new status cycle starts (as
-soon as a `release' version is out) [odd numbers are reserved for `released'
-versions, even ones for alpha/beta phase]. The patchlevel goes up each time
-we feel an upgrade is necessary (improvement, bugfix, ...). `Release'
-versions may be updated with further patchlevels if sufficiently important
-bugs need to be fixed before the next cycle reaches completion.
+is reached.
+The MAJOR version number will not change for a while.
+The MINOR version number increases by 2 when a new status cycle starts (as
+soon as a 'release' version is out): odd numbers are reserved for 'released'
+versions, even ones for alpha/beta phase.
+The patchlevel goes up each time we feel an upgrade is necessary (improvement
+or bugfix). 'Release' versions may be updated with further patchlevels if
+important bugs need to be fixed before the next cycle reaches completion.
