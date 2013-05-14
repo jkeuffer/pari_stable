@@ -1,4 +1,4 @@
-git ls-files | grep -v '/$' | grep -v '\.gitignore' | grep -v TODO |grep -v '^Announce\.'
+git ls-files | grep -v '/$' | grep -v '\.gitignore' | grep -v TODO
 # generated files
 echo doc/usersch3.tex
 echo src/language/default.h
