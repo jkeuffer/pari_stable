@@ -109,7 +109,7 @@ Doc:
  ? nf = nfinit([T, B]);
  ? nfcertify(nf)
  %3 = []      \\ nf is unconditionnally correct
- ? basis = nf.basis;
+ ? basis = nf.zk;
  ? disc = nf.disc;
  @eprog
 
