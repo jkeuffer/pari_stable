@@ -67,6 +67,38 @@ LIST            @Lists@2
 STR             @Strings@2
 VECSMALL        @Small vectors@2
 ERROR           @Error contexts@2
+e_SYNTAX        @iferr@
+e_BUG           @iferr@
+e_ALARM         @iferr@
+e_FILE          @iferr@
+e_MISC          @iferr@
+e_FLAG          @iferr@
+e_IMPL          @iferr@
+e_ARCH          @iferr@
+e_PACKAGE       @iferr@
+e_NOTFUNC       @iferr@
+e_PREC          @iferr@
+e_TYPE          @iferr@
+e_DIM           @iferr@
+e_VAR           @iferr@
+e_PRIORITY      @iferr@
+e_USER          @iferr@
+e_STACK         @iferr@
+e_OVERFLOW      @iferr@
+e_DOMAIN        @iferr@
+e_COMPONENT     @iferr@
+e_MAXPRIME      @iferr@
+e_CONSTPOL      @iferr@
+e_IRREDPOL      @iferr@
+e_COPRIME       @iferr@
+e_PRIME         @iferr@
+e_MODULUS       @iferr@
+e_ROOTS0        @iferr@
+e_OP            @iferr@
+e_TYPE2         @iferr@
+e_INV           @iferr@
+e_MEM           @iferr@
+e_SQRTN         @iferr@
 local           @Variables and Scope@2
 my              @Variables and Scope@2
 user defined    @User defined functions@2
