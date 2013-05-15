@@ -508,3 +508,4 @@ BA  6- [libpari] removed unusable functions dbg_close/dbg_release.
     9- Member function 'w' (this is technical, and no longer needed:-)
    10- obsolete function weipell(). Use ellwpseries()
    11- [libpari] obsolete function Polred. Use polredbest
+   12- old logo misc/pari.xpm, see http://pari.math.u-bordeaux1.fr/logo.html

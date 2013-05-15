@@ -406,7 +406,6 @@ install-misc:
 	\$(INSTALL_DATA) $misc/gpalias   \$(MISCDIR)
 	\$(INSTALL_PROGRAM) $misc/gpflog \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/gprc.dft  \$(MISCDIR)
-	\$(INSTALL_DATA) $misc/pari.xpm  \$(MISCDIR)
 	\$(INSTALL_PROGRAM) $misc/xgp    \$(MISCDIR)
 
 install-cfg::
