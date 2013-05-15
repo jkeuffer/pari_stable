@@ -8,7 +8,8 @@ Done for version 2.6.0 (released 15/05/2013):
        [ because a 0 polynomial could have lg() == 3 ]
     2- numerical instability in ellheightoo [#1204]
     3- Flm_gauss(m, smallish p): fix and enable the OK_ulong switch [ faster ]
-    4- remi2n didn't allow negative arguments [native kernel] [#1215] 5- ellrootno(e, p) started by computing a global minimal model for e
+    4- remi2n didn't allow negative arguments [native kernel] [#1215]
+    5- ellrootno(e, p) started by computing a global minimal model for e
        instead of a local one at p.
     6- qfbred(t_QFR) wrong when frac( sqrt(D) ) > 0.5
     7- add GC in sumalt()
@@ -140,6 +141,7 @@ LGr116- typo in modr_safe -> precision error [#1413]
    117- nfhnfmod(non-integral module) => wrong result
         nf=nfinit(y); A = [[1,1/2;0,1],[1,1]];
         nfhnfmod(nf, A, nfdetint(nf,A))
+BA 118- [native kernel] FFT mulii relied on unspecified order of evaluation
 
   Changed
     1- mathnf: swapped flag 3 and 5.

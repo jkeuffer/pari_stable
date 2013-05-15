@@ -1481,11 +1481,11 @@ muliifft_unspliti(GEN V, long bs, long len)
       GEN up = int_LSW(u);
       long lu = NLIMBS(u);
       LOCAL_OVERFLOW;
-      *ap-- = addll(*ap, *up--);
+      *ap = addll(*ap, *up--); ap--;
       for (j=1; j<lu; j++)
-        *ap-- = addllx(*ap, *up--);
+       { *ap = addllx(*ap, *up--); ap--; }
       while (overflow)
-        *ap-- = addll(*ap, 1);
+       { *ap = addll(*ap, 1); ap--; }
     }
   }
   return int_normalize(a,0);
