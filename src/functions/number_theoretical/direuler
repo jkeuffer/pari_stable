@@ -9,8 +9,9 @@ Help: direuler(p=a,b,expr,{c}): Dirichlet Euler product of expression expr
 Wrapper: (,,G)
 Description:
   (gen,gen,closure,?gen):gen direuler(${3 cookie}, ${3 wrapper}, $1, $2, $4)
-Doc: computes the \idx{Dirichlet series} associated to the \idx{Euler
- product} of expression \var{expr} as $p$ ranges through the primes from $a$
+Doc: computes the \idx{Dirichlet series} associated to the
+ \idx{Euler product} of expression \var{expr} as $p$ ranges through the primes
+ from $a$
  to $b$. \var{expr} must be a polynomial or rational function in another
  variable than $p$ (say $X$) and $\var{expr}(X)$ is understood as the local
  factor $\var{expr}(p^{-s})$.

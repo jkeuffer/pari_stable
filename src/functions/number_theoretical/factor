@@ -52,8 +52,9 @@ Doc: general factorization function, where $x$ is a
  \smallskip
 
  This routine uses trial division and perfect power tests, and should not be
- used for huge values of \var{lim} (at most $10^9$, say): \kbd{factorint(, 1
- + 8)} will in general be faster. The latter does not guarantee that all small
+ used for huge values of \var{lim} (at most $10^9$, say):
+ \kbd{factorint(, 1 + 8)} will in general be faster. The latter does not
+ guarantee that all small
  prime factors are found, but it also finds larger factors, and in a much more
  efficient way.
  \bprog

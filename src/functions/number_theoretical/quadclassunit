@@ -41,8 +41,9 @@ Doc: \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the
  harder. The default value for $c_1$ is $0$ and means that it is taken equal
  to $c_2$. The parameter $c_2$ is mostly obsolete and should not be changed,
  but we still document it for completeness: we compute a tentative class
- group by generators and relations using a factorbase of prime ideals $\leq
- c_1 (\log |D|)^2$, then prove that ideals of norm $\leq c_2 (\log |D|)^2$ do
+ group by generators and relations using a factorbase of prime ideals
+ $\leq c_1 (\log |D|)^2$, then prove that ideals of norm
+ $\leq c_2 (\log |D|)^2$ do
  not generate a larger group. By default an optimal $c_2$ is chosen, so that
  the result is provably correct under the GRH --- a famous result of Bach
  states that $c_2 = 6$ is fine, but it is possible to improve on this
