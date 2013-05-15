@@ -22,6 +22,5 @@ Doc: initialize tables for use with integral transforms such as \kbd{intmellinin
  use of this function, which is particularly useful when the function $s(X)$
  is lengthy to compute, such as a gamma product.
 
- \synt{intfuncinit}{void *E, GEN (*eval)(void*,GEN), GEN a,GEN b,long m, long
- flag, long prec}. Note that the order of $m$ and $\fl$ are reversed compared
+ \synt{intfuncinit}{void *E, GEN (*eval)(void*,GEN), GEN a,GEN b,long m, long flag, long prec}. Note that the order of $m$ and $\fl$ are reversed compared
  to the \kbd{GP} syntax.

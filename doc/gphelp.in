@@ -763,7 +763,7 @@ sub basic_subst {
   s/ *\\pmod(?![a-zA-Z]) *\{\s*((?:[^{}]|\{[^{}]*\})*)\}/ (mod $1)/g;
   s/ *\\cdot(?![a-zA-Z]) */./g;		# Maybe " . "?
   s/ *(\\|\@)[lc]?dots(?![a-zA-Z]) */.../g;
-  s/\\(Cl|log|sin|cos|lim(proj)?|tan|mod|sqrt|exp|ln|det|Re|Im|deg|wp|cap|oplus)(?![a-zA-Z])/$tr{startlword}$1$tr{endlword}/g;
+  s/\\(Norm|Cl|log|sin|cos|lim(proj)?|tan|mod|sqrt|exp|ln|det|Re|Im|deg|wp|cap|oplus)(?![a-zA-Z])/$tr{startlword}$1$tr{endlword}/g;
   s/\\pi(?![a-zA-Z])/$tr{startword}Pi$tr{endword}/g;
   s/\\(Alpha | Beta | Chi | Delta | Epsilon | Phi | Gamma | Eta | Iota
       | vartheta | Kappa | Lambda | Mu | Nu | Omicron | Pi | Theta | Rho
