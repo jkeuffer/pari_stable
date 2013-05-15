@@ -743,7 +743,7 @@ sub basic_subst {
   s/\\synt?\{\s*((?:[^{}]|\{[^{}]*\})*)\}\{\s*((?:[^{}]|\{[^{}]*\})*)\}/\\synx{$1}{$2}{$1}/g;
   # \def\synx#1#2#3{\sidx{#3}The library syntax is $\key{#1}({#2})$}
   # Often used with embedded {}.
-  s/\\synx\{\s*((?:[^{}]|\{[^{}]*\})*)\}\{\s*((?:[^{}]|\{[^{}]*\})*)\}\{((?:[^{}]|\{[^{}]*\})*)\}/\\sidx{$3}The library syntax is $tr{startbold}$1$tr{endbold}$tr{startpodcode}($2)$tr{endpodcode}/;
+  s/\\synx\{\s*((?:[^{}]|\{[^{}]*\})*)\}\{\s*((?:[^{}]|\{[^{}]*\})*)\}\{((?:[^{}]|\{[^{}]*\})*)\}/\\sidx{$3}The library syntax is $tr{startcode}$tr{startbold}$1$tr{endbold}($2)$tr{endcode}/;
 
   # May be used with an empty arg
   s/\\typ\{([^\}]*)\}/$tr{startcode}t_$1$tr{endcode}/g;
