@@ -23,8 +23,7 @@ Doc: numerical derivation of \var{expr} with respect to $X$ at $X=a$.
  (f(a))'/a'$.
 
  \synt{derivnum}{void *E, GEN (*eval)(void*,GEN), GEN a, long prec}. Also
- available is \fun{GEN}{derivfun}{void *E, GEN (*eval)(void *, GEN), GEN a,
- long prec}, which also allows power series for $a$.
+ available is \fun{GEN}{derivfun}{void *E, GEN (*eval)(void *, GEN), GEN a, long prec}, which also allows power series for $a$.
 
 Function: _derivfun
 Section: programming/internals

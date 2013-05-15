@@ -29,5 +29,6 @@ Doc: Computes the value at $z$ of the Weierstrass $\wp$ function attached to
  $[\wp(z),\wp'(z)]$.
 
 Variant: For $\fl = 0$, we also have
- \fun{GEN}{ellwp}{GEN w, GEN z, long prec}, and \fun{GEN}{ellwpseries}{GEN E,
- long v, long precdl} for the power series in variable $v$.
+ \fun{GEN}{ellwp}{GEN w, GEN z, long prec}, and
+ \fun{GEN}{ellwpseries}{GEN E, long v, long precdl} for the power series in
+ variable $v$.

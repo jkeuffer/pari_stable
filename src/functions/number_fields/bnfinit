@@ -98,5 +98,4 @@ Variant:
  corresponding to \kbd{tech = NULL}, where
  \kbd{flag} is either $0$ (default) or \tet{nf_FORCE} (insist on finding
  fundamental units). The function
- \fun{GEN}{Buchall_param}{GEN P, double c1, double c2, long nrpid, long
- flag, long prec} gives direct access to the technical parameters.
+ \fun{GEN}{Buchall_param}{GEN P, double c1, double c2, long nrpid, long flag, long prec} gives direct access to the technical parameters.
