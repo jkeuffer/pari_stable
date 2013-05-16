@@ -13,10 +13,9 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-/* Written by Vasili Burdo */
-
 const char* win32_basedir(void);
 char* win32_datadir(void);
 void win32_ansi_fputs(const char* s, void* f);
 int win32_terminal_width(void);
 int win32_terminal_height(void);
+void win32_set_pdf_viewer(void);

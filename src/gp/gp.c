@@ -245,6 +245,9 @@ init_help(void)
 # ifdef GPHELP
   if (!h) h = (char*)GPHELP;
 # endif
+#ifdef _WIN32
+  win32_set_pdf_viewer();
+#endif
   if (h) h = pari_strdup(h);
   return h;
 }

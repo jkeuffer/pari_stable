@@ -118,7 +118,8 @@ win32_ansi_fputs(const char* s, void* f)
   }
 }
 
-int win32_terminal_width(void)
+int
+win32_terminal_width(void)
 {
   CONSOLE_SCREEN_BUFFER_INFO sbi;
   if( !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbi) )
@@ -126,10 +127,34 @@ int win32_terminal_width(void)
   return (sbi.srWindow.Right - sbi.srWindow.Left);
 }
 
-int win32_terminal_height(void)
+int
+win32_terminal_height(void)
 {
   CONSOLE_SCREEN_BUFFER_INFO sbi;
   if( !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbi) )
       return 0;
   return (sbi.srWindow.Bottom - sbi.srWindow.Top);
+}
+
+void
+win32_set_pdf_viewer(void)
+{
+  char *s = getenv("GP_PDF_VIEWER");
+  if (!s)
+  {
+    HKEY handle;
+    const char *key = "AcroExch.Document\\shell\\open\\command";
+    const long SZ = 512;
+    char str[SZ], *buf;
+    int status;
+    DWORD L = SZ;
+
+    (void)RegOpenKeyEx(HKEY_CLASSES_ROOT, key, 0, KEY_READ, &handle);
+    status = RegQueryValueEx(handle, NULL, 0, NULL, (LPBYTE)str, &L);
+    RegCloseKey(handle);
+    if (status) return;
+    buf = malloc(strlen(str)+16); /*must not be freed*/
+    sprintf(buf,"GP_PDF_VIEWER=%s",str);
+    putenv(buf);
+  }
 }
