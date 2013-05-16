@@ -2313,7 +2313,8 @@ isin_G_H(buildroot *BR, long n1, long n2)
   ww = check_isin(BR, &R, tau, ss);
   if (ww)
   {
-    long z[NMAX+1], i , j, l = lg(BR->r);
+    GEN z = cgetg(N+1, t_VEC);
+    long i, j, l = lg(BR->r);
     s0 = permmul(ww, s0);
     if (DEBUGLEVEL)
     {
@@ -2324,8 +2325,8 @@ isin_G_H(buildroot *BR, long n1, long n2)
     for (i = 1; i < l; i++)
     {
       GEN p1 = gel(BR->r,i);
-      for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
-      for (j=1; j<=N; j++) p1[j] = z[j];
+      for (j=1; j<=N; j++) gel(z,j) = gel(p1, (int)s0[j]);
+      for (j=1; j<=N; j++) gel(p1,j) = gel(z,j);
     }
     avma = av; return n2;
   }
