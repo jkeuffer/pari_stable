@@ -476,7 +476,7 @@ slash_commands(void)
 \\h {m-n}: hashtable information\n\
 \\l {f}  : enable/disable logfile (set logfile=f)\n\
 \\m {n}  : print result in prettymatrix format\n\
-\\o {n}  : change output method (0=raw, 1=prettymatrix, 2=prettyprint, 3=2-dim)\n\
+\\o {n}  : set output method (0=raw, 1=prettymatrix, 2=prettyprint, 3=2-dim)\n\
 \\p {n}  : change real precision\n\
 \\ps{n}  : change series precision\n\
 \\q      : quit completely this GP session\n\
