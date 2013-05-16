@@ -283,9 +283,11 @@ sub treat {
   $help = $_;
 
   my ($first);
+  my ($pat) = $help;
+  if ($pat =~ /^[a-zA-Z]/) { $pat .= '\b'; } else { $pat .= '}'; }
   while (<DOC>)
   {
-    if (/\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter|label){$help\b/)
+    if (/\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter|label){$pat/)
       { $first = $_; last; }
   }
   if (eof(DOC))
