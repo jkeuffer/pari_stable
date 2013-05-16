@@ -23,8 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #define NMAX 11 /* maximum degree */
 
-typedef char IND;
-typedef IND *PERM;
+typedef GEN PERM;
 typedef PERM *GROUP;
 typedef struct {
   PERM *a;
@@ -120,13 +119,13 @@ _typ(long l,...)
 
 /* create a permutation with the N arguments of the function */
 static PERM
-_cr(long N, IND a,...)
+_cr(long N, long a,...)
 {
-  static IND x[NMAX+1];
+  static long x[NMAX+1];
   va_list args;
   long i;
 
-  va_start(args, a); x[0] = (IND)N; x[1] = a;
+  va_start(args, a); x[0] = N; x[1] = a;
   for (i=2; i<=N; i++) x[i] = va_arg(args,int);
   va_end(args); return x;
 }
@@ -135,9 +134,9 @@ static PERM
 permmul(PERM s1, PERM s2)
 {
   long i, n1 = s1[0];
-  PERM s3 = (PERM)stack_malloc((n1+1) * sizeof(IND));
-  for (i=1; i<=n1; i++) s3[i] = s1[(int)s2[i]];
-  s3[0] = (IND)n1; return s3;
+  PERM s3 = (PERM)stack_malloc((n1+1) * sizeof(long));
+  for (i=1; i<=n1; i++) s3[i] = s1[s2[i]];
+  s3[0] = n1; return s3;
 }
 
 static void
@@ -273,7 +272,7 @@ static PERM *
 alloc_pobj(long n, long m)
 {
   long i;
-  PERM *g = (PERM*) stack_malloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
+  PERM *g = (PERM*) stack_malloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(long) );
   PERM gpt = (PERM) (g + (m+1));
 
   for (i=1; i<=m; i++) { g[i] = gpt; gpt += (n+1); }
@@ -286,7 +285,7 @@ allocgroup(long n, long card)
   GROUP gr = alloc_pobj(n,card);
   long i;
 
-  for (i=1; i<=card; i++) gr[i][0]=(char)n;
+  for (i=1; i<=card; i++) gr[i][0] = n;
   return gr;
 }
 
@@ -373,7 +372,7 @@ Monomial(GEN r, PERM bb, long nbv)
 
   for (i = 1; i <= nbv; i++)
   {
-    t = gel(r,(int)bb[i]);
+    t = gel(r,bb[i]);
     if (typ(t) == t_COMPLEX && signe(gel(t,1)) < 0) { s = -s; t = gneg(t); }
     gel(R,i) = t;
   }
@@ -781,7 +780,7 @@ get_ro(long N, GEN rr, PERM S1, PERM S2, resolv *R)
 {
   GEN r = cgetg(N+1, t_VEC);
   long i;
-  for (i=1; i<=N; i++) r[i] = rr[ (int)S1[(int)S2[i] ] ];
+  for (i=1; i<=N; i++) r[i] = rr[ S1[S2[i] ] ];
   return R->a? gpolynomial(r, R): gpoly(r,R->nm,R->nv);
 }
 /* typ(z) = t_REAL, return zi = t_INT approximation */
@@ -2325,7 +2324,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
     for (i = 1; i < l; i++)
     {
       GEN p1 = gel(BR->r,i);
-      for (j=1; j<=N; j++) gel(z,j) = gel(p1, (int)s0[j]);
+      for (j=1; j<=N; j++) gel(z,j) = gel(p1,s0[j]);
       for (j=1; j<=N; j++) gel(p1,j) = gel(z,j);
     }
     avma = av; return n2;
