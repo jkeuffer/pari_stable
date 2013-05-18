@@ -4,6 +4,18 @@ Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 Done for version 2.6.1 (released ??/??/2013):
 
   Fixed
+  Added
+    1- genus2red: an implementation of Liu's algorithm to determine the
+       reduction of a genus 2 curve (at p > 2). Based on genus2reduction-0.3,
+         http://www.math.u-bordeaux1.fr/~liu/G2R/ (Cohen & Liu, 1994)
+       mostly rewritten from scratch:
+       - adapted to pari-2.*
+       - somewhat modularized
+       - fixes all known instances of 'bug27' and 'bug28' (at p = 3, reported
+         through Sage users).
+       - bench 'genus2red' contains a check of at least one instalce of each
+         of Namikawa-Ueno's types + all cases on which the original
+         genus2reduction was known to fail. [CAVEAT: the interface will change]
 
 Done for version 2.6.0 (released 15/05/2013):
 

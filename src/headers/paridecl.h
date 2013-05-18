@@ -1836,16 +1836,17 @@ GEN     ellwp(GEN w, GEN z, long prec);
 GEN     ellwp0(GEN w, GEN z, long flag, long prec);
 GEN     ellwpseries(GEN e, long v, long PRECDL);
 GEN     ellzeta(GEN om, GEN z, long prec);
+GEN     ellchangeinvert(GEN w);
+GEN     ellchangepoint(GEN x, GEN ch);
+GEN     ellchangepointinv(GEN x, GEN ch);
+GEN     elltors(GEN e);
 GEN     expIxy(GEN x, GEN y, long prec);
+GEN     genus2red(GEN Q, GEN P, GEN p);
 GEN     ghell(GEN e, GEN a, long prec);
 GEN     mathell(GEN e, GEN x, long prec);
 int     oncurve(GEN e, GEN z);
 GEN     orderell(GEN e, GEN p);
-GEN     ellchangeinvert(GEN w);
-GEN     ellchangepoint(GEN x, GEN ch);
-GEN     ellchangepointinv(GEN x, GEN ch);
 GEN     pointell(GEN e, GEN z, long prec);
-GEN     elltors(GEN e);
 GEN     zell(GEN e, GEN z, long prec);
 
 /* ellsea.c */

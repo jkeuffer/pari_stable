@@ -1,0 +1,107 @@
+Function: genus2red
+Section: elliptic_curves
+C-Name: genus2red
+Prototype: GGDG
+Help: genus2red(Q,P,{p}): let Q,P be polynomials with integer coefficients.
+ Determines the reduction at p > 2 of the
+ (proper, smooth) hyperelliptic curve C/Q: y^2+Qy = P, of genus 2.
+ (The special fiber X_p of the minimal regular model X of C over Z.)
+Doc: Let $Q,P$ be polynomials with integer coefficients.
+ Determines the reduction at $p > 2$ of the (proper, smooth) genus~2
+ curve $C/\Q$, defined by the hyperelliptic equation $y^2+Qy = P$. (The
+ special fiber $X_p$ of the minimal regular model $X$ of $C$ over $\Z$.)
+ If $p$ is omitted, determines the reduction type for all (odd) prime
+ divisors of the discriminant.
+
+ This function is based on an implementation of Liu's algorithm by Cohen and
+ Liu (1994) \kbd{genus2reduction-0.3}, see
+ \kbd{http://www.math.u-bordeaux1.fr/\til liu/G2R/}.
+
+ \misctitle{CAVEAT} The function interface will change soon: for the
+ time being, it prints some information and returns $[N,\var{FaN}, T]$
+ where $N$ is either the local conductor at $p$ or the
+ global conductor, \var{FaN} is its factorization, and $y^2 = T$ defines a
+ minimal model over $\Z[1/2]$. Unfortunately, the program is not complete for
+ $p = 2$, and we may return the odd part of the conductor only: this is the
+ case if the factorization includes the term $2^0$; if the factorization
+ contains another power of $2$, then this is the exact local conductor at $2$
+ and $N$ is the global conductor.
+
+ \bprog
+ ? genus2red(0,x^6 + 3*x^3 + 63, 3)
+ (potential) stable reduction :  (I)
+ reduction at p : [III{9}] page 184, (3)^2, f = 10
+ %1 = [59049, Mat([3, 10]), x^6 + 3*x^3 + 63]
+ ? [N, FaN, T] = genus2red(x^3-x^2-1, x^2-x);  \\ X_1(13), global reduction
+ p = 13
+ (potential) stable reduction :  (V), j1+j2 = 0, j1*j2 = 0
+ reduction at p : [I{0}-II-0] page 159, (1), f = 2
+ ? N
+ %3 = 169
+ ? FaN
+ %4 = Mat([13, 2])
+ ? T
+ %5 = x^6 + 58*x^5 + 1401*x^4 + 18038*x^3 + 130546*x^2 + 503516*x + 808561
+ @eprog
+
+ For each prime number $p$ considered two lines are printed. The first line
+ contains information about the stable reduction after field extension. Here
+ are the meanings of the symbols of stable reduction:
+
+ \item (I)   The stable reduction is smooth (i.e. the curve has potentially
+       good reduction).
+
+ \item (II)  The stable reduction is an elliptic curve $E$ with an ordinary
+ double point; $j$ mod $p$ is the modular invariant of $E$.
+
+ \item (III) The stable reduction is a projective line with two ordinary double
+       points.
+
+ \item (IV)  The stable reduction is two projective lines crossing
+ transversally at three points.
+
+ \item (V)   The stable reduction is the union of two elliptic curves $E_1$
+  and $E_2$ intersecting transversally at one point.
+  Let $j_1$, $j_2$ be their modular invariants, then $j_1+j_2$ and $j_1j_2$
+  are computed (they are integers mod $p$).
+
+ \item (VI)  The stable reduction is the union of an elliptic curve $E$ and a
+       projective line which has an ordinary double point. These two
+       components intersect transversally at one point; $j$ mod $p$ is the
+       modular invariant of $E$.
+
+ \item (VII) The stable reduction is as above, but the two components are both
+       singular.
+
+ In the cases (I) and (V), the Jacobian $J(C)$ has potentially good reduction.
+ In the cases (III), (IV) and (VII), $J(C)$ has potentially multiplicative
+ reduction. In the two remaining cases, the (potential) semi-abelian
+ reduction of $J(C)$ is the extension of an elliptic curve (with modular
+ invariant $j$ mod $p$) by a torus.
+
+ The second line contains three data concerning the reduction at p without any
+ field extension.
+ The first symbol describes the reduction at $p$ of $C$, following
+ Namikawa-Ueno, \emph{The complete classification of fibers in pencils of
+ curves of genus two}, Manuscripta Math., vol. 9, (1973), pages 143-186.
+ The reduction symbol is followed by the corresponding page number in the above
+ article.
+
+ A lower index is denoted between braces: for instance, \kbd{[I\obr 2\cbr-II-5]}
+ means \kbd{[I\_2-II-5]}.
+
+ Note that if $K$ and $K'$ are Kodaira symbols for singular fibers of elliptic
+ curves, \kbd{[$K$-$K'$-m]} and \kbd{[$K'$-$K$-m]} are the same type.
+ Finally, \kbd{[$K$-$K'$-$-1$]}  is \kbd{[$K'$-$K$-$\alpha$]} in the notation
+ of Namikawa-Ueno. The figure
+ \kbd{[2I\_0-m]} in Namikawa-Ueno, page 159 must be denoted by
+ \kbd{[2I\_0-(m+1)]}.
+
+ The second datum is the group of connected components (over an algebraic
+ closure of $\F_p$) of the Neron model of $J(C)$. The symbol $(n)$ means
+ the cyclic group with $n$ elements. When $n=0$, $(0)$ is
+ the trivial group $(1)$. $H\{n\}$ is isomorphic to $(2)\times (2)$
+ if $n$ is even and to $(4)$ otherwise.
+
+ Finally, the third datum $f$ is the exponent of the conductor of $J(C)$ at
+ $p$.
