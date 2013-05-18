@@ -1817,7 +1817,7 @@ genus2localred(struct igusa *I, GEN p, GEN polmini)
       default: pari_err_BUG("genus2localred [tt 2]");
     }
   }
-  if (equalis(p,2)) return 4;
+  if (equaliu(p,2)) return 4;
   pari_printf("reduction at p : ");
   polh = gel(polmini,1);
   lambda = itos(gel(polmini,2));
@@ -2060,8 +2060,7 @@ genus2red(GEN Q, GEN P, GEN p)
 {
   pari_sp av = avma;
   struct igusa I;
-  GEN a0, a1, a2, a3, a4, a5, a6;
-  GEN oddcond, cond, polr, facto, factp, vecmini;
+  GEN a0, a1, a2, a3, a4, a5, a6, polr, facto, factp, vecmini;
   long i, dd;
 
   if (typ(P) != t_POL) pari_err_TYPE("genus2red", P);
@@ -2127,22 +2126,18 @@ genus2red(GEN Q, GEN P, GEN p)
   I.j6 = igusaj6(a0,a1,a2,a3,a4,a5,a6);
   I.j8 = gmul2n(gsub(gmul(I.j2,I.j6),gsqr(I.j4)), -2);
   I.i12 = gmul2n(gsub(gadd(gsqr(gmul(I.j2,I.j4)),gmulsg(36,gmul(gmul(I.j2,I.j4),I.j6))),gadd(gadd(gmulsg(32,gmul(gsqr(I.j4),I.j4)),gmul(I.j6,gmul(gsqr(I.j2),I.j2))),gmulsg(108,gsqr(I.j6)))),-2);
-  cond = gen_1;
   for (i = 1; i < lg(factp); i++)
   {
     GEN q = gel(factp,i);
     long f;
     if (!p) pari_printf("p = %Ps\n", q);
     f = genus2localred(&I, q, gel(vecmini,i));
-    if (i > 1 || !equaliu(q, 2) || f != 4) pari_printf(", f = %ld\n", f);
-    cond = mulii(cond,powiu(q,f));
+    if (i == 1 && equaliu(q, 2) && f == 4)
+      f = 0; /* didn't truly compute the reduction type at 2 */
+    else
+      pari_printf(", f = %ld\n", f);
     gcoeff(facto,i,2) = stoi(f);
   }
   if (!p) pari_putc('\n');
-  if (Z_lvalrem(cond, 2, &oddcond) >= 4)
-  { /* couldn't decide the reduction type at 2 */
-    cond = oddcond;
-    gcoeff(facto,1,2) = gen_0;
-  }
-  return gerepilecopy(av, mkvec3(cond, facto, polr));
+  return gerepilecopy(av, mkvec3(factorback(facto), facto, polr));
 }
