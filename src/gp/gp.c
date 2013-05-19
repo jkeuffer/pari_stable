@@ -2030,24 +2030,17 @@ START:
     {
       case 'p': p = read_arg(&i,t,argc,argv); break;
       case 's': s = read_arg(&i,t,argc,argv); break;
-
       case 'e':
-        if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
-        f |= gpd_EMACS;
-        if (isalpha((int)*t)) goto START;
+        f |= gpd_EMACS; if (*t) goto START;
         break;
       case 'q':
-        f |= gpd_QUIET;
-        if (isalpha((int)*t)) goto START;
+        f |= gpd_QUIET; if (*t) goto START;
         break;
       case 't':
-        if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
-        f |= gpd_TEST;
-        if (isalpha((int)*t)) goto START;
+        f |= gpd_TEST; if (*t) goto START;
         break;
       case 'f':
-        initrc = 0;
-        if (isalpha((int)*t)) goto START;
+        initrc = 0; if (*t) goto START;
         break;
       case '-':
         if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }

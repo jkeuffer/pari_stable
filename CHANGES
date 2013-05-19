@@ -22,6 +22,8 @@ Done for version 2.6.1 (released ??/??/2013):
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
+    2- drop backward compatibility 'gp -emacs', 'gp -test'. Use the '--emacs'
+       and '--test' forms.
 
 Done for version 2.6.0 (released 15/05/2013):
 
