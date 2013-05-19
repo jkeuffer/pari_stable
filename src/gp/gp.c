@@ -2025,24 +2025,30 @@ read_opt(pari_stack *p_A, long argc, char **argv)
 
     if (*t++ != '-') break;
     i++;
+START:
     switch(*t++)
     {
-      case 'b': b = read_arg(&i,t,argc,argv);
-        pari_warn(warner, "buffersize is no longer used. -b ignored");
-        break;
       case 'p': p = read_arg(&i,t,argc,argv); break;
       case 's': s = read_arg(&i,t,argc,argv); break;
 
       case 'e':
         if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
-        f |= gpd_EMACS; break;
+        f |= gpd_EMACS;
+        if (isalpha((int)*t)) goto START;
+        break;
       case 'q':
-        f |= gpd_QUIET; break;
+        f |= gpd_QUIET;
+        if (isalpha((int)*t)) goto START;
+        break;
       case 't':
         if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
-        f |= gpd_TEST; break;
+        f |= gpd_TEST;
+        if (isalpha((int)*t)) goto START;
+        break;
       case 'f':
-        initrc = 0; break;
+        initrc = 0;
+        if (isalpha((int)*t)) goto START;
+        break;
       case '-':
         if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
         if (strcmp(t, "version") == 0) {

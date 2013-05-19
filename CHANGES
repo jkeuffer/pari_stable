@@ -4,6 +4,9 @@ Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 Done for version 2.6.1 (released ??/??/2013):
 
   Fixed
+    1- Allow compounding 1-letter flags to gp, e.g. qp -qf [ used to silently
+       ignore the 'f' ]
+
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the
        reduction of a genus 2 curve (at p > 2). Based on genus2reduction-0.3,
@@ -16,6 +19,9 @@ Done for version 2.6.1 (released ??/??/2013):
        - bench 'genus2red' contains a check of at least one instalce of each
          of Namikawa-Ueno's types + all cases on which the original
          genus2reduction was known to fail. [CAVEAT: the interface will change]
+
+  Removed
+    1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
 
 Done for version 2.6.0 (released 15/05/2013):
 
