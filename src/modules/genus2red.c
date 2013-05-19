@@ -1000,8 +1000,8 @@ tame_4(struct igusa *I, struct igusa_p *Ip, long v12)
 
 /* p = 3 */
 static void
-tame_567_init_3(struct igusa *I, struct igusa_p *Ip, GEN dk,
-                  long *pd, long *pn, long *pdm, long *pr)
+tame_567_init_3(struct igusa_p *Ip, GEN dk,
+                long *pd, long *pn, long *pdm, long *pr)
 {
   long n = 1 + Ip->r1/6;
   *pd = itos(gmulgs(dk,n));
@@ -1012,7 +1012,7 @@ tame_567_init_3(struct igusa *I, struct igusa_p *Ip, GEN dk,
 
 static void
 tame_567_init(struct igusa *I, struct igusa_p *Ip, GEN dk,
-                long *pd, long *pn, long *pdm, long *pr)
+              long *pd, long *pn, long *pdm, long *pr)
 {
   long va0, va2, va3, va5, vb2;
   long d, v1, v2;
@@ -1021,7 +1021,7 @@ tame_567_init(struct igusa *I, struct igusa_p *Ip, GEN dk,
   GEN p = Ip->p, val = Ip->val;
   long v5;
 
-  if (equalis(p, 3)) { tame_567_init_3(I, Ip, dk, pd, pn, pdm, pr); return; }
+  if (equalis(p, 3)) { tame_567_init_3(Ip, dk, pd, pn, pdm, pr); return; }
   /* assume p > 3 */
   va0 = myval(I->a0,p);
   va2 = myval(I->A2,p);
@@ -1088,7 +1088,7 @@ tame_567_init(struct igusa *I, struct igusa_p *Ip, GEN dk,
 static long
 tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
 {
-  long d, condp, n, dm, r;
+  long condp = -1, d, n, dm, r;
   GEN val = Ip->val;
 
   tame_567_init(I, Ip, dk, &d, &n, &dm, &r);
