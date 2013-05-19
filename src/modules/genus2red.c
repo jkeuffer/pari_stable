@@ -638,8 +638,8 @@ stable_reduction(struct igusa *I, struct igusa_p *Ip)
 }
 
 struct red {
-  char *t;
-  char *g;
+  const char *t;
+  const char *g;
   const char *pages;
 };
 
@@ -654,11 +654,9 @@ get_red(struct red *S, struct igusa_p *Ip, GEN polh, GEN p, long alpha, long r)
       indice = FpX_is_squarefree(FpX_red(polh,p), p)
                ? 0
                : val[6] - val[7] + val[Ip->eps2]/Ip->eps;
-      S->t = stackmalloc(4 + 20 + 1); /* max len: I{C long} */
-      (void)sprintf(S->t, "I{%ld}", indice);
+      S->t = stack_sprintf("I{%ld}", indice);
       S->pages = "159-177";
-      S->g = stackmalloc(3 + 20 + 1); /* max len: (C long) */
-      (void)sprintf(S->g, "(%ld)", indice? indice: 1);
+      S->g = stack_sprintf("(%ld)", indice? indice: 1);
       return indice ? indice: 1;
     case 6:
       if (alpha == 0) /* H(px) /p^3 */
@@ -666,11 +664,9 @@ get_red(struct red *S, struct igusa_p *Ip, GEN polh, GEN p, long alpha, long r)
       indice = FpX_is_squarefree(FpX_red(polh,p), p)
                ? 0
                : val[6] - val[7] + val[Ip->eps2]/Ip->eps;
-      S->t = stackmalloc(4 + 20 + 1); /* max len: I*{C long} */
-      (void)sprintf(S->t, "I*{%ld}", indice);
+      S->t = stack_sprintf("I*{%ld}", indice);
       S->pages = "159-177";
-      S->g = stackmalloc(3 + 20 + 1); /* max len: H{C long} */
-      (void)sprintf(S->g, "H{%ld}", indice);
+      S->g = stack_sprintf("H{%ld}", indice);
       return indice + 5;
     case 3:
       S->t = "III";
