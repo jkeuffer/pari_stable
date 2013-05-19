@@ -155,9 +155,9 @@ bpol2(GEN a0, GEN a1, GEN a2, GEN a3, GEN a4)
 }
 
 static const long VERYBIG = (1L<<20);
-long
+static long
 myval(GEN x, GEN p) { return signe(x)? Z_pval(x,p): VERYBIG; }
-long
+static long
 my3val(GEN x) { return signe(x)? Z_lval(x,3): VERYBIG; }
 /* largest power of p dividing pol */
 static long
