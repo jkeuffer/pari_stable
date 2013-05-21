@@ -1607,8 +1607,7 @@ quartic(GEN polh, long alpha, long dismin, struct igusa_p *Ip)
 
 static long
 litredtp(long alpha, long alpha1, GEN theta, GEN theta1, GEN polh, GEN polh1,
-         long dismin,
-         struct igusa *I, struct igusa_p *Ip)
+         long dismin, struct igusa *I, struct igusa_p *Ip)
 {
   GEN val = Ip->val, p = Ip->p;
   long condp = -1, indice, d, R = Ip->R;
@@ -1720,8 +1719,7 @@ labelm3(GEN polh, GEN theta, long alpha, long dismin,
   Ip->r1 = itos(gmulgs(theta1,6)) + 6*alpha1;
   Ip->r2 = itos(gmulgs(theta, 6)) + 6*alpha;
   Ip->R = R;
-  return litredtp(alpha, alpha1, theta, theta1, polh, polh1, dismin,
-                  I, Ip);
+  return litredtp(alpha, alpha1, theta, theta1, polh, polh1, dismin, I, Ip);
 }
 
 /* p = 3 */
