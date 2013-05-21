@@ -51,7 +51,6 @@ DTOL(double t) { return (long)(t + 0.5); }
 /********************************************************************/
 #define ISCR 64
 #define JSCR 22
-const char BLANK = ' ', YY = '|', XX_UPPER = '\'', XX_LOWER = '.';
 static char
 PICT(long j) {
   switch(j%3) {
@@ -118,6 +117,7 @@ READ_EXPR(GEN code, GEN x) {
 void
 plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
 {
+  const char BLANK = ' ', YY = '|', XX_UPPER = '\'', XX_LOWER = '.';
   long jz, j, i, sig;
   pari_sp av = avma, av2, limite;
   int jnew, jpre = 0; /* for lint */
@@ -158,7 +158,7 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
   if (!diff) { ybig += 1; diff= 1.; }
   dyj = ((JSCR-1)*3+2) / diff;
   jz = 3 - DTOL(ysml*dyj);
-  z = PICTZERO(jz); jz = jz/3;
+  z = PICTZERO(jz); jz /= 3;
   for (i=1; i<=ISCR; i++, avma = av2)
   {
     if (0<=jz && jz<=JSCR) scr[i][jz]=z;
