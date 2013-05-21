@@ -23,14 +23,14 @@ this Emacs shell are indicated by an EMACS sign in the left margin.
 
 To start the calculator, the general command line syntax is:
 
-\kbd{gp [--default \var{key}=\var{val}] [\var{files}]}
+\kbd{gp [-D \var{key}=\var{val}] [\var{files}]}
 
 \noindent
 where items within brackets are optional. The [\var{files}] argument is a
 list of files written in the GP scripting language, which will be loaded on
-startup. There can be any number of arguments of the form \kbd{--default
-\var{key}=\var{val}}, setting some internal parameters of \kbd{gp}, or
-\var{defaults}: each set the default \var{key} to the value \var{val}. See
+startup. There can be any number of arguments of the form
+\kbd{-D \var{key}=\var{val}}, setting some internal parameters of \kbd{gp},
+or \var{defaults}: each sets the default \var{key} to the value \var{val}. See
 \secref{se:defaults} below for a list and explanation of all defaults. These
 defaults can be changed by adding parameters to the input line as above, or
 interactively during a \kbd{gp} session, or in a preferences file also known

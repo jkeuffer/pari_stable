@@ -2022,7 +2022,20 @@ init_trivial_stack(void)
 }
 
 typedef struct { char *key, *val; } pair_t;
-
+/* If ab of the form key=val, record pair in new stack entry
+ * P[n].key must be freed by caller to avoid memory leak */
+static void
+record_default(pari_stack *s_P, char *ab)
+{
+  pair_t *P = (pair_t*)*pari_stack_base(s_P);
+  char *k, *v;
+  long n;
+  ab = pari_strdup(ab);
+  parse_key_val(ab, &k, &v);
+  n = pari_stack_new(s_P);
+  P[n].key = k;
+  P[n].val = v;
+}
 static void
 read_opt(pari_stack *p_A, long argc, char **argv)
 {
@@ -2060,6 +2073,10 @@ START:
       case 'f':
         initrc = 0; if (*t) goto START;
         break;
+      case 'D':
+        if (*t || i == argc) usage(argv[0]);
+        record_default(&s_P, argv[i++]);
+        break;
       case '-':
         if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
         if (strcmp(t, "version") == 0) {
@@ -2067,14 +2084,9 @@ START:
           pari_free((void*)bot); exit(0);
         }
         if (strcmp(t, "default") == 0) {
-          char *k, *v, *ab;
-          long n;
           if (i == argc) usage(argv[0]);
-          ab = pari_strdup( argv[i++] );
-          parse_key_val(ab, &k, &v);
-          n = pari_stack_new(&s_P);
-          P[n].key = k;
-          P[n].val = v; break;
+          record_default(&s_P, argv[i++]);
+          break;
         }
         if (strcmp(t, "texmacs") == 0) { f |= gpd_TEXMACS; break; }
         if (strcmp(t, "emacs") == 0) { f |= gpd_EMACS; break; }
@@ -2107,7 +2119,10 @@ START:
   /* override the values from gprc */
   if (p) (void)sd_primelimit(p, d_INITRC);
   if (s) (void)sd_parisize(s, d_INITRC);
-  for (i = 0; i < s_P.n; i++) setdefault(P[i].key, P[i].val, d_INITRC);
+  for (i = 0; i < s_P.n; i++) {
+    setdefault(P[i].key, P[i].val, d_INITRC);
+    free((void*)P[i].key);
+  }
   pari_stack_delete(&s_P);
 
   if (GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS|gpd_TEST)) disable_color = 1;
