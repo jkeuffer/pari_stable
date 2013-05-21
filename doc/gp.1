@@ -3,13 +3,15 @@
 gp \- PARI calculator
 .SH SYNOPSIS
 .B gp
-.RB [ --stacksize | -s
+.RB [ -s
 .IR stacksize ]
-.RB [ --primelimit | -p
+.RB [ -p
 .IR primelimit ]
 .RB [ --emacs ]
 .RB [ -f | --fast ]
 .RB [ -q | --quiet ]
+.RB [ --default
+.IR key=val ]
 .RB [ --help ]
 .RB [ --test ]
 .RB [ --texmacs ]
@@ -45,7 +47,7 @@ character strings,
 and recursive combinations of these.
 
 .SH OPTIONS
-Command line options are availaible in both short form (-f) and POSIX-like
+Command line options are available in both short form (-f) and POSIX-like
 (--fast). Numeric arguments can be followed by a modifier
 .B k
 ,
@@ -61,27 +63,37 @@ Fast start (or factory settings). Do not read
 .B .gprc
 (see below) upon startup.
 .TP
-.B \-p, \--primelimit limit
+.B \-p limit
+[DEPRECATED]
 Upon startup, gp computes a table of small primes used in
 number-theoretic applications. If
 .I primelimit
-is set, the table include primes up to that bound instead of the default.
-Unreasonably high values will considerably increase startup time. Exceedingly
-small values will cause some number-theoretic functions to fail with the
-message "not enough precomputed primes".
+is set, the table include primes up to that bound instead of the default
+(= 500000). It is now mostly useless to change this value.
 .TP
 .B \-q, \--quiet
-Quiet mode. Don't print headers or history numbers, don't say goodbye.
+Quiet mode. Do not print headers or history numbers and do not say goodbye.
 
 .TP
-.B \-s, \--stacksize limit
+.B \--default key=val
+performs 
+.BR default(key,
+.BR val) ";"
+on startup, overriding values from the 
+.B gprc
+preferences file. 'val' must be a constant value and is not allowed to
+involve any computation (e.g. 1+1 is forbidden). Any number of such
+default-setting statements may appear on the command line.
+
+.TP
+.B \-s limit
 Size of gp internal stack allocated on startup. When gp runs out of space, it
 interrupts the current computation and raises a 
 .BI "stack overflow"
 exception. If this occurs frequently, start with a bigger stack. The stack
 size can also be
 increased from within gp, using
-.BR default(parisize, ...) ";"
+.BR default(parisize, limit) ";"
 it may be convenient to set 
 .B stacksize
 from your 

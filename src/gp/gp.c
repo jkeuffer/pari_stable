@@ -363,17 +363,17 @@ static void
 usage(char *s)
 {
   printf("### Usage: %s [options] [GP files]\n", s);
-  printf("Options are:\n");
-  printf("\t[-f,--fast]\tFaststart: do not read .gprc\n");
-  printf("\t[-q,--quiet]\tQuiet mode: do not print banner and history numbers\n");
-  printf("\t[-p,--primelimit limit]\n\t\t\tPrecalculate primes up to 'limit'\n");
-  printf("\t[-s,--stacksize stacksize]\n\t\t\tStart with the PARI stack of given size (in bytes)\n");
-  printf("\t[--emacs]\tRun as if in Emacs shell\n");
-  printf("\t[--help]\tPrint this message\n");
-  printf("\t[--test]\tTest mode. No history, wrap long lines (bench only)\n");
-  printf("\t[--texmacs]\tRun as if using TeXmacs frontend\n");
-  printf("\t[--version]\tOutput version info and exit\n");
-  printf("\t[--version-short]\tOutput version number and exit\n\n");
+  printf("Available options:\n");
+  printf("  [-f,--fast]\t\tFast start: do not read .gprc\n");
+  printf("  [-q,--quiet]\t\tQuiet mode: do not print banner and history numbers\n");
+  printf("  [-s stacksize]\tStart with the PARI stack of given size (in bytes)\n");
+  printf("  [--default key=val]\tExecute default(key,val) on startup\n");
+  printf("  [--emacs]\t\tRun as if in Emacs shell\n");
+  printf("  [--help]\t\tPrint this message\n");
+  printf("  [--test]\t\tTest mode. No history, wrap long lines (bench only)\n");
+  printf("  [--texmacs]\t\tRun as if using TeXmacs frontend\n");
+  printf("  [--version]\t\tOutput version info and exit\n");
+  printf("  [--version-short]\tOutput version number and exit\n\n");
   exit(0);
 }
 
@@ -1118,7 +1118,12 @@ check_meta(char *buf, int ismain)
 /* LOCATE GPRC */
 
 static int get_line_from_file(const char *prompt, filtre_t *F, FILE *file);
-#define err_gprc(s,t,u) { err_printf("\n"); pari_err(e_SYNTAX,s,t,u); }
+static void
+err_gprc(char *s, char *t, char *u)
+{
+  err_printf("\n");
+  pari_err(e_SYNTAX,s,t,u);
+}
 
 /* return $HOME or the closest we can find */
 static const char *
@@ -1281,6 +1286,19 @@ filtered_buffer(filtre_t *F)
 
 static jmp_buf *env;
 static pari_stack s_env;
+/* parse src of the form s=t (or s="t"), set *ps to s, and *pt to t.
+ * modifies src (replaces = by \0) */
+static void
+parse_key_val(char *src, char **ps, char **pt)
+{
+  char *s_end, *t;
+  t = src; while (*t && *t != '=') t++;
+  if (*t != '=') err_gprc("missing '='",t,src);
+  s_end = t;
+  t++;
+  if (*t == '"') (void)readstring(t, t, src);
+  *s_end = 0; *ps = src; *pt = t;
+}
 
 static void
 gp_initrc(pari_stack *p_A)
@@ -1332,13 +1350,7 @@ gp_initrc(pari_stack *p_A)
       }
       else
       { /* set default */
-        char *s_end;
-        t = s; while (*t && *t != '=') t++;
-        if (*t != '=') err_gprc("missing '='",t,b->buf);
-        s_end = t;
-        t++;
-        if (*t == '"') (void)readstring(t, t, s);
-        *s_end = 0;
+        parse_key_val(s, &s,&t);
         (void)setdefault(s,t,d_INITRC);
       }
     }
@@ -2009,15 +2021,21 @@ init_trivial_stack(void)
   avma = top = bot + s;
 }
 
+typedef struct { char *key, *val; } pair_t;
+
 static void
 read_opt(pari_stack *p_A, long argc, char **argv)
 {
+  pair_t *P;
+  pari_stack s_P; /* key / value to record default() settings */
   char *b = NULL, *p = NULL, *s = NULL;
   ulong f = GP_DATA->flags;
   long i = 1, initrc = 1;
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
 
+  pari_stack_init(&s_P,sizeof(*P),(void**)&P);
+  pari_stack_alloc(&s_P, 64);
   pari_outfile = stderr;
   while (i < argc)
   {
@@ -2047,6 +2065,16 @@ START:
         if (strcmp(t, "version") == 0) {
           init_trivial_stack(); print_version();
           pari_free((void*)bot); exit(0);
+        }
+        if (strcmp(t, "default") == 0) {
+          char *k, *v, *ab;
+          long n;
+          if (i == argc) usage(argv[0]);
+          ab = pari_strdup( argv[i++] );
+          parse_key_val(ab, &k, &v);
+          n = pari_stack_new(&s_P);
+          P[n].key = k;
+          P[n].val = v; break;
         }
         if (strcmp(t, "texmacs") == 0) { f |= gpd_TEXMACS; break; }
         if (strcmp(t, "emacs") == 0) { f |= gpd_EMACS; break; }
@@ -2079,6 +2107,8 @@ START:
   /* override the values from gprc */
   if (p) (void)sd_primelimit(p, d_INITRC);
   if (s) (void)sd_parisize(s, d_INITRC);
+  for (i = 0; i < s_P.n; i++) setdefault(P[i].key, P[i].val, d_INITRC);
+  pari_stack_delete(&s_P);
 
   if (GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS|gpd_TEST)) disable_color = 1;
   pari_outfile = stdout;

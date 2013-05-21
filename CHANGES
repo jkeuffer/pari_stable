@@ -19,6 +19,15 @@ Done for version 2.6.1 (released ??/??/2013):
        - bench 'genus2red' contains a check of at least one instalce of each
          of Namikawa-Ueno's types + all cases on which the original
          genus2reduction was known to fail. [CAVEAT: the interface will change]
+    2- allow to startup gp with flags --default key=val: execute
+       default(key,val) on startup
+
+  Changed
+    1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
+       'gp --default primelimit=lim' (setting primelimit is now mostly
+       useless, anyway).
+    2- gp --stacksize lim is deprecated. Use gp -s lim or the generic form
+       'gp --default parisize=lim' .
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
