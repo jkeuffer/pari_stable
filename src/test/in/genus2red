@@ -569,17 +569,17 @@ P0=t*((x^2-t)^2+t^(k+2)*x^l)*((x-1)^2+t^(n-1));
 do(P0, Strprintf("[II*{%ld-%ld}], p. 184",n,p))
 
 \\ n > 0
-n = 9; k = 4; l = 0; n=3*k+l;
+k = 4; l = 0; n=3*k+l;
 P0=(x^3-t)^2+t^(k+2)*x^l;
 do(P0, Strprintf("[III{%ld}], p. 184",n))
 
 \\ n > 0
-n = 9; k = 4; l = 1; n=3*k+l;
+k = 4; l = 1; n=3*k+l;
 P0=(x^3-t)^2+t^(k+2)*x^l;
 do(P0, Strprintf("[III{%ld}], p. 184",n))
 
 \\ n > 0
-n = 9; k = 4; l = 2; n=3*k+l;
+k = 4; l = 2; n=3*k+l;
 P0=(x^3-t)^2+t^(k+2)*x^l;
 do(P0, Strprintf("[III{%ld}], p. 184",n))
 

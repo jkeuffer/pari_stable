@@ -576,22 +576,10 @@ struct igusa {
   GEN a0, A2, A3, A5, B2;
 };
 struct igusa_p {
-  long eps, eps2, tt, r1, r2, R;
-  GEN p, j, sjinv, pjinv, val;
-  char *str;
+  long eps, eps2, tt, r1, r2, R, tame;
+  GEN p, stable, val;
+  const char *type, *neron;
 };
-
-static void
-append_print(struct igusa_p *Ip, const char *s)
-{ Ip->str = Ip->str? stack_strcat(Ip->str, s): stack_strdup(s); }
-static void
-append_printf(struct igusa_p *Ip, const char *fmt, ...)
-{
-  va_list ap;
-  char *s;
-  va_start(ap, fmt); s = pari_vsprintf(fmt, ap);
-  va_end(ap); append_print(Ip, s); free(s);
-}
 
 static void
 stable_reduction(struct igusa *I, struct igusa_p *Ip)
@@ -599,7 +587,7 @@ stable_reduction(struct igusa *I, struct igusa_p *Ip)
   static const long deg[9] = { 0,2,4,4,6,8,10,12 };
   GEN j2 = I->j2, i4 = I->i4, j6 = I->j6, j8 = I->j8, j10 = I->j10;
   GEN i12 = I->i12, p = Ip->p, val = Ip->val;
-  GEN v, s, Ieps;
+  GEN J, v, s, Ieps;
   long r1, r2, r3, r4, i, eps, eps2;
 
   v = cgetg(8,t_COL);
@@ -607,18 +595,6 @@ stable_reduction(struct igusa *I, struct igusa_p *Ip)
   s = gel(v,1);
   for(i = 2; i <= 7; i++)
     if (gcmp(gel(v,i),s) < 0) s = gel(v,i);
-  /* s = max(v_p(X) / deg(X)) */
-  if (gegal(s,gel(v,6))) { Ip->tt = 1; return; }
-  if (gegal(s,gel(v,7)))
-  {
-    Ip->j = gmod(gdiv(gpowgs(i4,3),i12), p);
-    Ip->tt = 2; return;
-  }
-  if (gegal(s,gel(v,3)))
-  {
-    Ip->tt = (val[2] == val[3] || 2*val[4] == 3*val[3])? 3: 4;
-    return;
-  }
   switch(itos_or_0(p))
   {
     case 2:  eps = 4; eps2 = 5; Ieps = j8; break;
@@ -632,22 +608,51 @@ stable_reduction(struct igusa *I, struct igusa_p *Ip)
   r3 = eps*val[6] + val[eps2];
   r2 = eps*val[7];
   r4 = min3(r1, r2, r3);
-  if (r3 == r4)
+
+  /* s = max(v_p(X) / deg(X)) */
+  J = cgetg(1, t_VEC);
+  if (gegal(s,gel(v,6)))
+    Ip->tt = 1;
+  else if (gegal(s,gel(v,7)))
   {
-    GEN sjinv, pjinv, t = gmul(gpowgs(j10,eps),Ieps);
-    sjinv = gaddsg(1728, gdiv(gpowgs(i12,eps), t));
-    pjinv = gdiv(gpowgs(i4,3*eps), t);
-    Ip->sjinv = gmod(sjinv, p);
-    Ip->pjinv = gmod(pjinv, p);
-    Ip->tt = 5; return;
+    J = mkvec( Fp_to_mod(gmod(gdiv(gpowgs(i4,3),i12), p), p) );
+    Ip->tt = 2;
   }
-  if (r2 == r4)
+  else if (gegal(s,gel(v,3)))
+    Ip->tt = (val[2] == val[3] || 2*val[4] == 3*val[3])? 3: 4;
+  else if (r3 == r4)
   {
-    Ip->j = gmod(gdiv(gpowgs(i4,3),i12), p);
-    Ip->tt = 6; return;
+    GEN a,b, P, sj, pj, t = gmul(gpowgs(j10,eps),Ieps);
+    sj = gaddsg(1728, gdiv(gpowgs(i12,eps), t));
+    pj = gdiv(gpowgs(i4,3*eps), t);
+    a = gmod(sj, p);
+    b = gmod(pj, p);
+    P = mkpoln(3, gen_1, Fp_neg(a,p), b, 0); /* X^2 - SX + P: roots j1,j2 */
+    J = FpX_roots(P, p);
+    switch(lg(J)-1)
+    {
+      case 0:
+        P = FpX_to_mod(P, p);
+        a = FpX_to_mod(pol_x(0), p);
+        b = FpX_to_mod(deg1pol_shallow(b, gen_m1,0), p);
+        J = mkvec2(mkpolmod(a,P), mkpolmod(b,P)); break;
+      case 1:
+        a = Fp_to_mod(gel(J,1), p);
+        J = mkvec2(a, a); break;
+      case 2:
+        settyp(J, t_VEC);
+        J = FpV_to_mod(J, p); break;
+    }
+    Ip->tt = 5;
   }
-  /* r1 == r4 */
-  Ip->tt = 7;
+  else if (r2 == r4)
+  {
+    J = mkvec( Fp_to_mod(gmod(gdiv(gpowgs(i4,3),i12), p), p) );
+    Ip->tt = 6;
+  }
+  else
+    Ip->tt = 7; /* r1 == r4 */
+  Ip->stable = mkvec2(stoi(Ip->tt), J);
 }
 
 struct red {
@@ -655,6 +660,25 @@ struct red {
   const char *g;
   const char *pages;
 };
+
+static char *
+cyclic(long n)
+{
+  char *s = stack_malloc(64);
+  (void)sprintf(s, "(%ld)", n? n: 1); return s;
+}
+static char *
+dicyclic(long a, long b)
+{
+  char *s = stack_malloc(128);
+  if (!a) a = 1;
+  if (!b) b = 1;
+  if (a == b)
+    (void)sprintf(s, "(%ld)^2", a);
+  else
+    (void)sprintf(s, "(%ld)x(%ld)", a,b);
+  return s;
+}
 
 static long
 get_red(struct red *S, struct igusa_p *Ip, GEN polh, GEN p, long alpha, long r)
@@ -669,7 +693,7 @@ get_red(struct red *S, struct igusa_p *Ip, GEN polh, GEN p, long alpha, long r)
                : val[6] - val[7] + val[Ip->eps2]/Ip->eps;
       S->t = stack_sprintf("I{%ld}", indice);
       S->pages = "159-177";
-      S->g = stack_sprintf("(%ld)", indice? indice: 1);
+      S->g = cyclic(indice);
       return indice ? indice: 1;
     case 6:
       if (alpha == 0) /* H(px) /p^3 */
@@ -684,32 +708,32 @@ get_red(struct red *S, struct igusa_p *Ip, GEN polh, GEN p, long alpha, long r)
     case 3:
       S->t = "III";
       S->pages = "161-177";
-      S->g = "(2)";
+      S->g = cyclic(2);
       return 2;
     case 9:
       S->t = "III*";
       S->pages = "162-177";
-      S->g = "(2)";
+      S->g = cyclic(2);
       return 8;
     case 2:
       S->t = "II";
       S->pages = "159-174";
-      S->g = "(1)";
+      S->g = cyclic(1);
       return 1;
     case 8:
       S->t = "IV*";
       S->pages = "160-175";
-      S->g = "(3)";
+      S->g = cyclic(3);
       return 7;
     case 4:
       S->t = "IV";
       S->pages = "160-174";
-      S->g = "(3)";
+      S->g = cyclic(3);
       return 3;
     case 10:
       S->t = "II*";
       S->pages = "160-174";
-      S->g = "(1)";
+      S->g = cyclic(1);
       return 9;
     default: pari_err_BUG("get_red [type]");
       return -1; /*notreached*/
@@ -741,16 +765,28 @@ tame_1(struct igusa *I, struct igusa_p *Ip)
   r = modii(gmul(n,pro1), n);
   switch(itos(n))
   {
-    case 1: condp = 0; append_print(Ip, "[I{0-0-0}] page 155, (1)"); break;
+    case 1:
+      condp = 0;
+      Ip->type = "[I{0-0-0}] page 155";
+      Ip->neron = cyclic(1); break;
     case 2:
       switch(itos(r))
       {
-        case 0: condp = 4; append_print(Ip, "[I*{0-0-0}] page 155, (2)^4");break;
-        case 1: condp = 2; append_print(Ip, "[II] page 155, (1)");break;
+        case 0:
+          condp = 4;
+          Ip->type = "[I*{0-0-0}] page 155";
+          Ip->neron = "(2)^4"; break;
+        case 1:
+          condp = 2;
+          Ip->type = "[II] page 155";
+          Ip->neron = cyclic(1); break;
         default: pari_err_BUG("tame_1 [bug1]");
       }
       break;
-    case 4: condp = 4;append_print(Ip, "[VI] page 156, (2)^2");break;
+    case 4:
+      condp = 4;
+      Ip->type = "[VI] page 156";
+      Ip->neron = dicyclic(2,2); break;
     default: pari_err_BUG("tame_1 [bug8]");
   }
   return condp;
@@ -813,36 +849,39 @@ tame_2(struct igusa *I, struct igusa_p *Ip, long v12)
   d = n * (6*val[6]-5*val[7]) / 6;
   switch(n)
   {
-    case 1: condp = 1; append_printf(Ip, "[I{%ld-0-0}] page 170, (%ld)",d,d);break;
+    case 1: condp = 1;
+      Ip->type = stack_sprintf("[I{%ld-0-0}] page 170", d);
+      Ip->neron = cyclic(d); break;
     case 2:
       switch(r)
       {
         case 0: condp = 4;
-          append_printf(Ip, "[I*{%ld-0-0}] page 171, (2)^2xH{%ld}",d/2,d/2);
-          break;
+          Ip->type = stack_sprintf("[I*{%ld-0-0}] page 171",d/2);
+          Ip->neron = stack_sprintf("(2)^2xH{%ld}",d/2); break;
         case 1:
           switch(q)
           {
             case 0: condp = 2;
-              append_printf(Ip, "[II*{%ld-0}] page 172, (1)",d/2);
-              break;
+              Ip->type = stack_sprintf("[II*{%ld-0}] page 172",d/2);
+              Ip->neron = cyclic(1); break;
             case 1: condp = 3;
-              append_printf(Ip, "[II{%ld-0}] page 171, (%ld)",d/2,2*d);
-              break;
+              Ip->type = stack_sprintf("[II{%ld-0}] page 171",d/2);
+              Ip->neron = cyclic(2*d); break;
             default: pari_err_BUG("tame2 [bug10]");
           }
           break;
         default: pari_err_BUG("tame2 [bug11]");
       }
       break;
-    case 3:
+    case 3: condp = 3;
+      Ip->neron = cyclic(d);
       switch(r)
       {
-        case 1: condp = 3;
-          append_printf(Ip, "[IV-II{%ld}] page 175, (%ld)",(d-2)/3,d);
+        case 1:
+          Ip->type = stack_sprintf("[IV-II{%ld}] page 175", (d-2)/3);
           break;
-        case 2: condp = 3;
-          append_printf(Ip, "[IV*-II{%ld}] page 175, (%ld)",(d-1)/3,d);
+        case 2:
+          Ip->type = stack_sprintf("[IV*-II{%ld}] page 175", (d-1)/3);
           break;
         default: pari_err_BUG("tame2 [bug12]");
       }
@@ -854,11 +893,11 @@ tame_2(struct igusa *I, struct igusa_p *Ip, long v12)
           switch(q)
           {
             case 1: condp = 3;
-              append_printf(Ip, "[III-II{%ld}] page 177, (%ld)",(d-2)/4,d/2);
-              break;
+              Ip->type = stack_sprintf("[III-II{%ld}] page 177",(d-2)/4);
+              Ip->neron = cyclic(d/2); break;
             case 3: condp = 4;
-              append_printf(Ip, "[III*-II*{%ld}] page 178, (8)",(d-2)/4);
-              break;
+              Ip->type = stack_sprintf("[III*-II*{%ld}] page 178",(d-2)/4);
+              Ip->neron = cyclic(8); break;
             default: pari_err_BUG("tame2 [bug13]");
           }
           break;
@@ -866,11 +905,11 @@ tame_2(struct igusa *I, struct igusa_p *Ip, long v12)
           switch(q)
           {
             case 1: condp = 4;
-              append_printf(Ip, "[III-II*{%ld}] page 178, (8)",(d-2)/4);
-              break;
+              Ip->type = stack_sprintf("[III-II*{%ld}] page 178",(d-2)/4);
+              Ip->neron = cyclic(8); break;
             case 3: condp = 3;
-              append_printf(Ip, "[III*-II{%ld}] page 178, (%ld)",(d-2)/4,d/2);
-              break;
+              Ip->type = stack_sprintf("[III*-II{%ld}] page 178",(d-2)/4);
+              Ip->neron = cyclic(d/2); break;
             default: pari_err_BUG("tame2 [bug14]");
           }
           break;
@@ -881,10 +920,11 @@ tame_2(struct igusa *I, struct igusa_p *Ip, long v12)
       switch(r)
       {
         case 2: condp = 4;
-          append_printf(Ip, "[II*-II*{%ld}] page 176, H{%ld}",(d-4)/6,(d+2)/6);
-          break;
+          Ip->type = stack_sprintf("[II*-II*{%ld}] page 176", (d-4)/6);
+          Ip->neron = stack_sprintf("H{%ld}",(d+2)/6); break;
         case 4: condp = 4;
-          append_printf(Ip, "[II-II*{%ld}] page 176, H{%ld}",(d-2)/6,(d+4)/6);
+          Ip->type = stack_sprintf("[II-II*{%ld}] page 176", (d-2)/6);
+          Ip->neron = stack_sprintf("H{%ld}",(d+4)/6); break;
           break;
         default: pari_err_BUG("tame2 [bug16]");
       }
@@ -911,27 +951,27 @@ tame_3(struct igusa *I, struct igusa_p *Ip, long v12)
   switch(n)
   {
     case 1: condp = 2;
-      append_printf(Ip, "[I{%ld-%ld-0}] page 179, (%ld)x(%ld)",d1,d2,d1,d2);
-      break;
+      Ip->type = stack_sprintf("[I{%ld-%ld-0}] page 179", d1,d2);
+      Ip->neron = dicyclic(d1,d2); break;
     case 2:
       switch(r)
       {
         case 0: condp = 4;
-          append_printf(Ip, "[I*{%ld-%ld-0}] page 180, H{%ld}xH{%ld}",d1/2,d2/2,d1/2,d2/2);
-          break;
+          Ip->type = stack_sprintf("[I*{%ld-%ld-0}] page 180", d1/2,d2/2);
+          Ip->neron = stack_sprintf("H{%ld}xH{%ld}",d1/2,d2/2); break;
         case 1:
           switch(flc)
           {
             case 1:condp = 3;
-              append_printf(Ip, "[2I{%ld}-0] page 181, (%ld)",d1,d1);
-              break;
+              Ip->type = stack_sprintf("[2I{%ld}-0] page 181", d1);
+              Ip->neron = cyclic(d1); break;
             case 2: condp = 3;
-              append_printf(Ip, "[II{%ld-%ld}] page 182, ",d1/2,d2/2);
-              if ((d1*d2-4)&7) append_printf(Ip, "(%ld)",2*d1);
-              else append_printf(Ip, "(%ld)x(2)",d1);
-              append_printf(Ip, "or [II{%ld-%ld}] page 182, ",d2/2,d1/2);
-              if ((d1*d2-4)&7) append_printf(Ip, "(%ld)",2*d2);
-              else append_printf(Ip, "(%ld)x(2)",d2);
+              Ip->type = stack_sprintf("[II{%ld-%ld}] page 182",d1/2,d2/2);
+              if ((d1*d2-4)&7)
+                Ip->neron = cyclic(2*d1);
+              else
+                Ip->neron = dicyclic(d1,2);
+              /* FIXME: "or" same with d1<->d2 */
               break;
           }
           break;
@@ -939,8 +979,8 @@ tame_3(struct igusa *I, struct igusa_p *Ip, long v12)
       }
       break;
     case 4: condp = 4;
-      append_printf(Ip, "[III{%ld}] page 182, H{%ld}",d1/2,d1/2);
-      break;
+      Ip->type = stack_sprintf("[III{%ld}] page 182", d1/2);
+      Ip->neron = stack_sprintf("H{%ld}",d1/2); break;
     default: pari_err_BUG("tame3 [bug21]");
   }
   return condp;
@@ -967,14 +1007,14 @@ tame_4(struct igusa *I, struct igusa_p *Ip, long v12)
   switch(n)
   {
     case 1: condp = 2;
-      append_printf(Ip, "[I{%ld-%ld-%ld}] page 182, (%ld)x(%ld)",d1,d2,d3,h,g/h);
-      break;
+      Ip->type = stack_sprintf("[I{%ld-%ld-%ld}] page 182",d1,d2,d3);
+      Ip->neron = dicyclic(h,g/h); break;
     case 2:
       switch(r)
       {
         case 0: condp = 4;
-          append_printf(Ip, "[I*{%ld-%ld-%ld}] page 183, H{%ld}xH{%ld}",d1/2,d2/2,d3/2,g/4,2-((h&2)>>1));
-          break;
+          Ip->type = stack_sprintf("[I*{%ld-%ld-%ld}] page 183",d1/2,d2/2,d3/2);
+          Ip->neron = stack_sprintf("H{%ld}xH{%ld}", g/4,2-((h&2)>>1)); break;
         case 1:
           if      (d1 == d2 || d1 == d3) f2 = d1;
           else if (d2 == d3) f2 = d2;
@@ -986,22 +1026,23 @@ tame_4(struct igusa *I, struct igusa_p *Ip, long v12)
           switch(q)
           {
             case 0: condp = 3;
-              append_printf(Ip, "[II*{%ld-%ld}] page 184, (%ld)",f1/2,f2,f2);
-              break;
+              Ip->type = stack_sprintf("[II*{%ld-%ld}] page 184", f1/2,f2);
+              Ip->neron = cyclic(f2); break;
             case 1: condp = 3;
-              append_printf(Ip, "[II{%ld-%ld}] page 183, (%ld)",f1/2,f2,2*f1+f2);
-              break;
+              Ip->type = stack_sprintf("[II{%ld-%ld}] page 183", f1/2,f2);
+              Ip->neron = cyclic(2*f1+f2); break;
             default: pari_err_BUG("tame4 [bug24]");
           }
           break;
         default: pari_err_BUG("tame4 [bug25]");
       }
       break;
-    case 3: condp = 4; append_printf(Ip, "[III{%ld}] page 184, ",d1);
-      if (d1%3) append_print(Ip, "(9)");else append_print(Ip, "(3)^2");
-      break;
-    case 6: condp = 4; append_printf(Ip, "[III*{%ld}] page 184, (1)",d1/2);
-      break;
+    case 3: condp = 4;
+      Ip->type = stack_sprintf("[III{%ld}] page 184",d1);
+      Ip->neron = (d1%3)? cyclic(9): dicyclic(3,3); break;
+    case 6: condp = 4;
+      Ip->type = stack_sprintf("[III*{%ld}] page 184",d1/2);
+      Ip->neron = cyclic(1); break;
     default: pari_err_BUG("tame4 [bug26]");
   }
   return condp;
@@ -1105,45 +1146,46 @@ tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
   {
     switch(n)
     {
-      case 1: condp = 0; append_printf(Ip, "[I{0}-I{0}-%ld] page 158, (1)",d);
-        break;
+      case 1: condp = 0;
+        Ip->type = stack_sprintf("[I{0}-I{0}-%ld] page 158", d);
+        Ip->neron = cyclic(1); break;
       case 2:
         switch(dm)
         {
           case 0: condp = 4;
-            append_printf(Ip, "[I*{0}-I*{0}-%ld] page 158, (2)^4",(d-2)/2);
-            break;
+            Ip->type = stack_sprintf("[I*{0}-I*{0}-%ld] page 158",(d-2)/2);
+            Ip->neron = "(2)^4"; break;
           case 1: condp = 2;
-            append_printf(Ip, "[I{0}-I*{0}-%ld] page 159, (2)^2",(d-1)/2);
-            break;
+            Ip->type = stack_sprintf("[I{0}-I*{0}-%ld] page 159",(d-1)/2);
+            Ip->neron = dicyclic(2,2); break;
         }
         break;
       case 3:
         switch(dm)
         {
           case 0: condp = 4;
-            append_printf(Ip, "[IV-IV*-%ld] page 165, (3)^2",(d-3)/3);
-            break;
+            Ip->type = stack_sprintf("[IV-IV*-%ld] page 165",(d-3)/3);
+            Ip->neron = dicyclic(3,3); break;
           case 1:
             switch(r)
             {
               case 0: case 1: condp = 2;
-                append_printf(Ip, "[I{0}-IV-%ld] page 160, (3)",(d-1)/3);
-                break;
+                Ip->type = stack_sprintf("[I{0}-IV-%ld] page 160",(d-1)/3);
+                Ip->neron = cyclic(3); break;
               case 2: condp = 4;
-                append_printf(Ip, "[IV*-IV*-%ld] page 166, (3)^2",(d-4)/3);
-                break;
+                Ip->type = stack_sprintf("[IV*-IV*-%ld] page 166",(d-4)/3);
+                Ip->neron = dicyclic(3,3); break;
             }
             break;
           case 2:
             switch(r)
             {
               case 0: case 2: condp = 2;
-                append_printf(Ip, "[I{0}-IV*-%ld] page 160, (3)",(d-2)/3);
-                break;
+                Ip->type = stack_sprintf("[I{0}-IV*-%ld] page 160",(d-2)/3);
+                Ip->neron = cyclic(3); break;
               case 1: condp = 4;
-                append_printf(Ip, "[IV-IV-%ld] page 165, (3)^2",(d-2)/3);
-                break;
+                Ip->type = stack_sprintf("[IV-IV-%ld] page 165",(d-2)/3);
+                Ip->neron = dicyclic(3,3); break;
             }
             break;
         }
@@ -1152,27 +1194,28 @@ tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
         switch(dm)
         {
           case 0: condp = 4;
-            append_printf(Ip, "[III-III*-%ld] page 169, (2)^2",(d-4)/4);
-            break;
+            Ip->type = stack_sprintf("[III-III*-%ld] page 169",(d-4)/4);
+            Ip->neron = dicyclic(2,2); break;
           case 1:
             switch(r)
             {
               case 0: case 1: condp = 2;
-                append_printf(Ip, "[I{0}-III-%ld] page 161, (2)",(d-1)/4);
-                break;
+                Ip->type = stack_sprintf("[I{0}-III-%ld] page 161",(d-1)/4);
+                Ip->neron = cyclic(2); break;
               case 2: case 3: condp = 4;
-                append_printf(Ip, "[I*{0}-III*-%ld] page 162, (2)^3",(d-5)/4);
-                break;
+                Ip->type = stack_sprintf("[I*{0}-III*-%ld] page 162",(d-5)/4);
+                Ip->neron = "(2)^3"; break;
             }
             break;
-          case 2:
+          case 2: condp = 4;
+            Ip->neron = dicyclic(2,2);
             switch(r)
             {
-              case 1: condp = 4;
-                append_printf(Ip, "[III-III-%ld] page 169, (2)^2",(d-2)/4);
+              case 1:
+                Ip->type = stack_sprintf("[III-III-%ld] page 169",(d-2)/4);
                 break;
-              case 3: condp = 4;
-                append_printf(Ip, "[III*-III*-%ld] page 169, (2)^2",(d-6)/4);
+              case 3:
+                Ip->type = stack_sprintf("[III*-III*-%ld] page 169",(d-6)/4);
                 break;
               default: pari_err_BUG("tame5 [bug29]");
             }
@@ -1181,11 +1224,11 @@ tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
             switch(r)
             {
               case 0: case 3: condp = 2;
-                append_printf(Ip, "[I{0}-III*-%ld] page 162, (2)",(d-3)/4);
-                break;
+                Ip->type = stack_sprintf("[I{0}-III*-%ld] page 162",(d-3)/4);
+                Ip->neron = cyclic(2); break;
               case 1: case 2: condp = 4;
-                append_printf(Ip, "[I*{0}-III-%ld] page 162, (2)^3",(d-3)/4);
-                break;
+                Ip->type = stack_sprintf("[I*{0}-III-%ld] page 162",(d-3)/4);
+                Ip->neron = "(2)^3"; break;
             }
             break;
         }
@@ -1194,42 +1237,43 @@ tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
         switch(dm)
         {
           case 0: condp = 4;
-            append_printf(Ip, "[II-II*-%ld] page 163, (1)",(d-6)/6);
-            break;
+            Ip->type = stack_sprintf("[II-II*-%ld] page 163",(d-6)/6);
+            Ip->neron = cyclic(1); break;
           case 1:
             switch(r)
             {
               case 0: case 1: condp = 2;
-                append_printf(Ip, "[I{0}-II-%ld] page 159, (1)",(d-1)/6);
-                break;
+                Ip->type = stack_sprintf("[I{0}-II-%ld] page 159",(d-1)/6);
+                Ip->neron = cyclic(1); break;
               case 2: case 5: condp = 4;
-                append_printf(Ip, "[II*-IV-%ld] page 164, (3)",(d-7)/6);
-                break;
+                Ip->type = stack_sprintf("[II*-IV-%ld] page 164",(d-7)/6);
+                Ip->neron = cyclic(3); break;
               case 3: case 4: condp = 4;
-                append_printf(Ip, "[I*{0}-IV*-%ld] page 161, (2)^2x(3)",(d-7)/6);
-                break;
+                Ip->type = stack_sprintf("[I*{0}-IV*-%ld] page 161",(d-7)/6);
+                Ip->neron = "(2)^2x(3)"; break;
             }
             break;
           case 2:
             switch(r)
             {
               case 1: condp = 4;
-                append_printf(Ip, "[II-II-%ld] page 163, (1)",(d-2)/6);
-                break;
+                Ip->type = stack_sprintf("[II-II-%ld] page 163",(d-2)/6);
+                Ip->neron = cyclic(1); break;
               case 3: case 5: condp = 4;
-                append_printf(Ip, "[I*{0}-II*-%ld] page 160-161, (2)^2",(d-8)/6);
-                break;
+                Ip->type = stack_sprintf("[I*{0}-II*-%ld] page 160",(d-8)/6);
+                Ip->neron = dicyclic(2,2); break;
               default: pari_err_BUG("tame5 [bug30]");
             }
             break;
           case 3:
+            Ip->neron = cyclic(3);
             switch(r)
             {
               case 1: case 2: condp = 4;
-                append_printf(Ip, "[II-IV-%ld] page 164, (3)",(d-3)/6);
+                Ip->type = stack_sprintf("[II-IV-%ld] page 164",(d-3)/6);
                 break;
               case 4: case 5: condp = 4;
-                append_printf(Ip, "[II*-IV*-%ld] page 164-165, (3)",(d-9)/6);
+                Ip->type = stack_sprintf("[II*-IV*-%ld] page 164",(d-9)/6);
                 break;
               default: pari_err_BUG("tame5 [bug31]");
             }
@@ -1238,11 +1282,11 @@ tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
             switch(r)
             {
               case 1: case 3: condp = 4;
-                append_printf(Ip, "[I*{0}-II-%ld] page 160, (2)^2",(d-4)/6);
-                break;
+                Ip->type = stack_sprintf("[I*{0}-II-%ld] page 160",(d-4)/6);
+                Ip->neron = dicyclic(2,2); break;
               case 5: condp = 4;
-                append_printf(Ip, "[II*-II*-%ld] page 163, (1)",(d-10)/6);
-                break;
+                Ip->type = stack_sprintf("[II*-II*-%ld] page 163",(d-10)/6);
+                Ip->neron = cyclic(1); break;
               default: pari_err_BUG("tame5 [bug32]");
             }
             break;
@@ -1250,67 +1294,68 @@ tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
             switch(r)
             {
               case 0: case 5: condp = 2;
-                append_printf(Ip, "[I{0}-II*-%ld] page 160, (1)",(d-5)/6);
-                break;
+                Ip->type = stack_sprintf("[I{0}-II*-%ld] page 160",(d-5)/6);
+                Ip->neron = cyclic(1); break;
               case 1: case 4: condp = 4;
-                append_printf(Ip, "[II-IV*-%ld] page 164, (3)",(d-5)/6);
-                break;
+                Ip->type = stack_sprintf("[II-IV*-%ld] page 164",(d-5)/6);
+                Ip->neron = cyclic(3); break;
               case 2: case 3: condp = 4;
-                append_printf(Ip, "[I*{0}-IV-%ld] page 161, (2)^2x(3)",(d-5)/6);
-                break;
+                Ip->type = stack_sprintf("[I*{0}-IV-%ld] page 161",(d-5)/6);
+                Ip->neron = "(2)^2x(3)"; break;
             }
             break;
           default: pari_err_BUG("tame5 [bug33]");
         }
         break;
       case 12:
+        condp = 4;
         switch(dm)
         {
           case 1:
             switch(r)
             {
-              case 3: case 10: condp = 4;
-                append_printf(Ip, "[II*-III-%ld] page 166-167, (2)",(d-13)/12);
-                break;
-              case 4: case 9: condp = 4;
-                append_printf(Ip, "[IV-III*-%ld] page 167, (6)",(d-13)/12);
-                break;
+              case 3: case 10:
+                Ip->type = stack_sprintf("[II*-III-%ld] page 166",(d-13)/12);
+                Ip->neron = cyclic(2); break;
+              case 4: case 9:
+                Ip->type = stack_sprintf("[IV-III*-%ld] page 167",(d-13)/12);
+                Ip->neron = cyclic(6); break;
               default: pari_err_BUG("tame5 [bug34]");
             }
             break;
           case 5:
             switch(r)
             {
-              case 2: case 3: condp = 4;
-                append_printf(Ip, "[II-III-%ld] page 166, (2)",(d-5)/12);
-                break;
-              case 8: case 9: condp = 4;
-                append_printf(Ip, "[IV*-III*-%ld] page 168, (6)",(d-17)/12);
-                break;
+              case 2: case 3:
+                Ip->type = stack_sprintf("[II-III-%ld] page 166",(d-5)/12);
+                Ip->neron = cyclic(2); break;
+              case 8: case 9:
+                Ip->type = stack_sprintf("[IV*-III*-%ld] page 168",(d-17)/12);
+                Ip->neron = cyclic(6); break;
               default: pari_err_BUG("tame5 [bug35]");
             }
             break;
           case 7:
             switch(r)
             {
-              case 3: case 4: condp = 4;
-                append_printf(Ip, "[IV-III-%ld] page 167, (6)",(d-7)/12);
-                break;
-              case 9: case 10: condp = 4;
-                append_printf(Ip, "[II*-III*-%ld] page 167, (2)",(d-19)/12);
-                break;
+              case 3: case 4:
+                Ip->type = stack_sprintf("[IV-III-%ld] page 167",(d-7)/12);
+                Ip->neron = cyclic(6); break;
+              case 9: case 10:
+                Ip->type = stack_sprintf("[II*-III*-%ld] page 167",(d-19)/12);
+                Ip->neron = cyclic(2); break;
               default: pari_err_BUG("tame5 [bug36]");
             }
             break;
           case 11:
             switch(r)
             {
-              case 3: case 8: condp = 4;
-                append_printf(Ip, "[IV*-III-%ld] page 168, (6)",(d-11)/12);
-                break;
-              case 2: case 9: condp = 4;
-                append_printf(Ip, "[II-III*-%ld] page 166, (2)",(d-11)/12);
-                break;
+              case 3: case 8:
+                Ip->type = stack_sprintf("[IV*-III-%ld] page 168",(d-11)/12);
+                Ip->neron = cyclic(6); break;
+              case 2: case 9:
+                Ip->type = stack_sprintf("[II-III*-%ld] page 166",(d-11)/12);
+                Ip->neron = cyclic(2); break;
               default: pari_err_BUG("tame5 [bug37]");
             }
             break;
@@ -1326,43 +1371,46 @@ tame_5(struct igusa *I, struct igusa_p *Ip, GEN dk)
     switch(n)
     {
       case 2: condp = 2;
-        append_printf(Ip, "[2I{0}-%ld] page 159, (1)",(d/2));
-        break;
+        Ip->type = stack_sprintf("[2I{0}-%ld] page 159",(d/2));
+        Ip->neron = cyclic(1); break;
       case 4: condp = 4;
-        append_printf(Ip, "[2I*{0}-%ld] page 159, (2)^2",(d/2-1)/2);
-        break;
-      case 6:
+        Ip->type = stack_sprintf("[2I*{0}-%ld] page 159",(d/2-1)/2);
+        Ip->neron = dicyclic(2,2); break;
+      case 6: condp = 4;
+        Ip->neron = cyclic(3);
         switch(r)
           {
-          case 1: condp = 4;
-            append_printf(Ip, "[2IV-%ld] page 165, (3)",(d/2-1)/3);
+          case 1:
+            Ip->type = stack_sprintf("[2IV-%ld] page 165",(d/2-1)/3);
             break;
-          case 2: condp = 4;
-            append_printf(Ip, "[2IV*-%ld] page 165, (3)",(d/2-2)/3);
+          case 2:
+            Ip->type = stack_sprintf("[2IV*-%ld] page 165",(d/2-2)/3);
             break;
           default: pari_err_BUG("tame5 [bug40]");
           }
         break;
-      case 8:
+      case 8: condp = 4;
+        Ip->neron = cyclic(2);
         switch(r)
         {
-          case 1: condp = 4;
-            append_printf(Ip, "[2III-%ld] page 168, (2)",(d/2-1)/4);
+          case 1:
+            Ip->type = stack_sprintf("[2III-%ld] page 168",(d/2-1)/4);
             break;
-          case 3: condp = 4;
-            append_printf(Ip, "[2III*-%ld] page 168, (2)",(d/2-3)/4);
+          case 3:
+            Ip->type = stack_sprintf("[2III*-%ld] page 168",(d/2-3)/4);
             break;
           default: pari_err_BUG("tame5 [bug41]");
         }
         break;
-      case 12:
+      case 12: condp = 4;
+        Ip->neron = cyclic(1);
         switch(r)
         {
-          case 1: condp = 4;
-            append_printf(Ip, "[2II-%ld] page 162, (1)",(d/2-1)/6);
+          case 1:
+            Ip->type = stack_sprintf("[2II-%ld] page 162",(d/2-1)/6);
             break;
-          case 5: condp = 4;
-            append_printf(Ip, "[2II*-%ld] page 163, (1)",(d/2-5)/6);
+          case 5:
+            Ip->type = stack_sprintf("[2II*-%ld] page 163",(d/2-5)/6);
             break;
           default: pari_err_BUG("tame5 [bug42]");
         }
@@ -1386,26 +1434,28 @@ tame_6(struct igusa *I, struct igusa_p *Ip, GEN dk,
   switch(n)
   {
     case 1: condp = 1;
-      append_printf(Ip, "[I{%ld}-I{0}-%ld] page 170, (%ld)",d1,d,d1);
-      break;
+      Ip->type = stack_sprintf("[I{%ld}-I{0}-%ld] page 170",d1,d);
+      Ip->neron = cyclic(d1); break;
     case 2:
       switch(dm)
       {
         case 0: condp = 4;
-          append_printf(Ip, "[I*{0}-I*{%ld}-%ld] page 171, (2)^2xH{%ld}", d1/2,(d-2)/2,d1/2);
+          Ip->type=stack_sprintf("[I*{0}-I*{%ld}-%ld] page 171", d1/2,(d-2)/2);
+          Ip->neron = stack_sprintf("(2)^2xH{%ld}", d1/2);
           break;
         case 1: return labelm3(polh,theta,alpha,dismin,I,Ip);
         default: pari_err_BUG("tame6 [bug44]");
       }
       break;
-    case 3:
+    case 3: condp = 3;
+      Ip->neron = dicyclic(3,d1/3);
       switch(dm)
       {
-        case 1: condp = 3;
-          append_printf(Ip, "[IV-I{%ld}-%ld] page 173, (3)x(%ld)",d1/3,(d-1)/3,d1/3);
+        case 1:
+          Ip->type = stack_sprintf("[IV-I{%ld}-%ld] page 173",d1/3,(d-1)/3);
           break;
-        case 2: condp = 3;
-          append_printf(Ip, "[IV*-I{%ld}-%ld] page 173, (3)x(%ld)",d1/3,(d-2)/3,d1/3);
+        case 2:
+          Ip->type = stack_sprintf("[IV*-I{%ld}-%ld] page 173",d1/3,(d-2)/3);
           break;
         default: pari_err_BUG("tame6 [bug45]");
       }
@@ -1417,10 +1467,11 @@ tame_6(struct igusa *I, struct igusa_p *Ip, GEN dk,
           switch(r)
           {
             case 0: case 1: condp = 3;
-              append_printf(Ip, "[III-I{%ld}-%ld] page 176, (2)x(%ld)",d1/4,(d-1)/4,d1/4);
-              break;
+              Ip->type=stack_sprintf("[III-I{%ld}-%ld] page 176",d1/4,(d-1)/4);
+              Ip->neron = dicyclic(2,d1/4); break;
             case 2: case 3: condp = 4;
-              append_printf(Ip, "[III*-I*{%ld}-%ld] page 177, (2)xH{%ld}",d1/4,(d-5)/4,d1/4);
+              Ip->type=stack_sprintf("[III*-I*{%ld}-%ld] page 177",d1/4,(d-5)/4);
+              Ip->neron = stack_sprintf("(2)xH{%ld}",d1/4); break;
               break;
             default: pari_err_BUG("tame6 [bug46]");
           }
@@ -1429,11 +1480,11 @@ tame_6(struct igusa *I, struct igusa_p *Ip, GEN dk,
           switch(r)
           {
             case 0: case 3: condp = 3;
-              append_printf(Ip, "[III*-I{%ld}-%ld] page 176, (2)x(%ld)",d1/4,(d-3)/4,d1/4);
-              break;
+              Ip->type=stack_sprintf("[III*-I{%ld}-%ld] page 176",d1/4,(d-3)/4);
+              Ip->neron = dicyclic(2,d1/4); break;
             case 1: case 2: condp = 4;
-              append_printf(Ip, "[III-I*{%ld}-%ld] page 177, (2)xH{%ld}",d1/4,(d-3)/4,d1/4);
-              break;
+              Ip->type=stack_sprintf("[III-I*{%ld}-%ld] page 177",d1/4,(d-3)/4);
+              Ip->neron = stack_sprintf("(2)xH{%ld}",d1/4); break;
             default: pari_err_BUG("tame6 [bug47]");
           }
           break;
@@ -1447,29 +1498,29 @@ tame_6(struct igusa *I, struct igusa_p *Ip, GEN dk,
           switch(r)
           {
             case 0: case 1: condp = 3;
-              append_printf(Ip, "[II-I{%ld}-%ld] page 172, (%ld)",d1/6,(d-1)/6,d1/6);
-              break;
+              Ip->type = stack_sprintf("[II-I{%ld}-%ld] page 172",d1/6,(d-1)/6);
+              Ip->neron = cyclic(d1/6); break;
             case 3: case 4: condp = 4;
-              append_printf(Ip, "[IV*-I*{%ld}-%ld] page 174-175, (3)xH{%ld}",d1/6,(d-7)/6,d1/6);
-              break;
+              Ip->type=stack_sprintf("[IV*-I*{%ld}-%ld] page 174",d1/6,(d-7)/6);
+              Ip->neron = stack_sprintf("(3)xH{%ld}", d1/6); break;
             default: pari_err_BUG("tame6 [bug49]");
           }
           break;
         case 2: condp = 4;
-          append_printf(Ip, "[II*-I*{%ld}-%ld] page 174, H{%ld}",d1/6,(d-8)/6,d1/6);
-          break;
+          Ip->type = stack_sprintf("[II*-I*{%ld}-%ld] page 174",d1/6,(d-8)/6);
+          Ip->neron = stack_sprintf("H{%ld}",d1/6); break;
         case 4: condp = 4;
-          append_printf(Ip, "[II-I*{%ld}-%ld] page 173, H{%ld}",d1/6,(d-4)/6,d1/6);
-          break;
+          Ip->type = stack_sprintf("[II-I*{%ld}-%ld] page 173",d1/6,(d-4)/6);
+          Ip->neron = stack_sprintf("H{%ld}", d1/6); break;
         case 5:
           switch(r)
           {
             case 0: case 5: condp = 3;
-              append_printf(Ip, "[II*-I{%ld}-%ld] page 172, (%ld)",d1/6,(d-5)/6,d1/6);
-              break;
+              Ip->type=stack_sprintf("[II*-I{%ld}-%ld] page 172",d1/6,(d-5)/6);
+              Ip->neron = cyclic(d1/6); break;
             case 2: case 3: condp = 4;
-              append_printf(Ip, "[IV-I*{%ld}-%ld] page 174, (3)xH{%ld}",d1/6,(d-5)/6,d1/6);
-              break;
+              Ip->type=stack_sprintf("[IV-I*{%ld}-%ld] page 174",d1/6,(d-5)/6);
+              Ip->neron = stack_sprintf("(3)xH{%ld}",d1/6); break;
             default: pari_err_BUG("tame6 [bug50]");
           }
           break;
@@ -1498,31 +1549,32 @@ tame_7(struct igusa *I, struct igusa_p *Ip, GEN dk,
   switch(n)
   {
     case 1: condp = 2;
-      append_printf(Ip, "[I{%ld}-I{%ld}-%ld] page 179, (%ld)x(%ld)",d1,d2,d,d1,d2);
-      break;
+      Ip->type = stack_sprintf("[I{%ld}-I{%ld}-%ld] page 179",d1,d2,d);
+      Ip->neron = dicyclic(d1,d2); break;
     case 2:
       if ( odd(val[Ip->eps2]) )
-      { condp = 3;append_printf(Ip, "[2I{%ld}-%ld] page 181, (%ld)",d1,d/2,d1); }
+      {
+        condp = 3;
+        Ip->type = stack_sprintf("[2I{%ld}-%ld] page 181",d1,d/2);
+        Ip->neron = cyclic(d1);
+      }
+      else if (dm == 0)
+      {
+        condp = 4;
+        Ip->type = stack_sprintf("[I*{%ld}-I*{%ld}-%ld] page 180", d1/2,d2/2,(d-2)/2);
+        Ip->neron = stack_sprintf("H{%ld}xH{%ld}", d1/2, d2/2);
+      }
       else
       {
-        if (dm == 0)
-        {
-          condp = 4;
-          append_printf(Ip, "[I*{%ld}-I*{%ld}-%ld] page 180, H{%ld}xH{%ld}",
-                 d1/2,d2/2,(d-2)/2, d1/2, d2/2);
-        }
-        else
-        {
-          if (d1 != d2) return labelm3(polh,theta,alpha,dismin,I,Ip);
-          condp = 3;
-          append_printf(Ip, "[I{%ld}-I*{%ld}-%ld] page 180, (%ld)xH{%ld}",
-                 d1/2,d1/2,(d-1)/2,d1/2,d1/2);
-        }
+        if (d1 != d2) return labelm3(polh,theta,alpha,dismin,I,Ip);
+        condp = 3;
+        Ip->type = stack_sprintf("[I{%ld}-I*{%ld}-%ld] page 180", d1/2,d1/2,(d-1)/2);
+        Ip->neron = stack_sprintf("(%ld)xH{%ld}",d1/2,d1/2);
       }
       break;
     case 4: condp = 4;
-      append_printf(Ip, "[2I*{%ld}-%ld] page 181, H{%ld}",d1/2,(d-2)/4,d1/2);
-      break;
+      Ip->type = stack_sprintf("[2I*{%ld}-%ld] page 181",d1/2,(d-2)/4);
+      Ip->neron = stack_sprintf("H{%ld}",d1/2); break;
     default: pari_err_BUG("tame7 [bug55]");
   }
   return condp;
@@ -1532,7 +1584,7 @@ static long
 tame(GEN polh, GEN theta, long alpha, long dismin, struct igusa *I, struct igusa_p *Ip)
 {
   GEN val = Ip->val, dk;
-  append_print(Ip, "(tame) ");
+  Ip->tame = 1;
   switch(Ip->tt)
   {
     case 1: return tame_1(I, Ip);
@@ -1589,29 +1641,40 @@ quartic(GEN polh, long alpha, long dismin, struct igusa_p *Ip)
   {
     case 0:
       if (d)
-      { condp = 3;append_printf(Ip, "[2I{%ld}-%ld] page 181, (%ld)",d,R,d); }
+      {
+        condp = 3;
+        Ip->type = stack_sprintf("[2I{%ld}-%ld] page 181",d,R);
+        Ip->neron = cyclic(d);
+      }
       else
       {
         condp = 2;
-        if (R) append_printf(Ip, "[2I{0}-%ld] page 159, (1)",R);
-        else   append_print(Ip, "[II] page 155, (1)");
+        Ip->neron = cyclic(1);
+        if (R) Ip->type = stack_sprintf("[2I{0}-%ld] page 159",R);
+        else   Ip->type = "[II] page 155";
       }
       break;
-    case 6:
-      condp = 4; append_printf(Ip, "[2I*{%ld}-%ld] pages 159, 181, (2)^2",d,R);
-      break;
-    case 3:
-      condp = 4; append_printf(Ip, "[2III-%ld] page 168, (2)",R);break;
-    case 9:
-      condp = 4; append_printf(Ip, "[2III*-%ld] page 168, (2)",R);break;
-    case 2:
-      condp = dismin-12*R-13;append_printf(Ip, "[2II-%ld] page 162, (1)",R);break;
-    case 8:
-      condp = dismin-12*R-19;append_printf(Ip, "[2IV*-%ld] page 165, (3)",R);break;
-    case 4:
-      condp = dismin-12*R-15;append_printf(Ip, "[2IV-%ld] page 165, (3)",R);break;
-    case 10:
-      condp = dismin-12*R-21;append_printf(Ip, "[2II*-%ld] page 163, (1)",R);break;
+    case 6: condp = 4;
+      Ip->type = stack_sprintf("[2I*{%ld}-%ld] pages 159, 181",d,R);
+      Ip->neron = dicyclic(2,2); break;
+    case 3: condp = 4;
+      Ip->type = stack_sprintf("[2III-%ld] page 168",R);
+      Ip->neron = cyclic(2); break;
+    case 9: condp = 4;
+      Ip->type = stack_sprintf("[2III*-%ld] page 168",R);
+      Ip->neron = cyclic(2); break;
+    case 2: condp = dismin-12*R-13;
+      Ip->type = stack_sprintf("[2II-%ld] page 162",R);
+      Ip->neron = cyclic(1); break;
+    case 8: condp = dismin-12*R-19;
+      Ip->type = stack_sprintf("[2IV*-%ld] page 165",R);
+      Ip->neron = cyclic(3); break;
+    case 4: condp = dismin-12*R-15;
+      Ip->type = stack_sprintf("[2IV-%ld] page 165",R);
+      Ip->neron = cyclic(3); break;
+    case 10: condp = dismin-12*R-21;
+      Ip->type = stack_sprintf("[2II*-%ld] page 163",R);
+      Ip->neron = cyclic(1); break;
     default: pari_err_BUG("quartic [type1]");
   }
   if (condp > get_maxc(p) || condp < 0) pari_err_BUG("quartic [conductor]");
@@ -1633,16 +1696,16 @@ litredtp(long alpha, long alpha1, GEN theta, GEN theta1, GEN polh, GEN polh1,
       {
       case 0: /* (0,0) */
         condp = 0;
-        append_printf(Ip, "[I{0}-I{0}-%ld] page 158, (1)",R);
-        break;
+        Ip->type = stack_sprintf("[I{0}-I{0}-%ld] page 158",R);
+        Ip->neron = cyclic(1); break;
       case 6: /* (0,6) or (6,0) */
         condp = 2;
-        append_printf(Ip, "[I*{0}-I{0}-%ld] page 159, (2)^2",R);
-        break;
+        Ip->type = stack_sprintf("[I*{0}-I{0}-%ld] page 159",R);
+        Ip->neron = dicyclic(2,2); break;
       case 12: /* (6,6) */
         condp = 4;
-        append_printf(Ip, "[I*{0}-I*{0}-%ld] page 158, (2)^4",R);
-        break;
+        Ip->type = stack_sprintf("[I*{0}-I*{0}-%ld] page 158",R);
+        Ip->neron = "(2)^4"; break;
       }
       return condp;
     }
@@ -1675,21 +1738,19 @@ litredtp(long alpha, long alpha1, GEN theta, GEN theta1, GEN polh, GEN polh1,
     }
     if (Ip->r1)
     { /* (6,0) */
+      Ip->neron = stack_sprintf("H{%ld}x(%ld)",indice,d-indice);
       if (Ip->tt == 6)
-        append_printf(Ip, "[I*{%ld}-I{%ld}-%ld] page 170, H{%ld}x(%ld)",
-               indice,d-indice,R,indice,d-indice);
+        Ip->type = stack_sprintf("[I*{%ld}-I{%ld}-%ld] page 170",indice,d-indice,R);
       else
-        append_printf(Ip, "[I*{%ld}-I{%ld}-%ld] page 180, H{%ld}x(%ld)",
-               indice,d-indice,R,indice,d-indice);
+        Ip->type = stack_sprintf("[I*{%ld}-I{%ld}-%ld] page 180",indice,d-indice,R);
     }
     else
     { /* (0,6) */
+      Ip->neron = stack_sprintf("(%ld)xH{%ld}",indice,d-indice);
       if (Ip->tt == 6)
-        append_printf(Ip, "[I{%ld}-I*{%ld}-%ld] page 170, (%ld)xH{%ld}",
-               indice,d-indice,R,indice,d-indice);
+        Ip->type = stack_sprintf("[I{%ld}-I*{%ld}-%ld] page 170", indice,d-indice,R);
       else
-        append_printf(Ip, "[I{%ld}-I*{%ld}-%ld] page 180, (%ld)xH{%ld}",
-               indice,d-indice,R,indice,d-indice);
+        Ip->type = stack_sprintf("[I{%ld}-I*{%ld}-%ld] page 180", indice,d-indice,R);
     }
     return condp;
   }
@@ -1698,8 +1759,8 @@ litredtp(long alpha, long alpha1, GEN theta, GEN theta1, GEN polh, GEN polh1,
     struct red S1, S;
     long comp = get_red(&S1, Ip, polh1, p, alpha1, Ip->r1)
               + get_red(&S,  Ip, polh, p, alpha, Ip->r2);
-    append_printf(Ip, "[%s-%s-%ld] pages %s, %sx%s",
-                S1.t, S.t, R, S.pages, S1.g, S.g);
+    Ip->type = stack_sprintf("[%s-%s-%ld] pages %s", S1.t, S.t, R, S.pages);
+    Ip->neron = stack_sprintf("%sx%s", S1.g, S.g);
     condp = (R >= 0)? dismin-comp+2-12*R: dismin-comp+4;
   }
   if (condp > get_maxc(p)) pari_err_BUG("litredtp [conductor]");
@@ -1772,7 +1833,9 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
   long condp = -1, indice, vc6, mm, nb, dism;
 
   val = cgetg(8, t_VECSMALL);
-  Ip->str = NULL;
+  Ip->tame = 0;
+  Ip->neron = NULL;
+  Ip->type = NULL;
   Ip->p = p;
   Ip->val = val;
   val[1] = myval(I->j2,p);
@@ -1784,46 +1847,30 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
   val[7] = myval(I->i12,p);
   dismin = val[6];
   stable_reduction(I, Ip);
-  append_print(Ip, "(potential) stable reduction : ");
-  switch(Ip->tt)
+  if (dismin == 0)
   {
-    case 1: append_print(Ip, " (I)\n"); break;
-    case 2: append_printf(Ip, " (II), j = %Ps\n", Ip->j); break;
-    case 3: append_print(Ip, " (III)\n"); break;
-    case 4: append_print(Ip, " (IV)\n"); break;
-    case 5: append_printf(Ip, " (V), j1+j2 = %Ps, j1*j2 = %Ps\n", Ip->sjinv,Ip->pjinv);
-            break;
-    case 6: append_printf(Ip, " (VI), j = %Ps\n", Ip->j);
-            break;
-    case 7: append_print(Ip, " (VII)\n");
-  }
-  append_print(Ip, "reduction at p : ");
-  if (!dismin)
-  {
-    append_print(Ip, "(good) [I{0-0-0}] page 155, (1)");
-    return 0;
+    Ip->tame = 1;
+    Ip->type = "[I{0-0-0}] page 155";
+    Ip->neron = cyclic(1); return 0;
   }
   if (dismin == 1)
   {
-    append_print(Ip, "[I{1-0-0}] page 170, (1)");
-    return 1;
+    Ip->type = "[I{1-0-0}] page 170";
+    Ip->neron = cyclic(1); return 1;
   }
-  if (dismin == 2)
+  if (dismin == 2) switch(Ip->tt)
   {
-    switch(Ip->tt)
-    {
-      case 2:
-        append_print(Ip, "[I{2-0-0}] page 170, (2)");
-        return 1;
-      case 3:
-        append_print(Ip, "[I{1-1-0}] page 179, (1)");
-        return 2;
-      case 5:
-        if (cmpis(p,3) <= 0) pari_err_BUG("genus2localred [tt 1]");
-        append_print(Ip, "[I{0}-II-0] page 159, (1)");
-        return 2;
-      default: pari_err_BUG("genus2localred [tt 2]");
-    }
+    case 2:
+      Ip->type = "[I{2-0-0}] page 170";
+      Ip->neron = cyclic(2); return 1;
+    case 3:
+      Ip->type = "[I{1-1-0}] page 179";
+      Ip->neron = cyclic(1); return 2;
+    case 5:
+      if (cmpis(p,3) <= 0) pari_err_BUG("genus2localred [tt 1]");
+      Ip->type = "[I{0}-II-0] page 159";
+      Ip->neron = cyclic(1); return 2;
+    default: pari_err_BUG("genus2localred [tt 2]");
   }
   if (equaliu(p,2)) return 4;
   polh = gel(polmini,1);
@@ -1843,16 +1890,15 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
     switch(Ip->tt)
     {
       case 2: return tame(polh, theta, alpha, dismin, I, Ip);
-      case 3: append_print(Ip, "[I{2-1-0}] page 179, (2)"); return 2;
-      case 4: append_print(Ip, "[I{1-1-1}] page 182, (3)"); return 2;
+      case 3: Ip->type = "[I{2-1-0}] page 179"; Ip->neron = cyclic(2); return 2;
+      case 4: Ip->type = "[I{1-1-1}] page 182"; Ip->neron = cyclic(3); return 2;
       case 5:
         if (equalis(p,3) && !gegal(theta,ghalf))
-          return labelm3(polh,theta,alpha,dismin,I,Ip); /* p = 3 */
-        append_print(Ip, "[I{0}-III-0] page 161, (2)"); return 2;
+          return labelm3(polh,theta,alpha,dismin,I,Ip);
+        Ip->type = "[I{0}-III-0] page 161"; Ip->neron = cyclic(2); return 2;
       case 6:
         if (equalis(p,3)) pari_err_BUG("genus2localred [conductor]");
-        append_print(Ip, "[I{1}-II-0] page 172, (1)");
-        return 3;
+        Ip->type = "[I{1}-II-0] page 172"; Ip->neron = cyclic(1); return 3;
     }
     pari_err_BUG("genus2localred [switch tt 4]");
     return -1; /* not reached */
@@ -1863,19 +1909,25 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
       switch(itos(gmulgs(theta, 60))+alpha)
       {
         case 10:
-          condp = dismin-1;append_print(Ip, "[V] page 156, (3)");
-          break;
+          condp = dismin-1;
+          Ip->type = "[V] page 156";
+          Ip->neron = cyclic(3); break;
         case 11:
-          condp = dismin-11;append_print(Ip, "[V*] page 156, (3)");
-          break;
+          condp = dismin-11;
+          Ip->type = "[V*] page 156";
+          Ip->neron = cyclic(3); break;
         case 12:
-          condp = dismin-2;append_print(Ip, "[IX-2] page 157, (5)");
-          break;
+          condp = dismin-2;
+          Ip->type = "[IX-2] page 157";
+          Ip->neron = cyclic(5); break;
         case 13:
-          condp = dismin-12;append_print(Ip, "[VIII-4] page 157, (1)");
-          break;
+          condp = dismin-12;
+          Ip->type = "[VIII-4] page 157";
+          Ip->neron = cyclic(1); break;
         case 24:
-          condp = dismin-8;append_print(Ip, "[IX-4] page 158, (5)");
+          condp = dismin-8;
+          Ip->type = "[IX-4] page 158";
+          Ip->neron = cyclic(5);
           break;
         case 15: case 16:
           if (Ip->tt>= 5) pari_err_BUG("genus2localred [tt 6]");
@@ -1890,9 +1942,17 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
             {
               if (vb5 < 2) pari_err_BUG("genus2localred [red1]");
               if (vb5 >= 3)
-              { condp = dismin-8;append_print(Ip, "[II*-IV-(-1)] page 164, (3)"); }
+              {
+                condp = dismin-8;
+                Ip->type = "[II*-IV-(-1)] page 164";
+                Ip->neron = cyclic(3);
+              }
               else
-              { condp = dismin-7;append_print(Ip, "[IV-III*-(-1)] page 167, (6)"); }
+              {
+                condp = dismin-7;
+                Ip->type = "[IV-III*-(-1)] page 167";
+                Ip->neron = cyclic(6);
+              }
               break;
             }
             if (dvdii(b0,p)) pari_err_BUG("genus2localred [b0]");
@@ -1911,9 +1971,17 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
             if (vc6 == 2)
             {
               if (alpha)
-              { condp = dismin-16;append_print(Ip, "[IV] page 155, (1)"); }
+              {
+                condp = dismin-16;
+                Ip->type = "[IV] page 155";
+                Ip->neron = cyclic(1);
+              }
               else
-              { condp = dismin-6;append_print(Ip, "[III] page 155, (3)^2"); }
+              {
+                condp = dismin-6;
+                Ip->type = "[III] page 155";
+                Ip->neron = dicyclic(3,3);
+              }
             }
             else
             {
@@ -1921,15 +1989,15 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
               mm = min3(3*myval(c4,p)-4, 3*myval(c5,p)-5, 3*vc6-6);
               if (alpha)
               {
-                condp = dismin-mm-16;append_printf(Ip, "[III*{%ld}] page 184, (1)",mm);
+                condp = dismin-mm-16;
+                Ip->type = stack_sprintf("[III*{%ld}] page 184", mm);
+                Ip->neron = cyclic(1);
               }
               else
               {
                 condp = dismin-mm-6;
-                if (mm%3)
-                  append_printf(Ip, "[III{%ld}] page 184, (9)",mm);
-                else
-                  append_printf(Ip, "[III{%ld}] page 184, (3)^2",mm);
+                Ip->type = stack_sprintf("[III{%ld}] page 184", mm);
+                Ip->neron = (mm%3)? cyclic(9): dicyclic(3,3);
               }
             }
           }
@@ -1944,26 +2012,33 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
       switch(itos(gmulgs(theta, 60))+alpha)
       {
         case 12:
-          condp = dismin;append_print(Ip, "[VIII-1] page 156, (1)");
-          break;
+          condp = dismin;
+          Ip->type = "[VIII-1] page 156";
+          Ip->neron = cyclic(1); break;
         case 13:
-          condp = dismin-10;append_print(Ip, "[IX-3] page 157, (5)");
-          break;
+          condp = dismin-10;
+          Ip->type = "[IX-3] page 157";
+          Ip->neron = cyclic(5); break;
         case 24:
-          condp = dismin-4;append_print(Ip, "[IX-1] page 157, (5)");
-          break;
+          condp = dismin-4;
+          Ip->type = "[IX-1] page 157";
+          Ip->neron = cyclic(5); break;
         case 25:
-          condp = dismin-14;append_print(Ip, "[VIII-3] page 157, (1)");
-          break;
+          condp = dismin-14;
+          Ip->type = "[VIII-3] page 157";
+          Ip->neron = cyclic(1); break;
         case 36:
-          condp = dismin-8;append_print(Ip, "[VIII-2] page 157, (1)");
-          break;
+          condp = dismin-8;
+          Ip->type = "[VIII-2] page 157";
+          Ip->neron = cyclic(1); break;
         case 15:
-          condp = dismin-1;append_print(Ip, "[VII] page 156, (2)");
-          break;
+          condp = dismin-1;
+          Ip->type = "[VII] page 156";
+          Ip->neron = cyclic(2); break;
         case 16:
-          condp = dismin-11;append_print(Ip, "[VII*] page 156, (2)");
-          break;
+          condp = dismin-11;
+          Ip->type = "[VII*] page 156";
+          Ip->neron = cyclic(2); break;
         case 20:
           if (cmpis(p,3))
           {
@@ -1985,13 +2060,14 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
             dism = valp(RgX_disc(prod)) - 1;
           }
           condp = dismin-dism-3;
-          append_printf(Ip, "[II-II*{%ld}] page 176, H{%ld}",dism,dism+1);
-          break;
+          Ip->type = stack_sprintf("[II-II*{%ld}] page 176", dism);
+          Ip->neron = stack_sprintf("H{%ld}", dism+1); break;
         case 21:
           vb6 = myval(truecoeff(polh,0),p);
           if (vb6<2) pari_err_BUG("genus2localred [red3]");
-          condp = dismin-14; append_print(Ip, "[IV*-II{0}] page 175, (1)");
-          break;
+          condp = dismin-14;
+          Ip->type = "[IV*-II{0}] page 175";
+          Ip->neron = cyclic(1); break;
         case 30:
           vb5 = myval(truecoeff(polh,1),p);
           if (vb5 == 2)
@@ -1999,8 +2075,9 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
             if (Ip->tt >= 5) pari_err_BUG("genus2localred [tt 6]");
             return tame(polh, theta, alpha, dismin, I, Ip);
           }
-          condp = dismin-7; append_print(Ip, "[II*-III-(-1)] page 167, (2)");
-          break;
+          condp = dismin-7;
+          Ip->type = "[II*-III-(-1)] page 167";
+          Ip->neron = cyclic(2); break;
       }
       break;
     case 2:
@@ -2024,11 +2101,12 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
       {
         case 0:
           condp = dismin-dism-1;
-          append_printf(Ip, "[IV-II{%ld}] page 175, (%ld)",dism,3*dism+2);
-          break;
+          Ip->type = stack_sprintf("[IV-II{%ld}] page 175", dism);
+          Ip->neron = cyclic(3*dism+2); break;
         case 1:
           condp = dismin-dism-10;
-          append_printf(Ip, "[II*-II*{%ld}] page 175, H{%ld}",dism,dism+1);
+          Ip->type = stack_sprintf("[II*-II*{%ld}] page 176",dism);
+          Ip->neron = stack_sprintf("H{%ld}",dism+1); break;
           break;
         case 2: case 3:
           if (myval(truecoeff(polh,0),p) == 2)
@@ -2039,15 +2117,13 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
           dism++;
           indice = val[6]-(5*val[3]/2)-dism;
           condp = dismin-dism-indice-2;
-          if (both_odd(dism,indice))
-            append_printf(Ip, "[II{%ld-%ld}] page 182, (2)x(%ld)", dism,indice,2*dism);
-          else
-            append_printf(Ip, "[II{%ld-%ld}] page 182, (%ld)", dism,indice,4*dism);
+          Ip->type = stack_sprintf("[II{%ld-%ld}] page 182", dism,indice);
+          Ip->neron = both_odd(dism,indice)? dicyclic(2,2*dism): cyclic(4*dism);
           break;
         case 4:
           condp = dismin-dism-5;
-          append_printf(Ip, "[IV*-II{%ld}] page 175, (%ld)",dism+1,3*dism+4);
-          break;
+          Ip->type = stack_sprintf("[IV*-II{%ld}] page 175",dism+1);
+          Ip->neron = cyclic(3*dism+4); break;
       }
       break;
     case 3:
@@ -2067,8 +2143,8 @@ genus2red(GEN Q, GEN P, GEN p)
 {
   pari_sp av = avma;
   struct igusa I;
-  GEN a0, a1, a2, a3, a4, a5, a6, polr, facto, factp, vecmini;
-  long i, dd;
+  GEN j22, j42, j2j6, a0,a1,a2,a3,a4,a5,a6, V, polr, facto, factp, vecmini;
+  long i, l, dd;
 
   if (typ(P) != t_POL) pari_err_TYPE("genus2red", P);
   RgX_check_ZX(P, "genus2red");
@@ -2104,8 +2180,9 @@ genus2red(GEN Q, GEN P, GEN p)
     factp = mkcol(p);
     facto = mkmat2(factp, mkcol(gen_1));
   }
-  vecmini = cgetg(lg(factp), t_COL);
-  for(i = 1; i<lg(factp); i++)
+  l = lg(factp);
+  vecmini = cgetg(l, t_COL);
+  for(i = 1; i<l; i++)
   {
     GEN l = gel(factp,i), pm;
     if (i == 1 && equalis(l, 2)) { gel(vecmini,1) = gen_0; continue; }
@@ -2115,11 +2192,6 @@ genus2red(GEN Q, GEN P, GEN p)
   RgX_to_6(polr, &a0,&a1,&a2,&a3,&a4,&a5,&a6);
   I.j10 = !signe(a0)? mulii(sqri(a1), ZX_disc(polr)): ZX_disc(polr);
   I.j10 = gmul2n(I.j10,-12);
-
-  for(i = 1; i < lg(factp); i++)
-    gcoeff(facto,i,2) = stoi(Q_pval(I.j10, gel(factp,i)));
-  dd = polval(polr,gen_2) & (~1); /* = 2 floor(val/2) */
-  polr = gmul2n(polr, -dd);
 
   I.a0 = a0;
   I.A2 = apol2(a0,a1,a2);
@@ -2131,22 +2203,39 @@ genus2red(GEN Q, GEN P, GEN p)
   I.j4 = igusaj4(a0,a1,a2,a3,a4,a5,a6);
   I.i4 = gsub(gsqr(I.j2), gmulsg(24,I.j4));
   I.j6 = igusaj6(a0,a1,a2,a3,a4,a5,a6);
-  I.j8 = gmul2n(gsub(gmul(I.j2,I.j6),gsqr(I.j4)), -2);
-  I.i12 = gmul2n(gsub(gadd(gsqr(gmul(I.j2,I.j4)),gmulsg(36,gmul(gmul(I.j2,I.j4),I.j6))),gadd(gadd(gmulsg(32,gmul(gsqr(I.j4),I.j4)),gmul(I.j6,gmul(gsqr(I.j2),I.j2))),gmulsg(108,gsqr(I.j6)))),-2);
-  for (i = 1; i < lg(factp); i++)
+  j42 = gsqr(I.j4);
+  j22 = gsqr(I.j2);
+  j2j6 = gmul(I.j2,I.j6);
+  I.j8 = gmul2n(gsub(j2j6,j42), -2);
+  I.i12= gmul2n(gsub(gadd(gmul(j22,j42),gmulsg(36,gmul(j2j6,I.j4))),
+                     gadd(gadd(gmulsg(32,gmul(j42,I.j4)),gmul(j2j6,j22)),gmulsg(108,gsqr(I.j6)))),-2);
+
+  for(i = 1; i < l; i++)
+    gcoeff(facto,i,2) = stoi(Q_pval(I.j10, gel(factp,i)));
+  dd = polval(polr,gen_2) & (~1); /* = 2 floor(val/2) */
+  polr = gmul2n(polr, -dd);
+
+  V = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
   {
-    GEN q = gel(factp,i);
+    GEN q = gel(factp,i), red;
     struct igusa_p Ip;
     long f;
-    if (!p) pari_printf("p = %Ps\n", q);
     f = genus2localred(&I, &Ip, q, gel(vecmini,i));
-    pari_printf(Ip.str);
-    if (i == 1 && equaliu(q, 2) && f == 4)
-      f = 0; /* didn't truly compute the reduction type at 2 */
-    else
-      pari_printf(", f = %ld\n", f);
+    /* didn't truly compute the reduction type at 2? */
+    if (i == 1 && equaliu(q, 2) && f == 4) f = -1;
     gcoeff(facto,i,2) = stoi(f);
+    if (Ip.tame) Ip.type = stack_strcat("(tame) ", Ip.type);
+    if (DEBUGLEVEL)
+    {
+      if (!p) err_printf("p = %Ps\n", q);
+      err_printf("(potential) stable reduction: %Ps\n", Ip.stable);
+      err_printf("reduction at p: %s, %s", Ip.type, Ip.neron);
+      if (f >= 0) err_printf(", f = %ld\n", f);
+    }
+    red = mkvec2(strtoGENstr(Ip.type), strtoGENstr(Ip.neron));
+    gel(V, i) = mkvec3(q, Ip.stable, red);
   }
-  if (!p) pari_putc('\n');
-  return gerepilecopy(av, mkvec3(factorback(facto), facto, polr));
+  if (p) V = gel(V,1);
+  return gerepilecopy(av, mkvec4(factorback(facto), facto, polr, V));
 }
