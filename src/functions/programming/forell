@@ -11,4 +11,4 @@ Doc: evaluates \var{seq}, where the formal variable $E$ ranges through all
  elliptic curves of conductors from $a$ to $b$. Th \tet{elldata} database must
  be installed and contain data for the specified conductors.
 
- \synt{forell}{void *data, long (*call)(void*,GEN), GEN a, GEN b}.
+ \synt{forell}{void *data, long (*call)(void*,GEN), long a, long b}.
