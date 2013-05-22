@@ -1119,7 +1119,7 @@ check_meta(char *buf, int ismain)
 
 static int get_line_from_file(const char *prompt, filtre_t *F, FILE *file);
 static void
-err_gprc(char *s, char *t, char *u)
+err_gprc(const char *s, char *t, char *u)
 {
   err_printf("\n");
   pari_err(e_SYNTAX,s,t,u);
