@@ -1872,7 +1872,7 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
       Ip->neron = cyclic(1); return 2;
     default: pari_err_BUG("genus2localred [tt 2]");
   }
-  if (equaliu(p,2)) return 4;
+  if (equaliu(p,2)) return -1;
   polh = gel(polmini,1);
   lambda = itos(gel(polmini,2));
   theta = gel(polmini,3);
@@ -2143,7 +2143,7 @@ genus2red(GEN Q, GEN P, GEN p)
 {
   pari_sp av = avma;
   struct igusa I;
-  GEN j22, j42, j2j6, a0,a1,a2,a3,a4,a5,a6, V, polr, facto, factp, vecmini;
+  GEN j22, j42, j2j6, a0,a1,a2,a3,a4,a5,a6, V,polr,facto,factp, vecmini, cond;
   long i, l, dd;
 
   if (typ(P) != t_POL) pari_err_TYPE("genus2red", P);
@@ -2220,10 +2220,7 @@ genus2red(GEN Q, GEN P, GEN p)
   {
     GEN q = gel(factp,i), red;
     struct igusa_p Ip;
-    long f;
-    f = genus2localred(&I, &Ip, q, gel(vecmini,i));
-    /* didn't truly compute the reduction type at 2? */
-    if (i == 1 && equaliu(q, 2) && f == 4) f = -1;
+    long f = genus2localred(&I, &Ip, q, gel(vecmini,i));
     gcoeff(facto,i,2) = stoi(f);
     if (Ip.tame) Ip.type = stack_strcat("(tame) ", Ip.type);
     if (DEBUGLEVEL)
@@ -2237,5 +2234,8 @@ genus2red(GEN Q, GEN P, GEN p)
     gel(V, i) = mkvec3(q, Ip.stable, red);
   }
   if (p) V = gel(V,1);
-  return gerepilecopy(av, mkvec4(factorback(facto), facto, polr, V));
+  cond = factorback(facto);
+  /* remove denominator 2 coming from f = -1 in genuslocalred(, p = 2) */
+  if (typ(cond) != t_INT) cond = gel(cond,1);
+  return gerepilecopy(av, mkvec4(cond, facto, polr, V));
 }

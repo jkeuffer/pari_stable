@@ -49,11 +49,11 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  ? V
  %6 = [[13, [5, [Mod(0, 13), Mod(0, 13)]], ["[I{0}-II-0] page 159", "(1)"]]]
  @eprog\noindent
- We now first describe the format of the vector $V$ in the case where $p$ was
- specified (local reduction at~$p$): it is a triple $[p, \var{stable},
- \var{red}]$. The component $\var{stable} = [\var{type}, \var{vecj}]$
- contains information about the stable reduction after field extension; the
- following \var{type}s occur:
+ We now first describe the format of the vector $V = V_p$ in the case where
+ $p$ was specified (local reduction at~$p$): it is a triple $[p, \var{stable},
+ \var{red}]$. The component $\var{stable} = [\var{type}, \var{vecj}]$ contains
+ information about the stable reduction after field extension; the following
+ \var{type}s occur:
 
  \item 1: The stable reduction is smooth (i.e. the curve has potentially
        good reduction). The Jacobian $J(C)$ has potentially good reduction.
@@ -85,24 +85,33 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  \item 7: The stable reduction is as in type 6, but the two components are both
  singular. The Jacobian $J(C)$ has potentially multiplicative reduction.
 
- The component $\var{red} = [\var{type}, \var{neron}]$ contains two data
+ The component $\var{red} = [\var{NUtype}, \var{neron}]$ contains two data
  concerning the reduction at $p$ without any field extension.
- The \var{type} is a \typ{STR} describing the reduction at $p$ of $C$,
+ The \var{NUtype} is a \typ{STR} describing the reduction at $p$ of $C$,
  following Namikawa-Ueno, \emph{The complete classification of fibers in
  pencils of curves of genus two}, Manuscripta Math., vol. 9, (1973), pages
  143-186. The reduction symbol is followed by the corresponding page number in
  this article.
 
- A lower index is denoted between braces: for instance, \kbd{[I\obr 2\cbr-II-5]}
- means \kbd{[I\_2-II-5]}.
-
- Note that if $K$ and $K'$ are Kodaira symbols for singular fibers of elliptic
- curves, \kbd{[$K$-$K'$-m]} and \kbd{[$K'$-$K$-m]} are the same type.
- Finally, \kbd{[$K$-$K'$-$-1$]}  is \kbd{[$K'$-$K$-$\alpha$]} in the notation
- of Namikawa-Ueno. The figure \kbd{[2I\_0-m]} in Namikawa-Ueno, page 159 must
- be denoted by \kbd{[2I\_0-(m+1)]}.
-
  The second datum \var{neron} is the group of connected components (over an
  algebraic closure of $\F_p$) of the Neron model of $J(C)$. The symbol $(n)$
  means the cyclic group with $n$ elements. $H\{n\}$ is isomorphic to
  $(2)\times (2)$ if $n$ is even and to $(4)$ otherwise.
+ \smallskip
+
+ When $p$ was not specified, $V$ is the vector of all $V_p$, for all
+ considered $p$.
+
+ \misctitle{Notes about Namikawa-Ueno types}
+
+ \item A lower index is denoted between braces: for instance, \kbd{[I\obr
+  2\cbr-II-5]} means \kbd{[I\_2-II-5]}.
+
+ \item If $K$ and $K'$ are Kodaira symbols for singular fibers of elliptic
+ curves, \kbd{[$K$-$K'$-m]} and \kbd{[$K'$-$K$-m]} are the same.
+
+ \item \kbd{[$K$-$K'$-$-1$]}  is \kbd{[$K'$-$K$-$\alpha$]} in the notation of
+ Namikawa-Ueno.
+
+ \item The figure \kbd{[2I\_0-m]} in Namikawa-Ueno, page 159, must be denoted
+ by \kbd{[2I\_0-(m+1)]}.
