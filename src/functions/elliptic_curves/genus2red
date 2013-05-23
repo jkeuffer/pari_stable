@@ -32,27 +32,26 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  ? default(debuglevel, 1);
  ? genus2red(0,x^6 + 3*x^3 + 63, 3)
  (potential) stable reduction: [1, []]
- reduction at p: [III{9}] page 184, (3)^2, f = 10
- %1 = [59049, Mat([3, 10]), x^6 + 3*x^3 + 63,
-        [3, [1, []], ["[III{9}] page 184", "(3)^2"]]]
-
+ reduction at p: [III{9}] page 184, [3, 3], f = 10
+ %1 = [59049, Mat([3, 10]), x^6 + 3*x^3 + 63, [3, [1, []],
+        ["[III{9}] page 184", [3, 3]]]]
  ? [N, FaN, T, V] = genus2red(x^3-x^2-1, x^2-x);  \\ X_1(13), global reduction
  p = 13
  (potential) stable reduction: [5, [Mod(0, 13), Mod(0, 13)]]
- reduction at p: [I{0}-II-0] page 159, (1), f = 2
+ reduction at p: [I{0}-II-0] page 159, [], f = 2
  ? N
  %3 = 169
  ? FaN
- %4 = Mat([13, 2])
+ %4 = Mat([13, 2])   \\ in particular, good reduction at 2 !
  ? T
  %5 = x^6 + 58*x^5 + 1401*x^4 + 18038*x^3 + 130546*x^2 + 503516*x + 808561
  ? V
- %6 = [[13, [5, [Mod(0, 13), Mod(0, 13)]], ["[I{0}-II-0] page 159", "(1)"]]]
+ %6 = [[13, [5, [Mod(0, 13), Mod(0, 13)]], ["[I{0}-II-0] page 159", []]]]
  @eprog\noindent
  We now first describe the format of the vector $V = V_p$ in the case where
  $p$ was specified (local reduction at~$p$): it is a triple $[p, \var{stable},
  \var{red}]$. The component $\var{stable} = [\var{type}, \var{vecj}]$ contains
- information about the stable reduction after a finite field extension;
+ information about the stable reduction after a field extension;
  depending on \var{type}s, the stable reduction is
 
  \item 1: smooth (i.e. the curve has potentially good reduction). The
@@ -72,7 +71,8 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  \item 5: the union of two elliptic curves $E_1$ and $E_2$ intersecting
  transversally at one point; \var{vecj} contains their modular invariants
  $j_1$ and $j_2$, which may live in a quadratic extension of $\F_p$ are need
- not be distinct. The Jacobian $J(C)$ has potentially good reduction.
+ not be distinct. The Jacobian $J(C)$ has potentially good reduction,
+ isomorphic to the product of the reductions of $E_1$ and $E_2$.
 
  \item 6: the union of an elliptic curve $E$ and a projective line which has
  an ordinary double point, and these two components intersect transversally
@@ -84,7 +84,7 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  Jacobian $J(C)$ has potentially multiplicative reduction.
 
  The component $\var{red} = [\var{NUtype}, \var{neron}]$ contains two data
- concerning the reduction at $p$ without any field extension.
+ concerning the reduction at $p$ without any ramified field extension.
 
  The \var{NUtype} is a \typ{STR} describing the reduction at $p$ of $C$,
  following Namikawa-Ueno, \emph{The complete classification of fibers in
@@ -93,11 +93,10 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  this article.
 
  The second datum \var{neron} is the group of connected components (over an
- algebraic closure of $\F_p$) of the Neron model of $J(C)$. The symbol $(n)$
- means the cyclic group with $n$ elements. $H\{n\}$ is isomorphic to
- $(2)\times (2)$ if $n$ is even and to $(4)$ otherwise.
+ algebraic closure of $\F_p$) of the N\'eron model of $J(C)$, given as a
+ finite abelian group (vector of elementary divisors).
  \smallskip
- If $p = 2$, the \var{neron} component may be omitted altogether (and
+ If $p = 2$, the \var{red} component may be omitted altogether (and
  replaced by \kbd{[]}, in the case where the program could not compute it.
  When $p$ was not specified, $V$ is the vector of all $V_p$, for all
  considered $p$.
