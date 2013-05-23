@@ -545,6 +545,24 @@ ZM_to_zm(GEN z)
   return x;
 }
 
+GEN
+zv_to_Flv(GEN z, ulong p)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = smodss(z[i],p);
+  return x;
+}
+
+GEN
+zm_to_Flm(GEN z, ulong p)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) gel(x,i) = zv_to_Flv(gel(z,i),p);
+  return x;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         COPY, NEGATION                         **/

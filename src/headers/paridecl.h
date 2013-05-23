@@ -803,6 +803,7 @@ GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
 GEN     nm_Z_mul(GEN X, GEN c);
+GEN     zm_to_Flm(GEN z, ulong p);
 GEN     zm_to_ZM(GEN z);
 long    zv_content(GEN x);
 int     zv_equal(GEN V, GEN W);
@@ -812,6 +813,7 @@ GEN     zv_neg_inplace(GEN M);
 long    zv_prod(GEN v);
 GEN     zv_prod_Z(GEN v);
 long    zv_sum(GEN v);
+GEN     zv_to_Flv(GEN z, ulong p);
 GEN     zv_z_mul(GEN v, long n);
 int     zvV_equal(GEN V, GEN W);
 

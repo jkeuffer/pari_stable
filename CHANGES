@@ -21,7 +21,7 @@ Done for version 2.6.1 (released ??/??/2013):
          genus2reduction was known to fail. [CAVEAT: the interface will change]
     2- allow to startup gp with flags --default key=val (or -D key=val):
        execute default(key,val) on startup
-BA  3- Flm_center, Flv_center
+BA  3- Flm_center, Flv_center, zv_to_Flv, zm_to_Flm
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
