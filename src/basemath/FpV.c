@@ -49,6 +49,15 @@ FpC_center(GEN z, GEN p, GEN pov2)
   return x;
 }
 
+GEN
+Flv_center(GEN z, ulong p, ulong ps2)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = Fl_center(z[i],p,ps2);
+  return x;
+}
+
 /* z in Mat m,n(Z), return lift(z * Mod(1,p)) */
 GEN
 FpM_red(GEN z, GEN p)
@@ -64,6 +73,15 @@ FpM_center(GEN z, GEN p, GEN pov2)
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
   for (i=1; i<l; i++) gel(x,i) = FpC_center(gel(z,i), p, pov2);
+  return x;
+}
+
+GEN
+Flm_center(GEN z, ulong p, ulong ps2)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) gel(x,i) = Flv_center(gel(z,i),p,ps2);
   return x;
 }
 
