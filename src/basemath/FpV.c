@@ -279,6 +279,45 @@ ZMrow_ZC_mul_i(GEN x, GEN y, long lx, long i)
   }
   return c;
 }
+
+static long
+zmrow_zc_mul(GEN x, GEN y, long lx, long i)
+{
+  long k;
+  long c = coeff(x,i,1) * y[1];
+  for (k = 2; k < lx; k++)
+    c += coeff(x,i,k) * y[k];
+  return c;
+}
+
+GEN
+zm_zc_mul(GEN x, GEN y)
+{
+  long lx = lg(x);
+  GEN z = cgetg(lx,t_VECSMALL);
+  long i;
+  for (i=1; i<lx; i++)
+    z[i] = zmrow_zc_mul(x, y, lx, i);
+  return z;
+}
+
+GEN
+zm_mul(GEN x, GEN y)
+{
+  long i,j,lx=lg(x), ly=lg(y);
+  GEN z;
+  if (ly==1) return cgetg(1,t_MAT);
+  z = cgetg(ly,t_MAT);
+  if (lx==1)
+  {
+    for (i=1; i<ly; i++) gel(z,i) = cgetg(1,t_VECSMALL);
+    return z;
+  }
+  for (j=1; j<ly; j++)
+    gel(z,j) = zm_zc_mul(x, gel(y,j));
+  return z;
+}
+
 static ulong
 Flmrow_Flc_mul_SMALL(GEN x, GEN y, ulong p, long lx, long i)
 {
