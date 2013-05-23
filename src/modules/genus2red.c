@@ -2230,7 +2230,8 @@ genus2red(GEN Q, GEN P, GEN p)
       err_printf("reduction at p: %s, %s", Ip.type, Ip.neron);
       if (f >= 0) err_printf(", f = %ld\n", f);
     }
-    red = mkvec2(strtoGENstr(Ip.type), strtoGENstr(Ip.neron));
+    red = Ip.type? mkvec2(strtoGENstr(Ip.type), strtoGENstr(Ip.neron))
+                 : cgetg(1, t_VEC);
     gel(V, i) = mkvec3(q, Ip.stable, red);
   }
   if (p) V = gel(V,1);

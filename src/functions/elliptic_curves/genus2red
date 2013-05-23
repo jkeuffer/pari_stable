@@ -52,41 +52,40 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  We now first describe the format of the vector $V = V_p$ in the case where
  $p$ was specified (local reduction at~$p$): it is a triple $[p, \var{stable},
  \var{red}]$. The component $\var{stable} = [\var{type}, \var{vecj}]$ contains
- information about the stable reduction after field extension; the following
- \var{type}s occur:
+ information about the stable reduction after a finite field extension;
+ depending on \var{type}s, the stable reduction is
 
- \item 1: The stable reduction is smooth (i.e. the curve has potentially
-       good reduction). The Jacobian $J(C)$ has potentially good reduction.
+ \item 1: smooth (i.e. the curve has potentially good reduction). The
+       Jacobian $J(C)$ has potentially good reduction.
 
- \item 2: The stable reduction is an elliptic curve $E$ with an ordinary
- double point; \var{vecj} contains $j$ mod $p$, the modular invariant of $E$.
+ \item 2: an elliptic curve $E$ with an ordinary double point; \var{vecj}
+ contains $j$ mod $p$, the modular invariant of $E$. The (potential)
+ semi-abelian reduction of $J(C)$ is the extension of an elliptic curve (with
+ modular invariant $j$ mod $p$) by a torus.
+
+ \item 3: a projective line with two ordinary double points. The Jacobian
+ $J(C)$ has potentially multiplicative reduction.
+
+ \item 4: the union of two projective lines crossing transversally at three
+ points. The Jacobian $J(C)$ has potentially multiplicative reduction.
+
+ \item 5: the union of two elliptic curves $E_1$ and $E_2$ intersecting
+ transversally at one point; \var{vecj} contains their modular invariants
+ $j_1$ and $j_2$, which may live in a quadratic extension of $\F_p$ are need
+ not be distinct. The Jacobian $J(C)$ has potentially good reduction.
+
+ \item 6: the union of an elliptic curve $E$ and a projective line which has
+ an ordinary double point, and these two components intersect transversally
+ at one point; \var{vecj} contains $j$ mod $p$, the modular invariant of $E$.
  The (potential) semi-abelian reduction of $J(C)$ is the extension of an
  elliptic curve (with modular invariant $j$ mod $p$) by a torus.
 
- \item 3: The stable reduction is a projective line with two ordinary double
- points. The Jacobian $J(C)$ has potentially multiplicative reduction.
-
- \item 4: The stable reduction is two projective lines crossing transversally
- at three points. The Jacobian $J(C)$ has potentially multiplicative reduction.
-
- \item 5: The stable reduction is the union of two elliptic curves $E_1$
-  and $E_2$ intersecting transversally at one point; \var{vecj} contains
-  their modular invariants $j_1$ and $j_2$, which may live in a quadratic
-  extension of $\F_p$ are need not be distinct.
-  The Jacobian $J(C)$ has potentially good reduction.
-
- \item 6: The stable reduction is the union of an elliptic curve $E$ and a
-  projective line which has an ordinary double point. These two
-  components intersect transversally at one point; \var{vecj} contains
-  $j$ mod $p$, the modular invariant of $E$.
-  The (potential) semi-abelian reduction of $J(C)$ is the extension of an
-  elliptic curve (with modular invariant $j$ mod $p$) by a torus.
-
- \item 7: The stable reduction is as in type 6, but the two components are both
- singular. The Jacobian $J(C)$ has potentially multiplicative reduction.
+ \item 7: as in type 6, but the two components are both singular. The
+ Jacobian $J(C)$ has potentially multiplicative reduction.
 
  The component $\var{red} = [\var{NUtype}, \var{neron}]$ contains two data
  concerning the reduction at $p$ without any field extension.
+
  The \var{NUtype} is a \typ{STR} describing the reduction at $p$ of $C$,
  following Namikawa-Ueno, \emph{The complete classification of fibers in
  pencils of curves of genus two}, Manuscripta Math., vol. 9, (1973), pages
@@ -98,7 +97,8 @@ Doc: Let $Q,P$ be polynomials with integer coefficients.
  means the cyclic group with $n$ elements. $H\{n\}$ is isomorphic to
  $(2)\times (2)$ if $n$ is even and to $(4)$ otherwise.
  \smallskip
-
+ If $p = 2$, the \var{neron} component may be omitted altogether (and
+ replaced by \kbd{[]}, in the case where the program could not compute it.
  When $p$ was not specified, $V$ is the vector of all $V_p$, for all
  considered $p$.
 
