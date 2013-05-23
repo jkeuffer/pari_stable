@@ -526,15 +526,15 @@ GEN
 nupow(GEN x, GEN n)
 {
   pari_sp av;
-  GEN y, l;
+  GEN y, D;
 
   if (typ(n) != t_INT) pari_err_TYPE("nupow",n);
   if (gequal1(n)) return gcopy(x);
-  av = avma; y = qfi_1(x);
+  av = avma;
+  D = qfb_disc(x);
+  y = qfi_1_by_disc(D);
   if (!signe(n)) return y;
-
-  l = sqrti(shifti(sqrti(gel(y,3)),1));
-  y = gen_pow(x, n, (void*)l, &mul_nudupl, &mul_nucomp);
+  y = gen_pow(x, n, (void*)sqrtnint(absi(D), 4), &mul_nudupl, &mul_nucomp);
   if (signe(n) < 0
   && !absi_equal(gel(y,1),gel(y,2))
   && !absi_equal(gel(y,1),gel(y,3))) togglesign(gel(y,2));
