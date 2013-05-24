@@ -1534,6 +1534,7 @@ GEN     lindep2(GEN x, long bit);
 GEN     mathouseholder(GEN Q, GEN v);
 GEN     matqr(GEN x, long flag, long prec);
 GEN     minim(GEN a, GEN borne, GEN stockmax);
+GEN     minim_raw(GEN a, GEN borne, GEN stockmax);
 GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     padic_lindep(GEN x);
 GEN     qfrep0(GEN a, GEN borne, long flag);

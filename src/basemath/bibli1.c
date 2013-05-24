@@ -990,13 +990,16 @@ err_minim(GEN a)
 }
 
 static void
-forqfvec_init(struct qfvec *qv, GEN a)
+forqfvec_init_dolll(struct qfvec *qv, GEN a, long dolll)
 {
   GEN r, u;
   if (typ(a) != t_MAT || !RgM_is_ZM(a)) pari_err_TYPE("qfminim",a);
-  u = lllgramint(a);
-  if (lg(u) != lg(a)) err_minim(a);
-  a = qf_apply_ZM(a, u);
+  if (dolll)
+  {
+    u = lllgramint(a);
+    if (lg(u) != lg(a)) err_minim(a);
+    a = qf_apply_ZM(a, u);
+  } else u = NULL;
   qv->a = RgM_gtofp(a, DEFAULTPREC);
   r = qfgaussred_positive(qv->a);
   if (!r)
@@ -1007,6 +1010,12 @@ forqfvec_init(struct qfvec *qv, GEN a)
   }
   qv->r = r;
   qv->u = u;
+}
+
+static void
+forqfvec_init(struct qfvec *qv, GEN a)
+{
+  forqfvec_init_dolll(qv, a, 1);
 }
 
 static void
@@ -1109,7 +1118,7 @@ forqfvec0(GEN a, GEN BORNE, GEN code)
  *  flag = min_VECSMALL2, same but count only vectors with even norm, and shift the answer
  */
 static GEN
-minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
+minim0_dolll(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long dolll)
 {
   GEN x, u, r, L, gnorme, invp, V;
   long n = lg(a), i, j, k, s, maxrank, sBORNE;
@@ -1164,7 +1173,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   minim_alloc(n, &q, &x, &y, &z, &v);
   av1 = avma;
 
-  forqfvec_init(&qv, a);
+  forqfvec_init_dolll(&qv, a, dolll);
   r = qv.r;
   u = qv.u;
   n--;
@@ -1322,8 +1331,16 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   r = (maxnorm >= 0) ? roundr(dbltor(maxnorm)): stoi(sBORNE);
   k = minss(s,maxrank);
   L[0] = evaltyp(t_MAT) | evallg(k + 1);
-  for (j=1; j<=k; j++) gel(L,j) = ZM_zc_mul(u, gel(L,j));
+  if (dolll)
+    for (j=1; j<=k; j++)
+      gel(L,j) = ZM_zc_mul(u, gel(L,j));
   return gerepilecopy(av, mkvec3(stoi(s<<1), r, L));
+}
+
+static GEN
+minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
+{
+  return minim0_dolll(a, BORNE, STOCKMAX, flag, 1);
 }
 
 GEN
@@ -1358,6 +1375,12 @@ GEN
 minim(GEN a, GEN borne, GEN stockmax)
 {
   return minim0(a,borne,stockmax,min_ALL);
+}
+
+GEN
+minim_raw(GEN a, GEN BORNE, GEN STOCKMAX)
+{
+  return minim0_dolll(a, BORNE, STOCKMAX, min_ALL, 0);
 }
 
 GEN

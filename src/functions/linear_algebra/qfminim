@@ -91,3 +91,6 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
 Variant: Also available are
  \fun{GEN}{minim}{GEN x, GEN b = NULL, GEN m = NULL} ($\fl=0$),
  \fun{GEN}{minim2}{GEN x, GEN b = NULL, GEN m = NULL} ($\fl=1$).
+ \fun{GEN}{minim_raw}{GEN x, GEN b = NULL, GEN m = NULL} (do not perform LLL
+ reduction on x).
+
