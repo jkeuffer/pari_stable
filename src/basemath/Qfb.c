@@ -529,6 +529,7 @@ nupow(GEN x, GEN n)
   GEN y, D;
 
   if (typ(n) != t_INT) pari_err_TYPE("nupow",n);
+  if (typ(x) != t_QFI) pari_err_TYPE("nupow",x);
   if (gequal1(n)) return gcopy(x);
   av = avma;
   D = qfb_disc(x);
