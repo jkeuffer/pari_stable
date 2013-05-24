@@ -1880,13 +1880,14 @@ to \kbd{prec} words of accuracy.
 to \kbd{prec} words of accuracy.
 
 \fun{GEN}{strtoi}{char *s} convert the character string \kbd{s} to a
-non-negative \typ{INT}. The string \kbd{s} consists exclusively of digits (no
-leading sign).
+non-negative \typ{INT}. The string \kbd{s} consists exclusively of digits: no
+leading sign, no whitespace. Leading zeroes are discarded.
 
-\fun{GEN}{strtor}{char *s, long prec} convert the character string \kbd{s}
-to a non-negative \typ{REAL} of precision \kbd{prec}.
-The string \kbd{s} consists exclusively of digits and optional decimal
-point and exponent (no leading sign).
+\fun{GEN}{strtor}{char *s, long prec} convert the character string \kbd{s} to
+a non-negative \typ{REAL} of precision \kbd{prec}. The string \kbd{s}
+consists exclusively of digits and optional decimal point and exponent
+(\kbd{e} or \kbd{E}): no leading sign, no whitespace. Leading zeroes are
+discarded.
 
 \subsec{Assignment}
 In this section, the \kbd{z} argument in the \kbd{z}-functions must be of type
