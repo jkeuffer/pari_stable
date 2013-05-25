@@ -934,17 +934,28 @@ ch_Q(GEN E, GEN e, GEN w)
     S = obj_insert(E, Q_GROUPGEN, ellchangepoint(S, w));
   if ((S = obj_check(e, Q_MINIMALMODEL)))
   {
-    v = (lg(S) == 2)? gen_1: gel(S,2);
-    if (gequal(v, w) || (is_trivial_change(v) && is_trivial_change(w)))
-      v = gen_1; /* most useful case! */
+    if (lg(S) == 2)
+    {
+      if (!is_trivial_change(w))
+      {
+        S = mkvec3(gel(S,1), ellchangeinvert(w), e);
+        (void)obj_insert(E, Q_MINIMALMODEL, S);
+      }
+    }
     else
     {
-      w = ellchangeinvert(w);
-      gcomposev(&w, v); v = w;
+      v = gel(S,2);
+      if (gequal(v, w) || (is_trivial_change(v) && is_trivial_change(w)))
+        S = mkvec(gel(S,1)); /* now minimal */
+      else
+      {
+        w = ellchangeinvert(w);
+        gcomposev(&w, v); v = w;
+        S = leafcopy(S); /* don't modify S in place: would corrupt e */
+        gel(S,2) = v;
+      }
+      (void)obj_insert(E, Q_MINIMALMODEL, S);
     }
-    S = leafcopy(S); /* don't modify S in place: would corrupt e */
-    gel(S,1) = v;
-    S = obj_insert(E, Q_MINIMALMODEL, S);
   }
   if ((S = obj_check(e, Q_GLOBALRED)))
     S = obj_insert(E, Q_GLOBALRED, S);

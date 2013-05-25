@@ -6,6 +6,8 @@ Done for version 2.6.1 (released ??/??/2013):
   Fixed
     1- Allow compounding 1-letter flags to gp, e.g. qp -qf [ used to silently
        ignore the 'f' ]
+    2- ellminimalmodel, followed by ellchangecurve ==> structure incorrectly
+       updated [wrong Q_MINIMALMODEL component][#1416]
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the
