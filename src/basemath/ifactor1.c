@@ -1962,9 +1962,9 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
     }
     return 0;
   }
-  if (DEBUGLEVEL >= 5)
+  if (DEBUGLEVEL>4)
   {
-    err_printf("OddPwrs: is %lu\n\t...a", x);
+    err_printf("OddPwrs: is %Ps\n\t...a", x);
     if (*mask&1) err_printf(" 3rd%s", (*mask==7?",":(*mask!=1?" or":"")));
     if (*mask&2) err_printf(" 5th%s", (*mask==7?", or":(*mask&4?" or":"")));
     if (*mask&4) err_printf(" 7th");
@@ -2040,7 +2040,7 @@ is_kth_power(GEN x, ulong n, GEN *pt)
   {
     if (!(q = u_forprime_next(&T))) break;
     /* q a prime = 1 mod n */
-    if (DEBUGLEVEL>4) err_printf("\tchecking modulo %ld\n", q);
+    if (DEBUGLEVEL>7) err_printf("\tchecking modulo %ld\n", q);
     residue = umodiu(x, q);
     if (residue == 0)
     {
@@ -2050,7 +2050,7 @@ is_kth_power(GEN x, ulong n, GEN *pt)
     /* n-th power mod q ? */
     if (Fl_powu(residue, (q-1)/n, q) != 1)
     {
-      if (DEBUGLEVEL>4) err_printf("\t- ruled out\n");
+      if (DEBUGLEVEL>7) err_printf("\t- ruled out\n");
       avma = av; return 0;
     }
   }
