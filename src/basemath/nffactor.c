@@ -725,7 +725,7 @@ nf_root_bounds(GEN P, GEN T)
   if (nf && nf_get_prec(nf) >= prec)
     R = nf_get_roots(nf);
   else
-    R = cleanroots(T, prec);
+    R = QX_complex_roots(T, prec);
   lR = lg(R);
   V = cgetg(lR, t_VEC);
   Ps = cgetg(l, t_POL); /* sigma (P) */

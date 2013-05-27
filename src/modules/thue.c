@@ -65,7 +65,7 @@ vecmax_shallow(GEN v) { return gel(v, vecindexmax(v)); }
 static GEN
 tnf_get_roots(GEN poly, long prec, long S, long T)
 {
-  GEN R0 = cleanroots(poly, prec), R = cgetg(lg(R0), t_COL);
+  GEN R0 = QX_complex_roots(poly, prec), R = cgetg(lg(R0), t_COL);
   long k;
 
   for (k=1; k<=S; k++) gel(R,k) = gel(R0,k);

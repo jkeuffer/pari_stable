@@ -85,7 +85,7 @@ galoisconj2pol(GEN x, long prec)
   if (n <= 0) return cgetg(1, t_VEC);
   RgX_check_ZX(x, "galoisconj2pol");
   nbmax = numberofconjugates(x, 2);
-  polr = cleanroots(x, prec);
+  polr = QX_complex_roots(x, prec);
   p1 = gel(polr,1);
   /* accuracy in decimal digits */
   prec = (long)prec2nbits_mul(prec, LOG10_2 * 0.75);
@@ -289,7 +289,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
     }
   }
   else
-    L = cleanroots(T, prec);
+    L = QX_complex_roots(T, prec);
   if (DEBUGLEVEL>=4) timer_printf(&ti,"roots");
   prep = vandermondeinverseprep(L);
   if (!dn)

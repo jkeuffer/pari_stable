@@ -2953,6 +2953,7 @@ void    setrand(GEN seed);
 
 /* rootpol.c */
 
+GEN     QX_complex_roots(GEN p, long l);
 GEN     ZX_graeffe(GEN p);
 GEN     cleanroots(GEN x,long l);
 int     isrealappr(GEN x, long l);

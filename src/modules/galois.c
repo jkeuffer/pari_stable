@@ -763,7 +763,7 @@ moreprec(buildroot *BR)
     BR->prmax = maxss(BR->prmax+d, (long)(BR->prmax * 1.2));
     if (DEBUGLEVEL)
       { err_printf("$$$$$ New prec = %ld\n",BR->prmax); err_flush(); }
-    ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
+    ro = sortroots(QX_complex_roots(BR->p,BR->prmax), gel(BR->r,1));
     delete_roots(BR);
     vectrunc_append(BR->r, gclone(ro));
     for (d = 2; d < l; d++)
@@ -2409,7 +2409,7 @@ galoisbig(GEN pol, long prec)
     BR.prmax = BR.pr + BIGDEFAULTPREC-2;
     BR.N = N;
     BR.r = vectrunc_init(N+1);
-    r = gclone ( cleanroots(BR.p, BR.prmax) );
+    r = gclone ( QX_complex_roots(BR.p, BR.prmax) );
     vectrunc_append(BR.r, r); preci(r, BR.pr);
     switch(N)
     {

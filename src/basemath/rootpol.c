@@ -2069,28 +2069,11 @@ cmp_complex_appr(void *E, GEN x, GEN y)
   return (int) (sxi - syi);
 }
 
-/* the vector of roots of p, with absolute error 2^(- prec2nbits(l)) */
 static GEN
-roots_aux(GEN p, long l, long clean)
+clean_roots(GEN L, long l, long bit, long clean)
 {
-  pari_sp av = avma;
-  long n, i, ex;
-  GEN L, res;
-
-  if (typ(p) != t_POL)
-  {
-    if (gequal0(p)) pari_err_ROOTS0("roots");
-    if (!isvalidcoeff(p)) pari_err_TYPE("roots",p);
-    return cgetg(1,t_COL); /* constant polynomial */
-  }
-  if (!signe(p)) pari_err_ROOTS0("roots");
-  checkvalidpol(p);
-  if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
-
-  if (l < LOWDEFAULTPREC) l = LOWDEFAULTPREC;
-  ex = 5 - prec2nbits(l);
-  L = roots_com(p, prec2nbits(l)); n = lg(L);
-  res = cgetg(n,t_COL);
+  long i, n = lg(L), ex = 5 - bit;
+  GEN res = cgetg(n,t_COL);
   for (i=1; i<n; i++)
   {
     GEN c = gel(L,i);
@@ -2104,10 +2087,48 @@ roots_aux(GEN p, long l, long clean)
     gel(res,i) = c;
   }
   gen_sort_inplace(res, (void*)ex, &cmp_complex_appr, NULL);
-  return gerepileupto(av,res);
+  return res;
+}
+
+/* the vector of roots of p, with absolute error 2^(- prec2nbits(l)) */
+static GEN
+roots_aux(GEN p, long l, long clean)
+{
+  pari_sp av = avma;
+  long bit;
+  GEN L;
+
+  if (typ(p) != t_POL)
+  {
+    if (gequal0(p)) pari_err_ROOTS0("roots");
+    if (!isvalidcoeff(p)) pari_err_TYPE("roots",p);
+    return cgetg(1,t_COL); /* constant polynomial */
+  }
+  if (!signe(p)) pari_err_ROOTS0("roots");
+  checkvalidpol(p);
+  if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
+  if (l < LOWDEFAULTPREC) l = LOWDEFAULTPREC;
+  bit = prec2nbits(l);
+  L = roots_com(p, bit);
+  return gerepileupto(av, clean_roots(L, l, bit, clean));
 }
 GEN
 roots(GEN p, long l) { return roots_aux(p,l, 0); }
 /* clean up roots. If root is real replace it by its real part */
 GEN
 cleanroots(GEN p, long l) { return roots_aux(p,l, 1); }
+
+GEN
+QX_complex_roots(GEN p, long l)
+{
+  pari_sp av = avma;
+  long bit;
+  GEN L;
+
+  if (!signe(p)) pari_err_ROOTS0("QX_complex_roots");
+  if (lg(p) == 3) return cgetg(1,t_COL); /* constant polynomial */
+  if (l < LOWDEFAULTPREC) l = LOWDEFAULTPREC;
+  bit = prec2nbits(l);
+  L = all_roots(Q_primpart(p), bit);
+  return gerepileupto(av, clean_roots(L, l, bit, 1));
+}

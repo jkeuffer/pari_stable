@@ -6576,6 +6576,10 @@ caller).
 \fun{GEN}{QX_resultant}{GEN A, GEN B} returns the resultant of the
 \kbd{QX}~\kbd{A} and \kbd{B}.
 
+\fun{GEN}{QX_complex_roots}{GEN p, long l} returns the complex roots of the
+\kbd{QX} $p$ at accuracy $l$, where real roots are returned as \typ{REAL}s.
+More efficient when $p$ is irreducible and primitive.
+
 \subsec{\kbd{QXQ}}
 
 \fun{GEN}{QXQ_norm}{GEN A, GEN B} $A$ being a \kbd{QX} and $B$ being a

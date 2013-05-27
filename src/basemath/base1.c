@@ -515,7 +515,7 @@ polgalois(GEN x, long prec)
         prec = nbits2prec((long)(cb*(18./ LOG2)) + 64);
         for(;;)
         {
-          p1=cleanroots(x,prec);
+          p1=QX_complex_roots(x,prec);
           gel(z,1) = F4(p1);
           gel(z,2) = F4(transroot(p1,1,2));
           gel(z,3) = F4(transroot(p1,1,3));
@@ -549,7 +549,7 @@ polgalois(GEN x, long prec)
         {
           for(;;)
           {
-            p1=cleanroots(x,prec);
+            p1=QX_complex_roots(x,prec);
             for (l=1; l<=6; l++)
             {
               p2=(l==1)?p1: ((l<6)?transroot(p1,1,l): transroot(p1,2,5));
@@ -606,7 +606,7 @@ polgalois(GEN x, long prec)
         {
           for(;;)
           {
-            p1=cleanroots(x,prec);
+            p1=QX_complex_roots(x,prec);
             for (l=1; l<=6; l++)
             {
               p2=(l==1)?p1:transroot(p1,1,l);
@@ -693,7 +693,7 @@ polgalois(GEN x, long prec)
         prec = nbits2prec((long)(cb*(7. / LOG2)) + 64);
         for(;;)
         {
-          ind = 0; p1=cleanroots(x,prec);
+          ind = 0; p1=QX_complex_roots(x,prec);
           for (i=1; i<=5; i++)
             for (j=i+1; j<=6; j++)
             {
@@ -1224,7 +1224,7 @@ nfisincl(GEN a, GEN b) { return nfiso0(a,b,0); }
 GEN
 get_roots(GEN x, long r1, long prec)
 {
-  GEN roo = (typ(x)!=t_POL)? leafcopy(x): cleanroots(x,prec);
+  GEN roo = (typ(x)!=t_POL)? leafcopy(x): QX_complex_roots(x,prec);
   long i, ru = (lg(roo)-1 + r1) >> 1;
 
   for (i=r1+1; i<=ru; i++) gel(roo,i) = gel(roo, (i<<1)-r1);
