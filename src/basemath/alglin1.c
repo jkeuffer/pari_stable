@@ -1591,16 +1591,6 @@ F2m_gauss_sp(GEN a, GEN b)
 }
 
 GEN
-matid_F2m(long n)
-{
-  GEN y = cgetg(n+1,t_MAT);
-  long i;
-  if (n < 0) pari_err_DOMAIN("matid_F2m", "dimension","<",gen_0,stoi(n));
-  for (i=1; i<=n; i++) { gel(y,i) = zero_F2v(n); F2v_set(gel(y,i),i); }
-  return y;
-}
-
-GEN
 F2m_gauss(GEN a, GEN b) {
   if (lg(a) == 1) return cgetg(1,t_MAT);
   return F2m_gauss_sp(F2m_copy(a), F2m_copy(b));
@@ -1709,16 +1699,6 @@ Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
   else
     for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col(a,(uGEN)b[j], aco,p);
   return u;
-}
-
-GEN
-matid_Flm(long n)
-{
-  GEN y = cgetg(n+1,t_MAT);
-  long i;
-  if (n < 0) pari_err_DOMAIN("matid_Flm", "dimension","<",gen_0,stoi(n));
-  for (i=1; i<=n; i++) { gel(y,i) = zero_zv(n); ucoeff(y, i,i) = 1; }
-  return y;
 }
 
 GEN

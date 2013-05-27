@@ -618,6 +618,41 @@ Flm_transpose(GEN x)
 
 /********************************************************************/
 /**                                                                **/
+/**                           SCALAR MATRICES                      **/
+/**                                                                **/
+/********************************************************************/
+
+GEN
+matid_F2m(long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  long i;
+  if (n < 0) pari_err_DOMAIN("matid_F2m", "dimension","<",gen_0,stoi(n));
+  for (i=1; i<=n; i++) { gel(y,i) = zero_F2v(n); F2v_set(gel(y,i),i); }
+  return y;
+}
+
+GEN
+matid_Flm(long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  long i;
+  if (n < 0) pari_err_DOMAIN("matid_Flm", "dimension","<",gen_0,stoi(n));
+  for (i=1; i<=n; i++) { gel(y,i) = zero_zv(n); ucoeff(y, i,i) = 1; }
+  return y;
+}
+
+GEN
+scalar_Flm(long s, long n)
+{
+  long i;
+  GEN y = cgetg(n+1,t_MAT);
+  for (i=1; i<=n; i++) { gel(y,i) = zero_Flv(n); coeff(y, i,i) = s; }
+  return y;
+}
+
+/********************************************************************/
+/**                                                                **/
 /**                           CONVERSIONS                          **/
 /**                                                                **/
 /********************************************************************/
@@ -726,15 +761,6 @@ FpXQC_to_mod(GEN z, GEN T, GEN p)
   for (i=1; i<l; i++)
     gel(x,i) = mkpolmod(FpX_to_mod(gel(z,i), p), T);
   return x;
-}
-
-GEN
-scalar_Flm(long s, long n)
-{
-  long i;
-  GEN y = cgetg(n+1,t_MAT);
-  for (i=1; i<=n; i++) { gel(y,i) = zero_Flv(n); coeff(y, i,i) = s; }
-  return y;
 }
 
 /********************************************************************/
