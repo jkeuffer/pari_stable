@@ -728,6 +728,15 @@ FpXQC_to_mod(GEN z, GEN T, GEN p)
   return x;
 }
 
+GEN
+scalar_Flm(long s, long n)
+{
+  long i;
+  GEN y = cgetg(n+1,t_MAT);
+  for (i=1; i<=n; i++) { gel(y,i) = zero_Flv(n); coeff(y, i,i) = s; }
+  return y;
+}
+
 /********************************************************************/
 /*                                                                  */
 /*                     Blackbox linear algebra                      */

@@ -23,7 +23,8 @@ Done for version 2.6.1 (released ??/??/2013):
          genus2reduction was known to fail. [CAVEAT: the interface will change]
     2- allow to startup gp with flags --default key=val (or -D key=val):
        execute default(key,val) on startup
-BA  3- Flm_center, Flv_center, zv_to_Flv, zm_to_Flm, zm_mul, zm_zc_mul
+BA  3- functions Flm_center, Flv_center, zv_to_Flv, zm_to_Flm, zm_mul,
+       zm_zc_mul, scalar_Flm
 BA  4- function minim_raw
 
   Changed

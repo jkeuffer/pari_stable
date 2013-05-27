@@ -3659,6 +3659,12 @@ operations.
 
 \fun{GEN}{Flm_copy}{GEN x} returns a copy of \kbd{x}.
 
+\fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$
+identity matrix.
+
+\fun{GEN}{scalar_Flm}{long s, long n} returns an \kbd{Flm} which is $s$ times
+the $n \times n$ identity matrix.
+
 \fun{GEN}{Flm_center}{GEN z, ulong p, ulong ps2}
 
 \fun{GEN}{Flm_Fl_add}{GEN x, ulong y, ulong p} returns $x + y*\text{Id}$
@@ -5723,9 +5729,6 @@ with \kbd{n} components (assumed larger than the number of coefficients of
 array) to (normalized) polynomial in variable $v$.
 
 \fun{GEN}{zv_to_zx}{GEN x, long n} as \kbd{Flv\_to\_Flx}.
-
-\fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$
-identity matrix.
 
 \fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the columns of
 \kbd{Flm}~\kbd{x} to an array of \kbd{Flx} in the variable $v$
