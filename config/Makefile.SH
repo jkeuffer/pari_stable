@@ -678,7 +678,7 @@ for dir in basemath modules language gp graph systems; do
   compile='$(CC)'
   case "$f" in
   gp)
-    cflags="$cflags -I$src/language \$(RLINCLUDE)"
+    cflags="$cflags -I$src/language"
     depend="$src/gp/gp.h"
     ;;
   gp_rl)

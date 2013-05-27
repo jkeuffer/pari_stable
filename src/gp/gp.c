@@ -30,12 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #  endif
 #endif
 
-#ifdef READLINE
-BEGINEXTERN
-#  include <readline/readline.h>
-ENDEXTERN
-#endif
-
 /********************************************************************/
 /**                                                                **/
 /**                            STRINGS                             **/
@@ -780,34 +774,14 @@ aide(const char *s, long flag)
 static char *
 what_readline(void)
 {
-  char *s;
 #ifdef READLINE
-  const char *ver;
-  char *extra = stack_malloc(strlen(READLINE) + 32);
-#  if defined(HAS_RL_LIBRARY_VERSION) || defined(FAKE_RL_LIBRARY_VERSION)
-#    ifdef FAKE_RL_LIBRARY_VERSION
-  extern char *rl_library_version;
-#    endif
-
-  if (strcmp(READLINE, rl_library_version))
-  {
-    ver = (char*)rl_library_version;
-    (void)sprintf(extra, " [was v%s in Configure]", READLINE);
-  }
-  else
-#  endif
-  {
-    ver = READLINE;
-    extra[0] = 0;
-  }
-  s = stack_malloc(3 + strlen(ver) + 8 + strlen(extra));
-  (void)sprintf(s, "v%s %s%s", ver,
-            (GP_DATA->use_readline)? "enabled": "disabled",
-            extra);
-#else
-  s = (char*)"not compiled in";
-#endif
+  const char *v = READLINE;
+  char *s = stack_malloc(3 + strlen(v) + 8);
+  (void)sprintf(s, "v%s %s", v, GP_DATA->use_readline? "enabled": "disabled");
   return s;
+#else
+  return (char*)"not compiled in";
+#endif
 }
 
 static void
