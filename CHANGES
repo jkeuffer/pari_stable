@@ -27,12 +27,14 @@ BA  3- functions Flm_center, Flv_center, zv_to_Flv, zm_to_Flm, zm_mul,
        zm_zc_mul, scalar_Flm
 BA  4- function minim_raw
     5- function QX_complex_roots
+PMo 6- function forpart for looping over partitions
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
        'gp -D primelimit=lim' (setting primelimit is now mostly useless, anyway)
     2- gp --stacksize lim is deprecated. Use gp -s lim or the generic form
-       'gp -D parisize=lim' .
+       'gp -D parisize=lim'
+    3- partitions() interface to match forpart()
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)

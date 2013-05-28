@@ -47,6 +47,14 @@ typedef struct {
   GEN pp;
 } forprime_t;
 
+/* Iterate over partitions */
+typedef struct
+{
+  long k;
+  long amax, amin, nmin, strip;
+  GEN v;
+} forpart_t;
+
 /* binary I/O */
 typedef struct GENbin {
   size_t len; /* gsizeword(x) */

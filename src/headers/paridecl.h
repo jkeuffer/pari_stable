@@ -2694,8 +2694,11 @@ extern const char *paricfg_compiledate;
 
 /* part.c */
 
+void    forpart(void *E, long call(void*,GEN), long k, GEN nbound, GEN abound);
+void    forpart_init(forpart_t *T, long k, GEN abound, GEN nbound);
+GEN     forpart_next(forpart_t *T);
 GEN     numbpart(GEN x);
-GEN     partitions(long n, long amax);
+GEN     partitions(long k, GEN nbound, GEN abound);
 
 /* perm.c */
 

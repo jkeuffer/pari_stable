@@ -62,6 +62,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     machinery allows fast primes up to primelimit^2 which is more than
     enough even with a small table. The default value of 500.000 is already
     larger than necessary
+  - the order of partitions return by parititions() has been reversed (sorry).
 
 * Specific to the PARI library:
 ===============================

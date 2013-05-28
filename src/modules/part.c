@@ -157,90 +157,178 @@ numbpart(GEN n)
   return gerepileuptoint (ltop, roundr(mulrr(D,sum)));
 }
 
-/**
-* Return a vector in which each element is a vector of partitions of
-* the positive integer n, in which the length of each of these partitions
-* is pext, in which the minimum element in each of the partitions is amin,
-* and in which the maximum element in each of the partitions is amax.
-* R. J. Mathar, mathar@strw.leidenuniv.nl, 2008-05-05
-*/
-/* assume pext >= 2 */
-static GEN
-partitr(long n, long pext, long amin, long amax)
-{
-  GEN pi;
+/* for loop over partitions of integer k.
+ * nbounds can restrict partitions to have length between nmin and nmax
+ * (the length is the number of non zero entries) and
+ * abounds restrict to integers between amin and amax.
+ *
+ * Start from central partition.
+ * By default, remove zero entries on the left.
+ *
+ * Algorithm:
+ *
+ * A partition of k is an increasing sequence v1,... vn with sum(vi)=k
+ * The starting point is the minimal n-partition of k: a,...a,a+1,.. a+1
+ * (a+1 is repeated r times with k = a * n + r).
+ *
+ * The procedure to obtain the next partition:
+ * - find the last index i<n such that v{i-1} != v{i} (that is vi is the start
+ * of the last constant range excluding vn).
+ * - decrease vi by one, and set v{i+1},... v{n} to be a minimal partition (of
+ * the right sum).
+ *
+ * Examples: we highlight the index i
+ * 1 1 2 2 3
+ *     ^
+ * 1 1 1 3 3
+ *       ^
+ * 1 1 1 2 4
+ *       ^
+ * 1 1 1 1 5
+ * ^
+ * 0 2 2 2 3
+ *   ^
+ * This is recursive in nature. Restrictions on upper bounds of the vi or on
+ * the length of the partitions are straightforward to take into account. */
 
-  if (pext == 2)
+static void
+parse_interval(GEN a, long *amin, long *amax)
+{
+  switch (typ(a))
   {
-    long a, L1 = maxss(amin, n-amax), L2 = minss(amax, n/pext);
-    if (L1 > L2) return NULL;
-    pi = cgetg(L2 - L1 + 2, t_VEC);
-    for (a = L1; a <= L2; a++) gel(pi, a-L1+1) = mkvecsmall2(a, n-a);
+  case t_INT:
+    *amax = itos(a);
+    break;
+  case t_VEC:
+    if (lg(a) != 3)
+      pari_err_TYPE("forpart [expect vector of type [amin,amax]]",a);
+    *amin = gtos(gel(a,1));
+    *amax = gtos(gel(a,2));
+    if (*amin>*amax || *amin<0 || *amax<=0)
+      pari_err_TYPE("forpart [expect 0<=min<=max, 0<max]",a);
+    break;
+  default:
+    pari_err_TYPE("forpart",a);
   }
-  else
-  {
-    pari_sp av = avma;
-    long a, l, L1 = amin, L2 = minss(amax, n/pext);
-    if (L1 > L2) return NULL;
-    pi = cgetg(L2 - L1 + 2, t_VEC); l = 1;
-    for (a = L1; a <= L2; a++)
-    {
-      GEN P = partitr(n-a, pext-1, a, amax);
-      long i, lP;
-      if (!P) continue;
-      lP = lg(P);
-      for (i = 1; i < lP; i++) gel(P,i) = vecsmall_prepend(gel(P,i), a);
-      gel(pi, l++) = P;
-    }
-    if (l == 1) { avma = av; return NULL; }
-    setlg(pi, l);
-    pi = gerepilecopy(av, shallowconcat1(pi));
-  }
-  return pi;
 }
 
-/**
-* Return a vector in which each element is a vector of partitions of
-* the positive integer n,
-* and in which the maximum element in each of the partitions is amax.
-* The restrictions on the maximum element can be lifted setting amax to zero,
-* which allows for each element to grow to its maximum of n itself.
-*
-* Example: partit(9,2) yields
-*  [[1, 2, 2, 2, 2], [1, 1, 1, 2, 2, 2], [1, 1, 1, 1, 1, 2, 2],
-*     [1, 1, 1, 1, 1, 1, 1, 2], [1, 1, 1, 1, 1, 1, 1, 1, 1]]
-* R. J. Mathar, mathar@strw.leidenuniv.nl, 2008-05-05
-*/
+void
+forpart_init(forpart_t *T, long k, GEN abound, GEN nbound)
+{
+  long n;
+  T->amin=1; T->nmin=1;
+  if (abound) parse_interval(abound,&T->amin,&T->amax);
+  else T->amax = k;
+  if (T->amax<=0) T->amax = k;
+
+  T->strip = (T->amin > 0) ? 1 : 0; /* remove leading zeros */
+
+  if (nbound) parse_interval(nbound,&T->nmin,&n);
+  else n = k;
+  if (T->strip && n>k/T->amin)
+    n=k/T->amin; /* strip implies amin>0 */
+
+  T->v = zero_zv(n);
+  T->k = k;
+}
+
 GEN
-partitions(long n, long amax)
+forpart_next(forpart_t *T)
+{
+  GEN v = T->v;
+  long n = lg(v)-1;
+  long j, ni, q, r;
+  long i, s;
+  if (n>0 && v[n])
+  {
+    /* find index to decrease */
+    i = n-1; s = v[n];
+    while (i>1 && (v[i-1]==v[i] || v[i+1]==T->amax))
+      s+= v[i--];
+    /* amax condition */
+    if ( v[i+1] == T->amax ) return NULL;     /* above amax */
+    /* amin condition: stop if below except if strip & try to remove */
+    if (!i) return NULL;
+    if (v[i] == T->amin) {
+      if (!T->strip) return NULL;
+      s += v[i]; v[i] = 0;
+    } else {
+      v[i]--; s++;
+    }
+    /* zero case... */
+    if (v[i] == 0)
+    {
+      if (T->nmin > n-i) return NULL; /* need too many non zero coeffs */
+      /* reduce size of v ? */
+      if (T->strip) {
+        i = 0; n--;
+        setlg(v, n+1);
+      }
+    }
+  } else
+  {
+    s = T->k;
+    i = 0;
+    if (s==0)
+    {
+      if (n==0 && T->nmin==0) {T->nmin++; return v;}
+      return NULL;
+    }
+    if (n*T->amax < s || s < T->nmin*T->amin) return NULL;
+  }
+  /* set minimal partition of sum s starting from index i */
+  ni = n-i;
+  q = s / ni;
+  r = s % ni;
+  for(j=i+1;   j<=n-r; j++) v[j]=q;
+  for(j=n-r+1; j<=n;   j++) v[j]=q + 1;
+  return v;
+}
+
+static long
+countpart(long k, GEN abound, GEN nbound)
 {
   pari_sp av = avma;
-  GEN pi;
-  long p, l;
+  long n;
+  forpart_t T;
+  if (k<0) return 0;
+  forpart_init(&T, k, abound, nbound);
+  for (n=0; forpart_next(&T); n++)
+  avma = av;
+  return n;
+}
 
-  /* lift the restriction on the maximum element if amax=0 */
-  if (amax == 0) amax = n;
-  if (amax < 0) return cgetg(1, t_VEC);
-  if (n <= 0) {
-    if (n < 0) return cgetg(1, t_VEC);
-    pi = cgetg(2, t_VEC);
-    gel(pi,1) = cgetg(1, t_VECSMALL);
-    return pi;
-  }
-  /* the partitions are generated in Abramowitz-Stegun order:
-  * first the partitions with 1 element, then those with 2, then
-  * those with 3 until 1+1+1+..+1=n, the longest, is created. p is the
-  * length of these partitions. */
+GEN
+partitions(long k, GEN abound, GEN nbound)
+{
+  GEN v;
+  forpart_t T;
+  long i, n = countpart(k,abound,nbound);
+  if (n==0) return cgetg(1, t_VEC);
+  forpart_init(&T, k, abound, nbound);
+  v = cgetg(n+1, t_VEC);
+  for (i=1; i<=n; i++)
+    gel(v,i)=zv_copy(forpart_next(&T));
+  return v;
+}
 
-  /* partitions with 1 element */
-  pi = cgetg(n+1, t_VEC); l = 1;
-  if (n <= amax) gel(pi, l++) = mkvec( mkvecsmall(n) );
-  /* vector of partitions of length p, elements in the range of 1.. amax */
-  for (p = 2; p <= n; ++p)
-  {
-    GEN P = partitr(n, p, 1, amax);
-    if (P) gel(pi, l++) = P;
-  }
-  setlg(pi, l);
-  return gerepilecopy(av, shallowconcat1(pi)) ;
+void
+forpart(void *E, long call(void*, GEN), long k, GEN abound, GEN nbound)
+{
+  GEN v;
+  forpart_t T;
+  forpart_init(&T, k, abound, nbound);
+  while ((v=forpart_next(&T)))
+    if (call(E, v)) break;
+}
+
+void
+forpart0(GEN k, GEN code, GEN abound, GEN nbound)
+{
+  pari_sp av = avma;
+  if (typ(k) != t_INT || signe(k)<0) pari_err_TYPE("forpart",k);
+  push_lex(gen_0, code);
+  forpart((void*)code, &gp_evalvoid, itos(k), abound, nbound);
+  pop_lex(1);
+  avma=av;
 }
