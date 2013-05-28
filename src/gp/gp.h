@@ -23,6 +23,7 @@ BEGINEXTERN
 void aide(const char *s, long flag);
 void echo_and_log(const char *prompt, const char *s);
 int  get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F);
+void readline_prompt_color(char *s, int c);
 void gp_output(GEN z, gp_data *G);
 void init_readline(void);
 void texmacs_completion(const char *s, long pos);

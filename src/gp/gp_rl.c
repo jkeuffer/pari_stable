@@ -679,6 +679,20 @@ init_readline(void)
   rl_bind_key_in_map(2, pari_rl_backward_sexp, emacs_meta_keymap); /* M-C-b */
 }
 
+void
+readline_prompt_color(char *s, int c)
+{
+#ifdef RL_PROMPT_START_IGNORE
+  *s++ = RL_PROMPT_START_IGNORE;
+  term_get_color(s, c);
+  s += strlen(s);
+  *s++ = RL_PROMPT_END_IGNORE;
+  *s = 0;
+#else
+  term_get_color(s, c);
+#endif
+}
+
 /* readline-specific defaults */
 GEN
 sd_readline(const char *v, long flag)

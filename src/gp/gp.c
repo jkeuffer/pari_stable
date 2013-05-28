@@ -1355,14 +1355,10 @@ static void
 brace_color(char *s, int c, int force)
 {
   if (disable_color || (gp_colors[c] == c_NONE && !force)) return;
-#ifdef RL_PROMPT_START_IGNORE
-  if (GP_DATA->use_readline) {
-    *s++ = RL_PROMPT_START_IGNORE;
-    term_get_color(s, c);
-    s += strlen(s);
-    *s++ = RL_PROMPT_END_IGNORE;
-    *s = 0;
-  } else
+#ifdef READLINE
+  if (GP_DATA->use_readline)
+    readline_prompt_color(s, c);
+  else
 #endif
     term_get_color(s, c);
 }
