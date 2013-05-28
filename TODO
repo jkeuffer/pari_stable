@@ -4,10 +4,8 @@ If you intend to work on any of these things, have a look at
 README-git and drop an email to pari-dev.
 
 Priority classification (first column): [subjective and debatable]
-5    as soon as possible
-4    should be done
-3    nice to have
-2    maybe not
+3    as soon as possible
+2    nice to have
 1    probably not
 0    no
 -    unclassified
@@ -15,16 +13,16 @@ Priority classification (first column): [subjective and debatable]
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision
 
-4  factorback should not accept [;] since matrix(0,2) is the only valid
+2  factorback should not accept [;] since matrix(0,2) is the only valid
    form of an empty matrix input, corresponding e.g to factor(1). But the
    empty matrix is used in many places as a marker for a void factorization.
    This convention should be encapsulated; then we may declare [;] invalid
    input.
 
-3  some functions assume MAXVARN is a free variable, yielding bogus
+2  some functions assume MAXVARN is a free variable, yielding bogus
    results if the input involves it (only affects library programming).
 
-3  recursive plot easily fooled. One could split intervals in 3 + make sure
+1  recursive plot easily fooled. One could split intervals in 3 + make sure
    size of neighbouring intervals don't differ too much.
 
 1  O(x) * y --> O(x)
@@ -44,59 +42,32 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
    gphelp is not affected by the problem since it prints an 'ugly_kludge'
    string to tell the caller (gp) that it is finished [it should use 'wait'
-   instead, but less portable]. tex2mail just uses a delay loop [prettyp_wait()].
+   instead, but less portable]. tex2mail just uses a delay loop [prettyp_wait].
    Note that tex2mail is always running in the background whereas gphelp is
    restarted everytime.
 
-2  under GP after an error, memory is only recovered from "entire variables".
-   Individual components of lists/vectors/matrices are left alone if the
-   GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ...
-   occured)
-
 ***************************  DOCUMENTATION    ****************************
 
-5  add examples for all functions in Chapter 3
-
-4  document the innards of PARI (entree, pariFILE, bloc, ...)
-
-***************************  MISCELLANEOUS    ****************************
-
-2  switch to autoconf
+2  document the innards of PARI (entree, pariFILE, bloc, ...)
 
 ***************************   ALGORITHMS      ****************************
 
 Kernel:
 =======
-5  implement Jebelean-Krandick diviiexact
+2  implement Jebelean-Krandick diviiexact
 
-5  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
+2  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
 
-4  benchmark / profile basic functions and see what needs to be done
+2  benchmark / profile basic functions and see what needs to be done
 
-4  inline level0 routines should operate on _limbs_, not on words.
+2  inline level0 routines should operate on _limbs_, not on words.
 
-3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
-
-2  interval arithmetic
-
-2  add support for different multiprecision kernels (a la LiDIA)
-
-0  support standard rounding modes in floating point operations
-   [ not worth it ]
+2  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
 
 Misc:
 =====
-5  add an optional argument to content, denominator, numerator to specify
+-  add an optional argument to content, denominator, numerator to specify
    the main variable
-
-4  decent (non-prime) finite field package [ esp. in small characteristic ]
-
-4  rnfkummer (non-prime degree)
-
-3  nfsubfields [use known subfields to discard blocs right away]
-
-3  PSLQ (algdep(x,n, -3)) is very slow, PSLQ Level2 (algdep(x,n, -4)) is even
-   slower and very unreliable. Until somebody fixes this, use LLL.
 
 3  zetak is very inefficient, unable to handle most fields of degree > 8, and
    gives mostly bogus results at high precision. E.g.
@@ -107,73 +78,65 @@ Misc:
    %1 = 7.41787592 E21
    To be rewritten...
 
-3  have quadclassunit return bnf structure
+2  decent (non-prime) finite field package [ esp. in small characteristic ]
 
-3  p-adic ellztopoint
+2  rnfkummer (non-prime degree)
 
-0  graphics: allow FIG output (besides PostScript) [easier to edit!]
-   [ use pstoedit ]
+2  nfsubfields [use known subfields to discard blocs right away]
+
+2  merge quadclassunit and bnfinit
+
+2  p-adic ellztopoint
 
 ***************************   LIBRARY DESIGN   ****************************
 
-5  add a 'variable' as an optional last argument in content, denominator,
+3  add a 'variable' as an optional last argument in content, denominator,
    numerator, as is done in divrem (cf. 2.6.2)
 
-4  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
+3  remove all dependencies on types ordering [if (typ(x) < t_POL) ...]
+
+2  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
    easily define new ones)
 
-4  remove all dependencies on types ordering [if (typ(x) < t_POL) ...]
+2  rename library functions following GP names
 
-3  rename library functions following GP names
-
-3  introduce "special" types for objects which are really containers and
+2  introduce "special" types for objects which are really containers and
    should be defined by a secondary type (e.g number fields, finite fields,
    p-adic fields, elliptic curves, ...). Would keep list of types small
    (and fast)
 
-3  sparse representations for multivariate polynomials and matrices.
+2  sparse representations for multivariate polynomials and matrices.
 
-3  type "element in" ([number|finite] field...), "point" on elliptic curve
+2  type "element in" ([number|finite] field...), "point" on elliptic curve
 
-3  find a way to deal (generically) with "integral object + its content"
+2  find a way to deal (generically) with "integral object + its content"
    [ rational arithmetic would be much more efficient, when polynomials or
      matrices are involved. Currently, the content is being recomputed all
      the time, removed, then multiplied back in ]
 
-2  have some header magic (transparently) prepend some prefix (e.g "pari_")
+1  have some header magic (transparently) prepend some prefix (e.g "pari_")
    before all exported functions to prevent name conflicts. Build alias
    files for debuggers
 
-0  "mute" variables for t_POLMOD. Should have Mod(x,x^2+1) == Mod(y,y^2+1).
-   [ too confusing ]
-
 ***************************   GP DESIGN       ****************************
 
--  Allow GP to trap an OS signal. Suppose that gp runs, say in nohup mode, and
+2  Allow GP to trap an OS signal. Suppose that gp runs, say in nohup mode, and
    it takes several days to complete the program. In meantime several things
    can happen resulting in shutdown of the machine. On shutdown all programs
    receive SIGTERM signal. I would like gp to be able to trap this signal and
    when it receives one, to execute some gp command, e.g saving all settings
    with full accuracy (e.g writebin).
 
-5  write an analog of the 'echo' default which would print code as it is
+2  write an analog of the 'echo' default which would print code as it is
    _executed_, not as it is read
 
-3  possibility to save and load a session (variables, functions, defaults)
+2  possibility to save and load a session (variables, functions, defaults)
 
-3  a type t_FILE [current: stream re-opened/flushed/closed after every single
+2  a type t_FILE [current: stream re-opened/flushed/closed after every single
    write(): disaster when one wants to write often to the same file]
-
-0  add a possibility to increase the maximal recursion depth (need to
-   increase the GP process stack: use setrlimit(RLIMIT_STACK,) + fork)
-   [ was never requested and wouldn't be portable. Do it yourself before
-   launching gp ]
 
 ***************************   TOOLS           ****************************
 
-4  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
+2  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
 
 2  write a GP scripts profiler
-
-0  a script to translate legacy GP code into GP2
-   [ was never requested; GP2 was released in 1997 ]
