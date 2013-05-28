@@ -5,25 +5,25 @@ Prototype: vV=GIDGDG
 Wrapper: (,vG,,)
 Description:
  (small,closure,?gen,?gen):void forpart(${2 cookie}, ${2 wrapper}, $1, $3, $4)
-Help: forpart(X=k,seq,{a=k},{n=k}): evaluate sequence with X a Vecsmall going
- over the partitions of integer k ordered lexicographically. Restriction can be
- put on the length of the partitions with parameter n (n=nmax or n=[nmin,nmax])
- and on the range of X[i] with parameter a (a=amax or a=[amin,amax]). By default
- remove zeros, but one can set amin=0 to get X of fixed length nmax (=k by
+Help: forpart(X=k,seq,{a=k},{n=k}): evaluate sequence seq where the Vecsmall X
+ goes going over the partitions of k, ordered lexicographically. Optional
+ parameter n (n=nmax or n=[nmin,nmax]) restricts the length of the partion.
+ Optional parameter a (a=amax or a=[amin,amax]) restricts the range of the
+ parts X[i]. Zeros are removed unless one sets set amin=0 to get X of fixed
+ length nmax (=k by
  default).
-Doc: evaluate \var{seq} over the partitions $X=[x_1,\dots x_n]$ of integer $k$,
- that is increasing
- sequences $x_1\leq x_2\dots \leq x_n$ of sum $x_1+\dots x_n=k$.
+Doc: evaluate \var{seq} over the partitions $X=[x_1,\dots x_n]$ of the
+ integer $k$, i.e.~increasing sequences $x_1\leq x_2\dots \leq x_n$ of sum
+ $x_1+\dots + x_n=k$.
 
- Optional parameters $n$ and $a$ can be:
+ Optional parameters $n$ and $a$ are as follows:
 
- \item $n=nmax$ (resp. $n=[nmin,nmax]$) to restrict partitions to have length
- less than $nmax$ (resp. length between $nmin$ and $nmax$), where the length is
+ \item $n=nmax$ (resp. $n=[nmin,nmax]$) restricts partitions to length less
+ than $nmax$ (resp. length between $nmin$ and $nmax$), where the length is
  the number of non zero entries.
 
- \item $a=amax$ (resp. $a=[amin,amax]$) to restrict
- the components of $X$ to be to integers less than $amax$ (resp. between $amin$
- and $amax$).
+ \item $a=amax$ (resp. $a=[amin,amax]$) restricts the components of $X$ to
+  integers less than $amax$ (resp. between $amin$ and $amax$).
 
  By default, remove zero entries on the left except if $amin\leq0$, in which
  case $nmin$ is ignored and $X$ is of constant length $nmax$.
@@ -45,6 +45,6 @@ Doc: evaluate \var{seq} over the partitions $X=[x_1,\dots x_n]$ of integer $k$,
  [0, 0, 2, 3]
  [0, 0, 1, 4]
  @eprog\noindent
- The behaviour is unspecified if $X$ is modified inside loop.
+ The behaviour is unspecified if $X$ is modified inside the loop.
 
  \synt{forpart}{void *data, long (*call)(void*,GEN), long k, GEN a, GEN n}.
