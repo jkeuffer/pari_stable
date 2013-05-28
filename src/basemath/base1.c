@@ -1822,7 +1822,7 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
     {
       nfmaxord_t S;
       nfmaxord(&S, x, flag);
-      x = S.T; if (!ZX_is_irred(x)) pari_err_IRREDPOL("nfinit",x);
+      x = S.T;
       T->x0 = S.T0;
       T->dKP = S.dKP;
       dK = S.dK;
@@ -1876,6 +1876,7 @@ nfinitall(GEN x, long flag, long prec)
   nfbasic_t T;
 
   nfbasic_init(x, flag, &T);
+  if (!ZX_is_irred(T.x)) pari_err_IRREDPOL("nfinit",x);
   if (!equali1(leading_term(T.x0)) && !(flag & nf_RED))
   {
     pari_warn(warner,"non-monic polynomial. Result of the form [nf,c]");
