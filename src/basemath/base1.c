@@ -2313,13 +2313,30 @@ GEN
 ordred(GEN x)
 {
   pari_sp av = avma;
-  GEN y;
+  GEN v, lt;
+  long i, n, vx;
 
-  if (typ(x) != t_POL) pari_err_TYPE("ordred",x);
-  if (!gequal1(leading_term(x))) pari_err_IMPL("ordred");
-  if (!signe(x)) return RgX_copy(x);
-  y = mkvec2(x, pol_x_powers(degpol(x), varn(x)));
-  return gerepileupto(av, polred(y));
+  if (typ(x) != t_POL) pari_err_TYPE("polredord",x);
+  x = Q_primpart(x); RgX_check_ZX(x,"polredord");
+  n = degpol(x); if (n <= 0) pari_err_CONSTPOL("polredord");
+  lt = leading_term(x); vx = varn(x);
+  if (is_pm1(lt))
+  {
+    if (signe(lt) < 0) x = ZX_neg(x);
+    v = pol_x_powers(n, vx);
+  }
+  else
+  { GEN L;
+    /* basis for Dedekind order */
+    v = cgetg(n+1, t_VEC);
+    gel(v,1) = scalarpol_shallow(lt, vx);
+    for (i = 2; i <= n; i++)
+      gel(v,i) = RgX_Rg_add(RgX_mulXn(gel(v,i-1), 1), gel(x,n+3-i));
+    gel(v,1) = pol_1(vx);
+    x = ZX_Q_normalize(x, &L);
+    v = gsubst(v, vx, monomial(ginv(L),1,vx));
+  }
+  return gerepileupto(av, polred(mkvec2(x, v)));
 }
 
 GEN
