@@ -35,6 +35,7 @@ PMo 6- function forpart for looping over partitions
     2- gp --stacksize lim is deprecated. Use gp -s lim or the generic form
        'gp -D parisize=lim'
     3- partitions() interface to match forpart()
+    4- improve qfbred(t_QFI) for "small" inputs
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)

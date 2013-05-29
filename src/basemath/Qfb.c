@@ -135,9 +135,9 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
 static void
 qfb_sqr(GEN z, GEN x)
 {
-  GEN c, d1, x2, y2, v1, v2, c3, m, p1, r;
+  GEN c, d1, x2, v1, v2, c3, m, p1, r;
 
-  d1 = bezout(gel(x,2),gel(x,1),&x2,&y2);
+  d1 = bezout(gel(x,2),gel(x,1),&x2, NULL); /* usually 1 */
   c = gel(x,3);
   m = mulii(c,x2);
   if (is_pm1(d1))
@@ -189,8 +189,7 @@ qfb_comp(GEN z, GEN x, GEN y)
   c3 = addii(c, mulii(r,addii(gel(y,2),p1)));
   gel(z,1) = mulii(v1,v2);
   gel(z,2) = addii(gel(y,2), shifti(p1,1));
-  gel(z,3) = dvmdii(c3,v1, &s);
-  if (signe(s)) pari_err_TYPE2("composition",x,y);
+  gel(z,3) = diviiexact(c3,v1);
 }
 
 static GEN
@@ -413,7 +412,7 @@ nucomp(GEN x, GEN y, GEN L)
 {
   pari_sp av = avma;
   long z;
-  GEN a, a1, a2, b2, b, d, d1, g, n, p1, q1, q2, s, u, u1, v, v1, v2, v3, Q;
+  GEN a, a1, a2, b2, b, d, d1, g, n, p1, q1, q2, s, u, u1, v, v2, v3, Q;
 
   if (x==y) return nudupl(x,L);
   if (typ(x) != t_QFI) pari_err_TYPE("nucomp",x);
@@ -436,7 +435,7 @@ nucomp(GEN x, GEN y, GEN L)
     else
     {
       GEN p2, l;
-      d1 = bezout(s,d,&u1,&v1);
+      d1 = bezout(s,d,&u1,NULL);
       if (!is_pm1(d1))
       {
         a1 = diviiexact(a1,d1);
@@ -487,7 +486,7 @@ nudupl(GEN x, GEN L)
   if (typ(x) != t_QFI) pari_err_TYPE("nudupl",x);
   a = gel(x,1);
   b = gel(x,2);
-  d1 = bezout(b,a, &u,&v);
+  d1 = bezout(b,a, &u,NULL);
   if (!is_pm1(d1))
   {
     a = diviiexact(a, d1);
@@ -544,6 +543,7 @@ nupow(GEN x, GEN n)
 
 /* Reduction */
 
+/* assume a > 0. Write b = q*2a + r, with -a < r <= a */
 static GEN
 dvmdii_round(GEN b, GEN a, GEN *r)
 {
@@ -555,12 +555,69 @@ dvmdii_round(GEN b, GEN a, GEN *r)
   }
   return q;
 }
+/* Assume 0 < a <= LONG_MAX. Ensure no overflow */
+static long
+dvmdsu_round(long b, ulong a, long *r)
+{
+  ulong a2 = a << 1, q, ub, ur;
+  if (b >= 0) {
+    ub = b;
+    q = ub / a2;
+    ur = ub % a2;
+    if (ur > a) { ur -= a; q++; *r = (long)ur; *r -= (long)a; }
+    else *r = (long)ur;
+    return (long)q;
+  } else { /* r <= 0 */
+    ub = (ulong)-b; /* |b| */
+    q = ub / a2;
+    ur = ub % a2;
+    if (ur >= a) { ur -= a; q++; *r = (long)ur; *r = (long)a - *r; }
+    else *r = -(long)ur;
+    return -(long)q;
+  }
+}
 /* reduce b mod 2*a. Update b,c */
 static void
 REDB(GEN a, GEN *b, GEN *c)
 {
   GEN r, q = dvmdii_round(*b, a, &r);
+  if (!signe(q)) return;
   *c = subii(*c, mulii(q, shifti(addii(*b, r),-1)));
+  *b = r;
+}
+/* Assume a > 0. Reduce b mod 2*a. Update b,c */
+static void
+sREDB(ulong a, long *b, ulong *c)
+{
+  long r, q;
+  ulong uz;
+  if (a > LONG_MAX) return; /* b already reduced */
+  q = dvmdsu_round(*b, a, &r);
+  if (q == 0) return;
+  /* Final (a,r,c2) satisfies |r| <= |b| hence c2 <= c, c2 = c - q*z,
+   * where z = (b+r) / 2, representable as long, has the same sign as q. */
+  if (*b < 0)
+  { /* uz = -z >= 0, q < 0 */
+    if (r >= 0) /* different signs=>no overflow, exact division */
+      uz = (ulong)-((*b + r)>>1);
+    else
+    {
+      ulong ub = (ulong)-*b, ur = (ulong)-r;
+      uz = (ub + ur) >> 1;
+    }
+    *c -= (-q) * uz; /* c -= qz */
+  }
+  else
+  { /* uz = z >= 0, q > 0 */
+    if (r <= 0)
+      uz = (*b + r)>>1;
+    else
+    {
+      ulong ub = (ulong)*b, ur = (ulong)r;
+      uz = ((ub + ur) >> 1);
+    }
+    *c -= q * uz; /* c -= qz */
+  }
   *b = r;
 }
 static void
@@ -627,16 +684,76 @@ redimagsl2(GEN q, GEN *U)
   *U = mkmat2(mkcol2(u1,v1), mkcol2(u2,v2)); return Q;
 }
 
+static GEN
+setq_b0(ulong a, ulong c)
+{ retmkqfi( utoipos(a), gen_0, utoipos(c) ); }
+/* assume |sb| = 1 */
+static GEN
+setq(ulong a, ulong b, ulong c, long sb)
+{ retmkqfi( utoipos(a), sb == 1? utoipos(b): utoineg(b), utoipos(c) ); }
+/* 0 < a, c < 2^BIL, b = 0 */
+static GEN
+redimag_1_b0(ulong a, ulong c)
+{ return (a <= c)? setq_b0(a, c): setq_b0(c, a); }
+
+/* 0 < a, c < 2^BIL: single word affair */
+static GEN
+redimag_1(pari_sp av, GEN a, GEN b, GEN c)
+{
+  ulong ua, ub, uc;
+  long sb;
+  for(;;)
+  { /* at most twice */
+    long lb = lgefint(b); /* <= 3 after first loop */
+    if (lb == 2) return redimag_1_b0(a[2],c[2]);
+    if (lb == 3 && (ulong)b[2] <= (ulong)LONG_MAX) break;
+    REDB(a,&b,&c);
+    if ((ulong)a[2] <= (ulong)c[2])
+    { /* lg(b) <= 3 but may be too large for itos */
+      long s = signe(b);
+      avma = av;
+      if (!s) return redimag_1_b0(a[2], c[2]);
+      if (a[2] == c[2]) s = 1;
+      return setq(a[2], b[2], c[2], s);
+    }
+    swap(a,c); b = negi(b);
+  }
+  /* b != 0 */
+  avma = av;
+  ua = a[2];
+  ub = sb = b[2]; if (signe(b) < 0) sb = -sb;
+  uc = c[2];
+  if (ua < ub)
+    sREDB(ua, &sb, &uc);
+  else if (ua == ub && sb < 0) sb = (long)ub;
+  while(ua > uc)
+  {
+    lswap(ua,uc); sb = -sb;
+    sREDB(ua, &sb, &uc);
+  }
+  if (!sb) return setq_b0(ua, uc);
+  else
+  {
+    long s = 1;
+    if (sb < 0)
+    {
+      sb = -sb;
+      if (ua != uc) s = -1;
+    }
+    return setq(ua, sb, uc, s);
+  }
+}
+
 GEN
 redimag(GEN q)
 {
-  GEN Q = cgetg(4, t_QFI);
-  pari_sp av = avma, av2, lim = stack_lim(av, 1);
-  GEN a = gel(q,1), b = gel(q,2), c = gel(q,3);
-  long cmp;
-  /* upper bound for size of final (a,b,c) */
-  (void)new_chunk(lgefint(a) + lgefint(b) + lgefint(c) + 3);
-  av2 = avma;
+  pari_sp av = avma;
+  GEN Q, a = gel(q,1), b = gel(q,2), c = gel(q,3);
+  long cmp, lb, la = lgefint(a), lc = lgefint(c);
+
+  if (la == 3 && lc == 3) return redimag_1(av, a, b, c);
+  /* upper bound for size of final Qfb(a,b,c) */
+  lb = lgefint(b); (void)new_chunk(la + lb + lc + 7);
   cmp = absi_cmp(a, b);
   if (cmp < 0)
     REDB(a,&b,&c);
@@ -645,16 +762,13 @@ redimag(GEN q)
   for(;;)
   {
     cmp = absi_cmp(a, c); if (cmp <= 0) break;
+    if (lgefint(a) == 3) return redimag_1(av, a, b, c);
     swap(a,c); b = negi(b); /* apply rho */
     REDB(a,&b,&c);
-    if (low_stack(lim, stack_lim(av, 1))) {
-      if (DEBUGMEM>1) pari_warn(warnmem, "redimag");
-      gerepileall(av2, 3, &a,&b,&c);
-    }
   }
   if (cmp == 0 && signe(b) < 0) b = negi(b);
-
   avma = av;
+  Q = cgetg(4, t_QFI);
   gel(Q,1) = icopy(a);
   gel(Q,2) = icopy(b);
   gel(Q,3) = icopy(c); return Q;

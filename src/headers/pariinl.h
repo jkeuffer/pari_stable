@@ -42,6 +42,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
        gel(_v,1) = (x);\
        gel(_v,2) = (y);\
        gel(_v,3) = (z); return _v; } while(0)
+#define retmkqfi(x,y,z)\
+  do { GEN _v = cgetg(4, t_QFI);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z); return _v; } while(0)
 #define retmkvec4(x,y,z,t)\
   do { GEN _v = cgetg(5, t_VEC);\
        gel(_v,1) = (x);\
@@ -156,8 +161,7 @@ mkvecsmall4(long x,long y,long z,long t) { GEN v = cgetg(5, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; v[4]=t; return v; }
 
 INLINE GEN
-mkqfi(GEN x, GEN y, GEN z)
-{ GEN v=cgetg(4,t_QFI); gel(v,1)=x; gel(v,2)=y; gel(v,3)=z; return v; }
+mkqfi(GEN x, GEN y, GEN z) { retmkqfi(x,y,z); }
 /* vec */
 INLINE GEN
 mkvec(GEN x) { retmkvec(x); }
