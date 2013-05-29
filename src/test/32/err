@@ -392,9 +392,6 @@
   ***   at top-level: qfbcomp(Qfb(1,1,1),Q
   ***                 ^--------------------
   ***   not a function in function call
-  ***   at top-level: qfbcompraw(Qfb(21,1,
-  ***                 ^--------------------
-  *** qfbcompraw: forbidden composition t_QFI , t_QFI.
   ***   at top-level: galoisinit(x^2)
   ***                 ^---------------
   *** galoisinit: domain error in galoisinit: issquarefree(pol) = 0
@@ -580,4 +577,4 @@
   ***   at top-level: solve(x=0,1,x^2+1)
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
-Total time spent: 37
+Total time spent: 20
