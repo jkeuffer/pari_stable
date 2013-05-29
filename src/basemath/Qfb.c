@@ -160,11 +160,10 @@ qfb_sqr(GEN z, GEN x)
 static void
 qfb_comp(GEN z, GEN x, GEN y)
 {
-  GEN s, n, c, d, y1, v1, v2, c3, m, p1, r;
+  GEN n, c, d, y1, v1, v2, c3, m, p1, r;
 
   if (x == y) { qfb_sqr(z,x); return; }
-  s = shifti(addii(gel(x,2),gel(y,2)), -1);
-  n = subii(gel(y,2),s);
+  n = shifti(subii(gel(y,2),gel(x,2)), -1);
   v1 = gel(x,1);
   v2 = gel(y,1);
   c  = gel(y,3);
@@ -173,6 +172,7 @@ qfb_comp(GEN z, GEN x, GEN y)
     m = mulii(y1,n);
   else
   {
+    GEN s = subii(gel(y,2), n);
     GEN x2, y2, d1 = bezout(s,d,&x2,&y2); /* x2 s + y2 (x1 v1 + y1 v2) = d1 */
     if (!is_pm1(d1))
     {
@@ -192,15 +192,15 @@ qfb_comp(GEN z, GEN x, GEN y)
   gel(z,3) = diviiexact(c3,v1);
 }
 
+static GEN redimag_av(pari_sp av, GEN q);
 static GEN
 qficomp0(GEN x, GEN y, int raw)
 {
   pari_sp av = avma;
   GEN z = cgetg(4,t_QFI);
-  if (absi_cmp(gel(x,1), gel(y,1)) > 0) swap(x, y);
   qfb_comp(z, x,y);
   if (raw) return gerepilecopy(av,z);
-  return gerepileupto(av, redimag(z));
+  return redimag_av(av, z);
 }
 static GEN
 qfrcomp0(GEN x, GEN y, int raw)
@@ -241,7 +241,7 @@ qfisqr0(GEN x, long raw)
   if (typ(x)!=t_QFI) pari_err_TYPE("composition",x);
   qfb_sqr(z,x);
   if (raw) return gerepilecopy(av,z);
-  return gerepileupto(av, redimag(z));
+  return redimag_av(av, z);
 }
 static GEN
 qfrsqr0(GEN x, long raw)
@@ -473,7 +473,7 @@ nucomp(GEN x, GEN y, GEN L)
   q2 = addii(q1,n);
   gel(Q,2) = addii(b2, z? addii(q1,q2): shifti(q1, 1));
   gel(Q,3) = addii(mulii(v3,diviiexact(q2,d)), mulii(g,v2));
-  return gerepileupto(av, redimag(Q));
+  return redimag_av(av, Q);
 }
 
 GEN
@@ -514,7 +514,7 @@ nudupl(GEN x, GEN L)
   }
   gel(Q,2) = addii(b2, subii(sqri(addii(d,v3)), addii(a2,c2)));
   gel(Q,3) = addii(c2, mulii(g,v2));
-  return gerepileupto(av, redimag(Q));
+  return redimag_av(av, Q);
 }
 
 static GEN
@@ -744,10 +744,9 @@ redimag_1(pari_sp av, GEN a, GEN b, GEN c)
   }
 }
 
-GEN
-redimag(GEN q)
+static GEN
+redimag_av(pari_sp av, GEN q)
 {
-  pari_sp av = avma;
   GEN Q, a = gel(q,1), b = gel(q,2), c = gel(q,3);
   long cmp, lb, la = lgefint(a), lc = lgefint(c);
 
@@ -773,6 +772,8 @@ redimag(GEN q)
   gel(Q,2) = icopy(b);
   gel(Q,3) = icopy(c); return Q;
 }
+GEN
+redimag(GEN q) { return redimag_av(avma, q); }
 
 static GEN
 rhoimag(GEN x)
