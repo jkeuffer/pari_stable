@@ -20,8 +20,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*******************************************************************/
 #define retmkfrac(x,y)\
   do { GEN _v = cgetg(3, t_FRAC);\
-       gel(_v,1) = (y);\
-       gel(_v,2) = (x); return _v; } while(0)
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y); return _v; } while(0)
 #define retmkintmod(x,y)\
   do { GEN _v = cgetg(3, t_INTMOD);\
        gel(_v,1) = (y);\
@@ -122,11 +122,9 @@ mkintmodu(ulong x, ulong y) {
 INLINE GEN
 mkpolmod(GEN x, GEN y) { retmkpolmod(x,y); }
 INLINE GEN
-mkfrac(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
-  gel(v,1) = x; gel(v,2) = y; return v; }
+mkfrac(GEN x, GEN y) { retmkfrac(x,y); }
 INLINE GEN
-mkfraccopy(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
-  gel(v,1) = icopy(x); gel(v,2) = icopy(y); return v; }
+mkfraccopy(GEN x, GEN y) { retmkfrac(icopy(x), icopy(y)); }
 INLINE GEN
 mkrfrac(GEN x, GEN y) { GEN v = cgetg(3, t_RFRAC);
   gel(v,1) = x; gel(v,2) = y; return v; }

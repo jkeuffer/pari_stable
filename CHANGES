@@ -8,6 +8,8 @@ Done for version 2.6.1 (released ??/??/2013):
        ignore the 'f' ]
     2- ellminimalmodel, followed by ellchangecurve ==> structure incorrectly
        updated [wrong Q_MINIMALMODEL component][#1416]
+    3- lift(1/2 + O(2)) = 2/1 --> incorrect result + corrupt object [#1424]
+       (introduced in 2.6.0)
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the
