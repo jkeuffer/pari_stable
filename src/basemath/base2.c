@@ -235,7 +235,6 @@ allbase_from_maxord(nfmaxord_t *S, GEN maxord)
       gerepileall(av, 2, &a, &da);
       centered = 1;
     }
-    if (DEBUGLEVEL>5) err_printf("Result for prime %Ps is:\n%Ps\n",P[i],b);
   }
   if (da)
   {
