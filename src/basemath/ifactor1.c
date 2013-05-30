@@ -1857,9 +1857,6 @@ check_res(ulong x, ulong N, int shift, ulong *mask)
 {
   long r = x%N; if ((ulong)r> (N>>1)) r = N - r;
   *mask &= (powersmod[r] >> shift);
-  if (DEBUGLEVEL >= 5)
-    err_printf("\t   %3ld:  %3ld   (3rd %ld, 5th %ld, 7th %ld)\n",
-               N, r, *mask&1, (*mask>>1)&1, (*mask>>2)&1);
   return *mask;
 }
 
@@ -1952,6 +1949,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   GEN y;
 
   if (!*mask) return 0; /* useful when running in a loop */
+  if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
   if (lgefint(x) == 3) {
     ulong t;
     long e = uis_357_power(x[2], &t, mask);
@@ -1962,15 +1960,6 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
     }
     return 0;
   }
-  if (DEBUGLEVEL>4)
-  {
-    err_printf("OddPwrs: is %Ps\n\t...a", x);
-    if (*mask&1) err_printf(" 3rd%s", (*mask==7?",":(*mask!=1?" or":"")));
-    if (*mask&2) err_printf(" 5th%s", (*mask==7?", or":(*mask&4?" or":"")));
-    if (*mask&4) err_printf(" 7th");
-    err_printf(" power?\n\tmodulo: resid. (remaining possibilities)\n");
-  }
-
 #ifdef LONG_IS_64BIT
   r = (lx == 3)? (ulong)x[2]: umodiu(x, 6046846918939827UL);
   if (!uis_357_powermod(r, mask)) return 0;
@@ -1996,7 +1985,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
       avma = (pari_sp)y; *pt = gerepileuptoint(av, y);
       return e;
     }
-    if (DEBUGLEVEL >= 5)
+    if (DEBUGLEVEL>4)
       err_printf("\tBut it nevertheless wasn't a %ld%s power.\n", e,eng_ord(e));
     *mask &= ~b; /* turn the bit off */
     avma = av;
@@ -2040,7 +2029,6 @@ is_kth_power(GEN x, ulong n, GEN *pt)
   {
     if (!(q = u_forprime_next(&T))) break;
     /* q a prime = 1 mod n */
-    if (DEBUGLEVEL>7) err_printf("\tchecking modulo %ld\n", q);
     residue = umodiu(x, q);
     if (residue == 0)
     {
@@ -2048,11 +2036,7 @@ is_kth_power(GEN x, ulong n, GEN *pt)
       continue;
     }
     /* n-th power mod q ? */
-    if (Fl_powu(residue, (q-1)/n, q) != 1)
-    {
-      if (DEBUGLEVEL>7) err_printf("\t- ruled out\n");
-      avma = av; return 0;
-    }
+    if (Fl_powu(residue, (q-1)/n, q) != 1) { avma = av; return 0; }
   }
   avma = av;
 
@@ -2082,11 +2066,9 @@ is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
   long size = expi(x) /* not +1 */;
   ulong p;
   pari_sp av = avma;
-
   if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
   while ((p = u_forprime_next(T)) && size/p >= cutoffbits) {
     long v = 1;
-    if (DEBUGLEVEL>4) err_printf("OddPwrs: testing for exponent %ld\n", p);
     while (is_kth_power(x, p, pt)) {
       v *= p; x = *pt;
       size = expi(x);
@@ -2726,8 +2708,6 @@ ifac_crack(GEN *partial, GEN *where, long moebius_mode)
       update_pow(*where, factor, 2, &av);
       if (moebius_mode) return 0; /* no need to carry on */
     }
-    /* At debug levels > 4, is_357_power() prints something more informative */
-    if (DEBUGLEVEL == 4) err_printf("IFAC: checking for odd power\n");
     while ( (exp = is_357_power(VALUE(*where), &factor, &mask)) )
     {
       good = 1; /* remember we succeeded once */
