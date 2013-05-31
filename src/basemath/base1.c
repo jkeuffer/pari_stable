@@ -2335,6 +2335,8 @@ ordred(GEN x)
     gel(v,1) = pol_1(vx);
     x = ZX_Q_normalize(x, &L);
     v = gsubst(v, vx, monomial(ginv(L),1,vx));
+    for (i=2; i <= n; i++)
+      if (Q_denom(gel(v,i)) == gen_1) gel(v,i) = monomial(gen_1, i-1, vx);
   }
   return gerepileupto(av, polred(mkvec2(x, v)));
 }
