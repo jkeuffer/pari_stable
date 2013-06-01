@@ -80,9 +80,8 @@ Doc:
  (without actually needing to find those primes), or the computation
  exhibits a non-trivial zero divisor, thereby factoring $C$ and
  we go on with the refined factorization. (Note that including a $C$
- such that $C^2$ does not divide $C$ is useless.) It may also happen that
- neither happen, then the computed basis need not generate the maximal order.
- Here is an example:
+ such that $C^2$ does not divide $D$ is useless.) If neither happen, then the
+ computed basis need not generate the maximal order. Here is an example:
  \bprog
  ? B = 10^5;
  ? P = factor(poldisc(T), B)[,1]; \\ primes <= B dividing D + cofactor
