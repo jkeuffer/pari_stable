@@ -260,6 +260,38 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   return gerepileupto(ltop, gmul(den, M));
 }
 
+GEN
+roots_to_disc(GEN L, long prec)
+{
+  GEN V = vandermondeinverseprep(L);
+  V = gabs(gprec_w(V, prec), prec);
+  return divide_conquer_prod(V, mpmul);
+}
+
+/* #r = r1 + r2 */
+GEN
+nfroots_to_roots(GEN r, long r1)
+{
+  long r2 = lg(r)-1-r1;
+  GEN L;
+  if (!r2) L = r;
+  else
+  {
+    long i,j, N = r1+2*r2;
+    L = cgetg(N+1, t_VEC);
+    for (i = 1; i <= r1; i++) gel(L,i) = gel(r,i);
+    for (j = i; j <= N; i++)
+    {
+      gel(L,j++) = gel(r,i);
+      gel(L,j++) = gconj(gel(r,i));
+    }
+  }
+  return L;
+}
+GEN
+nfroots_to_disc(GEN L, long r1, long prec)
+{ return roots_to_disc(nfroots_to_roots(L, r1), prec); }
+
 /* Compute bound for the coefficients of automorphisms.
  * T a ZX, dn a t_INT denominator or NULL */
 GEN
@@ -272,22 +304,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   T = get_nfpol(T, &nf);
   r = nf ? nf_get_roots(nf) : NULL;
   if (nf &&  precision(gel(r, 1)) >= prec)
-  {
-    long r1,r2;
-    nf_get_sign(nf, &r1, &r2);
-    if (!r2) L = r;
-    else
-    {
-      long i,j, N = r1+2*r2;
-      L = cgetg(N + 1, t_VEC);
-      for (i = 1; i <= r1; i++) gel(L,i) = gel(r,i);
-      for (j = i; j <= N; i++)
-      {
-        gel(L,j++) = gel(r,i);
-        gel(L,j++) = gconj(gel(r,i));
-      }
-    }
-  }
+    L = nfroots_to_roots(r, nf_get_r1(nf));
   else
     L = QX_complex_roots(T, prec);
   if (DEBUGLEVEL>=4) timer_printf(&ti,"roots");

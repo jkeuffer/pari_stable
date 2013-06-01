@@ -2076,7 +2076,10 @@ long    galoisisnormal(GEN gal, GEN sub);
 GEN     galoispermtopol(GEN gal, GEN perm);
 GEN     galoissubgroups(GEN G);
 GEN     galoissubfields(GEN G, long flag, long v);
+GEN     nfroots_to_disc(GEN r, long r1, long prec);
+GEN     nfroots_to_roots(GEN r, long r1);
 long    numberofconjugates(GEN T, long pdepart);
+GEN     roots_to_disc(GEN L, long prec);
 GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 
 /* gen1.c */

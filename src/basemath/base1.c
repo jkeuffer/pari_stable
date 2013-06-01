@@ -2000,6 +2000,7 @@ typedef struct {
   GEN u; /* matrix giving fincke-pohst-reduced Zk basis */
   GEN M; /* embeddings of initial (LLL-reduced) Zk basis */
   GEN bound; /* T2 norm of the polynomial defining nf */
+  long expo_best_disc; /* expo(disc(x)), best generator so far */
 } CG_data;
 
 /* characteristic pol of x (given by embeddings) */
@@ -2016,34 +2017,60 @@ static GEN
 get_polchar(CG_data *d, GEN x)
 { return get_pol(d, RgM_RgC_mul(d->ZKembed,x)); }
 
-
-/* return a defining polynomial for Q(alpha), v = embeddings of alpha.
- * Return NULL on failure (low accuracy) */
-static GEN
-try_polmin(pari_sp av, CG_data *d, GEN v)
+/* Choose a canonical polynomial in the pair { z(X), (+/-)z(-X) }.
+ * z a ZX with lc(z) > 0. We want to keep that property, while
+ * ensuring that the leading coeff of the odd (resp. even) part of z is < 0
+ * if deg z is even (resp. odd).
+ * Either leave z alone (return 1) or set z <-- (-1)^deg(z) z(-X). In place. */
+static int
+ZX_canon_neg(GEN z)
 {
-  GEN g = get_pol(d, v);
-  if (!g) { avma = av; return NULL; }
+  long i,s;
+
+  for (i = lg(z)-2; i >= 2; i -= 2)
+  { /* examine the odd (resp. even) part of z if deg(z) even (resp. odd). */
+    s = signe(gel(z,i));
+    if (!s) continue;
+    /* non trivial */
+    if (s < 0) break; /* the condition is already satisfied */
+
+    for (; i>=2; i-=2) gel(z,i) = negi(gel(z,i));
+    return 1;
+  }
+  return 0;
+}
+/* return a defining polynomial for Q(alpha), v = embeddings of alpha.
+ * Return NULL on failure: discriminant too large or non primitive */
+static GEN
+try_polmin(CG_data *d, nfbasic_t *T, GEN v, long flag, GEN *ai)
+{
+  const long best = flag & nf_ABSOLUTE;
+  long ed;
+  pari_sp av = avma;
+  GEN g;
+  if (best)
+  {
+    ed = expo(nfroots_to_disc(v, d->r1, LOWDEFAULTPREC));
+    avma = av; if (d->expo_best_disc < ed) return NULL;
+  }
+  else
+    ed = 0;
+  g = get_pol(d, v);
+  /* accuracy too low, compute algebraically */
+  if (!g) { avma = av; g = ZXQ_charpoly(*ai, T->x, varn(T->x)); }
   (void)ZX_gcd_all(g, ZX_deriv(g), &g);
-  return gerepilecopy(av, g);
-}
-/* defining polynomial for Q(w_k) */
-static GEN
-get_polmin_w(CG_data *d, long k) {
-  pari_sp av = avma;
-  return try_polmin(av, d, gel(d->ZKembed,k));
-}
-/* defining polynomial for Q(w_k+w_l) */
-static GEN
-get_polmin_add2(CG_data *d, long k, long l) {
-  pari_sp av = avma;
-  return try_polmin(av, d, RgV_add(gel(d->ZKembed,k), gel(d->ZKembed,l)));
-}
-/* defining polynomial for Q(w_k-w_l) */
-static GEN
-get_polmin_sub2(CG_data *d, long k, long l) {
-  pari_sp av = avma;
-  return try_polmin(av, d, RgV_sub(gel(d->ZKembed,k), gel(d->ZKembed,l)));
+  if (best && degpol(g) != degpol(T->x)) { avma = av; return NULL; }
+  g = gerepilecopy(av, g);
+  d->expo_best_disc = ed;
+  if (flag & nf_ORIG)
+  {
+    if (ZX_canon_neg(g)) *ai = RgX_neg(*ai);
+    if (!isint1(T->unscale)) *ai = RgX_unscale(*ai, T->unscale);
+  }
+  else
+    (void)ZX_canon_neg(g);
+  if (DEBUGLEVEL>3) err_printf("polred: generator %Ps\n", g);
+  return g;
 }
 
 /* does x generate the correct field ? */
@@ -2095,28 +2122,6 @@ remove_duplicates(GEN P, GEN A)
   avma = av;
 }
 
-/* Choose a canonical polynomial in the pair { z(X), (+/-)z(-X) }.
- * z a ZX with lc(z) > 0. We want to keep that property, while
- * ensuring that the leading coeff of the odd (resp. even) part of z is < 0
- * if deg z is even (resp. odd).
- * Either leave z alone (return 1) or set z <-- (-1)^deg(z) z(-X). In place. */
-static int
-ZX_canon_neg(GEN z)
-{
-  long i,s;
-
-  for (i = lg(z)-2; i >= 2; i -= 2)
-  { /* examine the odd (resp. even) part of z if deg(z) even (resp. odd). */
-    s = signe(gel(z,i));
-    if (!s) continue;
-    /* non trivial */
-    if (s < 0) break; /* the condition is already satisfied */
-
-    for (; i>=2; i-=2) gel(z,i) = negi(gel(z,i));
-    return 1;
-  }
-  return 0;
-}
 static long
 polred_init(nfbasic_t *T, nffp_t *F, CG_data *d)
 {
@@ -2131,21 +2136,11 @@ polred_init(nfbasic_t *T, nffp_t *F, CG_data *d)
   prec = chk_gen_prec(n, e);
   get_nf_fp_compo(T, F, ro, 1, prec);
   d->v = varn(T->x);
+  d->expo_best_disc = -1;
+  d->ZKembed = NULL;
+  d->M = NULL;
+  d->u = NULL;
   d->r1= T->r1; return prec;
-}
-static void
-update(GEN *pai, GEN *pch, nfbasic_t *T, long orig)
-{
-  GEN ch = *pch, ai = *pai;
-  if (!ch)
-  { /* accuracy too low, compute algebraically */
-    ch = ZXQ_charpoly(ai, T->x, varn(T->x));
-    (void)ZX_gcd_all(ch, ZX_deriv(ch), &ch);
-  }
-  if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
-  if (DEBUGLEVEL>3) err_printf("polred: generator %Ps\n", ch);
-  if (!isint1(T->unscale) && orig) ai = RgX_unscale(ai, T->unscale);
-  *pch = ch; *pai = ai;
 }
 static GEN
 findmindisc(GEN y, GEN *pa)
@@ -2191,49 +2186,62 @@ filter(GEN y, GEN b, long n)
 }
 
 static GEN
-polred_aux(nfbasic_t *T, GEN *pro, long orig)
-{
-  GEN b, y, x = T->x;
+polred_aux(nfbasic_t *T, GEN *pro, long flag)
+{ /* only keep polynomials of max degree and best discriminant */
+  const long best = flag & nf_ABSOLUTE;
+  const long orig = flag & nf_ORIG;
+  GEN M, b, y, x = T->x;
   long maxi, i, j, k, v = varn(x), n = lg(T->bas)-1;
   nffp_t F;
   CG_data d;
 
+  if (n == 1)
+  {
+    GEN ch = deg1pol_shallow(gen_1, gen_m1, v);
+    return orig? mkmat2(mkcol(ch),mkcol(gen_1)): mkvec(ch);
+  }
+
   (void)polred_init(T, &F, &d);
   *pro = F.ro;
-  d.ZKembed = F.M;
+  M = F.M;
+  if (best)
+  {
+    if (!T->dx) T->dx = ZX_disc(T->x);
+    d.expo_best_disc = expi(T->dx);
+  }
 
   /* n + 2 sum_{1 <= i <= n} n-i = n + n(n-1) = n*n */
   y = cgetg(n*n + 1, t_VEC);
   b = cgetg(n*n + 1, t_COL);
-  /* i = 1 */
-  gel(y,1) = deg1pol_shallow(gen_1, gen_m1, v);
-  gel(b,1) = gen_1;
-  for (i = k = 2; i <= n; i++)
+  k = 1;
+  if (!best)
+  {
+    GEN ch = deg1pol_shallow(gen_1, gen_m1, v);
+    gel(y,1) = ch; gel(b,1) = gen_1; k++;
+  }
+  for (i = 2; i <= n; i++)
   {
     GEN ch, ai;
     ai = gel(T->bas,i);
-    ch = get_polmin_w(&d, i);
-    update(&ai, &ch, T, orig);
-    gel(y,k) = ch;
-    gel(b,k) = ai; k++;
+    ch = try_polmin(&d, T, gel(M,i), flag, &ai);
+    if (ch) { gel(y,k) = ch; gel(b,k) = ai; k++; }
   }
-  k = i;
   maxi = minss(n, 3);
   for (i = 1; i <= maxi; i++)
     for (j = i+1; j <= n; j++)
     {
-      GEN ch, ai;
+      GEN ch, ai, v;
       ai = gadd(gel(T->bas,i), gel(T->bas,j));
-      ch = get_polmin_add2(&d, i, j);
-      update(&ai, &ch, T, orig);
-      gel(y,k) = ch;
-      gel(b,k) = ai; k++;
+      v = RgV_add(gel(M,i), gel(M,j));
+      /* defining polynomial for Q(w_i+w_j) */
+      ch = try_polmin(&d, T, v, flag, &ai);
+      if (ch) { gel(y,k) = ch; gel(b,k) = ai; k++; }
 
       ai = gsub(gel(T->bas,i), gel(T->bas,j));
-      ch = get_polmin_sub2(&d, i, j);
-      update(&ai, &ch, T, orig);
-      gel(y,k) = ch;
-      gel(b,k) = ai; k++;
+      v = RgV_sub(gel(M,i), gel(M,j));
+      /* defining polynomial for Q(w_i-w_j) */
+      ch = try_polmin(&d, T, v, flag, &ai);
+      if (ch) { gel(y,k) = ch; gel(b,k) = ai; k++; }
     }
   setlg(y, k);
   setlg(b, k); filter(y, b, n);
@@ -2248,7 +2256,7 @@ Polred(GEN x, long flag, GEN fa)
   pari_sp av = avma;
   GEN ro;
   nfbasic_t T; nfbasic_init(fa? mkvec2(x,fa): x, flag & nf_PARTIALFACT, &T);
-  return gerepilecopy(av, polred_aux(&T, &ro, flag & nf_ORIG));
+  return gerepilecopy(av, polred_aux(&T, &ro, flag));
 }
 
 /* finds "best" polynomial in polred_aux list, defaulting to T->x if none of
@@ -2258,21 +2266,35 @@ Polred(GEN x, long flag, GEN fa)
 static void
 polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
 {
-  GEN a, v, y, x = T->x, b = pol_x(varn(x)); /* default values */
-  long i, l, n = degpol(x);
-  v = polred_aux(T, pro, nf_ORIG);
+  GEN y, x = T->x; /* default value */
+  long i, l;
+  y = polred_aux(T, pro, pb? nf_ORIG|nf_ABSOLUTE: nf_ABSOLUTE);
   *pdx = T->dx;
-  y = gel(v,2);
-  a = gel(v,1); l = lg(a);
-  for (i=1; i<l; i++)
+  if (pb)
   {
-    GEN yi = gel(y,i);
-    pari_sp av = avma;
-    if (degpol(yi) == n && ZX_is_better(yi,x,pdx)) { x = yi; b = gel(a,i); }
-    else avma = av;
+    GEN a, b = pol_x(varn(x));
+    a = gel(y,1); l = lg(a);
+    y = gel(y,2);
+    for (i=1; i<l; i++)
+    {
+      GEN yi = gel(y,i);
+      pari_sp av = avma;
+      if (ZX_is_better(yi,x,pdx)) { x = yi; b = gel(a,i); } else avma = av;
+    }
+    *pb = b;
   }
+  else
+  {
+    l = lg(y);
+    for (i=1; i<l; i++)
+    {
+      GEN yi = gel(y,i);
+      pari_sp av = avma;
+      if (ZX_is_better(yi,x,pdx)) x = yi; else avma = av;
+    }
+  }
+  if (!*pdx) *pdx = ZX_disc(x);
   *px = x;
-  *pb = b;
 }
 GEN
 polredbest(GEN x, long flag)
@@ -2288,9 +2310,10 @@ polredbest(GEN x, long flag)
     case 1: fl = nf_PARTIALFACT|nf_ORIG; break;
   }
   nfbasic_init(x, fl, &T);
-  polredbest_aux(&T, &ro, &x, &dx, &b);
-  if (flag)
+  if (!flag) polredbest_aux(&T, &ro, &x, &dx, NULL);
+  else
   {
+    polredbest_aux(&T, &ro, &x, &dx, &b);
     if (x == T.x)
       b = pol_x(varn(x)); /* no improvement */
     else
@@ -2394,24 +2417,27 @@ static GEN
 chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
 {
   CG_data *d = (CG_data*)chk->data;
-  GEN P, V, S, inv, bound, M;
+  GEN P, V, D, inv, bound, S, M;
   long N = lg(U)-1, r1 = d->r1, r2 = (N-r1)>>1;
   long i, j, prec, firstprim = 0, skipfirst = 0;
   pari_sp av;
 
   d->u = U;
-  d->ZKembed = RgM_mul(d->M, U);
+  d->ZKembed = M = RgM_mul(d->M, U);
 
   av = avma; bound = d->bound;
-  S = cgetg(N+1, t_VECSMALL);
+  D = cgetg(N+1, t_VECSMALL);
   for (i = 1; i <= N; i++)
   {
     pari_sp av2 = avma;
-    P = get_polmin_w(d, i); if (!P) pari_err_PREC("chk_gen_init");
-    S[i] = degpol(P);
-    if (S[i] == N)
+    P = get_pol(d, gel(M,i));
+    if (!P) pari_err_PREC("chk_gen_init");
+    (void)ZX_gcd_all(P, ZX_deriv(P), &P);
+    P = gerepilecopy(av2, P);
+    D[i] = degpol(P);
+    if (D[i] == N)
     { /* primitive element */
-      GEN B = T2_from_embed(gel(d->ZKembed,i), r1);
+      GEN B = T2_from_embed(gel(M,i), r1);
       if (!firstprim) firstprim = i; /* index of first primitive element */
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
       if (gcmp(B,bound) < 0) bound = gerepileuptoleaf(av2, B);
@@ -2421,70 +2447,72 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: subfield %Ps\n",P);
       if (firstprim)
       { /* cycle basis vectors so that primitive elements come last */
-        GEN u = d->u, e = d->ZKembed;
+        GEN u = d->u, e = M;
         GEN te = gel(e,i), tu = gel(u,i), tR = gel(R,i);
-        long tS = S[i];
+        long tS = D[i];
         for (j = i; j > firstprim; j--)
         {
           u[j] = u[j-1];
           e[j] = e[j-1];
           R[j] = R[j-1];
-          S[j] = S[j-1];
+          D[j] = D[j-1];
         }
         gel(u,firstprim) = tu;
         gel(e,firstprim) = te;
         gel(R,firstprim) = tR;
-        S[firstprim] = tS; firstprim++;
+        D[firstprim] = tS; firstprim++;
       }
     }
   }
   if (!firstprim)
   { /* try (a little) to find primitive elements to improve bound */
-    GEN x = cgetg(N+1, t_VECSMALL), e, B;
+    GEN x = cgetg(N+1, t_VECSMALL);
     if (DEBUGLEVEL>1)
       err_printf("chk_gen_init: difficult field, trying random elements\n");
     for (i = 0; i < 10; i++)
     {
+      GEN e, B;
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
-      e = RgM_zc_mul(d->ZKembed, x);
+      e = RgM_zc_mul(M, x);
+      B = T2_from_embed(e, r1);
+      if (gcmp(B,bound) >= 0) continue;
       P = get_pol(d, e); if (!P) pari_err_PREC( "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
-      B = T2_from_embed(e, r1);
-      if (gcmp(B,bound) < 0) bound = B ;
+      bound = B ;
     }
   }
 
   if (firstprim != 1)
   {
-    inv = ginv( split_realimag(d->ZKembed, r1, r2) ); /*TODO: use QR?*/
+    inv = ginv( split_realimag(M, r1, r2) ); /*TODO: use QR?*/
     V = gel(inv,1);
     for (i = 2; i <= r1+r2; i++) V = gadd(V, gel(inv,i));
     /* V corresponds to 1_Z */
     V = grndtoi(V, &j);
     if (j > -5) pari_err_BUG("precision too low in chk_gen_init");
-    M = mkmat(V); /* 1 */
+    S = mkmat(V); /* 1 */
 
     V = cgetg(N+1, t_VEC);
     for (i = 1; i <= N; i++,skipfirst++)
-    { /* M = Q-basis of subfield generated by nf.zk[1..i-1] */
+    { /* S = Q-basis of subfield generated by nf.zk[1..i-1] */
       GEN Mx, M2;
-      long j, k, h, rkM, dP = S[i];
+      long j, k, h, rkM, dP = D[i];
 
       if (dP == N) break; /* primitive */
-      Mx = set_mulid(V, d->ZKembed, inv, r1, r2, N, i);
+      Mx = set_mulid(V, M, inv, r1, r2, N, i);
       if (!Mx) break; /* prec. problem. Stop */
       if (dP == 1) continue;
-      rkM = lg(M)-1;
-      M2 = cgetg(N+1, t_MAT); /* we will add to M the elts of M2 */
+      rkM = lg(S)-1;
+      M2 = cgetg(N+1, t_MAT); /* we will add to S the elts of M2 */
       gel(M2,1) = col_ei(N, i); /* nf.zk[i] */
       k = 2;
       for (h = 1; h < dP; h++)
       {
-        long r; /* add to M2 the elts of M * nf.zk[i]  */
-        for (j = 1; j <= rkM; j++) gel(M2,k++) = ZM_ZC_mul(Mx, gel(M,j));
+        long r; /* add to M2 the elts of S * nf.zk[i]  */
+        for (j = 1; j <= rkM; j++) gel(M2,k++) = ZM_ZC_mul(Mx, gel(S,j));
         setlg(M2, k); k = 1;
-        M = ZM_image_shallow(shallowconcat(M,M2), &r);
+        S = ZM_image_shallow(shallowconcat(S,M2), &r);
         if (r == rkM) break;
         if (r > rkM)
         {
@@ -2506,7 +2534,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   if (DEBUGLEVEL)
     err_printf("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
   if (prec > d->prec) pari_err_BUG("polredabs (precision problem)");
-  if (prec < d->prec) d->ZKembed = gprec_w(d->ZKembed, prec);
+  if (prec < d->prec) d->ZKembed = gprec_w(M, prec);
   return bound;
 }
 
