@@ -300,7 +300,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
     if (overflow)
     {
       z[1] = 1; /* stops since z[1] != 0 */
-      for (;;) { z[i] = y[i]+1; if (z[i--]) break; }
+      for (;;) { z[i] = (ulong) y[i]+1; if (z[i--]) break; }
       if (i <= 0)
       {
         shift_right(z,z, 2,lz, 1,1);
@@ -328,7 +328,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
     else        z[i] = subll(y[i], x[j--]);
     for (i--; j>=2; i--) z[i] = subllx(y[i], x[j--]);
     if (overflow) /* stops since y[1] != 0 */
-      for (;;) { z[i] = y[i]-1; if (y[i--]) break; }
+      for (;;) { z[i] = (ulong) y[i]-1; if (y[i--]) break; }
     for (; i>=2; i--) z[i] = y[i];
     sx = sy;
   }
@@ -363,7 +363,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
       if ((last<<j) & HIGHBIT)
       { /* round up */
         i = lz-1;
-        while (++z[i] == 0 && i > 1) i--;
+        while (++((ulong*)z)[i] == 0 && i > 1) i--;
         if (i == 1) { ez++; z[2] = (long)HIGHBIT; }
       }
     }
