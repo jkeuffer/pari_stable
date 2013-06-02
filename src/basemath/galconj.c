@@ -646,9 +646,9 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
         mael(Cd,h,j) = polheadlong(r,1,gl->Q);
         avma = av3;
       }
-      cache[j] = cache[j+1]+mael(Cd,h,j);
+      uel(cache,j) = uel(cache,j+1)+umael(Cd,h,j);
     }
-    if (headlongisint(cache[1],n))
+    if (headlongisint(uel(cache,1),n))
     {
       long ZZ = Z;
       for (j = 1; j < m; j++) ZZ += polheadlong(gmael(C,SG[pf[j]],j),2,gl->Q);
@@ -754,8 +754,8 @@ galois_test_perm(struct galois_test *td, GEN pf)
     GEN PW = gel(td->PV, ord);
     if (PW)
     {
-      long Z = mael(PW,1,pf[1]);
-      for (j = 2; j <= n; j++) Z += mael(PW,j,pf[j]);
+      ulong Z = umael(PW,1,pf[1]);
+      for (j = 2; j <= n; j++) Z += umael(PW,j,pf[j]);
       if (!headlongisint(Z,n)) break;
     } else
     {
@@ -799,7 +799,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 {
   pari_sp av, avm = avma;
   long a, b, c, d, n, p1, p2, p3, p4, p5, p6, l1, l2, N1, N2, R1;
-  long V, i, j, cx, hop = 0, start = 0;
+  long i, j, cx, hop = 0, start = 0;
   GEN pf, ar, G, W, NN, NQ;
   pari_timer ti;
   if (DEBUGLEVEL >= 1) timer_start(&ti);
@@ -847,23 +847,24 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
       /* intheadlong test: overflow in + is OK, we compute mod 2^BIL */
       for (p1 = i+1, p5 = p1%d - 1 ; p1 >= 1; p1--, p5--) /* p5 = (p1%d) - 1 */
       {
+        ulong V = 0;
         if (p5 == - 1) { p5 = d - 1; p6 = p1 + 1 - d; } else p6 = p1 + 1;
         p4 = p5 ? x[p1-1] : 0;
         V = 0;
         for (p2 = 1+p4, p3 = 1 + x[p1]; p2 <= b; p2++)
         {
-          V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
+          V += umael(W,mael(G,p6,p3),mael(G,p1,p2));
           p3 += s; if (p3 > b) p3 -= b;
         }
         p3 = 1 + x[p1] - s; if (p3 <= 0) p3 += b;
         for (p2 = p4; p2 >= 1; p2--)
         {
-          V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
+          V += umael(W,mael(G,p6,p3),mael(G,p1,p2));
           p3 -= s; if (p3 <= 0) p3 += b;
         }
         ar[p1] = ar[p1+1] + V;
       }
-      if (!headlongisint(ar[1],n)) continue;
+      if (!headlongisint(uel(ar,1),n)) continue;
 
       /* intheadlong succeeds. Full computation */
       for (p1=1, p5=d; p1 <= a; p1++, p5++)
@@ -1336,7 +1337,7 @@ a4galoisgen(struct galois_test *td)
   for (j = 1; j <= n; j++) gel(MT,j) = cgetg(n+1, t_VECSMALL);
   for (j = 1; j <= n; j++)
     for (i = 1; i < j; i++)
-      coeff(MT,i,j) = coeff(MT,j,i) = coeff(mt,i,j)+coeff(mt,j,i);
+      ucoeff(MT,i,j) = ucoeff(MT,j,i) = ucoeff(mt,i,j)+ucoeff(mt,j,i);
   /* MT(i,i) unused */
 
   av2 = avma;
@@ -1344,10 +1345,10 @@ a4galoisgen(struct galois_test *td)
   /* n = 2k = 12; N = (2k)! / (k! * 2^k) = 10395 */
   N = 10395;
   if (DEBUGLEVEL>=4) err_printf("A4GaloisConj:will test %ld permutations\n", N);
-  ar[4] = mael(MT,11,12);
-  ar[3] = ar[4] + mael(MT,9,10);
-  ar[2] = ar[3] + mael(MT,7,8);
-  ar[1] = ar[2] + mael(MT,5,6);
+  uel(ar,4) = umael(MT,11,12);
+  uel(ar,3) = uel(ar,4) + umael(MT,9,10);
+  uel(ar,2) = uel(ar,3) + umael(MT,7,8);
+  uel(ar,1) = uel(ar,2) + umael(MT,5,6);
   for (i = 0; i < N; i++)
   {
     long g;
@@ -1363,33 +1364,33 @@ a4galoisgen(struct galois_test *td)
       case 5:
         x = t[0]; t[0] = t[2]; t[2] = t[1]; t[1] = x;
         lswap(t[4], t[4-a]);
-        ar[1] = ar[2] + mael(MT,t[4],t[5]);
+        uel(ar,1) = uel(ar,2) + umael(MT,t[4],t[5]);
         break;
       case 7:
         x = t[0]; t[0] = t[4]; t[4] = t[3]; t[3] = t[1]; t[1] = t[2]; t[2] = x;
         lswap(t[6], t[6-a]);
-        ar[2] = ar[3] + mael(MT,t[6],t[7]);
-        ar[1] = ar[2] + mael(MT,t[4],t[5]);
+        uel(ar,2) = uel(ar,3) + umael(MT,t[6],t[7]);
+        uel(ar,1) = uel(ar,2) + umael(MT,t[4],t[5]);
         break;
       case 9:
         x = t[0]; t[0] = t[6]; t[6] = t[5]; t[5] = t[3]; t[3] = x;
         lswap(t[1], t[4]);
         lswap(t[8], t[8-a]);
-        ar[3] = ar[4] + mael(MT,t[8],t[9]);
-        ar[2] = ar[3] + mael(MT,t[6],t[7]);
-        ar[1] = ar[2] + mael(MT,t[4],t[5]);
+        uel(ar,3) = uel(ar,4) + umael(MT,t[8],t[9]);
+        uel(ar,2) = uel(ar,3) + umael(MT,t[6],t[7]);
+        uel(ar,1) = uel(ar,2) + umael(MT,t[4],t[5]);
         break;
       case 11:
         x = t[0]; t[0] = t[8]; t[8] = t[7]; t[7] = t[5]; t[5] = t[1];
         t[1] = t[6]; t[6] = t[3]; t[3] = t[2]; t[2] = t[4]; t[4] = x;
         lswap(t[10], t[10-a]);
-        ar[4] = mael(MT,t[10],t[11]);
-        ar[3] = ar[4] + mael(MT,t[8],t[9]);
-        ar[2] = ar[3] + mael(MT,t[6],t[7]);
-        ar[1] = ar[2] + mael(MT,t[4],t[5]);
+        uel(ar,4) = umael(MT,t[10],t[11]);
+        uel(ar,3) = uel(ar,4) + umael(MT,t[8],t[9]);
+        uel(ar,2) = uel(ar,3) + umael(MT,t[6],t[7]);
+        uel(ar,1) = uel(ar,2) + umael(MT,t[4],t[5]);
       }
     }
-    g = ar[1]+mael(MT,t[0],t[1])+mael(MT,t[2],t[3]);
+    g = uel(ar,1)+umael(MT,t[0],t[1])+umael(MT,t[2],t[3]);
     if (headlongisint(g,n))
     {
       for (k = 0; k < n; k += 2)
@@ -1417,7 +1418,7 @@ a4galoisgen(struct galois_test *td)
   }
   for (i = 0; i < N; i++)
   {
-    long g = 0;
+    ulong g = 0;
     if (i)
     {
       long a, x = i, y = -2;
@@ -1485,7 +1486,7 @@ a4galoisgen(struct galois_test *td)
     pfv[O1[4]] = O2[2+j];
     for (i = 0; i < 4; i++)
     {
-      long g = 0;
+      ulong g = 0;
       switch (i)
       {
       case 0: break;
