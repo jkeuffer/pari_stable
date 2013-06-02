@@ -66,8 +66,7 @@ update_fact(GEN d, GEN f)
   GEN P;
   switch (typ(f))
   {
-    case t_INT: return f;
-    case t_VEC: case t_COL: P = f; break;
+    case t_INT: case t_VEC: case t_COL: return f;
     case t_MAT:
       if (lg(f) == 3) { P = gel(f,1); break; }
     /*fall through*/
@@ -77,19 +76,32 @@ update_fact(GEN d, GEN f)
   }
   return fact_from_factors(d, P, 1);
 }
-static GEN
-ZX_Q_normalize_fact(GEN x, GEN *L, GEN *fa)
-{
-  x = ZX_Q_normalize(x, L);
-  /* x = C x0(t/L); disc x = C^2(d - 1) L^-(d(d-1)) disc(x0), d = deg(x) */
-  if (*fa && !isint1(*L)) *fa = update_fact(ZX_disc(x), *fa);
-  return x;
-}
 
+/* T = C T0(X/L); C = L^d / lt(T0), d = deg(T)
+ * disc T = C^2(d - 1) L^-(d(d-1)) disc T0 = (L^d / lt(T0)^2)^(d-1) disc T0 */
+static GEN
+set_disc(nfmaxord_t *S)
+{
+  GEN l0, L, dT;
+  long d;
+  if (S->dT) return S->dT;
+  if (S->T0 == S->T) return ZX_disc(S->T);
+  d = degpol(S->T0);
+  l0 = leading_term(S->T0);
+  L = S->unscale;
+  if (typ(L) == t_FRAC && absi_cmp(gel(L,1), gel(L,2)) < 0)
+    dT = ZX_disc(S->T); /* more efficient */
+  else
+  {
+    GEN a = gpowgs(gdiv(gpowgs(L, d), sqri(l0)), d-1);
+    dT = gmul(a, ZX_disc(S->T0)); /* more efficient */
+  }
+  return S->dT = dT;
+}
 static void
 nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
 {
-  GEN dT, E, P, fa = NULL;
+  GEN dT, L, E, P, fa = NULL;
   pari_timer t;
   long l, ty = typ(T);
 
@@ -103,8 +115,13 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
   if (degpol(T) <= 0) pari_err_CONSTPOL("nfmaxord");
   RgX_check_ZX(T, "nfmaxord");
   S->T0 = T;
-  S->T = T = ZX_Q_normalize_fact(T, &(S->unscale), &fa);
-  if (fa) {
+  T = ZX_Q_normalize(T, &L);
+  S->unscale = L;
+  S->T = T;
+  S->dT = NULL;
+  if (fa)
+  {
+    if (!isint1(L)) fa = update_fact(set_disc(S), fa);
     switch(typ(fa))
     {
       case t_MAT:
@@ -113,14 +130,14 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
       case t_VEC:
         fa = leafcopy(fa); settyp(fa, t_COL);/*fall through*/
       case t_COL:
-        dT = ZX_disc(T);
+        dT = set_disc(S);
         fa = fact_from_factors(dT, fa, 0);
         break;
 
       case t_INT:
       {
         ulong all = (signe(fa) <= 0)? 1: itou(fa);
-        dT = ZX_disc(T);
+        dT = set_disc(S);
         fa = absi_factor_limit(dT, all);
         break;
       }
@@ -129,11 +146,8 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
     }
     if (!signe(dT)) pari_err_IRREDPOL("nfmaxord",mkvec2(T,fa));
   } else {
-    dT = ZX_disc(T);
-    if (flag & nf_PARTIALFACT)
-      fa = absi_factor_limit(dT, 0);
-    else
-      fa = absi_factor(dT);
+    dT = set_disc(S);
+    fa = (flag & nf_PARTIALFACT)? absi_factor_limit(dT, 0): absi_factor(dT);
   }
   S->dT = dT;
   P = gel(fa,1); l = lg(P);
@@ -635,7 +649,7 @@ static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
 static GEN ZX_Dedekind(GEN F, GEN *pg, GEN p);
 
-/* Warning: data computed for T = ZX_Q_normalize_fact(T0). If S.unscale !=
+/* Warning: data computed for T = ZX_Q_normalize(T0). If S.unscale !=
  * gen_1, caller must take steps to correct the components if it wishes
  * to stick to the original T0 */
 static GEN
