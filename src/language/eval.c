@@ -1138,8 +1138,9 @@ closure_eval(GEN C)
       break;
     case OClocalvar:
       {
-        entree *ep = (entree *)operand;
         long n = pari_stack_new(&s_lvars);
+        entree *ep = (entree *)operand;
+        checkvalue(ep);
         lvars[n] = ep;
         nblvar++;
         pushvalue(ep,gel(st,--sp));
@@ -1147,8 +1148,9 @@ closure_eval(GEN C)
       }
     case OClocalvar0:
       {
-        entree *ep = (entree *)operand;
         long n = pari_stack_new(&s_lvars);
+        entree *ep = (entree *)operand;
+        checkvalue(ep);
         lvars[n] = ep;
         nblvar++;
         zerovalue(ep);
