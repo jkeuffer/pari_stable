@@ -54,7 +54,7 @@ galoisconj1(GEN nf)
   }
   if (v == 0)
   {
-    long w = fetch_user_var("y");
+    long w = fetch_var();
     if (nf) y = gsubst(nf, 0, pol_x(w));
     else { y = leafcopy(x); setvarn(y, w); }
   }
@@ -71,6 +71,7 @@ galoisconj1(GEN nf)
     if (typ(t) == t_POL) setvarn(t, v);
     gel(y,i) = t;
   }
+  if (v == 0) delete_var();
   return gerepileupto(av, y);
 }
 
