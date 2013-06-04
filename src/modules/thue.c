@@ -647,13 +647,14 @@ thueinit(GEN pol, long flag, long prec)
   { /* reducible polynomial */
     GEN P, Q, R, g, f = gcoeff(fa,1,1), E = gcoeff(fa,1,2);
     long e = itos(E);
-    long vy = fetch_user_var("y_");
-    long va = fetch_user_var("a_");
-    long vb = fetch_user_var("b_");
+    long vy = fetch_var();
+    long va = fetch_var();
+    long vb = fetch_var();
     if (e != 1)
     {
       if (lfa == 2) {
         tnf = mkvec2(mkvec3(pol,C,L), mkvec2(thueinit(f, flag, prec), E));
+        delete_var(); delete_var(); delete_var();
         return gerepilecopy(av, tnf);
       }
       P = gpowgs(f,e);
@@ -665,6 +666,7 @@ thueinit(GEN pol, long flag, long prec)
     Q = RgX_Rg_sub(RgX_homogenize(g, vy), pol_x(vb));
     R = polresultant0(P, Q, -1, 0);
     tnf = mkvec2(mkvec3(pol,C,L), mkvec2(mkvecsmall4(degpol(f), e, va,vb),  R));
+    delete_var(); delete_var(); delete_var();
     return gerepilecopy(av, tnf);
   }
 
