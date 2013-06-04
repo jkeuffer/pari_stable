@@ -134,9 +134,3 @@ Misc:
 
 2  a type t_FILE [current: stream re-opened/flushed/closed after every single
    write(): disaster when one wants to write often to the same file]
-
-***************************   TOOLS           ****************************
-
-2  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
-
-2  write a GP scripts profiler
