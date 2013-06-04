@@ -4523,6 +4523,7 @@ wr(const char *s, GEN g, long flag, int addnl)
   print0_file(out, g, flag);
   if (addnl) fputc('\n', out);
   fflush(out);
+  if (fclose(out)) pari_warn(warnfile, "close", t);
 }
 void write0  (const char *s, GEN g) { wr(s, g, f_RAW, 1); }
 void writetex(const char *s, GEN g) { wr(s, g, f_TEX, 1); }
