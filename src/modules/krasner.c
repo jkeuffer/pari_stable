@@ -793,9 +793,10 @@ get_pk(KRASNER_t *data)
    where z is a root of upl defining an unramified extension of Q_p */
 /* See padicfields for the meaning of flag */
 static GEN
-GetRamifiedPol(GEN p, GEN efj, long v, long flag)
+GetRamifiedPol(GEN p, GEN efj, long flag)
 {
   long e = efj[1], f = efj[2], j = efj[3], i, l;
+  const long v = 1;
   GEN L, pols;
   KRASNER_t data;
   pari_sp av = avma;
@@ -907,10 +908,10 @@ possible_efj(GEN p, long m)
 static GEN
 pols_from_efj(pari_sp av, GEN EFJ, GEN p, long flag)
 {
-  long i, l, v = fetch_user_var("y");
+  long i, l;
   GEN L = cgetg_copy(EFJ, &l);
   if (l == 1) { avma = av; return flag == 2? gen_0: cgetg(1, t_VEC); }
-  for (i = 1; i < l; i++) gel(L,i) = GetRamifiedPol(p, gel(EFJ,i), v, flag);
+  for (i = 1; i < l; i++) gel(L,i) = GetRamifiedPol(p, gel(EFJ,i), flag);
   if (flag == 2) return gerepileuptoint(av, ZV_sum(L));
   return gerepilecopy(av, shallowconcat1(L));
 }
