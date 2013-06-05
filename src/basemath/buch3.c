@@ -1160,10 +1160,10 @@ bnfcertify0(GEN bnf, long flag)
   init_bad(&S, nf, bnf_get_gen(bnf));
 
   B = bound_unit_index(bnf, S.fu);
-  if (DEBUGLEVEL>1)
+  if (DEBUGLEVEL)
   {
-    err_printf("\nPHASE 2: are all primes good ?\n\n");
-    err_printf("  Testing primes <= %Ps\n\n", B); err_flush();
+    err_printf("PHASE 2 [UNITS]: are all primes good ?\n");
+    err_printf("  Testing primes <= %Ps\n", B); err_flush();
   }
   bound = itou_or_0(B);
   if (!bound) pari_err_OVERFLOW("bnfcertify [too many primes to check]");

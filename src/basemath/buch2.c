@@ -1280,12 +1280,17 @@ void
 testprimes(GEN bnf, GEN BOUND)
 {
   pari_sp av0 = avma, av;
-  ulong pmax;
+  ulong pmax, count = 0;
   GEN Vbase, fb, p, nf = bnf_get_nf(bnf), dK = nf_get_disc(nf);
   forprime_t S;
   FACT *fact;
   FB_t F;
 
+  if (DEBUGLEVEL)
+  {
+    err_printf("PHASE 1 [CLASS GROUP]: are all primes good ?\n");
+    err_printf("  Testing primes <= %Ps\n", BOUND); err_flush();
+  }
   if (is_bigint(BOUND))
     pari_warn(warner,"Zimmert's bound is large (%Ps), certification will take a long time", BOUND);
   if (!is_pm1(nf_get_index(nf)))
@@ -1307,6 +1312,12 @@ testprimes(GEN bnf, GEN BOUND)
   {
     GEN vP;
     long i, l;
+
+    if (DEBUGLEVEL == 1 && ++count > 1000)
+    {
+      err_printf("passing p = %Ps / %Ps\n", p, BOUND);
+      count = 0;
+    }
 
     avma = av;
     vP = idealprimedec(bnf, p);
