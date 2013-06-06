@@ -2778,7 +2778,7 @@ check_kernel(long N, long prmax, GEN C, GEN M, GEN p, GEN m)
 }
 
 static GEN
-Fp_log_find_ind(GEN a, GEN b, GEN K, long prmax, GEN C, GEN p, GEN m)
+Fp_log_find_ind(GEN a, GEN K, long prmax, GEN C, GEN p, GEN m)
 {
   pari_sp av=avma;
   GEN aa = gen_1;
@@ -2815,7 +2815,6 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   if (!is_pm1(gcdii(m,diviiexact(subis(p,1),m))))
   {
     GEN d = coprime_part(subis(p,1), m);
-    b = Fp_pow(pgener_Fp(p), d, p);
     m = diviiexact(subis(p,1), d);
   }
   nbi = uprimepi(bnd);
@@ -2859,9 +2858,9 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   r.rel = gerepileupto(av2, r.rel);
   K = check_kernel(nbrow, r.prmax, C, r.rel, p, m);
   if (DEBUGLEVEL) timer_start(&ti);
-  Ao = Fp_log_find_ind(a, b, K, r.prmax, C, p, m);
+  Ao = Fp_log_find_ind(a, K, r.prmax, C, p, m);
   if (DEBUGLEVEL) timer_printf(&ti," log element");
-  Bo = Fp_log_find_ind(b, b, K, r.prmax, C, p, m);
+  Bo = Fp_log_find_ind(b, K, r.prmax, C, p, m);
   if (DEBUGLEVEL) timer_printf(&ti," log generator");
   d = gcdii(Ao,Bo);
   l = Fp_div(diviiexact(Ao, d) ,diviiexact(Bo, d), m);
