@@ -215,20 +215,41 @@ parse_interval(GEN a, long *amin, long *amax)
 void
 forpart_init(forpart_t *T, long k, GEN abound, GEN nbound)
 {
-  long n;
-  T->amin=1; T->nmin=1;
+
+  /* bound on coefficients */
+  T->amin=1;
   if (abound) parse_interval(abound,&T->amin,&T->amax);
   else T->amax = k;
-  if (T->amax<=0) T->amax = k;
+  /* strip leading zeros ? */
+  T->strip = (T->amin > 0) ? 1 : 0;
+  /* bound on number of non-zero coefficients */
+  T->nmin=0;
+  if (nbound) parse_interval(nbound,&T->nmin,&T->nmax);
+  else T->nmax = k;
 
-  T->strip = (T->amin > 0) ? 1 : 0; /* remove leading zeros */
+  /* non empty if nmin*amin <= k <= amax*nmax */
+  if ( T->amin*T->nmin > k || k > T->amax * T->nmax )
+  {
+    T->nmin = T->nmax = 0;
+  }
+  else
+  {
+    /* to reach nmin one must have k <= nmin*amax, otherwise increase nmin */
+    if ( T->nmin * T->amax < k )
+      T->nmin = 1 + (k - 1) / T->amax; /* ceil( k/tmax ) */
+    /* decrease nmax (if strip): k <= amin*nmax */
+    if (T->strip && T->nmax > k/T->amin)
+      T->nmax = k / T->amin; /* strip implies amin>0 */ /* fixme: take ceil( ) */
+    /* no need to change amin */
+    /* decrease amax if amax + (nmin-1)*amin > k  */
+    if ( T->amax + (T->nmin-1)* T->amin > k )
+      T->amax = k - (T->nmin-1)* T->amin;
+  }
 
-  if (nbound) parse_interval(nbound,&T->nmin,&n);
-  else n = k;
-  if (T->strip && n>k/T->amin)
-    n=k/T->amin; /* strip implies amin>0 */
+  if ( T->amax < T->amin )
+    T->nmin = T->nmax = 0;
 
-  T->v = zero_zv(n);
+  T->v = zero_zv(T->nmax); /* partitions will be of length <= nmax */
   T->k = k;
 }
 
@@ -237,18 +258,77 @@ forpart_next(forpart_t *T)
 {
   GEN v = T->v;
   long n = lg(v)-1;
+  long i, s, a, k, vi, vn;
+
+  if (n>0 && v[n])
+  {
+    /* find index to increase: i s.t. v[i+1],...v[n] is central a,..a,a+1,..a+1
+       keep s = v[i] + v[i+1] + ... + v[n] */
+    s = a = v[n];
+    for(i = n-1; i>0 && v[i]+1 >= a; s += v[i--]);
+    if (i == 0) {
+      /* v is central [ a, a, .. a, a+1, .. a+1 ] */
+      if ((n+1) * T->amin > s || n == T->nmax) return NULL;
+      i = 1; n++;
+      setlg(v, n+1);
+      vi = T->amin;
+    } else {
+      s += v[i];
+      vi = v[i]+1;
+    }
+  } else {
+    /* init v */
+    s = T->k;
+    if (T->amin == 0) T->amin = 1;
+    if (T->strip) { n = T->nmin; setlg(T->v, n+1); }
+    if (s==0)
+    {
+      if (n==0 && T->nmin==0) {T->nmin++; return v;}
+      return NULL;
+    }
+    if (n==0) return NULL;
+    vi = T->amin;
+    i = T->strip ? 1 : n + 1 - T->nmin; /* first non-zero index */
+  }
+  /* now fill [ v[i],... v[n] ] with s, start at vi */
+  vn = s - (n-i)*vi; /* expected value for v[n] */
+  if (T->amax && vn > T->amax)
+  {
+    /* do not exceed amax */
+    long ai, q, r;
+    vn -= vi;
+    ai = T->amax - vi;
+    q = vn / ai; /* number of nmax */
+    r = vn % ai; /* value before nmax */
+    /* fill [ v[i],... v[n] ] as [ vi,... vi, vi+r, amax,... amax ] */
+    while ( q-- ) v[n--] = T->amax;
+    if ( n >= i ) v[n--] = vi + r;
+    while ( n >= i ) v[n--] = vi;
+  } else {
+    /* fill as [ v[i], ... v[i], vn ] */
+    for ( k=i; k<n; v[k++] = vi );
+    v[n] = vn;
+  }
+  return v;
+}
+
+GEN
+forpart_prev(forpart_t *T)
+{
+  GEN v = T->v;
+  long n = lg(v)-1;
   long j, ni, q, r;
   long i, s;
   if (n>0 && v[n])
   {
-    /* find index to decrease */
+    /* find index to decrease: start of last constant sequence, excluding v[n] */
     i = n-1; s = v[n];
     while (i>1 && (v[i-1]==v[i] || v[i+1]==T->amax))
       s+= v[i--];
-    /* amax condition */
-    if ( v[i+1] == T->amax ) return NULL;     /* above amax */
-    /* amin condition: stop if below except if strip & try to remove */
     if (!i) return NULL;
+    /* amax condition: cannot decrease i if maximal on the right */
+    if ( v[i+1] == T->amax ) return NULL;
+    /* amin condition: stop if below except if strip & try to remove */
     if (v[i] == T->amin) {
       if (!T->strip) return NULL;
       s += v[i]; v[i] = 0;
@@ -276,7 +356,7 @@ forpart_next(forpart_t *T)
     }
     if (n*T->amax < s || s < T->nmin*T->amin) return NULL;
   }
-  /* set minimal partition of sum s starting from index i */
+  /* set minimal partition of sum s starting from index i+1 */
   ni = n-i;
   q = s / ni;
   r = s % ni;

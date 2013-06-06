@@ -26,6 +26,6 @@ Doc: returns vector of partitions of the integer $k$ (negative values return
  A partition is given by a \typ{VECSMALL}:
  \bprog
  ? partitions(4, 2)
- %1 = [Vecsmall([1, 1, 1, 1]), Vecsmall([1, 1, 2]), Vecsmall([2, 2])]
+ %1 = [Vecsmall([2, 2]), Vecsmall([1, 1, 2]), Vecsmall([1, 1, 1, 1])]
  @eprog\noindent
  correspond to $2+2$, $1+1+2$, $1+1+1+1$.

@@ -51,7 +51,7 @@ typedef struct {
 typedef struct
 {
   long k;
-  long amax, amin, nmin, strip;
+  long amax, amin, nmin, nmax, strip;
   GEN v;
 } forpart_t;
 
