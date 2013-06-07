@@ -605,13 +605,39 @@ Flx_canonlift(GEN P, long n, ulong p)
          gen_ZpX_Newton(Flx_to_ZX(P),utoi(p), n, &p, _can5_iter, _can5_invd);
 }
 
+/* assume a and n  are coprime */
+static GEN
+RgX_circular_shallow(GEN P, long a, long n)
+{
+  long i, l = lgpol(P);
+  GEN Q = cgetg(2+n,t_POL);
+  Q[1] = P[1];
+  for(i=0; i<l; i++)
+    gel(Q,2+(i*a)%n) = gel(P,2+i);
+  for(   ; i<n; i++)
+    gel(Q,2+(i*a)%n) = gen_0;
+  return normalizepol_lg(Q,2+n);
+}
+
+static GEN
+ZpXQ_frob_cyc(GEN x, GEN T, GEN q, ulong p)
+{
+  long n = get_FpX_degree(T);
+  return FpX_rem(RgX_circular_shallow(x,p,n+1), T, q);
+}
+
 static GEN
 ZpXQ_frob(GEN x, GEN Xm, GEN T, GEN q, ulong p)
 {
-  long n = get_FpX_degree(T);
-  GEN V = RgX_blocks(RgX_inflate(x, p), n, p);
-  GEN W = ZXV_dotproduct(V, Xm);
-  return FpX_rem(W, T, q);
+  if (lg(Xm)==1)
+    return ZpXQ_frob_cyc(x, T, q, p);
+  else
+  {
+    long n = get_FpX_degree(T);
+    GEN V = RgX_blocks(RgX_inflate(x, p), n, p);
+    GEN W = ZXV_dotproduct(V, Xm);
+    return FpX_rem(W, T, q);
+  }
 }
 
 struct _lift_lin
@@ -729,13 +755,56 @@ getc2(GEN act, GEN X, GEN T, GEN q, ulong p, long N)
   return FpXQ_mul(P,ZpXQ_inv(Q,T,utoi(p),N),T,q);
 }
 
+struct _ZpXQ_norm
+{
+  long n;
+  GEN T, p;
+};
+
+static GEN
+ZpXQ_norm_mul(void *E, GEN x, GEN y)
+{
+  struct _ZpXQ_norm *D = (struct _ZpXQ_norm*)E;
+  GEN P = gel(x,1), Q = gel(y,1);
+  long a = mael(x,2,1), b = mael(y,2,1);
+  retmkvec2(FpXQ_mul(P,ZpXQ_frob_cyc(Q, D->T, D->p, a), D->T, D->p),
+            mkvecsmall((a*b)%D->n));
+}
+
+static GEN
+ZpXQ_norm_sqr(void *E, GEN x)
+{
+  return ZpXQ_norm_mul(E, x, x);
+}
+
+/* Assume T = Phi_(n) and n prime */
+GEN
+ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p, long e)
+{
+  GEN z;
+  struct _ZpXQ_norm D;
+  long d = get_FpX_degree(T);
+  D.T = T; D.p = q; D.n = d+1;
+  if (d==1) return ZX_copy(x);
+  z = mkvec2(x,mkvecsmall(p[2]));
+  z = gen_powu(z,d,(void*)&D,ZpXQ_norm_sqr,ZpXQ_norm_mul);
+  return gmael(z,1,2);
+}
+
+/* Assume T = Phi_(n) and n prime */
+static GEN
+ZpXQ_sqrtnorm_pcyc(GEN x, GEN T, GEN q, GEN p, long e)
+{
+  GEN z = ZpXQ_norm_pcyc(x, T, q, p, e);
+  return Zp_sqrtlift(z,Fp_sqrt(z,p),p,e);
+}
+
 /* Assume a = 1 [p], return the square root of the norm */
 static GEN
-ZpXQ_sqrtnorm(GEN a, GEN T, GEN p, long e)
+ZpXQ_sqrtnorm(GEN a, GEN T, GEN q, GEN p, long e)
 {
-  GEN pe = powiu(p,e);
-  GEN s = Fp_div(FpXQ_trace(ZpXQ_log(a, T, p, e), T, pe), gen_2, pe);
-  return modii(gel(Qp_exp(cvtop(s, p, e-1)),4),pe);
+  GEN s = Fp_div(FpXQ_trace(ZpXQ_log(a, T, p, e), T, q), gen_2, q);
+  return modii(gel(Qp_exp(cvtop(s, p, e-1)),4), q);
 }
 
 struct _teich_lin
@@ -886,6 +955,18 @@ get_Kohel_polynomials(ulong p, GEN *act, long *dj)
   return NULL;
 }
 
+long
+zx_is_pcyc(GEN T)
+{
+  long i, n = degpol(T);
+  if (!uisprime(n+1))
+    return 0;
+  for (i=0; i<=n; i++)
+    if (T[i+2]!=1UL)
+      return 0;
+  return 1;
+}
+
 static GEN
 Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
 {
@@ -897,14 +978,23 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   GEN S1, sqx;
   GEN Nc2, Np;
   GEN act, phi = get_Kohel_polynomials(p, &act, &dj);
+  long ispcyc = zx_is_pcyc(get_Flx_mod(T));
   timer_start(&ti);
-  T2 = Flx_canonlift(get_Flx_mod(T),N,p);
-  if (DEBUGLEVEL) timer_printf(&ti,"Teich");
+  if (!ispcyc)
+  {
+    T2 = Flx_canonlift(get_Flx_mod(T),N,p);
+    if (DEBUGLEVEL) timer_printf(&ti,"Teich");
+  } else
+    T2 = Flx_to_ZX(get_Flx_mod(T));
   T2 = FpX_get_red(T2, q); T = ZXT_to_FlxT(T2, p);
   av2 = avma;
   if (DEBUGLEVEL) timer_printf(&ti,"Barrett");
-  Xm = FpXQ_powers(monomial(gen_1,n,get_FpX_var(T2)),p-1,T2,q);
-  if (DEBUGLEVEL) timer_printf(&ti,"Xm");
+  if (!ispcyc)
+  {
+    Xm = FpXQ_powers(monomial(gen_1,n,get_FpX_var(T2)),p-1,T2,q);
+    if (DEBUGLEVEL) timer_printf(&ti,"Xm");
+  } else
+    Xm = cgetg(1,t_VEC);
   s1 = Flxq_inv(Flx_Fl_add(Flxq_ellj(a4,a6,T,p),dj, p),T,p);
   lr = Flxq_lroot(polx_Flx(get_Flx_var(T)), T, p);
   sqx = Flxq_powers(lr, p-1, T, p);
@@ -921,7 +1011,7 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   }
   c2 = gerepileupto(av2, c2);
   if (DEBUGLEVEL) timer_printf(&ti,"tc2");
-  Nc2 = ZpXQ_sqrtnorm(c2,T2,utoi(p),N);
+  Nc2 = (ispcyc? ZpXQ_sqrtnorm_pcyc: ZpXQ_sqrtnorm)(c2, T2, q, utoi(p), N);
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
   Np = get_norm(a4,a6,T,p,N);
   t = Fp_center(Fp_mul(Nc2,Np,q),q,shifti(q,-1));

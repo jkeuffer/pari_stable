@@ -543,6 +543,11 @@ void    pari_close_files(void);
 int     popinfile(void);
 pariFILE* try_pipe(const char *cmd, int flag);
 
+/* FlxqE.c */
+
+GEN     ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p, long e);
+long    zx_is_pcyc(GEN T);
+
 /* galconj.c */
 
 GEN     galoiscosets(GEN O, GEN perm);

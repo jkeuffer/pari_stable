@@ -660,6 +660,17 @@ solve_AGM_eqn(GEN x0, long n, GEN T, GEN sqx)
   return gen_ZpX_Newton(x0, gen_2, n, &F, _lift_iter, _lift_invd);
 }
 
+GEN ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p, long e);
+long zx_is_pcyc(GEN T);
+
+static GEN
+Z2XQ_invnorm_pcyc(GEN a, GEN T, long e)
+{
+  GEN q = int2n(e);
+  GEN z = ZpXQ_norm_pcyc(a, T, q, gen_2, e);
+  return Fp_inv(z, q);
+}
+
 /* Assume a = 1 [4] */
 static GEN
 Z2XQ_invnorm(GEN a, GEN T, long e)
@@ -688,8 +699,9 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
   pari_sp ltop = avma;
   pari_timer ti;
   GEN T, sqx;
-  GEN x, t;
+  GEN x, x2, t;
   long n = F2x_degree(T2), N = ((n + 1)>>1) + 2;
+  long ispcyc;
   if (n==1) return gen_m1;
   if (n==2) return F2x_degree(a6) ? gen_1 : stoi(-3);
   if (n==3) return F2x_degree(a6) ? (F2xq_trace(a6,T2) ?  stoi(-3): gen_1)
@@ -697,13 +709,15 @@ F2xq_elltrace_Harley(GEN a6, GEN T2)
   timer_start(&ti);
   sqx = mkvec2(F2xq_sqrt(polx_F2x(T2[1]),T2), T2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Sqrtx");
-  T = F2x_canonlift(T2, N-2);
+  ispcyc = zx_is_pcyc(F2x_to_Flx(T2));
+  T = ispcyc? F2x_to_ZX(T2): F2x_canonlift(T2, N-2);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Teich");
   T = FpX_get_red(T, int2n(N));
   if (DEBUGLEVEL>1) timer_printf(&ti,"Barrett");
   x = solve_AGM_eqn(F2x_to_ZX(a6), N-2, T, sqx);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Lift");
-  t = Z2XQ_invnorm(ZX_Z_add_shallow(ZX_shifti(x,2), gen_1), T, N);
+  x2 = ZX_Z_add_shallow(ZX_shifti(x,2), gen_1);
+  t = (ispcyc? Z2XQ_invnorm_pcyc: Z2XQ_invnorm)(x2, T, N);
   if (DEBUGLEVEL>1) timer_printf(&ti,"Norm");
   if (cmpii(sqri(t), int2n(n + 2)) > 0)
     t = subii(t, int2n(N));
