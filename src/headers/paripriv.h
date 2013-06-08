@@ -21,9 +21,6 @@ void hashstr_dbg(hashtable *h);
 /* for qsort */
 typedef int (*QSCOMP)(const void *, const void *);
 
-/* for (ulong*) GENs */
-typedef ulong *uGEN;
-#define ugel(a,i) ((uGEN*)(a))[i]
 #define ucoeff(a,i,j)  (((ulong**)(a))[j][i])
 #define umael(a,i,j)   (((ulong**)(a))[i][j])
 #define uel(a,i)       (((ulong*)(a))[i])
