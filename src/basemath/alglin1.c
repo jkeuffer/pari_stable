@@ -1263,10 +1263,10 @@ get_col(GEN a, GEN b, GEN p, long li)
   return u;
 }
 /* assume 0 <= a[i,j] < p */
-static uGEN
+static GEN
 Fl_get_col_OK(GEN a, uGEN b, long li, ulong p)
 {
-  uGEN u = (uGEN)cgetg(li+1,t_VECSMALL);
+  GEN u = cgetg(li+1,t_VECSMALL);
   ulong m = b[li] % p;
   long i,j;
 
@@ -1276,7 +1276,7 @@ Fl_get_col_OK(GEN a, uGEN b, long li, ulong p)
     m = p - b[i]%p;
     for (j = i+1; j <= li; j++) {
       if (m & HIGHBIT) m %= p;
-      m += ucoeff(a,i,j) * u[j]; /* 0 <= u[j] < p */
+      m += ucoeff(a,i,j) * uel(u,j); /* 0 <= u[j] < p */
     }
     m %= p;
     if (m) m = ((p-m) * ucoeff(a,i,i)) % p;
@@ -1284,10 +1284,10 @@ Fl_get_col_OK(GEN a, uGEN b, long li, ulong p)
   }
   return u;
 }
-static uGEN
+static GEN
 Fl_get_col(GEN a, uGEN b, long li, ulong p)
 {
-  uGEN u = (uGEN)cgetg(li+1,t_VECSMALL);
+  GEN u = cgetg(li+1,t_VECSMALL);
   ulong m = b[li] % p;
   long i,j;
 
@@ -1695,9 +1695,9 @@ Flm_gauss_sp(GEN a, GEN b, ulong *detp, ulong p)
   }
   u = cgetg(bco+1,t_MAT);
   if (OK_ulong)
-    for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col_OK(a,(uGEN)b[j], aco,p);
+    for (j=1; j<=bco; j++) gel(u,j) = Fl_get_col_OK(a,(uGEN)b[j], aco,p);
   else
-    for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col(a,(uGEN)b[j], aco,p);
+    for (j=1; j<=bco; j++) gel(u,j) = Fl_get_col(a,(uGEN)b[j], aco,p);
   return u;
 }
 
