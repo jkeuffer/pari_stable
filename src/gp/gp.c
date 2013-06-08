@@ -1527,7 +1527,6 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   char buf[MAX_PROMPT_LEN + 24];
   const char *p;
   int res, interactive;
-  BLOCK_EH_START
   F->downcase = (compatible == OLDALL);
   if (b->len > 100000) fix_buffer(b, 100000);
   interactive = is_interactive();
@@ -1538,26 +1537,26 @@ gp_read_line(filtre_t *F, const char *PROMPT)
 
   if (interactive)
   {
+    BLOCK_EH_START
 #ifdef READLINE
     if (GP_DATA->use_readline)
-    {
       res = get_line_from_readline(p, Prompt_cont, F);
-      goto END;
+    else
+#endif
+    {
+      pari_puts(p); pari_flush();
+      res = get_line_from_file(p, F, pari_infile);
     }
-#endif
-    pari_puts(p); pari_flush();
+    BLOCK_EH_END
   }
-  res = get_line_from_file(p, F, pari_infile);
+  else
+    res = get_line_from_file(p, F, pari_infile);
 
-#ifdef READLINE
-END:
-#endif
   if (!disable_color && p != DFT_PROMPT &&
       (gp_colors[c_PROMPT] != c_NONE || gp_colors[c_INPUT] != c_NONE))
   {
     term_color(c_NONE); pari_flush();
   }
-  BLOCK_EH_END
   return res;
 }
 

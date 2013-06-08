@@ -3774,8 +3774,10 @@ path_expand(const char *s)
 void
 strftime_expand(const char *s, char *buf, long max)
 {
+  BLOCK_SIGINT_START
   time_t t = time(NULL);
   (void)strftime(buf,max,s,localtime(&t));
+  BLOCK_SIGINT_END
 }
 #else
 void
