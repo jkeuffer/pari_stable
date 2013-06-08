@@ -230,6 +230,14 @@ kill_buffers_upto_including(Buffer *B)
 /**                                                                **/
 /********************************************************************/
 static int disable_exception_handler = 0;
+#define BLOCK_EH_START                \
+{                                     \
+  int block=disable_exception_handler;\
+  disable_exception_handler = 1;
+
+#define BLOCK_EH_END                \
+  disable_exception_handler = block;\
+}
 static char *Help;
 
 static char *
@@ -251,13 +259,13 @@ hit_return(void)
 {
   int c;
   if (GP_DATA->flags & (gpd_EMACS|gpd_TEXMACS)) return;
-  disable_exception_handler = 1;
+  BLOCK_EH_START
   pari_puts("/*-- (type RETURN to continue) --*/");
   pari_flush();
   /* if called from a readline callback, may be in a funny TTY mode */
   do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r');
   pari_putc('\n');
-  disable_exception_handler = 0;
+  BLOCK_EH_END
 }
 static void
 gp_ask_confirm(const char *s)
@@ -1519,7 +1527,7 @@ gp_read_line(filtre_t *F, const char *PROMPT)
   char buf[MAX_PROMPT_LEN + 24];
   const char *p;
   int res, interactive;
-  disable_exception_handler = 1;
+  BLOCK_EH_START
   F->downcase = (compatible == OLDALL);
   if (b->len > 100000) fix_buffer(b, 100000);
   interactive = is_interactive();
@@ -1549,7 +1557,7 @@ END:
   {
     term_color(c_NONE); pari_flush();
   }
-  disable_exception_handler = 0;
+  BLOCK_EH_END
   return res;
 }
 
