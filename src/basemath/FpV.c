@@ -520,12 +520,12 @@ Flv_dotproduct(GEN x, GEN y, ulong p)
 ulong
 F2v_dotproduct(GEN x0, GEN y0)
 {
-  uGEN x = (uGEN)x0, y = (uGEN)y0;
+  GEN x = x0, y = y0;
   long i, lx = lg(x);
   ulong c;
   if (lx == 2) return 0;
-  c = x[2] & y[2];
-  for (i=3; i<lx; i++) c ^= x[i] & y[i];
+  c = uel(x,2) & uel(y,2);
+  for (i=3; i<lx; i++) c ^= uel(x,i) & uel(y,i);
 #ifdef LONG_IS_64BIT
   c ^= c >> 32;
 #endif

@@ -177,8 +177,8 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
   ulong spa_b, spa_bs2, Sbound;
   GEN lc, lcpol, pa = powiu(p,a), pas2 = shifti(pa,-1);
-  uGEN trace1   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
-  uGEN trace2   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
+  GEN trace1   = cgetg(lfamod+1, t_VECSMALL);
+  GEN trace2   = cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN deg      = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
