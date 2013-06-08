@@ -779,7 +779,7 @@ ZpXQ_norm_sqr(void *E, GEN x)
 
 /* Assume T = Phi_(n) and n prime */
 GEN
-ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p, long e)
+ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p)
 {
   GEN z;
   struct _ZpXQ_norm D;
@@ -795,7 +795,7 @@ ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p, long e)
 static GEN
 ZpXQ_sqrtnorm_pcyc(GEN x, GEN T, GEN q, GEN p, long e)
 {
-  GEN z = ZpXQ_norm_pcyc(x, T, q, p, e);
+  GEN z = ZpXQ_norm_pcyc(x, T, q, p);
   return Zp_sqrtlift(z,Fp_sqrt(z,p),p,e);
 }
 

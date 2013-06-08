@@ -542,7 +542,7 @@ pariFILE* try_pipe(const char *cmd, int flag);
 
 /* FlxqE.c */
 
-GEN     ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p, long e);
+GEN     ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p);
 long    zx_is_pcyc(GEN T);
 
 /* galconj.c */

@@ -660,14 +660,11 @@ solve_AGM_eqn(GEN x0, long n, GEN T, GEN sqx)
   return gen_ZpX_Newton(x0, gen_2, n, &F, _lift_iter, _lift_invd);
 }
 
-GEN ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p, long e);
-long zx_is_pcyc(GEN T);
-
 static GEN
 Z2XQ_invnorm_pcyc(GEN a, GEN T, long e)
 {
   GEN q = int2n(e);
-  GEN z = ZpXQ_norm_pcyc(a, T, q, gen_2, e);
+  GEN z = ZpXQ_norm_pcyc(a, T, q, gen_2);
   return Fp_inv(z, q);
 }
 
