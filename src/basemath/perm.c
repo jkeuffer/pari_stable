@@ -200,6 +200,12 @@ vecvecsmall_sort(GEN x)
 }
 
 GEN
+vecvecsmall_sort_uniq(GEN x)
+{
+  return gen_sort_uniq(x, (void*)&vecsmall_lexcmp, cmp_nodata);
+}
+
+GEN
 vecvecsmall_indexsort(GEN x)
 {
   return gen_indexsort(x, (void*)&vecsmall_lexcmp, cmp_nodata);
