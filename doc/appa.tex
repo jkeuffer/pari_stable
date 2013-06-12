@@ -83,6 +83,11 @@ and the \kbd{perl} and \kbd{gunzip} (or \kbd{zcat}) binaries.
 If anything should have been found and was not, consider that \kbd{Configure}
 failed and follow the instructions in section~3.
 
+The \kbd{Configure} run creates a file \kbd{config.log} in the build
+directory, which contains debugging information --- in particular, all
+messages from compilers ---  that may help diagnose problems. This file
+is erased and recreated from scratch each time \kbd{Configure} is run.
+
 \subsec{Advanced configuration}
 \kbd{Configure} accepts many other flags, and you may use any number of them
 to build quite a complicated configuration command. See \kbd{Configure

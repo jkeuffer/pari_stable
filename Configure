@@ -33,15 +33,6 @@ cd $config_dir
 . ./get_head # do we need head -n # or head -# ?
 . ./version
 echo "Configuring pari-$pari_release_verbose $patchlevel_verbose"
-cat > $TOP/config.log << EOT
-This file contains messages produced while configuring
-  pari-$pari_release $patchlevel_verbose
-to aid debugging if Configure makes a mistake. Command line was
-  > $0 $@
-
-EOT
-exec 5>> $TOP/config.log
-
 . ./get_config_options
 ####################### CONFIGURE - SHELL ###################################
 . ./get_nl # how to get echo without \n ? (for config questions)
@@ -64,6 +55,16 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 
 ####################### CONFIGURE - ARCHITECTURE ############################
 . ./get_archos # arch, osname
+config_log=$TOP/config-$arch-$osname$$.log
+cat > $config_log<< EOT
+This file contains messages produced while configuring
+  pari-$pari_release $patchlevel_verbose
+to aid debugging if Configure makes a mistake. Command line was
+  > $0 $@
+
+EOT
+exec 5>> $config_log
+
 ####################### CONFIGURE - COMPILATION #############################
 # $_cc_list (includes 'optimization'), extraflag
 . ./get_cc
@@ -127,7 +128,6 @@ case "$osname" in
 esac
 ####################### CONFIGURE - CLEANUP #################################
 rm -f gmon.out # created by Configure -pg
-
 ####################### CONFIGURE - SPIT ####################################
 . ./get_tests #_test_list
 # Now spit out the results
@@ -136,6 +136,7 @@ cat << EOT
 EOT
 cd "$TOP"
 if test ! -d $objdir; then mkdir -p $objdir; fi
+rm -f $objdir/config.log; mv $config_log $objdir/config.log
 dflt_conf_file=$objdir/$dflt_conf_file
 
 cat > $dflt_conf_file << EOT
