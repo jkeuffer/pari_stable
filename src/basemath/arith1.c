@@ -733,7 +733,8 @@ Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
     if (!handle_pe(&a, q, L, K, utoipos(pp), e)) { avma = av; return 0; }
     if (stop)
     {
-      if (!handle_pe(&a, q, L, K, q, 1)) { avma = av; return 0; }
+      if (!is_pm1(q))
+        if (!handle_pe(&a, q, L, K, q, 1)) { avma = av; return 0; }
       goto END;
     }
   }

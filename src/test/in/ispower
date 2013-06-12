@@ -64,3 +64,4 @@ v = [Mod(p, p^2*q), Mod(6*p, q*(p*r)^2), Mod(6, p^2*q), Mod(4*p, 8*p^2*q)];
 [if(issquare(a^2,&b), b) | a<-v]
 [if(ispower(a^3,3,&b), b) | a<-v]
 ispower(Mod(2, 7*5^3), 7, &y); y
+issquare(Mod(1,2))
