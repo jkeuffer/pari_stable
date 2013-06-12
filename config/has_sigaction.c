@@ -1,5 +1,5 @@
 #include <signal.h>
-main()
+int main()
 {
   struct sigaction sa, oldsa;
 

@@ -1,4 +1,4 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-main(){ waitpid(-1,NULL,0); }
+int main(){ waitpid(-1,NULL,0); return 0; }

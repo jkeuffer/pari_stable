@@ -36,7 +36,7 @@ case "$arch" in
   arm*)
     exe=$osname-$arch-endian$$
     echo $n "Checking supported ARM kernel: $c"
-    if ($CC $CFLAGS -I../src/kernel/arm kernel.c -o $exe 2>/dev/null); then
+    if ($CC $CFLAGS -I../src/kernel/arm kernel.c -o $exe >&5 2>&1); then
       asmarch=arm;
     else
       asmarch=none;

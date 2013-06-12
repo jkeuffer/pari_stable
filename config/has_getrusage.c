@@ -4,4 +4,4 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
-main(){ struct rusage a; printf("%d",getrusage(RUSAGE_SELF,&a));}
+int main(){ struct rusage a; printf("%d",getrusage(RUSAGE_SELF,&a)); return 0; }

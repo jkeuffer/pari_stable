@@ -31,7 +31,7 @@ else
   RLLIBS="-lreadline"
 fi
 rllibs="$RLLIBS";
-$CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+$CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS >&5 2>&1
 if test ! -r $exe; then # need ncurses ?
   echo ..."Linking failed. Trying with libncurses"
   pth="$with_ncurses_lib $libpth"
@@ -41,7 +41,7 @@ if test ! -r $exe; then # need ncurses ?
   else
     RLLIBS="$rllibs -lncurses"
   fi
-  $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+  $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS >&5 2>&1
 fi
 if test ! -r $exe; then # need termcap ?
   echo ..."Linking failed. Trying with libtermcap"
@@ -52,7 +52,7 @@ if test ! -r $exe; then # need termcap ?
   else
     RLLIBS="$rllibs -ltermcap"
   fi
-  $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
+  $CC $CFLAGS $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS >&5 2>&1
 fi
 
 readline_version=

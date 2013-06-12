@@ -1,2 +1,2 @@
 #include <time.h>
-main(){ struct tm *x; strftime("",1,"",x);}
+int main(){ struct tm *x = NULL; strftime("",1," ",x); return 0; }

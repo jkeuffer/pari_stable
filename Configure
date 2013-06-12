@@ -33,6 +33,15 @@ cd $config_dir
 . ./get_head # do we need head -n # or head -# ?
 . ./version
 echo "Configuring pari-$pari_release_verbose $patchlevel_verbose"
+cat > $TOP/config.log << EOT
+This file contains messages produced while configuring
+  pari-$pari_release $patchlevel_verbose
+to aid debugging if Configure makes a mistake. Command line was
+  > $0 $@
+
+EOT
+exec 5>> $TOP/config.log
+
 . ./get_config_options
 ####################### CONFIGURE - SHELL ###################################
 . ./get_nl # how to get echo without \n ? (for config questions)

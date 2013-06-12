@@ -1,5 +1,5 @@
 exe=$osname-$arch-endian$$
-if ($CC $CFLAGS $extraflag endian.c -o $exe 2>/dev/null); then
+if ($CC $CFLAGS $extraflag endian.c -o $exe >&5 2>&1); then
   doubleformat=`$RUNTEST $exe`;
 else
   echo "***************************************************************"

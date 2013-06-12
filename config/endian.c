@@ -1,5 +1,5 @@
 #include <stdio.h>
-main()
+int main()
 {
   if (sizeof(long) == 4)
   {
@@ -18,4 +18,5 @@ main()
     else
       printf("NOT IEEE (64 bit)\n");
   }
+  return 0;
 }

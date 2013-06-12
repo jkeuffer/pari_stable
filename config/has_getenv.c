@@ -1,2 +1,2 @@
 #include <stdlib.h>
-main(){ (void)getenv(""); }
+int main(){ (void)getenv(""); return 0; }

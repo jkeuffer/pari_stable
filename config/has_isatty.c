@@ -1,2 +1,2 @@
 #include <unistd.h>
-main(){ isatty(0); }
+int main(){ isatty(0); return 0; }
