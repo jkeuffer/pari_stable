@@ -3053,13 +3053,18 @@ would be exhibited in this way, though.) This should be slower than
 \tet{BPSW_psp} for $k\geq 4$ and we would expect it to be less reliable.
 
 \subsec{Iterators over primes}
+
+\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b} initialize an
+iterator $T$ over primes in $[a,b]$; over primes $\geq a$ if $b =
+\kbd{NULL}$. Return $0$ if the range is known to be empty from the start
+(as if $b < a$ or $b < 0$), and return $1$ otherwise.
+
+\fun{GEN}{forprime_next}{forprime_t *T} returns the next prime in the range,
+assuming that $T$ was initialized by \tet{forprime_init}.
+
 \fun{int}{u_forprime_init}{forprime_t *T, ulong a, ulong b}
 
-\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b}
-
 \fun{ulong}{u_forprime_next}{forprime_t *T}
-
-\fun{GEN}{forprime_next}{forprime_t *T}
 
 \fun{void}{u_forprime_restrict}{forprime_t *T, ulong c} let $T$ an iterator
 over primes initialized via \kbd{u\_forprime\_init(\&T, a, b)}, possibly
@@ -3069,6 +3074,16 @@ b$. Restrict the range of primes considered to $[a,c]$.
 \fun{int}{u_forprime_arith_init}{forprime_t *T, ulong a,ulong b, ulong c,ulong q} initialize an iterator over primes in $[a,b]$, congruent to $c$
 modulo $q$. Assume $0 \leq c < q$ and $(c,q) = 1$. Subsequent calls to
 \tet{u_forprime_next} will only return primes congruent to $c$ modulo $q$.
+
+\subsec{Iterators over composite integers}
+
+\fun{int}{forcomposite}{forcomposite_t *T, GEN a, GEN b} initialize an
+iterator $T$ over composite integers in $[a,b]$; over composites $\geq a$ if
+$b = \kbd{NULL}$. Return $0$ if the range is known to be empty from the start
+(as if $b < a$ or $b < 0$), and return $1$ otherwise.
+
+\fun{GEN}{forcomposite_next}{forcomposite_t *T} returns the next composite in
+the range, assuming that $T$ was initialized by \tet{forcomposite_init}.
 
 \subsec{Pseudo-random integers}
 These routine return pseudo-random integers uniformly distributed in some

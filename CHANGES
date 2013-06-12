@@ -32,6 +32,8 @@ BA  3- functions Flm_center, Flv_center, zv_to_Flv, zm_to_Flm, zm_mul,
 BA  4- function minim_raw
     5- function QX_complex_roots
 PMo 6- function forpart for looping over partitions
+    7- [libpari] forcomposite_init / forcomposite_next, reimplement
+       forcomposite() using this iterator
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form

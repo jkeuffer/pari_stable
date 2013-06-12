@@ -523,42 +523,60 @@ forprime(GEN a, GEN b, GEN code)
   pop_lex(1); avma = av;
 }
 
+int
+forcomposite_init(forcomposite_t *C, GEN a, GEN b)
+{
+  pari_sp av = avma;
+  a = gceil(a); if (typ(a)!=t_INT) pari_err_TYPE("forcomposite",a);
+  if (b) {
+    b = gfloor(b);if (typ(b)!=t_INT) pari_err_TYPE("forcomposite",b);
+  }
+  if (signe(a) < 0) pari_err_DOMAIN("forcomposite", "a", "<", gen_0, a);
+  if (cmpiu(a, 4) < 0) a = utoipos(4);
+  if (!forprime_init(&C->T, a,b)) { avma = av; return 0; }
+  C->first = 1;
+  C->n = setloop(a);
+  C->b = b;
+  C->p = NULL; return 1;
+}
+
+GEN
+forcomposite_next(forcomposite_t *C)
+{
+  if (C->first) /* first call ever */
+  {
+    C->first = 0;
+    C->p = forprime_next(&C->T);
+    if (C->p && equalii(C->n, C->p)) incloop(C->n);
+    return C->n;
+  }
+  incloop(C->n);
+  if (C->p)
+  {
+    if (cmpii(C->n, C->p) < 0) return C->n;
+    incloop(C->n);
+    /* n = p+1 */
+    C->p = forprime_next(&C->T); /* nextprime(p) > n */
+    if (C->p) return C->n;
+  }
+  if (!C->b || cmpii(C->n, C->b) <= 0) return C->n;
+  return NULL;
+}
+
 void
 forcomposite(GEN a, GEN b, GEN code)
 {
   pari_sp av = avma;
-  GEN n, p;
-  forprime_t T;
-
-  a = gceil(a);
-  b = gfloor(b);
-  if (!forprime_init(&T, a,b)) { avma = av; return; }
-  if (signe(a) < 0) pari_err_DOMAIN("forcomposite", "a", "<", gen_0, a);
-  if (cmpiu(a, 2) < 0) a = gen_2;
-
-  n = setloop(a);
-
-  push_lex(n,code);
-  while( (p = forprime_next(&T)))
-  {
-    while(cmpii(n, p) < 0)
-    {
-      closure_evalvoid(code); if (loop_break()) break;
-      /* n changed in 'code', complain */
-      if (get_lex(-1) != n)
-        pari_err(e_MISC,"index read-only: was changed to %Ps", get_lex(-1));
-      incloop(n);
-    }
-    incloop(n);
-    /* n = p+1 */
-  }
-  while(cmpii(n, b) <= 0)
+  forcomposite_t T;
+  GEN n;
+  if (!forcomposite_init(&T,a,b)) return;
+  push_lex(T.n,code);
+  while((n = forcomposite_next(&T)))
   {
     closure_evalvoid(code); if (loop_break()) break;
     /* n changed in 'code', complain */
     if (get_lex(-1) != n)
       pari_err(e_MISC,"index read-only: was changed to %Ps", get_lex(-1));
-    incloop(n);
   }
   pop_lex(1); avma = av;
 }

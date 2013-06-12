@@ -47,6 +47,12 @@ typedef struct {
   GEN pp;
 } forprime_t;
 
+typedef struct {
+  int first;
+  GEN b, n, p;
+  forprime_t T;
+} forcomposite_t;
+
 /* Iterate over partitions */
 typedef struct
 {
