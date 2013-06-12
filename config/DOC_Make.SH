@@ -107,10 +107,10 @@ veryclean: clean
 	rm -f paricfg.tex gp.man
 
 .tex.pod:
-	perl gphelp -to_pod \$*.tex > tmp_pod && mv tmp_pod \$*.pod
+	\$(PERL) gphelp -to_pod \$*.tex > tmp_pod && mv tmp_pod \$*.pod
 
 .tex.dumbpod:
-	perl gphelp -to_dumb_pod \$*.tex > tmp_pod && mv tmp_pod \$*.dumbpod
+	\$(PERL) gphelp -to_dumb_pod \$*.tex > tmp_pod && mv tmp_pod \$*.dumbpod
 
 .ipf.inf:
 	ipfc /INF \$*.ipf

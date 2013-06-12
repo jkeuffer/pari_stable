@@ -39,10 +39,10 @@ echo "Configuring pari-$pari_release_verbose $patchlevel_verbose"
 . ./get_PATH
 #  We might need the following :
 echo Looking for some tools first ...
-list='ld zcat gzip ranlib perl'
+_tools_list='ar bison gzip ld perl ranlib zcat'
 pathspace=`echo $PATH | sed -e "s/$dir_sep/ /g" | sed -e 's,\\\\,/,g'`
 
-for file in $list; do
+for file in $_tools_list; do
   x=`./locate $file '' $pathspace`
   eval $file=$x
   case $x in
@@ -143,9 +143,10 @@ for variable in\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1 RT_LIBS DL_LIBS LIBS\
   dir_sep runpath runpathprefix LDDYN RUNTEST\
-  ranlib gzip zcat perl ln_s make_sh\
+  ln_s make_sh\
   sizeof_long doubleformat\
   enable_tls\
+  $_tools_list\
   $_test_list\
   $_install_list\
   $_perl_list\

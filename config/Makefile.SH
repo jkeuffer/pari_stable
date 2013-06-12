@@ -167,8 +167,9 @@ TOPDIR="$TOP"
 
 SHELL      = $make_sh
 PERL       = $perl
-BISON      = bison
-AR	   = ar
+BISON      = $bison
+AR	   = $ar
+RANLIB	   = $ranlib
 
 SIZEOF_LONG= $sizeof_long
 
@@ -298,7 +299,7 @@ lib-dyn: \$(LIBPARI_DYN)
 \$(LIBPARI_STA): $add_funclist \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
-	-$ranlib \$@
+	-\$(RANLIB) \$@
 
 kerntest\$(_O): $src/test/kerntest.c
 	\$(CC) -c -I$src/language \$(CPPFLAGS) \$(CFLAGS) -o \$@ $src/test/kerntest.c
