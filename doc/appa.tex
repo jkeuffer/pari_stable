@@ -397,9 +397,9 @@ files if you wish: \kbd{usersch*.tex} and all \kbd{dvi} files (assuming your
 \kbd{xdvi} knows how to deal with compressed files); the online-help system
 can handle it.
 
-By default, if a dynamic library \kbd{libpari.so} could be built, the static
-library \kbd{libpari.a} will not be created. If you want it as well, you can
-use the target \kbd{make install-lib-sta}. You can install a statically
+By default, if a dynamic library \kbd{libpari.so} can be built, the static
+library \kbd{libpari.a} is not created. If you want it as well, use the target
+\kbd{make install-lib-sta}. You can install a statically
 linked \kbd{gp} with the target \kbd{make install-bin-sta}. As a rule,
 programs linked statically (with \kbd{libpari.a}) may be slightly faster
 (about 5\% gain), but use more disk space and take more time to compile.
