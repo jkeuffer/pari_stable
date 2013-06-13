@@ -702,7 +702,7 @@ Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
   {
     if (pt) {
       GEN t = cgetg(3, t_INTMOD);
-      gel(t,1) = gen_0; gel(t,2) = icopy(q); *pt = t;
+      gel(t,1) = icopy(q); gel(t,2) = gen_0; *pt = t;
     }
     return 1;
   }
