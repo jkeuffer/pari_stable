@@ -796,7 +796,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
 
 /* assume pol(0) != 0, polp = pol/lc(pol) mod p.
  * Return vector of rational roots of a */
-GEN
+static GEN
 DDF_roots(GEN pol, GEN polp, GEN p)
 {
   GEN lc, lcpol, z, pe, pes2, bound;

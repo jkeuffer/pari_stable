@@ -629,7 +629,6 @@ GEN     sylvestermatrix_i(GEN x, GEN y);
 
 /* QX_factor */
 
-GEN     DDF_roots(GEN pol, GEN polp, GEN p);
 void    factor_quad(GEN x, GEN res, long *ptcnt);
 long    logint(GEN B, GEN y, GEN *ptq);
 
