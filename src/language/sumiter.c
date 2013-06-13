@@ -547,10 +547,9 @@ forcomposite_next(forcomposite_t *C)
   {
     C->first = 0;
     C->p = forprime_next(&C->T);
-    if (C->p && equalii(C->n, C->p)) incloop(C->n);
-    return C->n;
   }
-  incloop(C->n);
+  else
+    incloop(C->n);
   if (C->p)
   {
     if (cmpii(C->n, C->p) < 0) return C->n;
