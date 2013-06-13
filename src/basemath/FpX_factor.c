@@ -2100,7 +2100,8 @@ GEN
 Flx_factor(GEN f, ulong p)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, Flx_Berlekamp_i(f, p, 0));
+  GEN F = (degpol(f)>log2(p))? Flx_factcantor_i(f,p,0): Flx_Berlekamp_i(f,p,0);
+  return gerepilecopy(av, F);
 }
 GEN
 F2x_factor(GEN f)
