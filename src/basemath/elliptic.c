@@ -4303,7 +4303,10 @@ ellheight0(GEN e, GEN a, long flag, long prec)
     }
   }
   else
+  {
     e = ellminimalmodel_i(e, &v);
+    a = ellchangepoint(a, v);
+  }
   if (is_matvec_t(tx))
   {
     z = cgetg(lx,tx);
