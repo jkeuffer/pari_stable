@@ -3112,48 +3112,78 @@ makecycgen(GEN bnf)
   return h;
 }
 
-/* compute principal ideals corresponding to bnf relations */
 static GEN
-makematal(GEN bnf)
+get_y(GEN bnf, GEN pFB, long j)
 {
-  GEN W,B,pFB,nf,ma, WB_C;
-  long lW,lma,j,prec;
+  GEN W, B, nf, WB_C, ex, C, Nx, y;
+  long lW, e;
 
-  if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building matal)");
   W   = gel(bnf,1);
   B   = gel(bnf,2);
   WB_C= gel(bnf,4);
   nf  = bnf_get_nf(bnf);
-  lW=lg(W)-1; lma=lW+lg(B);
+  lW=lg(W)-1;
+
+  ex = (j<=lW)? gel(W,j): gel(B,j-lW);
+  C = (j<=lW)? NULL: gel(pFB,j);
+  Nx = get_norm_fact_primes(pFB, ex, C);
+  y = isprincipalarch(bnf,gel(WB_C,j), Nx,gen_1, gen_1, &e);
+  if (y && fact_ok(nf,y,C,pFB,ex)) return y;
+  y = isprincipalfact_or_fail(bnf, C, pFB, ex);
+  return typ(y) == t_INT? y: gel(y,2);
+}
+/* compute principal ideals corresponding to bnf relations */
+static GEN
+makematal(GEN bnf)
+{
+  GEN W, B, pFB, ma, retry;
+  long lma, j, prec = 0;
+
+  if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building matal)");
+  W   = gel(bnf,1);
+  B   = gel(bnf,2);
+  lma=lg(W)+lg(B)-1;
   pFB = get_Vbase(bnf);
   ma = cgetg(lma,t_VEC);
-
-  for (j=1; j<lma; j++)
+  retry = vectrunc_init(lma);
+  for (j=lma-1; j>0; j--)
   {
-    pari_sp btop = avma;
-    long e;
-    GEN c = getrand();
-    GEN ex = (j<=lW)? gel(W,j): gel(B,j-lW);
-    GEN C = (j<=lW)? NULL: gel(pFB,j);
-    GEN Nx = get_norm_fact_primes(pFB, ex, C);
-    GEN y = isprincipalarch(bnf,gel(WB_C,j), Nx,gen_1, gen_1, &e);
-    if (y && fact_ok(nf,y,C,pFB,ex))
+    pari_sp av0 = avma, av;
+    GEN c = getrand(), y;
+    av = avma; y = get_y(bnf, pFB, j);
+    if (typ(y) == t_INT)
     {
-      if (DEBUGLEVEL>1) err_printf("*%ld ",j);
-      gel(ma,j) = gerepileupto(btop, y); continue;
+      long E = itos(y);
+      if (DEBUGLEVEL>1) err_printf("\n%ld done later at prec %ld\n",j,E);
+      avma = av;
+      vectrunc_append(retry, mkvec2(c, (GEN)j));
+      if (E > prec) prec = E;
     }
-    y = isprincipalfact_or_fail(bnf, C, pFB, ex);
-    if (typ(y) != t_INT)
+    else
     {
       if (DEBUGLEVEL>1) err_printf("%ld ",j);
-      gel(ma,j) = gerepileupto(btop,gel(y,2)); continue;
+      gel(ma,j) = gerepileupto(av0,y);
     }
-
-    prec = itos(y);
-    j--; /* will retry the same element in next loop */
+  }
+  if (prec)
+  {
+    long k, l = lg(retry);
+    GEN y, nf = bnf_get_nf(bnf);
     if (DEBUGLEVEL) pari_warn(warnprec,"makematal",prec);
     nf = nfnewprec_shallow(nf,prec);
-    bnf = Buchall(nf, nf_FORCE, prec); setrand(c);
+    bnf = Buchall(nf, nf_FORCE, prec);
+    if (DEBUGLEVEL) err_printf("makematal, adding missing entries:");
+    for (k=1; k<l; k++)
+    {
+      pari_sp av = avma;
+      GEN S = gel(retry,k), c = gel(S,1);
+      long j = S[2];
+      setrand(c);
+      y = get_y(bnf, pFB, j);
+      if (typ(y) == t_INT) pari_err_PREC("makematal");
+      if (DEBUGLEVEL>1) err_printf("%ld ",j);
+      gel(ma,j) = gerepileupto(av,y);
+    }
   }
   if (DEBUGLEVEL>1) err_printf("\n");
   return ma;
