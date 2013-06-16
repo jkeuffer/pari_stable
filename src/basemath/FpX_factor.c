@@ -777,27 +777,6 @@ FpX_nbfact(GEN u, GEN p)
   avma = av; return lg(vker)-1;
 }
 
-/************************************************************/
-/* polynomial in variable v, whose coeffs are the digits of m in base p */
-static GEN
-stoFlx(ulong m, ulong p, long v)
-{
-  GEN y = new_chunk(BITS_IN_LONG + 2);
-  long l = 2;
-  do { ulong q = m/p; y[l++] = m - q*p; m=q; } while (m);
-  y[1] = v;
-  y[0] = evaltyp(t_VECSMALL) | evallg(l); return y;
-}
-static GEN
-itoFpX(GEN m, GEN p, long v)
-{
-  GEN y = new_chunk(bit_prec(m)+2);
-  long l = 2;
-  do { m = dvmdii(m, p, &gel(y,l)); l++; } while (signe(m));
-  y[1] = evalsigne(1) | evalvarn(v);
-  y[0] = evaltyp(t_POL) | evallg(l); return y;
-}
-
 static GEN
 try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
 {
@@ -858,7 +837,7 @@ F2x_split(ulong m, GEN *t, long d)
 }
 
 static void
-Flx_split(ulong m, GEN *t, long d, ulong p, GEN q, long r)
+Flx_split(GEN *t, long d, ulong p, GEN q, long r)
 {
   long l, v, dv;
   pari_sp av0, av;
@@ -868,8 +847,8 @@ Flx_split(ulong m, GEN *t, long d, ulong p, GEN q, long r)
   v=(*t)[1]; av0=avma;
   for(av=avma;;avma=av)
   {
-    w = Flx_rem(stoFlx(m,p,v),*t, p);
-    m++; w = Flx_try_pow(w,*t,p,q,r);
+    w = random_Flx(dv,v,p);
+    w = Flx_try_pow(w,*t,p,q,r);
     if (!w) continue;
     w = Flx_Fl_add(w, p-1, p);
     w = Flx_gcd(*t,w, p);
@@ -878,13 +857,13 @@ Flx_split(ulong m, GEN *t, long d, ulong p, GEN q, long r)
   w = Flx_normalize(w, p);
   w = gerepileupto(av0, w);
   l /= d; t[l]=Flx_div(*t,w,p); *t=w;
-  Flx_split(m,t+l,d,p,q,r);
-  Flx_split(m,t,  d,p,q,r);
+  Flx_split(t+l,d,p,q,r);
+  Flx_split(t,  d,p,q,r);
 }
 
 
 static void
-splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
+FpX_split(GEN *t, long d, GEN  p, GEN q, long r)
 {
   long l, v, dv = degpol(*t);
   pari_sp av;
@@ -892,12 +871,10 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
 
   if (dv==d) return;
   v = varn(*t);
-  m = setloop(m);
   av = avma;
   for(;; avma = av)
   {
-    m = incloop(m);
-    w = FpX_rem(itoFpX(m,p,v),*t, p);
+    w = random_FpX(dv, v, p);
     w = try_pow(w,*t,p,q,r);
     if (!w) continue;
     w = FpX_Fp_sub_shallow(w, gen_1, p);
@@ -907,8 +884,8 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
   w = FpX_normalize(w, p);
   w = gerepileupto(av, w);
   l /= d; t[l]=FpX_div(*t,w,p); *t=w;
-  splitgen(m,t+l,d,p,q,r);
-  splitgen(m,t,  d,p,q,r);
+  FpX_split(t+l,d,p,q,r);
+  FpX_split(t,  d,p,q,r);
 }
 
 static int
@@ -1387,10 +1364,7 @@ Flx_factcantor_i(GEN f, ulong p, long flag)
           g = Flx_normalize(g, p);
           gel(t,nbfact) = g; q = subis(pd,1);
           r = vali(q); q = shifti(pd,-r);
-         /* First parameter is an integer m, converted to polynomial w_m, whose
-          * coeffs are its digits in base p (initially m = p --> w_m = X). Take
-          * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. */
-          Flx_split(p,&gel(t,nbfact),d,p,q,r);
+          Flx_split(&gel(t,nbfact),d,p,q,r);
           for (; nbfact<j; nbfact++) E[nbfact]=e*k;
         }
         du -= dg;
@@ -1505,10 +1479,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
         g = FpX_normalize(g, pp);
         gel(t,nbfact) = g; q = subis(pd,1);
         r = vali(q); q = shifti(q,-r);
-       /* First parameter is an integer m, converted to polynomial w_m, whose
-        * coeffs are its digits in base p (initially m = p --> w_m = X). Take
-        * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. */
-        splitgen(pp,&gel(t,nbfact),d,pp,q,r);
+        FpX_split(&gel(t,nbfact),d,pp,q,r);
         for (; nbfact<j; nbfact++) E[nbfact]=k;
       }
       du -= dg;
