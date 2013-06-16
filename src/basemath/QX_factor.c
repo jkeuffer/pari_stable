@@ -794,42 +794,97 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
   return res;
 }
 
-/* assume pol(0) != 0, polp = pol/lc(pol) mod p.
- * Return vector of rational roots of a */
-static GEN
-DDF_roots(GEN pol, GEN polp, GEN p)
+/* Assume 'a' a squarefree ZX; return 0 if no root (fl=1) / irreducible (fl=0).
+ * Otherwise return prime p such that a mod p has fewest roots / factors */
+static ulong
+pick_prime(GEN a, long fl, pari_timer *T)
 {
-  GEN lc, lcpol, z, pe, pes2, bound;
-  long i, m, e, lz, v = varn(pol);
+  pari_sp av = avma, av1;
+  const long MAXNP = 7, da = degpol(a);
+  long nmax = da+1, np;
+  ulong chosenp = 0;
+  GEN lead = gel(a,da+2);
+  forprime_t S;
+  if (equali1(lead)) lead = NULL;
+  u_forprime_init(&S, 2, ULONG_MAX);
+  av1 = avma;
+  for (np = 0; np < MAXNP; avma = av1)
+  {
+    ulong p = u_forprime_next(&S);
+    long nfacp;
+    GEN z;
+
+    if (!p) pari_err_OVERFLOW("DDF [out of small primes]");
+    if (lead && !umodiu(lead,p)) continue;
+    z = ZX_to_Flx(a, p);
+    if (!Flx_is_squarefree(z, p)) continue;
+
+    if (fl)
+    {
+      nfacp = Flx_nbroots(z, p);
+      if (!nfacp) { chosenp = 0; break; } /* no root */
+    }
+    else
+    {
+      nfacp = Flx_nbfact(z, p);
+      if (nfacp == 1) { chosenp = 0; break; } /* irreducible */
+    }
+    if (DEBUGLEVEL>4)
+      err_printf("...tried prime %3lu (%-3ld %s). Time = %ld\n",
+                  p, nfacp, fl? "roots": "factors", timer_delay(T));
+    if (nfacp < nmax)
+    {
+      nmax = nfacp; chosenp = p;
+      if (da > 100 && nmax < 5) break; /* large degree, few factors. Enough */
+    }
+    np++;
+  }
+  avma = av; return chosenp;
+}
+
+/* Assume pol squarefree mod p; return vector of rational roots of a */
+static GEN
+DDF_roots(GEN A)
+{
+  GEN p, Ap, lc, lcpol, z, pe, pes2, bound;
+  long i, m, e, lz, v = varn(A);
+  ulong pp;
   pari_sp av, lim;
   pari_timer T;
 
   if (DEBUGLEVEL>2) timer_start(&T);
-  lc = absi(leading_term(pol));
-  if (is_pm1(lc)) lc = NULL;
-  lcpol = lc? ZX_Z_mul(pol, lc): pol;
-
-  bound = root_bound(pol);
-  if (lc) bound = mulii(lc, bound);
-  e = logint(addis(shifti(bound, 1), 1), p, &pe);
+  pp = pick_prime(A, 1, &T);
+  if (!pp) return cgetg(1,t_VEC); /* no root */
+  p = utoipos(pp);
+  lc = leading_term(A);
+  if (is_pm1(lc))
+  { lc = NULL; lcpol = A; }
+  else
+  { lc = absi(lc); lcpol = ZX_Z_mul(A, lc); }
+  Ap = ZX_to_Flx(A, pp);
+  bound = root_bound(A);
+  if (lc) { Ap = Flx_normalize(Ap, pp); bound = mulii(lc, bound); }
+  e = logint(addiu(shifti(bound, 1), 1), p, &pe);
   pes2 = shifti(pe, -1);
   if (DEBUGLEVEL>2) timer_printf(&T, "Root bound");
 
   av = avma; lim = stack_lim(av,2);
-  z = FpX_roots(polp, p);
+  z = Flx_roots(Ap, pp);
   lz = lg(z)-1;
-  if (lz > (degpol(pol) >> 2))
+  if (lz > (degpol(A) >> 2))
   { /* many roots */
-    z = shallowconcat(deg1_from_roots(z, v),
-                 FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
-    z = ZpX_liftfact(pol, z, NULL, p, e, pe);
+    GEN Bp = Flx_div(Ap, Flv_roots_to_pol(z, pp, v), pp);
+    z = Flv_to_ZV(z);
+    z = shallowconcat(deg1_from_roots(z, v), Flx_to_ZX(Bp));
+    z = ZpX_liftfact(A, z, NULL, p, e, pe);
   }
   else
   {
-    z = ZpX_liftroots(pol, z, p, e);
+    z = Flv_to_ZV(z);
+    z = ZpX_liftroots(A, z, p, e);
     z = deg1_from_roots(z, v);
   }
-  if (DEBUGLEVEL>2) timer_printf(&T, "Hensel lift (mod %Ps^%ld)", p,e);
+  if (DEBUGLEVEL>2) timer_printf(&T, "Hensel lift (mod %lu^%ld)", pp,e);
 
   for (m=1, i=1; i <= lz; i++)
   {
@@ -838,19 +893,19 @@ DDF_roots(GEN pol, GEN polp, GEN p)
     y = centermod_i(y, pe, pes2);
     if (! (q = ZX_divides(lcpol, y)) ) continue;
 
-    lcpol = pol = q;
+    lcpol = A = q;
     r = negi( constant_term(y) );
     if (lc) {
       r = gdiv(r,lc);
-      pol = Q_primpart(pol);
-      lc = absi( leading_term(pol) );
-      if (is_pm1(lc)) lc = NULL; else lcpol = ZX_Z_mul(pol, lc);
+      A = Q_primpart(A);
+      lc = absi( leading_term(A) );
+      if (is_pm1(lc)) lc = NULL; else lcpol = ZX_Z_mul(A, lc);
     }
     gel(z,m++) = r;
     if (low_stack(lim, stack_lim(av,2)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"DDF_roots, m = %ld", m);
-      gerepileall(av, lc? 4:2, &z, &pol, &lc, &lcpol);
+      gerepileall(av, lc? 4:2, &z, &A, &lc, &lcpol);
 
     }
   }
@@ -858,65 +913,30 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   z[0] = evaltyp(t_VEC) | evallg(m); return z;
 }
 
-/* Assume a squarefree, degree(a) > 0, a(0) != 0.
- * If fl != 0 look only for rational roots */
+/* Assume a squarefree ZX, deg(a) > 0, return rational factors.
+ * In fact, a(0) != 0 but we don't use this */
 static GEN
-DDF(GEN a, int fl)
+DDF(GEN a)
 {
-  GEN lead, prime, famod, z, ap;
-  const long da = degpol(a);
-  long nfacp, np, nmax, ti = 0;
-  ulong chosenp = 0;
-  pari_sp av = avma, av1;
-  const long MAXNP = 7;
+  GEN ap, prime, famod, z;
+  long ti = 0;
+  ulong p = 0;
+  pari_sp av = avma;
   pari_timer T, T2;
-  forprime_t S;
 
   if (DEBUGLEVEL>2) { timer_start(&T); timer_start(&T2); }
-  nmax = da+1;
-  lead = gel(a,da+2); if (equali1(lead)) lead = NULL;
-  u_forprime_init(&S, 2, ULONG_MAX);
-  av1 = avma;
-  for (np = 0; np < MAXNP; avma = av1)
-  {
-    ulong p = u_forprime_next(&S);
-
-    if (!p) pari_err_OVERFLOW("DDF [out of small primes]");
-    if (lead && !umodiu(lead,p)) continue;
-    z = ZX_to_Flx(a, p);
-    if (!Flx_is_squarefree(z, p)) continue;
-
-    nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);
-    if (DEBUGLEVEL>4)
-      err_printf("...tried prime %3lu (%-3ld %s). Time = %ld\n",
-                  p, nfacp, fl?"roots": "factors", timer_delay(&T2));
-    if (nfacp < nmax)
-    {
-      if (nfacp <= 1)
-      {
-        if (!fl) { avma = av; return mkcol(a); } /* irreducible */
-        if (!nfacp) return cgetg(1, t_VEC); /* no root */
-      }
-      nmax = nfacp; chosenp = p;
-      if (da > 100 && nmax < 5) break; /* large degree, few factors. Enough */
-    }
-    np++;
-  }
-  prime = utoipos(chosenp);
-  ap = lead? FpX_normalize(a, prime): FpX_red(a, prime);
-  if (fl) return gerepilecopy(av, DDF_roots(a, ap, prime));
-
-  famod = cgetg(nmax+1,t_COL);
-  gel(famod,1) = ap;
-  if (nmax != FpX_split_Berlekamp((GEN*)(famod+1), prime))
-    pari_err_BUG("DDF: wrong numbers of factors");
+  p = pick_prime(a, 0, &T2);
+  if (!p) return mkvec(a);
+  prime = utoipos(p);
+  ap = Flx_normalize(ZX_to_Flx(a, p), p);
+  famod = gel(Flx_factor(ap, p), 1);
   if (DEBUGLEVEL>2)
   {
-    if (DEBUGLEVEL>4) timer_printf(&T2, "splitting mod p = %lu", chosenp);
+    if (DEBUGLEVEL>4) timer_printf(&T2, "splitting mod p = %lu", p);
     ti = timer_delay(&T);
     err_printf("Time setup: %ld\n", ti);
   }
-  z = combine_factors(a, famod, prime, da-1);
+  z = combine_factors(a, FlxV_to_ZXV(famod), prime, degpol(a)-1);
   if (DEBUGLEVEL>2)
     err_printf("Total Time: %ld\n===========\n", ti + timer_delay(&T));
   return gerepilecopy(av, z);
@@ -930,7 +950,7 @@ ZX_DDF(GEN x)
   GEN L;
   long m;
   x = RgX_deflate_max(x, &m);
-  L = DDF(x, 0);
+  L = DDF(x);
   if (m > 1)
   {
     GEN e, v, fa = factoru(m);
@@ -946,7 +966,7 @@ ZX_DDF(GEN x)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-              L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), 0));
+              L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k])));
       L = L2;
     }
   }
@@ -1073,9 +1093,9 @@ nfrootsQ(GEN x)
   if (!RgX_is_ZX(x)) pari_err_TYPE("nfrootsQ",x);
   val = ZX_valrem(x, &x);
   (void)ZX_gcd_all(x, ZX_deriv(x), &x);
-  z = DDF(x, 1);
+  z = DDF_roots(x);
   if (val) z = shallowconcat(z, gen_0);
-  return gerepilecopy(av, z);
+  return gerepileupto(av, ZV_sort(z));
 }
 
 /************************************************************************
