@@ -1095,7 +1095,7 @@ nfrootsQ(GEN x)
   (void)ZX_gcd_all(x, ZX_deriv(x), &x);
   z = DDF_roots(x);
   if (val) z = shallowconcat(z, gen_0);
-  return gerepileupto(av, ZV_sort(z));
+  return gerepileupto(av, sort(z));
 }
 
 /************************************************************************
