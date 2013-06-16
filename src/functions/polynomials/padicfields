@@ -17,7 +17,7 @@ Doc: returns a vector of polynomials generating all the extensions of degree
 
  The list is minimal in the sense that two different polynomials generate
  non-isomorphic extensions; in particular, the number of polynomials is the
- number of classes of isomorphic extensions. If $P$ is a polynomial in this
+ number of classes of non-isomorphic extensions. If $P$ is a polynomial in this
  list, $\alpha$ is any root of $P$ and $K = \Q_p(\alpha)$, then $\alpha$
  is the sum of a uniformizer and a (lift of a) generator of the residue field
  of $K$; in particular, the powers of $\alpha$ generate the ring of $p$-adic
