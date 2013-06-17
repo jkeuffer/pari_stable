@@ -49,6 +49,7 @@ PMo 6- function forpart for looping over partitions
     4- improve qfbred(t_QFI) for "small" inputs
     5- bnfnewprec: ensure we recompute bnf from scratch at most once (could
        happen many times in makematal())
+    6- [make bench] properly align results if 'printf' is available
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
