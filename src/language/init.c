@@ -895,11 +895,11 @@ err_init(void)
 }
 
 static void
-err_init_msg(int numerr)
+err_init_msg(int numerr, int user)
 {
   const char *gp_function_name;
   out_puts(pariErr, "  *** ");
-  if (numerr != e_USER && (gp_function_name = closure_func_err()))
+  if (numerr != user && (gp_function_name = closure_func_err()))
     out_printf(pariErr, "%s: ", gp_function_name);
   else
     out_puts(pariErr, "  ");
@@ -914,7 +914,7 @@ pari_warn(int numerr, ...)
   va_start(ap,numerr);
 
   err_init();
-  err_init_msg(numerr);
+  err_init_msg(numerr, warnuser);
   switch (numerr)
   {
     case warnuser:
@@ -955,7 +955,7 @@ pari_sigint(const char *time_s)
   BLOCK_SIGALRM_START
   err_init();
   closure_err(0);
-  err_init_msg(e_MISC);
+  err_init_msg(e_MISC, e_USER);
   out_puts(pariErr, "user interrupt after ");
   out_puts(pariErr, time_s);
   out_term_color(pariErr, c_NONE);
@@ -1272,7 +1272,7 @@ pari_err_display(GEN err)
   else
   {
     char *s = pari_err2str(err);
-    err_init_msg(numerr);
+    err_init_msg(numerr, e_USER);
     pariErr->puts(s);
     if (numerr==e_NOTFUNC)
     {
