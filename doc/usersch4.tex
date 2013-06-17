@@ -1952,6 +1952,17 @@ non-zero value.
 
 \item \tet{forprime}, for which we refer you to the next subsection.
 
+\item \tet{forcomposite}, we provide an iterator over composite integers:
+
+\fun{int}{forcomposite}{forcomposite_t *T, GEN a, GEN b} initialize an
+iterator $T$ over composite integers in $[a,b]$; over composites $\geq a$ if
+$b = \kbd{NULL}$. Return $0$ if the range is known to be empty from the start
+(as if $b < a$ or $b < 0$), and return $1$ otherwise.
+
+\fun{GEN}{forcomposite_next}{forcomposite_t *T} returns the next composite in
+the range, assuming that $T$ was initialized by \tet{forcomposite_init}.
+
+
 \item \tet{forvec}, for which we provide a convenient iterator. To
 initialize the analog of \kbd{forvec(X = v, ..., flag)}, call
 
@@ -1978,25 +1989,29 @@ minute. If speed is critical and you know that all integers involved are
 non-negative and going to remain less than $2^{32}$ or $2^{64}$, write a
 simple direct backtracking algorithm using $C$ \kbd{long}s.
 
-\item \tet{forpart} is a variant of forvec which iterate over partitions.
-See the documentation of the corresponding GP function for detail.
-It is available in both forms: the prototype of the function with callback is
+\item \tet{forpart} is a variant of \kbd{forvec} which iterates over
+  partitions. See the documentation of the \kbd{forpart} GP function for
+  details. This function is available as a loop with callbacks:
 
-\fun{void}{forpart}{void *data, long (*call)(void*,GEN), long k, GEN a, GEN n}
+  \fun{void}{forpart}{void *data, long (*call)(void*,GEN), long k, GEN a, GEN n}
 
-On the other hand, the iterator is initialised by
+  \noindent It is also available as an iterator:
 
-\fun{void}{forpart_init}{forpart_t *T, long k, GEN a, GEN b}
+  \fun{void}{forpart_init}{forpart_t *T, long k, GEN a, GEN n} initializes an
+  iterator over the partitions of $k$, with length restricted by $n$,
+  and components restricted by $a$, either of which can be set to \kbd{NULL}
+  to run without restriction.
 
-the next partition being obtained by
+  \fun{GEN}{forpart_next}{forpart_t *T} returns the next partition, or
+  \kbd{NULL} when all partitions have been exhausted.
 
-\fun{GEN}{forpart_next}{forpart *T}
-which returns \kbd{NULL} after the last partition is returned.
+  \fun{GEN}{forpart_prev}{forpart_t *T}returns the previous partition, or
+  \kbd{NULL} when all partitions have been exhausted.
 
-the previous partition being obtained by
-
-\fun{GEN}{forpart_prev}{forpart *T}
-which returns \kbd{NULL} after the last partition is returned.
+  You may \emph{not} mix calls to \tet{forpart_next} and \tet{forpart_prev}:
+  the first one called determines the ordering used to iterate over the
+  partitions; you can not go back since the \tet{forpart_t} structure is used
+  in incompatible ways.
 
 \subsec{Iterating over primes}\label{se:primeiter}
 
