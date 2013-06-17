@@ -913,19 +913,23 @@ cxeint1(GEN x, long prec)
 {
   pari_sp av = avma;
   GEN q, S1, S2, S3, logx, mx;
-  long n, E = prec2nbits(prec);
+  long n, E = prec2nbits(prec), ex = gexpo(x);
 
-  if (gexpo(x) > E || dblmodulus(x) > 3*E/4)
+  if (ex > E || dblmodulus(x) > 3*E/4)
   {
     GEN z = incgam_asymp(gen_0, x, prec);
     if (z) return z;
   }
   logx = glog(x, prec);
-  mx = gneg(x);
   S1 = negr(mpeuler(prec));
   S2 = gneg(logx);
-  S3 = x;
-  q = x; n = 1;
+  if (ex > 0)
+  { /* take cancellation into account, log2(\sum |x|^n / n!) = |x| / log(2) */
+    long p = LOWDEFAULTPREC;
+    double X = rtodbl(gabs(gtofp(x, p), p));
+    x = gtofp(x, prec + nbits2extraprec(X / LOG2));
+  }
+  q = S3 = x; n = 1; mx = gneg(x);
   while (gexpo(q) > -E)
   {
     n++; q = gmul(q, gdivgs(mx, n));
