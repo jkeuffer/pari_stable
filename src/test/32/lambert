@@ -1,21 +1,16 @@
-*** ../src/test/32/lambert	Mon Jun 17 14:54:35 2013
---- gp.out	Mon Jun 17 14:55:39 2013
-***************
-*** 0 ****
---- 1,16 ----
-+   ***   at top-level: do(-1)
-+   ***                 ^------
-+   ***   in function do: my(x=lambertw(y));exp(x)*
-+   ***                        ^--------------------
-+   *** lambertw: domain error in Lw: y < 0
-+   ***   at top-level: do(I)
-+   ***                 ^-----
-+   ***   in function do: my(x=lambertw(y));exp(x)*
-+   ***                        ^--------------------
-+   *** lambertw: sorry, complex lambertW is not yet implemented.
-+ 1.0000000000000000000000000000000000000
-+    realprecision = 211 significant digits (200 digits displayed)
-+ 1.00000000000000000000000000000000000000000000000000000000000000000000000000
-+ 0000000000000000000000000000000000000000000000000000000000000000000000000000
-+ 0000000000000000000000000000000000000000000000000
-+ Total time spent: 8
+  ***   at top-level: do(-1)
+  ***                 ^------
+  ***   in function do: my(x=lambertw(y));exp(x)*
+  ***                        ^--------------------
+  *** lambertw: domain error in Lw: y < 0
+  ***   at top-level: do(I)
+  ***                 ^-----
+  ***   in function do: my(x=lambertw(y));exp(x)*
+  ***                        ^--------------------
+  *** lambertw: sorry, complex lambertW is not yet implemented.
+1.0000000000000000000000000000000000000
+   realprecision = 211 significant digits (200 digits displayed)
+1.00000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000
+Total time spent: 8
