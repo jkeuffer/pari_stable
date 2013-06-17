@@ -15,6 +15,7 @@ Done for version 2.6.1 (released ??/??/2013):
 PB  6- issquare(Mod(1,2)) -> domain error [#1429]
 PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [#1430]
     8- ellheight(E not given by minimal model, P) -> domain error [#1432]
+    9- ellchangecurve(E, [1,0,0,0]) lost Q_MINIMALMODEL ->SEGV later
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the

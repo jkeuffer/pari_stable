@@ -183,3 +183,7 @@ E2=ellchangecurve(E,v); ellminimalmodel(E2,&w); w
 
 \\#1432
 E=ellinit([-3,-60,480,0,0]); ellheight(E,[0,0])
+
+e=ellminimalmodel(ellinit([1,1]));
+e=ellchangecurve(e,1)
+e=ellchangecurve(e,[2,0,0,0])

@@ -935,12 +935,10 @@ ch_Q(GEN E, GEN e, GEN w)
   if ((S = obj_check(e, Q_MINIMALMODEL)))
   {
     if (lg(S) == 2)
-    {
-      if (!is_trivial_change(w))
-      {
+    { /* model was minimal */
+      if (!is_trivial_change(w)) /* no longer minimal */
         S = mkvec3(gel(S,1), ellchangeinvert(w), e);
-        (void)obj_insert(E, Q_MINIMALMODEL, S);
-      }
+      (void)obj_insert(E, Q_MINIMALMODEL, S);
     }
     else
     {
