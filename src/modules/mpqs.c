@@ -408,13 +408,7 @@ mpqs_find_k(mpqs_handle_t *h)
  * Thus we allocate size_of_FB+3 slots for FB.
  *
  * If a prime factor of N is found during the construction, it is returned
- * in f, otherwise f = 0.
- * We use PARI's normal diffptr array if it's large enough, or otherwise
- * our own because we don't want to pull out PARI's array under our caller
- * if someone was in the middle of using it while calling us. (But note
- * that this makes ourselves non-reentrant.) */
-/* TODO: convert (everything!) to new FB entry format */
-/* TODO: also fill in a number of other FB entry fields */
+ * in f, otherwise f = 0. */
 
 /* returns the FB array pointer for convenience */
 static mpqs_FB_entry_t *
@@ -429,7 +423,6 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
 
   FB = mpqs_FB_ctor(h);
 
-  if (MPQS_DEBUGLEVEL >= 7) err_printf("MPQS: FB [-1,2");
   FB[2].fbe_p = 2;
   /* the fbe_logval and the fbe_sqrt_kN for 2 are never used */
   FB[2].fbe_flags = MPQS_FBE_CLEAR;
@@ -458,7 +451,6 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
       if (kr != -1)
       {
         if (kr == 0) { *f = p; return FB; }
-        if (MPQS_DEBUGLEVEL >= 7) err_printf(",%lu", p);
         FB[i].fbe_p = (mpqs_uint32_t) p;
         FB[i].fbe_flags = MPQS_FBE_CLEAR;
         /* dyadic logarithm of p; single precision suffices */
@@ -472,30 +464,17 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
     }
   }
   avma = av;
-
-  if (MPQS_DEBUGLEVEL >= 7) err_printf("]\n");
+  if (MPQS_DEBUGLEVEL >= 7)
+  {
+    err_printf("MPQS: FB [-1,2");
+    for (i = 3; i < h->index0_FB; i++) err_printf(",<%lu>", FB[i].fbe_p);
+    for (; i < size + 2; i++) err_printf(",%lu", FB[i].fbe_p);
+    err_printf("]\n");
+  }
 
   FB[i].fbe_p = 0;              /* sentinel */
   h->largest_FB_p = FB[i-1].fbe_p; /* at subscript size_of_FB + 1 */
 
-#ifdef MPQS_EXPERIMENTAL_COUNT_SIEVE_HITS
-  /* temporary addition: ------------8<---------------------- */
-  {
-    double hitsum;
-    long j;
-    for (j = 300; j <= 1000; j += 100)
-    {
-      hitsum = 0.;
-      for (i = j; i < size + 2; i++)
-      {
-        p = FB[i].fbe_p; if (p == 0) break;
-        hitsum += ((4.0 * h->M) / p);
-      }
-      err_printf("MPQS DEBUG: hits from FB[%d]=%ld up: %10.2f\n",
-                 j, (long)(FB[j].fbe_p), hitsum);
-    }
-  }
-#endif
   /* locate the smallest prime that will be used for sieving */
   for (i = h->index0_FB; FB[i].fbe_p != 0; i++)
     if (FB[i].fbe_p >= h->pmin_index1) break;
