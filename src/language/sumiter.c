@@ -533,8 +533,13 @@ forcomposite_init(forcomposite_t *C, GEN a, GEN b)
   }
   if (signe(a) < 0) pari_err_DOMAIN("forcomposite", "a", "<", gen_0, a);
   if (cmpiu(a, 4) < 0) a = utoipos(4);
-  if (!forprime_init(&C->T, a,b)) { avma = av; return 0; }
   C->first = 1;
+  if (!forprime_init(&C->T, a,b))
+  {
+    C->n = gen_1; /* in case caller forgets to check the return value */
+    C->b = gen_0;
+    avma = av; return 0;
+  }
   C->n = setloop(a);
   C->b = b;
   C->p = NULL; return 1;
