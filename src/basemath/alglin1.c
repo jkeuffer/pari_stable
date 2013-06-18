@@ -958,29 +958,21 @@ sFlm_invimage(GEN mat, GEN y, ulong p)
 }
 
 /* inverse image of v by m */
-
 GEN
 Flm_invimage(GEN m, GEN v, ulong p)
 {
-  pari_sp av = avma;
-  long j, l;
-  GEN y, c;
+  GEN y;
 
   if (typ(v) == t_VECSMALL)
   {
-    c = sFlm_invimage(m,v,p);
-    if (c) return c;
+    pari_sp av = avma;
+    y = sFlm_invimage(m,v,p);
+    if (y) return y;
     avma = av; return cgetg(1,t_MAT);
   }
   /* t_MAT */
-  y = cgetg_copy(v, &l);
-  for (j=1; j < l; j++)
-  {
-    c = sFlm_invimage(m,gel(v,j),p);
-    if (!c) { avma = av; return cgetg(1,t_MAT); }
-    gel(y,j) = c;
-  }
-  return y;
+  y = Flm_inverseimage(m,v,p);
+  return y? y: cgetg(1, t_MAT);
 }
 
 static GEN
@@ -988,13 +980,11 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
 {
   pari_sp av = avma;
   long i, l = lg(mat);
-  GEN M = cgetg(l+1,t_MAT), col, t;
+  GEN M, col, t;
 
   if (l==1) return NULL;
   if (lg(y) != lgcols(mat)) pari_err_DIM("FpM_invimage");
-
-  for (i=1; i<l; i++) gel(M,i) = gel(mat,i);
-  gel(M,l) = y; M = FpM_ker(M,p);
+  M = FpM_ker(shallowconcat(mat,y),p);
   i = lg(M)-1; if (!i) return NULL;
 
   col = gel(M,i); t = gel(col,l);
@@ -1010,25 +1000,18 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
 GEN
 FpM_invimage(GEN m, GEN v, GEN p)
 {
-  pari_sp av = avma;
-  long j, l;
-  GEN y, c;
+  GEN y;
 
   if (typ(v) == t_COL)
   {
-    c = sFpM_invimage(m,v,p);
-    if (c) return c;
-    avma = av; return cgetg(1,t_MAT);
+    pari_sp av = avma;
+    y = sFpM_invimage(m,v,p);
+    if (y) return y;
+    avma = av; return cgetg(1,t_COL);
   }
   /* t_MAT */
-  y = cgetg_copy(v, &l);
-  for (j=1; j < l; j++)
-  {
-    c = sFpM_invimage(m,gel(v,j),p);
-    if (!c) { avma = av; return cgetg(1,t_MAT); }
-    gel(y,j) = c;
-  }
-  return y;
+  y = FpM_inverseimage(m,v,p);
+  return y? y: cgetg(1, t_MAT);
 }
 
 static GEN
@@ -1476,6 +1459,54 @@ RgM_inv_upper(GEN A)
   long i, l;
   GEN B = cgetg_copy(A, &l);
   for (i = 1; i < l; i++) gel(B,i) = RgM_inv_upper_ind(A, i);
+  return B;
+}
+
+/* assume dim A >= 1, A invertible + upper triangular, 1s on diagonal  */
+static GEN
+FpM_inv_upper_1_ind(GEN A, long index, GEN p)
+{
+  long n = lg(A)-1, i = index, j;
+  GEN u = zerocol(n);
+  gel(u,i) = gen_1;
+  for (i--; i>0; i--)
+  {
+    pari_sp av = avma;
+    GEN m = negi(mulii(gcoeff(A,i,i+1),gel(u,i+1))); /* j = i+1 */
+    for (j=i+2; j<=n; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+    gel(u,i) = gerepileuptoint(av, modii(m,p));
+  }
+  return u;
+}
+static GEN
+FpM_inv_upper_1(GEN A, GEN p)
+{
+  long i, l;
+  GEN B = cgetg_copy(A, &l);
+  for (i = 1; i < l; i++) gel(B,i) = FpM_inv_upper_1_ind(A, i, p);
+  return B;
+}
+/* assume dim A >= 1, A invertible + upper triangular, 1s on diagonal  */
+static GEN
+Flm_inv_upper_1_ind(GEN A, long index, ulong p)
+{
+  long n = lg(A)-1, i = index, j;
+  GEN u = const_vecsmall(n, 0);
+  u[i] = 1;
+  for (i--; i>0; i--)
+  {
+    ulong m = Fl_mul(ucoeff(A,i,i+1),uel(u,i+1), p); /* j = i+1 */
+    for (j=i+2; j<=n; j++) m = Fl_add(m, Fl_mul(ucoeff(A,i,j),uel(u,j),p), p);
+    u[i] = Fl_neg(m, p);
+  }
+  return u;
+}
+static GEN
+Flm_inv_upper_1(GEN A, ulong p)
+{
+  long i, l;
+  GEN B = cgetg_copy(A, &l);
+  for (i = 1; i < l; i++) gel(B,i) = Flm_inv_upper_1_ind(A, i, p);
   return B;
 }
 
@@ -2456,31 +2487,103 @@ sinverseimage(GEN mat, GEN y)
   return gerepileupto(av, RgC_Rg_div(col, p1));
 }
 
-/* Calcule l'image reciproque de v par m */
+/* Return X such that m X = v (t_COL or t_MAT), resp. an empty t_COL / t_MAT
+ * if no solution exist */
 GEN
 inverseimage(GEN m,GEN v)
 {
-  pari_sp av=avma;
-  long j,lv,tv=typ(v);
-  GEN y,p1;
+  pari_sp av;
+  GEN y;
 
   if (typ(m)!=t_MAT) pari_err_TYPE("inverseimage",m);
-  if (tv==t_COL)
+  switch(typ(v))
   {
-    p1 = sinverseimage(m,v);
-    if (p1) return p1;
-    avma = av; return cgetg(1,t_COL);
+    case t_COL:
+      av = avma;
+      y = sinverseimage(m,v);
+      if (y) return y;
+      avma = av; return cgetg(1,t_COL);
+    case t_MAT:
+      y = RgM_inverseimage(m, v);
+      return y? y: cgetg(1,t_MAT);
+    default: pari_err_TYPE("inverseimage",v);
+             return NULL;/*not reached*/
   }
-  if (tv!=t_MAT) pari_err_TYPE("inverseimage",v);
+}
 
-  lv=lg(v)-1; y=cgetg(lv+1,t_MAT);
-  for (j=1; j<=lv; j++)
+static GEN
+Flm_inverseimage_i(GEN A, GEN B, ulong p)
+{
+  GEN d, x, X, Y;
+  long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
+  x = Flm_ker_sp(shallowconcat(Flm_neg(A,p), B), p, 0);
+  /* AX = BY, Y in strict upper echelon form with pivots = 1.
+   * We must find T such that Y T = Id_nB then X T = Z. This exists iff
+   * Y has at least nB columns and full rank */
+  nY = lg(x)-1;
+  if (nY < nB) return NULL;
+  Y = rowslice(x, nA+1, nA+nB); /* nB rows */
+  d = cgetg(nB+1, t_VECSMALL);
+  for (i = nB, j = nY; i >= 1; i--)
   {
-    p1 = sinverseimage(m,gel(v,j));
-    if (!p1) { avma = av; return cgetg(1,t_MAT); }
-    gel(y,j) = p1;
+    for (; j>=1; j--)
+      if (coeff(Y,i,j)) { d[i] = j; break; }
+    if (!j) return NULL;
   }
-  return y;
+  /* reduce to the case Y square, upper triangular with 1s on diagonal */
+  Y = vecpermute(Y, d);
+  x = vecpermute(x, d);
+  X = rowslice(x, 1, nA);
+  return Flm_mul(X, Flm_inv_upper_1(Y,p), p);
+}
+GEN
+Flm_inverseimage(GEN A, GEN B, ulong p)
+{
+  pari_sp av = avma;
+  GEN X = Flm_inverseimage_i(A,B,p);
+  if (!X) { avma = av; return NULL; }
+  return gerepileupto(av, X);
+}
+static GEN
+FpM_inverseimage_i(GEN A, GEN B, GEN p)
+{
+  GEN d, x, X, Y;
+  long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    A = ZM_to_Flm(A, pp);
+    B = ZM_to_Flm(B, pp);
+    x = Flm_inverseimage_i(A, B, pp);
+    return x? Flm_to_ZM(x): NULL;
+  }
+  x = FpM_ker(shallowconcat(ZM_neg(A), B), p);
+  /* AX = BY, Y in strict upper echelon form with pivots = 1.
+   * We must find T such that Y T = Id_nB then X T = Z. This exists iff
+   * Y has at least nB columns and full rank */
+  nY = lg(x)-1;
+  if (nY < nB) return NULL;
+  Y = rowslice(x, nA+1, nA+nB); /* nB rows */
+  d = cgetg(nB+1, t_VECSMALL);
+  for (i = nB, j = nY; i >= 1; i--)
+  {
+    for (; j>=1; j--)
+      if (signe(gcoeff(Y,i,j))) { d[i] = j; break; }
+    if (!j) return NULL;
+  }
+  /* reduce to the case Y square, upper triangular with 1s on diagonal */
+  Y = vecpermute(Y, d);
+  x = vecpermute(x, d);
+  X = rowslice(x, 1, nA);
+  return FpM_mul(X, FpM_inv_upper_1(Y,p), p);
+}
+GEN
+FpM_inverseimage(GEN A, GEN B, GEN p)
+{
+  pari_sp av = avma;
+  GEN X = FpM_inverseimage_i(A,B,p);
+  if (!X) { avma = av; return NULL; }
+  return gerepileupto(av, X);
 }
 /* find Z such that A Z = B. Return NULL if no solution */
 GEN
@@ -2489,6 +2592,15 @@ RgM_inverseimage(GEN A, GEN B)
   pari_sp av = avma;
   GEN d, x, X, Y;
   long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
+  GEN p = NULL;
+  if (RgM_is_FpM(A, &p) && p)
+  {
+    A = RgM_to_FpM(A,p);
+    B = RgM_to_FpM(B,p);
+    x = FpM_inverseimage_i(A, B, p);
+    if (!x) { avma = av; return NULL; }
+    return gerepileupto(av, FpM_to_mod(x, p));
+  }
   x = ker(shallowconcat(RgM_neg(A), B));
   /* AX = BY, Y in strict upper echelon form with pivots = 1.
    * We must find T such that Y T = Id_nB then X T = Z. This exists iff

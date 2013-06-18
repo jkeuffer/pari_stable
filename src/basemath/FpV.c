@@ -247,7 +247,7 @@ Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
     for(j=1; j<l; j++)
       for(i=1; i<m; i++) ucoeff(y,i,j) = (ucoeff(y,i,j) * x) % p;
 }
-/* set y = x * y */
+/* return x * y */
 GEN
 Flm_Fl_mul(GEN y, ulong x, ulong p)
 {
@@ -263,7 +263,18 @@ Flm_Fl_mul(GEN y, ulong x, ulong p)
       GEN c = cgetg(m, t_VECSMALL); gel(z,j) = c;
       for(i=1; i<m; i++) c[i] = (ucoeff(y,i,j) * x) % p;
     }
-  return y;
+  return z;
+}
+GEN
+Flm_neg(GEN y, ulong p)
+{
+  long i, j, m = lgcols(y), l = lg(y);
+  GEN z = cgetg(l, t_MAT);
+  for(j=1; j<l; j++) {
+    GEN c = cgetg(m, t_VECSMALL); gel(z,j) = c;
+    for(i=1; i<m; i++) c[i] = Fl_neg(ucoeff(y,i,j), p);
+  }
+  return z;
 }
 
 /* x[i,]*y. Assume lx > 1 and 0 < i < lgcols(x) */
