@@ -117,8 +117,6 @@ gerepile_gauss(GEN x,long k,long t,pari_sp av, long j, GEN c)
 /*                         GENERIC                                 */
 /*                                                                 */
 /*******************************************************************/
-
-/* assume x has integer entries */
 GEN
 gen_ker(GEN x, long deplin, void *E, const struct bb_field *ff)
 {
