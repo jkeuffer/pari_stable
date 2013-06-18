@@ -913,6 +913,7 @@ GEN     RgM_diagonal(GEN m);
 GEN     RgM_diagonal_shallow(GEN m);
 GEN     RgM_Hadamard(GEN a);
 GEN     RgM_inv_upper(GEN a);
+GEN     RgM_inverseimage(GEN A, GEN B);
 GEN     RgM_solve(GEN a, GEN b);
 GEN     RgM_solve_realimag(GEN x, GEN y);
 void    RgMs_structelim(GEN M, long N, GEN A, GEN *p_col, GEN *p_lin);

@@ -6181,6 +6181,9 @@ make it appear so).
 \fun{GEN}{RgM_inv_upper}{GEN a} as \kbd{RgM\_inv}, assuming that $a$ is a
 non-empty invertible upper triangular matrix, hence a little faster.
 
+\fun{GEN}{RgM_inverseimage}{GEN A, GEN B} returns a \typ{MAT} $X$ such that
+$A X = B$ if one such exists, and \kbd{NULL} otherwise.
+
 \fun{GEN}{RgM_Hadamard}{GEN a} returns a upper bound for the absolute
 value of $\text{det}(a)$. The bound is a \typ{INT}.
 

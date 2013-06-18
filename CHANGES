@@ -41,6 +41,7 @@ PMo 6- function forpart for looping over partitions
        forcomposite() using this iterator
     8- Configure now generates a file 'config.log' to help debugging when it
        makes a mistake (contains all messages from compilers)
+    9- [libpari] RgM_inverseimage
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form

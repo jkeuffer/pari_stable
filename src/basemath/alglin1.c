@@ -2482,6 +2482,33 @@ inverseimage(GEN m,GEN v)
   }
   return y;
 }
+/* find Z such that A Z = B. Return NULL if no solution */
+GEN
+RgM_inverseimage(GEN A, GEN B)
+{
+  pari_sp av = avma;
+  GEN d, x, X, Y;
+  long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
+  x = ker(shallowconcat(RgM_neg(A), B));
+  /* AX = BY, Y in strict upper echelon form with pivots = 1.
+   * We must find T such that Y T = Id_nB then X T = Z. This exists iff
+   * Y has at least nB columns and full rank */
+  nY = lg(x)-1;
+  if (nY < nB) { avma = av; return NULL; }
+  Y = rowslice(x, nA+1, nA+nB); /* nB rows */
+  d = cgetg(nB+1, t_VECSMALL);
+  for (i = nB, j = nY; i >= 1; i--)
+  {
+    for (; j>=1; j--)
+      if (!gequal0(gcoeff(Y,i,j))) { d[i] = j; break; }
+    if (!j) { avma = av; return NULL; }
+  }
+  /* reduce to the case Y square, upper triangular with 1s on diagonal */
+  Y = vecpermute(Y, d);
+  x = vecpermute(x, d);
+  X = rowslice(x, 1, nA);
+  return gerepileupto(av, RgM_mul(X, RgM_inv_upper(Y)));
+}
 
 static GEN
 get_suppl(GEN x, GEN d, long r)
