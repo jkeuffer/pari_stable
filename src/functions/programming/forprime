@@ -14,8 +14,7 @@ Function: _forprime_init
 Class: gp2c_internal
 Help: Initialize forprime_t
 Description:
- (forprime,int):void                  forprime_init(&$1, $2, NULL);
- (forprime,int,int):void              forprime_init(&$1, $2, $3);
+ (forprime,int,?int):void             forprime_init(&$1, $2, $3);
 
 Function: _forprime_next_
 Class: gp2c_internal
@@ -27,8 +26,8 @@ Function: _u_forprime_init
 Class: gp2c_internal
 Help: Initialize forprime_t (ulong version)
 Description:
- (forprime,small):void              u_forprime_init(&$1, $2, ULONG_MAX);
- (forprime,small,small):void        u_forprime_init(&$1, $2, $3);
+ (forprime,small,):void              u_forprime_init(&$1, $2, LONG_MAX);
+ (forprime,small,small):void         u_forprime_init(&$1, $2, $3);
 
 Function: _u_forprime_next
 Class: gp2c_internal
@@ -42,6 +41,11 @@ C-Name: forprime
 Prototype: vV=GDGI
 Help: forprime(p=a,{b},seq): the sequence is evaluated, p running over the
  primes between a and b. Omitting b runs through primes >= a
+Iterator:
+ (*notype,small,small) (forprime, _u_forprime_init, _u_forprime_next)
+ (*small,gen,?gen)    (forprime, _u_forprime_init, _u_forprime_next)
+ (*int,gen,?gen)      (forprime, _forprime_init, _forprime_next_)
+ (gen,gen,?gen)       (forprime, _forprime_init, _forprime_next_)
 Doc: evaluates \var{seq},
  where the formal variable $p$ ranges over the prime numbers between the real
  numbers $a$ to $b$, including $a$ and $b$ if they are prime. More precisely,
