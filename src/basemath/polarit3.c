@@ -1338,15 +1338,15 @@ Flx_factorff_irred(GEN P, GEN Q, ulong p)
   FQ = Flxq_matrix_pow(Flxq_powu(polx_Flx(vq),p,Q,p),nq,nq,Q,p);
   av = avma;
   FP = Flxq_matrix_pow(Flxq_powu(polx_Flx(vp),p,P,p),np,np,P,p);
-  FpX_ffintersect(Flx_to_ZX(P),Flx_to_ZX(Q),d,utoi(p),&SP,&SQ, Flm_to_ZM(FP), Flm_to_ZM(FQ));
+  Flx_ffintersect(P,Q,d,p,&SP,&SQ, FP, FQ);
   E = Flx_factorgalois(P,p,d,vq, FP);
   E = FlxX_to_Flm(E,np);
-  MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,P,p);
+  MP= Flxq_matrix_pow(SP,np,d,P,p);
   IR= gel(Flm_indexrank(MP,p),1);
   E = rowpermute(E, IR);
   M = rowpermute(MP,IR);
   M = Flm_inv(M,p);
-  MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,Q,p);
+  MQ= Flxq_matrix_pow(SQ,nq,d,Q,p);
   M = Flm_mul(MQ,M,p);
   M = Flm_mul(M,E,p);
   M = gerepileupto(av,M);
