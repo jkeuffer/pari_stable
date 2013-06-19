@@ -60,6 +60,8 @@ PMo 6- function forpart for looping over partitions
     7- [libpari] the *_invimage function no longer accept a t_COL second
        argument: use the RgM_RgC_invimage variant. They now return NULL when
        no solution exist (used to return a t_COL / t_MAT of length 1)
+    8- [libpari] replace the forvec_start() function by a standard
+       iterator: forvec_init() / forvec_next()
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)

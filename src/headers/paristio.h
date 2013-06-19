@@ -53,6 +53,13 @@ typedef struct {
   forprime_t T;
 } forcomposite_t;
 
+typedef struct forvec_t {
+  long first;
+  GEN *a, *m, *M; /* current n-uplet, minima, Maxima */
+  long n; /* length */
+  GEN (*next)(struct forvec_t *);
+} forvec_t;
+
 /* Iterate over partitions */
 typedef struct
 {
