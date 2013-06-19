@@ -216,6 +216,22 @@ RgM_to_FpM(GEN x, GEN p)
   for (i = 1; i < l; i++) gel(z,i) = RgC_to_FpC(gel(x,i), p);
   return z;
 }
+GEN
+RgC_to_Flc(GEN x, ulong p)
+{
+  long l = lg(x), i;
+  GEN a = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) a[i] = Rg_to_Fl(gel(x,i), p);
+  return a;
+}
+GEN
+RgM_to_Flm(GEN x, ulong p)
+{
+  long l, i;
+  GEN a = cgetg_copy(x, &l);
+  for (i=1; i<l; i++) gel(a,i) = RgC_to_Flc(gel(x,i), p);
+  return a;
+}
 
 GEN
 RgX_to_FpXQX(GEN x, GEN T, GEN p)
@@ -779,7 +795,7 @@ Flxq_ffisom_inv(GEN S,GEN T, ulong p)
   pari_sp ltop = avma;
   long n = degpol(T);
   GEN M = Flxq_matrix_pow(S,n,n,T,p);
-  GEN V = Flm_invimage(M, vecsmall_ei(n, 2), p);
+  GEN V = Flm_Flc_invimage(M, vecsmall_ei(n, 2), p);
   return gerepileupto(ltop, Flv_to_Flx(V, T[1]));
 }
 
@@ -789,7 +805,7 @@ FpXQ_ffisom_inv(GEN S,GEN T, GEN p)
   pari_sp ltop = avma;
   long n = degpol(T);
   GEN V, M = FpXQ_matrix_pow(S,n,n,T,p);
-  V = FpM_invimage(M, col_ei(n, 2), p);
+  V = FpM_FpC_invimage(M, col_ei(n, 2), p);
   return gerepilecopy(ltop, RgV_to_RgX(V, varn(T)));
 }
 
@@ -1099,18 +1115,18 @@ Flx_ffintersect(GEN P, GEN Q, long n, ulong l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       {
         Ay = Flxq_mul(Ay,Flxq_powu(Ap,lmun,P,l),P,l);
         for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
-        for(;i<=np;i++) gel(VP,i) = gen_0;
+        for(;i<=np;i++) VP[i] = 0;
       }
-      Ap = Flm_invimage(MA,VP,l);
+      Ap = Flm_Flc_invimage(MA,VP,l);
       Ap = Flv_to_Flx(Ap,vp);
 
       if (j)
       {
         By = Flxq_mul(By,Flxq_powu(Bp,lmun,Q,l),Q,l);
         for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
-        for(;i<=nq;i++) gel(VQ,i) = gen_0;
+        for(;i<=nq;i++) VQ[i] = 0;
       }
-      Bp = Flm_invimage(MB,VQ,l);
+      Bp = Flm_Flc_invimage(MB,VQ,l);
       Bp = Flv_to_Flx(Bp,vq);
     }
   }
@@ -1220,7 +1236,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
         for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
         for(;i<=np;i++) gel(VP,i) = gen_0;
       }
-      Ap = FpM_invimage(MA,VP,l);
+      Ap = FpM_FpC_invimage(MA,VP,l);
       Ap = RgV_to_RgX(Ap,vp);
 
       if (j)
@@ -1229,7 +1245,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
         for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
         for(;i<=nq;i++) gel(VQ,i) = gen_0;
       }
-      Bp = FpM_invimage(MB,VQ,l);
+      Bp = FpM_FpC_invimage(MB,VQ,l);
       Bp = RgV_to_RgX(Bp,vq);
     }
   }

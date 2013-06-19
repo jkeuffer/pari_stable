@@ -62,6 +62,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     machinery allows fast primes up to primelimit^2 which is more than
     enough even with a small table. The default value of 500.000 is already
     larger than necessary
+  - the *_invimage function no longer accept a t_COL second argument. Use the
+    RgM_RgC_invimage variant. They now return NULL when no solution exist
+    (used to return a t_COL / t_MAT of length 1)
 
 * Specific to the PARI library:
 ===============================

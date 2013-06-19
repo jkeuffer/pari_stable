@@ -44,7 +44,8 @@ PMo 6- function forpart for looping over partitions
        forcomposite() using this iterator
     8- Configure now generates a file 'config.log' to help debugging when it
        makes a mistake (contains all messages from compilers)
-    9- [libpari] RgM_inverseimage, FpM_inverseimage, Flm_inverseimage, Flm_neg
+    9- [libpari] RgM_invimage, RgM_RgC_invimage, FpM_invimage,
+       FpM_FpC_invimage, Flm_invimage, Flm_Flc_invimage, Flm_neg
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
@@ -56,6 +57,9 @@ PMo 6- function forpart for looping over partitions
     5- bnfnewprec: ensure we recompute bnf from scratch at most once (could
        happen many times in makematal())
     6- [make bench] properly align results if 'printf' is available
+    7- [libpari] the *_invimage function no longer accept a t_COL second
+       argument: use the RgM_RgC_invimage variant. They now return NULL when
+       no solution exist (used to return a t_COL / t_MAT of length 1)
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)

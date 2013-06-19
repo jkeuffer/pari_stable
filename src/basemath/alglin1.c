@@ -934,87 +934,6 @@ FqM_rank(GEN x, GEN T, GEN p)
 }
 
 static GEN
-sFlm_invimage(GEN mat, GEN y, ulong p)
-{
-  pari_sp av = avma;
-  long i, l = lg(mat);
-  GEN M = cgetg(l+1,t_MAT), col;
-  ulong t;
-
-  if (l==1) return NULL;
-  if (lg(y) != lgcols(mat)) pari_err_DIM("Flm_invimage");
-
-  for (i=1; i<l; i++) gel(M,i) = gel(mat,i);
-  gel(M,l) = y; M = Flm_ker(M,p);
-  i = lg(M)-1; if (!i) return NULL;
-
-  col = gel(M,i); t = col[l];
-  if (!t) return NULL;
-
-  t = Fl_inv(Fl_neg(t,p),p);
-  setlg(col,l);
-  if (t==1) return gerepilecopy(av, col);
-  return gerepileupto(av, Flc_Fl_mul(col, t, p));
-}
-
-/* inverse image of v by m */
-GEN
-Flm_invimage(GEN m, GEN v, ulong p)
-{
-  GEN y;
-
-  if (typ(v) == t_VECSMALL)
-  {
-    pari_sp av = avma;
-    y = sFlm_invimage(m,v,p);
-    if (y) return y;
-    avma = av; return cgetg(1,t_MAT);
-  }
-  /* t_MAT */
-  y = Flm_inverseimage(m,v,p);
-  return y? y: cgetg(1, t_MAT);
-}
-
-static GEN
-sFpM_invimage(GEN mat, GEN y, GEN p)
-{
-  pari_sp av = avma;
-  long i, l = lg(mat);
-  GEN M, col, t;
-
-  if (l==1) return NULL;
-  if (lg(y) != lgcols(mat)) pari_err_DIM("FpM_invimage");
-  M = FpM_ker(shallowconcat(mat,y),p);
-  i = lg(M)-1; if (!i) return NULL;
-
-  col = gel(M,i); t = gel(col,l);
-  if (!signe(t)) return NULL;
-
-  t = Fp_inv(negi(t),p);
-  setlg(col,l);
-  if (is_pm1(t)) return gerepilecopy(av, col);
-  return gerepileupto(av, FpC_Fp_mul(col, t, p));
-}
-
-/* inverse image of v by m */
-GEN
-FpM_invimage(GEN m, GEN v, GEN p)
-{
-  GEN y;
-
-  if (typ(v) == t_COL)
-  {
-    pari_sp av = avma;
-    y = sFpM_invimage(m,v,p);
-    if (y) return y;
-    avma = av; return cgetg(1,t_COL);
-  }
-  /* t_MAT */
-  y = FpM_inverseimage(m,v,p);
-  return y? y: cgetg(1, t_MAT);
-}
-
-static GEN
 FpM_ker_i(GEN x, GEN p, long deplin)
 {
   const struct bb_field *ff;
@@ -2465,54 +2384,118 @@ GEN
 ZM_imagecomplspec(GEN x, long *nlze)
 { return imagecomplspec_aux(x,nlze,&ZM_pivots); }
 
-static GEN
-sinverseimage(GEN mat, GEN y)
+GEN
+RgM_RgC_invimage(GEN A, GEN y)
 {
   pari_sp av = avma;
-  long i, nbcol = lg(mat);
-  GEN col,p1 = cgetg(nbcol+1,t_MAT);
+  long i, l = lg(A);
+  GEN M, x, t, p = NULL;
 
-  if (nbcol==1) return NULL;
-  if (lg(y) != lgcols(mat)) pari_err_DIM("inverseimage");
+  if (RgM_is_FpM(A, &p) && RgV_is_FpV(y, &p) && p)
+  {
+    if (lgefint(p) == 3)
+    {
+      ulong pp = p[2];
+      A = RgM_to_Flm(A,pp);
+      y = RgC_to_Flc(y,pp);
+      x = Flm_Flc_invimage(A, y, pp);
+      x = Flc_to_ZC(x);
+    }
+    else
+    {
+      A = RgM_to_FpM(A,p);
+      y = RgC_to_FpC(y,p);
+      x = FpM_FpC_invimage(A, y, p);
+    }
+    if (!x) { avma = av; return NULL; }
+    return gerepileupto(av, FpC_to_mod(x, p));
+  }
 
-  gel(p1,nbcol) = y;
-  for (i=1; i<nbcol; i++) gel(p1,i) = gel(mat,i);
-  p1 = ker(p1); i=lg(p1)-1;
-  if (!i) return NULL;
+  if (l==1) return NULL;
+  if (lg(y) != lgcols(A)) pari_err_DIM("inverseimage");
+  M = ker(shallowconcat(A, y));
+  i = lg(M)-1;
+  if (!i) { avma = av; return NULL; }
 
-  col = gel(p1,i); p1 = gel(col,nbcol);
-  if (gequal0(p1)) return NULL;
+  x = gel(M,i); t = gel(x,l);
+  if (gequal0(t)) { avma = av; return NULL; }
 
-  p1 = gneg_i(p1); setlg(col,nbcol);
-  return gerepileupto(av, RgC_Rg_div(col, p1));
+  t = gneg_i(t); setlg(x,l);
+  return gerepileupto(av, RgC_Rg_div(x, t));
+}
+GEN
+FpM_FpC_invimage(GEN A, GEN y, GEN p)
+{
+  pari_sp av = avma;
+  long i, l = lg(A);
+  GEN M, x, t;
+
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    A = ZM_to_Flm(A, pp);
+    y = ZV_to_Flv(y, pp);
+    x = Flm_Flc_invimage(A,y,pp);
+    if (!x) { avma = av; return NULL; }
+    return gerepileupto(av, Flc_to_ZC(x));
+  }
+  if (l==1) return NULL;
+  if (lg(y) != lgcols(A)) pari_err_DIM("FpM_FpC_invimage");
+  M = FpM_ker(shallowconcat(A,y),p);
+  i = lg(M)-1; if (!i) { avma = av; return NULL; }
+
+  x = gel(M,i); t = gel(x,l);
+  if (!signe(t)) { avma = av; return NULL; }
+
+  setlg(x,l); t = Fp_inv(negi(t),p);
+  if (is_pm1(t)) return gerepilecopy(av, x);
+  return gerepileupto(av, FpC_Fp_mul(x, t, p));
+}
+GEN
+Flm_Flc_invimage(GEN A, GEN y, ulong p)
+{
+  pari_sp av = avma;
+  long i, l = lg(A);
+  GEN M, x;
+  ulong t;
+
+  if (l==1) return NULL;
+  if (lg(y) != lgcols(A)) pari_err_DIM("Flm_Flc_invimage");
+  M = cgetg(l+1,t_MAT);
+  for (i=1; i<l; i++) gel(M,i) = gel(A,i);
+  gel(M,l) = y; M = Flm_ker(M,p);
+  i = lg(M)-1; if (!i) { avma = av; return NULL; }
+
+  x = gel(M,i); t = x[l];
+  if (!t) { avma = av; return NULL; }
+
+  setlg(x,l); t = Fl_inv(Fl_neg(t,p),p);
+  if (t!=1) x = Flc_Fl_mul(x, t, p);
+  return gerepileuptoleaf(av, x);
 }
 
 /* Return X such that m X = v (t_COL or t_MAT), resp. an empty t_COL / t_MAT
  * if no solution exist */
 GEN
-inverseimage(GEN m,GEN v)
+inverseimage(GEN m, GEN v)
 {
-  pari_sp av;
   GEN y;
-
   if (typ(m)!=t_MAT) pari_err_TYPE("inverseimage",m);
   switch(typ(v))
   {
     case t_COL:
-      av = avma;
-      y = sinverseimage(m,v);
-      if (y) return y;
-      avma = av; return cgetg(1,t_COL);
+      y = RgM_RgC_invimage(m,v);
+      return y? y: cgetg(1,t_COL);
     case t_MAT:
-      y = RgM_inverseimage(m, v);
+      y = RgM_invimage(m, v);
       return y? y: cgetg(1,t_MAT);
-    default: pari_err_TYPE("inverseimage",v);
-             return NULL;/*not reached*/
   }
+  pari_err_TYPE("inverseimage",v);
+  return NULL;/*not reached*/
 }
 
 static GEN
-Flm_inverseimage_i(GEN A, GEN B, ulong p)
+Flm_invimage_i(GEN A, GEN B, ulong p)
 {
   GEN d, x, X, Y;
   long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
@@ -2537,15 +2520,15 @@ Flm_inverseimage_i(GEN A, GEN B, ulong p)
   return Flm_mul(X, Flm_inv_upper_1(Y,p), p);
 }
 GEN
-Flm_inverseimage(GEN A, GEN B, ulong p)
+Flm_invimage(GEN A, GEN B, ulong p)
 {
   pari_sp av = avma;
-  GEN X = Flm_inverseimage_i(A,B,p);
+  GEN X = Flm_invimage_i(A,B,p);
   if (!X) { avma = av; return NULL; }
   return gerepileupto(av, X);
 }
 static GEN
-FpM_inverseimage_i(GEN A, GEN B, GEN p)
+FpM_invimage_i(GEN A, GEN B, GEN p)
 {
   GEN d, x, X, Y;
   long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
@@ -2554,7 +2537,7 @@ FpM_inverseimage_i(GEN A, GEN B, GEN p)
     ulong pp = p[2];
     A = ZM_to_Flm(A, pp);
     B = ZM_to_Flm(B, pp);
-    x = Flm_inverseimage_i(A, B, pp);
+    x = Flm_invimage_i(A, B, pp);
     return x? Flm_to_ZM(x): NULL;
   }
   x = FpM_ker(shallowconcat(ZM_neg(A), B), p);
@@ -2578,26 +2561,38 @@ FpM_inverseimage_i(GEN A, GEN B, GEN p)
   return FpM_mul(X, FpM_inv_upper_1(Y,p), p);
 }
 GEN
-FpM_inverseimage(GEN A, GEN B, GEN p)
+FpM_invimage(GEN A, GEN B, GEN p)
 {
   pari_sp av = avma;
-  GEN X = FpM_inverseimage_i(A,B,p);
+  GEN X = FpM_invimage_i(A,B,p);
   if (!X) { avma = av; return NULL; }
   return gerepileupto(av, X);
 }
+
 /* find Z such that A Z = B. Return NULL if no solution */
 GEN
-RgM_inverseimage(GEN A, GEN B)
+RgM_invimage(GEN A, GEN B)
 {
   pari_sp av = avma;
   GEN d, x, X, Y;
   long i, j, nY, nA = lg(A)-1, nB = lg(B)-1;
   GEN p = NULL;
-  if (RgM_is_FpM(A, &p) && p)
+  if (RgM_is_FpM(A, &p) && RgM_is_FpM(B, &p) && p)
   {
-    A = RgM_to_FpM(A,p);
-    B = RgM_to_FpM(B,p);
-    x = FpM_inverseimage_i(A, B, p);
+    if (lgefint(p) == 3)
+    {
+      ulong pp = p[2];
+      A = RgM_to_Flm(A,pp);
+      B = RgM_to_Flm(B,pp);
+      x = Flm_invimage_i(A, B, pp);
+      x = Flm_to_ZM(x);
+    }
+    else
+    {
+      A = RgM_to_FpM(A,p);
+      B = RgM_to_FpM(B,p);
+      x = FpM_invimage_i(A, B, p);
+    }
     if (!x) { avma = av; return NULL; }
     return gerepileupto(av, FpM_to_mod(x, p));
   }

@@ -3618,10 +3618,13 @@ or \kbd{NULL} if none exist.
 \fun{GEN}{FpM_inv}{GEN x, GEN p} returns the inverse of \kbd{x}, or
 \kbd{NULL} if \kbd{x} is not invertible.
 
-\fun{GEN}{FpM_invimage}{GEN m, GEN v, GEN p} as \kbd{inverseimage}
+\fun{GEN}{FpM_FpC_invimage}{GEN m, GEN v, GEN p}
+ given an \kbd{FpM} $x$ and an \kbd{FpC} $y$, returns an $x$ such that $Ax =
+ y$, or \kbd{NULL} if no such vector exist.
 
-\fun{GEN}{FpM_inverseimage}{GEN A, GEN B, GEN p} returns a \typ{MAT} $X$ such
-that $A X = B$ if one such exists, and \kbd{NULL} otherwise.
+\fun{GEN}{FpM_invimage}{GEN m, GEN v, GEN p}
+given two \kbd{FpM} $x$ and $y$, returns $x$ such that $Ax = y$, or \kbd{NULL}
+if no such matrix exist.
 
 \fun{GEN}{FpM_ker}{GEN x, GEN p} as \kbd{ker}
 
@@ -3756,10 +3759,13 @@ the square \kbd{Flm} $x$, as a \kbd{Flx}.
 
 \fun{GEN}{Flm_inv}{GEN x, ulong p}
 
-\fun{GEN}{Flm_invimage}{GEN x, GEN y, ulong p}
+\fun{GEN}{Flm_Flc_invimage}{GEN A, GEN y, ulong p} given an \kbd{Flm}
+$x$ and an \kbd{Flc} $y$, returns an $x$ such that $Ax = y$, or \kbd{NULL}
+if no such vector exist.
 
-\fun{GEN}{Flm_inverseimage}{GEN A, GEN B, ulong p} returns a \typ{MAT} $X$
-such that $A X = B$ if one such exists, and \kbd{NULL} otherwise.
+\fun{GEN}{Flm_invimage}{GEN x, GEN y, ulong p}
+given two \kbd{Flm} $x$ and $y$, returns $x$ such that $Ax = y$, or \kbd{NULL}
+if no such matrix exist.
 
 \fun{GEN}{Flm_ker}{GEN x, ulong p}
 
@@ -6189,7 +6195,10 @@ make it appear so).
 \fun{GEN}{RgM_inv_upper}{GEN a} as \kbd{RgM\_inv}, assuming that $a$ is a
 non-empty invertible upper triangular matrix, hence a little faster.
 
-\fun{GEN}{RgM_inverseimage}{GEN A, GEN B} returns a \typ{MAT} $X$ such that
+\fun{GEN}{RgM_RgC_invimage}{GEN A, GEN B} returns a \typ{COL} $X$ such that
+$A X = B$ if one such exists, and \kbd{NULL} otherwise.
+
+\fun{GEN}{RgM_invimage}{GEN A, GEN B} returns a \typ{MAT} $X$ such that
 $A X = B$ if one such exists, and \kbd{NULL} otherwise.
 
 \fun{GEN}{RgM_Hadamard}{GEN a} returns a upper bound for the absolute

@@ -2251,7 +2251,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   f = N - m; /* we want v_p(Norm(x)) = p^f */
   q = powiu(p,f+1);
 
-  u = FpM_invimage(shallowconcat(P, V), col_ei(N,1), p);
+  u = FpM_FpC_invimage(shallowconcat(P, V), col_ei(N,1), p);
   setlg(u, lg(P));
   u = centermod(ZM_ZC_mul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
