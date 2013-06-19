@@ -1102,7 +1102,7 @@ Flx_ffintersect(GEN P, GEN Q, long n, ulong l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   {
     GEN VP, VQ, Ay, By;
     ulong lmun = l-1;
-    long i, j;
+    long j;
     MA = Flm_Fl_add(MA,lmun,l);
     MB = Flm_Fl_add(MB,lmun,l);
     Ay = pol1_Flx(vp);
@@ -1114,8 +1114,7 @@ Flx_ffintersect(GEN P, GEN Q, long n, ulong l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (j)
       {
         Ay = Flxq_mul(Ay,Flxq_powu(Ap,lmun,P,l),P,l);
-        for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
-        for(;i<=np;i++) VP[i] = 0;
+        VP = Flx_to_Flv(Ay,np);
       }
       Ap = Flm_Flc_invimage(MA,VP,l);
       Ap = Flv_to_Flx(Ap,vp);
@@ -1123,8 +1122,7 @@ Flx_ffintersect(GEN P, GEN Q, long n, ulong l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (j)
       {
         By = Flxq_mul(By,Flxq_powu(Bp,lmun,Q,l),Q,l);
-        for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
-        for(;i<=nq;i++) VQ[i] = 0;
+        VQ = Flx_to_Flv(By,nq);
       }
       Bp = Flm_Flc_invimage(MB,VQ,l);
       Bp = Flv_to_Flx(Bp,vq);
@@ -1221,7 +1219,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
   if (e)
   {
     GEN VP, VQ, Ay, By, lmun = addis(l,-1);
-    long i, j;
+    long j;
     MA = RgM_Rg_add_shallow(MA,gen_m1);
     MB = RgM_Rg_add_shallow(MB,gen_m1);
     Ay = pol_1(vp);
@@ -1233,8 +1231,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (j)
       {
         Ay = FpXQ_mul(Ay,FpXQ_pow(Ap,lmun,P,l),P,l);
-        for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
-        for(;i<=np;i++) gel(VP,i) = gen_0;
+        VP = RgX_to_RgV(Ay,np);
       }
       Ap = FpM_FpC_invimage(MA,VP,l);
       Ap = RgV_to_RgX(Ap,vp);
@@ -1242,8 +1239,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (j)
       {
         By = FpXQ_mul(By,FpXQ_pow(Bp,lmun,Q,l),Q,l);
-        for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
-        for(;i<=nq;i++) gel(VQ,i) = gen_0;
+        VQ = RgX_to_RgV(By,nq);
       }
       Bp = FpM_FpC_invimage(MB,VQ,l);
       Bp = RgV_to_RgX(Bp,vq);
