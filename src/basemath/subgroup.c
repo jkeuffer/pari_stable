@@ -99,10 +99,10 @@ addcell(sublist_t *S, GEN H)
 
   L = 3;
   for (j=1; j<=n; j++)
-    for(i=1; i<=j; i++) {
-      long l = lgefint(gcoeff(H,i,j));
-      if (l > L) L = l;
-    }
+  { /* H in HNF, largest entries are on diagonal */
+    long l = lgefint(gcoeff(H,j,j));
+    if (l > L) L = l;
+  }
   L -= 2;
   cell = (slist*) pari_malloc(sizeof(slist)
                               + ((n*(n+1)) >> 1) * sizeof(long) * L);
