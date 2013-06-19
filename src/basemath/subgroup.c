@@ -124,9 +124,7 @@ list_fun(void *E, GEN x)
 {
   sublist_t *S = (sublist_t*)E;
   GEN H = ZM_hnf(shallowconcat(S->hnfgroup,x));
-  if (!S->gen || subgroup_conductor_ok(H, S->gen)) {
-    addcell(S, H);
-  }
+  if (!S->gen || subgroup_conductor_ok(H, S->gen)) addcell(S, H);
   return 0;
 }
 /* -------------------------------------------------------------- */
