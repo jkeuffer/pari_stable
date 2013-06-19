@@ -1405,19 +1405,32 @@ FpM_inv_upper_1(GEN A, GEN p)
   for (i = 1; i < l; i++) gel(B,i) = FpM_inv_upper_1_ind(A, i, p);
   return B;
 }
-/* assume dim A >= 1, A invertible + upper triangular, 1s on diagonal  */
+/* assume dim A >= 1, A invertible + upper triangular, 1s on diagonal,
+ * reduced mod p */
 static GEN
 Flm_inv_upper_1_ind(GEN A, long index, ulong p)
 {
   long n = lg(A)-1, i = index, j;
   GEN u = const_vecsmall(n, 0);
   u[i] = 1;
-  for (i--; i>0; i--)
-  {
-    ulong m = Fl_mul(ucoeff(A,i,i+1),uel(u,i+1), p); /* j = i+1 */
-    for (j=i+2; j<=n; j++) m = Fl_add(m, Fl_mul(ucoeff(A,i,j),uel(u,j),p), p);
-    u[i] = Fl_neg(m, p);
-  }
+  if (SMALL_ULONG(p))
+    for (i--; i>0; i--)
+    {
+      ulong m = ucoeff(A,i,i+1) * uel(u,i+1); /* j = i+1 */
+      for (j=i+2; j<=n; j++)
+      {
+        if (m & HIGHMASK) m %= p;
+        m += ucoeff(A,i,j) * uel(u,j);
+      }
+      u[i] = Fl_neg(m % p, p);
+    }
+  else
+    for (i--; i>0; i--)
+    {
+      ulong m = Fl_mul(ucoeff(A,i,i+1),uel(u,i+1), p); /* j = i+1 */
+      for (j=i+2; j<=n; j++) m = Fl_add(m, Fl_mul(ucoeff(A,i,j),uel(u,j),p), p);
+      u[i] = Fl_neg(m, p);
+    }
   return u;
 }
 static GEN
