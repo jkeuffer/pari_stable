@@ -806,7 +806,7 @@ forvec_init(forvec_t *d, GEN x, long flag)
       default: m = gcopy(m);
         break;
     }
-    if (gcmp(m,M) > 0) { d->a = NULL; return 0; }
+    if (gcmp(m,M) > 0) { d->a = NULL; d->next = &_next; return 0; }
     d->m[i] = m;
     d->M[i] = M;
   }
