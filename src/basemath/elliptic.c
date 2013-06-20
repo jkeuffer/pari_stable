@@ -5445,34 +5445,43 @@ ellgenerators(GEN E)
   }
 }
 
+/* char != 2,3, j != 0, 1728 */
+static GEN
+ellfromj_simple(GEN j)
+{
+  pari_sp av = avma;
+  GEN k = gsubsg(1728,j), kj = gmul(k, j), k2j = gmul(kj, k);
+  GEN E = zerovec(5);
+  gel(E,4) = gmulsg(3,kj);
+  gel(E,5) = gmulsg(2,k2j); return gerepileupto(av, E);
+}
 GEN
 ellfromj(GEN j)
 {
-  pari_sp av=avma;
-  GEN k, kj, k2j, T = NULL, p = typ(j)==t_FFELT? FF_p_i(j): NULL;
-  if (p || (Rg_is_FpXQ(j,&T,&p) && p))
+  GEN T = NULL, p = typ(j)==t_FFELT? FF_p_i(j): NULL;
+  /* trick: use j^0 to get 1 in the proper base field */
+  if ((p || (Rg_is_FpXQ(j,&T,&p) && p)) && lgefint(p) == 3) switch(p[2])
   {
-    if (equaliu(p,2))
-    {
+    case 2:
       if (gequal0(j))
-        retmkvec5(gen_0,gen_0,mkintmodu(1,2),gen_0,gen_0);
+        retmkvec5(gen_0,gen_0, gpowgs(j,0), gen_0,gen_0);
       else
-        retmkvec5(mkintmodu(1,2),gen_0,gen_0,gen_0,ginv(j));
-    }
-    if (equaliu(p,3))
-    {
+        retmkvec5(gpowgs(j,0),gen_0,gen_0, gen_0,ginv(j));
+    case 3:
       if (gequal0(j))
-        retmkvec5(gen_0,gen_0,gen_0,mkintmodu(1,3),gen_0);
+        retmkvec5(gen_0,gen_0,gen_0, gpowgs(j,0), gen_0);
       else
-        return gerepilecopy(av, mkvec5(gen_0,j,gen_0,gen_0,gneg(gsqr(j))));
-    }
+      {
+        GEN E = zerovec(5);
+        pari_sp av = avma;
+        gel(E,5) = gerepileupto(av, gneg(gsqr(j)));
+        gel(E,2) = gcopy(j);
+        return E;
+      }
   }
-  if (gequal0(j))
-    retmkvec5(gen_0,gen_0,gen_0,gen_0,gen_1);
-  if (gequalgs(j,1728))
-    retmkvec5(gen_0,gen_0,gen_0,gen_1,gen_0);
-  k = gsubsg(1728,j); kj = gmul(k, j); k2j = gmul(kj, k);
-  return gerepilecopy(av, mkvec5(gen_0,gen_0,gen_0,gmulsg(3,kj),gmulsg(2,k2j)));
+  if (gequal0(j)) retmkvec5(gen_0,gen_0,gen_0,gen_0, gpowgs(j,0));
+  if (gequalgs(j,1728)) retmkvec5(gen_0,gen_0,gen_0, gpowgs(j,0), gen_0);
+  return ellfromj_simple(j);
 }
 
 /* n <= 4 */

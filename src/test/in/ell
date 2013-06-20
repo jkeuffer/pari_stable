@@ -59,9 +59,11 @@ ellinit([a1,a2,a3,a4,a6]);
 ellinit(ellfromj(0)).j
 ellinit(ellfromj(1728)).j
 ellinit(ellfromj(j)).j
-ellinit(ellfromj(0*Mod(1,2))).j
+ellinit(ellfromj(Mod(0,2))).j
+ellinit(ellfromj(Mod(0,5))).j
+ellinit(ellfromj(Mod(3,5))).j
 ellinit(ellfromj(j*Mod(1,2))).j
-ellinit(ellfromj(0*Mod(1,3))).j
+ellinit(ellfromj(Mod(0,3))).j
 ellinit(ellfromj(j*Mod(1,3))).j
 a=ffgen(ffinit(2,5),'a);ellinit(ellfromj(a)).j
 a=ffgen(ffinit(3,5),'a);ellinit(ellfromj(a)).j

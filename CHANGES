@@ -20,6 +20,7 @@ PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [#1430]
    11- matinverseimage(A, t_MAT B) would treat individual columns B[,i]
        independently and successively. Now use a single Gauss reduction.
    12- Flm_Fl_mul returned a wrong result
+   13- ellinit(ellfromj(Mod(0,17))) -> curve defined over Z [#1436]
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the
