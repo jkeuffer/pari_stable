@@ -1468,7 +1468,9 @@ ggamma(GEN x, long prec)
           Y = gsubsg(1, y);
         }
         z = gexp(glngamma(Y,prec),prec);
-        if (pi) z = gdiv(pi, gmul(z, gsin(gmul(pi,y), prec)));
+        if (pi)
+          z = gdiv(mpodd(t)? negr(pi): pi,
+                   gmul(z, gsin(gmul(pi,serchop0(y)), prec)));
       }
       return gerepileupto(av, z);
   }
