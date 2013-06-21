@@ -182,8 +182,8 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN deg      = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
-  GEN listmod  = cgetg(lfamod+1, t_COL);
-  GEN fa       = cgetg(lfamod+1, t_COL);
+  GEN listmod  = cgetg(lfamod+1, t_VEC);
+  GEN fa       = cgetg(lfamod+1, t_VEC);
 
   *pmaxK = cmbf_maxK(lfamod);
   lc = absi(leading_term(pol));
@@ -687,7 +687,7 @@ AGAIN:
     if (DEBUGLEVEL>2)
       err_printf("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
                  a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, timer_delay(&TI));
-    if (!CM_L) { list = mkcol(P); break; }
+    if (!CM_L) { list = mkvec(P); break; }
     if (b > bmin)
     {
       CM_L = gerepilecopy(av2, CM_L);
@@ -782,7 +782,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
   res     = gel(L,1);
   listmod = gel(L,2); l = lg(listmod)-1;
   famod = gel(listmod,l);
-  if (maxK >= 0 && lg(famod)-1 > 2*maxK)
+  if (maxK > 0 && lg(famod)-1 > 2*maxK)
   {
     if (l!=1) A = factor_bound(gel(res,l));
     if (DEBUGLEVEL > 4) err_printf("last factor still to be checked\n");
