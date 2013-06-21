@@ -1009,7 +1009,7 @@ Fp_ispower(GEN x, GEN K, GEN p)
   /* implies p > 2 */
   p_1 = subiu(p,1);
   K = gcdii(K, p_1);
-  if (equaliu(K, 2)) { r = kronecker(x,p); avma = av; return r; }
+  if (equaliu(K, 2)) { r = kronecker(x,p); avma = av; return (r > 0); }
   x = Fp_pow(x, diviiexact(p_1,K), p);
   avma = av; return equali1(x);
 }
