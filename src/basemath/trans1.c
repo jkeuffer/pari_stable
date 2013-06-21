@@ -3005,7 +3005,7 @@ cxexp1(GEN z, long prec)
 void
 gsincos(GEN x, GEN *s, GEN *c, long prec)
 {
-  long ii, i, j, ex, ex2, lx, ly, mi;
+  long i, j, ex, ex2, lx, ly, mi;
   pari_sp av, tetpil;
   GEN y, r, u, v, u1, v1, p1, p2, p3, p4, ps, pc;
   GEN *gptr[4];
@@ -3054,8 +3054,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
       if (!ex)
       {
-        p1 = leafcopy(y); gel(p1,2) = gen_0;
-        gsincos(normalize(p1),&u,&v,prec);
+        gsincos(serchop0(y),&u,&v,prec);
         gsincos(gel(y,2),&u1,&v1,prec);
         p1 = gmul(v1,v);
         p2 = gmul(u1,u);
@@ -3079,7 +3078,8 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       for (i=3; i< ex2; i++) gel(pc,i) = gen_0;
       for (i=ex2; i<ly; i++)
       {
-        ii = i-ex; av = avma; p1 = gen_0;
+        long ii = i-ex;
+        av = avma; p1 = gen_0;
         for (j=ex; j<=minss(ii-2,mi); j++)
           p1 = gadd(p1, gmulgs(gmul(gel(y,j-ex+2),gel(ps,ii-j)),j));
         gel(pc,i) = gerepileupto(av, gdivgs(p1,2-i));
@@ -3089,7 +3089,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
           for (j=ex; j<=minss(i-ex2,mi); j++)
             p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
           p1 = gdivgs(p1,i-2);
-          gel(ps,i-ex) = gerepileupto(av, gadd(p1,gel(y,i-ex)));
+          gel(ps,ii) = gerepileupto(av, gadd(p1,gel(y,ii)));
         }
       }
       return;
