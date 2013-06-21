@@ -2033,6 +2033,18 @@ cxexp(GEN x, long prec)
   return y;
 }
 
+/* return s - s(0), shallow */
+GEN
+serchop0(GEN s)
+{
+  long i, l = lg(s);
+  GEN y;
+  if (l == 2) return s;
+  y = cgetg(l, t_SER); y[1] = s[1];
+  gel(y,2) = gen_0; for (i=3; i <l; i++) gel(y,i) = gel(s,i);
+  return normalize(y);
+}
+
 static GEN
 serexp(GEN x, long prec)
 {
@@ -2063,12 +2075,8 @@ serexp(GEN x, long prec)
     }
     return y;
   }
-  av = avma; y = cgetg(lx, t_SER);
-  y[1] = x[1]; gel(y,2) = gen_0;
-  for (i=3; i <lx; i++) gel(y,i) = gel(x,i);
-  p1 = gexp(gel(x,2),prec);
-  y = gmul(p1, serexp(normalize(y),prec));
-  return gerepileupto(av, y);
+  av = avma;
+  return gerepileupto(av, gmul(gexp(gel(x,2),prec), serexp(serchop0(x),prec)));
 }
 
 GEN

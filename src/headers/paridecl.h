@@ -3083,6 +3083,7 @@ GEN     powru(GEN x, ulong n);
 GEN     powruhalf(GEN x, ulong s);
 GEN     powuu(ulong p, ulong k);
 GEN     powgi(GEN x, GEN n);
+GEN     serchop0(GEN s);
 GEN     sqrtnint(GEN a, long n);
 GEN     teich(GEN x);
 ulong   upowuu(ulong p, ulong k);
