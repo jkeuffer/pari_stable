@@ -2033,7 +2033,7 @@ cxexp(GEN x, long prec)
   return y;
 }
 
-/* return s - s(0), shallow */
+/* given a t_SER x^v s(x), with s(0) != 0, return x^v(s - s(0)), shallow */
 GEN
 serchop0(GEN s)
 {
