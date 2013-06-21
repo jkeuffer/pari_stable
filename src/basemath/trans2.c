@@ -1622,6 +1622,124 @@ cxpsi(GEN s0, long prec)
   avma = av; return affc_fixlg(z, res);
 }
 
+/* psi(1+x) + O(x^n), x = pol_x(v) */
+static GEN
+serpsi1(long n, long v, long prec)
+{
+  long i, l = n+3;
+  GEN g, s = cgetg(l, t_SER);
+  s[1] = evalsigne(1)|evalvalp(0)|evalvarn(v);
+  g = mpeuler(prec); setsigne(g, -1);
+  gel(s,2) = g;
+  for (i = 2; i < l-1; i++)
+  {
+    GEN c = szeta(i, prec);
+    if (odd(i)) setsigne(c, -1);
+    gel(s,i+1) = c;
+  }
+  return s;
+}
+/* T an RgX, return T(X + z0) + O(X^L) */
+static GEN
+tr(GEN T, GEN z0, long L)
+{
+  GEN s = RgX_to_ser(RgX_translate(T, z0), L+3);
+  setvarn(s, 0); return s;
+}
+/* psi(z0+x) + O(x^n) */
+static GEN
+serpsiz0(GEN z0, long L, long v, long prec)
+{
+  pari_sp av, lim;
+  GEN A,A1,A2, B,B1,B2, Q;
+  long n;
+
+  if (equali1(z0)) return serpsi1(L, v, prec);
+  /* otherwise use Luke's rational approximations for psi(x) */
+  n = gprecision(z0); if (n) prec = n;
+  z0 = gtofp(z0, prec + EXTRAPRECWORD);
+  /* Start from n = 3; in Luke's notation, A2 := A_{n-2}, A1 := A_{n-1},
+   * A := A_n. Same for B */
+  av = avma; lim = stack_lim(av,1);
+  A2= gdivgs(mkpoln(2, gen_1, utoipos(6)), 2);
+  B2 = scalarpol_shallow(utoipos(4), 0);
+  A1= gdivgs(mkpoln(3, gen_1, utoipos(82), utoipos(96)), 6);
+  B1 = mkpoln(2, utoipos(8), utoipos(28));
+  A = gdivgs(mkpoln(4, gen_1, utoipos(387), utoipos(2906), utoipos(1920)), 12);
+  B = mkpoln(3, utoipos(14), utoipos(204), utoipos(310));
+  A2= tr(A2,z0, L);
+  B2= tr(B2,z0, L);
+  A1= tr(A1,z0, L);
+  B1= tr(B1,z0, L);
+  A = tr(A, z0, L);
+  B = tr(B, z0, L); Q = gdiv(A, B);
+  /* work with z0+x as a variable */
+  for (n = 4;; n++)
+  {
+    GEN Q0 = Q, a, b, r, c3,c2,c1,c0 = muluu(2*n-3, n+1);
+    GEN u = subiu(muluu(n, 7*n-9), 6);
+    GEN t = addiu(muluu(n, 7*n-19), 4);
+    /* c1=(2*n-1)*(3*(n-1)*z+7*n^2-9*n-6);
+     * c2=(2*n-3)*(z-n-1)*(-3*(n-1)*z+7*n^2-19*n+4);
+     * c3=(2*n-1)*(n-3)*(z-n)*(z-(n+1))*(z+(n-4)); */
+    c1 = deg1pol_shallow(muluu(3*(n-1),2*n-1), muliu(u,2*n-1), 0);
+    c2 = ZX_mul(deg1pol_shallow(utoipos(2*n-3), negi(muluu(2*n-3,n+1)), 0),
+                deg1pol_shallow(utoineg(3*(n-1)), t, 0));
+    r = mkvec3(utoipos(n), utoipos(n+1), stoi(4-n));
+    c3 = ZX_Z_mul(roots_to_pol(r,0), muluu(2*n-1,n-3));
+    c1 = tr(c1, z0, L+3);
+    c2 = tr(c2, z0, L+3);
+    c3 = tr(c3, z0, L+3);
+
+    /* A_{n+1}, B_{n+1} */
+    a = gdiv(gadd(gadd(gmul(c1,A),gmul(c2,A1)),gmul(c3,A2)), c0);
+    b = gdiv(gadd(gadd(gmul(c1,B),gmul(c2,B1)),gmul(c3,B2)), c0);
+    Q = gdiv(a,b);
+    if (gexpo(gsub(Q,Q0)) < -bit_accuracy(prec)) break;
+    A2 = A1; A1 = A; A = a;
+    B2 = B1; B1 = B; B = b;
+    if (low_stack(lim,stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"serpsiz0, n = %ld", n);
+      gerepileall(av, 7, &A,&A1,&A2, &B,&B1,&B2, &Q);
+    }
+  }
+  Q = gmul(Q, gmul2n(gsubsg(1, ginv(tr(pol_x(v),z0, L))), 1));
+  return gadd(negr(mpeuler(prec)), Q);
+}
+static GEN
+serpsi(GEN y, long prec)
+{
+  pari_sp av = avma;
+  GEN Q, z0, Y;
+  long L = lg(y)-2, v  = varn(y), vy = valp(y);
+  int reflect;
+
+  if (!L) pari_err_DOMAIN("psi", "argument", "=", gen_0,y);
+  if (vy < 0) pari_err_DOMAIN("psi", "series valuation", "<", gen_0,y);
+  if (vy)
+    z0 = gen_0;
+  else
+  {
+    GEN t;
+    z0 = gel(y,2); t = ground(z0);
+    if (gequal(t,z0)) z0 = t;
+  }
+  reflect = (gcmp(real_i(z0),ghalf) < 0); /* use reflection formula */
+  if (reflect) { z0 = gsubsg(1,z0); Y = gsubsg(1,y); } else Y = y;
+  Q = serpsiz0(z0, L, v, prec);
+  Q = gsubst(Q, v, serchop0(Y)); /* psi(Y) */
+  if (reflect)
+  { /* psi(y) = psi(Y) + Pi cotan(Pi Y) = psi(Y) - Pi cotan(Pi y) */
+    GEN pi = mppi(prec);
+    if (equali1(z0))
+      Q = gsub(Q, gmul(pi, gcotan(gmul(pi,y), prec)));
+    else
+      Q = gadd(Q, gmul(pi, gcotan(gmul(pi,Y), prec)));
+  }
+  return gerepileupto(av, Q);
+}
+
 GEN
 gpsi(GEN x, long prec)
 {
@@ -1629,7 +1747,7 @@ gpsi(GEN x, long prec)
   {
     case t_REAL: case t_COMPLEX: return cxpsi(x,prec);
     case t_INTMOD: case t_PADIC: pari_err_TYPE("gpsi",x);
-    case t_SER: pari_err_IMPL("psi of power series");
+    case t_SER: return serpsi(x,prec);
   }
   return transc(gpsi,x,prec);
 }
