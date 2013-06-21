@@ -1835,9 +1835,32 @@ err_intformal(GEN x)
 { pari_err_DOMAIN("intformal", "residue(series, pole)", "!=", gen_0, x); }
 
 GEN
+integser(GEN x)
+{
+  long i, lx = lg(x), vx = varn(x), e = valp(x);
+  GEN y;
+  if (lx == 2) return zeroser(vx, e+1);
+  y = cgetg(lx, t_SER);
+  for (i=2; i<lx; i++)
+  {
+    long j = i+e-1;
+    GEN c = gel(x,i);
+    if (j)
+      c = gdivgs(c, j);
+    else
+    { /* should be isexactzero, but try to avoid error */
+      if (!gequal0(c)) err_intformal(x);
+      c = gen_0;
+    }
+    gel(y,i) = c;
+  }
+  y[1] = evalsigne(1) | evalvarn(vx) | evalvalp(e+1); return y;
+}
+
+GEN
 integ(GEN x, long v)
 {
-  long lx, tx, e, i, vx, n;
+  long lx, tx, i, vx, n;
   pari_sp av = avma;
   GEN y,p1;
 
@@ -1860,8 +1883,7 @@ integ(GEN x, long v)
     case t_POL:
       vx = varn(x);
       if (v == vx) return RgX_integ(x);
-      lx = lg(x);
-      if (lx == 2) {
+      if (lg(x) == 2) {
         if (varncmp(vx, v) < 0) v = vx;
         return zeropol(v);
       }
@@ -1869,35 +1891,14 @@ integ(GEN x, long v)
       return triv_integ(x,v);
 
     case t_SER:
-      lx = lg(x); vx = varn(x); e = valp(x);
-      if (lx == 2)
-      {
-        if (vx == v) e++; else if (varncmp(vx, v) < 0) v = vx;
-        return zeroser(v, e);
+      vx = varn(x);
+      if (v == vx) return integser(x);
+      if (lg(x) == 2) {
+        if (varncmp(vx, v) < 0) v = vx;
+        return zeroser(v, valp(x));
       }
-      if (varncmp(vx, v) > 0)
-      {
-        y = cgetg(4,t_POL);
-        y[1] = evalvarn(v) | evalsigne(1);
-        gel(y,2) = gen_0;
-        gel(y,3) = gcopy(x); return y;
-      }
-      if (varncmp(vx, v) < 0) return triv_integ(x,v);
-      y = cgetg(lx, t_SER);
-      for (i=2; i<lx; i++)
-      {
-        long j = i+e-1;
-        GEN c = gel(x,i);
-        if (j)
-          c = gdivgs(c, j);
-        else
-        { /* should be isexactzero, but try to avoid error */
-          if (!gequal0(c)) err_intformal(x);
-          c = gen_0;
-        }
-        gel(y,i) = c;
-      }
-      y[1] = evalsigne(1) | evalvarn(vx) | evalvalp(e+1); return y;
+      if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
+      return triv_integ(x,v);
 
     case t_RFRAC:
     {

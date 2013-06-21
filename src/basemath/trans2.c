@@ -152,7 +152,7 @@ gatan(GEN x, long prec)
       if (valp(y) < 0) pari_err_DOMAIN("atan","valuation", "<", gen_0, x);
       if (lg(y)==2) return gerepilecopy(av, y);
       /* lg(y) > 2 */
-      a = integ(gdiv(derivser(y), gaddsg(1,gsqr(y))), varn(y));
+      a = integser(gdiv(derivser(y), gaddsg(1,gsqr(y))));
       if (!valp(y)) a = gadd(a, gatan(gel(y,2),prec));
       return gerepileupto(av, a);
   }
@@ -220,7 +220,7 @@ gasin(GEN x, long prec)
         return gerepileupto(av, scalarser(t, varn(y), valp(p1)>>1));
       }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
-      a = integ(p1,varn(y));
+      a = integser(p1);
       if (!valp(y)) a = gadd(a, gasin(gel(y,2),prec));
       return gerepileupto(av, a);
   }
@@ -287,9 +287,9 @@ gacos(GEN x, long prec)
       {
         p1 = gsubsg(1,gsqr(y));
         if (gequal0(p1)) return zeroser(varn(y), valp(p1)>>1);
-        p1 = integ(gdiv(gneg(derivser(y)), gsqrt(p1,prec)), varn(y));
-        if (gequal1(gel(y,2)) && !valp(y)) /*y(t) = 1+O(t)*/
-          return gerepileupto(av, p1);
+        p1 = integser(gdiv(gneg(derivser(y)), gsqrt(p1,prec)));
+        /*y(t) = 1+O(t)*/
+        if (gequal1(gel(y,2)) && !valp(y)) return gerepileupto(av, p1);
       }
       else p1 = y;
       a = (lg(y)==2 || valp(y))? Pi2n(-1, prec): gacos(gel(y,2),prec);
@@ -585,7 +585,7 @@ gash(GEN x, long prec)
         return gerepileupto(av, scalarser(t, varn(y), valp(p1)>>1));
       }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
-      a = integ(p1,varn(y));
+      a = integser(p1);
       if (!valp(y)) a = gadd(a, gash(gel(y,2),prec));
       return gerepileupto(av, a);
   }
@@ -655,7 +655,7 @@ gach(GEN x, long prec)
       p1 = gsubgs(gsqr(y),1);
       if (gequal0(p1)) { avma = av; return zeroser(varn(y), valp(p1)>>1); }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
-      a = integ(p1, varn(y));
+      a = integser(p1);
       if (v)
         p1 = PiI2n(-1, prec); /* I Pi/2 */
       else
@@ -725,7 +725,7 @@ gath(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err_DOMAIN("ath","valuation", "<", gen_0, x);
       z = gdiv(derivser(y), gsubsg(1,gsqr(y)));
-      a = integ(z, varn(y));
+      a = integser(z);
       if (!valp(y)) a = gadd(a, gath(gel(y,2),prec));
       return gerepileupto(av, a);
   }
@@ -1293,22 +1293,19 @@ gammahs(long m, long prec)
 GEN
 ggamd(GEN x, long prec)
 {
-  pari_sp av, tetpil;
-
   switch(typ(x))
   {
-    case t_INT:
-    {
+    case t_INT: {
       long k = itos(x);
       if (labs(k) > 962353) pari_err_OVERFLOW("ggamd");
       return gammahs(k<<1, prec);
     }
-    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD: case t_PADIC:
-      av=avma; x = gadd(x,ghalf); tetpil=avma;
-      return gerepile(av,tetpil,ggamma(x,prec));
-
+    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
+    case t_PADIC: case t_SER: {
+      pari_sp av = avma;
+      return gerepileupto(av, ggamma(gadd(x,ghalf), prec));
+    }
     case t_INTMOD: pari_err_TYPE("ggamd",x);
-    case t_SER: pari_err_IMPL("gamd of a power series");
   }
   return transc(ggamd,x,prec);
 }
@@ -1459,10 +1456,20 @@ ggamma(GEN x, long prec)
     case t_INTMOD: pari_err_TYPE("ggamma",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y)>0)
+      /* exp(lngamma) */
+      if (valp(y)>0 || lg(y) == 2)
         z = gdiv(gexp(glngamma(gaddgs(y,1),prec),prec),y);
       else
-        z = gexp(glngamma(y,prec),prec);
+      { /* use fun eq. to avoid log singularity of lngamma at negative ints */
+        GEN Y = y, y0 = gel(y,2), t = ground(y0), pi = NULL;
+        if (gequal(y0, t) && typ(t) == t_INT && signe(t) < 0)
+        {
+          pi = mppi(prec);
+          Y = gsubsg(1, y);
+        }
+        z = gexp(glngamma(Y,prec),prec);
+        if (pi) z = gdiv(pi, gmul(z, gsin(gmul(pi,y), prec)));
+      }
       return gerepileupto(av, z);
   }
   return transc(ggamma,x,prec);
@@ -1484,9 +1491,8 @@ mpfactr(long n, long prec)
 GEN
 glngamma(GEN x, long prec)
 {
-  long i, n;
   pari_sp av;
-  GEN a, y, p1;
+  GEN y, p1;
 
   switch(typ(x))
   {
@@ -1517,13 +1523,10 @@ glngamma(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y)) pari_err_DOMAIN("lngamma","valuation", "!=", gen_0, x);
-      p1 = gsubsg(1,y);
-      if (!valp(p1)) pari_err_IMPL("lngamma around a!=1");
-      n = (lg(y)-3) / valp(p1);
-      a = zeroser(varn(y), lg(y)-2);
-      for (i=n; i>=2; i--) a = gmul(p1, gadd(a, gdivgs(szeta(i, prec),i)));
-      a = gadd(a, mpeuler(prec));
-      return gerepileupto(av, gmul(a, p1));
+      /* (lngamma y)' = y' psi(y) */
+      p1 = integser(gmul(derivser(y), gpsi(y, prec)));
+      if (!gequal1(gel(y,2))) p1 = gadd(p1, glngamma(gel(y,2),prec));
+      return gerepileupto(av, p1);
 
     case t_PADIC: av = avma; return gerepileupto(av, Qp_log(Qp_gamma(x)));
     case t_INTMOD: pari_err_TYPE("glngamma",x);

@@ -2422,7 +2422,7 @@ ellzeta(GEN w, GEN z, long prec0)
     if (v <= 0) pari_err(e_IMPL,"ellzeta(t_SER) away from 0");
     if (gequal0(y)) { avma = av; return zeroser(vy, -v); }
     P = ellwpseries0(&T, vy, lg(y)-2);
-    P = integ(gneg(P), vy); /* \zeta' = - \wp*/
+    P = integser(gneg(P)); /* \zeta' = - \wp*/
     Q = gsubst(P, varn(P), y);
     return gerepileupto(av, Q);
   }
@@ -2494,9 +2494,9 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
     if (flag) pari_err_TYPE("log(ellsigma)",y);
     if (gequal0(y)) { avma = av; return zeroser(vy, -v); }
     P = ellwpseries0(&T, vy, lg(y)-2);
-    P = integ(gneg(P), vy); /* \zeta' = - \wp*/
+    P = integser(gneg(P)); /* \zeta' = - \wp*/
     /* (log \sigma)' = \zeta; remove log-singularity first */
-    P = integ(gsub(P, monomial(gen_1,-1,vy)), vy);
+    P = integser(gsub(P, monomial(gen_1,-1,vy)));
     P = gexp(P, prec0);
     setvalp(P, valp(P)+1);
     Q = gsubst(P, varn(P), y);

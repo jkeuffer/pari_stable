@@ -1,0 +1,11 @@
+default(realprecision,38);
+default(seriesprecision,6);
+gamma(2+I+x)
+gamma(1+x)
+gamma(-2+x)
+lngamma(2+I+x)
+lngamma(1+x)
+lngamma(-2+x)
+psi(2+I+x)
+psi(1+x)
+psi(-2+x)

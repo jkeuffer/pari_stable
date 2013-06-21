@@ -2621,7 +2621,7 @@ glog(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (!signe(y)) pari_err_DOMAIN("log", "argument", "=", gen_0, x);
       if (valp(y)) pari_err_DOMAIN("log", "series valuation", "!=", gen_0, x);
-      p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
+      p1 = integser(gdiv(derivser(y), y)); /* log(y)' = y'/y */
       if (!gequal1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
       return gerepileupto(av, p1);
   }

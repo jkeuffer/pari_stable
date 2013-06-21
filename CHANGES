@@ -49,8 +49,10 @@ PMo 6- function forpart for looping over partitions
        makes a mistake (contains all messages from compilers)
     9- [libpari] RgM_invimage, RgM_RgC_invimage, FpM_invimage,
        FpM_FpC_invimage, Flm_invimage, Flm_Flc_invimage, Flm_neg
-   10- [libpari] serchop0 function
-   11- psi(t_SER) using Luke's recursion
+   10- [libpari] serchop0, integser functions
+   11- psi(t_SER) using Luke's recursion, then lngamma, gamma, gammah
+       for t_SER arguments around an arbitrary complex z0 (was implemented
+       for z0 = 0,1 only)
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
