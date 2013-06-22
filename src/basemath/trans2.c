@@ -1710,6 +1710,7 @@ serpsiz0(GEN z0, long L, long v, long prec)
     }
   }
   Q = gmul(Q, gmul2n(gsubsg(1, ginv(tr(pol_x(v),z0, L))), 1));
+  setvarn(Q, v);
   return gadd(negr(mpeuler(prec)), Q);
 }
 static GEN
