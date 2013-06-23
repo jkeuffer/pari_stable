@@ -462,11 +462,12 @@ init_universal_constants(void)
   err_e_STACK = (GEN)readonly_err_STACK;
 }
 
+static const size_t MIN_STACK = 500000;
 static size_t
 fix_size(size_t a)
 {
   size_t b = (a / sizeof(long)) * sizeof(long); /* Align */
-  if (b < 500000) b = 500000;
+  if (b < MIN_STACK) b = MIN_STACK;
   return b;
 }
 /* old = current stack size (0 = unallocated), size = new size */
@@ -475,14 +476,15 @@ pari_init_stack(size_t size, size_t old)
 {
   size_t s = fix_size(size);
   if (old != s) {
-    if (old) pari_free((void*)bot);
     BLOCK_SIGINT_START;
+    if (old) pari_free((void*)bot);
     for (;; s>>=1)
     {
       char buf[128];
       bot = (pari_sp)malloc(s); /* NOT pari_malloc, e_MEM would be deadly */
       if (bot) break;
-      if (!s) pari_err(e_MEM); /* no way out. Die */
+      if (s < MIN_STACK) pari_err(e_MEM); /* no way out. Die */
+      s = fix_size(s);
       /* must use sprintf: pari stack is currently dead */
       sprintf(buf, "not enough memory, new stack %lu", (ulong)s);
       pari_warn(warner, buf, s);
