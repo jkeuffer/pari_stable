@@ -25,7 +25,8 @@ else
   GMPLIBS="-lgmp"
 fi
 
-$CC $CFLAGS $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS >&5 2>&1
+cmd="$CC $CFLAGS $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS"
+. log_cmd
 if test -r $exe; then
   gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $RUNTEST $exe`;
 fi
@@ -33,7 +34,8 @@ case "$gmp_version" in
   unsupported) gmp=
     echo "### Your GMP library ABI is unsupported.";;
   "") gmp=
-    $CC $CFLAGS $extraflag $GMPINCLUDE -o $exe ansi.c $GMPLIBS >&5 2>&1
+    cmd="$CC $CFLAGS $extraflag $GMPINCLUDE -o $exe ansi.c $GMPLIBS"
+    . log_cmd
     if test -r $exe; then
       echo "### Your version of GMP is too old for PARI. Please upgrade"
     else

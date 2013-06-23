@@ -1,6 +1,7 @@
 tdir=$osname-$arch-X11$$
 mkdir $tdir; cp Imakefile $tdir; cd $tdir
-if (xmkmf) >&5 2>&1 && test -f Makefile; then
+cmd="xmkmf"; . ../log_cmd
+if test -f Makefile; then
   eval `make gp-X11 >&5 2>&1 | grep -v make`
   x11pth="$usrlibdir $libdir";
 fi
@@ -43,7 +44,8 @@ if test -n "$X11"; then
   X11_LIBS="-L$X11 -lX11 $extralib"
 else
   exe=$osname-$arch-X11$$
-  $CC $CFLAGS $extraflag $X11_INC -o $exe has_X11.c -lX11 $extralib >&5 2>&1
+  cmd="$CC $CFLAGS $extraflag $X11_INC -o $exe has_X11.c -lX11 $extralib"
+  . log_cmd
   if test -r $exe; then
     X11_LIBS="-lX11 $extralib"
   else

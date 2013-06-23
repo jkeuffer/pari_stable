@@ -78,7 +78,10 @@ EOT
 fi
 
 exe=$osname-$arch-ansi$$
-$CC $CFLAGS $extraflag -o $exe ansi.c >&5 2>&1 && $RUNTEST $exe
+cmd="$CC $CFLAGS $extraflag -o $exe ansi.c"; . log_cmd
+if test -s $exe; then
+  $RUNTEST $exe
+fi
 if test $? != 0; then cat << EOT
 ###
 ### C compiler does not work. PARI/GP requires an ANSI C compiler! Aborting.
