@@ -5196,7 +5196,11 @@ static GEN
 checkellp(GEN E, GEN p, const char *s)
 {
   GEN q;
-  if (p && typ(p)!=t_INT) pari_err_TYPE(s,p);
+  if (p)
+  {
+    if (typ(p)!=t_INT) pari_err_TYPE(s,p);
+    if (cmpis(p, 2) < 0) pari_err_DOMAIN(s,"p", "<", gen_2, p);
+  }
   checkell(E);
   switch(ell_get_type(E))
   {

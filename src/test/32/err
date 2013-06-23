@@ -374,6 +374,12 @@
   ***   at top-level: ellap(E)
   ***                 ^--------
   *** ellap: incorrect type in ellap [can't determine p] (t_VEC).
+  ***   at top-level: ellap(E,1)
+  ***                 ^----------
+  *** ellap: domain error in ellap: p < 2
+  ***   at top-level: ellap(E,'x)
+  ***                 ^-----------
+  *** ellap: incorrect type in ellap (t_POL).
   ***   at top-level: elltaniyama(E,-1)
   ***                 ^-----------------
   *** elltaniyama: domain error in elltaniyama: precision < 0
@@ -578,4 +584,4 @@
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
   ***   user warning: 1
-Total time spent: 12
+Total time spent: 20

@@ -170,6 +170,8 @@ ellsigma([1,I],x,1)
 ellsigma([1,I],1,1)
 E=ellinit([1,1]);
 ellap(E)
+ellap(E,1)
+ellap(E,'x)
 elltaniyama(E,-1)
 ellheight(E,[2,2])
 Qfb(0,0,0)
