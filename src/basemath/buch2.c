@@ -781,9 +781,9 @@ divide_p_quo(GEN LP, long ip, long k, GEN nf, GEN I, GEN m, FACT *fact)
   return 0;
 }
 
-/* *N > 0 is the norm of a primitive ideal, in particular not divisible by
- * any inert prime. Is *N > 0 a smooth rational integer wrt F ?
- * (put the exponents in *ex) */
+/* |*N| != 0 is the norm of a primitive ideal, in particular not divisible by
+ * any inert prime. Is |*N| a smooth rational integer wrt F ? (put the
+ * exponents in *ex) */
 static int
 smooth_norm(FB_t *F, GEN *N, GEN *ex)
 {
@@ -822,7 +822,7 @@ divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
 /* Let x = m if I == NULL,
  *         I if m == NULL,
  *         m/I otherwise.
- * Can we factor the integral primitive ideal x ? N = Norm x > 0 [DESTROYED] */
+ * Can we factor the integral primitive ideal x ? |N| = Norm x > 0 [DESTROYED]*/
 static long
 can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 {
@@ -833,7 +833,7 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
   if (!smooth_norm(F, &N, &ex)) return 0;
   for (i=1; i<=ex[0]; i++)
     if (ex[i] && !divide_p(F, F->FB[i], ex[i], nf, I, m, fact)) return 0;
-  return is_pm1(N) || divide_p(F, itos(N), 1, nf, I, m, fact);
+  return is_pm1(N) || divide_p(F, itou(N), 1, nf, I, m, fact);
 }
 
 /* can we factor m/I ? [m in I from idealpseudomin_nonscalar], NI = norm I */
@@ -845,7 +845,7 @@ factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
   GEN N = divri(norm_by_embed(r1, RgM_RgC_mul(M,m)), NI); /* ~ N(m/I) */
   N = grndtoi(N, &e);
   if (e > -1) return 0;
-  return can_factor(F, nf, I, m, absi(N), fact);
+  return can_factor(F, nf, I, m, N, fact);
 }
 
 /*  FUNDAMENTAL UNITS */
@@ -2483,7 +2483,6 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
         if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
         continue;
       }
-      setabssign(Nx);
       if (!can_factor(F, nf, NULL, gx, Nx, fact)) {
         if (DEBUGLEVEL > 1) { err_printf("."); err_flush(); }
         continue;
@@ -3734,7 +3733,6 @@ try_elt(RELCACHE_t *cache, FB_t *F, GEN nf, GEN x, FACT *fact)
   if (RgV_isscalar(x)) return;
   x = Q_primpart(x);
   Nx = nfnorm(nf, x);
-  setabssign(Nx);
   if (!can_factor(F, nf, NULL, x, Nx, fact)) return;
 
   /* smooth element */
