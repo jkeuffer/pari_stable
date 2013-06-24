@@ -8834,9 +8834,10 @@ convert \kbd{res} to a \typ{REAL} if $x$ is a \typ{REAL}.
 \fun{GEN}{Qp_log}{GEN x} shortcut for \kbd{glog(x, /*ignored*/prec)}
 
 \fun{GEN}{Qp_sqrt}{GEN x} shortcut for \kbd{gsqrt(x, /*ignored*/prec)}
+Return \kbd{NULL} if $x$ is not a square.
 
 \fun{GEN}{Qp_sqrtn}{GEN x, GEN n, GEN *z} shortcut for \kbd{gsqrtn(x, n, z,
-/*ignored*/prec)}
+/*ignored*/prec)}. Return \kbd{NULL} if $x$ is not an $n$-th power.
 
 \subsec{Cached constants}
 

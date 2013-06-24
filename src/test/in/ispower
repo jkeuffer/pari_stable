@@ -67,3 +67,4 @@ ispower(Mod(2, 7*5^3), 7, &y); y
 issquare(Mod(1,2))
 issquare(Mod(0,2),&s);s
 issquare(Mod(2,3))
+issquare(Mod(13,121))

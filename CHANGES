@@ -26,6 +26,7 @@ PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [#1430]
    16- allocatemem: make sure fix_size() is called to avoid alignment
        problems [#1437]
    17- ellmodulareqn(2) did not clean the stack properly [from 2.6.0, #1442]
+   18- issquare(Mod(13,121)) --> not an n-th power residue in Qp_sqrt
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the

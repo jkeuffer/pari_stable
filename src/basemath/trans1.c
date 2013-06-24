@@ -1243,8 +1243,7 @@ Qp_sqrt(GEN x)
   GEN z,y,mod, p = gel(x,2);
 
   if (gequal0(x)) return zeropadic(p, (e+1) >> 1);
-  if (e & 1)
-    pari_err_DOMAIN("sqrt", "valuation", "!=", mkintmod(gen_0, gen_2), x);
+  if (e & 1) return NULL;
 
   y = cgetg(5,t_PADIC);
   pp = precp(x);
@@ -1252,7 +1251,7 @@ Qp_sqrt(GEN x)
   z   = gel(x,4); /* lift to t_INT */
   e >>= 1;
   z = Up_sqrt(z, p, pp);
-  if (!z) pari_err_SQRTN("Qp_sqrt",x);
+  if (!z) return NULL;
   if (equaliu(p,2))
   {
     pp  = (pp <= 3) ? 1 : pp-1;
@@ -1396,7 +1395,9 @@ gsqrt(GEN x, long prec)
     }
 
     case t_PADIC:
-      return Qp_sqrt(x);
+      y = Qp_sqrt(x);
+      if (!y) pari_err_SQRTN("Qp_sqrt",x);
+      return y;
 
     case t_FFELT: return FF_sqrt(x);
 
