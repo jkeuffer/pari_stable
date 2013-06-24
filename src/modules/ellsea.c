@@ -104,16 +104,13 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
 
 static void
 err_modular_eqn(long ell)
-{
-  char *s = seadata_filename(ell), *t = stack_strdup(s);
-  pari_err_FILE("seadata file", t);
-}
+{ pari_err_FILE("seadata file", seadata_filename(ell)); }
 
 GEN
 ellmodulareqn(long ell, long vx, long vy)
 {
+  pari_sp av = avma;
   struct meqn meqn;
-  GEN res;
   if (vx<0) vx=0;
   if (vy<0) vy=fetch_user_var("y");
   if (varncmp(vx,vy)>=0)
@@ -121,15 +118,9 @@ ellmodulareqn(long ell, long vx, long vy)
   if (ell < 0 || !uisprime(ell))
     pari_err_PRIME("ellmodulareqn (level)", stoi(ell));
 
-  res = cgetg(3, t_VEC);
   if (!get_modular_eqn(&meqn, ell, vx, vy))
     err_modular_eqn(ell);
-  else
-  {
-    gel(res,1) = meqn.eq;
-    gel(res,2) = stoi(meqn.type=='A');
-  }
-  return res;
+  return gerepilecopy(av,mkvec2(meqn.eq, stoi(meqn.type=='A')));
 }
 
 /*Gives the first precS terms of the Weierstrass series related to */
