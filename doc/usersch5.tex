@@ -3657,6 +3657,9 @@ or \kbd{NULL} if none exist.
 
 \fun{GEN}{FqM_image}{GEN x, GEN T, GEN p} as \kbd{image}
 
+\fun{GEN}{FqM_inv}{GEN x, GEN T, GEN p} returns the inverse of \kbd{x}, or
+\kbd{NULL} if \kbd{x} is not invertible.
+
 \fun{long}{FqM_rank}{GEN x, GEN T, GEN p} as \kbd{rank}
 
 \fun{GEN}{FqM_suppl}{GEN x, GEN T, GEN p} as \kbd{suppl}
@@ -3887,9 +3890,13 @@ and \kbd{y}
 \fun{GEN}{FlxM_Flx_add_shallow}{GEN x, GEN y, ulong p} as
 \kbd{RgM\_Rg\_add\_shallow}.
 
+\fun{GEN}{FlxqM_gauss}{GEN a, GEN b, GEN T, ulong p}
+
 \fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
 
 \fun{GEN}{FlxqM_image}{GEN x, GEN T, ulong p}
+
+\fun{GEN}{FlxqM_inv}{GEN x, GEN T, ulong p}
 
 \fun{long}{FlxqM_rank}{GEN x, GEN T, ulong p}
 

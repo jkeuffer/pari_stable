@@ -57,6 +57,7 @@ PMo 6- function forpart for looping over partitions
    11- psi(t_SER) using Luke's recursion, then lngamma, gamma, gammah
        for t_SER arguments around an arbitrary complex z0 (was implemented
        for z0 = 0,1 only)
+PB 12- PARI functions FlxqM_gauss, FlxqM_inv and FqM_gauss
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
