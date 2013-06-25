@@ -167,9 +167,9 @@ TOPDIR="$TOP"
 
 SHELL      = $make_sh
 PERL       = $perl
-BISON      = $bison
-AR	   = $ar
-RANLIB	   = $ranlib
+BISON      = bison
+AR         = ar
+RANLIB     = ranlib
 
 SIZEOF_LONG= $sizeof_long
 

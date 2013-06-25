@@ -39,7 +39,7 @@ echo "Configuring pari-$pari_release_verbose $patchlevel_verbose"
 . ./get_PATH
 #  We might need the following :
 echo Looking for some tools first ...
-_tools_list='ar bison gzip ld perl ranlib zcat'
+_tools_list='gzip ld perl zcat'
 pathspace=`echo $PATH | sed -e "s/$dir_sep/ /g" | sed -e 's,\\\\,/,g'`
 
 for file in $_tools_list; do
