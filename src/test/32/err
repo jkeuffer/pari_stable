@@ -200,7 +200,7 @@
   *** sqrt: domain error in sqrtn: valuation != Mod(0, 2)
   ***   at top-level: sqrt(2+O(2^2))
   ***                 ^--------------
-  *** sqrt: domain error in sqrt: valuation != Mod(0, 2)
+  *** sqrt: not an n-th power residue in Qp_sqrt: 2 + O(2^2).
   ***   at top-level: sqrtn(x,3)
   ***                 ^----------
   *** sqrtn: domain error in sqrtn: valuation != Mod(0, 3)
@@ -584,4 +584,4 @@
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
   ***   user warning: 1
-Total time spent: 20
+Total time spent: 28
