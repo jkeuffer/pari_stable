@@ -481,7 +481,7 @@ carberkowitz(GEN x, long v)
 {
   long lx, i, j, k, r;
   GEN V, S, C, Q;
-  pari_sp av0, lim;
+  pari_sp av0, av, lim;
   if ((V = easychar(x,v,NULL))) return V;
 
   lx = lg(x); av0 = avma; lim = stack_lim(av0,1);
@@ -489,47 +489,47 @@ carberkowitz(GEN x, long v)
   S = cgetg(lx+1, t_VEC);
   C = cgetg(lx+1, t_VEC);
   Q = cgetg(lx+1, t_VEC);
+  av = avma;
   gel(C,1) = gen_m1;
   gel(V,1) = gen_m1;
   for (i=2;i<=lx; i++) gel(C,i) = gel(Q,i) = gel(S,i) = gel(V,i) = gen_0;
   gel(V,2) = gcoeff(x,1,1);
   for (r = 2; r < lx; r++)
   {
-    pari_sp av;
+    pari_sp av2;
     GEN t;
 
     for (i = 1; i < r; i++) gel(S,i) = gcoeff(x,i,r);
     gel(C,2) = gcoeff(x,r,r);
     for (i = 1; i < r-1; i++)
     {
-      av = avma; t = gmul(gcoeff(x,r,1), gel(S,1));
+      av2 = avma; t = gmul(gcoeff(x,r,1), gel(S,1));
       for (j = 2; j < r; j++) t = gadd(t, gmul(gcoeff(x,r,j), gel(S,j)));
-      gel(C,i+2) = gerepileupto(av, t);
+      gel(C,i+2) = gerepileupto(av2, t);
       for (j = 1; j < r; j++)
       {
-        av = avma; t = gmul(gcoeff(x,j,1), gel(S,1));
+        av2 = avma; t = gmul(gcoeff(x,j,1), gel(S,1));
         for (k = 2; k < r; k++) t = gadd(t, gmul(gcoeff(x,j,k), gel(S,k)));
-        gel(Q,j) = gerepileupto(av, t);
+        gel(Q,j) = gerepileupto(av2, t);
       }
       for (j = 1; j < r; j++) gel(S,j) = gel(Q,j);
     }
-    av = avma; t = gmul(gcoeff(x,r,1), gel(S,1));
+    av2 = avma; t = gmul(gcoeff(x,r,1), gel(S,1));
     for (j = 2; j < r; j++) t = gadd(t, gmul(gcoeff(x,r,j), gel(S,j)));
-    gel(C,r+1) = gerepileupto(av, t);
-
-    for (i = 1; i <= r+1; i++)
-    {
-      av = avma; t = gmul(gel(C,i), gel(V,1));
-      for (j = 2; j <= minss(r,i); j++)
-        t = gadd(t, gmul(gel(C,i+1-j), gel(V,j)));
-      gel(Q,i) = gerepileupto(av, t);
-    }
-    for (i = 1; i <= r+1; i++) gel(V,i) = gel(Q,i);
+    gel(C,r+1) = gerepileupto(av2, t);
     if (low_stack(lim, stack_lim(av0,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"carberkowitz");
-      gerepileall(4, av0, &C, &Q, &S, &V);
+      gerepileall(av, 2, &C, &V);
     }
+    for (i = 1; i <= r+1; i++)
+    {
+      av2 = avma; t = gmul(gel(C,i), gel(V,1));
+      for (j = 2; j <= minss(r,i); j++)
+        t = gadd(t, gmul(gel(C,i+1-j), gel(V,j)));
+      gel(Q,i) = gerepileupto(av2, t);
+    }
+    for (i = 1; i <= r+1; i++) gel(V,i) = gel(Q,i);
   }
   V = RgV_to_RgX(vecreverse(V), v); /* not gtopoly: fail if v > gvar(V) */
   V = odd(lx)? gcopy(V): RgX_neg(V);
