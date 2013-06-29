@@ -28,6 +28,7 @@ PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [#1430]
    17- ellmodulareqn(2) did not clean the stack properly [from 2.6.0, #1442]
    18- issquare(Mod(13,121)) --> not an n-th power residue in Qp_sqrt
    19- stack corruption in carberkowitz / charpoly(,,3) [ session crash ]
+   20- ellinit(E over Fp, t_FFELT) => error
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the

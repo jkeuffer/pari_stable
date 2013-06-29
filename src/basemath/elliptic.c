@@ -412,16 +412,18 @@ base_ring(GEN x, GEN *pp, long *prec)
       }
       case t_INTMOD: {
         GEN p2 = gel(q,1);
-        t = t_INTMOD;
         if (!p)
+        {
+          t = t_INTMOD;
           p = p2;
+        }
         else
         {
           GEN p3;
           switch(typ(p))
           {
             case t_FFELT: p3 = FF_p_i(p); break;
-            case t_INT: p3 = p; break;
+            case t_INT: t = t_INTMOD; p3 = p; break;
             default: pari_err_MODULUS("ellinit", p,p2); p3 = p;
           }
           if (!equalii(p3, p2)) pari_err_MODULUS("ellinit", p3,p2);

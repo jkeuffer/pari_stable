@@ -189,3 +189,4 @@ E=ellinit([-3,-60,480,0,0]); ellheight(E,[0,0])
 e=ellminimalmodel(ellinit([1,1]));
 e=ellchangecurve(e,1)
 e=ellchangecurve(e,[2,0,0,0])
+ellinit(ellinit([0,1]*Mod(1,5),ffgen(ffinit(5,2))));
