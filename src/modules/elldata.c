@@ -170,6 +170,16 @@ ellsearch(GEN A)
   long f, c, i;
   GEN V;
   if      (typ(A)==t_INT) { f = itos(A); c = i = -1; }
+  else if  (typ(A)==t_VEC)
+  {
+    long l = lg(A)-1;
+    if (l<1 && l>3)
+      pari_err_TYPE("ellsearch",A);
+    f = gtos(gel(A,1));
+    c = l>=2 ? gtos(gel(A,2)): -1;
+    i = l>=3 ? gtos(gel(A,3)): -1;
+    if (l>=3) A = ellconvertname(A);
+  }
   else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
       pari_err_TYPE("ellsearch",A);

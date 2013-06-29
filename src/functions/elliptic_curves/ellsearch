@@ -2,14 +2,15 @@ Function: ellsearch
 Section: elliptic_curves
 C-Name: ellsearch
 Prototype: G
-Help: ellsearch(N): if N is an integer, it is taken as a conductor else if N is
- a string, it can be a curve name ("11a1"), a isogeny class ("11a") or a
- conductor ("11"). Return all curves in the elldata database that match the
- property.
-Doc: if $N$ is an integer, it is taken as a conductor else if $N$ is a
- string, it can be a curve name ("11a1"), an isogeny class ("11a") or a
- conductor "11". This function finds all curves in the \tet{elldata} database
- with the given property.
+Help: ellsearch(N): if N is an integer, it is taken as a conductor, else if N is
+ a string or a vector, it can be a curve name ("11a1", [11,0,1]), a isogeny
+ class ("11a", [11, 0]) or a conductor ("11",[11]). Return all curves in the
+ elldata database that match the property.
+Doc: if $N$ is an integer, it is taken as a conductor else if $N$ is a string
+ or a vector, it can be a curve name ("11a1", $[11,0,1]$), an isogeny class
+ ("11a",$[11,0]$) or a conductor ("11",[11]). This function finds all curves in
+ the \tet{elldata} database with the given property. The correspondance between
+ strings and vectors follows \tet{ellconvertname}.
 
  If $N$ is a full curve name, the output format is $[N, [a_1,a_2,a_3,a_4,a_6],
  G]$ where $[a_1,a_2,a_3,a_4,a_6]$ are the coefficients of the Weierstrass
@@ -19,4 +20,4 @@ Doc: if $N$ is an integer, it is taken as a conductor else if $N$ is a
  If $N$ is not a full-curve name, the output is a vector of all matching
  curves in the above format.
 Variant: Also available is \fun{GEN}{ellsearchcurve}{GEN N} that only
- accepts complete curve names.
+ accepts complete curve names (as \typ{STR}).

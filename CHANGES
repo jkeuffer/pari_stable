@@ -62,6 +62,7 @@ PB 12- PARI functions FlxqM_gauss, FlxqM_inv and FqM_gauss
        RgM_Rg_sub_shallow
    14- generic driver for GP's charpoly(): select appropriate algorith (flag)
        depending on input type.
+BA 15- ellsearch now accept input to be a vector
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
