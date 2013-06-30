@@ -95,7 +95,8 @@ get_modular_eqn(struct meqn *M, ulong ell, long vx, long vy)
   if (!modular_eqn && !get_seadata(0)) pari_err_PACKAGE("seadata");
   if (idx && idx<lg(modular_eqn))
     eqn = gel(modular_eqn, idx);
-  else eqn = get_seadata(ell);
+  else
+    eqn = get_seadata(ell);
   if (!eqn) return 0;
   M->type = *GSTR(gel(eqn, 2));
   M->eq = list_to_pol(gel(eqn, 3), vx, vy);
