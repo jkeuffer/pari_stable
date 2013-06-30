@@ -74,15 +74,36 @@ get_seadata(ulong ell)
   }
 }
 
-/*Builds the modular equation corresponding to the vector list */
+static GEN
+RgV_to_RgX_reverse(GEN x, long v)
+{
+  long j, k, l = lg(x);
+  GEN p;
+
+  for (k = 2; k < l; k++)
+    if (!gequal0(gel(x,k))) break;
+  if (k == l) return pol_0(v);
+  k -= 2;
+  l -= k;
+  x += k;
+  p = cgetg(l+1,t_POL);
+  p[1] = evalsigne(1) | evalvarn(v);
+  for (j=2, k=l; j<=l; j++) gel(p,j) = gel(x,--k);
+  return p;
+}
+/*Builds the modular equation corresponding to the vector list. Shallow */
 static GEN
 list_to_pol(GEN list, long vx, long vy)
 {
-  pari_sp ltop = avma;
   long i, l = lg(list);
   GEN P = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) gel(P, i) = gtopoly(gel(list,i), vy);
-  return gerepileupto(ltop, gtopoly(P, vx));
+  for (i = 1; i < l; i++)
+  {
+    GEN L = gel(list,i);
+    if (typ(L) == t_VEC) L = RgV_to_RgX_reverse(L, vy);
+    gel(P, i) = L;
+  }
+  return RgV_to_RgX_reverse(P, vx);
 }
 
 struct meqn { char type; GEN eq; };
