@@ -1773,7 +1773,12 @@ FpXY_Fq_evaly(GEN Q, GEN y, GEN T, GEN p, long vx)
   if (lb == 3 || !signe(y)) return typ(z)==t_INT? scalar_ZX(z, vx): ZX_copy(z);
 
   if (typ(z) == t_INT) z = scalar_ZX_shallow(z, vx);
-  for (i=lb-2; i>=2; i--) z = FqX_add(gel(Q,i), FqX_Fq_mul(z, y, T, p), T, p);
+  for (i=lb-2; i>=2; i--)
+  {
+    GEN c = gel(Q,i);
+    z = FqX_Fq_mul(z, y, T, p);
+    z = typ(c) == t_INT? FqX_Fq_add(z,c,T,p): FqX_add(z,c,T,p);
+  }
   return gerepileupto(av, z);
 }
 
