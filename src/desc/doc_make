@@ -18,6 +18,7 @@ while (<FILE>)
   if (/^% *SECTION *: *(.*) */)
   {
     my ($sec) = $1;
+    next if (!$Fun_by_sec{$sec});
     for ( sort @{$Fun_by_sec{$sec}} ) {
       my ($fun) = $funcs{$_};
       my ($doc) = $fun->{Doc};
