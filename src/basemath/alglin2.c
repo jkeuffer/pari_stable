@@ -41,13 +41,15 @@ charpoly0(GEN x, long v, long flag)
       if (typ(x) != t_MAT) pari_err_TYPE("charpoly",x);
       RgM_check_ZM(x, "charpoly");
       x = ZM_charpoly(x); setvarn(x, v); return x;
+    case 5:
+      return charpoly(x, v);
   }
   pari_err_FLAG("charpoly"); return NULL; /* not reached */
 }
 
 /* characteristic pol. Easy cases. Return NULL in case it's not so easy. */
 static GEN
-easychar(GEN x, long v, GEN *py)
+easychar(GEN x, long v)
 {
   pari_sp av;
   long lx;
@@ -60,11 +62,9 @@ easychar(GEN x, long v, GEN *py)
       p1=cgetg(4,t_POL);
       p1[1]=evalsigne(1) | evalvarn(v);
       gel(p1,2) = gneg(x); gel(p1,3) = gen_1;
-      if (py) { *py = cgetg(2, t_MAT); gel(*py,1) = mkcolcopy(x); }
       return p1;
 
     case t_COMPLEX: case t_QUAD:
-      if (py) pari_err_TYPE("easychar",x);
       p1 = cgetg(5,t_POL);
       p1[1] = evalsigne(1) | evalvarn(v);
       gel(p1,2) = gnorm(x); av = avma;
@@ -73,27 +73,46 @@ easychar(GEN x, long v, GEN *py)
 
     case t_FFELT: {
       pari_sp ltop=avma;
-      if (py) pari_err_TYPE("easychar",x);
       p1 = FpX_to_mod(FF_charpoly(x), FF_p_i(x));
       setvarn(p1,v); return gerepileupto(ltop,p1);
     }
 
     case t_POLMOD:
-      if (py) pari_err_TYPE("easychar",x);
       return RgXQ_charpoly(gel(x,2), gel(x,1), v);
 
     case t_MAT:
       lx=lg(x);
-      if (lx==1)
-      {
-        if (py) *py = cgetg(1,t_MAT);
-        return pol_1(v);
-      }
+      if (lx==1) return pol_1(v);
       if (lgcols(x) != lx) break;
       return NULL;
   }
   pari_err_TYPE("easychar",x);
   return NULL; /* not reached */
+}
+GEN
+charpoly(GEN x, long v)
+{
+  GEN T, p = NULL;
+  if ((T = easychar(x,v))) return T;
+  if (RgM_is_ZM(x)) T = ZM_charpoly(x);
+  else if (RgM_is_FpM(x, &p) && BPSW_psp(p))
+  {
+    pari_sp av = avma;
+    if (lgefint(p) == 3)
+    {
+      ulong pp = p[2];
+      T = Flm_charpoly(RgM_to_Flm(x, pp), pp);
+      T = Flx_to_ZX(T);
+    }
+    else
+      T = FpM_charpoly(RgM_to_FpM(x, p), p);
+    T = gerepileupto(av, FpX_to_mod(T,p));
+  }
+  else if (isinexact(x))
+    T = carhess(x, v);
+  else
+    T = carberkowitz(x, v);
+  setvarn(T, v); return T;
 }
 
 /* We possibly worked with an "invalid" polynomial p, satisfying
@@ -113,7 +132,7 @@ caract(GEN x, long v)
   GEN  T, C, x_k, Q;
   long k, n;
 
-  if ((T = easychar(x,v,NULL))) return T;
+  if ((T = easychar(x,v))) return T;
 
   n = lg(x)-1;
   if (n == 1) return fix_pol(av, deg1pol(gen_1, gneg(gcoeff(x,1,1)), v));
@@ -154,7 +173,15 @@ caradj(GEN x, long v, GEN *py)
   long i, k, l;
   GEN p, y, t;
 
-  if ((p = easychar(x, v, py))) return p;
+  if ((p = easychar(x, v)))
+  {
+    if (py)
+    {
+      if (typ(x) != t_MAT) pari_err_TYPE("matadjoint",x);
+      *py = cgetg(1,t_MAT);
+    }
+    return p;
+  }
 
   l = lg(x); av0 = avma;
   p = cgetg(l+2,t_POL); p[1] = evalsigne(1) | evalvarn(v);
@@ -246,7 +273,7 @@ easymin(GEN x, long v)
   GEN G, R, dR;
   if (typ(x)==t_POLMOD && !issquarefree(gel(x,1)))
     return NULL;
-  R=easychar(x, v, NULL);
+  R = easychar(x, v);
   if (!R) return R;
   dR=RgX_deriv(R);
   if (!lgpol(dR)) {avma=ltop; return NULL;}
@@ -328,8 +355,6 @@ GEN
 Flm_hess(GEN x, ulong p)
 {
   long lx = lg(x), m, i, j;
-
-  if (typ(x) != t_MAT) pari_err_TYPE("hess",x);
   if (lx == 1) return cgetg(1,t_MAT);
   if (lgcols(x) != lx) pari_err_DIM("hess");
 
@@ -356,7 +381,47 @@ Flm_hess(GEN x, ulong p)
   }
   return x;
 }
+GEN
+FpM_hess(GEN x, GEN p)
+{
+  pari_sp av = avma, lim;
+  long lx = lg(x), m, i, j;
+  if (lx == 1) return cgetg(1,t_MAT);
+  if (lgcols(x) != lx) pari_err_DIM("hess");
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    x = Flm_hess(ZM_to_Flm(x, pp), pp);
+    return gerepileupto(av, Flm_to_ZM(x));
+  }
+  x = RgM_shallowcopy(x); lim = stack_lim(av,2);
+  for (m=2; m<lx-1; m++)
+  {
+    GEN t = NULL;
+    for (i=m+1; i<lx; i++) { t = gcoeff(x,i,m-1); if (signe(t)) break; }
+    if (i == lx) continue;
+    for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
+    swap(gel(x,i), gel(x,m)); t = Fp_inv(t, p);
 
+    for (i=m+1; i<lx; i++)
+    {
+      GEN c = gcoeff(x,i,m-1);
+      if (!signe(c)) continue;
+
+      c = Fp_mul(c,t, p); gcoeff(x,i,m-1) = gen_0;
+      for (j=m; j<lx; j++)
+        gcoeff(x,i,j) = Fp_sub(gcoeff(x,i,j), Fp_mul(c,gcoeff(x,m,j),p), p);
+      for (j=1; j<lx; j++)
+        gcoeff(x,j,m) = Fp_add(gcoeff(x,j,m), Fp_mul(c,gcoeff(x,j,i),p), p);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+        if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
+        gerepileall(av,2, &x, &t);
+      }
+    }
+  }
+  return gerepilecopy(av,x);
+}
 GEN
 carhess(GEN x, long v)
 {
@@ -364,7 +429,7 @@ carhess(GEN x, long v)
   long lx, r, i;
   GEN y, H;
 
-  if ((H = easychar(x,v,NULL))) return H;
+  if ((H = easychar(x,v))) return H;
 
   lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
   gel(y,1) = pol_1(v); H = hess(x);
@@ -383,6 +448,37 @@ carhess(GEN x, long v)
     gel(y,r+1) = gerepileupto(av2, RgX_sub(z, b)); /* (X - H[r,r])y[r] - b */
   }
   return fix_pol(av, gel(y,lx));
+}
+
+GEN
+FpM_charpoly(GEN x, GEN p)
+{
+  pari_sp av;
+  long lx, r, i;
+  GEN y, H;
+
+  /* Flm_charpoly left on stack */
+  if (lgefint(p) == 3) return Flx_to_ZX(Flm_charpoly(x, p[2]));
+  lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
+  gel(y,1) = pol_1(0); H = FpM_hess(x, p);
+  for (r = 1; r < lx; r++)
+  {
+    pari_sp av2 = avma;
+    GEN z, a = gen_1, b = pol_0(0);
+    for (i = r-1; i; i--)
+    {
+      a = Fp_mul(a, gcoeff(H,i+1,i), p);
+      if (!signe(a)) break;
+      b = ZX_add(b, ZX_Z_mul(gel(y,i), Fp_mul(a,gcoeff(H,i,r),p)));
+    }
+    b = FpX_red(b, p);
+    z = FpX_sub(RgX_shift_shallow(gel(y,r), 1),
+                FpX_Fp_mul(gel(y,r), gcoeff(H,r,r), p), p);
+    z = FpX_sub(z,b,p);
+    if (r+1 == lx) { gel(y,lx) = z; break; }
+    gel(y,r+1) = gerepileupto(av2, z); /* (X - H[r,r])y[r] - b */
+  }
+  return gerepileupto(av, gel(y,lx));
 }
 GEN
 Flm_charpoly(GEN x, long p)
@@ -482,8 +578,7 @@ carberkowitz(GEN x, long v)
   long lx, i, j, k, r;
   GEN V, S, C, Q;
   pari_sp av0, av, lim;
-  if ((V = easychar(x,v,NULL))) return V;
-
+  if ((V = easychar(x,v))) return V;
   lx = lg(x); av0 = avma; lim = stack_lim(av0,1);
   V = cgetg(lx+1, t_VEC);
   S = cgetg(lx+1, t_VEC);

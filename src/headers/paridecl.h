@@ -962,6 +962,8 @@ GEN     suppl(GEN x);
 
 /* alglin2.c */
 
+GEN     FpM_charpoly(GEN x, GEN p);
+GEN     FpM_hess(GEN x, GEN p);
 GEN     Flm_charpoly(GEN x, long p);
 GEN     Flm_hess(GEN x, ulong p);
 GEN     QM_minors_coprime(GEN x, GEN pp);
@@ -975,6 +977,7 @@ GEN     caract(GEN x, long v);
 GEN     caradj(GEN x, long v, GEN *py);
 GEN     carberkowitz(GEN x, long v);
 GEN     carhess(GEN x, long v);
+GEN     charpoly(GEN x, long v);
 GEN     charpoly0(GEN x, long v,long flag);
 GEN     gnorm(GEN x);
 GEN     gnorml1(GEN x,long prec);
