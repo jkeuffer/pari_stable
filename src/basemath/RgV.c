@@ -181,6 +181,24 @@ RgM_Rg_add(GEN x, GEN y)
   return z;
 }
 GEN
+RgM_Rg_sub(GEN x, GEN y)
+{
+  long l = lg(x), i, j;
+  GEN z = cgetg(l,t_MAT);
+
+  if (l==1) return z;
+  if (l != lgcols(x)) pari_err_OP( "-", x, y);
+  z = cgetg(l,t_MAT);
+  for (i=1; i<l; i++)
+  {
+    GEN zi = cgetg(l,t_COL), xi = gel(x,i);
+    gel(z,i) = zi;
+    for (j=1; j<l; j++)
+      gel(zi,j) = i==j? gsub(y,gel(xi,j)): gcopy(gel(xi,j));
+  }
+  return z;
+}
+GEN
 RgM_Rg_add_shallow(GEN x, GEN y)
 {
   long l = lg(x), i, j;
@@ -194,6 +212,23 @@ RgM_Rg_add_shallow(GEN x, GEN y)
     gel(z,i) = zi;
     for (j=1; j<l; j++) gel(zi,j) = gel(xi,j);
     gel(zi,i) = gadd(gel(zi,i), y);
+  }
+  return z;
+}
+GEN
+RgM_Rg_sub_shallow(GEN x, GEN y)
+{
+  long l = lg(x), i, j;
+  GEN z = cgetg(l,t_MAT);
+
+  if (l==1) return z;
+  if (l != lgcols(x)) pari_err_OP( "-", x, y);
+  for (i=1; i<l; i++)
+  {
+    GEN zi = cgetg(l,t_COL), xi = gel(x,i);
+    gel(z,i) = zi;
+    for (j=1; j<l; j++) gel(zi,j) = gel(xi,j);
+    gel(zi,i) = gsub(gel(zi,i), y);
   }
   return z;
 }

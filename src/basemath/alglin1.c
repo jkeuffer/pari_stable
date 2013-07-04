@@ -1102,9 +1102,12 @@ gauss_get_pivot_NZ(GEN X, GEN x0/*unused*/, long ix, GEN c)
 }
 
 /* Return pivot seeking function appropriate for the domain of the RgM x
- * (first non zero pivot, maximal pivot...) */
+ * (first non zero pivot, maximal pivot...)
+ * x0 is a reference point used when guessing whether x[i,j] ~ 0
+ * (iff x[i,j] << x0[i,j]); typical case: mateigen, Gauss pivot on x - vp.Id,
+ * but use original x when deciding whether a prospective pivot is non-0 */
 static pivot_fun
-get_pivot_fun(GEN x, GEN *data)
+get_pivot_fun(GEN x, GEN x0, GEN *data)
 {
   long i, j, hx, lx = lg(x);
   int res = t_INT;
@@ -1140,7 +1143,7 @@ get_pivot_fun(GEN x, GEN *data)
   }
   switch(res)
   {
-    case t_REAL: *data = x; return &gauss_get_pivot_max;
+    case t_REAL: *data = x0; return &gauss_get_pivot_max;
     case t_PADIC: *data = p; return &gauss_get_pivot_padic;
     default: return &gauss_get_pivot_NZ;
   }
@@ -1314,7 +1317,7 @@ RgM_solve(GEN a, GEN b)
   }
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
-  pivot = get_pivot_fun(a, &data);
+  pivot = get_pivot_fun(a, a, &data);
   a = RgM_shallowcopy(a);
   bco = lg(b)-1;
   if(DEBUGLEVEL>4) err_printf("Entering gauss\n");
@@ -2150,20 +2153,23 @@ deplin(GEN x0)
 /*           (kernel, image, complementary image, rank)            */
 /*                                                                 */
 /*******************************************************************/
-/* return the transform of x under a standard Gauss pivot. r = dim ker(x).
- * d[k] contains the index of the first non-zero pivot in column k */
+/* return the transform of x under a standard Gauss pivot.
+ * x0 is a reference point when guessing whether x[i,j] ~ 0
+ * (iff x[i,j] << x0[i,j])
+ * Set r = dim ker(x). d[k] contains the index of the first non-zero pivot
+ * in column k */
 static GEN
-gauss_pivot_ker(GEN x0, GEN *dd, long *rr)
+gauss_pivot_ker(GEN x, GEN x0, GEN *dd, long *rr)
 {
-  GEN x, c, d, p, data;
+  GEN c, d, p, data;
   pari_sp av, lim;
   long i, j, k, r, t, n, m;
   pivot_fun pivot;
 
-  n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
-  m=nbrows(x0); r=0;
-  pivot = get_pivot_fun(x0, &data);
-  x = RgM_shallowcopy(x0);
+  n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
+  m=nbrows(x); r=0;
+  pivot = get_pivot_fun(x, x0, &data);
+  x = RgM_shallowcopy(x);
   c = zero_zv(m);
   d = cgetg(n+1,t_VECSMALL);
   av=avma; lim=stack_lim(av,1);
@@ -2317,19 +2323,20 @@ END:
 static GEN
 gauss_pivot(GEN x, long *rr) {
   GEN data;
-  pivot_fun pivot = get_pivot_fun(x, &data);
+  pivot_fun pivot = get_pivot_fun(x, x, &data);
   return RgM_pivots(x, data, rr, pivot);
 }
 
-/* compute ker(x) */
+/* compute ker(x), x0 is a reference point when guessing whether x[i,j] ~ 0
+ * (iff x[i,j] << x0[i,j]) */
 static GEN
-ker_aux(GEN x)
+ker_aux(GEN x, GEN x0)
 {
   pari_sp av = avma;
   GEN d,y;
   long i,j,k,r,n;
 
-  x = gauss_pivot_ker(x,&d,&r);
+  x = gauss_pivot_ker(x,x0,&d,&r);
   if (!r) { avma=av; return cgetg(1,t_MAT); }
   n = lg(x)-1; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
@@ -2356,7 +2363,7 @@ ker(GEN x)
   GEN p = NULL;
   if (RgM_is_FpM(x, &p) && p)
     return gerepileupto(av, FpM_to_mod(FpM_ker(RgM_to_FpM(x, p), p), p));
-  return ker_aux(x);
+  return ker_aux(x,x);
 }
 GEN
 matker0(GEN x,long flag)
@@ -3033,8 +3040,8 @@ RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
 GEN
 eigen(GEN x, long prec)
 {
-  GEN y,rr,p,ssesp,r1,r2,r3;
-  long e,i,k,l,ly,ex, n = lg(x);
+  GEN y, R, T;
+  long k, l, ex, n = lg(x);
   pari_sp av = avma;
 
   if (typ(x)!=t_MAT) pari_err_TYPE("eigen",x);
@@ -3042,30 +3049,50 @@ eigen(GEN x, long prec)
   if (n<=2) return gcopy(x);
 
   ex = 16 - prec2nbits(prec);
-  y=cgetg(n,t_MAT);
-  p=caradj(x,0,NULL); rr = cleanroots(p,prec);
-  ly=1; k=2; r2=gel(rr,1);
-  for(;;)
+  T = charpoly(x,0);
+  if (RgX_is_QX(T))
   {
-    r3 = grndtoi(r2, &e); if (e < ex) r2 = r3;
-    ssesp = ker_aux(RgM_Rg_add_shallow(x, gneg(r2))); l = lg(ssesp);
-    if (l == 1 || ly + (l-1) > n)
-      pari_err_PREC("mateigen");
-    for (i=1; i<l; i++,ly++) gel(y,ly) = gel(ssesp,i); /* eigenspace done */
-
-    r1=r2; /* try to find a different eigenvalue */
-    do
-    {
-      if (k == n || ly == n)
-      {
-        setlg(y,ly); /* x may not be diagonalizable */
-        return gerepilecopy(av,y);
-      }
-      r2 = gel(rr,k++);
-      r3 = gsub(r1,r2);
+    T = Q_primpart(T);
+    (void)ZX_gcd_all(T, ZX_deriv(T),  &T);
+    R = nfrootsQ(T);
+    if (lg(R)-1 < degpol(T))
+    { /* add missing complex roots */
+      T = RgX_div(T, roots_to_pol(R, 0));
+      R = shallowconcat(R, cleanroots(T,prec));
     }
-    while (gequal0(r3) || gexpo(r3) < ex);
   }
+  else
+  {
+    GEN r1, v = vectrunc_init(lg(T));
+    long e;
+    R = cleanroots(T,prec);
+    r1 = NULL;
+    for (k = 1; k < lg(R); k++)
+    {
+      GEN r2 = gel(R,k), r = grndtoi(r2, &e);
+      if (e < ex) r2 = r;
+      if (r1)
+      {
+        r = gsub(r1,r2);
+        if (gcmp0(r) || gexpo(r) < ex) continue;
+      }
+      vectrunc_append(v, r2);
+      r1 = r2;
+    }
+    R = v;
+  }
+  /* R = distinct complex roots of charpoly(x) */
+  l = lg(R); y = cgetg(l, t_VEC);
+  for (k = 1; k < l; k++)
+  {
+    GEN F = ker_aux(RgM_Rg_sub_shallow(x, gel(R,k)), x);
+    if (lg(F) == 1) pari_err_PREC("mateigen");
+    gel(y,k) = F;
+  }
+  y = shallowconcat1(y);
+  if (lg(y) > n) pari_err_PREC("mateigen");
+  /* lg(y) < n if x is not diagonalizable */
+  return gerepilecopy(av,y);
 }
 
 /*******************************************************************/
@@ -3189,7 +3216,7 @@ det2(GEN a)
   if (n != nbrows(a)) pari_err_DIM("det2");
   if (n == 1) return gcopy(gcoeff(a,1,1));
   if (n == 2) return RgM_det2(a);
-  pivot = get_pivot_fun(a, &data);
+  pivot = get_pivot_fun(a, a, &data);
   return det_simple_gauss(a, data, pivot);
 }
 
@@ -3502,7 +3529,7 @@ det(GEN a)
     av = avma;
     return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
   }
-  pivot = get_pivot_fun(a, &data);
+  pivot = get_pivot_fun(a, a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
   B = (double)n;
   return det_develop(a, det_init_max(n), B*B*B);

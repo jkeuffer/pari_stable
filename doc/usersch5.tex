@@ -6070,6 +6070,12 @@ and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
 \fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
 fewer copies. Not suitable for \kbd{gerepileupto}.
 
+\fun{GEN}{RgM_Rg_sub}{GEN x, GEN y} assuming $x$ is a square matrix
+and $y$ a scalar, returns the square matrix $x - y*\text{Id}$.
+
+\fun{GEN}{RgM_Rg_sub_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_sub} with much
+fewer copies. Not suitable for \kbd{gerepileupto}.
+
 \fun{GEN}{RgC_Rg_add}{GEN x, GEN y} assuming $x$ is a non-empty column vector
 and $y$ a scalar, returns the vector $[x_1 + y, x_2,\dots,x_n]$.
 
