@@ -10,6 +10,13 @@ Doc: returns the (complex) eigenvectors of $x$ as columns of a matrix.
  eigenspaces as kernels of the $x - \lambda_i$. This algorithm is
  ill-conditioned and is likely to miss kernel vectors if some roots of the
  characteristic polynomial are close, in particular if it has multiple roots.
+ \bprog
+ ? mateigen([13,2; 10,14])
+ %1 =
+ [-1/2 2/5]
+
+ [   1   1]
+ @eprog\noindent
  For symmetric matrices, use \tet{qfjacobi} instead; for Hermitian matrices,
  compute
  \bprog
