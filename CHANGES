@@ -62,7 +62,9 @@ PB 12- PARI functions FlxqM_gauss, FlxqM_inv and FqM_gauss
        RgM_Rg_sub_shallow
    14- generic driver for GP's charpoly(): select appropriate algorith (flag)
        depending on input type.
-BA 15- ellsearch now accept input to be a vector
+BA 15- allow ellsearch(t_VEC) : search for curve with given name, in given
+       isogeny class or with given conductor; alias for the existing
+       ellsearch(t_STR) as per the ellconvertname correspondance
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
