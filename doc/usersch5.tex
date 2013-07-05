@@ -5647,7 +5647,12 @@ repeatedly called on the polynomial's coefficients.
 \fun{GEN}{ZXXV_to_FlxXV}{GEN V, ulong p, long v}, as \kbd{ZXX\_to\_FlxX},
 repeatedly called on the vector's coefficients.
 
-\fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
+\fun{GEN}{RgC_to_Flc}{GEN x, ulong p} reduce the \typ{VEC}/\typ{COL}
+$x$ modulo $p$, yielding a \typ{VECSMALL}.
+
+\fun{GEN}{RgM_to_Flm}{GEN x, ulong p} reduce the \typ{MAT} $x$ modulo $p$.
+
+\fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~$x$ modulo $p$
 (yielding an \kbd{Flm}).
 
 \fun{GEN}{ZV_to_zv}{GEN z}, converts coefficients using \kbd{itos}
@@ -5661,6 +5666,7 @@ to coefficient in Flx, result being a column vector.
 
 \fun{GEN}{FqV_to_FlxV}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
 to coefficient in Flx, result being a line vector.
+
 
 \fun{GEN}{FqM_to_FlxM}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
 to coefficient in Flx.

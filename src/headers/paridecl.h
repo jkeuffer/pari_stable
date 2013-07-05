@@ -540,7 +540,6 @@ GEN     FpC_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpC_center(GEN z, GEN p, GEN pov2);
 GEN     FpC_red(GEN z, GEN p);
 GEN     FpC_to_mod(GEN z, GEN p);
-GEN     FpCs_to_FpC(GEN C);
 GEN     FpM_FpC_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v);
 GEN     FpM_center(GEN z, GEN p, GEN pov2);
