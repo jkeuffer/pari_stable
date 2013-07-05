@@ -8812,6 +8812,9 @@ $x\geq 0$, assuming that \kbd{expx} is \kbd{mpexp}$(x)$.
 function at the (possibly negative) integer $s\neq 1$, in relative accuracy
 \kbd{prec}.
 
+\fun{GEN}{mplambertW}{GEN y} solution $x$ of the implicit equation
+$x \exp(x) = y$, for $y > 0$ a \typ{REAL}.
+
 \noindent Useful low-level functions which \emph{disregard} the sign of $x$:
 
 \fun{GEN}{sqrtr_abs}{GEN x} returns $\sqrt{|x|}$ assuming $x\neq 0$.
