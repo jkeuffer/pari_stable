@@ -3038,7 +3038,7 @@ RgMs_structelim(GEN M, long nbrow, GEN A, GEN *p_col, GEN *p_row)
 /*******************************************************************/
 
 GEN
-eigen(GEN x, long prec)
+mateigen(GEN x, long flag, long prec)
 {
   GEN y, R, T;
   long k, l, ex, n = lg(x);
@@ -3046,7 +3046,17 @@ eigen(GEN x, long prec)
 
   if (typ(x)!=t_MAT) pari_err_TYPE("eigen",x);
   if (n != 1 && n != lgcols(x)) pari_err_DIM("eigen");
-  if (n<=2) return gcopy(x);
+  if (flag < 0 || flag > 1) pari_err_FLAG("mateigen");
+  if (n == 1)
+  {
+    if (flag) retmkvec2(cgetg(1,t_VEC), cgetg(1,t_MAT));
+    return cgetg(1,t_VEC);
+  }
+  if (n == 2)
+  {
+    if (flag) retmkvec2(mkveccopy(gcoeff(x,1,1)), matid(1));
+    return matid(1);
+  }
 
   ex = 16 - prec2nbits(prec);
   T = charpoly(x,0);
@@ -3086,14 +3096,19 @@ eigen(GEN x, long prec)
   for (k = 1; k < l; k++)
   {
     GEN F = ker_aux(RgM_Rg_sub_shallow(x, gel(R,k)), x);
-    if (lg(F) == 1) pari_err_PREC("mateigen");
+    long d = lg(F)-1;
+    if (!d) pari_err_PREC("mateigen");
     gel(y,k) = F;
+    if (flag) gel(R,k) = const_vec(d, gel(R,k));
   }
   y = shallowconcat1(y);
   if (lg(y) > n) pari_err_PREC("mateigen");
   /* lg(y) < n if x is not diagonalizable */
+  if (flag) y = mkvec2(shallowconcat1(R), y);
   return gerepilecopy(av,y);
 }
+GEN
+eigen(GEN x, long prec) { return mateigen(x, 0, prec); }
 
 /*******************************************************************/
 /*                                                                 */

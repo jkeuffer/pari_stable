@@ -9,4 +9,4 @@ default(realprecision,38);
 A=[5/3,7/45;0,21/10];
 mateigen(A)
 mateigen(A*1.)
-
+mateigen(A,1)
