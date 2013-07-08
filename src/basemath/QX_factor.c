@@ -510,7 +510,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
   if (DEBUGLEVEL>7) err_printf("special_pivot output:\n%Ps\n",piv);
 
   r  = lg(piv)-1;
-  list = cgetg(r+1, t_COL);
+  list = cgetg(r+1, t_VEC);
   lt = absi(leading_term(pol));
   if (is_pm1(lt)) lt = NULL;
   ltpol = lt? ZX_Z_mul(pol, lt): pol;

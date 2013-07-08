@@ -945,7 +945,7 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN deg      = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
-  GEN fa       = cgetg(lfamod+1, t_COL);
+  GEN fa       = cgetg(lfamod+1, t_VEC);
   const double Bhigh = get_Bhigh(lfamod, dnf);
   trace_data _T1, _T2, *T1, *T2;
   div_data D;
@@ -1143,7 +1143,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
   if (DEBUGLEVEL>3) err_printf("special_pivot output:\n%Ps\n",piv);
 
   r  = lg(piv)-1;
-  list = cgetg(r+1, t_COL);
+  list = cgetg(r+1, t_VEC);
   init_div_data(&D, pol, T->L->topowden);
   for (i = 1;;)
   {
