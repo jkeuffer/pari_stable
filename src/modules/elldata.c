@@ -173,7 +173,7 @@ ellsearch(GEN A)
   else if  (typ(A)==t_VEC)
   {
     long l = lg(A)-1;
-    if (l<1 && l>3)
+    if (l<1 || l>3)
       pari_err_TYPE("ellsearch",A);
     f = gtos(gel(A,1));
     c = l>=2 ? gtos(gel(A,2)): -1;
