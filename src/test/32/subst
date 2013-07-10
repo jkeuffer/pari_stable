@@ -1,4 +1,5 @@
 Y/x
 x + 1
 0
-Total time spent: 8
+O(x^2)
+Total time spent: 4

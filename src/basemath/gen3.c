@@ -1430,7 +1430,8 @@ gsubst(GEN x, long v, GEN y)
           return gerepileupto(av, gmul(z,p2));
 
         case t_POL:
-          if (lg(y) == 2) return scalarser(gel(x,2),v,lx-2);
+          if (lg(y) == 2)
+            return (lx == 2)? gcopy(x): scalarser(gel(x,2),v,lx-2);
         case t_RFRAC:
           vy = gvar(y); e = gval(y,vy);
           if (e <= 0)
