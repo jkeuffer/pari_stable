@@ -2754,6 +2754,7 @@ GEN     subgroups_tableset(GEN S, long n);
 long    tableset_find_index(GEN tbl, GEN set);
 GEN     trivialgroup(void);
 GEN     vecperm_orbits(GEN v, long n);
+GEN     vec_insert(GEN v, long n, GEN x);
 int     vec_is1to1(GEN v);
 int     vec_isconst(GEN v);
 long    vecsmall_duplicate(GEN x);

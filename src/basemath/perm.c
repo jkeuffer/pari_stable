@@ -48,6 +48,16 @@ vec_is1to1(GEN v)
   return 1;
 }
 
+GEN
+vec_insert(GEN v, long n, GEN x)
+{
+  long i, l=lg(v);
+  GEN V = cgetg(l+1,t_VEC);
+  for(i=1; i<n; i++) gel(V,i) = gel(v,i);
+  gel(V,n) = x;
+  for(i=n+1; i<=l; i++) gel(V,i) = gel(v,i-1);
+  return V;
+}
 /*************************************************************************/
 /**                                                                     **/
 /**                   Routines for handling VECSMALL                    **/
