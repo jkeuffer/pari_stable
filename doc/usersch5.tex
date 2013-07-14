@@ -6519,8 +6519,13 @@ where $L > 0$ is allowed to be rational, the monic $Q\in \Z[X]$ has possibly
 smaller coefficients.
 
 \fun{GEN}{ZX_rescale}{GEN P, GEN h} returns $h^{\deg(P)} P(x/h)$.
-\kbd{P} is a \kbd{ZX} and \kbd{h} is a non-zero integer. (Leaves small
-objects on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
+\kbd{P} is a \kbd{ZX} and \kbd{h} is a non-zero integer. Neither memory-clean
+not suitable for \kbd{gerepileupto}.
+
+\fun{GEN}{ZX_rescale_lt}{GEN P} returns the monic integral polynomial
+$h^{\deg(P)-1} P(x/h)$, where \kbd{P} is a non-zero \kbd{ZX} and \kbd{h} is
+its leading coefficient. Neither memory-clean not suitable for
+\kbd{gerepileupto}.
 
 \fun{GEN}{ZX_translate}{GEN P, GEN c} assume $P$ is a \kbd{ZX} and $c$ an
 integer. Returns $P(X + c)$ (optimized for $c = \pm 1$).

@@ -302,21 +302,40 @@ ZX_valrem(GEN x, GEN *Z)
   return vx;
 }
 
-/* Return h^degpol(P) P(x / h), not memory clean. h integer, P ZX */
+/* Return h^deg(P) P(x / h), not memory clean. h integer, P ZX */
 GEN
 ZX_rescale(GEN P, GEN h)
 {
-  long i, l = lg(P);
-  GEN Q = cgetg(l,t_POL), hi = h;
-  Q[l-1] = P[l-1];
-  for (i=l-2; i>=2; i--)
+  long l = lg(P);
+  GEN Q = cgetg(l,t_POL);
+  if (l != 2)
   {
-    gel(Q,i) = mulii(gel(P,i), hi);
-    if (i == 2) break;
-    hi = mulii(hi,h);
+    long i = l-1;
+    GEN hi = h;
+    gel(Q,i) = gel(P,i);
+    if (l != 3) { i--; gel(Q,i) = mulii(gel(P,i), h); }
+    for (i--; i>=2; i--) { hi = mulii(hi,h); gel(Q,i) = mulii(gel(P,i), hi); }
   }
   Q[1] = P[1]; return Q;
 }
+/* Return h^(deg(P)-1) P(x / h), P!=0, h=lt(P), memory unclean; monic result */
+GEN
+ZX_rescale_lt(GEN P)
+{
+  long l = lg(P);
+  GEN Q = cgetg(l,t_POL);
+  gel(Q,l-1) = gen_1;
+  if (l != 3)
+  {
+    long i = l-1;
+    GEN h = gel(P,i), hi = h;
+    i--; gel(Q,i) = gel(P,i);
+    if (l != 4) { i--; gel(Q,i) = mulii(gel(P,i), h); }
+    for (i--; i>=2; i--) { hi = mulii(hi,h); gel(Q,i) = mulii(gel(P,i), hi); }
+  }
+  Q[1] = P[1]; return Q;
+}
+
 
 /*Eval x in 2^(k*BIL) in linear time*/
 static GEN

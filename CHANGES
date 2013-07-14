@@ -68,6 +68,7 @@ BA 15- allow ellsearch(t_VEC) : search for curve with given name, in given
        ellsearch(t_STR) as per the ellconvertname correspondance
    16- option flag to mateigen: also return the eigenvalues
    17- [libpari] Z_lvalrem_stop, u_lvalrem_stop
+   18- [libpari] ZX_rescale_lt
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
