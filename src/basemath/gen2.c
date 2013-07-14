@@ -1373,19 +1373,26 @@ u_lvalrem_stop(ulong *n, ulong p, int *stop)
   }
   *stop = q <= p; return v;
 }
-/* Assume n > 0. Return v_p(n), assign n := n/p^v_p(n). Set 'stop' if now
+/* Assume n > 0. Return v_p(n), set *n := n/p^v_p(n). Set 'stop' if now
  * n < p^2 [implies n prime if no prime < p divides n] */
 long
-Z_lvalrem_stop(GEN n, ulong p, int *stop)
+Z_lvalrem_stop(GEN *n, ulong p, int *stop)
 {
   pari_sp av;
-  long v = 0;
+  long v;
   ulong r;
   GEN N, q;
 
-  if (lgefint(n) == 3) return u_lvalrem_stop((ulong*)&n[2], p, stop);
-  av = avma; q = diviu_rem(n, p, &r);
-  if (!r)
+  if (lgefint(*n) == 3)
+  {
+    r = (*n)[2];
+    v = u_lvalrem_stop(&r, p, stop);
+    if (v) *n = utoipos(r);
+    return v;
+  }
+  av = avma; v = 0; q = diviu_rem(*n, p, &r);
+  if (r) avma = av;
+  else
   {
     do {
       v++; N = q;
@@ -1397,10 +1404,9 @@ Z_lvalrem_stop(GEN n, ulong p, int *stop)
       }
       q = diviu_rem(N, p, &r);
     } while (!r);
-    affii(N, n);
+    *n = N;
   }
-  *stop = isless_iu(q,p);
-  avma = av; return v;
+  *stop = isless_iu(q,p); return v;
 }
 
 /* x is a non-zero integer, |p| > 1 */

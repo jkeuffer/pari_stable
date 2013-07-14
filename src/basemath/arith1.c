@@ -723,12 +723,11 @@ Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
     goto END;
   }
   L = pt? vectrunc_init(expi(q)+1): NULL;
-  q = icopy(q);
   u_forprime_init(&S, 2, tridiv_bound(q));
   while ((pp = u_forprime_next(&S)))
   {
     int stop;
-    e = Z_lvalrem_stop(q, pp, &stop);
+    e = Z_lvalrem_stop(&q, pp, &stop);
     if (!e) continue;
     if (!handle_pe(&a, q, L, K, utoipos(pp), e)) { avma = av; return 0; }
     if (stop)
@@ -1225,13 +1224,12 @@ Z_isanypower_aux(GEN x, GEN *pty)
   k = l = 1;
   P = cgetg(26 + 1, t_VECSMALL);
   E = cgetg(26 + 1, t_VECSMALL);
-  x = absi(x); /* Z_lvalrem_stop assigns to x */
   /* trial division */
   for(i = 0; i < 26; i++)
   {
     ulong p = tinyprimes[i];
     int stop;
-    v = Z_lvalrem_stop(x, p, &stop);
+    v = Z_lvalrem_stop(&x, p, &stop);
     if (v)
     {
       P[l] = p;
@@ -1239,7 +1237,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
       e = ugcd(e, v); if (e == 1) goto END;
     }
     if (stop) {
-      if (equali1(x)) k = e;
+      if (is_pm1(x)) k = e;
       goto END;
     }
   }

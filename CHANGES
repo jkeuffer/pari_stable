@@ -83,6 +83,7 @@ BA 15- allow ellsearch(t_VEC) : search for curve with given name, in given
        no solution exist (used to return a t_COL / t_MAT of length 1)
     8- [libpari] replace the forvec_start() function by a standard
        iterator: forvec_init() / forvec_next()
+    9- [libpari] Z_lvalrem would destroy its argument. No longer.
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)

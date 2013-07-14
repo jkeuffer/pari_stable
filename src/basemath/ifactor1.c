@@ -3370,7 +3370,7 @@ moebius(GEN n)
   while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
+    v = Z_lvalrem_stop(&n, p, &stop);
     if (v)
     {
       if (v > 1) { avma = av; return 0; }
@@ -3414,7 +3414,7 @@ ispowerful(GEN n)
   while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
+    v = Z_lvalrem_stop(&n, p, &stop);
     if (v)
     {
       if (v == 1) { avma = av; return 0; }
@@ -3480,7 +3480,7 @@ core(GEN n)
   while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    v = Z_lvalrem_stop(n, p, &stop);
+    v = Z_lvalrem_stop(&n, p, &stop);
     if (v)
     {
       if (v & 1) m = muliu(m, p);
@@ -3725,12 +3725,11 @@ Z_issmooth(GEN m, ulong lim)
   pari_sp av=avma;
   ulong p = 2;
   forprime_t S;
-  m = icopy(m);
   u_forprime_init(&S, 2, lim);
   while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
-    (void)Z_lvalrem_stop(m, p, &stop);
+    (void)Z_lvalrem_stop(&m, p, &stop);
     if (stop) { avma = av; return cmpiu(m,lim)<=0; }
   }
   avma = av; return 0;
@@ -3744,7 +3743,6 @@ Z_issmooth_fact(GEN m, ulong lim)
   ulong p;
   long i = 1, l = expi(m)+1;
   forprime_t S;
-  m = absi(m);
   P = cgetg(l, t_VECSMALL);
   E = cgetg(l, t_VECSMALL);
   F = mkmat2(P,E);
@@ -3753,7 +3751,7 @@ Z_issmooth_fact(GEN m, ulong lim)
   {
     long v;
     int stop;
-    if ((v = Z_lvalrem_stop(m, p, &stop)))
+    if ((v = Z_lvalrem_stop(&m, p, &stop)))
     {
       P[i] = p;
       E[i] = v; i++;
@@ -3828,7 +3826,7 @@ special_primes(GEN n, ulong p, long *nb, GEN T)
 static GEN
 ifactor_sign(GEN n, ulong all, long hint, long sn)
 {
-  GEN M;
+  GEN M, N;
   pari_sp av;
   long nb = 0, i;
   ulong lim;
@@ -3871,7 +3869,7 @@ ifactor_sign(GEN n, ulong all, long hint, long sn)
   if (sn < 0) STORE(&nb, utoineg(1), 1);
   if (is_pm1(n)) return aux_end(M,NULL,nb);
 
-  n = gclone(n); setabssign(n);
+  n = N = gclone(n); setabssign(n);
   /* trial division bound */
   lim = all; if (!lim) lim = tridiv_bound(n);
   if (lim > 2)
@@ -3891,9 +3889,14 @@ ifactor_sign(GEN n, ulong all, long hint, long sn)
     /* first pass: known to fit in private prime table */
     while ((p = u_forprime_next_fast(&T)))
     {
+      pari_sp av3 = avma;
       int stop;
-      long k = Z_lvalrem_stop(n, p, &stop);
-      if (k) STOREu(&nb, p, k);
+      long k = Z_lvalrem_stop(&n, p, &stop);
+      if (k)
+      {
+        affii(n, N); n = N; avma = av3;
+        STOREu(&nb, p, k);
+      }
       if (stop)
       {
         if (!is_pm1(n)) STOREi(&nb, n, 1);
@@ -3907,9 +3910,14 @@ ifactor_sign(GEN n, ulong all, long hint, long sn)
       av = avma; u_forprime_init(&T, maxp+1, lim); av2 = avma;
       while ((p = u_forprime_next(&T)))
       {
+        pari_sp av3 = avma;
         int stop;
-        long k = Z_lvalrem_stop(n, p, &stop);
-        if (k) STOREu(&nb, p, k);
+        long k = Z_lvalrem_stop(&n, p, &stop);
+        if (k)
+        {
+          affii(n, N); n = N; avma = av3;
+          STOREu(&nb, p, k);
+        }
         if (stop)
         {
           if (!is_pm1(n)) STOREi(&nb, n, 1);

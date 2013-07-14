@@ -796,7 +796,7 @@ smooth_norm(FB_t *F, GEN *N, GEN *ex)
   for (i=1; ; i++)
   {
     int stop;
-    (*ex)[i] = Z_lvalrem_stop(*N, (ulong)FB[i], &stop);
+    (*ex)[i] = Z_lvalrem_stop(N, (ulong)FB[i], &stop);
     if (stop) break;
     if (i == KCZ) return 0;
   }
@@ -822,7 +822,7 @@ divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
 /* Let x = m if I == NULL,
  *         I if m == NULL,
  *         m/I otherwise.
- * Can we factor the integral primitive ideal x ? |N| = Norm x > 0 [DESTROYED]*/
+ * Can we factor the integral primitive ideal x ? |N| = Norm x > 0 */
 static long
 can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 {
@@ -1164,10 +1164,9 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   if (nf_get_degree(nf) != lg(x)-1)
     pari_err_TYPE("idealtyp [dimension != degree]", x);
 
-  /* try without reduction if x is small.
-   * N.B. can_factor() destroys its NI argument */
+  /* try without reduction if x is small */
   if (gexpo(gcoeff(x,1,1)) < 100 &&
-      can_factor(F, nf, x, NULL, icopy(Nx), fact)) return NULL;
+      can_factor(F, nf, x, NULL, Nx, fact)) return NULL;
 
   av = avma;
   y = idealpseudomin_nonscalar(x, nf_get_roundG(nf));
