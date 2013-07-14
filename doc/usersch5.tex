@@ -2154,25 +2154,37 @@ shifts the mantissa
 $$f, s[m], s[m+1],\ldots s[M]$$
 right by $n$ bits.
 
-\subsec{Valuations}
-\fun{long}{Z_pvalrem}{GEN x, GEN p, GEN *r} applied to \typ{INT}s
-$\kbd{x}\neq 0$ and~\kbd{p}, $|\kbd{p}| > 1$, returns the highest
-exponent $e$ such that $\kbd{p}^{e}$ divides~\kbd{x}. The quotient
-$\kbd{x}/\kbd{p}^{e}$ is returned in~\kbd{*r}. In particular, if \kbd{p} is a
-prime, this returns the valuation at \kbd{p} of~\kbd{x}, and \kbd{*r} is
-the prime-to-\kbd{p} part of~\kbd{x}.
+\subsec{Integer valuation}
+For integers $x$ and $p$, such that $x\neq 0$ and $|p| > 1$, we define
+$v_p(x)$ to be the largest integer exponent $e$ such that $p^e$ divides $x$.
+If $p$ is prime, this is the ordinary valuation of $x$ at $p$.
 
-\fun{long}{Z_pval}{GEN x, GEN p} as \kbd{Z\_pvalrem} but only returns the
-``valuation''.
+\fun{long}{Z_pvalrem}{GEN x, GEN p, GEN *r} applied to \typ{INT}s
+$\kbd{x}\neq 0$ and~\kbd{p}, $|\kbd{p}| > 1$, returns $e := v_p(x)$
+The quotient $\kbd{x}/\kbd{p}^e$ is returned in~\kbd{*r}. If
+$|\kbd{p}|$ is a prime, \kbd{*r} is the prime-to-\kbd{p} part of~\kbd{x}.
+
+\fun{long}{Z_pval}{GEN x, GEN p} as \kbd{Z\_pvalrem} but only returns
+$v_p(x)$.
 
 \fun{long}{Z_lvalrem}{GEN x, ulong p, GEN *r} as \kbd{Z\_pvalrem},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
+
+\fun{long}{Z_lvalrem_stop}{GEN *x, ulong p, int *stop} returns $e := v_p(x)$
+and replaces $x$ by $x / p^e$. Set \kbd{stop} to $1$ if the new value
+of $x$ is $ < p^2$ (and $0$ otherwise). To be used when trial dividing $x$
+by successive primes: the \kbd{stop} condition is cheaply tested while
+testing whether $p$ divides $x$ (is the quotient less than $p$?), and allows
+to decide that $n$ is prime if no prime $< p$ divides $n$. Not memory-clean.
 
 \fun{long}{Z_lval}{GEN x, ulong p} as \kbd{Z\_pval},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
 \fun{long}{u_lvalrem}{ulong x, ulong p, ulong *r} as \kbd{Z\_pvalrem},
 except the inputs/outputs are now \kbd{ulong}s.
+
+\fun{long}{u_lvalrem_stop}{ulong *n, ulong p, int *stop} as
+\kbd{Z\_pvalrem\_stop}.
 
 \fun{long}{u_pvalrem}{ulong x, GEN p, ulong *r} as \kbd{Z\_pvalrem},
 except \kbd{x} and \kbd{r} are now \kbd{ulong}s.
