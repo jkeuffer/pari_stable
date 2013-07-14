@@ -29,6 +29,16 @@ RgM_is_ZM(GEN x)
   return 1;
 }
 
+int
+RgV_is_ZMV(GEN V)
+{
+  long i, l = lg(V);
+  for (i=1; i<l; i++)
+    if (typ(gel(V,i))!=t_MAT || !RgM_is_ZM(gel(V,i)))
+      return 0;
+  return 1;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                   GENERIC LINEAR ALGEBRA                       **/

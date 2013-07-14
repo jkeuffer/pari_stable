@@ -547,7 +547,16 @@ zm_to_ZM(GEN z)
   return x;
 }
 
-/* same as Flv_to_ZV, Flc_to_ZC, Flm_to_ZM but do not assume positivity */
+GEN
+zmV_to_ZMV(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = zm_to_ZM(gel(z,i));
+  return x;
+}
+
+/* same as Flm_to_ZM but do not assume positivity */
 GEN
 ZM_to_zm(GEN z)
 {
@@ -572,6 +581,15 @@ zm_to_Flm(GEN z, ulong p)
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
   for (i=1; i<l; i++) gel(x,i) = zv_to_Flv(gel(z,i),p);
+  return x;
+}
+
+GEN
+ZMV_to_zmV(GEN z)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = ZM_to_zm(gel(z,i));
   return x;
 }
 

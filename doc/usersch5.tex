@@ -6043,6 +6043,15 @@ $0$ otherwise.
 \fun{int}{zvV_equal}{GEN x, GEN y} returns $1$ if the two \kbd{zvV} (vectors
 of \kbd{zv}) are equal and $0$ otherwise.
 
+\subsec{\kbd{ZMV} / \kbd{zmV} (vectors of \kbd{ZM}/\kbd{zm})}
+
+\fun{int}{RgV_is_ZMV}{GEN x} Assuming \kbd{x} is a \typ{VEC}
+or \typ{COL} return $1$ if its components are \kbd{ZM}, and $0$ otherwise.
+
+\fun{GEN}{ZMV_to_zmv}{GEN z}
+
+\fun{GEN}{zmV_to_ZMV}{GEN z}
+
 \subsec{\kbd{RgC} / \kbd{RgV}, \kbd{RgM}}
 
 \kbd{RgC} and \kbd{RgV} routines assume the inputs are \kbd{VEC} or \kbd{COL}
