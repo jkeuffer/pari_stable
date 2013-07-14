@@ -200,6 +200,18 @@ ZM_ZC_mul(GEN x, GEN y)
   return lx==1? cgetg(1,t_COL): ZM_ZC_mul_i(x, y, lx, lgcols(x));
 }
 
+long
+zv_dotproduct(GEN x, GEN y)
+{
+  long i, lx = lg(x);
+  ulong c;
+  if (lx == 1) return 0;
+  c = uel(x,1)*uel(y,1);
+  for (i = 2; i < lx; i++)
+    c += uel(x,i)*uel(y,i);
+  return c;
+}
+
 /* assume lx > 1 is lg(x) = lg(y) */
 static GEN
 ZV_dotproduct_i(GEN x, GEN y, long lx)

@@ -811,6 +811,7 @@ GEN     zm_to_Flm(GEN z, ulong p);
 GEN     zm_to_ZM(GEN z);
 GEN     zm_zc_mul(GEN x, GEN y);
 long    zv_content(GEN x);
+long    zv_dotproduct(GEN x, GEN y);
 int     zv_equal(GEN V, GEN W);
 int     zv_equal0(GEN V);
 GEN     zv_neg(GEN x);
