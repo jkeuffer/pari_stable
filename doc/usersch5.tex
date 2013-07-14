@@ -2889,7 +2889,8 @@ prime factors of the \typ{INT} $n$ are less or equal to $lim$.
 \fun{GEN}{Z_issmooth_fact}{GEN n, ulong lim} returns \kbd{NULL} if a prime
 factor of the \typ{INT} $n$ is $> lim$, and returns the factorization
 of $n$ otherwise, as a \typ{MAT} with \typ{VECSMALL} columns (word-size
-primes and exponents).
+primes and exponents). Neither memory-clean nor suitable for
+\kbd{gerepileupto}.
 
 \fun{long}{Z_issquarefree}{GEN n} returns $1$ if the \typ{INT} \kbd{n}
 is square-free, and $0$ otherwise.

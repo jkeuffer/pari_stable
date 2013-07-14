@@ -3761,8 +3761,7 @@ Z_issmooth_fact(GEN m, ulong lim)
         P[i] = m[2];
         E[i] = 1; i++;
         setlg(P, i);
-        setlg(E, i);
-        return F;
+        setlg(E, i); avma = (pari_sp)F; return F;
       }
     }
   }
