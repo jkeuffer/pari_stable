@@ -1555,9 +1555,9 @@ GEN     minim(GEN a, GEN borne, GEN stockmax);
 GEN     minim_raw(GEN a, GEN borne, GEN stockmax);
 GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     padic_lindep(GEN x);
+GEN     perf(GEN a);
 GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
-GEN     perf(GEN a);
 GEN     seralgdep(GEN s, long p, long r);
 GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
@@ -2989,7 +2989,7 @@ int     isrealappr(GEN x, long l);
 GEN     polgraeffe(GEN p);
 GEN     roots(GEN x,long l);
 
-/* polsubcyclo.c */
+/* subcyclo.c */
 
 GEN     factor_Aurifeuille(GEN p, long n);
 GEN     factor_Aurifeuille_prime(GEN p, long n);
