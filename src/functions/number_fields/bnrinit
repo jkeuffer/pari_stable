@@ -16,7 +16,7 @@ Doc: $\var{bnf}$ is as
  \kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the
  modulus; finally, \kbd{.clgp}, \kbd{.no}, \kbd{.cyc}, \kbd{.gen} refer to the
  ray class group (as a finite abelian group), its cardinality, its elementary
- divisors, its generators.
+ divisors, its generators (only computed if $\fl = 1$).
 
  The last group of functions are different from the members of the underlying
  \var{bnf}, which refer to the class group; use \kbd{\var{bnr}.bnf.\var{xxx}}
