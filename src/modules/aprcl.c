@@ -443,13 +443,11 @@ compute_t_small(double C)
 static ulong
 compute_t(GEN N, GEN *e, GEN *faet)
 {
-  pari_sp av0 = avma;
   /* 2^e b <= N < 2^e (b+1), where b >= 2^52. Approximating log_2 N by
    * log2(gtodouble(N)) ~ e+log2(b), the error is less than log(1+1/b) < 1e-15*/
   double C = dbllog2(N) + 1e-6; /* > log_2 N */
   ulong t;
   GEN B;
-  avma = av0;
   /* Return "smallest" t such that f(t) >= C, which implies e(t) > sqrt(N) */
   /* For N < 2^3515 ~ 10^1058 */
   if (C < 3514.6)
@@ -466,7 +464,7 @@ compute_t(GEN N, GEN *e, GEN *faet)
     if (cmpii(*e, B) > 0) break;
     avma = av;
   }
-  avma = av0; return t;
+  return t;
 }
 
 /* T[i] = discrete log of i in (Z/q)^*, q odd prime
