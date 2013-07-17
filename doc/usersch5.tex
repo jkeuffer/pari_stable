@@ -1751,15 +1751,11 @@ prime, and \kbd{x} to be a square modulo \kbd{p}.
 \fun{ulong}{random_Fl}{ulong p} returns a pseudo-random integer uniformly
 distributed in $0, 1, \dots p-1$.
 
-\fun{ulong}{pgener_Fl}{ulong p} returns a \idx{primitive root} modulo \kbd{p},
-assuming \kbd{p} is prime.
+\fun{ulong}{pgener_Fl}{ulong p} returns the smallest \idx{primitive root}
+modulo \kbd{p}, assuming \kbd{p} is prime.
 
-\fun{ulong}{pgener_Zl}{ulong p} returns a primitive root modulo $p^k$, $k
-> 1$, assuming $p$ is an odd prime. On a 64-bit machine,
-this function may fail and raise an exception, if $p > 2^{63}$; namely
-when $g := \kbd{pgener\_Fl}(p)$ is not a primitive element and $g + p$ no
-longer fits in an \kbd{ulong}. (It turns out that this cannot happen on a
-32-bit architecture.) Use \kbd{gener\_Fp} if this is a problem.
+\fun{ulong}{pgener_Zl}{ulong p} returns the smallest primitive root modulo
+$p^k$, $k > 1$, assuming $p$ is an odd prime.
 
 \fun{ulong}{pgener_Fl_local}{ulong p, GEN L}, see \kbd{gener\_Fp\_local},
 \kbd{L} is an \kbd{Flv}.
@@ -3240,11 +3236,11 @@ of \kbd{long}~x and \typ{INT}~\kbd{y}. As \kbd{kross} otherwise.
 \fun{long}{kronecker}{GEN x, GEN y} returns the \idx{Kronecker symbol} $(x|y)$
 of \typ{INT}s~x and~\kbd{y}. As \kbd{kross} otherwise.
 
-\fun{GEN}{pgener_Fp}{GEN p} returns a primitive root modulo \kbd{p}, assuming
-\kbd{p} is prime.
+\fun{GEN}{pgener_Fp}{GEN p} returns the smallest primitive root modulo
+\kbd{p}, assuming \kbd{p} is prime.
 
-\fun{GEN}{pgener_Zp}{GEN p} returns a primitive root modulo $p^k$, $k > 1$,
-assuming \kbd{p} is an odd prime.
+\fun{GEN}{pgener_Zp}{GEN p} returns the smallest primitive root modulo $p^k$,
+$k > 1$, assuming \kbd{p} is an odd prime.
 
 \fun{long}{Zp_issquare}{GEN x, GEN p} returns 1 if the \typ{INT} $x$ is
 a $p$-adic square, $0$ otherwise.
@@ -3260,13 +3256,13 @@ otherwise. If \kbd{py} is not \kbd{NULL}, set it to $y$ such that $y^K = x$
 modulo $n$.
 
 \fun{GEN}{pgener_Fp_local}{GEN p, GEN L}, \kbd{L} being a vector of
-primes dividing $p - 1$, returns an integer $x$ which is a generator of the
-$\ell$-Sylow of $\F_p^*$ for every $\ell$ in \kbd{L}. In other words,
-$x^{(p-1)/\ell} \neq 1$ for all such $\ell$. In particular, returns
-\kbd{pgener\_Fp(p)} if \kbd{L} contains all primes dividing $p - 1$.
+primes dividing $p - 1$, returns the smallest integer $x > 1$ which is a
+generator of the $\ell$-Sylow of $\F_p^*$ for every $\ell$ in \kbd{L}. In
+other words, $x^{(p-1)/\ell} \neq 1$ for all such $\ell$. In particular,
+returns \kbd{pgener\_Fp(p)} if \kbd{L} contains all primes dividing $p - 1$.
 It is not necessary, and in fact slightly inefficient, to include $\ell=2$,
-since 2 is treated separately in any case, i.e. the generator
-obtained is never a square.
+since 2 is treated separately in any case, i.e. the generator obtained is
+never a square.
 
 \fun{GEN}{rootsof1_Fp}{GEN n, GEN p} returns a primitive $n$-th root modulo
 the prime $p$.

@@ -39,6 +39,23 @@ is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
   }
   return 1;
 }
+/* assume p >2^32 */
+static ulong
+pgener_Zl_64(ulong p)
+{
+  const pari_sp av = avma;
+  const ulong p_1 = p - 1;
+  const ulong q = p_1 >>1;
+  long i, x, l ;
+  GEN L, p2 = sqru(p);
+  ulong t;
+  (void)u_lvalrem(q, 2, &t);
+  L = gel(factoru(t), 1); l = lg(L);
+  for (i=1; i<l; i++) L[i] = q / (ulong)L[i];
+  for (x=2;;x++)
+    if (is_gener_Fl(x,p,p_1,L) && !is_pm1(Fp_powu(utoipos(x),p_1,p2))) break;
+  avma = av; return x;
+}
 /* assume p prime */
 ulong
 pgener_Fl_local(ulong p, GEN L0)
@@ -126,41 +143,40 @@ pgener_Fp_local(GEN p, GEN L0)
 GEN
 pgener_Fp(GEN p) { return pgener_Fp_local(p, NULL); }
 
-/* Can fail if 2p > 2^BIL */
 ulong
 pgener_Zl(ulong p)
 {
-  ulong x;
   if (p == 2) pari_err_DOMAIN("pgener_Zl","p","=",gen_2,gen_2);
   /* only p < 2^32 such that znprimroot(p) != znprimroot(p^2) */
-  if (p == 40487) return 40492;
-  x = pgener_Fl(p);
-#ifdef LONG_IS_64BIT
-{
-  pari_sp av = avma;
-  GEN q = sqru(p);
-  GEN y = Fp_powu(utoipos(x), p-1, q);
-  if (equali1(y)) {
-    x += p;
-    if (x < p) pari_err_OVERFLOW("pgener_Zl [large prime]");
-  }
-  avma = av;
-}
+  if (p == 40487) return 10;
+#ifndef LONG_IS_64BIT
+  return pgener_Fl(p);
+#else
+  if (p < (1UL<<32)) return pgener_Fl(p);
+  return pgener_Zl_64(p);
 #endif
-  return x;
 }
 
 /* p prime. Return a primitive root modulo p^e, e > 1 */
 GEN
 pgener_Zp(GEN p)
 {
-  GEN x, y;
+  pari_sp av0;
+  GEN t, x, q, p_1, p2, L;
+  long l, i;
 
-  if (lgefint(p) == 3 && !(p[2] & HIGHBIT)) return utoipos( pgener_Zl(p[2]) );
-  x = pgener_Fp(p);
-  y = Fp_pow(x, subis(p,1), sqri(p));
-  if (equali1(y)) x = addii(x,p); else avma = (pari_sp)x;
-  return x;
+  if (lgefint(p) == 3) return utoipos(pgener_Zl(p[2]));
+  av0 = avma;
+  p2 = sqri(p);
+  p_1 = subis(p,1);
+  q = shifti(p_1, -1);
+  (void)Z_lvalrem(q, 2, &t);
+  L = gel(Z_factor(t), 1); l = lg(L);
+  for (i=1; i<l; i++) gel(L,i) = diviiexact(q, gel(L,i));
+  x = utoipos(2);
+  for (;; x[2]++)
+    if (is_gener_Fp(x,p,p_1,L) && !equali1(Fp_pow(x,p_1,p2))) break;
+  avma = av0; return utoipos((ulong)x[2]);
 }
 
 static GEN

@@ -87,6 +87,8 @@ BA 15- allow ellsearch(t_VEC) : search for curve with given name, in given
     8- [libpari] replace the forvec_start() function by a standard
        iterator: forvec_init() / forvec_next()
     9- [libpari] Z_lvalrem would destroy its argument. No longer.
+   10- znprimroot(p^k) now always returns the smallest primitive root (was
+       only true for k = 1)
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
