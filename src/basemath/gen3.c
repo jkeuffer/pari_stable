@@ -1460,6 +1460,23 @@ gsubst(GEN x, long v, GEN y)
   return gcopy(x);
 }
 
+/* Return P(x * h), not memory clean */
+GEN
+ser_unscale(GEN P, GEN h)
+{
+  long l = lg(P);
+  GEN Q = cgetg(l,t_SER);
+  Q[1] = P[1];
+  if (l != 2)
+  {
+    long i = 2;
+    GEN hi = gpowgs(h, valp(P));
+    gel(Q,i) = gmul(gel(P,i), hi);
+    for (i++; i<l; i++) { hi = gmul(hi,h); gel(Q,i) = gmul(gel(P,i), hi); }
+  }
+  return Q;
+}
+
 GEN
 gsubstvec(GEN e, GEN v, GEN r)
 {

@@ -2338,6 +2338,7 @@ GEN     roundr_safe(GEN x);
 GEN     scalarpol(GEN x, long v);
 GEN     scalarpol_shallow(GEN x, long v);
 GEN     scalarser(GEN x, long v, long prec);
+GEN     ser_unscale(GEN P, GEN h);
 GEN     simplify(GEN x);
 GEN     simplify_shallow(GEN x);
 GEN     tayl(GEN x, long v, long precdl);

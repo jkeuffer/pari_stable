@@ -8595,19 +8595,19 @@ or \typ{QFR} \kbd{x}.
 \fun{GEN}{qfb_disc3}{GEN x, GEN y, GEN z} returns $y^2 - 4xz$ assuming all
 inputs are \typ{INT}s. Not stack-clean.
 
-\section{Polynomial and power series}
-
-\fun{GEN}{derivser}{GEN x} returns the derivative of the \typ{SER} \kbd{x}
-with respect to its main variable.
-
-\fun{GEN}{integser}{GEN x} returns the primitive of the \typ{SER} \kbd{x}
-with respect to its main variable.
+\section{Polynomials}
 
 \fun{GEN}{truecoeff}{GEN x, long n} returns \kbd{polcoeff0(x,n, -1)}, i.e.
 the coefficient of the term of degree \kbd{n} in the main variable.
 
 \fun{long}{degree}{GEN x} returns \kbd{poldegree(x, -1)}, the degree of
 \kbd{x} with respect to its main variable.
+
+\fun{long}{degpol}{GEN x} returns the degree of \typ{POL}~\kbd{x},
+\emph{assuming} its leading coefficient is non-zero (an exact $0$ is
+impossible, but an inexact $0$ is allowed). By convention the degree of an
+exact $0$ polynomial is $-1$. If the leading coefficient of \kbd{x} is $0$,
+the result is undefined.
 
 \fun{GEN}{resultant}{GEN x,GEN y} resultant of \kbd{x} and \kbd{y}, with respect
 to the main variable of highest priority. Uses either
@@ -8623,6 +8623,20 @@ of Sylvester's matrix.
 non-zero remainder in the polynomial remainder sequence if such a sequence
 was computed, and to \kbd{gen\_0} otherwise (e.g. polynomials of degree 0,
 $u,v$ in $\Q[X]$).
+
+
+\section{Power series}
+
+\fun{GEN}{derivser}{GEN x} returns the derivative of the \typ{SER} \kbd{x}
+with respect to its main variable.
+
+\fun{GEN}{integser}{GEN x} returns the primitive of the \typ{SER} \kbd{x}
+with respect to its main variable.
+
+\fun{GEN}{truecoeff}{GEN x, long n} returns \kbd{polcoeff0(x,n, -1)}, i.e.
+the coefficient of the term of degree \kbd{n} in the main variable.
+
+\fun{GEN}{ser_unscale}{GEN P, GEN h} return $P(h x)$, not memory clean.
 
 \section{Functions to handle \typ{FFELT}}
 These functions define the public interface of the \typ{FFELT} type to use in

@@ -1584,14 +1584,14 @@ ppgamma(ST_t *T, long prec)
   if (b > a)
   {
     t = a; s = b; X = x2; Y = gsub(x2,ghalf);
-    p1 = gsubst(gam,0,x2);
-    p2 = gdiv(gsubst(gamdm,0,x2), Y); /* Gamma((x-1)/2) */
+    p1 = ser_unscale(gam, ghalf);
+    p2 = gdiv(ser_unscale(gamdm,ghalf), Y); /* Gamma((x-1)/2) */
   }
   else
   {
     t = b; s = a; X = gadd(x2,ghalf); Y = x2;
-    p1 = gsubst(gamdm,0,x2);
-    p2 = gsubst(gam,0,x2);
+    p1 = ser_unscale(gamdm,ghalf);
+    p2 = ser_unscale(gam,ghalf);
   }
   cf = powru(sqpi, t);
   an = gpowgs(gpow(gen_2, gsubsg(1,x), prec), t); /* 2^{t-tx} */
