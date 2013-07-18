@@ -95,8 +95,8 @@ if test -n "$DLLD"; then
     mingw) DLLDFLAGS="-Wl,--out-implib=\$(LIBPARI_SO)\$(_A)";;
   esac
   if test -n "$DLLDisGCC"; then
-    case "$arch" in
-      sparc*) extra='-mimpure-text';;
+    case "$arch-$osname" in
+      sparc-solaris) extra='-mimpure-text';;
       *) extra=;;
     esac
     case "$osname" in
