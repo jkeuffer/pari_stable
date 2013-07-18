@@ -396,6 +396,9 @@ equation $E:y^2=x^3+a_4\*x+a_6$, where $a_4$ and $a_6$ are \kbd{ulong}.
 A \kbd{Fle} is either the point at infinity (\kbd{ellinf()}), or a \kbd{Flv}
 with two components.
 
+\fun{long}{Fl_elltrace}{ulong a4, ulong a6, ulong p} returns the trace $t$ of the Frobenius of
+$E(\F_p)$. The cardinal of $E(\F_p)$ is thus $p+1-t$, which might not fit in a \kbd{ulong}.
+
 \fun{GEN}{Fle_add}{GEN P, GEN Q, ulong a4, ulong p}
 
 \fun{GEN}{Fle_dbl}{GEN P, ulong a4, ulong p}

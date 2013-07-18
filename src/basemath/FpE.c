@@ -1143,6 +1143,19 @@ Fp_ellcard(GEN a4, GEN a6, GEN p)
   return Fp_ellcard_Shanks(a4, a6, p);
 }
 
+long
+Fl_elltrace(ulong a4, ulong a6, ulong p)
+{
+  pari_sp av = avma;
+  long lp = expu(p), t;
+  if (lp < 7)
+    return p+1-Fl_ellcard_naive(a4, a6, p);
+  if (lp <= minss(56, BITS_IN_LONG-2))
+    return p+1-Fl_ellcard_Shanks(a4, a6, p);
+  t = itos(subui(p, Fp_ellcard(utoi(a4), utoi(a6), utoi(p)))) + 1;
+  avma = av; return t;
+}
+
 static GEN
 _FpE_pairorder(void *E, GEN P, GEN Q, GEN m, GEN F)
 {
