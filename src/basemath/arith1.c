@@ -27,6 +27,48 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*                 GENERATOR of (Z/mZ)*                           */
 /*                                                                */
 /******************************************************************/
+static GEN
+remove2(GEN q) { long v = vali(q); return v? shifti(q, -v): q; }
+static ulong
+u_remove2(ulong q) { return q >> vals(q); }
+static GEN
+odd_prime_divisors(GEN q) { return gel(Z_factor(remove2(q)), 1); }
+static GEN
+u_odd_prime_divisors(ulong q) { return gel(factoru(u_remove2(q)), 1); }
+/* p odd prime, q=(p-1)/2; L0 list of (some) divisors of q = (p-1)/2 or NULL
+ * (all prime divisors of q); return the q/l, l in L0 */
+static GEN
+is_gener_expo(GEN p, GEN L0)
+{
+  GEN L, q = shifti(p,-1);
+  long i, l;
+  if (L0) {
+    l = lg(L0);
+    L = cgetg(l, t_VEC);
+  } else {
+    L0 = L = odd_prime_divisors(q);
+    l = lg(L);
+  }
+  for (i=1; i<l; i++) gel(L,i) = diviiexact(q, gel(L0,i));
+  return L;
+}
+static GEN
+u_is_gener_expo(ulong p, GEN L0)
+{
+  const ulong q = p >> 1;
+  long i, l;
+  GEN L;
+  if (L0) {
+    l = lg(L0);
+    L = cgetg(l, t_VECSMALL);
+  } else {
+    L0 = L = u_odd_prime_divisors(q);
+    l = lg(L);
+  }
+  for (i=1; i<l; i++) L[i] = q / (ulong)L0[i];
+  return L;
+}
+
 int
 is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
 {
@@ -39,54 +81,22 @@ is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
   }
   return 1;
 }
-/* assume p >2^32 */
-static ulong
-pgener_Zl_64(ulong p)
-{
-  const pari_sp av = avma;
-  const ulong p_1 = p - 1;
-  const ulong q = p_1 >>1;
-  long i, x, l ;
-  GEN L, p2 = sqru(p);
-  ulong t;
-  (void)u_lvalrem(q, 2, &t);
-  L = gel(factoru(t), 1); l = lg(L);
-  for (i=1; i<l; i++) L[i] = q / (ulong)L[i];
-  for (x=2;;x++)
-    if (is_gener_Fl(x,p,p_1,L) && !is_pm1(Fp_powu(utoipos(x),p_1,p2))) break;
-  avma = av; return x;
-}
 /* assume p prime */
 ulong
 pgener_Fl_local(ulong p, GEN L0)
 {
   const pari_sp av = avma;
-  const ulong p_1 = p - 1;
-  const ulong q = p_1 >>1;
-  long i, x, l ;
+  const ulong p_1 = p-1;
+  long x;
   GEN L;
-  if (p <= 19)
+  if (p <= 19) switch(p)
   { /* quick trivial cases */
-    switch(p)
-    {
-      case 2:  return 1;
-      case 7:
-      case 17: return 3;
-      default: return 2;
-    }
+    case 2:  return 1;
+    case 7:
+    case 17: return 3;
+    default: return 2;
   }
-
-  if (!L0) {
-    ulong t;
-    (void)u_lvalrem(q, 2, &t);
-    L0 = L = gel(factoru(t), 1);
-    l = lg(L);
-  } else {
-    l = lg(L0);
-    L = cgetg(l, t_VECSMALL);
-  }
-
-  for (i=1; i<l; i++) L[i] = q / (ulong)L0[i];
+  L = u_is_gener_expo(p,L0);
   for (x=2;;x++) { if (is_gener_Fl(x,p,p_1,L)) break; }
   avma = av; return x;
 }
@@ -100,7 +110,8 @@ is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L)
 {
   long i, t = lgefint(x)==3? krosi(x[2], p): kronecker(x, p);
   if (t >= 0) return 0;
-  for (i = lg(L)-1; i; i--) {
+  for (i = lg(L)-1; i; i--)
+  {
     GEN t = Fp_pow(x, gel(L,i), p);
     if (equalii(t, p_1) || equali1(t)) return 0;
   }
@@ -112,8 +123,7 @@ GEN
 pgener_Fp_local(GEN p, GEN L0)
 {
   pari_sp av0 = avma;
-  long l, i;
-  GEN x, q, p_1, L;
+  GEN x, p_1, L;
   if (lgefint(p) == 3)
   {
     ulong z;
@@ -122,19 +132,7 @@ pgener_Fp_local(GEN p, GEN L0)
     z = pgener_Fl_local((ulong)p[2], L0);
     avma = av0; return utoipos(z);
   }
-  p_1 = subis(p,1);
-  q = shifti(p_1, -1);
-  if (!L0) {
-    GEN t;
-    (void)Z_lvalrem(q, 2, &t);
-    L0 = L = gel(Z_factor(t), 1);
-    l = lg(L);
-  } else {
-    l = lg(L0);
-    L = cgetg(l, t_VEC);
-  }
-
-  for (i=1; i<l; i++) gel(L,i) = diviiexact(q, gel(L0,i));
+  p_1 = subis(p,1); L = is_gener_expo(p, L0);
   x = utoipos(2);
   for (;; x[2]++) { if (is_gener_Fp(x, p, p_1, L)) break; }
   avma = av0; return utoipos((ulong)x[2]);
@@ -153,7 +151,16 @@ pgener_Zl(ulong p)
   return pgener_Fl(p);
 #else
   if (p < (1UL<<32)) return pgener_Fl(p);
-  return pgener_Zl_64(p);
+  else
+  {
+    const pari_sp av = avma;
+    const ulong p_1 = p-1;
+    long x ;
+    GEN p2 = sqru(p), L = u_is_gener_expo(p, NULL);
+    for (x=2;;x++)
+      if (is_gener_Fl(x,p,p_1,L) && !is_pm1(Fp_powu(utoipos(x),p_1,p2))) break;
+    avma = av; return x;
+  }
 #endif
 }
 
@@ -161,22 +168,16 @@ pgener_Zl(ulong p)
 GEN
 pgener_Zp(GEN p)
 {
-  pari_sp av0;
-  GEN t, x, q, p_1, p2, L;
-  long l, i;
-
   if (lgefint(p) == 3) return utoipos(pgener_Zl(p[2]));
-  av0 = avma;
-  p2 = sqri(p);
-  p_1 = subis(p,1);
-  q = shifti(p_1, -1);
-  (void)Z_lvalrem(q, 2, &t);
-  L = gel(Z_factor(t), 1); l = lg(L);
-  for (i=1; i<l; i++) gel(L,i) = diviiexact(q, gel(L,i));
-  x = utoipos(2);
-  for (;; x[2]++)
-    if (is_gener_Fp(x,p,p_1,L) && !equali1(Fp_pow(x,p_1,p2))) break;
-  avma = av0; return utoipos((ulong)x[2]);
+  else
+  {
+    const pari_sp av = avma;
+    GEN p_1 = subis(p,1), p2 = sqri(p), L = is_gener_expo(p,NULL);
+    GEN x = utoipos(2);
+    for (;; x[2]++)
+      if (is_gener_Fp(x,p,p_1,L) && !equali1(Fp_pow(x,p_1,p2))) break;
+    avma = av; return utoipos((ulong)x[2]);
+  }
 }
 
 static GEN
@@ -224,9 +225,8 @@ GEN
 rootsof1_Fp(GEN n, GEN p)
 {
   pari_sp av = avma;
-  GEN z;
-  GEN t; (void)Z_lvalrem(n, 2, &t); /* 2 implicit in pgener_Fp_local */
-  z = pgener_Fp_local(p, gel(Z_factor(t), 1));
+  GEN L = odd_prime_divisors(n); /* 2 implicit in pgener_Fp_local */
+  GEN z = pgener_Fp_local(p, L);
   z = Fp_pow(z, diviiexact(subis(p,1), n), p); /* prim. n-th root of 1 */
   return gerepileuptoint(av, z);
 }
@@ -235,9 +235,8 @@ GEN
 rootsof1u_Fp(ulong n, GEN p)
 {
   pari_sp av = avma;
-  GEN z;
-  ulong t; (void)u_lvalrem(n, 2, &t); /* 2 implicit in pgener_Fp_local */
-  z = pgener_Fp_local(p, gel(Z_factor(utoipos(t)), 1));
+  GEN z, L = u_odd_prime_divisors(n); /* 2 implicit in pgener_Fp_local */
+  z = pgener_Fp_local(p, Flv_to_ZV(L));
   z = Fp_pow(z, diviuexact(subis(p,1), n), p); /* prim. n-th root of 1 */
   return gerepileuptoint(av, z);
 }
@@ -246,8 +245,8 @@ ulong
 rootsof1_Fl(ulong n, ulong p)
 {
   pari_sp av = avma;
-  ulong z, t; (void)u_lvalrem(n, 2, &t); /* 2 implicit in pgener_Fp_local */
-  z = pgener_Fl_local(p, gel(factoru(t), 1));
+  GEN L = u_odd_prime_divisors(n); /* 2 implicit in pgener_Fl_local */
+  ulong z = pgener_Fl_local(p, L);
   z = Fl_powu(z, (p-1) / n, p); /* prim. n-th root of 1 */
   avma = av; return z;
 }
