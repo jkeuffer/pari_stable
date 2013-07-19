@@ -1801,6 +1801,52 @@ RgX_RgXQ_eval(GEN Q, GEN x, GEN T)
   return gen_bkeval(Q,degpol(Q),x,use_sqr,(void*)T,&RgXQ_algebra,_cmul);
 }
 
+/* mod X^n */
+struct modXn {
+  long v; /* varn(X) */
+  long n;
+} ;
+/* FIXME: write proper short products RgX_mul_low / RgX_sqr_low */
+static GEN
+_sqrXn(void *data, GEN x) {
+  struct modXn *S = (struct modXn*)data;
+  return RgX_modXn_shallow(RgX_sqr(x), S->n);
+}
+static GEN
+_mulXn(void *data, GEN x, GEN y) {
+  struct modXn *S = (struct modXn*)data;
+  return RgX_modXn_shallow(RgX_mul(x,y), S->n);
+}
+static GEN
+_oneXn(void *data) {
+  struct modXn *S = (struct modXn*)data;
+  return pol_1(S->v);
+}
+static GEN
+_zeroXn(void *data) {
+  struct modXn *S = (struct modXn*)data;
+  return pol_0(S->v);
+}
+static struct bb_algebra RgX_modXn_algebra = { _red,_add, _mulXn,_sqrXn, _oneXn,_zeroXn };
+
+/* Q(x) mod t^n, x in R[t], n >= 1 */
+GEN
+RgX_modXn_eval(GEN Q, GEN x, long n)
+{
+  long d = degpol(x);
+  int use_sqr;
+  struct modXn S;
+  if (d == 1 && isrationalzero(gel(x,2)))
+  {
+    GEN y = RgX_unscale(Q, gel(x,3));
+    setvarn(y, varn(x)); return y;
+  }
+  S.v = varn(x);
+  S.n = n;
+  use_sqr = (d<<1) >= n;
+  return gen_bkeval(Q,degpol(Q),x,use_sqr,(void*)&S,&RgX_modXn_algebra,_cmul);
+}
+
 /* x,T in Rg[X], n in N, compute lift(x^n mod T)) */
 GEN
 RgXQ_powu(GEN x, ulong n, GEN T)

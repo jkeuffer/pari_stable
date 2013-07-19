@@ -714,6 +714,7 @@ GEN     RgX_get_0(GEN x);
 GEN     RgX_get_1(GEN x);
 GEN     RgX_inflate(GEN x0, long d);
 GEN     RgX_modXn_shallow(GEN a, long n);
+GEN     RgX_modXn_eval(GEN Q, GEN x, long n);
 GEN     RgX_mul(GEN x,GEN y);
 GEN     RgX_mul_normalized(GEN A, long a, GEN B, long b);
 GEN     RgX_mulXn(GEN x, long d);

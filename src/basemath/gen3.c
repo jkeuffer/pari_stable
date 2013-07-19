@@ -1285,7 +1285,7 @@ GEN
 gsubst(GEN x, long v, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);
-  long l, vx, vy, e, ex, ey, i, j, k, jb;
+  long l, vx, vy, ex, ey, i, j, k, jb;
   pari_sp av, av2, lim;
   GEN X, t, p1, p2, modp1, z;
 
@@ -1371,10 +1371,8 @@ gsubst(GEN x, long v, GEN y)
       switch(ty) /* here vx == v */
       {
         case t_SER:
-          ey = valp(y);
-          vy = varn(y);
-          if (ey < 1) return zeroser(vy, ey*(ex+lx-2));
-          if (lx == 2) return zeroser(vy, ey*ex);
+          vy = varn(y); ey = valp(y);
+          if (ey < 1 || lx == 2) return zeroser(vy, ey*(ex+lx-2));
           if (vy != vx)
           {
             av = avma; lim = stack_lim(av,1); z = gel(x,lx-1);
@@ -1401,8 +1399,6 @@ gsubst(GEN x, long v, GEN y)
             l2 = (i-2)*ey + (gequal0(y)? 2 : ly);
             if (l > l2) l = l2;
           }
-          p2 = ex? gpowgs(y, ex): NULL;
-
           av = avma; lim=stack_lim(av,1);
           t = leafcopy(y);
           if (l < ly) setlg(t, l);
@@ -1426,19 +1422,28 @@ gsubst(GEN x, long v, GEN y)
               gerepileall(av,2, &z,&t);
             }
           }
-          if (!p2) return gerepilecopy(av,z);
-          return gerepileupto(av, gmul(z,p2));
+          if (!ex) return gerepilecopy(av,z);
+          return gerepileupto(av, gmul(z,gpowgs(y, ex)));
 
-        case t_POL:
-          if (lg(y) == 2)
-            return (lx == 2)? gcopy(x): scalarser(gel(x,2),v,lx-2);
-        case t_RFRAC:
-          vy = gvar(y); e = gval(y,vy);
-          if (e <= 0)
-            pari_err_DOMAIN("gsubst [t_SER]","valuation(y)", "<=", gen_0,y);
-          av = avma; p1 = poleval(ser2pol_i(x, lg(x)), y);
-          z = gmul(gpowgs(y,ex), gadd(p1, zeroser(vy, e*(lx-2))));
+        case t_POL: case t_RFRAC:
+        {
+          long n = lx-2;
+          GEN cx;
+          vy = gvar(y); ey = gval(y,vy);
+          if (ey == LONG_MAX) return n? scalarser(gel(x,2),v,n): gcopy(x);
+          if (ey < 1 || n == 0) return zeroser(vy, ey*(ex+n));
+          av = avma;
+          n *= ey;
+          y = (ty == t_RFRAC)? rfractoser(y, vy, n): poltoser(y, vy, n);
+          x = ser2pol_i(x, lx);
+          x = primitive_part(x, &cx);
+          z = RgX_modXn_eval(x, ser2rfrac_i(y), n);
+          z = RgX_to_ser(z, n+2);
+          if (cx) z = gmul(z, cx);
+          if (!ex && !cx) return gerepilecopy(av, z);
+          if (ex) z = gmul(z, gpowgs(y,ex));
           return gerepileupto(av, z);
+        }
 
         default: pari_err_TYPE2("substitution",x,y);
       }
