@@ -518,7 +518,7 @@ orbitlen(long pt, long orblen, GEN G, long nG, GEN V)
  * list, returns the length of orb1 */
 
 static long
-delete(GEN orb1, GEN orb2)
+orbdelete(GEN orb1, GEN orb2)
 {
   long i, j, len;
   long l1 = lg(orb1)-1;
@@ -986,7 +986,7 @@ aut(long step, GEN x, GEN C, struct group *G, struct qfauto *qf,
           return 1;
       orb[1] = x[step];
       /* delete the chosen vector from the list of candidates */
-      (void)delete(gel(C,step), orb);
+      (void)orbdelete(gel(C,step), orb);
     }
     else
     {
@@ -1005,7 +1005,7 @@ static void
 autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
                                           struct qfcand *cand)
 {
-  long i, j, step, im, nC, nH, found, try;
+  long i, j, step, im, nC, nH, found, tries;
   GEN  x, orb, bad, H;
   long nbad;
   GEN V = qf->V;
@@ -1045,11 +1045,11 @@ autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
     orb = orbit(fp->e, step-1, 1, H, V);
     G->ord[step] = lg(orb)-1;
     /* delete the orbit of the step-th base-vector from the candidates */
-    nC = delete(gel(C,step), orb);
+    nC = orbdelete(gel(C,step), orb);
     while (nC > 0  &&  (im = mael(C,step,1)) != 0)
     {
       found = 0;
-      /* try vector V.v[im] as image of the step-th base-vector */
+      /* tries vector V.v[im] as image of the step-th base-vector */
       x[step] = im;
       if (step < dim)
       {
@@ -1070,7 +1070,7 @@ autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
       {
         GEN oc = orbit(mkvecsmall(im), 0, 1, H, V);
         /* delete the orbit of im from the candidates for x[step] */
-        nC = delete(gel(C,step), oc);
+        nC = orbdelete(gel(C,step), oc);
         bad[++nbad] = im;
       }
       else
@@ -1091,33 +1091,33 @@ autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
         orb = orbit(fp->e, step-1, 1, H, V);
         G->ord[step] = lg(orb)-1;
         /* delete the orbit from the candidates for x[step] */
-        nC = delete(gel(C,step), orb);
+        nC = orbdelete(gel(C,step), orb);
         /* compute the new orbit of the vectors, which could not be continued
            to an automorphism */
         oc = orbit(bad, 0, nbad, H, V);
         /* delete the orbit from the candidates */
-        nC = delete(gel(C,step), oc);
+        nC = orbdelete(gel(C,step), oc);
       }
     }
     /* test, whether on step STAB some generators may be omitted */
     if (step == STAB)
-      for (try = G->nsg[step]; try <= G->ng[step]; ++try)
+      for (tries = G->nsg[step]; tries <= G->ng[step]; ++tries)
       {
         nH = 0;
-        for (j = 1; j < try; ++j)
+        for (j = 1; j < tries; ++j)
           gel(H,++nH) = gmael(G->g,step,j);
-        for (j = try+1; j < G->ng[step]; ++j)
+        for (j = tries+1; j < G->ng[step]; ++j)
           gel(H,++nH) = gmael(G->g,step,j);
         for (i = step+1; i <= dim; ++i)
           for (j = 1; j <= G->ng[i]; ++j)
             gel(H,++nH) = gmael(G->g,i,j);
         if (orbitlen(fp->e[step], G->ord[step], H, nH, V) == G->ord[step])
-          /* the generator g[step][try] can be omitted */
+          /* the generator g[step][tries] can be omitted */
         {
           G->ng[step]--;
-          for (i = try; i < G->ng[step]; ++i)
+          for (i = tries; i < G->ng[step]; ++i)
             gmael(G->g,step,i) = gmael(G->g,step,i+1);
-          try--;
+          tries--;
         }
       }
     if (step < dim  &&  G->ord[step] > 1)
@@ -1597,7 +1597,7 @@ iso(long step, GEN x, GEN C, struct qfauto *qf, struct qfauto *qff,
         return 1;
       orb = orbit(x, step-1, 1, G, qff->V);
       /* delete the orbit of the chosen vector from the list of candidates */
-      delete(gel(C,step), orb);
+      orbdelete(gel(C,step), orb);
     }
     else
     {
