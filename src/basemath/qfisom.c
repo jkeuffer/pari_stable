@@ -1423,6 +1423,58 @@ gen_group(struct group *G)
   return mkvec2(o, V);
 }
 
+static long
+is_qfisom(GEN F)
+{
+  return (lg(F)==6 && typ(F)==t_VEC && typ(gel(F,1))==t_VEC
+                   && typ(gel(F,3))==t_VEC && typ(gel(F,4))==t_VEC);
+}
+
+static GEN
+unpack_qfisominit(GEN F, GEN *norm, struct qfauto *qf,
+      struct fingerprint *fp, struct qfcand *cand)
+{
+  GEN QF = gel(F,3);
+  qf->F = gel(QF,1);
+  qf->V = gel(QF,2);
+  qf->W = gel(QF,3);
+  qf->v = gel(QF,4);
+  QF = gel(F,4);
+  fp->diag = gel(QF,1);
+  fp->per  = gel(QF,2);
+  fp->e    = gel(QF,3);
+  QF = gel(F,5);
+  cand->cdep =itos(gel(QF,1));
+  cand->comb = gel(QF,2);
+  cand->bacher_pol = gel(QF,3);
+  *norm = gel(F,2);
+  qf->dim = lg(gmael(F,1,1))-1;
+  return gel(F,1);
+}
+
+static GEN
+init_qfisom(GEN F, struct fingerprint *fp, struct qfcand *cand,
+                   struct qfauto *qf, GEN flags, long *max)
+{
+  GEN norm;
+  if (is_qfisom(F))
+  {
+    F = unpack_qfisominit(F, &norm, qf, fp, cand);
+    *max = zm_maxdiag(gel(F,1));
+  }
+  else
+  {
+    GEN A = gel(F,1);
+    *max = zm_maxdiag(A);
+    if (DEBUGLEVEL) err_printf("max=%ld\n",max);
+    norm=init_qfauto(F, *max, qf, NULL);
+    fingerprint(fp, qf);
+    if (DEBUGLEVEL) err_printf("fp=%Ps\n",fp->diag);
+    init_flags(cand, A, fp, qf, flags);
+  }
+  return norm;
+}
+
 GEN
 qfauto(GEN F, GEN flags)
 {
@@ -1431,16 +1483,9 @@ qfauto(GEN F, GEN flags)
   struct group G;
   struct qfcand cand;
   struct qfauto qf;
-  GEN A = gel(F,1);
-  pari_timer ti;
-  if (DEBUGLEVEL>=1) timer_start(&ti);
-  init_qfauto(F, zm_maxdiag(A), &qf, NULL);
-  if (DEBUGLEVEL>=1) timer_printf(&ti,"QfAuto: Init");
-  fingerprint(&fp, &qf);
-  if (DEBUGLEVEL>=1) timer_printf(&ti, "QfAuto: fingerprint=%Ps",fp.diag);
+  long max;
+  (void)init_qfisom(F, &fp, &cand, &qf, flags, &max);
   init_qfgroup(&G, &fp, &qf);
-  init_flags(&cand, A, &fp, &qf, flags);
-  if (DEBUGLEVEL>=1) timer_printf(&ti,"QfAuto: flags");
   autom(&G, &qf, &fp, &cand);
   return gerepilecopy(av, gen_group(&G));
 }
@@ -1459,12 +1504,14 @@ qfauto0(GEN F, GEN flags)
 {
   pari_sp av = avma;
   GEN G;
-  F = qf_to_zmV(F);
-  if (!F) pari_err_TYPE("qfauto",F);
+  if (!is_qfisom(F))
+  {
+    F = qf_to_zmV(F);
+    if (!F) pari_err_TYPE("qfauto",F);
+  }
   G = qfauto(F, flags);
   return gerepilecopy(av, mkvec2(gel(G,1), zmV_to_ZMV(gel(G,2))));
 }
-
 /* computes the orbit of V.v[pt] under the generators G[0],...,G[nG-1] and
  * elements stabilizing V.v[pt], which are stored in H, returns the number of
  * generators in H */
@@ -1657,68 +1704,21 @@ qfisominit0(GEN F, GEN flags)
   return gerepileupto(av, qfisominit(F, flags));
 }
 
-static GEN
-unpack_qfisominit(GEN F, GEN *norm, struct qfauto *qf,
-      struct fingerprint *fp, struct qfcand *cand)
-{
-  GEN QF = gel(F,3);
-  qf->F = gel(QF,1);
-  qf->V = gel(QF,2);
-  qf->W = gel(QF,3);
-  qf->v = gel(QF,4);
-  QF = gel(F,4);
-  fp->diag = gel(QF,1);
-  fp->per  = gel(QF,2);
-  fp->e    = gel(QF,3);
-  QF = gel(F,5);
-  cand->cdep =itos(gel(QF,1));
-  cand->comb = gel(QF,2);
-  cand->bacher_pol = gel(QF,3);
-  *norm = gel(F,2);
-  qf->dim = lg(gmael(F,1,1))-1;
-  return gel(F,1);
-}
-
 GEN
 qfisom(GEN F, GEN FF, GEN flags)
 {
   pari_sp av = avma;
   struct fingerprint fp;
-  GEN G, norm, res;
+  GEN G, res;
   struct qfauto qf, qff;
   struct qfcand cand;
   long max;
-  if (lg(F)==6)
-  {
-    F = unpack_qfisominit(F, &norm, &qf, &fp, &cand);
-    max = zm_maxdiag(gel(F,1));
-  }
-  else
-  {
-    GEN A = gel(F,1);
-    max = zm_maxdiag(A);
-    if (DEBUGLEVEL) err_printf("max=%ld\n",max);
-    norm=init_qfauto(F, max, &qf,NULL);
-    fingerprint(&fp, &qf);
-    if (DEBUGLEVEL) err_printf("fp=%Ps\n",fp.diag);
-    init_flags(&cand, A, &fp, &qf, flags);
-  }
+  GEN norm = init_qfisom(F, &fp, &cand, &qf, flags, &max);
   init_qfauto(FF, max, &qff, norm);
-#if 1
-  G = mkvec(scalar_Flm(-1,qff.dim));
-#else
-  G = concat1(gel(qfauto(FF),2));
-#endif
+  G = mkvec(scalar_Flm(-1, qff.dim));
   res = isometry(&qf, &qff, &fp, G, &cand);
   if (!res) { avma=av; return gen_0; }
-  return gerepilecopy(av,zm_to_ZM(res));
-}
-
-static long
-is_qfisom(GEN F)
-{
-  return (lg(F)==6 && typ(F)==t_VEC && typ(gel(F,1))==t_VEC
-                   && typ(gel(F,3))==t_VEC && typ(gel(F,4))==t_VEC);
+  return gerepilecopy(av, zm_to_ZM(res));
 }
 
 GEN

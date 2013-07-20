@@ -8,6 +8,8 @@ Doc:
  $G$ being a square and symmetric matrix with integer entries representing a
  positive definite quadratic form, outputs the automorphism group of the form.
 
+ $G$ can also be given by an \kbd{qfisominit} structure.
+
  This implements an algorithm of Plesken and Souvignier, following closely
  Souvignier own implementation.
 
