@@ -1317,19 +1317,18 @@ qfisolvep(GEN Q, GEN p)
 }
 
 GEN
-redrealsl2step(GEN A)
+redrealsl2step(GEN A, GEN d, GEN rd)
 {
   pari_sp ltop = avma;
   GEN N, V = gel(A,1), M = gel(A,2);
   GEN a = gel(V,1), b = gel(V,2), c = gel(V,3);
-  GEN d = qfb_disc3(a,b,c), rd = sqrti(d);
   GEN ac = mpabs(c);
   GEN r = addii(b, gmax(rd, ac));
   GEN q = truedvmdii(r, shifti(ac, 1), NULL);
   r = subii(mulii(shifti(q, 1), ac), b);
   a = c; b = r;
   c = truedvmdii(subii(sqri(r), d), shifti(c,2), NULL);
-  if (signe(a) < 0) q = negi(q);
+  if (signe(a) < 0) togglesign(q);
   N = mkmat2(gel(M,2),
              mkcol2(subii(mulii(q, gcoeff(M, 1, 2)), gcoeff(M, 1, 1)),
                     subii(mulii(q, gcoeff(M, 2, 2)), gcoeff(M, 2, 1))));
@@ -1337,13 +1336,11 @@ redrealsl2step(GEN A)
 }
 
 GEN
-redrealsl2(GEN V)
+redrealsl2(GEN V, GEN d, GEN rd)
 {
-  pari_sp ltop = avma, btop, st_lim;
+  pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
   GEN M, u1, u2, v1, v2;
   GEN a = gel(V,1), b = gel(V,2), c = gel(V,3);
-  GEN d = qfb_disc3(a,b,c), rd = sqrti(d);
-  btop = avma; st_lim = stack_lim(btop, 1);
   u1 = v2 = gen_1; v1 = u2 = gen_0;
   while (!ab_isreduced(a,b,rd))
   {
@@ -1356,10 +1353,10 @@ redrealsl2(GEN V)
     if (signe(a) < 0) togglesign(q);
     r = u1; u1 = v1; v1 = subii(mulii(q, v1), r);
     r = u2; u2 = v2; v2 = subii(mulii(q, v2), r);
-    if (low_stack(st_lim, stack_lim(btop, 1)))
+    if (low_stack(st_lim, stack_lim(ltop, 1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"redrealsl2");
-      gerepileall(btop, 7, &a,&b,&c,&u1,&u2,&v1,&v2);
+      gerepileall(ltop, 7, &a,&b,&c,&u1,&u2,&v1,&v2);
     }
   }
   M = mkmat2(mkcol2(u1,u2), mkcol2(v1,v2));
@@ -1370,21 +1367,23 @@ GEN
 qfrsolvep(GEN Q, GEN p)
 {
   pari_sp ltop = avma, btop, st_lim;
-  GEN N, P, P1, P2, M, d = qfb_disc(Q);
+  GEN N, P, P1, P2, M, rd, d = qfb_disc(Q);
   if (kronecker(d, p) < 0) { avma = ltop; return gen_0; }
-  M = N = redrealsl2(Q);
+  rd = sqrti(d);
+  M = N = redrealsl2(Q, d,rd);
   P = primeform(d, p, DEFAULTPREC);
-  P1 = redrealsl2(P);
+  P1 = redrealsl2(P, d,rd);
   togglesign( gel(P,2) );
-  P2 = redrealsl2(P);
+  P2 = redrealsl2(P, d,rd);
   btop = avma; st_lim = stack_lim(btop, 1);
-  while (!ZV_equal(gel(M,1), gel(P1,1)) && !ZV_equal(gel(M,1), gel(P2,1)))
+  for(;;)
   {
-    M = redrealsl2step(M);
+    if (ZV_equal(gel(M,1), gel(P1,1))) { N = gel(P1,2); break; }
+    if (ZV_equal(gel(M,1), gel(P2,1))) { N = gel(P2,2); break; }
+    M = redrealsl2step(M, d,rd);
     if (ZV_equal(gel(M,1), gel(N,1))) { avma = ltop; return gen_0; }
     if (low_stack(st_lim, stack_lim(btop, 1))) M = gerepileupto(btop, M);
   }
-  N = ZV_equal(gel(M,1),gel(P1,1))? gel(P1,2): gel(P2,2);
   return gerepilecopy(ltop, SL2_div_mul_e1(gel(M,2),N));
 }
 

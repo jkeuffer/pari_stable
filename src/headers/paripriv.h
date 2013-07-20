@@ -442,8 +442,8 @@ char *file_getline(Buffer *b, char **s0, input_method *IM);
 /* Qfb.c */
 
 GEN     redimagsl2(GEN q, GEN *U);
-GEN     redrealsl2(GEN V);
-GEN     redrealsl2step(GEN A);
+GEN     redrealsl2(GEN V, GEN d, GEN rd);
+GEN     redrealsl2step(GEN A, GEN d, GEN rd);
 GEN     redtausl2(GEN t, GEN *U);
 
 /* alglin1.c */
