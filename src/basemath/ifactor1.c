@@ -3719,6 +3719,24 @@ sumdivk(GEN n, long k)
   return gerepileupto(av, gdiv(P, powiu(n,k)));
 }
 
+/* K t_VECSMALL of k >= 0 */
+GEN
+usumdivkvec(ulong n, GEN K)
+{
+  pari_sp av = avma;
+  GEN F = factoru(n), P = gel(F,1), E = gel(F,2), Z, S;
+  long i,j, l = lg(P), lK = lg(K);
+  Z = cgetg(l, t_VEC);
+  S = cgetg(lK, t_VEC);
+  for (j=1; j<lK; j++)
+  {
+    long k = K[j];
+    for (i=1; i<l; i++) gel(Z,i) = u_euler_sumdivk(P[i], E[i], k);
+    gel(S,j) = ZV_prod(Z);
+  }
+  return gerepilecopy(av, S);
+}
+
 long
 Z_issmooth(GEN m, ulong lim)
 {

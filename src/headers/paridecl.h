@@ -2444,6 +2444,7 @@ long    uissquarefree(ulong n);
 long    uissquarefree_fact(GEN f);
 ulong   unextprime(ulong n);
 ulong   uprecprime(ulong n);
+GEN     usumdivkvec(ulong n, GEN K);
 
 /* init.c */
 
