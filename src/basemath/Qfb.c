@@ -307,8 +307,7 @@ static GEN
 qfr3_1(struct qfr_data *S)
 {
   GEN y = cgetg(4, t_VEC);
-  qfr_1_fill(y, S);
-  return y;
+  qfr_1_fill(y, S); return y;
 }
 
 static GEN
@@ -851,13 +850,9 @@ rho_get_BC(GEN *B, GEN *C, GEN b, GEN c, struct qfr_data *S)
 GEN
 qfr3_rho(GEN x, struct qfr_data *S)
 {
-  GEN B, C, y, b = gel(x,2), c = gel(x,3);
-
+  GEN B, C, b = gel(x,2), c = gel(x,3);
   rho_get_BC(&B, &C, b, c, S);
-  y = cgetg(4, t_VEC);
-  gel(y,1) = c;
-  gel(y,2) = B;
-  gel(y,3) = C; return y;
+  return mkvec3(c,B,C);
 }
 /* Not stack-clean */
 GEN
@@ -1241,38 +1236,26 @@ primeform(GEN x, GEN p, long prec)
   return y;
 }
 
-/* Let M and N in SL_2(Z), return (N*M^-1)[,1]
- *
-*/
+/* Let M and N in SL2(Z), return (N*M^-1)[,1] */
 static GEN
 SL2_div_mul_e1(GEN N, GEN M)
 {
-  GEN b = gcoeff(M, 2, 1);
-  GEN d = gcoeff(M, 2, 2);
-  GEN p2 = cgetg(3, t_VEC);
-  gel(p2,1) = subii(mulii(gcoeff(N, 1, 1), d),
-                    mulii(gcoeff(N, 1, 2), b));
-  gel(p2,2) = subii(mulii(gcoeff(N, 2, 1), d),
-                    mulii(gcoeff(N, 2, 2), b));
-  return p2;
+  GEN b = gcoeff(M,2,1), d = gcoeff(M,2,2);
+  GEN p = subii(mulii(gcoeff(N,1,1), d), mulii(gcoeff(N,1,2), b));
+  GEN q = subii(mulii(gcoeff(N,2,1), d), mulii(gcoeff(N,2,2), b));
+  return mkvec2(p,q);
 }
-/* Let M and N in SL_2(Z), return (N*[1,0;0,-1]*M^-1)[,1]
- *
-*/
+/* Let M and N in SL2(Z), return (N*[1,0;0,-1]*M^-1)[,1] */
 static GEN
 SL2_swap_div_mul_e1(GEN N, GEN M)
 {
-  GEN b = gcoeff(M, 2, 1);
-  GEN d = gcoeff(M, 2, 2);
-  GEN p2 = cgetg(3, t_VEC);
-  gel(p2,1) = addii(mulii(gcoeff(N, 1, 1), d),
-                    mulii(gcoeff(N, 1, 2), b));
-  gel(p2,2) = addii(mulii(gcoeff(N, 2, 1), d),
-                    mulii(gcoeff(N, 2, 2), b));
-  return p2;
+  GEN b = gcoeff(M,2,1), d = gcoeff(M,2,2);
+  GEN p = addii(mulii(gcoeff(N,1,1), d), mulii(gcoeff(N,1,2), b));
+  GEN q = addii(mulii(gcoeff(N,2,1), d), mulii(gcoeff(N,2,2), b));
+  return mkvec2(p,q);
 }
 
-/*Test equality modulo GL2*/
+/* Test equality modulo GL2 of two reduced forms */
 static int
 GL2_qfb_equal(GEN a, GEN b)
 {
@@ -1301,8 +1284,8 @@ qfisolvep(GEN Q, GEN p)
   {
     a = gel(Q,1);
     c = gel(Q,3); /* if principal form, use faster cornacchia */
-    if (gequal1(a)) return qfbsolve_cornacchia(c, p, 0);
-    if (gequal1(c)) return qfbsolve_cornacchia(a, p, 1);
+    if (equali1(a)) return qfbsolve_cornacchia(c, p, 0);
+    if (equali1(c)) return qfbsolve_cornacchia(a, p, 1);
   }
   d = qfb_disc(Q); if (kronecker(d,p) < 0) return gen_0;
   a = redimagsl2(Q, &N);
@@ -1337,14 +1320,9 @@ GEN
 redrealsl2step(GEN A)
 {
   pari_sp ltop = avma;
-  GEN N;
-  GEN V = gel(A,1);
-  GEN M = gel(A,2);
-  GEN a = gel(V,1);
-  GEN b = gel(V,2);
-  GEN c = gel(V,3);
-  GEN d = qfb_disc3(a,b,c);
-  GEN rd = sqrti(d);
+  GEN N, V = gel(A,1), M = gel(A,2);
+  GEN a = gel(V,1), b = gel(V,2), c = gel(V,3);
+  GEN d = qfb_disc3(a,b,c), rd = sqrti(d);
   GEN ac = mpabs(c);
   GEN r = addii(b, gmax(rd, ac));
   GEN q = truedvmdii(r, shifti(ac, 1), NULL);
@@ -1362,13 +1340,9 @@ GEN
 redrealsl2(GEN V)
 {
   pari_sp ltop = avma, btop, st_lim;
-  GEN u1, u2, v1, v2;
-  GEN M;
-  GEN a = gel(V,1);
-  GEN b = gel(V,2);
-  GEN c = gel(V,3);
-  GEN d = qfb_disc3(a,b,c);
-  GEN rd = sqrti(d);
+  GEN M, u1, u2, v1, v2;
+  GEN a = gel(V,1), b = gel(V,2), c = gel(V,3);
+  GEN d = qfb_disc3(a,b,c), rd = sqrti(d);
   btop = avma; st_lim = stack_lim(btop, 1);
   u1 = v2 = gen_1; v1 = u2 = gen_0;
   while (!ab_isreduced(a,b,rd))
