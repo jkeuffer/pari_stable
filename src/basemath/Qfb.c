@@ -747,12 +747,10 @@ redimag_1(pari_sp av, GEN a, GEN b, GEN c)
 static GEN
 redimag_av(pari_sp av, GEN q)
 {
-  GEN Q, a = gel(q,1), b = gel(q,2), c = gel(q,3);
-  long cmp, lb, la = lgefint(a), lc = lgefint(c);
+  GEN a = gel(q,1), b = gel(q,2), c = gel(q,3);
+  long cmp, lc = lgefint(c);
 
-  if (la == 3 && lc == 3) return redimag_1(av, a, b, c);
-  /* upper bound for size of final Qfb(a,b,c) */
-  lb = lgefint(b); (void)new_chunk(la + lb + lc + 7);
+  if (lgefint(a) == 3 && lc == 3) return redimag_1(av, a, b, c);
   cmp = absi_cmp(a, b);
   if (cmp < 0)
     REDB(a,&b,&c);
@@ -761,16 +759,17 @@ redimag_av(pari_sp av, GEN q)
   for(;;)
   {
     cmp = absi_cmp(a, c); if (cmp <= 0) break;
-    if (lgefint(a) == 3) return redimag_1(av, a, b, c);
+    lc = lgefint(a); /* lg(future c): we swap a & c next */
+    if (lc == 3) return redimag_1(av, a, b, c);
     swap(a,c); b = negi(b); /* apply rho */
     REDB(a,&b,&c);
   }
   if (cmp == 0 && signe(b) < 0) b = negi(b);
+  /* size of reduced Qfb(a,b,c) <= 3 lg(c) + 4 <= 4 lg(c) */
+  (void)new_chunk(lc<<2);
+  a = icopy(a); b = icopy(b); c = icopy(c);
   avma = av;
-  Q = cgetg(4, t_QFI);
-  gel(Q,1) = icopy(a);
-  gel(Q,2) = icopy(b);
-  gel(Q,3) = icopy(c); return Q;
+  retmkqfi(icopy(a), icopy(b), icopy(c));
 }
 GEN
 redimag(GEN q) { return redimag_av(avma, q); }
