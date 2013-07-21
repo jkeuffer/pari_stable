@@ -1460,8 +1460,12 @@ init_qfisom(GEN F, struct fingerprint *fp, struct qfcand *cand,
   GEN norm;
   if (is_qfisom(F))
   {
+    GEN A;
     F = unpack_qfisominit(F, &norm, qf, fp, cand);
-    *max = zm_maxdiag(gel(F,1));
+    A=gel(F,1);
+    *max = zm_maxdiag(A);
+    if (flags)
+      init_flags(cand, A, fp, qf, flags);
   }
   else
   {
