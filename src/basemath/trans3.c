@@ -2747,6 +2747,41 @@ aut_factor(GEN U, GEN z)
 }
 #endif
 
+/* j(q) = \sum_{n >= -1} c(n)q^n,
+ * \sum_{n = -1}^{N-1} c(n) (-10n \sigma_3(N-n) + 21 \sigma_5(N-n))
+ * = c(N) (N+1)/24 */
+static GEN
+ser_j(long prec)
+{
+  GEN j, J, K = mkvecsmall2(3,5), S = cgetg(prec+1, t_VEC);
+  long i, n;
+  for (n = 1; n <= prec; n++)
+  {
+    GEN s = usumdivkvec(n, K);
+    gel(s,2) = mului(21, gel(s,2));
+    gel(S,n) = s;
+  }
+  J = cgetg(prec+2, t_SER),
+  J[1] = evalvarn(0)|evalsigne(1)|evalvalp(-1);
+  j = J+3;
+  gel(j,-1) = gen_1;
+  gel(j,0) = utoipos(744);
+  gel(j,1) = utoipos(196884);
+  for (n = 2; n < prec; n++)
+  {
+    pari_sp av = avma;
+    GEN c, s = gel(S,n+1), s3 = gel(s,1), s5 = gel(s,2);
+    c = addii(mului(10, s3), s5);
+    for (i = 0; i < n; i++)
+    {
+      s = gel(S,n-i); s3 = gel(s,1); s5 = gel(s,2);
+      c = addii(c, mulii(gel(j,i), addii(mulsi(-10*i,s3), s5)));
+    }
+    gel(j,n) = gerepileuptoint(av, diviuexact(muliu(c,24), n+1));
+  }
+  return J;
+}
+
 GEN
 jell(GEN x, long prec)
 {
@@ -2754,13 +2789,19 @@ jell(GEN x, long prec)
   pari_sp av = avma;
   GEN q, h, U;
 
-  if (!is_scalar_t(tx) || tx == t_PADIC)
+  if (!is_scalar_t(tx))
   {
-    GEN p1, p2;
-    q = qq(x,prec);
-    p1 = gdiv(inteta(gsqr(q)), inteta(q));
+    if (gcmpX(x)) { h = ser_j(precdl); setvarn(h, varn(x)); return h; }
+    q = toser_i(x);
+    if (!q) pari_err_TYPE("ellj",x);
+    h = ser_j(lg(q) - 2);
+    return gerepileupto(av, gsubst(h, 0, q));
+  }
+  if (tx == t_PADIC)
+  {
+    GEN p2, p1 = gdiv(inteta(gsqr(x)), inteta(x));
     p1 = gmul2n(gsqr(p1),1);
-    p1 = gmul(q,gpowgs(p1,12));
+    p1 = gmul(x,gpowgs(p1,12));
     p2 = gaddsg(768,gadd(gsqr(p1),gdivsg(4096,p1)));
     p1 = gmulsg(48,p1);
     return gerepileupto(av, gadd(p2,p1));
