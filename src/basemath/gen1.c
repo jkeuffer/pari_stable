@@ -1799,11 +1799,18 @@ gmul(GEN x, GEN y)
       z[1] = evalvalp(valp(x)+valp(y)) | evalvarn(vx) | evalsigne(1);
       if (lx > 200) /* threshold for 32bit coeffs: 400, 512 bits: 100 */
       {
+        GEN p = NULL;
         x = ser2pol_i(x, lx);
         y = ser2pol_i(y, lx);
         /* FIXME: should be a short product */
         if (RgX_is_ZX(x) && RgX_is_ZX(y))
           y = ZX_mul(x,y);
+        else if (RgX_is_FpX(x,&p) && RgX_is_FpX(y,&p))
+        {
+          x = RgX_to_FpX(x, p);
+          y = RgX_to_FpX(y, p);
+          y = FpX_to_mod(ZX_mul(x,y), p);
+        }
         else
           y = RgX_mul(x, y);
         z = fill_ser(z, y);
@@ -2176,11 +2183,16 @@ gsqr(GEN x)
       if (lx > 300)
       {
         pari_sp av = avma;
-        GEN z = cgetg(lx,t_SER);
+        GEN z = cgetg(lx,t_SER), p = NULL;
         z[1] = evalvalp(2*valp(x)) | evalvarn(varn(x)) | evalsigne(1);
         x = ser2pol_i(x,lx);
         if (RgX_is_ZX(x))
           x = ZX_sqr(x);
+        else if (RgX_is_FpX(x,&p))
+        {
+          x = RgX_to_FpX(x, p);
+          x = FpX_to_mod(ZX_sqr(x), p);
+        }
         else
           x = RgX_sqr(x);
         z = fill_ser(z, x);

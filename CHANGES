@@ -92,6 +92,8 @@ BA 19- Port of the program ISOM by Bernt Souvignier for computation of
     9- [libpari] Z_lvalrem would destroy its argument. No longer.
    10- znprimroot(p^k) now always returns the smallest primitive root (was
        only true for k = 1)
+   11- gmul / gsqr for t_SER with t_INTMOD coefficients: reduce to Z[X] +
+       Kronecker substititution (quasi-linear vs. Karatsuba)
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
