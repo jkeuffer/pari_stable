@@ -1165,7 +1165,6 @@ init_qfauto(GEN F, long max, struct qfauto *qf, GEN norm)
   }
   if (max > MAXENTRY)
     pari_err(e_MISC,"qfisom: lattice too large");
-  qf->p = unextprime(2*max+1);
   V = vecvecsmall_sort_uniq(V);
   if (!norm)
   {
@@ -1485,6 +1484,7 @@ qfauto(GEN F, GEN flags)
   struct qfauto qf;
   long max;
   (void)init_qfisom(F, &fp, &cand, &qf, flags, &max);
+  qf.p = unextprime(2*max+1);
   init_qfgroup(&G, &fp, &qf);
   autom(&G, &qf, &fp, &cand);
   return gerepilecopy(av, gen_group(&G));
