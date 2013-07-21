@@ -1165,6 +1165,7 @@ init_qfauto(GEN F, long max, struct qfauto *qf, GEN norm)
   }
   if (max > MAXENTRY)
     pari_err(e_MISC,"qfisom: lattice too large");
+  qf->p = unextprime(2*max+1);
   V = vecvecsmall_sort_uniq(V);
   if (!norm)
   {
@@ -1438,6 +1439,7 @@ unpack_qfisominit(GEN F, GEN *norm, struct qfauto *qf,
   qf->V = gel(QF,2);
   qf->W = gel(QF,3);
   qf->v = gel(QF,4);
+  qf->p = itou(gel(QF,5));
   QF = gel(F,4);
   fp->diag = gel(QF,1);
   fp->per  = gel(QF,2);
@@ -1465,7 +1467,7 @@ init_qfisom(GEN F, struct fingerprint *fp, struct qfcand *cand,
   {
     GEN A = gel(F,1);
     *max = zm_maxdiag(A);
-    if (DEBUGLEVEL) err_printf("max=%ld\n",max);
+    if (DEBUGLEVEL) err_printf("max=%ld\n",*max);
     norm=init_qfauto(F, *max, qf, NULL);
     fingerprint(fp, qf);
     if (DEBUGLEVEL) err_printf("fp=%Ps\n",fp->diag);
@@ -1484,7 +1486,6 @@ qfauto(GEN F, GEN flags)
   struct qfauto qf;
   long max;
   (void)init_qfisom(F, &fp, &cand, &qf, flags, &max);
-  qf.p = unextprime(2*max+1);
   init_qfgroup(&G, &fp, &qf);
   autom(&G, &qf, &fp, &cand);
   return gerepilecopy(av, gen_group(&G));
@@ -1689,7 +1690,7 @@ qfisominit(GEN F, GEN flags)
   GEN norm=init_qfauto(F, max, &qf,NULL);
   fingerprint(&fp, &qf);
   init_flags(&cand, A, &fp, &qf, flags);
-  return gerepilecopy(av, mkvec5(F, norm, mkvec4(qf.F, qf.V, qf.W, qf.v),
+  return gerepilecopy(av, mkvec5(F, norm, mkvec5(qf.F, qf.V, qf.W, qf.v, utoi(qf.p)),
                           mkvec3(fp.diag, fp.per, fp.e),
                           mkvec3(stoi(cand.cdep),cand.comb?cand.comb:cgetg(1,t_VEC),
                                  cand.bacher_pol)));
