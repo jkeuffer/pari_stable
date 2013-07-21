@@ -732,7 +732,7 @@ stab(long I, struct group *G, struct fingerprint *fp, GEN V, ulong p)
 
 static long
 qfisom_candidates_novec(GEN CI, long I, GEN x, struct qfauto *qf,
-       struct qfauto *qff, struct fingerprint *fp, struct qfcand *qfcand)
+       struct qfauto *qff, struct fingerprint *fp)
 {
   pari_sp av = avma;
   long i, j, k, okp, okm, nr, fail;
@@ -820,7 +820,7 @@ qfisom_candidates(GEN CI, long I, GEN x, struct qfauto *qf,
       return 0;
   }
   if (I==1 || DEP ==0)
-    return qfisom_candidates_novec(CI,I,x,qf,qff,fp,qfcand);
+    return qfisom_candidates_novec(CI,I,x,qf,qff,fp);
   vec = cgetg(I,t_VECSMALL);
   scpvec = cgetg(len+1,t_VECSMALL);
   com = gel(qfcand->comb,I-1);
