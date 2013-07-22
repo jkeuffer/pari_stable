@@ -1505,14 +1505,16 @@ qf_to_zmV(GEN F)
 }
 
 GEN
-qfauto0(GEN F, GEN flags)
+qfauto0(GEN x, GEN flags)
 {
   pari_sp av = avma;
-  GEN G;
-  if (!is_qfisom(F))
+  GEN F, G;
+  if (is_qfisom(x))
+    F = x;
+  else
   {
-    F = qf_to_zmV(F);
-    if (!F) pari_err_TYPE("qfauto",F);
+    F = qf_to_zmV(x);
+    if (!F) pari_err_TYPE("qfauto",x);
   }
   G = qfauto(F, flags);
   return gerepilecopy(av, mkvec2(gel(G,1), zmV_to_ZMV(gel(G,2))));
@@ -1727,16 +1729,19 @@ qfisom(GEN F, GEN FF, GEN flags)
 }
 
 GEN
-qfisom0(GEN F, GEN FF, GEN flags)
+qfisom0(GEN x, GEN y, GEN flags)
 {
   pari_sp av = avma;
-  if (!is_qfisom(F))
+  GEN F, FF;
+  if (is_qfisom(x))
+    F = x;
+  else
   {
-    F = qf_to_zmV(F);
-    if (!F) pari_err_TYPE("qfisom",F);
+    F = qf_to_zmV(x);
+    if (!F) pari_err_TYPE("qfisom",x);
   }
-  FF = qf_to_zmV(FF);
-  if (!FF) pari_err_TYPE("qfisom",FF);
+  FF = qf_to_zmV(y);
+  if (!FF) pari_err_TYPE("qfisom",y);
   return gerepileupto(av, qfisom(F, FF, flags));
 }
 
