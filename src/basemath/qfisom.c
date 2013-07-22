@@ -846,6 +846,7 @@ qfisom_candidates(GEN CI, long I, GEN x, struct qfauto *qf,
   fail = 0;
   for (j = 1; j <= n  &&  fail == 0; ++j)
   {
+    long sign;
     GEN Vj = gel(V,j), Wj = gel(W, j);
     okp = 0;
     okm = 0;
@@ -878,7 +879,6 @@ qfisom_candidates(GEN CI, long I, GEN x, struct qfauto *qf,
     }
     /* check, whether the scalar product combination scpvec is contained in the
        list comb[I-1].list */
-    long sign;
     if (!zv_equal0(scpvec))
     {
       sign = zv_canon(scpvec);
