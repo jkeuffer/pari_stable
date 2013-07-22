@@ -244,7 +244,7 @@
   *** ellj: incorrect type in modular function (t_INTMOD).
   ***   at top-level: ellj(Qfb(1,1,1))
   ***                 ^----------------
-  *** ellj: incorrect type in modular function (t_QFI).
+  *** ellj: incorrect type in ellj (t_QFI).
   ***   at top-level: eta(1+O(2))
   ***                 ^-----------
   *** eta: domain error in eta: v_p(q) <= 0
@@ -584,4 +584,4 @@
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
   ***   user warning: 1
-Total time spent: 28
+Total time spent: 24
