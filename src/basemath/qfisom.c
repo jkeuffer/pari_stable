@@ -1457,19 +1457,20 @@ static GEN
 init_qfisom(GEN F, struct fingerprint *fp, struct qfcand *cand,
                    struct qfauto *qf, GEN flags, long *max)
 {
-  GEN norm;
+  GEN A, norm;
   if (is_qfisom(F))
   {
-    GEN A;
     F = unpack_qfisominit(F, &norm, qf, fp, cand);
-    A=gel(F,1);
+    A = gel(F,1);
     *max = zm_maxdiag(A);
     if (flags)
       init_flags(cand, A, fp, qf, flags);
   }
   else
   {
-    GEN A = gel(F,1);
+    if (lg(F)<2) pari_err_TYPE("qfisom",F);
+    A = gel(F,1);
+    if (lg(A)<2) pari_err_TYPE("qfisom",A);
     *max = zm_maxdiag(A);
     if (DEBUGLEVEL) err_printf("max=%ld\n",*max);
     norm=init_qfauto(F, *max, qf, NULL);
@@ -1700,11 +1701,11 @@ qfisominit(GEN F, GEN flags)
 }
 
 GEN
-qfisominit0(GEN F, GEN flags)
+qfisominit0(GEN x, GEN flags)
 {
   pari_sp av = avma;
-  F = qf_to_zmV(F);
-  if (!F) pari_err_TYPE("qfisom",F);
+  GEN F = qf_to_zmV(x);
+  if (!F) pari_err_TYPE("qfisom",x);
   return gerepileupto(av, qfisominit(F, flags));
 }
 
@@ -1774,11 +1775,11 @@ GEN
 qfautoexport(GEN G, long flag)
 {
   pari_sp av = avma;
-  GEN gen = gel(G,2);
-  long i, lgen = lg(gen)-1,  c = 2;
-  GEN str, comma = strtoGENstr(", ");
-  if (typ(G)!=t_VEC && lg(G)!=3) pari_err_TYPE("qfautoexport", G);
+  long i, lgen,  c = 2;
+  GEN gen, str, comma = strtoGENstr(", ");
+  if (typ(G)!=t_VEC || lg(G)!=3) pari_err_TYPE("qfautoexport", G);
   if (flag!=0 && flag!=1) pari_err_FLAG("qfautoexport");
+  gen = gel(G,2); lgen = lg(gen)-1;
   str = cgetg(2+2*lgen,t_VEC);
   /* in GAP or MAGMA the matrix group is called BG */
   if (flag == 0)
