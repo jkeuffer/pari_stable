@@ -1688,14 +1688,11 @@ GEN
 qfisominit(GEN F, GEN flags)
 {
   pari_sp av = avma;
-  GEN A = gel(F,1);
-  long max = zm_maxdiag(A);
   struct fingerprint fp;
   struct qfauto qf;
   struct qfcand cand;
-  GEN norm=init_qfauto(F, max, &qf,NULL);
-  fingerprint(&fp, &qf);
-  init_flags(&cand, A, &fp, &qf, flags);
+  long max;
+  GEN norm = init_qfisom(F, &fp, &cand, &qf, flags, &max);
   return gerepilecopy(av, mkvec5(F, norm, mkvec5(qf.F, qf.V, qf.W, qf.v, utoi(qf.p)),
                           mkvec3(fp.diag, fp.per, fp.e),
                           mkvec3(stoi(cand.cdep),cand.comb?cand.comb:cgetg(1,t_VEC),
