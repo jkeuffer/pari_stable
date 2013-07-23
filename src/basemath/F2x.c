@@ -596,7 +596,7 @@ F2x_valrem(GEN x, GEN *Z)
   if (v2 == 0)
     for (i=2; i<l; i++) y[i] = x[i+v];
   else if (l == 3)
-    y[2] = x[2+v] >> v2;
+    y[2] = ((ulong)x[2+v]) >> v2;
   else
   {
     const ulong sh = BITS_IN_LONG - v2;

@@ -29,6 +29,7 @@ PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [2.6.0, #1430]
    19- mateigen([5/3,7/45;0,21/10]) => precision error (missing eigenspace)
    20- subst(O(x^2),x,0*x) => SEGV [#1447]
    21- memory corruption in aprcl [2.6.0]
+   22- factormod(,2) => wrong result [2.6.0, #1451]
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the
