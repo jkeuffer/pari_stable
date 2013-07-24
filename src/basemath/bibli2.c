@@ -686,28 +686,28 @@ GEN
 dirmul(GEN x, GEN y)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
-  long lx, ly, lz, dx, dy, i, j, k;
+  long nx, ny, nz, dx, dy, i, j, k;
   GEN z;
 
   if (typ(x)!=t_VEC) pari_err_TYPE("dirmul",x);
   if (typ(y)!=t_VEC) pari_err_TYPE("dirmul",y);
-  dx = dirval(x); lx = lg(x);
-  dy = dirval(y); ly = lg(y);
-  if (ly-dy < lx-dx) { swap(x,y); lswap(lx,ly); lswap(dx,dy); }
-  lz = minss(lx*dy,ly*dx);
-  z = zerovec(lz-1);
-  for (j=dx; j<lx; j++)
+  dx = dirval(x); nx = lg(x)-1;
+  dy = dirval(y); ny = lg(y)-1;
+  if (ny-dy < nx-dx) { swap(x,y); lswap(nx,ny); lswap(dx,dy); }
+  nz = minss(nx*dy,ny*dx);
+  z = zerovec(nz);
+  for (j=dx; j<=nx; j++)
   {
     GEN c = gel(x,j);
     if (gequal0(c)) continue;
     if (gequal1(c))
-      for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gel(y,k));
+      for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gel(y,k));
     else
     {
       if (gequalm1(c))
-        for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
+        for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
       else
-        for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
+        for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -722,29 +722,29 @@ GEN
 dirdiv(GEN x, GEN y)
 {
   pari_sp av = avma;
-  long lx,ly,lz,dx,dy,i,j;
+  long nx,ny,nz,dx,dy,i,j;
   GEN z,p1;
 
   if (typ(x)!=t_VEC) pari_err_TYPE("dirdiv",x);
   if (typ(y)!=t_VEC) pari_err_TYPE("dirdiv",y);
-  dx = dirval(x); lx = lg(x);
-  dy = dirval(y); ly = lg(y);
-  if (dy != 1 || ly == 1) pari_err_INV("dirdiv",y);
-  lz = minss(lx,ly*dx); p1 = gel(y,1);
+  dx = dirval(x); nx = lg(x)-1;
+  dy = dirval(y); ny = lg(y)-1;
+  if (dy != 1 || !ny) pari_err_INV("dirdiv",y);
+  nz = minss(nx,ny*dx); p1 = gel(y,1);
   if (!gequal1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = leafcopy(x);
-  z = zerovec(lz-1);
-  for (j=dx; j<lz; j++)
+  z = zerovec(nz);
+  for (j=dx; j<=nz; j++)
   {
     p1=gel(x,j); gel(z,j) = p1;
     if (gequal0(p1)) continue;
     if (gequal1(p1))
-      for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gel(y,i/j));
+      for (i=j+j; i<=nz; i+=j) gel(x,i) = gsub(gel(x,i),gel(y,i/j));
     else
     {
       if (gequalm1(p1))
-        for (i=j+j; i<lz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
+        for (i=j+j; i<=nz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
       else
-        for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,gel(y,i/j)));
+        for (i=j+j; i<=nz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,gel(y,i/j)));
     }
   }
   return gerepilecopy(av,z);
