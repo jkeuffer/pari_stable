@@ -1303,8 +1303,8 @@ statements, use the following encapsulated variants:
 output stream, according to the conversion specifications in format \kbd{fmt}
 (see \tet{printf}).
 
-\fun{void}{err_printf}{char *s}: as \tet{pari_printf}, writing to PARI's
-current error stream.
+\fun{void}{err_printf}{const char *fmt, ...}: as \tet{pari_printf}, writing to
+PARI's current error stream.
 
 \fun{void}{err_flush}{void} flush error stream.
 
@@ -2806,7 +2806,7 @@ for an \kbd{ulong} operand \kbd{n}.
 
 \fun{ulong}{usqrt}{ulong a} returns the floor of the square root of $a$.
 
-\fun{ulong}{usqrtn}{ulong a, ulong n} returns the floow of the $n$-th root
+\fun{ulong}{usqrtn}{ulong a, ulong n} returns the floor of the $n$-th root
 of $a$.
 
 \fun{long}{Z_ispower}{GEN x, ulong k} returns $1$ if the \typ{INT} $n$ is a
@@ -3179,7 +3179,7 @@ modulo \kbd{m} is invertible, else return $0$ and set
 $\kbd{g} = \gcd(\kbd{a},\kbd{m})$.
 
 \fun{GEN}{Fp_log}{GEN a, GEN g, GEN ord, GEN p} Let $g$ such that
-$g^ord \equiv 1 \pmod{p}$. Return an integer $e$ such that
+$g^{ord} \equiv 1 \pmod{p}$. Return an integer $e$ such that
 $a^e \equiv g \pmod{p}$. If $e$ does not exist, the result is currently
 undefined.
 
@@ -5000,7 +5000,7 @@ its factorization.
 \fun{GEN}{FlxY_Flx_div}{GEN x, GEN y, ulong p} divides the coefficients of $x$
 by $y$ using \kbd{Flx\_div}.
 
-\fun{GEN}{FlxY_evalx}{GEN x, GEN y, ulong p}
+\fun{GEN}{FlxY_evalx}{GEN x, ulong y, ulong p}
 
 \fun{GEN}{FlxY_Flxq_evalx}{GEN x, GEN y, ulong p}
 
@@ -8715,8 +8715,8 @@ performed in the definition field of \kbd{a}.
 \fun{GEN}{FF_mul}{GEN a, GEN b} returns $a\*b$ where \kbd{a} and \kbd{b} are
 \typ{FFELT} having the same definition field.
 
-\fun{GEN}{FF_Z_mul}{GEN a, GEN b} returns $a\*x$, where \kbd{a} is a
-\typ{FFELT}, and \kbd{x} is a \typ{INT}, the computation being
+\fun{GEN}{FF_Z_mul}{GEN a, GEN b} returns $a\*b$, where \kbd{a} is a
+\typ{FFELT}, and \kbd{b} is a \typ{INT}, the computation being
 performed in the definition field of \kbd{a}.
 
 \fun{GEN}{FF_div}{GEN a, GEN b} returns $a/b$ where \kbd{a} and \kbd{b} are
