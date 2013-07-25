@@ -180,25 +180,28 @@ cgetr(long x)
 INLINE GEN
 leafcopy(GEN x)
 {
-  long lx;
-  GEN y = cgetg_copy(x, &lx);
+  register long lx = lg(x);
+  GEN y = new_chunk(lx); /* can't use cgetg_copy, in case x,y overlap */
   while (--lx > 0) y[lx] = x[lx];
-  return y;
+  y[0] = x[0] & (TYPBITS|LGBITS); return y;
 }
 INLINE GEN
 icopy(GEN x)
 {
-  register long lx = lgefint(x);
-  GEN y = cgeti(lx);
-  while (--lx > 0) y[lx] = x[lx];
+  long i = lgefint(x), lx = i;
+  GEN y = new_chunk(lx); /* can't use cgeti, in case x,y overlap */
+  while (--i > 0) y[i] = x[i];
+  y[0] = evaltyp(t_INT) | evallg(lx);
   return y;
 }
 INLINE GEN
 icopyspec(GEN x, long nx)
 {
-  GEN y = cgeti(nx + 2);
-  y[1] = evalsigne(1) | evallgefint(nx + 2);
-  while (--nx >= 0) y[nx + 2]=x[nx];
+  long i = nx+2, lx = i;
+  GEN y = new_chunk(lx); /* can't use cgeti, in case x,y overlap */
+  x -= 2; while (--i >= 2) y[i] = x[i];
+  y[1] = evalsigne(1) | evallgefint(lx);
+  y[0] = evaltyp(t_INT) | evallg(lx);
   return y;
 }
 INLINE GEN rcopy(GEN x) { return leafcopy(x); }

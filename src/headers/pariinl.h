@@ -1001,21 +1001,21 @@ cgetalloc(long t, size_t l)
 INLINE GEN
 icopy_avma(GEN x, pari_sp av)
 {
-  long lx = lgefint(x), lq = lx;
-  GEN q = ((GEN)av) - lx;
-  while (--lx > 0) q[lx] = x[lx];
-  q[0] = evaltyp(t_INT)|evallg(lq);
-  return q;
+  long i = lgefint(x), lx = i;
+  GEN y = ((GEN)av) - i;
+  while (--i > 0) y[i] = x[i];
+  y[0] = evaltyp(t_INT)|evallg(lx);
+  return y;
 }
 /* copy leaf x as if we had avma = av */
 INLINE GEN
 leafcopy_avma(GEN x, pari_sp av)
 {
-  long lx = lg(x);
-  GEN q = ((GEN)av) - lx;
-  while (--lx > 0) q[lx] = x[lx];
-  q[0] = x[0] & (~CLONEBIT);
-  return q;
+  long i = lg(x);
+  GEN y = ((GEN)av) - i;
+  while (--i > 0) y[i] = x[i];
+  y[0] = x[0] & (~CLONEBIT);
+  return y;
 }
 INLINE GEN
 gerepileuptoleaf(pari_sp av, GEN x)
