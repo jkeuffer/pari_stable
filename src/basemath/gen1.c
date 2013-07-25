@@ -805,10 +805,69 @@ add_scal(GEN y, GEN x, long ty)
 static GEN
 addsub_frac(GEN x, GEN y, GEN (*op)(GEN,GEN))
 {
+  pari_sp av = avma;
   GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_FRAC);
   GEN y1 = gel(y,1), y2 = gel(y,2), q, r, n, d, delta;
+  int s = cmpii(x2, y2);
 
-  delta = gcdii(x2,y2);
+  if (!s)
+  { /* common denominator: (x1 op y1) / x2 */
+    n = op(x1, y1);
+    if (!signe(n)) { avma = av; return gen_0; }
+    d = x2;
+    q = dvmdii(n, d, &r);
+    if (r == gen_0) { avma = av; return icopy(q); }
+    r = gcdii(d, r);
+    if (!is_pm1(r)) { n = diviiexact(n, r); d = diviiexact(d, r); }
+    gel(z,1) = icopy_avma(n, (pari_sp)z);
+    gel(z,2) = icopy_avma(d, (pari_sp)gel(z,1));
+    avma = (pari_sp)gel(z,2); return z;
+  }
+  if (s < 0)
+  {
+    GEN Q = dvmdii(y2, x2, &r);
+    if (r == gen_0)
+    { /* y2 = Q x2: 1/x2 . (Q x1 op y1)/Q, where latter is in coprime form */
+      pari_sp av = avma;
+      n = op(mulii(Q,x1), y1);
+      q = dvmdii(n, x2, &r);
+      if (r == gen_0)
+      {
+        gel(z,1) = gerepileuptoint(av, q);
+        gel(z,2) = Q; return z;
+      }
+      r = gcdii(x2, r);
+      if (!is_pm1(r)) { n = diviiexact(n, r); x2 = diviiexact(x2, r); }
+      d = mulii(x2,Q);
+      gel(z,1) = icopy_avma(n, (pari_sp)z);
+      gel(z,2) = icopy_avma(d, (pari_sp)gel(z,1));
+      avma = (pari_sp)gel(z,2); return z;
+    }
+    delta = gcdii(x2,r);
+  }
+  else
+  {
+    GEN Q = dvmdii(x2, y2, &r);
+    if (r == gen_0)
+    { /* x2 = Q y2: 1/y2 . (x1 op Q y1)/Q, where latter is in coprime form */
+      pari_sp av = avma;
+      n = op(x1, mulii(Q,y1));
+      q = dvmdii(n, y2, &r);
+      if (r == gen_0)
+      {
+        gel(z,1) = gerepileuptoint(av, q);
+        gel(z,2) = Q; return z;
+      }
+      r = gcdii(y2, r);
+      if (!is_pm1(r)) { n = diviiexact(n, r); y2 = diviiexact(y2, r); }
+      d = mulii(y2,Q);
+      gel(z,1) = icopy_avma(n, (pari_sp)z);
+      gel(z,2) = icopy_avma(d, (pari_sp)gel(z,1));
+      avma = (pari_sp)gel(z,2); return z;
+    }
+    delta = gcdii(y2,r);
+  }
+  /* delta = gcd(x2,y2) */
   if (is_pm1(delta))
   { /* numerator is non-zero */
     gel(z,1) = gerepileuptoint((pari_sp)z, op(mulii(x1,y2), mulii(y1,x2)));
@@ -817,12 +876,12 @@ addsub_frac(GEN x, GEN y, GEN (*op)(GEN,GEN))
   x2 = diviiexact(x2,delta);
   y2 = diviiexact(y2,delta);
   n = op(mulii(x1,y2), mulii(y1,x2));
-  if (!signe(n)) { avma = (pari_sp)(z+3); return gen_0; }
+  if (!signe(n)) { avma = av; return gen_0; }
   d = mulii(x2, y2);
   q = dvmdii(n, delta, &r);
   if (r == gen_0)
   {
-    if (is_pm1(d)) { avma = (pari_sp)(z+3); return icopy(q); }
+    if (is_pm1(d)) { avma = av; return icopy(q); }
     avma = (pari_sp)z;
     gel(z,2) = icopy(d);
     gel(z,1) = icopy(q); return z;
@@ -830,8 +889,8 @@ addsub_frac(GEN x, GEN y, GEN (*op)(GEN,GEN))
   r = gcdii(delta, r);
   if (!is_pm1(r))
   {
-    delta = diviiexact(delta, r);
     n     = diviiexact(n, r);
+    delta = diviiexact(delta, r);
   }
   d = mulii(d,delta); avma = (pari_sp)z;
   gel(z,1) = icopy(n);
