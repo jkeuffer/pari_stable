@@ -923,21 +923,27 @@ not_given(long reason)
   return cgetg(1,t_MAT);
 }
 
-/* check whether exp(x) will get too big */
-static long
-expgexpo(GEN x)
+/* check whether exp(x) will 1) get too big (real(x) large), 2) require
+ * large accuracy for argument reduction (imag(x) large) */
+static int
+exp_OK(GEN x, long *pte)
 {
-  long i,j,e, E = - (long)HIGHEXPOBIT;
-  GEN p1;
-
-  for (i=1; i<lg(x); i++)
-    for (j=1; j<lgcols(x); j++)
+  long i,I,j,J, e = - (long)HIGHEXPOBIT;
+  RgM_dimensions(x, &I,&J);
+  for (j=1; j<=J; j++)
+    for (i=1; i<=I; i++)
     {
-      p1 = gmael(x,i,j);
-      if (typ(p1)==t_COMPLEX) p1 = gel(p1,1);
-      e = gexpo(p1); if (e>E) E=e;
+      GEN c = gcoeff(x,i,j), re;
+      if (typ(c)!=t_COMPLEX) re = c;
+      else
+      {
+        GEN im = gel(c,2);
+        e = maxss(e, expo(im) + 5 - bit_prec(im));
+        re = gel(c,1);
+      }
+      if (expo(re) > 20) { *pte = LONG_MAX; return 0; }
     }
-  return E;
+  *pte = -e; return (e < 0);
 }
 
 static GEN
@@ -964,8 +970,8 @@ getfu(GEN nf, GEN *ptA, long *pte, long prec)
   if (typ(u) != t_MAT) return not_given(fupb_PRECI);
 
   y = RgM_mul(matep,u);
-  if (expgexpo(y) > 20) { *pte = LONG_MAX; return not_given(fupb_LARGE); }
-
+  if (!exp_OK(y, pte))
+    return not_given(*pte == LONG_MAX? fupb_LARGE: fupb_PRECI);
   if (prec <= 0) prec = gprecision(A);
   y = RgM_solve_realimag(M, gexp(y,prec));
   if (!y) return not_given(fupb_PRECI);
