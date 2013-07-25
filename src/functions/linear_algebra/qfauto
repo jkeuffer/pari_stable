@@ -21,3 +21,6 @@ Doc:
 
  Since this requires computing the minimal vectors, the computations can
  become very lengthy as the dimension of $G$ grows.
+Variant: Also available is
+ \fun{GEN}{qfauto}{GEN F, GEN flags}
+ which handles matrices with \typ{VECSMALL} columns.

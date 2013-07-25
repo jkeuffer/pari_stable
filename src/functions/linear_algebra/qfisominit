@@ -24,3 +24,6 @@ Doc:
 
  Since this function computes the minimal vectors, it can become very lengthy
  as the dimension of $G$ grows.
+Variant: Also available is
+ \fun{GEN}{qfisominit}{GEN F, GEN flags}
+ which handles matrices with \typ{VECSMALL} columns.
