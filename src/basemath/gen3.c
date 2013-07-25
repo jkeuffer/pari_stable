@@ -572,7 +572,7 @@ modr_safe(GEN x, GEN y)
   q = gdiv(x,y); /* t_REAL */
 
   e = expo(q);
-  if (e >= 0 && nbits2prec(e) > realprec(q)) return NULL;
+  if (e >= 0 && nbits2prec(e+1) > realprec(q)) return NULL;
   f = floorr(q);
   if (gsigne(y) < 0 && signe(subri(q,f))) f = addis(f, 1);
   return signe(f)? gsub(x, mulir(f,y)): x;
