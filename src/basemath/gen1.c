@@ -1795,7 +1795,7 @@ fill_ser(GEN z, GEN y)
 GEN
 gmul(GEN x, GEN y)
 {
-  long tx, ty, lx, ly, vx, vy, i, j, l;
+  long tx, ty, lx, ly, vx, vy, i, l;
   pari_sp av, tetpil;
   GEN z, p1, p2;
 
@@ -1845,50 +1845,34 @@ gmul(GEN x, GEN y)
       return RgX_mul(x, y);
 
     case t_SER: {
-      long mix, miy;
+      GEN p = NULL;
       vx = varn(x);
       vy = varn(y);
       if (vx != vy) {
         if (varncmp(vx, vy) < 0) return mul_ser_scal(x, y);
         else                     return mul_ser_scal(y, x);
       }
-      lx = lg(x); if (lx > lg(y)) { lx = lg(y); swap(x, y); }
+      lx = lg(x);
+      ly = lg(y); if (lx > ly) { lx = ly; swap(x, y); }
       if (lx == 2) return zeroser(vx, valp(x)+valp(y));
       z = cgetg(lx,t_SER);
       z[1] = evalvalp(valp(x)+valp(y)) | evalvarn(vx) | evalsigne(1);
-      if (lx > 200) /* threshold for 32bit coeffs: 400, 512 bits: 100 */
+      x = ser2pol_i(x, lx);
+      y = ser2pol_i(y, lx);
+      if (RgX_is_FpX(x,&p) && RgX_is_FpX(y,&p))
       {
-        GEN p = NULL;
-        x = ser2pol_i(x, lx);
-        y = ser2pol_i(y, lx);
-        /* FIXME: should be a short product */
-        if (RgX_is_ZX(x) && RgX_is_ZX(y))
-          y = ZX_mul(x,y);
-        else if (RgX_is_FpX(x,&p) && RgX_is_FpX(y,&p))
+        if (!p) y = ZX_mul(x,y);
+        else
         {
           x = RgX_to_FpX(x, p);
           y = RgX_to_FpX(y, p);
           y = FpX_to_mod(ZX_mul(x,y), p);
         }
-        else
-          y = RgX_mul(x, y);
-        z = fill_ser(z, y);
-        return gerepilecopy((pari_sp)(z + lx), z);
       }
-      x += 2; y += 2; z += 2; lx -= 3;
-      p2 = (GEN)pari_malloc((lx+1)*sizeof(long));
-      mix = miy = 0;
-      for (i=0; i<=lx; i++)
-      {
-        p2[i] = !isrationalzero(gel(y,i)); if (p2[i]) miy = i;
-        if (!isrationalzero(gel(x,i))) mix = i;
-        p1 = gen_0; av = avma;
-        for (j=i-mix; j<=minss(i,miy); j++)
-          if (p2[j]) p1 = gadd(p1, gmul(gel(y,j),gel(x,i-j)));
-        gel(z,i) = gerepileupto(av,p1);
-      }
-      z -= 2; /* back to normalcy */
-      pari_free(p2); return normalize(z);
+      else
+        y = RgX_mullow(x, y, lx-2);
+      z = fill_ser(z, y);
+      return gerepilecopy((pari_sp)(z + lx), z);
     }
     case t_QFI: return qficomp(x,y);
     case t_QFR: return qfrcomp(x,y);
@@ -2239,25 +2223,28 @@ gsqr(GEN x)
 
     case t_SER:
       lx = lg(x);
-      if (lx > 300)
+      if (lx < 40)
+        return normalize( sqr_ser_part(x, 0, lx-3) );
+      else
       {
         pari_sp av = avma;
         GEN z = cgetg(lx,t_SER), p = NULL;
         z[1] = evalvalp(2*valp(x)) | evalvarn(varn(x)) | evalsigne(1);
         x = ser2pol_i(x,lx);
-        if (RgX_is_ZX(x))
-          x = ZX_sqr(x);
-        else if (RgX_is_FpX(x,&p))
+        if (RgX_is_FpX(x,&p))
         {
-          x = RgX_to_FpX(x, p);
-          x = FpX_to_mod(ZX_sqr(x), p);
+          if (!p) x = ZX_sqr(x);
+          else
+          {
+            x = RgX_to_FpX(x, p);
+            x = FpX_to_mod(ZX_sqr(x), p);
+          }
         }
         else
-          x = RgX_sqr(x);
+          x = RgX_sqrlow(x, lx-2);
         z = fill_ser(z, x);
         return gerepilecopy(av, z);
       }
-      return normalize( sqr_ser_part(x, 0, lx-3) );
 
     case t_RFRAC: z = cgetg(3,t_RFRAC);
       gel(z,1) = gsqr(gel(x,1));

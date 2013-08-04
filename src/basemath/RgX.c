@@ -953,6 +953,24 @@ addpolcopy(GEN x, GEN y, long lx, long ly)
   z -= 2; z[1]=0; return normalizepol_lg(z, lz);
 }
 
+/* Return the vector of coefficients of x, where we replace rational 0s by NULL
+ * [ to speed up basic operation s += x[i]*y[j] ]. We create a proper
+ * t_VECSMALL, to hold this, which can be left on stack: gerepile
+ * will not crash on it. The returned vector itself is not a proper GEN,
+ * we access the coefficients as x[i], i = 0..deg(x) */
+static GEN
+RgXspec_kill0(GEN x, long lx)
+{
+  GEN z = cgetg(lx+1, t_VECSMALL) + 1; /* inhibit gerepile-wise */
+  long i;
+  for (i=0; i <lx; i++)
+  {
+    GEN c = gel(x,i);
+    z[i] = (long)(isrationalzero(c)? NULL: c);
+  }
+  return z;
+}
+
 INLINE GEN
 RgX_mulspec_basecase_limb(GEN x, GEN y, long a, long b)
 {
@@ -961,10 +979,11 @@ RgX_mulspec_basecase_limb(GEN x, GEN y, long a, long b)
   long i;
 
   for (i=a; i<b; i++)
-  {
-    GEN t = gmul(gel(y,i), gel(x,-i));
-    s = s? gadd(s, t): t;
-  }
+    if (gel(y,i) && gel(x,-i))
+    {
+      GEN t = gmul(gel(y,i), gel(x,-i));
+      s = s? gadd(s, t): t;
+    }
   return s? gerepileupto(av, s): gen_0;
 }
 
@@ -975,6 +994,8 @@ RgX_mulspec_basecase(GEN x, GEN y, long nx, long ny, long v)
   long i, lz, nz;
   GEN z;
 
+  x = RgXspec_kill0(x,nx);
+  y = RgXspec_kill0(y,ny);
   lz = nx + ny + 1; nz = lz-2;
   lz += v;
   z = cgetg(lz, t_POL) + 2; /* x:y:z [i] = term of degree i */
@@ -1055,6 +1076,50 @@ addmulXncopy(GEN x, GEN y, long d)
   while (yd > y) gel(--zd,0) = gcopy(gel(--yd,0));
   *--zd = evalsigne(1);
   *--zd = evaltyp(t_POL) | evallg(lz); return zd;
+}
+
+/* return x * y mod t^n */
+static GEN
+RgX_mullow_basecase(GEN x, GEN y, long n)
+{
+  long i, lz = n+2, lx = lgpol(x), ly = lgpol(y);
+  GEN z;
+  if (lx < 0) return pol_0(varn(x));
+  if (ly < 0) return pol_0(varn(x));
+  z = cgetg(lz, t_POL) + 2;
+  x+=2; if (lx > n) lx = n;
+  y+=2; if (ly > n) ly = n;
+  z[-1] = x[-1];
+  if (ly > lx) { swap(x,y); lswap(lx,ly); }
+  x = RgXspec_kill0(x, lx);
+  y = RgXspec_kill0(y, ly);
+  /* x:y:z [i] = term of degree i */
+  for (i=0;i<ly; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y, 0,i+1);
+  for (  ; i<lx; i++) gel(z,i) = RgX_mulspec_basecase_limb(x+i,y, 0,ly);
+  for (  ; i<n; i++)  gel(z,i) = RgX_mulspec_basecase_limb(x+i,y, i-lx+1,ly);
+  return normalizepol_lg(z - 2, lz);
+}
+/* Mulders / Karatsuba product f*g mod t^n (Hanrot-Zimmermann variant) */
+GEN
+RgX_mullow(GEN f, GEN g, long n)
+{
+  pari_sp av = avma;
+  GEN fe,fo, ge,go, l,h,m;
+  long n0, n1;
+  if (degpol(f) + degpol(g) < n) return RgX_mul(f,g);
+  if (n < 80) return RgX_mullow_basecase(f,g,n);
+  n0 = n>>1; n1 = n-n0;
+  RgX_even_odd(f, &fe, &fo);
+  RgX_even_odd(g, &ge, &go);
+  l = RgX_mullow(fe,ge,n1);
+  h = RgX_mullow(fo,go,n0);
+  m = RgX_sub(RgX_mullow(RgX_add(fe,fo),RgX_add(ge,go),n0), RgX_add(l,h));
+  l = RgX_inflate(l,2);
+  m = RgX_inflate(m,2);
+  if (2*degpol(h)+2 == n) h = normalizepol_lg(h, lg(h)-1);
+  h = RgX_inflate(h,2);
+  h = addmulXncopy(addmulXn(h,m,1), l,1);
+  setvarn(h, varn(f)); return gerepileupto(av, h);
 }
 
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
@@ -1138,6 +1203,7 @@ RgX_sqrspec_basecase(GEN x, long nx, long v)
   GEN z;
 
   if (!nx) return pol_0(0);
+  x = RgXspec_kill0(x,nx);
   lz = (nx << 1) + 1, nz = lz-2;
   lz += v;
   z = cgetg(lz,t_POL) + 2;
@@ -1145,6 +1211,43 @@ RgX_sqrspec_basecase(GEN x, long nx, long v)
   for (i=0; i<nx; i++)gel(z,i) = RgX_sqrspec_basecase_limb(x, 0, i);
   for (  ; i<nz; i++) gel(z,i) = RgX_sqrspec_basecase_limb(x, i-nx+1, i);
   z -= v+2; z[1] = 0; return normalizepol_lg(z, lz);
+}
+/* return x^2 mod t^n */
+static GEN
+RgX_sqrlow_basecase(GEN x, long n)
+{
+  long i, lz = n+2, lx = lgpol(x);
+  GEN z;
+  if (lx < 0) return pol_0(varn(x));
+  z = cgetg(lz, t_POL);
+  z[1] = x[1];
+  x+=2; if (lx > n) lx = n;
+  x = RgXspec_kill0(x,lx);
+  z+=2;/* x:z [i] = term of degree i */
+  for (i=0;i<lx; i++) gel(z,i) = RgX_sqrspec_basecase_limb(x, 0, i);
+  for (  ; i<n; i++)  gel(z,i) = RgX_sqrspec_basecase_limb(x, i-lx+1, i);
+  z -= 2; return normalizepol_lg(z, lz);
+}
+/* Mulders / Karatsuba product f^2 mod t^n (Hanrot-Zimmermann variant) */
+GEN
+RgX_sqrlow(GEN f, long n)
+{
+  pari_sp av = avma;
+  GEN fe,fo, l,h,m;
+  long n0, n1;
+  if (2*degpol(f) < n) return RgX_sqr(f);
+  if (n < 80) return RgX_sqrlow_basecase(f,n);
+  n0 = n>>1; n1 = n-n0;
+  RgX_even_odd(f, &fe, &fo);
+  l = RgX_sqrlow(fe,n1);
+  h = RgX_sqrlow(fo,n0);
+  m = RgX_sub(RgX_sqrlow(RgX_add(fe,fo),n0), RgX_add(l,h));
+  l = RgX_inflate(l,2);
+  m = RgX_inflate(m,2);
+  if (2*degpol(h)+2 == n) h = normalizepol_lg(h, lg(h)-1);
+  h = RgX_inflate(h,2);
+  h = addmulXncopy(addmulXn(h,m,1), l,1);
+  setvarn(h, varn(f)); return gerepileupto(av, h);
 }
 
 GEN
@@ -1806,16 +1909,15 @@ struct modXn {
   long v; /* varn(X) */
   long n;
 } ;
-/* FIXME: write proper short products RgX_mul_low / RgX_sqr_low */
 static GEN
 _sqrXn(void *data, GEN x) {
   struct modXn *S = (struct modXn*)data;
-  return RgX_modXn_shallow(RgX_sqr(x), S->n);
+  return RgX_sqrlow(x, S->n);
 }
 static GEN
 _mulXn(void *data, GEN x, GEN y) {
   struct modXn *S = (struct modXn*)data;
-  return RgX_modXn_shallow(RgX_mul(x,y), S->n);
+  return RgX_mullow(x,y, S->n);
 }
 static GEN
 _oneXn(void *data) {

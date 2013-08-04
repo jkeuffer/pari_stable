@@ -6833,6 +6833,10 @@ $\sum_{i = 0}^{\kbd{na-1}} \kbd{a}[i] X^i$ and
 $\sum_{i = 0}^{\kbd{nb-1}} \kbd{b}[i] X^i$. Returns their product (as a true
 \kbd{GEN}).
 
+\fun{GEN}{RgX_mullow}{GEN a, GEN b, long n} returns $a b$ modulo $X^n$,
+where $a,b$ are two \typ{POL} in the same variable $X$ and $n \geq 0$. Uses
+Karatsuba algorithm (Mulders, Hanrot-Zimmermann variant).
+
 \fun{GEN}{RgX_sqr}{GEN x} squares the \typ{POL} \kbd{x}. Uses Karatsuba
 algorithm.
 
@@ -6840,6 +6844,10 @@ algorithm.
 \kbd{a} is an array of coefficients representing polynomial
 $\sum_{i = 0}^{\kbd{na-1}} \kbd{a}[i] X^i$. Return its square (as a true
 \kbd{GEN}).
+
+\fun{GEN}{RgX_sqrlow}{GEN a, long n} returns $a^2$ modulo $X^n$,
+where $a$ is a \typ{POL} in the variable $X$ and $n \geq 0$. Uses
+Karatsuba algorithm (Mulders, Hanrot-Zimmermann variant).
 
 \fun{GEN}{RgX_divrem}{GEN x, GEN y, GEN *r} by default, returns the Euclidean
 quotient and store the remainder in $r$. Three special values of $r$ change

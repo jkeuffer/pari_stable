@@ -75,6 +75,7 @@ BA 15- allow ellsearch(t_VEC) : search for curve with given name, in given
 BA 19- Port of the program ISOM by Bernt Souvignier for computation of
        automorphisms and isomorphisms of lattices.
        New GP functions qfauto, qfisom, qfisominit, qfautoexport
+   20- [libpari] RgX_mullow, RgX_sqrlow
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form
@@ -96,6 +97,7 @@ BA 19- Port of the program ISOM by Bernt Souvignier for computation of
        only true for k = 1)
    11- gmul / gsqr for t_SER with t_INTMOD coefficients: reduce to Z[X] +
        Kronecker substititution (quasi-linear vs. Karatsuba)
+   12- Mulders/Hanrot-Zimmerman short products for power series
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
