@@ -893,6 +893,11 @@ gidentical(GEN x, GEN y)
 
     case t_COMPLEX:
       return gidentical(gel(x,2),gel(y,2)) && gidentical(gel(x,1),gel(y,1));
+    case t_PADIC:
+      return valp(x) == valp(y)
+        && equalii(gel(x,2),gel(y,2))
+        && equalii(gel(x,3),gel(y,3))
+        && equalii(gel(x,4),gel(y,4));
     case t_POLMOD:
       return gidentical(gel(x,2),gel(y,2)) && polidentical(gel(x,1),gel(y,1));
     case t_POL:
@@ -934,7 +939,6 @@ gidentical(GEN x, GEN y)
   }
   return 0;
 }
-
 /* x,y t_POL */
 static int
 polequal(GEN x, GEN y)
@@ -1001,6 +1005,10 @@ gequal(GEN x, GEN y)
 
       case t_COMPLEX:
         return gequal(gel(x,2),gel(y,2)) && gequal(gel(x,1),gel(y,1));
+      case t_PADIC:
+        if (!equalii(gel(x,2),gel(y,2))) return 0;
+        av = avma; i = gequal0(gsub(x,y)); avma = av;
+        return i;
       case t_POLMOD:
         return gequal(gel(x,2),gel(y,2)) && RgX_equal_var(gel(x,1),gel(y,1));
       case t_POL:
