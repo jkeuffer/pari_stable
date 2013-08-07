@@ -951,7 +951,7 @@ F2xq_order(GEN a, GEN ord, GEN T)
 }
 
 static long
-F2x_issmooth_squarefree(GEN f, long r)
+F2x_is_smooth_squarefree(GEN f, long r)
 {
   pari_sp av = avma;
   long i;
@@ -966,14 +966,14 @@ F2x_issmooth_squarefree(GEN f, long r)
 }
 
 static long
-F2x_issmooth(GEN g, long r)
+F2x_is_smooth(GEN g, long r)
 {
   GEN f = gen_0;
   if (lgpol(g)==0) return 0;
   while (1)
   {
     f = F2x_gcd(g, F2x_deriv(g));
-    if (!F2x_issmooth_squarefree(F2x_div(g, f), r))
+    if (!F2x_is_smooth_squarefree(F2x_div(g, f), r))
       return 0;
     if (F2x_degree(f)==0) return 1;
     g = F2x_issquare(f) ? F2x_sqrt(f): f;
@@ -1056,10 +1056,10 @@ F2xq_log_Coppersmith_d(GEN W, GEN g, long r, long n, GEN T, GEN mo)
     qh= F2x_shift(q,h);
     p = F2x_rem(qh,g);
     b = F2x_add(F2x_mul(R, F2x_pow2n(q, n)), F2x_shift(F2x_pow2n(p, n), d));
-    if (lgpol(b)==0 || !F2x_issmooth(b, r)) continue;
+    if (lgpol(b)==0 || !F2x_is_smooth(b, r)) continue;
     a = F2x_div(F2x_add(qh,p),g);
     if (F2x_degree(F2x_gcd(a,q)) &&  F2x_degree(F2x_gcd(a,p))) continue;
-    if (!(lgpol(a)==0 || !F2x_issmooth(a, r)))
+    if (!(lgpol(a)==0 || !F2x_is_smooth(a, r)))
     {
       GEN F = F2x_factorel(b);
       GEN G = F2x_factorel(a);
@@ -1091,10 +1091,10 @@ F2xq_log_find_rel(GEN b, long r, GEN T, GEN *g, ulong *e)
     GEN M;
     *g = F2xq_mul(*g, b, T); (*e)++;
     M = F2x_halfgcd(*g,T);
-    if (F2x_issmooth(gcoeff(M,1,1), r))
+    if (F2x_is_smooth(gcoeff(M,1,1), r))
     {
       GEN z = F2x_add(F2x_mul(gcoeff(M,1,1),*g), F2x_mul(gcoeff(M,1,2),T));
-      if (F2x_issmooth(z, r))
+      if (F2x_is_smooth(z, r))
       {
         GEN F = F2x_factorel(z);
         GEN G = F2x_factorel(gcoeff(M,1,1));
@@ -1168,9 +1168,9 @@ rel_Coppersmith(GEN u, GEN v, long h, GEN R, long r, long n, long d)
 {
   GEN b, F, G, M;
   GEN a = F2x_add(F2x_shift(u, h), v);
-  if (!F2x_issmooth(a, r)) return NULL;
+  if (!F2x_is_smooth(a, r)) return NULL;
   b  = F2x_add(F2x_mul(R, F2x_pow2n(u, n)), F2x_shift(F2x_pow2n(v, n),d));
-  if (!F2x_issmooth(b, r)) return NULL;
+  if (!F2x_is_smooth(b, r)) return NULL;
   F = F2x_factorel(a);
   G = F2x_factorel(b);
   M = mkmat2(vecsmall_concat(gel(F, 1), vecsmall_append(gel(G, 1), 2)),
