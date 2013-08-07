@@ -2449,7 +2449,7 @@ RgM_RgC_invimage(GEN A, GEN y)
       A = RgM_to_Flm(A,pp);
       y = RgC_to_Flc(y,pp);
       x = Flm_Flc_invimage(A, y, pp);
-      x = Flc_to_ZC(x);
+      if (x) x = Flc_to_ZC(x);
     }
     else
     {
