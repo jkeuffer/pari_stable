@@ -1013,12 +1013,12 @@ F2xq_log_from_rel(GEN W, GEN rel, long r, long n, GEN T, GEN m)
     GEN R = gel(W, F[i]);
     if (signe(R)==0) /* Already failed */
       return NULL;
-    if (signe(R)<0) /* Not yet tested */
+    else if (signe(R)<0) /* Not yet tested */
     {
       setsigne(gel(W,F[i]),0);
       R = F2xq_log_Coppersmith_d(W, mkF2(F[i],T[1]), r, n, T, m);
       if (!R) return NULL;
-    } else R = gel(W, F[i]);
+    }
     o = Fp_add(o, mulis(R, E[i]), m);
   }
   return gerepileuptoint(av, o);
