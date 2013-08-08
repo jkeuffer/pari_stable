@@ -2382,6 +2382,15 @@ Flx_addifsmooth3(pari_sp *av, struct Flxq_log_rel *r, GEN h, long u, long v, lon
   return r->nbrel==r->nb || r->nbrel==r->nbmax;
 }
 
+static void
+Flx_renormalize_inplace(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>1; i--)
+    if (x[i]) break;
+  setlg(x, i+1);
+}
+
 /*
    Let T*X^e=C^3-R
    a+b+c = 0
@@ -2392,28 +2401,28 @@ Flx_addifsmooth3(pari_sp *av, struct Flxq_log_rel *r, GEN h, long u, long v, lon
 static void
 Flxq_log_cubic(struct Flxq_log_rel *r, GEN C, GEN R, ulong p)
 {
-  long l = lg(C)-2, la, lb;
-  GEN a = zero_zv(l+2); /*We allocate one extra word to catch overflow*/
-  GEN b = zero_zv(l+2);
+  long l = lg(C);
+  GEN a = zero_zv(l); /*We allocate one extra word to catch overflow*/
+  GEN b = zero_zv(l);
   pari_sp av = avma;
   long i,j,k, dh=0;
   for(i=0; ; i++, Flx_cnext(a, p))
   {
-    la = Flx_lgrenormalizespec(a+2, l+1);
+    Flx_renormalize_inplace(a, l+1);
     if (DEBUGLEVEL && (i&127)==127)
       err_printf("%ld%%[%ld] ",200*(r->nbrel-1)/r->nbmax, dh);
     r->nb++;
     if (Flx_addifsmooth3(&av, r, Flx_add(a, C, p), i, -1, -1, p)) return;
-    for(j=2; j<lg(b); j++) b[j] = 0;
+    for(j=2; j<=l; j++) b[j] = 0;
     for(j=0; j<=i; j++, Flx_cnext(b, p))
     {
       GEN h,c;
       GEN pab,pabc,pabc2;
+      Flx_renormalize_inplace(b, l+1);
       c = Flx_neg(Flx_add(a,b,p),p);
       k = Flx_cindex(c, p);
       if (k > j) continue;
-      lb = Flx_lgrenormalizespec(b+2, l);
-      pab  = Flx_mulspec(a+2, b+2, p, la, lb); pab[1]=0;
+      pab  = Flx_mul(a, b, p);
       pabc = Flx_mul(pab,c,p);
       pabc2= Flx_sub(pab,Flx_sqr(c,p),p);
       h = Flx_add(R,Flx_add(Flx_mul(C,pabc2,p),pabc,p), p);
