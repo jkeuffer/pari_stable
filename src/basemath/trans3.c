@@ -995,83 +995,119 @@ veceint1(GEN C, GEN nmax, long prec)
   return mpveceint1(C, NULL, itos(nmax));
 }
 
-/* C > 0 a t_REAL */
-GEN
-mpveceint1(GEN C, GEN eC, long n)
+/* j > 0, a t_REAL. Return sum_{m >= 0} a^m / j(j+1)...(j+m)).
+ * Stop when expo(summand) < E */
+static GEN
+mp_sum_j(GEN a, long j, long E, long prec)
 {
-  long i, nstop, nmin, G, chkpoint, prec = realprec(C);
-  pari_sp av, av1;
-  GEN y, e1, e2, F0, unr;
+  pari_sp av = avma;
+  GEN q = divru(real_1(prec), j), s = q;
+  long m;
+  for (m = 0;; m++)
+  {
+    if (expo(q) < E) break;
+    q = mulrr(q, divru(a, m+j));
+    s = addrr(s, q);
+  }
+  return gerepileuptoleaf(av, s);
+}
+/* j > 0, a complex. Return s_a(j) = sum_{m >= 0} a^m / j(j+1)...(j+m)).
+ * Stop when expo(summand) < E
+ * Note that s(j-1) = (a s(j) + 1) / (j-1). */
+static GEN
+sum_j(GEN a, long j, long E, long prec)
+{
+  pari_sp av = avma;
+  GEN q = divru(real_1(prec), j), s = q;
+  long m;
+  for (m = 0;; m++)
+  {
+    if (gexpo(q) < E) break;
+    q = gmul(q, gdivgs(a, m+j));
+    s = gadd(s, q);
+  }
+  return gerepileupto(av, s);
+}
 
-  if (n <= 0) return cgetg(1,t_VEC);
-  y = cgetg(n+1,t_VEC);
-  for(i=1; i<=n; i++) gel(y,i) = cgetr(prec);
-  av = avma; G = expo(C);
-  if (G >= 0) nstop = n;
+/* Return the s_a(j), j <= J */
+static GEN
+sum_jall(GEN a, long J, long prec)
+{
+  GEN s = cgetg(J+1, t_VEC);
+  long j, E = -bit_accuracy(prec) - 5;
+  if (typ(a) == t_REAL)
+  {
+    gel(s, J) = mp_sum_j(a, J, E, prec);
+    for (j = J-1; j; j--)
+      gel(s,j) = divru(addrs(mulrr(a, gel(s,j+1)), 1), j);
+  }
   else
   {
-    nstop = itos(ceilr(divur(4,C))); /* >= 4 ~ 4 / C */
-    if (nstop > n) nstop = n;
+    gel(s, J) = sum_j(a, J, E, prec);
+    for (j = J-1; j; j--)
+      gel(s, j) = gdivgs(gaddgs(gmul(a, gel(s,j+1)), 1), j);
   }
-  /* 1 <= nstop <= n */
-  if (!eC) eC = mpexp(C);
-  if (DEBUGLEVEL>5) err_printf("veceint1: (n, nstop) = (%ld, %ld)\n",n, nstop);
-  e1 = rcopy(eC); av1 = avma;
-  affrr(incgamcf_0(C, e1), gel(y,1));
-  for(i=2; i <= nstop; i++, avma = av1)
+  return s;
+}
+
+/* T a dense t_POL with t_REAL coeffs. Return T(n) [faster than poleval] */
+static GEN
+rX_s_eval(GEN T, long n)
+{
+  long i = lg(T)-1;
+  GEN c = gel(T,i);
+  for (i--; i>=2; i--) c = gadd(mulrs(c,n),gel(T,i));
+  return c;
+}
+
+/* C>0 t_REAL, eC = exp(C). Return eint1(n*C) for 1<=n<=N. Absolute accuracy */
+GEN
+mpveceint1(GEN C, GEN eC, long N)
+{
+  const long prec = realprec(C);
+  long Nmin = 15; /* >= 1. E.g. between 10 and 30, but little effect */
+  GEN en, v, w = cgetg(N+1, t_VEC);
+  pari_sp av0;
+  double DL;
+  long n, j, jmax, jmin;
+  if (!N) return w;
+  for (n = 1; n <= N; n++) gel(w,n) = cgetr(prec);
+  av0 = avma;
+  if (N < Nmin) Nmin = N;
+  en = eC; affrr(incgamcf_0(C, en), gel(w,1));
+  for (n = 2; n <= Nmin; n++)
   {
-    affrr(mulrr(e1, eC), e1); /* e1 = exp(iC) */
-    affrr(incgamcf_0(mulur(i,C), e1), gel(y,i));
+    pari_sp av2;
+    en = mulrr(en,eC); /* exp(n C) */
+    av2 = avma;
+    affrr(incgamcf_0(mulru(C,n), en), gel(w,n));
+    avma = av2;
   }
-  if (nstop == n) { avma = av; return y; }
+  if (Nmin == N) { avma = av0; return w; }
 
-  e1 = powrs(eC, -n);
-  e2 = powru(eC, 10);
-  unr = real_1(prec);
-  av1 = avma;
-  G = -prec2nbits(prec);
-  F0 = gel(y,n); chkpoint = n;
-  affrr(eint1(mulur(n,C),prec), F0);
-  nmin = n;
-  for(;;)
+  DL = bit_accuracy_mul(prec, LOG2) + 5;
+  jmin = ceil(DL/log(N)) + 1;
+  jmax = ceil(DL/log(Nmin)) + 1;
+  v = sum_jall(C, jmax, prec);
+  en = powrs(eC, -N); /* exp(-N C) */
+  affrr(incgamcf_0(mulru(C,N), invr(en)), gel(w,N));
+  for (j = jmin, n = N-1; j <= jmax; j++)
   {
-    GEN minvn = divrs(unr,-n), My = subrr(minvn,C);
-    GEN mcn   = divrs(C,  -n), Mx = mcn;
-    GEN t = divrs(e1,-n), D = mkvec2( t, mulrr(My,t) );
-    long a, k, cD = 2; /* cD = #D */
-
-    /* D = [ e1/-n, (-1/n-C) * (e1/-n) ] */
-    nmin -= 10; if (nmin < nstop) nmin = nstop;
-    My = addrr(My, minvn);
-    if (DEBUGLEVEL>5 && n < chkpoint)
-      { err_printf("%ld ",n) ; chkpoint -= nstop/20; }
-    for (a=1,n--; n>=nmin; n--,a++)
+    long limN = maxss((long)ceil(exp(DL/j)), Nmin);
+    GEN polsh;
+    setlg(v, j+1);
+    polsh = RgV_to_RgX_reverse(v, 0);
+    for (; n >= limN; n--)
     {
-      GEN F = F0, den = stor(-a, prec);
-      for (k=1;;)
-      {
-        GEN add;
-        if (k > cD)
-        {
-          GEN z = addrr(mulrr(My, gel(D,cD)), mulrr(Mx,gel(D,cD-1)));
-          Mx = addrr(Mx,mcn);
-          My = addrr(My,minvn);
-          D = shallowconcat(D, z); cD = k;
-          /* My = -C - k/n,  Mx = -C k/n */
-        }
-        add = mulrr(den, gel(D,k));
-        if (expo(add) < G) { affrr(F,gel(y,n)); break; }
-        F = addrr(F,add); k++;
-        den = mulrs(divru(den, k), -a);
-        /* den = prod(i=1,k, -a/i)*/
-      }
+      pari_sp av2 = avma;
+      GEN S = divri(mulrr(en, rX_s_eval(polsh, -n)), powuu(n,j));
+      /* w[n+1] - exp(-n C) * polsh(-n) / (-n)^j */
+      GEN c = odd(j)? addrr(gel(w,n+1), S) : subrr(gel(w,n+1), S);
+      affrr(c, gel(w,n)); avma = av2;
+      en = mulrr(en,eC); /* exp(-n C) */
     }
-    avma = av1; F0 = gel(y, ++n);
-    if (n <= nstop) break;
-    affrr(mulrr(e1,e2), e1);
   }
-  if (DEBUGLEVEL>5) err_printf("\n");
-  avma = av; return y;
+  avma = av0; return w;
 }
 
 /* e t_REAL, vector of e^i, 1 <= i <= n */

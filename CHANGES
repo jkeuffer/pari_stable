@@ -99,6 +99,7 @@ BA 19- Port of the program ISOM by Bernt Souvignier for computation of
    11- gmul / gsqr for t_SER with t_INTMOD coefficients: reduce to Z[X] +
        Kronecker substititution (quasi-linear vs. Karatsuba)
    12- Mulders/Hanrot-Zimmerman short products for power series
+HC 13- new mpveceint1 implementation: faster and more precise
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)
