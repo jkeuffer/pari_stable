@@ -74,23 +74,6 @@ get_seadata(ulong ell)
   }
 }
 
-static GEN
-RgV_to_RgX_reverse(GEN x, long v)
-{
-  long j, k, l = lg(x);
-  GEN p;
-
-  for (k = 2; k < l; k++)
-    if (!gequal0(gel(x,k))) break;
-  if (k == l) return pol_0(v);
-  k -= 2;
-  l -= k;
-  x += k;
-  p = cgetg(l+1,t_POL);
-  p[1] = evalsigne(1) | evalvarn(v);
-  for (j=2, k=l; j<=l; j++) gel(p,j) = gel(x,--k);
-  return p;
-}
 /*Builds the modular equation corresponding to the vector list. Shallow */
 static GEN
 list_to_pol(GEN list, long vx, long vy)

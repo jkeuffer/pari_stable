@@ -7322,6 +7322,10 @@ with arbitrary components. Similarly, an \kbd{RgXV} is a \typ{VEC} or
 (normalized) polynomial in variable~\kbd{v} (as \kbd{gtopolyrev}, without
 copy).
 
+\fun{GEN}{RgV_to_RgX_reverse}{GEN x, long v} converts the \kbd{RgV}~\kbd{x}
+to a (normalized) polynomial in variable~\kbd{v} (as \kbd{gtopoly},
+without copy).
+
 \fun{GEN}{RgX_to_RgV}{GEN x, long N} converts the \typ{POL}~\kbd{x} to a
 \typ{COL}~\kbd{v} with \kbd{N} components. Other types than \typ{POL} are
 allowed for \kbd{x}, which is then considered as a constant polynomial.
