@@ -1074,6 +1074,7 @@ mpveceint1(GEN C, GEN eC, long N)
   for (n = 1; n <= N; n++) gel(w,n) = cgetr(prec);
   av0 = avma;
   if (N < Nmin) Nmin = N;
+  if (!eC) eC = mpexp(C);
   en = eC; affrr(incgamcf_0(C, en), gel(w,1));
   for (n = 2; n <= Nmin; n++)
   {
