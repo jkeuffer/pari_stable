@@ -737,6 +737,7 @@ Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
     }
     goto END;
   }
+  if (!mod2(K) && kronecker(a,q) == -1) { avma = av; return 0; }
   L = pt? vectrunc_init(expi(q)+1): NULL;
   u_forprime_init(&S, 2, tridiv_bound(q));
   while ((pp = u_forprime_next(&S)))
@@ -747,8 +748,7 @@ Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
     if (!handle_pe(&a, q, L, K, utoipos(pp), e)) { avma = av; return 0; }
     if (stop)
     {
-      if (!is_pm1(q))
-        if (!handle_pe(&a, q, L, K, q, 1)) { avma = av; return 0; }
+      if (!is_pm1(q) && !handle_pe(&a, q, L, K, q, 1)) { avma = av; return 0; }
       goto END;
     }
   }
@@ -790,9 +790,7 @@ Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
     }
     else
     {
-      GEN part;
-      if (!mod2(K) && kronecker(a,q) == -1) { avma = av; return 0; }
-      part = ifac_start(q, 0);
+      GEN part = ifac_start(q, 0);
       for(;;)
       {
         long e;
