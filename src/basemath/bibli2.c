@@ -830,20 +830,22 @@ binomial(GEN n, long k)
   return gerepileupto(av, y);
 }
 
-/* Assume n >= 1, return bin, bin[k+1] = binomial(n, k) */
+/* Assume n >= 0, return bin, bin[k+1] = binomial(n, k) */
 GEN
 vecbinome(long n)
 {
-  long d = (n + 1)/2, k;
-  GEN C = cgetg(n+2, t_VEC) + 1; /* C[k] = binomial(n, k) */
+  long d, k;
+  GEN C;
+  if (!n) return mkvec(gen_1);
+  C = cgetg(n+2, t_VEC) + 1; /* C[k] = binomial(n, k) */
   gel(C,0) = gen_1;
-  gel(C,1) = utoipos(n);
+  gel(C,1) = utoipos(n); d = (n + 1) >> 1;
   for (k=2; k <= d; k++)
   {
     pari_sp av = avma;
     gel(C,k) = gerepileuptoint(av, diviuexact(mului(n-k+1, gel(C,k-1)), k));
   }
-  for (   ; k <= n; k++) C[k] = C[n - k];
+  for (   ; k <= n; k++) gel(C,k) = gel(C,n-k);
   return C - 1;
 }
 

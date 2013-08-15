@@ -32,6 +32,7 @@ PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [2.6.0, #1430]
    22- factormod(,2) => wrong result [2.6.0, #1451]
    23- dirmul/dirdiv: incorrect result length when valuation > 1
    24- x,y a t_PADIC, x === y always returned 0
+   25- bernpol(0) => memory corruption [#1458]
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the
