@@ -2109,9 +2109,8 @@ ground(GEN x)
       for (i=2; i<lx; i++) gel(y,i) = ground(gel(x,i));
       return normalize(y);
     case t_RFRAC:
-      y = cgetg(3, t_RFRAC);
-      gel(y,1) = ground(gel(x,1));
-      gel(y,2) = ground(gel(x,2)); return y;
+      av = avma;
+      return gerepileupto(av, gdiv(ground(gel(x,1)), ground(gel(x,2))));
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = ground(gel(x,i));

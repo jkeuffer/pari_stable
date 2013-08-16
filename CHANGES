@@ -33,6 +33,7 @@ PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [2.6.0, #1430]
    23- dirmul/dirdiv: incorrect result length when valuation > 1
    24- x,y a t_PADIC, x === y always returned 0
    25- bernpol(0) => memory corruption [#1458]
+   26- round((1e-40+x) / (1e-39+x)) would create the invalid object x/x
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the

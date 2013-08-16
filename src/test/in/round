@@ -1,0 +1,2 @@
+default(realprecision,38);
+round((1e-40 + x) / (1e-39 + x))
