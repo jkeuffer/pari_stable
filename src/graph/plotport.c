@@ -157,7 +157,8 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
   diff = ybig - ysml;
   if (!diff) { ybig += 1; diff= 1.; }
   dyj = ((JSCR-1)*3+2) / diff;
-  jz = 3 - DTOL(ysml*dyj);
+  /* work around bug in gcc-4.8 (32bit): plot(x=-5,5,sin(x)))) */
+  jz = 3 - (long)(ysml*dyj + 0.5); /* 3 - DTOL(ysml*dyj) */
   z = PICTZERO(jz); jz /= 3;
   for (i=1; i<=ISCR; i++, avma = av2)
   {
