@@ -15,4 +15,5 @@ x^2 - 4*x
 [0                                        1]
 
 [[5/3, 21/10], [1, 14/39; 0, 1]]
-Total time spent: 0
+-x^2 + (-y - w)*x + (-y + (w^2 - w))
+Total time spent: 4

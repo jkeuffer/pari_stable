@@ -94,7 +94,11 @@ charpoly(GEN x, long v)
 {
   GEN T, p = NULL;
   if ((T = easychar(x,v))) return T;
-  if (RgM_is_ZM(x)) T = ZM_charpoly(x);
+  if (RgM_is_ZM(x))
+  {
+    T = ZM_charpoly(x);
+    setvarn(T, v);
+  }
   else if (RgM_is_FpM(x, &p) && BPSW_psp(p))
   {
     pari_sp av = avma;
@@ -107,12 +111,13 @@ charpoly(GEN x, long v)
     else
       T = FpM_charpoly(RgM_to_FpM(x, p), p);
     T = gerepileupto(av, FpX_to_mod(T,p));
+    setvarn(T, v);
   }
   else if (isinexact(x))
     T = carhess(x, v);
   else
     T = carberkowitz(x, v);
-  setvarn(T, v); return T;
+  return T;
 }
 
 /* We possibly worked with an "invalid" polynomial p, satisfying
