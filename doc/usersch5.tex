@@ -2656,9 +2656,12 @@ remainder.
 and remainder of the \typ{INT}~\kbd{x} by the \kbd{long}~\kbd{s}. As
 \kbd{sdivss\_rem} otherwise.
 
-\fun{GEN}{diviu_rem}{GEN x, ulong s, long *r} computes the Euclidean quotient
+\fun{GEN}{diviu_rem}{GEN x, ulong s, ulong *r} computes the Euclidean quotient
 and remainder of \emph{absolute value} of the \typ{INT}~\kbd{x} by the
 \kbd{ulong}~\kbd{s}. As \kbd{sdivss\_rem} otherwise.
+
+\fun{ulong}{udiviu_rem}{GEN n, ulong d, ulong *r} as \tet{diviu_rem}, assuming
+that $|n|/d$ fits into an \kbd{ulong}.
 
 \fun{ulong}{udivui_rem}{ulong x, GEN y, ulong *rem}
 computes the Euclidean quotient and remainder of $x$ by $y$. As

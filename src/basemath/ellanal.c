@@ -532,71 +532,65 @@ struct heegner
   ulong rootbnd;
 };
 
-static GEN
-heegner_G(struct heegner *h, GEN n)
+/* assume n / h->rootbnd fits in an ulong */
+static void
+get_baby_giant(struct heegner *h, GEN n, GEN *b, GEN *g)
 {
-  GEN q, G, baby, giant;
-  ulong r;
-  long j,l;
-  if (cmpiu(n, h->rootbnd) <= 0) return gel(h->baby, itou(n));
-  q = diviu_rem(n,h->rootbnd,&r);
-  giant = gel(h->giant, itou(q));
-  if (!r) return giant;
-  baby = gel(h->baby, r);
-  l = lg(baby);
-  G = cgetg(l, t_VEC);
-  for (j = 1; j < l; j++) gel(G, j) = gmul(gel(baby,j), gel(giant,j));
-  return G;
+  ulong r, q = udiviu_rem(n, h->rootbnd, &r);
+  *b = r? gel(h->baby,r): NULL;
+  *g = q? gel(h->giant,q): NULL;
 }
 
 static void
 heegner_L1(void*E, GEN *psum, GEN n, GEN a, long jmax)
 {
-  struct heegner *h = (struct heegner *) E;
   long j, l = lg(*psum);
-  GEN G = heegner_G(h,n);
-  GEN sum = cgetg(l, t_VEC);
+  GEN b, g, sum = cgetg(l, t_VEC);
+  get_baby_giant((struct heegner *)E, n, &b, &g);
   (void)jmax;
   for (j = 1; j < l; j++)
-    gel(sum, j) = addrr(gel(*psum,j), divri(mulir(a, real_i(gel(G,j))), n));
+  {
+    GEN G;
+    if (!b)      G = real_i(gel(g,j));
+    else if (!g) G = real_i(gel(b,j));
+    else G = mulreal(gel(b,j), gel(g,j));
+    gel(sum, j) = addrr(gel(*psum,j), divri(mulir(a, G), n));
+  }
   *psum = sum;
 }
 
+/* Return C, C[i][j] = Q[j]^i, i = 1..nb */
 static GEN
-fillstep(GEN qi, long nb)
+fillstep(GEN Q, long nb)
 {
-  long i, k, np=lg(qi);
-  GEN cache = cgetg(nb+1,t_VEC);
-  gel(cache,1) = qi;
+  long i, k, l = lg(Q);
+  GEN C = cgetg(nb+1,t_VEC);
+  gel(C,1) = Q;
   for (i = 2; i<=nb; ++i)
   {
-    gel(cache,i) = cgetg(np, t_VEC);
-    for (k = 1; k<np; ++k)
-      gmael(cache,i,k) = gmul(gel(qi,k),gmael(cache,i-1,k));
+    gel(C,i) = cgetg(l, t_VEC);
+    for (k = 1; k<l; ++k) gmael(C,i,k) = gmul(gel(Q,k),gmael(C,i-1,k));
   }
-  return cache;
+  return C;
 }
 
+/* ymin a t_REAL */
 static GEN
 heegner_psi(GEN E, GEN N, GEN ymin, GEN points, long bitprec)
 {
   pari_sp av = avma;
   struct heegner h;
   struct bg_data bg;
-  GEN sum, qi;
-  long k, np = lg(points);
-  long prec = nbits2prec(bitprec)+1;
-  GEN bnd = gceil(gdiv(mulsr(bitprec,mplog2(prec)),
-                       gmul(Pi2n(1, prec), ymin)));
-  GEN pim = PiI2(prec);
+  long k, np = lg(points), prec = nbits2prec(bitprec)+1;
+  GEN sum, Q, pi2 = Pi2n(1, prec);
+  GEN bnd = ceilr(divrr(mulur(bitprec,mplog2(DEFAULTPREC)), mulrr(pi2, ymin)));
   gen_BG_init(&bg,E,N,bnd,NULL);
   h.rootbnd = bg.rootbnd + 1;
-  qi = cgetg(np, t_VEC);
-  for (k = 1; k<np; ++k)
-    gel(qi, k) = gexp(gmul(pim, gel(points, k)), prec);
-  h.baby  = fillstep(qi,h.rootbnd);
+  Q = cgetg(np, t_VEC);
+  for (k = 1; k<np; ++k) gel(Q, k) = expIxy(pi2, gel(points, k), prec);
+  h.baby  = fillstep(Q,h.rootbnd);
   h.giant = fillstep(gel(h.baby,h.rootbnd),h.rootbnd);
-  sum = gen_BG_rec(&h, heegner_L1, &bg, real_i(qi));
+  sum = gen_BG_rec(&h, heegner_L1, &bg, real_i(Q));
   return gerepileupto(av, sum);
 }
 

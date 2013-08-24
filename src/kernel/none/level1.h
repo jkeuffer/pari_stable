@@ -629,6 +629,32 @@ udivui_rem(ulong x, GEN y, ulong *r)
   *r = hiremainder; return q;
 }
 
+/* assume d != 0 and |n| / d can be represented as an ulong.
+ * Return |n|/d, set *r = |n| % d */
+INLINE ulong
+udiviu_rem(GEN n, ulong d, ulong *r)
+{
+  switch(lgefint(n))
+  {
+    case 2: *r = 0; return 0;
+    case 3:
+    {
+      ulong nn = n[2];
+      *r = nn % d; return nn / d;
+    }
+    default: /* 4 */
+    {
+      ulong n1, n0, q;
+      LOCAL_HIREMAINDER;
+      n0 = *int_W(n,0);
+      n1 = *int_W(n,1);
+      hiremainder = n1;
+      q = divll(n0, d);
+      *r = hiremainder; return q;
+    }
+  }
+}
+
 INLINE long
 sdivsi_rem(long x, GEN y, long *r)
 {
