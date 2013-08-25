@@ -36,6 +36,9 @@ struct bg_data
 
 typedef void bg_fun(void*el, GEN *psum, GEN n, GEN a, long jmax);
 
+/* a = a_n, where p = bg->pp[i] divides n, and lasta = a_{n/p}.
+ * Call fun(E, psum, N, a_N, 0), for all N, n | N, P^+(N) <= p, a_N != 0,
+ * i.e. assumes that fun accumulates psum += a_N * w(N) */
 static void
 gen_BG_add(void *E, bg_fun *fun, struct bg_data *bg, GEN *psum, GEN n, long i, GEN a, GEN lasta)
 {
@@ -381,7 +384,8 @@ init_Gr(struct ellld *el, long prec)
     el->BG->giant = powruvec(gel(el->BG->baby,bnd), bnd);
     return gel(el->BG->baby, 1);
   }
-  else if (el->r == 1) el->gcache = mpveceint1(el->X, el->eX, el->rootbnd);
+  if (el->r == 1)
+    el->gcache = mpveceint1(el->X, el->eX, el->rootbnd);
   else
   {
     long m, j, l = el->rootbnd;
@@ -396,32 +400,41 @@ init_Gr(struct ellld *el, long prec)
   return gel(el->gcache, 1);
 }
 
-/* m t_INT, returns a t_REAL */
-static GEN
-ellld_G(struct ellld *el, GEN m)
-{
-  if (cmpiu(m, el->rootbnd) <= 0) return gel(el->gcache, itos(m));
-  if (el->r == 1) return mpeint1(mulir(m, el->X), powgi(el->eX,m));
-  return compute_Gr_Sx(el, m, 0); /* r >= 2 */
-}
-
-
-/* el->r<=1 */
-static GEN
-ellld_Gmulti(struct ellld *el, GEN p, long jmax)
-{
-  el->gjcache = mpveceint1(mulir(p,el->X), powgi(el->eX,p), jmax);
-  return gel(el->gjcache, 1);
-}
-
+/* r >= 2; sum += G(n*X) * a_n / n */
 static void
 ellld_L1(void *E, GEN *psum, GEN n, GEN a, long j)
 {
-  struct ellld *el = (struct ellld *) E;
+  struct ellld *el = (struct ellld *)E;
   GEN G;
-  if (j==0 || el->r>=2) G = ellld_G(el, n);
-  else if (j < 0)  G = ellld_Gmulti(el, n, -j);
-  else G = gel(el->gjcache, j);
+  (void)j;
+  if (cmpiu(n, el->rootbnd) <= 0)
+    G = gel(el->gcache, itou(n));
+  else
+    G = compute_Gr_Sx(el, n, 0);
+  *psum = addrr(*psum, divri(mulir(a, G), n));
+}
+/* r = 1; sum += G(n*X) * a_n / n, where G = eint1.
+ * If j < 0, cache values G(n*a*X), 1 <= a <= |j| in gjcache
+ * If j > 0, assume n = N*j and retrieve G(N*j*X), from gjcache */
+static void
+ellld_L1r1(void *E, GEN *psum, GEN n, GEN a, long j)
+{
+  struct ellld *el = (struct ellld *)E;
+  GEN G;
+  if (j==0)
+  {
+    if (cmpiu(n, el->rootbnd) <= 0)
+      G = gel(el->gcache, itou(n));
+    else
+      G = mpeint1(mulir(n,el->X), powgi(el->eX,n));
+  }
+  else if (j < 0)
+  {
+    el->gjcache = mpveceint1(mulir(n,el->X), powgi(el->eX,n), -j);
+    G = gel(el->gjcache, 1);
+  }
+  else
+    G = gel(el->gjcache, j);
   *psum = addrr(*psum, divri(mulir(a, G), n));
 }
 
@@ -475,7 +488,7 @@ ellL1_i(struct ellld *el, struct bg_data *bg, long r, GEN ap, long prec)
   el->rootbnd = bg->rootbnd;
   sum = init_Gr(el, prec);
   if (DEBUGLEVEL>=3) err_printf("el_bnd = %Ps, N=%Ps\n", el->bnd, el->N);
-  sum = gen_BG_rec(el, r?ellld_L1:ellld_L1r0, bg, sum);
+  sum = gen_BG_rec(el, r>=2? ellld_L1: (r==1? ellld_L1r1: ellld_L1r0), bg, sum);
   return mulri(shiftr(sum, 1), mpfact(r));
 }
 
