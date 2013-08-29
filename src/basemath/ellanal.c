@@ -172,14 +172,17 @@ struct ellld {
   GEN E, N; /* ell, conductor */
   GEN bnd; /* t_INT; will need all an for n <= bnd */
   ulong rootbnd; /* floor(sqrt(bnd)) */
-  long r; /* we are comuting L^{(r)}(1) */
+  long r; /* we are computing L^{(r)}(1) */
   GEN X; /* t_REAL, 2Pi / sqrt(N) */
   GEN eX; /* t_REAL, exp(X) */
   GEN emX; /* t_REAL, exp(-X) */
-  GEN gcache, gjcache; /* t_VEC of t_REALs */
+  long epsbit;
+  /* only if r > 1 */
   GEN alpha; /* t_VEC of t_REALs, except alpha[1] = gen_1 */
   GEN A; /* t_VEC of t_REALs, A[1] = 1 */
-  long epsbit;
+  /* only if r = 1 */
+  GEN gcache, gjcache; /* t_VEC of t_REALs */
+  /* only if r = 0 */
   struct babygiant BG[1];
 };
 
@@ -373,8 +376,11 @@ compute_Gr_Sx(struct ellld *el, GEN m, ulong sm)
   return gerepileuptoleaf(av, odd(r)? subrr(p4, p3): subrr(p3, p4));
 }
 
+/* return G_r(X), cache values G(n*X), n < rootbnd.
+ * If r = 0, G(x) = exp(-x), cache Baby/Giant struct in el->BG
+ * If r >= 2, precompute the expansions at 0 and oo of G */
 static GEN
-init_Gr(struct ellld *el, long prec)
+init_G(struct ellld *el, long prec)
 {
   if (el->r == 0)
   {
@@ -486,7 +492,7 @@ ellL1_i(struct ellld *el, struct bg_data *bg, long r, GEN ap, long prec)
   el->bnd = cutoff_point(r, el->X, el->emX, el->epsbit, prec);
   gen_BG_init(bg,el->E,el->N,el->bnd,ap);
   el->rootbnd = bg->rootbnd;
-  sum = init_Gr(el, prec);
+  sum = init_G(el, prec);
   if (DEBUGLEVEL>=3) err_printf("el_bnd = %Ps, N=%Ps\n", el->bnd, el->N);
   sum = gen_BG_rec(el, r>=2? ellld_L1: (r==1? ellld_L1r1: ellld_L1r0), bg, sum);
   return mulri(shiftr(sum, 1), mpfact(r));
