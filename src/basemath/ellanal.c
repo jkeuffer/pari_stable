@@ -552,8 +552,7 @@ ellanalyticrank(GEN e, GEN eps, long prec)
     }
   init_el(&el, e, &rk, prec2nbits(prec)); /* set rk to rank parity (0 or 1) */
   if (DEBUGLEVEL) {
-    err_printf("ellanalyticrank: Rank is %s, eps= % Ps\n",
-                rk == 0? "even": "odd",eps);
+    err_printf("ellanalyticrank: rank is %s, eps=%Ps\n", rk? "odd": "even",eps);
     timer_start(&T);
   }
   av2 = avma;
