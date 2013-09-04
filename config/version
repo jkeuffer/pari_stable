@@ -20,7 +20,7 @@ patchlevel_verbose=
 case "$stat" in # $stat rewritten by config/settar ?
   *git-*) patchlevel_verbose="[ $stat ]";;
   *) if test -d "$TOP/.git"; then
-       vcsversion="git-"`git log -1 --pretty=format:%h`
+       vcsversion=`git describe | sed -e 's/.*-\([0-9]*\)-g\([a-z0-9]*\)$/\1-\2/'`
        status="$stat $vcsversion"
        patchlevel_verbose="[ $status ]"
      fi

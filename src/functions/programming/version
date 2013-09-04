@@ -6,8 +6,8 @@ Help: version(): returns the PARI version as [major,minor,patch] or [major,minor
 Doc: returns the current version number as a \typ{VEC} with three integer
  components (major version number, minor version number and patchlevel);
  if your sources were obtained through our version control system, this will
- be followed by a more precise version string, e.g.~\kbd{git-}\emph{commit
- hash}.
+ be followed by further more precise arguments, including
+ e.g.~a~\kbd{git} \emph{commit hash}.
 
  This function is present in all versions of PARI following releases 2.3.4
  (stable) and 2.4.3 (testing).
@@ -27,16 +27,22 @@ Doc: returns the current version number as a \typ{VEC} with three integer
  \bprog
   %1 = [2, 3, 4]    \\ released version, stable branch
   %1 = [2, 4, 3]    \\ released version, testing branch
-  %1 = [2, 6, 0, "git-2cce227"] \\ development
+  %1 = [2, 6, 0, 240, "fed73f7"] \\ development
  @eprog
 
- In particular the first line of the gp introductory message can be essentially
- emulated by
+ In particular, if you are only working with released versions, the first
+ line of the gp introductory message can be emulated by
  \bprog
-    v = version();
-    n = Str(v[1], ".", v[2], ".", v[3]);
-    s = if (#v > 3, v[4], "");
-    print("GP/PARI CALCULATOR Version ", n, " (", s, ")");
+    [M,m,p] = version();
+    printf("GP/PARI CALCULATOR Version %s.%s.%s", M,m,p);
   @eprog\noindent If you \emph{are} working with many development versions of
-  PARI/GP, the last component can be profitably included in the name of
-  your logfile, for instance.
+  PARI/GP, the 4th and/or 5th components can be profitably included in the
+  name of your logfiles, for instance.
+
+  \misctitle{Technical note} For development versions obtained via \kbd{git},
+  the 4th and 5th components are liable to change eventually, but we document
+  their current meaning for completeness. The 4th component counts the number
+  of commits in the branch since the last tag (as per \kbd{git describe}), and
+  the 5th is the \kbd{git} commit hash. In particular, \kbd{lex} comparison
+  still orders correctly development versions with respect to each others or
+  to released versions!

@@ -102,6 +102,8 @@ BA 19- Port of the program ISOM by Bernt Souvignier for computation of
        Kronecker substititution (quasi-linear vs. Karatsuba)
    12- Mulders/Hanrot-Zimmerman short products for power series
 HC 13- new mpveceint1 implementation: faster and more precise
+   14- version string for development versions: added number of commits since
+       last tag (as per git describe). Affects version() [#1346]
 
   Removed
     1- drop support for "gp -b buffersize" (obsolete since 2.2.10, 04/2005)

@@ -2228,11 +2228,18 @@ pari_version(void)
   minor = n & mask; n >>= PARI_VERSION_SHIFT;
   major = n;
   if (*paricfg_vcsversion) {
-    GEN v = cgetg(5, t_VEC);
+    const char *ver = paricfg_vcsversion;
+    char *s = strchr(ver, '-'), t[8];
+    const long len = s-ver;
+    GEN v;
+    if (!s || len > 6) pari_err_BUG("pari_version()"); /* paranoia */
+    memcpy(t, ver, len); t[len] = 0;
+    v = cgetg(6, t_VEC);
     gel(v,1) = utoi(major);
     gel(v,2) = utoi(minor);
     gel(v,3) = utoi(patch);
-    gel(v,4) = strtoGENstr(paricfg_vcsversion);
+    gel(v,4) = stoi( atoi(t) );
+    gel(v,5) = strtoGENstr(s+1);
     return v;
   } else {
     GEN v = cgetg(4, t_VEC);
