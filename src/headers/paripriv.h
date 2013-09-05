@@ -538,6 +538,10 @@ void    pari_close_files(void);
 int     popinfile(void);
 pariFILE* try_pipe(const char *cmd, int flag);
 
+/* Flxq_log.c */
+
+GEN Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p);
+
 /* FlxqE.c */
 
 GEN     ZpXQ_norm_pcyc(GEN x, GEN T, GEN q, GEN p);
