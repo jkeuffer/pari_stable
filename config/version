@@ -20,9 +20,16 @@ patchlevel_verbose=
 case "$stat" in # $stat rewritten by config/settar ?
   *git-*) patchlevel_verbose="[ $stat ]";;
   *) if test -d "$TOP/.git"; then
-       vcsversion=`git describe | sed -e 's/.*-\([0-9]*\)-g\([a-z0-9]*\)$/\1-\2/'`
-       status="$stat $vcsversion"
-       patchlevel_verbose="[ $status ]"
+       t=`git describe 2>/dev/null`
+       if test -n "$t"; then # else empty: git describe not implemented ?
+         T=`echo $t | sed -e 's/.*-\([0-9]*\)-g\([a-f0-9]*\)$/\1-\2/'`
+         if test $t = $T; then # didn't match, annotated tag: rewrite 0-hash
+           T=0-`git log -1 --pretty=format:%h`
+         fi
+         vcsversion=$T
+         status="$stat $T"
+         patchlevel_verbose="[ $status ]"
+        fi
      fi
 esac
 version=$VersionMajor.$VersionMinor
