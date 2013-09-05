@@ -2196,8 +2196,8 @@ closure11(long EVEN, buildroot *BR)
     if (degpol(r) == 22) return 2; /* D11 */
     h = leafcopy(h); setvarn(h, MAXVARN);
     setvarn(r, 0); r = nffactor(h, r);
-    /* S11 or F_110[11] */
-    return (lgcols(r) == 12)? 4: 8;
+    /* S11 (P10*P10*P90) or F_110[11] (11 factors of degree 10) */
+    return (lgcols(r)-1 == 11)? 4: 8;
   }
 }
 
