@@ -2229,7 +2229,8 @@ pari_version(void)
   major = n;
   if (*paricfg_vcsversion) {
     const char *ver = paricfg_vcsversion;
-    char *s = strchr(ver, '-'), t[8];
+    const char *s = strchr(ver, '-');
+    char t[8];
     const long len = s-ver;
     GEN v;
     if (!s || len > 6) pari_err_BUG("pari_version()"); /* paranoia */
