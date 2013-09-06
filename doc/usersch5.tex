@@ -5612,6 +5612,15 @@ $a\equiv 1 \pmod{4\Z_2[X]}$ if $p=2$.
 
 \fun{GEN}{QpV_to_QV}{GEN v} apply \tet{padic_to_Q_shallow}
 
+\fun{long}{padicprec}{GEN x, GEN p} returns the absolute $p$-adic precision of
+the object $x$, by definition the minimum precision of the components of $x$.
+For a non-zero \typ{PADIC}, this returns \kbd{valp(x) + precp(x)}.
+
+\fun{long}{padicprec_relative}{GEN x} returns the relative $p$-adic
+precision of the \typ{INT}, \typ{FRAC}, or \typ{PADIC} $x$ (minimum precision
+of the components of $x$ for \typ{POL} or vector/matrices).
+For a \typ{PADIC}, this returns \kbd{precp(x)} if $x\neq0$, and $0$ for $x=0$.
+
 \subsec{Conversions involving single precision objects}
 
 \subsubsec{To single precision}
@@ -6063,7 +6072,7 @@ of \kbd{zv}) are equal and $0$ otherwise.
 \fun{int}{RgV_is_ZMV}{GEN x} Assuming \kbd{x} is a \typ{VEC}
 or \typ{COL} return $1$ if its components are \kbd{ZM}, and $0$ otherwise.
 
-\fun{GEN}{ZMV_to_zmv}{GEN z}
+\fun{GEN}{ZMV_to_zmV}{GEN z}
 
 \fun{GEN}{zmV_to_ZMV}{GEN z}
 
@@ -6968,6 +6977,10 @@ algorithm, hence always computes \kbd{sol}.
 
 \fun{GEN}{RgX_modXn_shallow}{GEN x, long n} return $\kbd{x \% } t^n$,
 where $n\geq 0$. Shallow function.
+
+\fun{GEN}{RgX_modXn_eval}{GEN Q, GEN x, long n} special case of
+\tet{RgX_RgXQ_eval}, when the modulus is a monomial:
+returns $\kbd{Q}(\kbd{x})$ modulo $t^n$, where $x \in R[t]$.
 
 \fun{GEN}{RgX_renormalize}{GEN x} remove leading terms in \kbd{x} which are
 equal to (necessarily inexact) zeros.
@@ -8617,6 +8630,10 @@ inputs are \typ{INT}s. Not stack-clean.
 
 \fun{GEN}{truecoeff}{GEN x, long n} returns \kbd{polcoeff0(x,n, -1)}, i.e.
 the coefficient of the term of degree \kbd{n} in the main variable.
+
+\fun{GEN}{polcoeff_i}{GEN x, long n, long v} internal shallow function. Rewrite
+$x$ as a Laurent polynomial in the variable $v$ and returns its coefficient
+of degree $n$. Allow \typ{POL}, \typ{SER}, \typ{RFRAC} and scalars.
 
 \fun{long}{degree}{GEN x} returns \kbd{poldegree(x, -1)}, the degree of
 \kbd{x} with respect to its main variable.
