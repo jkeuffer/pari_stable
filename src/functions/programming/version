@@ -27,7 +27,7 @@ Doc: returns the current version number as a \typ{VEC} with three integer
  \bprog
   %1 = [2, 3, 4]    \\ released version, stable branch
   %1 = [2, 4, 3]    \\ released version, testing branch
-  %1 = [2, 6, 0, 240, "fed73f7"] \\ development
+  %1 = [2, 6, 1, 15174, ""505ab9b"] \\ development
  @eprog
 
  In particular, if you are only working with released versions, the first
@@ -42,7 +42,8 @@ Doc: returns the current version number as a \typ{VEC} with three integer
   \misctitle{Technical note} For development versions obtained via \kbd{git},
   the 4th and 5th components are liable to change eventually, but we document
   their current meaning for completeness. The 4th component counts the number
-  of commits in the branch since the last tag (as per \kbd{git describe}), and
-  the 5th is the \kbd{git} commit hash. In particular, \kbd{lex} comparison
-  still orders correctly development versions with respect to each others or
-  to released versions!
+  of reachable commits in the branch (analogous to \kbd{svn}'s revision
+  number), and the 5th is the \kbd{git} commit hash. In particular, \kbd{lex}
+  comparison still orders correctly development versions with respect to each
+  others or to released versions (provided we stay within a given branch,
+  e.g. \kbd{master})!
