@@ -261,37 +261,68 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   return gerepileupto(ltop, gmul(den, M));
 }
 
-GEN
-roots_to_disc(GEN L, long prec)
-{
-  GEN V = vandermondeinverseprep(L);
-  V = gabs(gprec_w(V, prec), prec);
-  return divide_conquer_prod(V, mpmul);
-}
-
 /* #r = r1 + r2 */
 GEN
-nfroots_to_roots(GEN r, long r1)
+embed_to_roots(GEN ro, long r1)
 {
-  long r2 = lg(r)-1-r1;
+  long r2 = lg(ro)-1-r1;
   GEN L;
-  if (!r2) L = r;
+  if (!r2) L = ro;
   else
   {
     long i,j, N = r1+2*r2;
     L = cgetg(N+1, t_VEC);
-    for (i = 1; i <= r1; i++) gel(L,i) = gel(r,i);
+    for (i = 1; i <= r1; i++) gel(L,i) = gel(ro,i);
     for (j = i; j <= N; i++)
     {
-      gel(L,j++) = gel(r,i);
-      gel(L,j++) = gconj(gel(r,i));
+      GEN z = gel(ro,i);
+      gel(L,j++) = z;
+      gel(L,j++) = mkcomplex(gel(z,1), gneg(gel(z,2)));
     }
   }
   return L;
 }
 GEN
-nfroots_to_disc(GEN L, long r1, long prec)
-{ return roots_to_disc(nfroots_to_roots(L, r1), prec); }
+embed_to_disc(GEN z, long r1, long prec)
+{
+  pari_sp av = avma;
+  GEN t = real_1(prec);
+  long i, j, n = lg(z)-1, r2 = n-r1;
+  for (i = 1; i < r1; i++)
+  {
+    GEN zi = gel(z,i);
+    for (j = i+1; j <= r1; j++) t = gmul(t, gsub(zi, gel(z,j)));
+  }
+  for (j = r1+1; j <= n; j++)
+  {
+    GEN zj = gel(z,j), a = gel(zj,1), b = gel(zj,2), b2 = gsqr(b);
+    for (i = 1; i <= r1; i++)
+    {
+      GEN zi = gel(z,i);
+      t = gmul(t, gadd(gsqr(gsub(zi, a)), b2));
+    }
+    t = gmul(t, b);
+  }
+  if (r2) t = gmul2n(t, r2);
+  if (r2 > 1)
+  {
+    GEN T = real_1(prec);
+    for (i = r1+1; i < n; i++)
+    {
+      GEN zi = gel(z,i), a = gel(zi,1), b = gel(zi,2);
+      for (j = i+1; j <= n; j++)
+      {
+        GEN zj = gel(z,j), c = gel(zj,1), d = gel(zj,2);
+        GEN f = gsqr(gsub(a,c)), g = gsqr(gsub(b,d)), h = gsqr(gadd(b,d));
+        T = gmul(T, gmul(gadd(f,g), gadd(f,h)));
+      }
+    }
+    t = gmul(t, T);
+  }
+  t = gsqr(t);
+  if (odd(r2)) t = gneg(t);
+  return gerepileupto(av, t);
+}
 
 /* Compute bound for the coefficients of automorphisms.
  * T a ZX, dn a t_INT denominator or NULL */
@@ -305,7 +336,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   T = get_nfpol(T, &nf);
   r = nf ? nf_get_roots(nf) : NULL;
   if (nf &&  precision(gel(r, 1)) >= prec)
-    L = nfroots_to_roots(r, nf_get_r1(nf));
+    L = embed_to_roots(r, nf_get_r1(nf));
   else
     L = QX_complex_roots(T, prec);
   if (DEBUGLEVEL>=4) timer_printf(&ti,"roots");

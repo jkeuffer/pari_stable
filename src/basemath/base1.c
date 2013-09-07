@@ -1234,19 +1234,7 @@ get_roots(GEN x, long r1, long prec)
 GEN
 nf_get_allroots(GEN nf)
 {
-  long i, j, n, r1, r2;
-  GEN ro = nf_get_roots(nf), v;
-  nf_get_sign(nf, &r1,&r2);
-  n = r1 + (r2<<1);
-  v = cgetg(n+1, t_VEC);
-  for (i = 1; i <= r1; i++) gel(v,i) = gel(ro,i);
-  for (j = i; j <= n; i++)
-  {
-    GEN z = gel(ro,i);
-    gel(v,j++) = z;
-    gel(v,j++) = mkcomplex(gel(z,1), gneg(gel(z,2)));
-  }
-  return v;
+  return embed_to_roots(nf_get_roots(nf), nf_get_r1(nf));
 }
 
 /* For internal use. compute trace(x mod pol), sym=polsym(pol,deg(pol)-1) */
@@ -2090,7 +2078,7 @@ try_polmin(CG_data *d, nfbasic_t *T, GEN v, long flag, GEN *ai)
   GEN g;
   if (best)
   {
-    ed = expo(nfroots_to_disc(v, d->r1, LOWDEFAULTPREC));
+    ed = expo(embed_to_disc(v, d->r1, LOWDEFAULTPREC));
     avma = av; if (d->expo_best_disc < ed) return NULL;
   }
   else

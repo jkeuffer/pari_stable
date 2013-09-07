@@ -80,7 +80,8 @@ BA 19- Port of the program ISOM by Bernt Souvignier for computation of
        automorphisms and isomorphisms of lattices.
        New GP functions qfauto, qfisom, qfisominit, qfautoexport
    20- [libpari] RgX_mullow, RgX_sqrlow
-   21- [libpari] T2_from_embed, T2_from_embed_norm
+   21- [libpari] T2_from_embed, T2_from_embed_norm, embed_to_roots,
+       embed_to_disc
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form

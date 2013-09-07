@@ -1057,6 +1057,16 @@ restrict to real arithmetic and use
   x = gnorm( RgM_RgC_mul(nf_get_M(nf), algtobasis(nf,v)) );
 @eprog\noindent returns $T_2(v)$.
 
+\fun{GEN}{embed_to_roots}{GEN z, long r1} given a vector $z$ of $r_1+r_2$
+complex embeddings of the algebraic number $v$ (the first $r_1$ components
+being real, the other \typ{COMPLEX}), return the $r_1+2r_2$ roots of its
+characteristic polynomial. Shallow function.
+
+\fun{GEN}{embed_to_disc}{GEN z, long r1, long prec} given a vector $z$ of
+$r_1+r_2$ complex embeddings of the algebraic number $v$, return the
+discriminant of its characteristic polynomial as a \typ{REAL} of precision
+\kbd{prec}.
+
 \subsec{Ideal reduction, low level}
 
 In the following routines \var{nf} is a true \kbd{nf}, associated to a number
