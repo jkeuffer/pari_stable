@@ -1986,13 +1986,53 @@ nfnewprec(GEN nf, long prec)
 GEN
 T2_from_embed_norm(GEN x, long r1)
 {
+  pari_sp av = avma;
   GEN p = RgV_sumpart(x, r1);
   GEN q = RgV_sumpart2(x,r1+1, lg(x)-1);
   if (q != gen_0) p = gadd(p, gmul2n(q,1));
-  return p;
+  return avma == av? gcopy(p): gerepileupto(av, p);
+}
+
+/* simplified version of gnorm for non-complex inputs, without GC */
+static GEN
+real_norm(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_INT:  return sqri(x);
+    case t_REAL: return sqrr(x);
+    case t_FRAC: return sqrfrac(x);
+  }
+  pari_err_TYPE("norm", x);
+  return NULL;
 }
 GEN
-T2_from_embed(GEN x, long r1) { return T2_from_embed_norm(gnorm(x), r1); }
+T2_from_embed(GEN x)
+{
+  pari_sp av = avma;
+  long i, l = lg(x);
+  GEN c, t, s = NULL;
+  c = gel(x,1);
+  if (typ(c) == t_COMPLEX)
+    i = 1;
+  else
+  {
+    s = real_norm(c);
+    for (i = 2; i < l; i++)
+    {
+      c = gel(x,i); if (typ(c) == t_COMPLEX) break;
+      s = gadd(s, real_norm(c));
+    }
+  }
+  if (i < l)
+  {
+    t = cxnorm(c);
+    for (; i < l; i++) t = gadd(t, cxnorm(gel(x,i)));
+    t = gmul2n(t,1);
+    s = s? gadd(s, t): t;
+  }
+  return gerepileupto(av, s);
+}
 
 typedef struct {
   long r1, v, prec;
@@ -2437,7 +2477,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     D[i] = degpol(P);
     if (D[i] == N)
     { /* primitive element */
-      GEN B = T2_from_embed(gel(M,i), r1);
+      GEN B = T2_from_embed(gel(M,i));
       if (!firstprim) firstprim = i; /* index of first primitive element */
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
       if (gcmp(B,bound) < 0) bound = gerepileuptoleaf(av2, B);
@@ -2474,7 +2514,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       GEN e, B;
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
       e = RgM_zc_mul(M, x);
-      B = T2_from_embed(e, r1);
+      B = T2_from_embed(e);
       if (gcmp(B,bound) >= 0) continue;
       P = get_pol(d, e); if (!P) pari_err_PREC( "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
@@ -2577,7 +2617,7 @@ polredabs_aux(nfbasic_t *T, GEN *u)
   CG_data d; chk.data = (void*)&d;
 
   prec = polred_init(T, &F, &d);
-  d.bound = T2_from_embed(F.ro, T->r1);
+  d.bound = T2_from_embed(F.ro);
   if (realprec(d.bound) > prec) d.bound = rtor(d.bound, prec);
   for (;;)
   {

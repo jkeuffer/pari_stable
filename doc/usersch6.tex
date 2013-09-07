@@ -1031,6 +1031,32 @@ may decide to increase the accuracy using \tet{bnfnewprec} (and keep the
 resulting \kbd{bnf}!), or avoid the computation altogether. In any case the
 decision can be taken at the place where it is most likely to be correct.
 
+\subsec{Floating point embeddings, the $T_2$ quadratic form}
+
+We assume the \var{nf} is a true \kbd{nf} structure, associated to a number
+field $K$ of degree $n$ and signature $(r_1,r_2)$. We saw that
+
+\fun{GEN}{nf_get_M}{GEN nf} returns the $(r_1+r_2)\times n$ matrix $M$
+giving the embeddings of $K$, to that if $v$ is an $n$-th dimensional
+\typ{COL} representing the element $\sum_{i=1}^n v[i] w_i$ of $K$, then
+\kbd{RgM\_RgC\_mul(M,v)} represents the embeddings of $v$.
+
+\fun{GEN}{T2_from_embed}{GEN x} assuming $x$ is the
+vector of floating point embeddings of some algebraic number $v$, i.e.
+\bprog
+  x = RgM_RgC_mul(nf_get_M(nf), algtobasis(nf,v));
+@eprog\noindent returns $T_2(v)$. If the floating point embeddings themselves
+are not needed, but only the values of $T_2$, it is more efficient to
+restrict to real arithmetic and use
+\bprog
+  gnorml2( RgM_RgC_mul(nf_get_G(nf), algtobasis(nf,v)));
+@eprog
+
+\fun{GEN}{T2_from_embed_norm}{GEN x, long r1} assuming that
+\bprog
+  x = gnorm( RgM_RgC_mul(nf_get_M(nf), algtobasis(nf,v)) );
+@eprog\noindent returns $T_2(v)$.
+
 \subsec{Ideal reduction, low level}
 
 In the following routines \var{nf} is a true \kbd{nf}, associated to a number

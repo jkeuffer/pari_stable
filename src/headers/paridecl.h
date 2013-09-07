@@ -1256,7 +1256,8 @@ GEN     dirzetak(GEN nf, GEN b);
 /* base1.c */
 
 GEN     FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p);
-GEN     T2_from_embed(GEN x, long r1);
+GEN     T2_from_embed(GEN x);
+GEN     T2_from_embed_norm(GEN x, long r1);
 void    check_ZKmodule(GEN x, const char *s);
 void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);

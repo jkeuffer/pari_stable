@@ -227,7 +227,6 @@ GEN    prodid(GEN nf, GEN I);
 GEN    rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pfi);
 GEN    special_anti_uniformizer(GEN nf, GEN pr);
 GEN    subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
-GEN    T2_from_embed_norm(GEN x, long r1);
 void   testprimes(GEN bnf, GEN bound);
 GEN    to_Fp_simple(GEN nf, GEN x, GEN ffproj);
 GEN    unif_mod_fZ(GEN pr, GEN F);
