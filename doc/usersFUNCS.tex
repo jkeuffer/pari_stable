@@ -482,9 +482,30 @@ These functions are by definition functions whose natural domain of
 definition is either $\Z$ (or $\Z_{>0}$). The way these functions are used is
 completely different from transcendental functions in that there are no
 automatic type conversions: in general only integers are accepted as
-arguments.
+arguments. An integer argument $N$ can be given in the following alternate
+formats:
 
-\subsec{Arithmetic functions and factorization}
+\item \typ{MAT}: its factorization \kbd{fa = factor($N$)},
+
+\item \typ{VEC}: a pair \kbd{[$N$, fa]} giving both the integer and
+  its factorization.
+
+This allows to compute different arithmetic functions at a given $N$
+while factoring the latter only once.
+
+\bprog
+  ? N = 10!; faN = factor(N);
+  ? eulerphi(N)
+  %2 = 829440
+  ? eulerphi(faN)
+  %3 = 829440
+  ? eulerphi(S = [N, faN])
+  %4 = 829440
+  ? sigma(S)
+  %5 = 15334088
+@eprog
+
+\subsec{Arithmetic functions and the factoring engine}
 All arithmetic functions in the narrow sense of the word~--- Euler's
 totient\sidx{Euler totient function} function, the \idx{Moebius} function,
 the sums over divisors or powers of divisors etc.--- call, after trial
@@ -513,7 +534,7 @@ compute discrete logarithms in the same groups (whenever this is meaningful)
 All such functions allow an optional argument specifying an integer
 $N$, representing the order of the group. (The \emph{order} functions also
 allows any non-zero multiple of the order, with a minor loss of efficiency.)
-The meaning of that optional argument is as follows and depends on its type
+That optional argument follows the same format as given above:
 
 \item \typ{INT}: the integer $N$,
 

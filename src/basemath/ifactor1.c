@@ -3292,10 +3292,81 @@ END:
   return f;
 }
 
-INLINE void
+int
+is_Z_factor(GEN f)
+{
+  long i, l;
+  GEN P, E;
+  if (typ(f) != t_MAT || lg(f) != 3) return 0;
+  P = gel(f,1);
+  E = gel(f,2); l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), e = gel(E,i);
+    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
+      return 0;
+  }
+  return 1;
+}
+/* as is_Z_factor, also allow factor(0) */
+static int
+is_Z_factor0(GEN f)
+{
+  long i, l;
+  GEN P, E;
+  if (typ(f) != t_MAT || lg(f) != 3) return 0;
+  P = gel(f,1);
+  E = gel(f,2); l = lg(P);
+  if (l == 2)
+  {
+    GEN p = gel(P,1), e = gel(E,1);
+    long s;
+    if (typ(p) != t_INT || typ(e) != t_INT || signe(e) <= 0) return 0;
+    s = signe(p);
+    return (s > 0) || (!s && is_pm1(e));
+  }
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), e = gel(E,i);
+    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
+      return 0;
+  }
+  return 1;
+}
+
+INLINE GEN
 chk_arith(GEN n, const char *f) {
-  if (typ(n) != t_INT) pari_err_TYPE(f,n);
-  if (!signe(n)) pari_err_DOMAIN(f, "argument", "=", gen_0, gen_0);
+  switch(typ(n))
+  {
+    case t_INT:
+      if (!signe(n)) pari_err_DOMAIN(f, "argument", "=", gen_0, gen_0);
+      return NULL;
+    case t_VEC:
+      if (lg(n) != 3 || typ(gel(n,1)) != t_INT) break;
+      n = gel(n,2); /* fall through */
+    case t_MAT:
+      if (!is_Z_factor(n)) break;
+      return n;
+  }
+  pari_err_TYPE(f,n);
+  return NULL;
+}
+/* as chk_arith, allow n = 0 */
+INLINE GEN
+chk_arith0(GEN n, const char *f) {
+  switch(typ(n))
+  {
+    case t_INT:
+      return NULL;
+    case t_VEC:
+      if (lg(n) != 3 || typ(gel(n,1)) != t_INT) break;
+      n = gel(n,2); /* fall through */
+    case t_MAT:
+      if (!is_Z_factor0(n)) break;
+      return n;
+  }
+  pari_err_TYPE(f,n);
+  return NULL;
 }
 
 long
@@ -3308,7 +3379,7 @@ moebiusu(ulong n)
 
   switch(n)
   {
-    case 0: chk_arith(gen_0,"moebius");/*error*/
+    case 0: (void)chk_arith(gen_0,"moebius");/*error*/
     case 1: return  1;
     case 2: return -1;
   }
@@ -3356,11 +3427,19 @@ long
 moebius(GEN n)
 {
   pari_sp av = avma;
+  GEN F;
   ulong p;
   long i, l, s, v;
   forprime_t S;
 
-  chk_arith(n,"moebius");
+  if ((F = chk_arith(n,"moebius")))
+  {
+    GEN E = gel(F,2);
+    l = lg(E);
+    for(i = 1; i < l; i++)
+      if (!equali1(gel(E,1))) return 0;
+    return odd(l)? 1: -1;
+  }
   if (lgefint(n) == 3) return moebiusu(n[2]);
   p = mod4(n); if (!p) return 0;
   if (p == 2) { s = -1; n = shifti(n, -1); } else { s = 1; n = icopy(n); }
@@ -3399,11 +3478,22 @@ long
 ispowerful(GEN n)
 {
   pari_sp av = avma;
+  GEN F;
   ulong p;
   long i, l, v;
   forprime_t S;
 
-  if (typ(n) != t_INT) pari_err_TYPE("ispowerful",n);
+  if ((F = chk_arith0(n, "ispowerful")))
+  {
+    GEN p, P = gel(F,1), E = gel(F,2);
+    if (lg(P) == 1) return 1; /* 1 */
+    p = gel(P,1);
+    if (!signe(p)) return 1; /* 0 */
+    l = lg(E);
+    for (i = 1; i < l; i++)
+      if (equali1(gel(E,i))) return 0;
+    return 1;
+  }
   if (!signe(n)) return 1;
 
   if (mod4(n) == 2) return 0;
@@ -3460,12 +3550,23 @@ GEN
 core(GEN n)
 {
   pari_sp av = avma;
-  GEN m;
+  GEN m, F;
   ulong p;
   long i, l, v;
   forprime_t S;
 
-  if (typ(n) != t_INT) pari_err_TYPE("core",n);
+  if ((F = chk_arith0(n, "core")))
+  {
+    GEN p, x, P = gel(F,1), E = gel(F,2);
+    long j = 1;
+    if (lg(P) == 1) return gen_1;
+    p = gel(P,1);
+    if (!signe(p)) return gen_0;
+    l = lg(P); x = cgetg(l, t_VEC);
+    for (i = 1; i < l; i++)
+      if (mpodd(gel(E,i))) gel(x,j++) = gel(P,i);
+    setlg(x, j); return ZV_prod(x);
+  }
   switch(lgefint(n))
   {
     case 2: return gen_0;
@@ -3554,8 +3655,8 @@ omega(GEN n)
 {
   pari_sp av = avma;
   GEN F, P;
-  chk_arith(n,"omega");
-  if (lgefint(n) == 3)
+  if ((F = chk_arith(n,"omega"))) {}
+  else if (lgefint(n) == 3)
   {
     if (n[2] == 1) return 0;
     F = factoru(n[2]);
@@ -3565,23 +3666,23 @@ omega(GEN n)
   P = gel(F,1); avma = av; return lg(P)-1;
 }
 
+static GEN
+bigomega_aux(GEN F) { return ZV_to_zv(gel(F,2)); }
 long
 bigomega(GEN n)
 {
   pari_sp av = avma;
   GEN F, E;
-  chk_arith(n,"bigomega");
-  if (lgefint(n) == 3)
+  if ((F = chk_arith(n,"bigomega")))
+    E = bigomega_aux(F);
+  else if (lgefint(n) == 3)
   {
     if (n[2] == 1) return 0;
     F = factoru(n[2]);
     E = gel(F,2);
   }
   else
-  {
-    F = absi_factor(n);
-    E = ZV_to_zv(gel(F,2));
-  }
+    E = bigomega_aux(absi_factor(n));
   avma = av; return zv_sum(E);
 }
 
@@ -3620,9 +3721,10 @@ eulerphi(GEN n)
   GEN F, P, E;
   long i, l;
 
-  chk_arith(n,"eulerphi");
-  if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
-  F = absi_factor(n);
+  if ((F = chk_arith(n,"eulerphi"))) {}
+  else if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
+  else
+    F = absi_factor(n);
   P = gel(F,1);
   E = gel(F,2); l = lg(P);
   for (i = 1; i < l; i++)
@@ -3636,14 +3738,24 @@ eulerphi(GEN n)
   return gerepileuptoint(av, ZV_prod(P));
 }
 
+static GEN
+numdiv_aux(GEN F)
+{
+  GEN x, E = gel(F,2);
+  long i, l = lg(E);
+  x = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = itou(gel(E,i))+1;
+  return x;
+}
 GEN
 numdiv(GEN n)
 {
   pari_sp av = avma;
   GEN F, E;
   long i, l;
-  chk_arith(n,"numdiv");
-  if (lgefint(n) == 3)
+  if ((F = chk_arith(n,"numdiv")))
+    E = numdiv_aux(F);
+  else if (lgefint(n) == 3)
   {
     if (n[2] == 1) return gen_1;
     F = factoru(n[2]);
@@ -3651,14 +3763,19 @@ numdiv(GEN n)
     for (i=1; i<l; i++) E[i]++;
   }
   else
-  {
-    F = absi_factor(n);
-    E = gel(F,2); l = lg(E);
-    for (i=1; i<l; i++) E[i] = gel(E,i)[2] + 1;
-  }
+    E = numdiv_aux(absi_factor(n));
   return gerepileuptoint(av, zv_prod_Z(E));
 }
 
+static GEN
+sumdiv_aux(GEN F)
+{
+  GEN x, P = gel(F,1), E = gel(F,2);
+  long i, l = lg(P);
+  x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = euler_sumdiv(gel(P,i), itou(gel(E,i)));
+  return x;
+}
 GEN
 sumdiv(GEN n)
 {
@@ -3666,26 +3783,30 @@ sumdiv(GEN n)
   GEN F, P, E;
   long i, l;
 
-  chk_arith(n,"sumdiv");
-  if (lgefint(n) == 3)
+  if ((F = chk_arith(n,"sumdiv")))
+    P = sumdiv_aux(F);
+  else if (lgefint(n) == 3)
   {
     if (n[2] == 1) return gen_1;
     F = factoru(n[2]);
     P = gel(F,1);
     E = gel(F,2); l = lg(P);
     for (i=1; i<l; i++) gel(P,i) = u_euler_sumdiv(P[i], E[i]);
-    return gerepileuptoint(av, ZV_prod(P));
   }
   else
-  {
-    F = absi_factor(n);
-    P = gel(F,1);
-    E = gel(F,2); l = lg(P);
-    for (i=1; i<l; i++) gel(P,i) = euler_sumdiv(gel(P,i), gel(E,i)[2]);
-    return gerepileuptoint(av, ZV_prod(P));
-  }
+    P = sumdiv_aux(absi_factor(n));
+  return gerepileuptoint(av, ZV_prod(P));
 }
 
+static GEN
+sumdivk_aux(GEN F, long k)
+{
+  GEN x, P = gel(F,1), E = gel(F,2);
+  long i, l = lg(P);
+  x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = euler_sumdivk(gel(P,i), gel(E,i)[2], k);
+  return x;
+}
 GEN
 sumdivk(GEN n, long k)
 {
@@ -3696,10 +3817,11 @@ sumdivk(GEN n, long k)
   if (!k) return numdiv(n);
   if (k == 1) return sumdiv(n);
   if (k ==-1) return gerepileupto(av, gdiv(sumdiv(n), n));
-  chk_arith(n,"sumdivk");
   k1 = k;
   if (k < 0)  k = -k;
-  if (lgefint(n) == 3)
+  if ((F = chk_arith(n,"sumdivk")))
+    P = sumdivk_aux(F,k);
+  else if (lgefint(n) == 3)
   {
     if (n[2] == 1) return gen_1;
     F = factoru(n[2]);
@@ -3708,12 +3830,7 @@ sumdivk(GEN n, long k)
     for (i=1; i<l; i++) gel(P,i) = u_euler_sumdivk(P[i], E[i], k);
   }
   else
-  {
-    F = absi_factor(n);
-    P = gel(F,1);
-    E = gel(F,2); l = lg(P);
-    for (i=1; i<l; i++) gel(P,i) = euler_sumdivk(gel(P,i), gel(E,i)[2], k);
-  }
+    P = sumdivk_aux(absi_factor(n), k);
   P = ZV_prod(P);
   if (k1 > 0) return gerepileuptoint(av, P);
   return gerepileupto(av, gdiv(P, powiu(n,k)));
@@ -3990,7 +4107,8 @@ ifac_next(GEN *part, GEN *p, long *e)
 GEN
 factorint(GEN n, long flag)
 {
-  if (typ(n) != t_INT) pari_err_TYPE("factorint",n);
+  GEN F;
+  if ((F = chk_arith0(n,"factorint"))) return gcopy(F);
   return ifactor(n,0,flag);
 }
 
@@ -4012,24 +4130,6 @@ Z_factor(GEN n)
 GEN
 absi_factor(GEN n)
 { return ifactor_sign(n, 0, decomp_default_hint, signe(n)? 1: 0); }
-
-
-int
-is_Z_factor(GEN f)
-{
-  long i, l;
-  GEN P, E;
-  if (typ(f) != t_MAT || lg(f) != 3) return 0;
-  P = gel(f,1);
-  E = gel(f,2); l = lg(P);
-  for (i = 1; i < l; i++)
-  {
-    GEN p = gel(P,i), e = gel(E,i);
-    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
-      return 0;
-  }
-  return 1;
-}
 
 /* Factor until the unfactored part is smaller than limit. Return the
  * factored part. Hence factorback(output) may be smaller than n */

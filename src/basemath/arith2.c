@@ -791,6 +791,11 @@ core2_i(GEN n)
 {
   GEN f = core(n);
   if (!signe(f)) return mkvec2(gen_0, gen_1);
+  switch(typ(n))
+  {
+    case t_VEC: n = gel(n,1); break;
+    case t_MAT: n = factorback(n); break;
+  }
   return mkvec2(f, sqrtint(diviiexact(n, f)));
 }
 GEN

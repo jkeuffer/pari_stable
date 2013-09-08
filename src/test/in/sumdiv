@@ -8,6 +8,22 @@ sumdivmult(n, d, d^2)
 sumdivmult(fa, d, eulerphi(d))
 sumdivmult(fa, d, d^2)
 
+sigma2(x) = sigma(x,2);
+sigma3(x) = sigma(x,3);
+core2(x) = core(x,1);
+fun = [ispowerful, moebius, core, core2, omega, bigomega, eulerphi, numdiv, sigma, sigma2, sigma3];
+for(i=1,#fun, print(fun[i](fa)))
+
+fa = factor(1);
+for(i=1,#fun, print(fun[i](fa)))
+
+fa = factor(0);
+ispowerful(fa)
+core(fa)
+core2(fa)
+
+core2([10!, factor(10!)])
+
 n = x^2*(x+1)^3*(x+2)^5; fa = factor(n);
 sumdiv(n, d, d)
 sumdiv(fa, d, d)
