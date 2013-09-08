@@ -125,7 +125,7 @@ reducebetanaive(GEN bnfz, GEN be, long ell, GEN elllogfu)
   b = gprec_w(gnorm(b), DEFAULTPREC); /* need little precision */
   gel(z,1) = shallowconcat(c, vecinv(c));
   for (k=2; k<=n; k++) gel(z,k) = vecmul(gel(z,1), gel(z,k-1));
-  nmax = T2_from_embed_norm(b, r1);
+  nmax = embednorm_T2(b, r1);
   ru = lg(c)-1; c = zerovec(ru);
   for(;;)
   {
@@ -137,9 +137,9 @@ reducebetanaive(GEN bnfz, GEN be, long ell, GEN elllogfu)
       for (i=1; i<=ru; i++)
       {
         GEN v, t;
-        v = vecmul(b, gel(zk,i));    t = T2_from_embed_norm(v,r1);
+        v = vecmul(b, gel(zk,i));    t = embednorm_T2(v,r1);
         if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk = k; continue; }
-        v = vecmul(b, gel(zk,i+ru)); t = T2_from_embed_norm(v,r1);
+        v = vecmul(b, gel(zk,i+ru)); t = embednorm_T2(v,r1);
         if (gcmp(t,nmax) < 0) { B=v; nmax=t; besti=i; bestk =-k; }
       }
     }

@@ -1234,7 +1234,7 @@ get_roots(GEN x, long r1, long prec)
 GEN
 nf_get_allroots(GEN nf)
 {
-  return embed_to_roots(nf_get_roots(nf), nf_get_r1(nf));
+  return embed_roots(nf_get_roots(nf), nf_get_r1(nf));
 }
 
 /* For internal use. compute trace(x mod pol), sym=polsym(pol,deg(pol)-1) */
@@ -1972,7 +1972,7 @@ nfnewprec(GEN nf, long prec)
 /**                                                                **/
 /********************************************************************/
 GEN
-T2_from_embed_norm(GEN x, long r1)
+embednorm_T2(GEN x, long r1)
 {
   pari_sp av = avma;
   GEN p = RgV_sumpart(x, r1);
@@ -1995,7 +1995,7 @@ real_norm(GEN x)
   return NULL;
 }
 GEN
-T2_from_embed(GEN x)
+embed_T2(GEN x)
 {
   pari_sp av = avma;
   long i, l = lg(x);
@@ -2078,7 +2078,7 @@ try_polmin(CG_data *d, nfbasic_t *T, GEN v, long flag, GEN *ai)
   GEN g;
   if (best)
   {
-    ed = expo(embed_to_disc(v, d->r1, LOWDEFAULTPREC));
+    ed = expo(embed_disc(v, d->r1, LOWDEFAULTPREC));
     avma = av; if (d->expo_best_disc < ed) return NULL;
   }
   else
@@ -2465,7 +2465,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     D[i] = degpol(P);
     if (D[i] == N)
     { /* primitive element */
-      GEN B = T2_from_embed(gel(M,i));
+      GEN B = embed_T2(gel(M,i));
       if (!firstprim) firstprim = i; /* index of first primitive element */
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
       if (gcmp(B,bound) < 0) bound = gerepileuptoleaf(av2, B);
@@ -2502,7 +2502,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       GEN e, B;
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
       e = RgM_zc_mul(M, x);
-      B = T2_from_embed(e);
+      B = embed_T2(e);
       if (gcmp(B,bound) >= 0) continue;
       P = get_pol(d, e); if (!P) pari_err_PREC( "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
@@ -2605,7 +2605,7 @@ polredabs_aux(nfbasic_t *T, GEN *u)
   CG_data d; chk.data = (void*)&d;
 
   prec = polred_init(T, &F, &d);
-  d.bound = T2_from_embed(F.ro);
+  d.bound = embed_T2(F.ro);
   if (realprec(d.bound) > prec) d.bound = rtor(d.bound, prec);
   for (;;)
   {

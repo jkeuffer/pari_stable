@@ -1037,12 +1037,14 @@ We assume the \var{nf} is a true \kbd{nf} structure, associated to a number
 field $K$ of degree $n$ and signature $(r_1,r_2)$. We saw that
 
 \fun{GEN}{nf_get_M}{GEN nf} returns the $(r_1+r_2)\times n$ matrix $M$
-giving the embeddings of $K$, to that if $v$ is an $n$-th dimensional
+giving the embeddings of $K$, so that if $v$ is an $n$-th dimensional
 \typ{COL} representing the element $\sum_{i=1}^n v[i] w_i$ of $K$, then
-\kbd{RgM\_RgC\_mul(M,v)} represents the embeddings of $v$.
+\kbd{RgM\_RgC\_mul(M,v)} represents the embeddings of $v$. Its first $r_1$
+components are real numbers (\typ{INT}, \typ{FRAC} or \typ{REAL}, usually the
+latter), and the last $r_2$ are \typ{COMPLEX}.
 
-\fun{GEN}{T2_from_embed}{GEN x} assuming $x$ is the
-vector of floating point embeddings of some algebraic number $v$, i.e.
+\fun{GEN}{embed_T2}{GEN x} assuming $x$ is the vector of floating point
+embeddings of some algebraic number $v$, i.e.
 \bprog
   x = RgM_RgC_mul(nf_get_M(nf), algtobasis(nf,v));
 @eprog\noindent returns $T_2(v)$. If the floating point embeddings themselves
@@ -1052,20 +1054,24 @@ restrict to real arithmetic and use
   gnorml2( RgM_RgC_mul(nf_get_G(nf), algtobasis(nf,v)));
 @eprog
 
-\fun{GEN}{T2_from_embed_norm}{GEN x, long r1} assuming that
+\fun{GEN}{embednorm_T2}{GEN x, long r1} analogous to \tet{embed_T2},
+applied to the \kbd{gnorm} of the floating point embeddings. Assuming that
 \bprog
   x = gnorm( RgM_RgC_mul(nf_get_M(nf), algtobasis(nf,v)) );
 @eprog\noindent returns $T_2(v)$.
 
-\fun{GEN}{embed_to_roots}{GEN z, long r1} given a vector $z$ of $r_1+r_2$
-complex embeddings of the algebraic number $v$ (the first $r_1$ components
-being real, the other \typ{COMPLEX}), return the $r_1+2r_2$ roots of its
-characteristic polynomial. Shallow function.
+\fun{GEN}{embed_roots}{GEN z, long r1} given a vector $z$ of $r_1+r_2$
+complex embeddings of the algebraic number $v$, return the $r_1+2r_2$ roots
+of its characteristic polynomial. Shallow function.
 
-\fun{GEN}{embed_to_disc}{GEN z, long r1, long prec} given a vector $z$ of
-$r_1+r_2$ complex embeddings of the algebraic number $v$, return the
-discriminant of its characteristic polynomial as a \typ{REAL} of precision
-\kbd{prec}.
+\fun{GEN}{embed_disc}{GEN z, long r1, long prec} given a vector $z$ of
+$r_1+r_2$ complex embeddings of the algebraic number $v$, return a floating
+point approximation of the discriminant of its characteristic polynomial as a
+\typ{REAL} of precision \kbd{prec}.
+
+\fun{GEN}{embed_norm}{long r1, GEN x} given a vector $z$ of $r_1+r_2$ complex
+embeddings of the algebraic number $v$, return (a floating point approximation
+of) the norm of $v$.
 
 \subsec{Ideal reduction, low level}
 

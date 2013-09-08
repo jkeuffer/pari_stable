@@ -842,7 +842,7 @@ factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 {
   long e, r1 = nf_get_r1(nf);
   GEN M = nf_get_M(nf);
-  GEN N = divri(norm_by_embed(r1, RgM_RgC_mul(M,m)), NI); /* ~ N(m/I) */
+  GEN N = divri(embed_norm(r1, RgM_RgC_mul(M,m)), NI); /* ~ N(m/I) */
   N = grndtoi(N, &e);
   if (e > -1)
   {
@@ -2481,7 +2481,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
       GEN Nx, xembed = RgM_RgC_mul(M, gx);
       long e;
       if (nbsmallnorm) (*nbsmallnorm)++;
-      Nx = grndtoi(norm_by_embed(R1,xembed), &e);
+      Nx = grndtoi(embed_norm(R1,xembed), &e);
       if (e >= 0) {
         if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
         continue;

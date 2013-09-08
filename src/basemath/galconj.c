@@ -263,7 +263,7 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
 
 /* #r = r1 + r2 */
 GEN
-embed_to_roots(GEN ro, long r1)
+embed_roots(GEN ro, long r1)
 {
   long r2 = lg(ro)-1-r1;
   GEN L;
@@ -283,7 +283,7 @@ embed_to_roots(GEN ro, long r1)
   return L;
 }
 GEN
-embed_to_disc(GEN z, long r1, long prec)
+embed_disc(GEN z, long r1, long prec)
 {
   pari_sp av = avma;
   GEN t = real_1(prec);
@@ -336,7 +336,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   T = get_nfpol(T, &nf);
   r = nf ? nf_get_roots(nf) : NULL;
   if (nf &&  precision(gel(r, 1)) >= prec)
-    L = embed_to_roots(r, nf_get_r1(nf));
+    L = embed_roots(r, nf_get_r1(nf));
   else
     L = QX_complex_roots(T, prec);
   if (DEBUGLEVEL>=4) timer_printf(&ti,"roots");

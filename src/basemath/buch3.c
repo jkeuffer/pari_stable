@@ -715,7 +715,7 @@ regulatorbound(GEN bnf)
 
 /* x given by its embeddings */
 GEN
-norm_by_embed(long r1, GEN x)
+embed_norm(long r1, GEN x)
 {
   long ru = lg(x)-1, i = ru-1;
   GEN p = gel(x,ru);
@@ -732,7 +732,7 @@ static int
 is_unit(GEN M, long r1, GEN x)
 {
   pari_sp av = avma;
-  GEN Nx = ground( norm_by_embed(r1, RgM_zc_mul(M,x)) );
+  GEN Nx = ground( embed_norm(r1, RgM_zc_mul(M,x)) );
   int ok = is_pm1(Nx);
   avma = av; return ok;
 }

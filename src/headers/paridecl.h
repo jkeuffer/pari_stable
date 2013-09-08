@@ -1256,8 +1256,9 @@ GEN     dirzetak(GEN nf, GEN b);
 /* base1.c */
 
 GEN     FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p);
-GEN     T2_from_embed(GEN x);
-GEN     T2_from_embed_norm(GEN x, long r1);
+GEN     embed_T2(GEN x);
+GEN     embednorm_T2(GEN x, long r1);
+GEN     embed_norm(long r1, GEN x);
 void    check_ZKmodule(GEN x, const char *s);
 void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);
@@ -2088,8 +2089,8 @@ GEN     p_to_FF(GEN p, long v);
 
 GEN     checkgal(GEN gal);
 GEN     checkgroup(GEN g, GEN *S);
-GEN     embed_to_disc(GEN r, long r1, long prec);
-GEN     embed_to_roots(GEN r, long r1);
+GEN     embed_disc(GEN r, long r1, long prec);
+GEN     embed_roots(GEN r, long r1);
 GEN     galois_group(GEN gal);
 GEN     galoisconj(GEN nf, GEN d);
 GEN     galoisconj0(GEN nf, long flag, GEN d, long prec);

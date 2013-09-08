@@ -220,7 +220,6 @@ GEN    maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 GEN    nf_deg1_prime(GEN nf);
 GEN    nfpol_to_Flx(GEN nf, GEN pol, ulong *ptp);
 GEN    nfroots_split(GEN nf, GEN pol);
-GEN    norm_by_embed(long r1, GEN x);
 GEN    pidealprimeinv(GEN nf, GEN x);
 GEN    primedec_apply_kummer(GEN nf,GEN pol,long e,GEN p);
 GEN    prodid(GEN nf, GEN I);

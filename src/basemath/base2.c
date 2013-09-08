@@ -2122,7 +2122,7 @@ indexpartial(GEN T, GEN DT)
 /* to compute norm of elt in basis form */
 typedef struct {
   long r1;
-  GEN M;  /* via norm_by_embed */
+  GEN M;  /* via embed_norm */
 
   GEN D, w, T; /* via resultant if M = NULL */
 } norm_S;
@@ -2133,7 +2133,7 @@ get_norm(norm_S *S, GEN a)
   if (S->M)
   {
     long e;
-    GEN N = grndtoi( norm_by_embed(S->r1, RgM_RgC_mul(S->M, a)), &e );
+    GEN N = grndtoi( embed_norm(S->r1, RgM_RgC_mul(S->M, a)), &e );
     if (e > -5) pari_err_PREC( "get_norm");
     return N;
   }
@@ -2156,7 +2156,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
     GEN M = nf_get_M(nf);
     long ex = gexpo(M) + gexpo(mului(8 * N, p));
     if (N * ex <= prec2nbits(gprecision(M)))
-    { /* enough prec to use norm_by_embed */
+    { /* enough prec to use embed_norm */
       S->M = M;
       S->r1 = nf_get_r1(nf);
     }
