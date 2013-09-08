@@ -2133,7 +2133,7 @@ get_norm(norm_S *S, GEN a)
   if (S->M)
   {
     long e;
-    GEN N = grndtoi( embed_norm(S->r1, RgM_RgC_mul(S->M, a)), &e );
+    GEN N = grndtoi( embed_norm(RgM_RgC_mul(S->M, a), S->r1), &e );
     if (e > -5) pari_err_PREC( "get_norm");
     return N;
   }
@@ -2146,8 +2146,8 @@ init_norm(norm_S *S, GEN nf, GEN p)
   GEN T = nf_get_pol(nf);
   long N = degpol(T);
 
+  S->r1 = nf_get_r1(nf);
   S->M = NULL; /* -Wall */
-  S->r1 = 0;   /* -Wall */
   S->D = NULL; /* -Wall */
   S->w = NULL; /* -Wall */
   S->T = NULL; /* -Wall */
@@ -2155,11 +2155,8 @@ init_norm(norm_S *S, GEN nf, GEN p)
   {
     GEN M = nf_get_M(nf);
     long ex = gexpo(M) + gexpo(mului(8 * N, p));
-    if (N * ex <= prec2nbits(gprecision(M)))
-    { /* enough prec to use embed_norm */
-      S->M = M;
-      S->r1 = nf_get_r1(nf);
-    }
+    /* enough prec to use embed_norm */
+    if (N * ex <= prec2nbits(gprecision(M))) S->M = M;
   }
   if (!S->M)
   {

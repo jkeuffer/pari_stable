@@ -1981,7 +1981,7 @@ embednorm_T2(GEN x, long r1)
   return avma == av? gcopy(p): gerepileupto(av, p);
 }
 
-/* simplified version of gnorm for non-complex inputs, without GC */
+/* simplified version of gnorm for scalar, non-complex inputs, without GC */
 static GEN
 real_norm(GEN x)
 {
@@ -1991,34 +1991,56 @@ real_norm(GEN x)
     case t_REAL: return sqrr(x);
     case t_FRAC: return sqrfrac(x);
   }
-  pari_err_TYPE("norm", x);
+  pari_err_TYPE("real_norm", x);
   return NULL;
 }
+/* simplified version of gnorm, without GC */
+static GEN
+complex_norm(GEN x)
+{
+  return typ(x) == t_COMPLEX? cxnorm(x): real_norm(x);
+}
+/* return T2(x), argument r1 needed in case x has components whose type
+ * is unexpected, e.g. all of them t_INT for embed(gen_1) */
 GEN
-embed_T2(GEN x)
+embed_T2(GEN x, long r1)
 {
   pari_sp av = avma;
   long i, l = lg(x);
-  GEN c, t, s = NULL;
-  c = gel(x,1);
-  if (typ(c) == t_COMPLEX)
-    i = 1;
-  else
+  GEN c, s = NULL, t = NULL;
+  if (typ(gel(x,1)) == t_INT) return muliu(gel(x,1), 2*(l-1)-r1);
+  for (i = 1; i <= r1; i++)
   {
-    s = real_norm(c);
-    for (i = 2; i < l; i++)
-    {
-      c = gel(x,i); if (typ(c) == t_COMPLEX) break;
-      s = gadd(s, real_norm(c));
-    }
+    c = real_norm(gel(x,i));
+    s = s? gadd(s, c): c;
   }
-  if (i < l)
+  for (; i < l; i++)
   {
-    t = cxnorm(c);
-    for (; i < l; i++) t = gadd(t, cxnorm(gel(x,i)));
-    t = gmul2n(t,1);
-    s = s? gadd(s, t): t;
+    c = complex_norm(gel(x,i));
+    t = t? gadd(t, c): c;
   }
+  if (t) { t = gmul2n(t,1); s = s? gadd(s,t): t; }
+  return gerepileupto(av, s);
+}
+/* return N(x) */
+GEN
+embed_norm(GEN x, long r1)
+{
+  pari_sp av = avma;
+  long i, l = lg(x);
+  GEN c, s = NULL, t = NULL;
+  if (typ(gel(x,1)) == t_INT) return powiu(gel(x,1), 2*(l-1)-r1);
+  for (i = 1; i <= r1; i++)
+  {
+    c = gel(x,i);
+    s = s? gmul(s, c): c;
+  }
+  for (; i < l; i++)
+  {
+    c = complex_norm(gel(x,i));
+    t = t? gmul(t, c): c;
+  }
+  if (t) s = s? gmul(s,t): t;
   return gerepileupto(av, s);
 }
 
@@ -2465,7 +2487,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     D[i] = degpol(P);
     if (D[i] == N)
     { /* primitive element */
-      GEN B = embed_T2(gel(M,i));
+      GEN B = embed_T2(gel(M,i), r1);
       if (!firstprim) firstprim = i; /* index of first primitive element */
       if (DEBUGLEVEL>2) err_printf("chk_gen_init: generator %Ps\n",P);
       if (gcmp(B,bound) < 0) bound = gerepileuptoleaf(av2, B);
@@ -2502,7 +2524,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       GEN e, B;
       for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
       e = RgM_zc_mul(M, x);
-      B = embed_T2(e);
+      B = embed_T2(e, r1);
       if (gcmp(B,bound) >= 0) continue;
       P = get_pol(d, e); if (!P) pari_err_PREC( "chk_gen_init");
       if (!ZX_is_squarefree(P)) continue;
@@ -2605,7 +2627,7 @@ polredabs_aux(nfbasic_t *T, GEN *u)
   CG_data d; chk.data = (void*)&d;
 
   prec = polred_init(T, &F, &d);
-  d.bound = embed_T2(F.ro);
+  d.bound = embed_T2(F.ro, d.r1);
   if (realprec(d.bound) > prec) d.bound = rtor(d.bound, prec);
   for (;;)
   {

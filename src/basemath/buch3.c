@@ -713,26 +713,11 @@ regulatorbound(GEN bnf)
   return gmax(p1, dbltor(0.2));
 }
 
-/* x given by its embeddings */
-GEN
-embed_norm(long r1, GEN x)
-{
-  long ru = lg(x)-1, i = ru-1;
-  GEN p = gel(x,ru);
-  if (r1 != ru)
-  {
-    p = gnorm(p);
-    for (; i>r1; i--) p = gmul(p, gnorm(gel(x,i)));
-  }
-  for (; i>0; i--) p = gmul(p, gel(x,i));
-  return p;
-}
-
 static int
 is_unit(GEN M, long r1, GEN x)
 {
   pari_sp av = avma;
-  GEN Nx = ground( embed_norm(r1, RgM_zc_mul(M,x)) );
+  GEN Nx = ground( embed_norm(RgM_zc_mul(M,x), r1) );
   int ok = is_pm1(Nx);
   avma = av; return ok;
 }
@@ -742,7 +727,7 @@ static GEN
 minimforunits(GEN nf, long BORNE, ulong w)
 {
   const long prec = MEDDEFAULTPREC;
-  long n, i, j, k, s, *x, r1, cnt = 0;
+  long n, r1, i, j, k, s, *x, cnt = 0;
   pari_sp av = avma;
   GEN u, r, M;
   double p, norme, normin, normax;
@@ -755,7 +740,7 @@ minimforunits(GEN nf, long BORNE, ulong w)
     if (DEBUGLEVEL>2) err_printf("   BOUND = %ld\n",BORNE);
     err_flush();
   }
-  r1 = nf_get_r1(nf); n = nf_get_degree(nf);
+  n = nf_get_degree(nf); r1 = nf_get_r1(nf);
   minim_alloc(n+1, &q, &x, &y, &z, &v);
   M = gprec_w(nf_get_M(nf), prec);
   r = gaussred_from_QR(nf_get_G(nf), prec);
@@ -797,7 +782,7 @@ minimforunits(GEN nf, long BORNE, ulong w)
 
     p = (double)x[1] + z[1]; norme = y[1] + p*p*v[1] + eps;
     if (norme > normax) normax = norme;
-    if (is_unit(M,r1, x)
+    if (is_unit(M, r1, x)
     && (norme > 2*n  /* exclude roots of unity */
         || !ZV_isscalar(nfpow_u(nf, zc_to_ZC(x), w))))
     {

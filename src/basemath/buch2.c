@@ -842,7 +842,7 @@ factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 {
   long e, r1 = nf_get_r1(nf);
   GEN M = nf_get_M(nf);
-  GEN N = divri(embed_norm(r1, RgM_RgC_mul(M,m)), NI); /* ~ N(m/I) */
+  GEN N = divri(embed_norm(RgM_RgC_mul(M,m), r1), NI); /* ~ N(m/I) */
   N = grndtoi(N, &e);
   if (e > -1)
   {
@@ -2390,7 +2390,7 @@ step(GEN x, double *y, GEN inc, long k)
 }
 
 INLINE long
-Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
+Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, long R1, GEN M,
     GEN G, GEN ideal0, FACT *fact, long nbrelpid, FP_t *fp,
     RNDREL_t *rr, long prec, long *nbsmallnorm, long *nbfact)
 {
@@ -2481,7 +2481,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, long N, GEN M, long R1,
       GEN Nx, xembed = RgM_RgC_mul(M, gx);
       long e;
       if (nbsmallnorm) (*nbsmallnorm)++;
-      Nx = grndtoi(embed_norm(R1,xembed), &e);
+      Nx = grndtoi(embed_norm(xembed, R1), &e);
       if (e >= 0) {
         if (DEBUGLEVEL > 1) { err_printf("+"); err_flush(); }
         continue;
@@ -2548,7 +2548,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       ideal = idealmul(nf, p0, ideal);
     else
       ideal = idealhnf_two(nf, ideal);
-    if (Fincke_Pohst_ideal(cache, F, nf, N, M, R1, G, ideal, fact,
+    if (Fincke_Pohst_ideal(cache, F, nf, N,R1, M, G, ideal, fact,
           nbrelpid, &fp, NULL, prec, &nbsmallnorm, &nbfact))
       break;
     if (DEBUGLEVEL>1) timer_printf(&T, "for this ideal");
@@ -2635,8 +2635,8 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, FACT *fact)
       err_printf("(%ld) ", jlist, rr.jid);
     ideal = idealmul_HNF(nf, baseideal, ideal);
     rr.Nideal = ZM_det_triangular(ideal);
-    if (Fincke_Pohst_ideal(cache, F, nf, N, M, R1, G, ideal, fact,
-                              RND_REL_RELPID, &fp, &rr, prec, NULL, NULL))
+    if (Fincke_Pohst_ideal(cache, F, nf, N,R1, M, G, ideal, fact,
+                           RND_REL_RELPID, &fp, &rr, prec, NULL, NULL))
       break;
     if (PREVENT_LLL_IN_RND_REL || cache->last != last) continue;
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
@@ -2714,7 +2714,7 @@ be_honest(FB_t *F, GEN nf, GEN auts, FACT *fact)
       }
       for(nbtest=0;;)
       {
-        if (Fincke_Pohst_ideal(NULL, F, nf, N, M, R1, G, ideal, fact, 0, &fp,
+        if (Fincke_Pohst_ideal(NULL, F, nf, N,R1, M, G, ideal, fact, 0, &fp,
               NULL, prec, NULL, NULL))
           break;
         avma = av2;

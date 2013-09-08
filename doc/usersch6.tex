@@ -1041,9 +1041,10 @@ giving the embeddings of $K$, so that if $v$ is an $n$-th dimensional
 \typ{COL} representing the element $\sum_{i=1}^n v[i] w_i$ of $K$, then
 \kbd{RgM\_RgC\_mul(M,v)} represents the embeddings of $v$. Its first $r_1$
 components are real numbers (\typ{INT}, \typ{FRAC} or \typ{REAL}, usually the
-latter), and the last $r_2$ are \typ{COMPLEX}.
+latter), and the last $r_2$ are complex numbers (usually of \typ{COMPLEX},
+but not necessarily for embeddings of rational numbers).
 
-\fun{GEN}{embed_T2}{GEN x} assuming $x$ is the vector of floating point
+\fun{GEN}{embed_T2}{GEN x, long r1} assuming $x$ is the vector of floating point
 embeddings of some algebraic number $v$, i.e.
 \bprog
   x = RgM_RgC_mul(nf_get_M(nf), algtobasis(nf,v));
@@ -1069,9 +1070,9 @@ $r_1+r_2$ complex embeddings of the algebraic number $v$, return a floating
 point approximation of the discriminant of its characteristic polynomial as a
 \typ{REAL} of precision \kbd{prec}.
 
-\fun{GEN}{embed_norm}{long r1, GEN x} given a vector $z$ of $r_1+r_2$ complex
-embeddings of the algebraic number $v$, return (a floating point approximation
-of) the norm of $v$.
+\fun{GEN}{embed_norm}{GEN x, long r1} given a vector $z$ of $r_1+r_2$ complex
+embeddings of the algebraic number $v$, return (a floating point
+approximation of) the norm of $v$.
 
 \subsec{Ideal reduction, low level}
 
