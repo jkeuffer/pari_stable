@@ -665,31 +665,44 @@ factor_eulerphi(GEN n)
 int
 divisors_init(GEN n, GEN *pP, GEN *pE)
 {
-  long tn = typ(n), i,l;
-  GEN E, P, e;
+  long i,l;
+  GEN F, E, P, e;
   int isint = 1;
 
-  if (tn == t_MAT && lg(n) == 3)
+  switch(typ(n))
   {
-    P = gel(n,1); l = lg(P);
-    for (i = 1; i < l; i++)
-      if (typ(gel(P,i)) != t_INT) { isint = 0; break; }
-    RgV_check_ZV(gel(n,2), "divisors");
-  }
-  else
-  {
-    if (tn == t_INT)
-      n = absi_factor(n);
-    else {
-      if (is_matvec_t(tn)) pari_err_TYPE("divisors",n);
+    case t_INT:
+      if (!signe(n)) pari_err_DOMAIN("divisors", "argument", "=", gen_0, gen_0);
+      F = absi_factor(n);
+      break;
+    case t_VEC:
+      if (lg(n) != 3) pari_err_TYPE("divisors",n);
+      F = gel(n,2); /* fall through */
+    case t_MAT:
+      F = n;
+      if (lg(F) != 3) pari_err_TYPE("divisors",n);
+      P = gel(F,1); l = lg(P);
+      E = gel(F,2);
+      RgV_check_ZV(E, "divisors");
+      isint = RgV_is_ZV(P);
+      if (isint)
+      {
+        /* skip -1 */
+        if (l>1 && signe(gel(P,1)) < 0) { E++; P = vecslice(P,2,--l); }
+        /* test for 0 */
+        for (i = 1; i < l; i++)
+          if (!signe(gel(P,i)) && signe(gel(E,i)))
+            pari_err_DOMAIN("divisors", "argument", "=", gen_0, n);
+      }
+      break;
+    case t_COL:
+      pari_err_TYPE("divisors",n);
+    default:
       isint = 0;
-      n = factor(n);
-    }
-    P = gel(n,1); l = lg(P);
+      F = factor(n);
   }
-  E = gel(n,2);
-  /* skip -1 */
-  if (isint && l>1 && signe(gel(P,1)) < 0) { E++; P = vecslice(P,2,--l); }
+  P = gel(F,1); l = lg(P);
+  E = gel(F,2);
   e = cgetg(l, t_VECSMALL);
   for (i=1; i<l; i++)
   {

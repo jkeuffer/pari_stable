@@ -16,11 +16,13 @@ for(i=1,#fun, print(fun[i](fa)))
 
 fa = factor(1);
 for(i=1,#fun, print(fun[i](fa)))
+divisors(fa)
 
 fa = factor(0);
 ispowerful(fa)
 core(fa)
 core2(fa)
+divisors(fa)
 
 core2([10!, factor(10!)])
 
