@@ -1430,9 +1430,8 @@ strip_prompt(const char *s)
   t = t0;
   for (; *s; s++)
   {
-#ifdef RL_PROMPT_START_IGNORE
-    if (*s == RL_PROMPT_START_IGNORE || *s == RL_PROMPT_END_IGNORE) continue;
-#endif
+    /* RL_PROMPT_START_IGNORE / RL_PROMPT_END_IGNORE */
+    if (*s == 1 || *s == 2) continue;
     if (*s == esc) /* skip ANSI color escape sequence */
     {
       while (*++s != 'm')
