@@ -318,14 +318,17 @@ file_getline(Buffer *b, char **s0, input_method *IM)
     ulong left = b->len - used, l;
     char *s;
 
-    if (left < 512)
+    /* If little space left, double the buffer size before next read.
+     * The # of chars read by fgets is an int; prevent 'left' from getting
+     * larger than 2^31-1 */
+    if (left < 512 && b->len < (1UL << 30))
     {
       fix_buffer(b, b->len << 1);
       left = b->len - used;
       *s0 = b->buf + used0;
     }
     s = b->buf + used;
-    if (! IM->fgets(s, left, IM->file))
+    if (! IM->fgets(s, (int)left, IM->file))
       return first? NULL: *s0; /* EOF */
 
     l = strlen(s); first = 0;
