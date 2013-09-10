@@ -501,7 +501,7 @@
   *** contfracpnqn: inconsistent dimensions in pnqn [ nbrows != 1,2 ].
   ***   at top-level: divisors(1/2)
   ***                 ^-------------
-  *** divisors: incorrect type in divisors [denominator] (t_MAT).
+  *** divisors: incorrect type in divisors [denominator] (t_FRAC).
   ***   at top-level: idealstar(K,0)
   ***                 ^--------------
   *** idealstar: domain error in Idealstar: ideal = 0
@@ -584,4 +584,4 @@
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
   ***   user warning: 1
-Total time spent: 24
+Total time spent: 20
