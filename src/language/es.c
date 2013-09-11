@@ -167,7 +167,10 @@ filtre0(filtre_t *F)
   if (t != F->t) /* non empty input */
   {
     c = t[-1]; /* = last input char */
-    if (c == '=')                 F->more_input = 2;
+    if (c == '=')
+    {
+      if (t-1 != F->t && t[-2] != '?') F->more_input = 2;
+    }
     else if (! F->wait_for_brace) F->more_input = 0;
     else if (c == RBRACE)       { F->more_input = 0; t--; F->wait_for_brace--;}
   }
