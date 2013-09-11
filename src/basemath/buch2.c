@@ -444,6 +444,7 @@ init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD)
   const double c1 = PI*PI/2;
   const double c2 = 3.663862376709;
   const double c3 = 3.801387092431; /* Euler + log(8*Pi)*/
+  S->clone = 0;
   S->cN = R1*c2 + N*c1;
   S->cD = LOGD - N*c3 - R1*PI/2;
   S->maxprimes = 16000; /* sufficient for LIMC=176081*/
@@ -453,21 +454,34 @@ init_GRHcheck(GRHcheck_t *S, long N, long R1, double LOGD)
   u_forprime_init(&S->P, 2, ULONG_MAX);
 }
 
+void
+free_GRHcheck(GRHcheck_t *S)
+{
+  if (S->clone)
+  {
+    long i = S->nprimes;
+    GRHprime_t *pr;
+    for (pr = S->primes, i = S->nprimes; i > 0; pr++, i--) gunclone(pr->dec);
+  }
+  pari_free(S->primes);
+}
+
 int
 GRHok(GRHcheck_t *S, double L, double SA, double SB)
 {
   return (S->cD + (S->cN + 2*SB) / L - 2*SA < -1e-8);
 }
 
+/* Return factorization pattern of p: [f,n], where n[i] primes of
+ * residue degree f[i] */
 static GEN
 get_fs(GEN nf, GEN P, GEN index, ulong p)
 {
   long j, k, f, n, l;
-  GEN fs, ns, dec = cgetg(3, t_MAT);
+  GEN fs, ns;
 
-  (void)new_chunk((degpol(P)+1)<<1); /*HACK*/
   if (umodiu(index, p))
-  { /* p does not divide index */
+  { /* easy case: p does not divide index */
     GEN F = Flx_degfact(ZX_to_Flx(P,p), p);
     fs = gel(F,1); l = lg(fs);
     ns = gel(F,2); /*to be overwritten*/
@@ -490,20 +504,21 @@ get_fs(GEN nf, GEN P, GEN index, ulong p)
       f = fs[j]; n = 1;
     }
   ns[k] = n; fs[k] = f; k++;
-  avma = (pari_sp)dec;
-  setlg(fs, k); gel(dec,1) = leafcopy(fs);
-  setlg(ns, k); gel(dec,2) = leafcopy(ns); return dec;
+  setlg(fs, k);
+  setlg(ns, k); return mkvec2(fs,ns);
 }
 
 /* cache data for all rational primes up to the LIM */
 static void
 cache_prime_dec(GRHcheck_t *S, ulong LIM, GEN nf)
 {
+  pari_sp av = avma;
   GRHprime_t *pr;
   GEN index, P;
   double nb;
 
   if (S->limp >= LIM) return;
+  S->clone = 1;
   nb = primepi_upper_bound((double)LIM); /* #{p <= LIM} <= nb */
   GRH_ensure(S, nb+1); /* room for one extra prime */
   P = nf_get_pol(nf);
@@ -513,12 +528,13 @@ cache_prime_dec(GRHcheck_t *S, ulong LIM, GEN nf)
     ulong p = u_forprime_next(&(S->P));
     pr->p = p;
     pr->logp = log((double)p);
-    pr->dec = get_fs(nf, P, index, p);
+    pr->dec = gclone(get_fs(nf, P, index, p));
     S->nprimes++;
     pr++;
     /* store up to nextprime(LIM) included */
     if (p >= LIM) { S->limp = p; break; }
   }
+  avma = av;
 }
 
 static GEN
@@ -4194,8 +4210,7 @@ START:
     }
   } while (need || precpb);
 
-  delete_cache(&cache); delete_FB(&F);
-  pari_free(GRHcheck.primes);
+  delete_cache(&cache); delete_FB(&F); free_GRHcheck(&GRHcheck);
   Vbase = vecpermute(F.LP, F.perm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
   res = get_clfu(clg1, R, zu, fu);
