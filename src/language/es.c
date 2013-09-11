@@ -309,30 +309,30 @@ gp_readvec_file(char *s)
 char *
 file_getline(Buffer *b, char **s0, input_method *IM)
 {
-  int first = 1;
+  const ulong MAX = (1UL << 31) - 1;
   ulong used0, used;
 
+  **s0 = 0; /* paranoia */
   used0 = used = *s0 - b->buf;
   for(;;)
   {
-    ulong left = b->len - used, l;
+    ulong left = b->len - used, l, read;
     char *s;
 
-    /* If little space left, double the buffer size before next read.
-     * The # of chars read by fgets is an int; prevent 'left' from getting
-     * larger than 2^31-1 */
-    if (left < 512 && b->len < (1UL << 30))
+    /* If little space left, double the buffer size before next read. */
+    if (left < 512)
     {
       fix_buffer(b, b->len << 1);
       left = b->len - used;
       *s0 = b->buf + used0;
     }
+    /* # of chars read by fgets is an int; be careful */
+    read = minuu(left, MAX);
     s = b->buf + used;
-    if (! IM->fgets(s, (int)left, IM->file))
-      return first? NULL: *s0; /* EOF */
+    if (! IM->fgets(s, (int)read, IM->file)) return **s0? *s0: NULL; /* EOF */
 
-    l = strlen(s); first = 0;
-    if (l+1 < left || s[l-1] == '\n') return *s0; /* \n */
+    l = strlen(s);
+    if (l+1 < read || s[l-1] == '\n') return *s0; /* \n */
     used += l;
   }
 }
