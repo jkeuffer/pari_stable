@@ -2970,6 +2970,7 @@ znlog_rec(GEN h, GEN g, GEN N, GEN P, GEN E, GEN PHI)
       if (vpohpe > vpogpe) return NULL;
 
       ogpe = mulii(ogp, powiu(p, vpogpe)); /* order g mod p^e */
+      if (is_pm1(gpe)) return is_pm1(hpe)? a: NULL;
       b = gdiv(Qp_log(cvtop(hpe, p, e)), Qp_log(cvtop(gpe, p, e)));
       a = addii(a, mulii(ogp, gtrunc(b)));
     }

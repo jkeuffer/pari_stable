@@ -37,6 +37,7 @@ PB  7- issquare(Mod(0,2),&s); s -> Mod(2,0) error [2.6.0, #1430]
    27- polgalois(x^11 + 627*x^4 - 584) -> F_110 instead of S_11 [#1460]
    28- input lines with more than 2^31 characters (without \n) resulted in a
        truncated read [#1461]
+   29- znlog(1,Mod(8,9)) -> division by 0 [#1463]
 
   Added
     1- genus2red: an implementation of Liu's algorithm to determine the
