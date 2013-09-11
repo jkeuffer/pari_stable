@@ -19,7 +19,7 @@ Doc: discrete logarithm of the finite field element $x$ in base $g$. If
  \item a cubic sieve index calculus algorithm for larger fields of degree at
  least $5$.
 
- \item Coppersmith algorithm for fields of characteristic $2$.
+ \item Coppersmith algorithm for fields of characteristic at most $5$.
 
  \bprog
  ? t = ffgen(ffinit(7,5));

@@ -315,8 +315,8 @@ smooth_best(long p, long n, long *pt_r, long *pt_nb)
       if ((!bestc || gcmp(gmul2n(c,r), gmul2n(bestc,bestr)) < 0))
       {
         if (DEBUGLEVEL)
-          err_printf("d=%ld r=%ld fb=%Ps early rels=%lu P=%.5Pe -> C=%.5Pe \n"
-                     ,dt,r,FB,rels,pr,c);
+          err_printf("r=%ld d=%ld fb=%Ps early rels=%lu P=%.5Pe -> C=%.5Pe \n",
+                      r, dt, FB, rels, pr, c);
         bestc = c;
         bestr = r;
         bestFB = itos_or_0(FB);
@@ -359,7 +359,7 @@ check_kernel(long r, GEN M, long nbi, long nbrow, GEN T, ulong p, GEN m)
       f++;
   }
   if (DEBUGLEVEL) timer_printf(&ti,"found %ld/%ld logs", f, nbi);
-  if (f*p < nbi) return NULL; /* Not enough logs found */
+  if (f < maxss(3,maxss(p/2,nbi/p))) return NULL; /* Not enough logs found */
   return gerepilecopy(av, K);
 }
 
@@ -393,8 +393,8 @@ Flxq_log_rec(GEN W, GEN a, long r, GEN T, ulong p, GEN m)
   }
 }
 
-GEN
-Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
+static GEN
+Flxq_log_index_cubic(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
 {
   long n = get_Flx_degree(T0), r, nb;
   pari_sp av = avma;
@@ -447,4 +447,253 @@ Flxq_log_index(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
   if (!zv_equal(Flxq_pow(b0, e, T0, p), a0))
     pari_err_BUG("Flxq_log");
   return gerepileupto(av, e);
+}
+
+INLINE GEN Flx_frob(GEN u, ulong p) { return Flx_inflate(u, p); }
+
+static GEN
+rel_Coppersmith(long r, GEN u, GEN v, long h, GEN R, long d, ulong p)
+{
+  GEN b, F, G, M;
+  if (degpol(Flx_gcd(u,v,p))) return NULL;
+  GEN a = Flx_add(Flx_shift(u, h), v, p);
+  if (lgpol(a)==0 || !Flx_is_smooth(a, r, p)) return NULL;
+  b  = Flx_add(Flx_mul(R, Flx_frob(u, p), p), Flx_shift(Flx_frob(v, p),d), p);
+  if (!Flx_is_smooth(b, r, p)) return NULL;
+  F = factorel(a, p); G = factorel(b, p);
+  M = mkmat2(vecsmall_concat(gel(F, 1), vecsmall_append(gel(G, 1), 2*p)),
+             vecsmall_concat(zv_z_mul(gel(F, 2),p), vecsmall_append(zv_neg(gel(G, 2)),d)));
+  return famatsmall_reduce(M);
+}
+
+static GEN
+Flxq_log_Coppersmith(long nbrel, long r, GEN T, ulong p)
+{
+  long dT = degpol(T);
+  long h = dT/p, d = dT-(h*p);
+  GEN R = Flx_sub(Flx_shift(pol1_Flx(T[1]), dT), T, p);
+  GEN u = zero_zv(dT+2), v = zero_zv(dT+2);
+  long nbtest = 0, rel = 0;
+  GEN M = cgetg(nbrel+1, t_VEC);
+  pari_sp av = avma;
+  long i, j;
+  if (DEBUGLEVEL) err_printf("Coppersmith (R = %ld): ",degpol(R));
+  for (i=1; ; i++)
+  {
+    Flx_cnext(u, p);
+    Flx_renormalize_inplace(u, dT+2);
+    for(j=2; j<lg(v); j++) v[j] = 0;
+    for(j=1; j<i; j++)
+    {
+      GEN z;
+      Flx_cnext(v, p);
+      Flx_renormalize_inplace(v, dT+2);
+      avma = av;
+      if (u[lg(u)-1]==1)
+      {
+        z = rel_Coppersmith(r, u, v, h, R, d, p);
+        nbtest++;
+        if (z)
+        {
+          gel(M,++rel) = gerepilecopy(av, z); av = avma;
+          if (DEBUGLEVEL && (rel&511UL)==0)
+            err_printf("%ld%%[%ld] ",rel*100/nbrel,i);
+        }
+        if (rel>nbrel) break;
+      }
+      if (i==j) continue;
+      if (v[lg(v)-1]==1)
+      {
+        z = rel_Coppersmith(r, v, u, h, R, d, p);
+        nbtest++;
+        if (z)
+        {
+          gel(M,++rel) = gerepilecopy(av, z); av = avma;
+          if (DEBUGLEVEL && (rel&511UL)==0)
+            err_printf("%ld%%[%ld] ",rel*100/nbrel,i);
+        }
+        if (rel>nbrel) break;
+      }
+    }
+    if (rel>nbrel) break;
+  }
+  if (DEBUGLEVEL) err_printf(": %ld tests\n", nbtest);
+  return M;
+}
+
+static GEN Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo);
+
+static GEN
+Flxq_log_from_rel(GEN W, GEN rel, long r, GEN T, ulong p, GEN m)
+{
+  pari_sp av = avma;
+  GEN F = gel(rel,1), E = gel(rel,2), o = gen_0;
+  long i, l = lg(F);
+  for(i=1; i<l; i++)
+  {
+    GEN R = gel(W, F[i]);
+    if (signe(R)==0) /* Already failed */
+      return NULL;
+    else if (signe(R)<0) /* Not yet tested */
+    {
+      setsigne(gel(W,F[i]),0);
+      R = Flxq_log_Coppersmith_d(W, cindex_Flx(F[i],r,p,T[1]), r, T, p, m);
+      if (!R) return NULL;
+    }
+    o = Fp_add(o, mulis(R, E[i]), m);
+  }
+  return gerepileuptoint(av, o);
+}
+
+static GEN
+Flxq_log_Coppersmith_d(GEN W, GEN g, long r, GEN T, ulong p, GEN mo)
+{
+  pari_sp av = avma, av2;
+  long dg = degpol(g), k = r-1, m = maxss((dg-k)/2,0);
+  long i, j, l = dg-m, N;
+  GEN v = cgetg(k+m+1,t_MAT);
+  long dT = degpol(T);
+  long h = dT/p, d = dT-h*p;
+  GEN R = Flx_rem(Flx_shift(pol1_Flx(T[1]), dT), T, p);
+  GEN z = Flx_rem(Flx_shift(pol1_Flx(T[1]), h), g, p);
+  for(i=1; i<=k+m; i++)
+  {
+    gel(v,i) = Flx_to_Flv(Flx_shift(z,-l),m);
+    z = Flx_rem(Flx_shift(z,1),g,p);
+  }
+  v = Flm_ker(v,p);
+  for(i=1; i<=k; i++)
+    gel(v,i) = Flv_to_Flx(gel(v,i),T[1]);
+  N = upowuu(p,k);
+  av2 = avma;
+  for (i=1; i<N; i++)
+  {
+    GEN p0,q,qh,a,b;
+    ulong el = i;
+    avma = av2;
+    q = pol0_Flx(T[1]);
+    for (j=1; j<=k; j++)
+    {
+      ulong r = el % p;
+      el /= p;
+      if (r) q = Flx_add(q, Flx_Fl_mul(gel(v,j), r, p), p);
+    }
+    qh = Flx_shift(q, h);
+    p0 = Flx_rem(qh, g, p);
+    b = Flx_sub(Flx_mul(R, Flx_frob(q, p), p), Flx_shift(Flx_frob(p0, p), d), p);
+    if (lgpol(b)==0 || !Flx_is_smooth(b, r, p)) continue;
+    a = Flx_div(Flx_sub(qh, p0, p), g, p);
+    if (degpol(Flx_gcd(a, q, p)) &&  degpol(Flx_gcd(a, p0 ,p)))
+      continue;
+    if (!(lgpol(a)==0 || !Flx_is_smooth(a, r, p)))
+    {
+      GEN F = factorel(b, p);
+      GEN G = factorel(a, p);
+      GEN FG = vecsmall_concat(vecsmall_append(gel(F, 1), 2*p), gel(G, 1));
+      GEN E  = vecsmall_concat(vecsmall_append(gel(F, 2), -d),
+          zv_z_mul(gel(G, 2),-p));
+      GEN R  = famatsmall_reduce(mkmat2(FG, E));
+      GEN l  = Flxq_log_from_rel(W, R, r, T, p, mo);
+      if (!l) continue;
+      l = Fp_div(l,utoi(p),mo);
+      if (dg <= r)
+      {
+        affii(l,gel(W,g[2]));
+        if (DEBUGLEVEL>1) err_printf("Found %lu\n", g[2]);
+      }
+      return gerepileuptoint(av, l);
+    }
+  }
+  avma = av;
+  return NULL;
+}
+
+static GEN
+Flxq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, GEN T, ulong p, GEN m)
+{
+  GEN b = polx_Flx(T[1]);
+  long AV = 0;
+  GEN g = a, bad = pol0_Flx(T[1]);
+  pari_timer ti;
+  while(1)
+  {
+    long i, l;
+    GEN V, F, E, Ao;
+    timer_start(&ti);
+    V = Flxq_log_find_rel(b, r2, T, p, &g, &AV);
+    if (DEBUGLEVEL>1) timer_printf(&ti,"%ld-smooth element",r2);
+    F = gel(V,1); E = gel(V,2);
+    l = lg(F);
+    Ao = gen_0;
+    for(i=1; i<l; i++)
+    {
+      GEN Fi = cindex_Flx(F[i], r2, p, T[1]);
+      GEN R;
+      if (degpol(Fi) <= r)
+      {
+        if (signe(gel(W,F[i]))==0)
+          break;
+        else if (signe(gel(W,F[i]))<0)
+        {
+          setsigne(gel(W,F[i]),0);
+          R = Flxq_log_Coppersmith_d(W,Fi,r,T,p,m);
+        } else
+          R = gel(W,F[i]);
+      }
+      else
+      {
+        if (zv_equal(Fi,bad)) break;
+        R = Flxq_log_Coppersmith_d(W,Fi,r,T,p,m);
+        if (!R) bad = Fi;
+      }
+      if (!R) break;
+      Ao = Fp_add(Ao, mulis(R, E[i]), m);
+    }
+    if (i==l) return subis(Ao,AV);
+  }
+}
+
+
+static GEN
+Flxq_log_index_Coppersmith(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
+{
+  pari_sp av = avma;
+  GEN  M, S, a, b, Ao=NULL, Bo=NULL, W, e;
+  pari_timer ti;
+  double rf = p ==3 ? 1.2 : .9;
+  long n = degpol(T0), r = (long) sqrt(n*rf);
+  GEN T;
+  long r2 = 3*r/2;
+  long nbi = itos(ffsumnbirred(utoi(p), r)), nbrel=nbi*5/4;
+  if (DEBUGLEVEL)
+  {
+    err_printf("Coppersmith: Parameters r=%ld r2=%ld\n", r,r2);
+    err_printf("Coppersmith: Size FB=%ld rel. needed=%ld\n", nbi, nbrel);
+    timer_start(&ti);
+  }
+  T = smallirred_Flx(p,n,get_Flx_var(T0));
+  S = Flx_ffisom(T0,T,p);
+  a = Flx_Flxq_eval(a0, S, T, p);
+  b = Flx_Flxq_eval(b0, S, T, p);
+  if (DEBUGLEVEL) timer_printf(&ti,"model change");
+  M = Flxq_log_Coppersmith(nbrel, r, T, p);
+  if (DEBUGLEVEL) timer_printf(&ti,"relations");
+  W = check_kernel(r, M, nbi, 3*upowuu(p,r), T, p, m);
+  timer_start(&ti);
+  Ao = Flxq_log_Coppersmith_rec(W, r2, a, r, T, p, m);
+  if (DEBUGLEVEL) timer_printf(&ti,"smooth element");
+  Bo = Flxq_log_Coppersmith_rec(W, r2, b, r, T, p, m);
+  if (DEBUGLEVEL) timer_printf(&ti,"smooth generator");
+  e = Fp_div(Ao, Bo, m);
+  if (!zv_equal(Flxq_pow(b0,e,T0,p),a0))
+    pari_err_BUG("Flxq_log");
+  return gerepileupto(av, e);
+}
+
+GEN
+Flxq_log_index(GEN a, GEN b, GEN m, GEN T, ulong p)
+{
+  if (p==3 || (p==5 && degpol(T)>41))
+    return Flxq_log_index_Coppersmith(a, b, m, T, p);
+  else    return Flxq_log_index_cubic(a, b, m, T, p);
 }
