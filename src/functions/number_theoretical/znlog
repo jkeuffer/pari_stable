@@ -26,9 +26,9 @@ Doc: discrete logarithm of $x$ in $(\Z/N\Z)^*$ in base $g$.
 
  \item a combination of generic discrete log algorithms (see below).
 
- \item Only in $(\Z/N\Z)^*$ for when $N$ is prime: a linear sieve index calculus
- method, suitable for $N < 10^{50}$, say, is used for large prime divisors of the
- order.
+ \item in $(\Z/N\Z)^*$ when $N$ is prime: a linear sieve index calculus
+ method, suitable for $N < 10^{50}$, say, is used for large prime divisors of
+ the order.
 
  The generic discrete log algorithms are:
 
