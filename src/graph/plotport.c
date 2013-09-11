@@ -130,7 +130,6 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
   if (sig<0) { x=a; a=b; b=x; }
   x = gtofp(a, prec); push_lex(x, code);
   dx = divru(gtofp(gsub(b,a),prec), ISCR-1);
-  ysml = ybig = 0.;
   for (j=1; j<=JSCR; j++) scr[1][j]=scr[ISCR][j]=YY;
   for (i=2; i<ISCR; i++)
   {
@@ -139,11 +138,17 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
     for (j=2; j<JSCR; j++) scr[i][j] = BLANK;
   }
   av2 = avma; limite=stack_lim(av2,1);
+  ysml = ybig = 0.; /* -Wall */
   for (i=1; i<=ISCR; i++)
   {
     y[i] = gtodouble( READ_EXPR(code,x) );
-    if (y[i] < ysml) ysml = y[i];
-    if (y[i] > ybig) ybig = y[i];
+    if (i == 1)
+      ysml = ybig = y[1];
+    else
+    {
+      if (y[i] < ysml) ysml = y[i];
+      if (y[i] > ybig) ybig = y[i];
+    }
     x = addrr(x,dx);
     if (low_stack(limite, stack_lim(av2,1)))
     {
