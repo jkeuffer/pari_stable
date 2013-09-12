@@ -1483,7 +1483,7 @@ FpXQ_pow_Frobenius(GEN x, GEN n, GEN aut, GEN T, GEN p)
     GEN bb, u, v, autk;
     long vb = Z_pvalrem(b,p,&bb);
     long m, r, k = is_pm1(bb) ? 1 : bounded_order(p,bb,d);
-    if (!k) return FpXQ_pow(x,n, T, p);
+    if (!k || d-vb<k) return FpXQ_pow(x,n, T, p);
     m = (d-vb)/k; r = (d-vb)%k;
     u = diviiexact(subis(powiu(p,k),1),bb);
     v = diviiexact(subii(powiu(p,r+vb),a),b);
