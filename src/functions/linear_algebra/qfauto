@@ -7,20 +7,17 @@ Help: qfauto(G,{fl}): automorphism group of the positive definite quadratic form
 Doc:
  $G$ being a square and symmetric matrix with integer entries representing a
  positive definite quadratic form, outputs the automorphism group of the form.
-
- $G$ can also be given by an \kbd{qfisominit} structure.
-
- This implements an algorithm of Plesken and Souvignier, following closely
- Souvignier own implementation.
-
- The output is a two-components vector $[o,g]$ where $o$ is the group
- order and $g$ is the list of generators (as a vector).
-
- The interface of this function is experimental and will likely change in future
- release.  See \kbd{qfisominit} for the meaning of \kbd{fl}.
-
  Since this requires computing the minimal vectors, the computations can
- become very lengthy as the dimension of $G$ grows.
-Variant: Also available is
- \fun{GEN}{qfauto}{GEN F, GEN flags}
+ become very lengthy as the dimension grows. $G$ can also be given by an
+ \kbd{qfisominit} structure.
+ See \kbd{qfisominit} for the meaning of \kbd{fl}.
+
+ The output is a two-components vector $[o,g]$ where $o$ is the group order
+ and $g$ is the list of generators (as a vector). The interface of this
+ function is experimental and will likely change in the future.
+
+ This function implements an algorithm of Plesken and Souvignier, following
+ Souvignier's implementation.
+
+Variant: Also available is \fun{GEN}{qfauto}{GEN F, GEN flags}
  which handles matrices with \typ{VECSMALL} columns.
