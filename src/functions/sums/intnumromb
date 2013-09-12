@@ -10,9 +10,9 @@ Help: intnumromb(X=a,b,expr,{flag=0}): numerical integration of expr (smooth in
 Wrapper: (,,G)
 Description:
   (gen,gen,gen,?small):gen:prec intnumromb(${3 cookie}, ${3 wrapper}, $1, $2, $4, prec)
-Doc: numerical integration of
- \var{expr} (smooth in $]a,b[$), with respect to $X$. This function is
- deprecated, use \tet{intnum} instead.
+Doc: numerical integration of \var{expr} (smooth in $]a,b[$), with respect to
+ $X$. Suitable for low accuracy; if \var{expr} is very regular (e.g. analytic
+ in a large region) and high accuracy is desired, try \tet{intnum} first.
 
  Set $\fl=0$ (or omit it altogether) when $a$ and $b$ are not too large, the
  function is smooth, and can be evaluated exactly everywhere on the interval
@@ -40,10 +40,10 @@ Doc: numerical integration of
  can of course be accomplished by just multiplying by an appropriate constant.
 
  Note that \idx{infinity} can be represented with essentially no loss of
- accuracy by 1e1000. However beware of real underflow when dealing with
+ accuracy by a huge number. However beware of real underflow when dealing with
  rapidly decreasing functions. For example, if one wants to compute the
- $\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one should set
- infinity equal to 10 for example, and certainly not to 1e1000.
+ $\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one can
+ infinity equal to 10 for example, and certainly not to \kbd{1e1000}.
 
  \synt{intnumromb}{void *E, GEN (*eval)(void*,GEN), GEN a, GEN b, long flag, long prec},
  where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
