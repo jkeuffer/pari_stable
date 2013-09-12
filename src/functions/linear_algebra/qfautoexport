@@ -8,7 +8,7 @@ Help: qfautoexport(qfa,{flag}): qfa being an automorphism group as output by
 Doc: \var{qfa} being an automorphism group as output by
  \tet{qfauto}, export the underlying matrix group as a string suitable
  for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma. The following example
- compute the size of the matrix group using GAP:
+ computes the size of the matrix group using GAP:
  \bprog
  ? G = qfauto([2,1;1,2]);
  ? s = qfautoexport(G)
@@ -17,5 +17,4 @@ Doc: \var{qfa} being an automorphism group as output by
  %3 = 12
  ? factorback(Vec(G[1]))
  %4 = 12
- @eprog\noindent
  @eprog
