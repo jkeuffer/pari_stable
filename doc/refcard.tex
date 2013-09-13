@@ -17,10 +17,10 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari/GP reference card}
-\def\versionnumber{2.26}% Version of this reference card
-\def\PARIversion{2.5.0}% Version of PARI described on this reference card
+\def\versionnumber{2.27}% Version of this reference card
+\def\PARIversion{2.6.1}% Version of PARI described on this reference card
 \def\year{2013}
-\def\month{May}
+\def\month{September}
 
 \special{papersize=29.7cm,21cm}
 
@@ -127,7 +127,7 @@ Send comments and corrections to \<Karim.Belabas@math.u-bordeaux.fr>
 %  \voffset -.745in
   \voffset -.815in
   \font\titlefont=cmbx10 \scaledmag2
-  \font\headingfont=cmbx10 \scaledmag1
+  \font\headingfont=cmbx10 %\scaledmag1
   \font\smallfont=cmr6
   \font\smallsy=cmsy6
   \font\eightrm=cmr8
@@ -209,15 +209,15 @@ Send comments and corrections to \<Karim.Belabas@math.u-bordeaux.fr>
 \outer\def\title#1{{\titlefont\centerline{#1}}}
 
 \outer\def\section#1{\par\filbreak
-  \vskip 1.4ex plus .4ex minus .5ex
+  \vskip 1ex plus .4ex minus .5ex
   {\headingfont #1}\mark{#1}%
-  \vskip .7ex plus .3ex minus .5ex
+  \vskip .5ex plus .3ex minus .5ex
 }
 
 \outer\def\subsec#1{\filbreak
-  \vskip 0.1ex plus 0.05ex
+  \vskip 0.07ex plus 0.05ex
   {\bf #1}
-  \vskip 0.04ex plus 0.05ex
+  \vskip 0.03ex plus 0.05ex
 }
 
 \newdimen\keyindent
@@ -280,17 +280,13 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \li{comment}{/* $\dots$ */}
 \li{one-line comment, rest of line ignored}{\\\\ \dots}
 \li{set default $d$ to \var{val}} {default$(\{d\},\{\var{val}\},\{\fl\})$}
-\li{mimic behavior of GP 1.39} {default(compatible,3)}
 
 \section{Metacommands}
 \li{toggle timer on/off}{\#}
 \li{print time for last result}{\#\#}
-\li{print \%$n$ in raw format}{\\a $n$}
 \li{print defaults}{\\d}
 \li{set debug level to $n$}{\\g $n$}
 \li{set memory debug level to $n$}{\\gm $n$}
-\li{enable/disable logfile}{\\l $\{${\it filename}$\}$}
-\li{print \%$n$ in pretty matrix format}{\\m}
 \li{set output mode (raw=0, default=1)}{\\o $n$}
 \li{set $n$ significant digits}{\\p $n$}
 \li{set $n$ terms in series}{\\ps $n$}
@@ -298,28 +294,11 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \li{print the list of PARI types}{\\t}
 \li{print the list of user-defined functions}{\\u}
 \li{read file into GP}{\\r {\it filename}}
-\li{write \%$n$ to file}{\\w $n$ {\it filename}}
 
-\section{GP Within Emacs}
-\li{to enter GP from within Emacs:}{M-x gp{\rm,} C-u M-x gp}
-\li{word completion}{{\rm \<TAB>}}
-\li{help menu window}{M-\\c}
-\li{describe function}{M-?}
-\li{display \TeX'd PARI manual}{M-x gpman}
-\li{set prompt string}{M-\\p}
-\li{break line at column 100, insert \kbd{\\}}{M-\\\\}
-\li{PARI metacommand \kbd{\\}{\it letter}}{M-\\\hbox{\it letter}}
-
-\section{Reserved Variable Names}
-\li{$\pi=3.14159\cdots$}{Pi}
-\li{Euler's constant ${}=.57721\cdots$}{Euler}
-\li{square root of $-1$}{I}
-\li{big-oh notation}{O}
-
-% ****************************************
-% This goes at the bottom of page 1
-\shortcopyrightnotice
-\newcolumn
+\section{Debugger / break loop}
+\li{get out of break loop}{break {\rm or} <C-D>}
+\li{go up $n$ frames}{dbg\_up$(\{n\})$}
+\li{examine object $o$}{dbg\_x$(o)$}
 
 \section{PARI Types \& Input Formats}
 \li{\typ{INT}/\typ{REAL}. Integers, Reals}{$\pm n$, $\pm n.ddd$}
@@ -339,7 +318,20 @@ Note: optional arguments are surrounded by braces $\{\}$.
   {[$x,y,z$]{\rm,} [$x,y,z$]\til}
 \li{\typ{MAT}. Matrices}{[$x,y$;$z,t$;$u,v$]}
 \li{\typ{LIST}. Lists}{List$($[$x,y,z$]$)$}
-\li{\typ{STR}. Strings}{"aaa"}
+\li{\typ{STR}. Strings}{"abc"}
+
+
+% ****************************************
+% This goes at the bottom of page 1
+\shortcopyrightnotice
+\newcolumn
+
+\section{Reserved Variable Names}
+\li{$\pi=3.14159\cdots$}{Pi}
+\li{Catalan's constant $C =.91596\cdots$}{Catalan}
+\li{Euler's constant $\gamma =.57721\cdots$}{Euler}
+\li{square root of $-1$}{I}
+\li{big-oh notation}{O}
 
 \section{Standard Operators}
 \li{basic operations}{+{\rm,} - {\rm,} *{\rm,} /{\rm,} \pow}
@@ -350,12 +342,15 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{shift $x$ left or right $n$ bits}{ $x$<<$n$, $x$>>$n$
   {\rm or} shift$(x,\pm n)$}
   \li{comparison operators}{<={\rm, }<{\rm, }>={\rm, }>{\rm, }=={\rm,
-  }!={\rm, }===}
+  }!={\rm, }==={\rm, }lex{\rm, }cmp}
 \li{boolean operators (or, and, not)}{||{\rm, } \&\&{\rm ,} !}
+\li{bit operations}{bitand{\rm, }bitneg{\rm, }bitor{\rm, }bitxor}
 \li{sign of $x=-1,0,1$}{sign$(x)$}
 \li{maximum/minimum of $x$ and $y$}{max{\rm,} min$(x,y)$}
 \li{integer or real factorial of $x$}{$x$!~{\rm or} factorial$(x)$}
 \li{derivative of $f$ w.r.t. $x$}{$f$'}
+\li{apply differential operator}{diffop}
+\li{restore $x$ as a formal variable}{$x$='$x$}
 \section{Conversions}
 %
 \subsec{Change Objects}
@@ -363,20 +358,21 @@ $x$\%$y${\rm,} divrem$(x,y)$}
   {Col{\rm/}Vec{\rm,}Mat{\rm,}Set{\rm,}List{\rm,}Str}
 \li{create PARI object $(x\mod y)$}{Mod$(x,y)$}
 \li{make $x$ a polynomial of $v$}{Pol$(x,\{v\})$}
-\li{as above, starting with constant term}{Polrev$(x,\{v\})$}
+\li{as \kbd{Pol}/\kbd{Vec}, starting with constant term}{Polrev{\rm, }Vecrev}
 \li{make $x$ a power series of $v$}{Ser$(x,\{v\})$}
+\li{string from bytes / from format+args}{Strchr{\rm, }Strprintf}
 \li{PARI type of object $x$}{type$(x)$}
-\li{object $x$ with precision $n$}{prec$(x,\{n\})$}
+\li{object $x$ with precision $n$}{precision$(x,\{n\})$}
 \li{evaluate $f$ replacing vars by their value}{eval$(f)$}
 %
 \subsec{Select Pieces of an Object}
 \li{length of $x$}{\#$x$ {\rm or} length$(x)$}
 \li{$n$-th component of $x$}{component$(x,n)$}
 \li{$n$-th component of vector/list $x$}{$x$[$n$]}
+\li{components $a,a+1,\dots,b$ of vector $x$}{$x$[$a$..$b$]}
 \li{$(m,n)$-th component of matrix $x$}{$x$[$m,n$]}
 \li{row $m$ or column $n$ of matrix $x$}{$x$[$m,$]{\rm,} $x$[$,n$]}
-\li{numerator of $x$}{numerator$(x)$}
-\li{lowest denominator of $x$}{denominator$(x)$}
+\li{numerator/denominator of $x$}{numerator$(x)${\rm, }denominator}
 %
 \subsec{Conjugates and Lifts}
 \li{conjugate of a number $x$}{conj$(x)$}
@@ -386,9 +382,8 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{lift of $x$ from Mods}{lift{\rm,} centerlift$(x)$}
 
 \section{Random Numbers}
-\li{random integer between $0$ and $N-1$}{random$(\{N\})$}
-\li{get random seed}{getrand$()$}
-\li{set random seed to $s$}{setrand$(s)$}
+\li{random integer/prime in $[0,N[$}{random$(N)${\rm, }randomprime}
+\li{get/set random seed}{getrand{\rm, }setrand$(s)$}
 
 \begingroup
 \outer\def\subsec#1{\filbreak
@@ -399,21 +394,26 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 
 \section{Lists, Sets \& Sorting}
 \li{sort $x$ by $k$th component}{vecsort$(x,\{k\},\{fl=0\})$}
+\li{min.~$m$ of $x$ ($m=x[i]$), max.}{vecmin$(x,\{\&i\})${\rm, }vecmax}
+\li{does $y$ belong to $x$, sorted wrt. $f$}{vecsearch$(x,y,\{f\})$}
   {\bf Sets} (= row vector of strings with strictly increasing entries)\hfill\break
 %
 \li{intersection of sets $x$ and $y$}{setintersect$(x,y)$}
 \li{set of elements in $x$ not belonging to $y$}{setminus$(x,y)$}
 \li{union of sets $x$ and $y$}{setunion$(x,y)$}
-\li{look if $y$ belongs to the set $x$}{setsearch$(x,y,\{\fl\})$}
+\li{does $y$ belong to the set $x$}{setsearch$(x,y,\{\fl\})$}
 %
-\subsec{Lists}
-\li{create empty list $L$}{$L$ = List$()$}
+\subsec{Lists. {\rm create empty list: $L$ = List$()$}}
 \li{append $x$ to list $L$}{listput$(L,x,\{i\})$}
 \li{remove $i$-th component from list $L$}{listpop$(L,\{i\})$}
 \li{insert $x$ in list $L$ at position $i$}{listinsert$(L,x,i)$}
 \li{sort the list $L$ in place}{listsort$(L,\{\fl\})$}
 
-\section{Programming \& User Functions}
+\section{Programming}
+\subsec{Functions and closures}
+\leavevmode
+ {\tt fun(vars) = my(local vars); \var{seq}\hfill\break}
+ {\tt fun = (vars) -> my(local vars); \var{seq}\hfill}
 \subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}
 \li{eval.\ \seq\ for $a\le X\le b$}{for$(X\,$=$\;a,b,\seq)$}
 \li{eval.\ \seq\ for $X$ dividing $n$}{fordiv$(n,X,\seq)$}
@@ -421,44 +421,51 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{eval.\ \seq\ for $a\le X\le b$ stepping
 $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{multivariable {\tt for}}{forvec$(X\,$=$\;v,\seq)$}
-\li{if $a\ne0$, evaluate $\seq_1$, else $\seq_2$}{if$(a,\{\seq_1\},\{\seq_2\})$}
+\li{loop over partitions of $n$}{forpart$(p\,$=$n\;\seq)$}
+\li{loop over vectors $v$, $q(v)\leq B$, $q > 0$}{forqfvec$(v, q, b, \seq)$}
+\li{loop over subgrps $H$ of abelian grp $G$}{forsubgroup$(H=G)$}
 \li{evaluate \seq\ until $a\ne0$}{until$(a,\seq)$}
 \li{while $a\ne0$, evaluate \seq}{while$(a,\seq)$}
 \li{exit $n$ innermost enclosing loops}{break$(\{n\})$}
 \li{start new iteration of $n$th enclosing loop}{next$(\{n\})$}
 \li{return $x$ from current subroutine}{return$(\{x\})$}
+\li{raise an exception}{error$()$}
+\li{if $a\ne0$, evaluate $\seq_1$, else $\seq_2$}{if$(a,\{\seq_1\},\{\seq_2\})$}
 \li{try $\seq_1$, evaluate $\seq_2$ on error}{iferr$(\seq_1, E, \seq_2)$}
-\li{try $\seq_1$, eval $\seq_2$ on error $e$}{iferrname$(e, \seq_1, E, \seq_2)$}
-\li{type of error message $E$}{errname$(E)$}
+%\li{type of error message $E$}{errname$(E)$}
+\li{select from $v$ according to $f$}{select$(f, v)$}
+\li{apply $f$ to all entries in $v$}{apply$(f, v)$}
 %
 \subsec{Input/Output}
-\li{print args with/without newline}{print$(),$ print1$()$}
+\li{print with/without \kbd{\bs n}, \TeX\ format}{print{\rm, }print1{\rm,
+}printtex}
 \li{formatted printing}{printf$()$}
-\li{read a string from keyboard}{input$()$}
-\li{output \args\ in \TeX\ format}{printtex$(\args)$}
 \li{write \args\ to file}{write{\rm,} write1{\rm,} writetex$(\file,\args)$}
+\li{write $x$ in binary format}{writebin$(\file,x)$}
 \li{read file into GP}{read($\{\file\}$)}
+\li{read file, return as vector of lines}{readvec($\{\file\}$)}
+\li{read a string from keyboard}{input$()$}
 %
 \subsec{Interface with User and System}
 \li{allocates a new stack of $s$ bytes}{allocatemem$(\{s\})$}
+\li{alias \var{old}\ to \var{new}}{alias$(\var{new},\var{old})$}
+\li{install function from library}{install$(f,code,\{\var{gpf\/}\},\{\var{lib}\})$}
 \li{execute system command $a$}{system$(a)$}
 \li{as above, feed result to GP}{extern$(a)$}
-\li{install function from library}{install$(f,code,\{\var{gpf\/}\},\{\var{lib}\})$}
-\li{alias \var{old}\ to \var{new}}{alias$(\var{new},\var{old})$}
-\li{new name of function $f$ in GP 2.0}{whatnow$(f)$}
+\li{as above, return GP string}{externstr$(a)$}
+%\li{new name of function $f$ in GP 2.0}{whatnow$(f)$}
+\li{get \kbd{\$VAR} from environment}{getenv$($\kbd{"VAR"}$)$}
+\li{measure time in ms.}{gettime$()$}
+\li{timeout command after $s$ seconds}{alarm$(s, \expr)$}
 %
-\subsec{User Defined Functions}
-\leavevmode
-  {\tt name(formal vars) = my(local vars); \var{seq}}\hfill\break
-  {\tt struct.member = \var{seq}}\hfill\break
-\li{kill value of variable or function $x$}{kill$(x)$}
-
 \section{Iterations, Sums \& Products}
 \li{numerical integration}{intnum$(X\,$=$\;a,b,\expr,\{\fl\})$}
 \li{sum \expr\ over divisors of $n$}{sumdiv$(n,X,\expr)$}
+\li{\kbd{sumdiv}, with \expr\ multiplicative}{sumdivmult$(n,X,\expr)$}
 \li{sum $X=a$ to $X=b$, initialized at $x$}{sum$(X\,$=$\;a,b,\expr,\{x\})$}
 \li{sum of series \expr}{suminf$(X\,$=$\;a,\expr)$}
 \li{sum of alternating/positive series}{sumalt{\rm,} sumpos}
+\li{sum of series using \kbd{intnum}}{sumnum}
 \li{product $a\le X\le b$, initialized at $x$}{prod$(X\,$=$\;a,b,\expr,\{x\})$}
 \li{product over primes $a\le X\le b$}{prodeuler$(X\,$=$\;a,b,\expr)$}
 \li{infinite product $a\le X\le\infty$}{prodinf$(X\,$=$\;a,\expr)$}
@@ -474,24 +481,26 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{extract components of $x$}{vecextract$(x,y,\{z\})$}
 \li{transpose of vector or matrix $x$}{mattranspose$(x)$ {\rm or} $x$\til}
 \li{adjoint of the matrix $x$}{matadjoint$(x)$}
-\li{eigenvectors of matrix $x$}{mateigen$(x)$}
-\li{characteristic polynomial of $x$}{charpoly$(x,\{v\},\{\fl\})$}
-\li{minimal polynomial of $x$}{minpoly$(x,\{v\})$}
-\li{trace of matrix $x$}{trace$(x)$}
+\li{eigenvectors/values of matrix $x$}{mateigen$(x)$}
+\li{characteristic/minimal polynomial of $x$}{charpoly$(x)${\rm, }minpoly}
+\li{trace/determinant of matrix $x$}{trace$(x)${\rm, }matdet}
+\li{Frobenius form of $x$}{matfrobenius$(x)$}
+\li{QR decomposition}{matqr$(x)$}
 %
 \subsec{Constructors \& Special Matrices}
 \li{row vec.\ of \expr\ eval'ed at $1\le i\le n$}{vector$(n,\{i\},\{\expr\})$}
 \li{col.\ vec.\ of \expr\ eval'ed at $1\le i\le n$}{vectorv$(n,\{i\},\{\expr\})$}
 \li{matrix $1\le i\le m$, $1\le j\le n$}{matrix$(m,n,\{i\},\{j\},\{\expr\})$}
+\li{define matrix by blocks}{matconcat$(B)$}
 \li{diagonal matrix with diagonal $x$}{matdiagonal$(x)$}
 \li{$n\times n$ identity matrix}{matid$(n)$}
 \li{Hessenberg form of square matrix $x$}{mathess$(x)$}
-\li{$n\times n$ Hilbert matrix $H_{ij}=(i+j-1)^{-1}$}{mathilbert$(n)$}
-\li{$n\times n$ Pascal triangle $P_{ij}={i\choose j}$}{matpascal$(n-1)$}
+%\li{$n\times n$ Hilbert matrix $H_{ij}=(i+j-1)^{-1}$}{mathilbert$(n)$}
+%\li{$n\times n$ Pascal triangle}{matpascal$(n-1)$}
 \li{companion matrix to polynomial $x$}{matcompanion$(x)$}
+\li{Sylvester matrix of $x$}{polsylvestermatrix$(x)$}
 %
 \subsec{Gaussian elimination}
-\li{determinant of matrix $x$}{matdet$(x,\{\fl\})$}
 \li{kernel of matrix $x$}{matker$(x,\{\fl\})$}
 \li{intersection of column spaces of $x$ and $y$}{matintersect$(x,y)$}
 \li{solve $M*X = B$ ($M$ invertible)}{matsolve$(M,B)$}
@@ -514,17 +523,18 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 %
 \li{signature of quad form $^ty*x*y$}{qfsign$(x)$}
 \li{decomp into squares of $^ty*x*y$}{qfgaussred$(x)$}
+\li{eigenvals/eigenvecs for real symmetric $x$}{qfjacobi$(x)$}
 \li{find up to $m$ sols of $^ty*x*y\le b$}{qfminim$(x,b,m)$}
 \li{$v$, $v[i]:=$number of sols of $^ty*x*y = i$}{qfrep$(x,B,\{\fl\})$}
+\li{automorphism group of $q$}{qfauto$(q)$}
 %\li{perfection rank of $x$}{qfperfection$(x)$}
-\li{eigenvals/eigenvecs for real symmetric $x$}{qfjacobi$(x)$}
 
 \section{Formal \& p-adic Series}
 \li{truncate power series or $p$-adic number}{truncate$(x)$}
 \li{valuation of $x$ at $p$}{valuation$(x,p)$}
 \subsec{Dirichlet and Power Series}
 \li{Taylor expansion around $0$ of $f$ w.r.t. $x$}{taylor$(f,x)$}
-\li{$\sum a_kb_k t^k$ from $\sum a_kt^k$ and $\sum b_kt^k$}{serconvol$(x,y)$}
+\li{$\sum a_kb_k t^k$ from $\sum a_kt^k$ and $\sum b_kt^k$}{serconvol$(a,b)$}
 \li{$f=\sum a_k t^k$ from $\sum (a_k/k!)t^k$}{serlaplace$(f)$}
 \li{reverse power series $F$ so $F(f(x))=x$}{serreverse$(f)$}
 \li{Dirichlet series multiplication / division}{dirmul{\rm,} dirdiv$(x,y)$}
@@ -549,7 +559,8 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{resultant of $f$ and $g$}{polresultant$(f,g,\{v\},\{\fl\})$}
 \li{as above, give $[u,v,d]$, $xu + yv = d$}{polresultantext$(x,y,\{v\})$}
 \li{derivative of $f$ w.r.t. $x$}{deriv$(f,x)$}
-\li{formal integral of $f$ w.r.t. $x$}{intformal$(f,x)$}
+\li{formal integral of $f$ w.r.t. $x$}{intformal$(f,\{x\})$}
+\li{formal sum of $f$ w.r.t. $x$}{sumformal$(f,\{x\})$}
 \li{reciprocal poly $x^{\deg f}f(1/x)$}{polrecip$(f)$}
 \li{interpol.~pol.~eval.~at $a$}{polinterpolate$(X,\{Y\},\{a\},\{$\&$e\})$}
 \li{initialize $t$ for Thue equation solver}{thueinit$(f)$}
@@ -583,8 +594,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{inverse trig functions}{asin, acos, atan}
 \li{hyperbolic functions}{sinh, cosh, tanh}
 \li{inverse hyperbolic functions}{asinh, acosh, atanh}
-\li{exponential of $x$}{exp$(x)$}
-\li{natural log of $x$}{ln$(x)$ {\rm or} log$(x)$}
+\li{exponential / natural log of $x$}{exp{\rm, }log}
 %
 \li{gamma function $\Gamma(x)=\int_0^\infty e^{-t}t^{x-1}dt$}{gamma$(x)$}
 %\li{half-integer gamma function $\Gamma(n+1/2)$}{gammah$(n)$}
@@ -596,28 +606,28 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{dilogarithm of $x$}{dilog$(x)$}
 \li{$m$th polylogarithm of $x$}{polylog$(m,x,\{\fl\})$}
 \li{$U$-confluent hypergeometric function}{hyperu$(a,b,u)$}
-\li{$J$-Bessel function, $J_{n+1/2}(x)$}{besselj$(n,x)$, besseljh$(n,x)$}
-\li{$K$-Bessel function of index \var{nu}}{besselk$(\var{nu},x)$}
+\li{Bessel $J_n(x)$, $J_{n+1/2}(x)$}{besselj$(n,x)$, besseljh$(n,x)$}
+\li{Bessel $I_\nu$, $K_\nu$, $H^1_\nu$, $H^2_\nu$, $N_\nu$}
+{(bessel)i{\rm, }k{\rm, }h1{\rm, }h2{\rm, }n}
+\li{Lambert $W$: $x$ s.t. $xe^x =y$}{lambertw$(y)$}
 
 \section{Elementary Arithmetic Functions}
 \li{vector of binary digits of $|x|$}{binary$(x)$}
 \li{give bit number $n$ of integer $x$}{bittest$(x,n)$}
-\li{ceiling of $x$}{ceil$(x)$}
-\li{floor of $x$}{floor$(x)$}
-\li{fractional part of $x$}{frac$(x)$}
+\li{ceiling/floor/fractional part}{ceil{\rm, }floor{\rm, }frac}
 \li{round $x$ to nearest integer}{round$(x,\{$\&$e\})$}
 \li{truncate $x$}{truncate$(x,\{$\&$e\})$}
 \li{gcd/LCM of $x$ and $y$}{gcd$(x,y)$, lcm$(x,y)$}
 \li{gcd of entries of a vector/matrix}{content$(x)$}
 \par
 \subsec{Primes and Factorization}
-\li{add primes in $v$ to the prime table}{addprimes$(v)$}
-\li{the $n$th prime}{prime$(n)$}
+\li{add primes in $v$ to prime table}{addprimes$(v)$}
+\li{Chebyshev $\pi(x)$, $n$-th prime $p_n$}{primepi$(x)$, prime$(n)$}
 \li{vector of first $n$ primes}{primes$(n)$}
 \li{smallest prime $\ge x$}{nextprime$(x)$}
 \li{largest prime $\le x$}{precprime$(x)$}
 \li{factorization of $x$}{factor$(x,\{lim\})$}
-\li{reconstruct $x$ from its factorization}{factorback$(f,\{e\})$}
+\li{recover $x$ from its factorization}{factorback$(f,\{e\})$}
 \par
 \subsec{Divisors}
 \li{number of distinct prime divisors}{omega$(x)$}
@@ -628,8 +638,8 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \par
 \subsec{Special Functions and Numbers}
 \li{binomial coefficient $x\choose y$}{binomial$(x,y)$}
-\li{Bernoulli number $B_n$ as real}{bernreal$(n)$}
-\li{Bernoulli vector $B_0,B_2,\ldots,B_{2n}$}{bernvec$(n)$}
+\li{Bernoulli number $B_n$ as real/rational}{bernreal$(n)${\rm, }bernfrac}
+\li{Bernoulli polynomial $B_n(x)$}{bernpol$(n,\{x\})$}
 \li{$n$th Fibonacci number}{fibonacci$(n)$}
 \li{number of partitions of $n$}{numbpart$(n)$}
 \li{Euler $\phi$-function}{eulerphi$(x)$}
@@ -639,12 +649,13 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \par
 \subsec{Miscellaneous}
 \li{integer or real factorial of $x$}{$x!$ {\rm or} fact$(x)$}
-\li{integer square root of $x$}{sqrtint$(x)$}
+\li{integer square / $n$-th root of $x$}{sqrtint$(x)$, sqrtnint$(x,n)$}
 \li{solve $z\equiv x$ and $z\equiv y$}{chinese$(x,y)$}
 \li{minimal $u,v$ so $xu+yv=\gcd(x,y)$}{gcdext$(x,y)$}
 \li{multiplicative order of $x$ (intmod) (<=$o$)}{znorder$(x,\{o\})$}
 \li{primitive root mod prime power $q$}{znprimroot$(q)$}
 \li{structure of $(\ZZ/n\ZZ)^*$}{znstar$(n)$}
+\li{discrete logarithm of $x$ in base $g$}{znlog$(x,g,\{o\})$}
 \li{continued fraction of $x$}{contfrac$(x,\{b\},\{lmax\})$}
 \li{last convergent of continued fraction $x$}{contfracpnqn$(x)$}
 \li{best rational approximation to $x$}{bestappr$(x,k)$}
@@ -655,6 +666,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{is $x$ a strong pseudo-prime?}{ispseudoprime$(x)$}
 \li{is $x$ square-free?}{issquarefree$(x)$}
 \li{is $x$ a square?}{issquare$(x,\{$\&$n\})$}
+\li{is $x$ a perfect power?}{ispower$(x,\{k\},\{$\&$n\})$}
 \li{is \var{pol}\ irreducible?}{polisirreducible$(\var{pol})$}
 
 % This goes at the bottom of the second page (column 6)
@@ -693,8 +705,8 @@ If $\fl$ omitted, also
 \endindentedkeys
 \li{change curve $E$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangecurve$(ell,v)$}
 \li{change point $z$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangepoint$(z,v)$}
-\li{add points $z_1+z_2$}{elladd$(ell,z_1,z_2)$}
-\li{subtract points $z_1-z_2$}{ellsub$(ell,z_1,z_2)$}
+\li{add points $P+Q$ / $P-Q$}{elladd$(ell,P,Q)${\rm, }ellsub}
+\li{negate point}{ellneg$(ell,P)$}
 \li{compute $n\cdot z$}{ellmul$(ell,z,n)$}
 \li{check if $z$ is on $E$}{ellisoncurve$(ell,z)$}
 \li{order of torsion point $z$}{ellorder$(ell,z)$}
@@ -757,6 +769,7 @@ If $\fl$ omitted, also
 \li{init window $w$, with size $x$,$y$}{plotinit$(w,x,y)$}
 \li{erase window $w$}{plotkill$(w)$}
 \li{copy $w$ to $w_2$ with offset $(dx,dy)$}{plotcopy$(w,w_2,dx,dy)$}
+\li{clips contents of $w$}{plotclip$(w)$}
 \li{scale coordinates in $w$}{plotscale$(w,x_1,x_2,y_1,y_2)$}
 \li{\kbd{ploth} in $w$}{plotrecth$(w,X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
 \li{\kbd{plothraw} in $w$}{plotrecthraw$(w,data,\{\fl\})$}
@@ -778,6 +791,7 @@ If $\fl$ omitted, also
 \li{draw points}{plotpoints$(w,lx,ly)$}
 \li{draw line to $(x+dx,y+dy)$}{plotrline$(w,dx,dy)$}
 \li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
+\li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
 %
 \subsec{Postscript Functions}
 \li{as {\tt ploth}}{psploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
@@ -798,6 +812,7 @@ If $\fl$ omitted, also
 \li{prime form of disc. $x$ above prime $p$}{qfbprimeform$(x,p)$}
 \li{class number of disc. $x$}{qfbclassno$(x)$}
 \li{Hurwitz class number of disc. $x$}{qfbhclassno$(x)$}
+\li{Solve $Q(x,y) = p$ in integers, $p$ prime}{qfbsolve$(Q,p)$}
 
 \section{Quadratic Fields}
 %
@@ -897,6 +912,7 @@ $a_1,\{a_2\},\{a_3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \li{expo.~of $x$ on fund.~units}{bnfisunit$(\var{bnf},x)$}
 \li{as above for $S$-units}{bnfissunit$(\var{bnfs},x)$}
 \li{signs of real embeddings of \kbd{\var{bnf}.fu}}{bnfsignunit$(\var{bnf})$}
+\li{narrow class group}{bnfnarrow$(\var{bnf})$}
 %
 \subsec{Class Field Theory}
 \li{ray class number for mod.~$m$}{bnrclassno$(\var{bnf},m)$}
@@ -922,7 +938,6 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{is $id$ an ideal in \var{nf} ?}{nfisideal$(\var{nf},id)$}
 \li{is $x$ principal in \var{bnf} ?}{bnfisprincipal$(\var{bnf},x)$}
 \li{principal ideal generated by $x$}{idealprincipal$(\var{nf},x)$}
-\li{principal idele generated by $x$}{ideleprincipal$(\var{nf},x)$}
 \li{give {\tt [}$a,b${\tt ]}, s.t.~ $a\ZZ_K+b\ZZ_K = x$}{idealtwoelt$(\var{nf},x,\{a\})$}
 \li{put ideal $a$ ($a\ZZ_K+b\ZZ_K$) in HNF form}{idealhnf$(\var{nf},a,\{b\})$}
 \li{norm of ideal $x$}{idealnorm$(\var{nf},x)$}
@@ -937,6 +952,7 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{inverse of ideal $x$}{idealinv$(\var{nf},x)$}
 \li{divide ideal $x$ by $y$}{idealdiv$(\var{nf},x,y,\{\fl\})$}
 \li{Find $(a,b)\in x\times y$, $a+b=1$}{idealaddtoone$(\var{nf},x,\{y\})$}
+\li{coprime integral $A,B$ such that $x=A/B$}{idealnumden$(\var{nf},x)$}
 %
 \subsec{Primes and Multiplicative Structure}
 \li{factor ideal $x$ in \var{nf}}{idealfactor$(\var{nf},x)$}
@@ -953,21 +969,26 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{solve $M x = B$ in $(\ZZ_K/pr)^*$}{nfsolvemodpr$(\var{nf},M,B,prmod)$}
 
 \section{Galois theory over $\QQ$}
-\li{initializes a Galois group structure}{galoisinit$(\var{pol},\{den\})$}
+\li{initializes a Galois group structure $G$}{galoisinit$(\var{pol},\{den\})$}
 \li{action of $p$ in nfgaloisconj form}{galoispermtopol$(G,\{p\})$}
-\li{identifies as abstract group}{galoisidentify$(G)$}
-\li{exports a group for GAP or MAGMA}{galoisexport$(G,\{\fl\})$}
+\li{identify as abstract group}{galoisidentify$(G)$}
+\li{export a group for GAP/MAGMA}{galoisexport$(G,\{\fl\})$}
 \li{subgroups of the Galois group $G$}{galoissubgroups$(G)$}
-\li{subfields from subgroups of $G$}{galoissubfields$(G,\{\fl\},\{v\})$}
+\li{is subgroup $H$ normal?}{galoisisnormal$(G,H)$}
+\li{subfields from subgroups}{galoissubfields$(G,\{\fl\},\{v\})$}
 \li{fixed field}{galoisfixedfield$(G,\var{perm},\{\fl\},\{v\})$}
+\li{Frobenius at maximal ideal $P$}{idealfrobenius$(\var{nf},G,P)$}
+\li{ramification groups at $P$}{idealramgroups$(\var{nf},G,P)$}
 \li{is $G$ abelian?}{galoisisabelian$(G,\{\fl\})$}
-\li{abelian number fields}{galoissubcyclo(N,H,\{\fl\},\{v\})}
+\li{abelian number fields/$\QQ$}{galoissubcyclo(N,H,\{\fl\},\{v\})}
+\li{query the \kbd{galpol} package}{galoisgetpol(a,b,\{s\})}
 
 \section{Relative Number Fields (rnf)}
 Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \hfill\break
 %
 \li{absolute equation of $L$}{rnfequation$(\var{nf},g,\{\fl\})$}
+\li{is $L/K$ abelian?}{rnfisabelian$(\var{nf},g)$}
 \li{relative {\tt nfalgtobasis}}{rnfalgtobasis$(\var{rnf},x)$}
 \li{relative {\tt nfbasistoalg}}{rnfbasistoalg$(\var{rnf},x)$}
 \li{relative {\tt idealhnf}}{rnfidealhnf$(\var{rnf},x)$}
@@ -993,7 +1014,8 @@ Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \li{relative Dedekind criterion, prime $pr$}{rnfdedekind$(\var{nf},g,pr)$}
 \li{discriminant of relative extension}{rnfdisc$(\var{nf},g)$}
 \li{pseudo-basis of $\ZZ_L$}{rnfpseudobasis$(\var{nf},g)$}
-\li{relative HNF basis of $order$}{rnfhnfbasis$(\var{bnf},order)$}
+%\li{relative HNF basis of $order$}{rnfhnfbasis$(\var{bnf},order)$}
+\li{relative HNF / SNF}{nfhnf$(\var{nf},x)${\rm, }nfsnf}
 \li{reduced basis for $order$}{rnflllgram$(\var{nf},g,order)$}
 \li{determinant of pseudo-matrix $A$}{rnfdet$(\var{nf},A)$}
 \li{Steinitz class of $order$}{rnfsteinitz$(\var{nf},order)$}
