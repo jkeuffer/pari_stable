@@ -692,14 +692,9 @@ as an abelian group structure.
 
 \subsubsec{Curves over $\Q$}
 
-Functions relative to height computations (\kbd{ellheight}, \kbd{ellbil} and
-\kbd{ellheighmatrix}) require that the curve be in \emph{minimal} Weierstrass
-form: this is achieved by the function \kbd{ellminimalmodel}. Using a
-non-minimal model in such a routine will raise an exception. Even if other
-functions do not require a minimal model, it is a good idea to stick
-to minimal models, whenever $\gcd(c_4,c_6)$ is easy to factor (otherwise
-\kbd{ellminimalmodel} will be slow). The
-construction
+All functions should return a correct result, whether the model is minimal or
+not, but it is a good idea to stick to minimal models whenever
+$\gcd(c_4,c_6)$ is easy to factor (minor speed-up). The construction
 \bprog
   E = ellminimalmodel(E0, &v)
 @eprog\noindent replaces the original model $E_0$ by a minimal model $E$,
