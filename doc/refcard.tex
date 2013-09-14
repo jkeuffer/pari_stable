@@ -83,7 +83,7 @@
 \begingroup\small
 \centerline{Based on an earlier version by Joseph H. Silverman}
 \centerline{\version. Copyright \copyright\ \year\ K. Belabas}
-\centerline{GP copyright by The PARI Group}
+%\centerline{GP copyright by The PARI Group}
 
 Permission is granted to make and distribute copies of this card provided the
 copyright and this permission notice are preserved on all copies.
@@ -327,9 +327,7 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \newcolumn
 
 \section{Reserved Variable Names}
-\li{$\pi=3.14159\cdots$}{Pi}
-\li{Catalan's constant $C =.91596\cdots$}{Catalan}
-\li{Euler's constant $\gamma =.57721\cdots$}{Euler}
+\li{$\pi=3.14\dots$, $\gamma=0.57\dots$, $C=0.91\dots$}{Pi{\rm, }Euler{\rm, }Catalan}
 \li{square root of $-1$}{I}
 \li{big-oh notation}{O}
 
@@ -351,9 +349,19 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{derivative of $f$ w.r.t. $x$}{$f$'}
 \li{apply differential operator}{diffop}
 \li{restore $x$ as a formal variable}{$x$='$x$}
-\section{Conversions}
+\li{simultaneous assignment $x\leftarrow v_1$, $y\leftarrow v_2$}{[x,y] = v}
+\section{Info about an Object, Select Components}
+\li{PARI type of object $x$}{type$(x)$}
+\li{length of $x$ / size of $x$ in memory}{\#$x${\rm, }sizebyte$(x)$}
+\li{real or $p$-adic precision of $x$}{precision$(x)${\rm, }padicprec}
+\li{$n$-th component of $x$}{component$(x,n)$}
+\li{$n$-th component of vector/list $x$}{$x$[$n$]}
+\li{components $a,a+1,\dots,b$ of vector $x$}{$x$[$a$..$b$]}
+\li{$(m,n)$-th component of matrix $x$}{$x$[$m,n$]}
+\li{row $m$ or column $n$ of matrix $x$}{$x$[$m,$]{\rm,} $x$[$,n$]}
+\li{numerator/denominator of $x$}{numerator$(x)${\rm, }denominator}
 %
-\subsec{Change Objects}
+\section{Conversions}
 \li{to vector, matrix, set, list, string}
   {Col{\rm/}Vec{\rm,}Mat{\rm,}Set{\rm,}List{\rm,}Str}
 \li{create PARI object $(x\mod y)$}{Mod$(x,y)$}
@@ -361,18 +369,8 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{as \kbd{Pol}/\kbd{Vec}, starting with constant term}{Polrev{\rm, }Vecrev}
 \li{make $x$ a power series of $v$}{Ser$(x,\{v\})$}
 \li{string from bytes / from format+args}{Strchr{\rm, }Strprintf}
-\li{PARI type of object $x$}{type$(x)$}
-\li{object $x$ with precision $n$}{precision$(x,\{n\})$}
-\li{evaluate $f$ replacing vars by their value}{eval$(f)$}
-%
-\subsec{Select Pieces of an Object}
-\li{length of $x$}{\#$x$ {\rm or} length$(x)$}
-\li{$n$-th component of $x$}{component$(x,n)$}
-\li{$n$-th component of vector/list $x$}{$x$[$n$]}
-\li{components $a,a+1,\dots,b$ of vector $x$}{$x$[$a$..$b$]}
-\li{$(m,n)$-th component of matrix $x$}{$x$[$m,n$]}
-\li{row $m$ or column $n$ of matrix $x$}{$x$[$m,$]{\rm,} $x$[$,n$]}
-\li{numerator/denominator of $x$}{numerator$(x)${\rm, }denominator}
+\li{convert $x$ to simplest possible type}{simplify$(x)$}
+\li{object $x$ with precision $n$}{precision$(x,n)$}
 %
 \subsec{Conjugates and Lifts}
 \li{conjugate of a number $x$}{conj$(x)$}
@@ -393,7 +391,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 }
 
 \section{Lists, Sets \& Sorting}
-\li{sort $x$ by $k$th component}{vecsort$(x,\{k\},\{fl=0\})$}
+\li{sort $x$ by $k$-th component}{vecsort$(x,\{k\},\{fl=0\})$}
 \li{min.~$m$ of $x$ ($m=x[i]$), max.}{vecmin$(x,\{\&i\})${\rm, }vecmax}
 \li{does $y$ belong to $x$, sorted wrt. $f$}{vecsearch$(x,y,\{f\})$}
   {\bf Sets} (= row vector of strings with strictly increasing entries)\hfill\break
@@ -427,7 +425,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{evaluate \seq\ until $a\ne0$}{until$(a,\seq)$}
 \li{while $a\ne0$, evaluate \seq}{while$(a,\seq)$}
 \li{exit $n$ innermost enclosing loops}{break$(\{n\})$}
-\li{start new iteration of $n$th enclosing loop}{next$(\{n\})$}
+\li{start new iteration of $n$-th enclosing loop}{next$(\{n\})$}
 \li{return $x$ from current subroutine}{return$(\{x\})$}
 \li{raise an exception}{error$()$}
 \li{if $a\ne0$, evaluate $\seq_1$, else $\seq_2$}{if$(a,\{\seq_1\},\{\seq_2\})$}
@@ -495,7 +493,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{diagonal matrix with diagonal $x$}{matdiagonal$(x)$}
 \li{$n\times n$ identity matrix}{matid$(n)$}
 \li{Hessenberg form of square matrix $x$}{mathess$(x)$}
-%\li{$n\times n$ Hilbert matrix $H_{ij}=(i+j-1)^{-1}$}{mathilbert$(n)$}
+\li{$n\times n$ Hilbert matrix $H_{ij}=(i+j-1)^{-1}$}{mathilbert$(n)$}
 %\li{$n\times n$ Pascal triangle}{matpascal$(n-1)$}
 \li{companion matrix to polynomial $x$}{matcompanion$(x)$}
 \li{Sylvester matrix of $x$}{polsylvestermatrix$(x)$}
@@ -525,9 +523,10 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{decomp into squares of $^ty*x*y$}{qfgaussred$(x)$}
 \li{eigenvals/eigenvecs for real symmetric $x$}{qfjacobi$(x)$}
 \li{find up to $m$ sols of $^ty*x*y\le b$}{qfminim$(x,b,m)$}
+\li{perfection rank of $x$}{qfperfection$(x)$}
 \li{$v$, $v[i]:=$number of sols of $^ty*x*y = i$}{qfrep$(x,B,\{\fl\})$}
 \li{automorphism group of $q$}{qfauto$(q)$}
-%\li{perfection rank of $x$}{qfperfection$(x)$}
+\li{find isomorphism between $q$ and $Q$}{qfisom$(q,Q)$}
 
 \section{Formal \& p-adic Series}
 \li{truncate power series or $p$-adic number}{truncate$(x)$}
@@ -539,9 +538,6 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{reverse power series $F$ so $F(f(x))=x$}{serreverse$(f)$}
 \li{Dirichlet series multiplication / division}{dirmul{\rm,} dirdiv$(x,y)$}
 \li{Dirichlet Euler product ($b$ terms)}{direuler$(p\,$=$\;a,b,\expr)$}
-\subsec{$p$-adic Functions}
-\li{Teichmuller character of $x$}{teichmuller$(x)$}
-\li{Newton polygon of $f$ for prime $p$}{newtonpoly$(f,p)$}
 
 \newcolumn
 \title{PARI-GP Reference Card}
@@ -550,15 +546,17 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \section{Polynomials \& Rational Functions}
 %
 \li{degree of $f$}{poldegree$(f)$}
-\li{coefficient of degree $n$ of $f$}{polcoeff$(f,n)$}
-\li{round coeffs of $f$ to nearest integer}{round$(f,\{$\&$e\})$}
+\li{coeff. of degree $n$ of $f$, leading coeff.}{polcoeff$(f,n)${\rm, }pollead}
 \li{gcd of coefficients of $f$}{content$(f)$}
-\li{replace $x$ by $y$ in $f$}{subst$(f,x,y)$}
+\li{replace $x$ by $y$}{subst$(f,x,y)$}
+\li{evaluate $f$ replacing vars by their value}{eval$(f)$}
+\li{replace polynomial expr.~$T(x)$ by $y$ in $f$}{substpol$(f,T,y)$}
+\li{replace $x_1,\dots,x_n$ by $y_1,\dots,y_n$ in $f$}{substvec$(f,x,y)$}
 \li{discriminant of polynomial $f$}{poldisc$(f)$}
 %\li{elementary divisors of Z[a]/f'(a)Z[a]}{poldiscreduced$(f)$}
-\li{resultant of $f$ and $g$}{polresultant$(f,g,\{v\},\{\fl\})$}
-\li{as above, give $[u,v,d]$, $xu + yv = d$}{polresultantext$(x,y,\{v\})$}
-\li{derivative of $f$ w.r.t. $x$}{deriv$(f,x)$}
+\li{resultant $R = \text{Res}_v(f,g)$}{polresultant$(f,g,\{v\})$}
+\li{$[u,v,R]$, $xu + yv = \text{Res}_v(f,g)$}{polresultantext$(x,y,\{v\})$}
+\li{derivative of $f$ w.r.t. $x$}{deriv$(f,\{x\})$}
 \li{formal integral of $f$ w.r.t. $x$}{intformal$(f,\{x\})$}
 \li{formal sum of $f$ w.r.t. $x$}{sumformal$(f,\{x\})$}
 \li{reciprocal poly $x^{\deg f}f(1/x)$}{polrecip$(f)$}
@@ -570,23 +568,23 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{number of real roots of $f$, $a < x\le b$}{polsturm$(f,\{a\},\{b\})$}
 \li{complex roots of $f$}{polroots$(f)$}
 \li{symmetric powers of roots of $f$ up to $n$}{polsym$(f,n)$}
-\li{roots of $f \mod p$}{polrootsmod$(f,p,\{\fl\})$}
 \li{factor $f$}{factor$(f,\{lim\})$}
-\li{factorization of $f\mod p$}{factormod$(f,p,\{\fl\})$}
-\li{factorization of $f$ over $\FF_{p^a}$}{factorff$(f,p,a)$}
-\li{$p$-adic fact. of $f$ to prec. $r$}{factorpadic$(f,p,r,\{\fl\})$}
-\li{$p$-adic roots of $f$ to prec. $r$}{polrootspadic$(f,p,r)$}
+\li{factor $f\mod p$ / roots}{factormod$(f,p)${\rm, }polrootsmod}
+\li{factor $f$ over $\FF_{p^a}$ / roots}{factorff$(f,p,a)${\rm, }polrootsff}
+\li{factor $f$ over $\QQ_p$ / roots}{factorpadic$(f,p,r)${\rm, }polrootspadic}
+\li{find irreducible $T\in \FF_p[x]$, $\deg T = n$}{ffinit$(p,n,\{x\})$}
+\li{$\#\{{\rm monic\ irred.}\ T\in \FF_q[x], \deg T = n\}$}{ffnbirred$(q,n)$}
 \li{$p$-adic root of $f$ cong. to $a\mod p$}{padicappr$(f,a)$}
 \li{Newton polygon of $f$ for prime $p$}{newtonpoly$(f,p)$}
+\li{extensions of $\QQ_p$ of degree $N$}{padicfields$(p,N)$}
 %
 \subsec{Special Polynomials}
-\li{$n$th cyclotomic polynomial in var. $v$}{polcyclo$(n,\{v\})$}
+\li{$n$-th cyclotomic polynomial in var. $v$}{polcyclo$(n,\{v\})$}
 \li{$d$-th degree subfield of $\QQ(\zeta_n)$} {polsubcyclo$(n,d,\{v\})$}
-\li{$n$-th Legendre polynomial}{pollegendre$(n,\{v=x\})$}
-\li{$n$-th Tchebicheff polynomial}{polchebyshev$(n,\{\fl\},\{v=x\})$}
-\li{Zagier's polynomial of index $n$,$m$}{polzagier$(n,m)$}
+\li{$P_n$, $T_n/U_n$, $H_n$}{pollegendre{\rm, }polchebyshev{\rm, }polhermite}
+%\li{Zagier's polynomial of index $n$,$m$}{polzagier$(n,m)$}
 
-\section{Transcendental Functions}
+\section{Transcendental and $p$-adic Functions}
 \li{real, imaginary part of $x$}{real$(x)$, imag$(x)$}
 \li{absolute value, argument of $x$}{abs$(x)$, arg$(x)$}
 \li{square/nth root of $x$}{sqrt$(x)$, sqrtn$(x,n,\{$\&$z\})$}
@@ -596,24 +594,26 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{inverse hyperbolic functions}{asinh, acosh, atanh}
 \li{exponential / natural log of $x$}{exp{\rm, }log}
 %
-\li{gamma function $\Gamma(x)=\int_0^\infty e^{-t}t^{x-1}dt$}{gamma$(x)$}
+\li{Euler $\Gamma$ function, $\log \Gamma$, $\Gamma'/\Gamma$}
+   {gamma{\rm, }lngamma{\rm, }psi}
 %\li{half-integer gamma function $\Gamma(n+1/2)$}{gammah$(n)$}
-\li{logarithm of gamma function}{lngamma$(x)$}
-\li{$\psi(x)=\Gamma'(x)/\Gamma(x)$}{psi$(x)$}
 \li{incomplete gamma function ($y=\Gamma(s)$)}{incgam$(s,x,\{y\})$}
 \li{exponential integral $\int_x^\infty e^{-t}/t\,dt$}{eint1$(x)$}
 \li{error function $2/\sqrt\pi\int_x^\infty e^{-t^2}dt$}{erfc$(x)$}
 \li{dilogarithm of $x$}{dilog$(x)$}
-\li{$m$th polylogarithm of $x$}{polylog$(m,x,\{\fl\})$}
+\li{$m$-th polylogarithm of $x$}{polylog$(m,x,\{\fl\})$}
 \li{$U$-confluent hypergeometric function}{hyperu$(a,b,u)$}
 \li{Bessel $J_n(x)$, $J_{n+1/2}(x)$}{besselj$(n,x)$, besseljh$(n,x)$}
 \li{Bessel $I_\nu$, $K_\nu$, $H^1_\nu$, $H^2_\nu$, $N_\nu$}
 {(bessel)i{\rm, }k{\rm, }h1{\rm, }h2{\rm, }n}
 \li{Lambert $W$: $x$ s.t. $xe^x =y$}{lambertw$(y)$}
+\li{Teichmuller character of $p$-adic $x$}{teichmuller$(x)$}
 
 \section{Elementary Arithmetic Functions}
 \li{vector of binary digits of $|x|$}{binary$(x)$}
-\li{give bit number $n$ of integer $x$}{bittest$(x,n)$}
+\li{bit number $n$ of integer $x$}{bittest$(x,n)$}
+\li{Hamming weight of integer $x$}{hammingweight$(x)$}
+%\li{Sum of decimal digits of integer $x$}{sumdigits$(x)$}
 \li{ceiling/floor/fractional part}{ceil{\rm, }floor{\rm, }frac}
 \li{round $x$ to nearest integer}{round$(x,\{$\&$e\})$}
 \li{truncate $x$}{truncate$(x,\{$\&$e\})$}
@@ -627,38 +627,40 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{smallest prime $\ge x$}{nextprime$(x)$}
 \li{largest prime $\le x$}{precprime$(x)$}
 \li{factorization of $x$}{factor$(x,\{lim\})$}
+\li{$n=df^2$, $d$ squarefree/fundamental}{core$(n,\{fl\})${\rm, }coredisc}
 \li{recover $x$ from its factorization}{factorback$(f,\{e\})$}
 \par
 \subsec{Divisors}
-\li{number of distinct prime divisors}{omega$(x)$}
-\li{number of prime divisors  with mult}{bigomega$(x)$}
-\li{number of divisors of $x$}{numdiv$(x)$}
-\li{row vector of divisors of $x$}{divisors$(x)$}
-\li{sum of ($k$-th powers of) divisors of $x$}{sigma$(x,\{k\})$}
+\li{number of prime divisors $\omega(n)$ / $\Omega(n)$}
+   {omega$(n)${\rm, }bigomega}
+\li{divisors of $n$ / number of divisors $\tau(n)$}{divisors$(n)${\rm, }numdiv}
+\li{sum of ($k$-th powers of) divisors of $n$}{sigma$(n,\{k\})$}
 \par
 \subsec{Special Functions and Numbers}
 \li{binomial coefficient $x\choose y$}{binomial$(x,y)$}
 \li{Bernoulli number $B_n$ as real/rational}{bernreal$(n)${\rm, }bernfrac}
 \li{Bernoulli polynomial $B_n(x)$}{bernpol$(n,\{x\})$}
-\li{$n$th Fibonacci number}{fibonacci$(n)$}
+\li{$n$-th Fibonacci number}{fibonacci$(n)$}
+\li{Stirling numbers $s(n,k)$ and $S(n,k)$}{stirling$(n,k,\{\fl\})$}
 \li{number of partitions of $n$}{numbpart$(n)$}
-\li{Euler $\phi$-function}{eulerphi$(x)$}
 \li{M\"obius $\mu$-function}{moebius$(x)$}
 \li{Hilbert symbol of $x$ and $y$ (at $p$)}{hilbert$(x,y,\{p\})$}
 \li{Kronecker-Legendre symbol $({x\over y})$}{kronecker$(x,y)$}
+\li{Dedekind sum $s(h,k)$}{sumdedekind$(x,y)$}
 \par
+\subsec{Multiplicative groups $(\ZZ/N\ZZ)^*$, $\FF_q^*$}
+\li{Euler $\phi$-function}{eulerphi$(x)$}
+\li{multiplicative order of $x$ (divides $o$)}{znorder$(x,\{o\})${\rm, }fforder}
+\li{primitive root mod $q$ / $x$\kbd{.mod}}{znprimroot$(q)${\rm, }ffprimroot$(x)$}
+\li{structure of $(\ZZ/n\ZZ)^*$}{znstar$(n)$}
+\li{discrete logarithm of $x$ in base $g$}{znlog$(x,g,\{o\})${\rm, }fflog}
 \subsec{Miscellaneous}
-\li{integer or real factorial of $x$}{$x!$ {\rm or} fact$(x)$}
 \li{integer square / $n$-th root of $x$}{sqrtint$(x)$, sqrtnint$(x,n)$}
 \li{solve $z\equiv x$ and $z\equiv y$}{chinese$(x,y)$}
 \li{minimal $u,v$ so $xu+yv=\gcd(x,y)$}{gcdext$(x,y)$}
-\li{multiplicative order of $x$ (intmod) (<=$o$)}{znorder$(x,\{o\})$}
-\li{primitive root mod prime power $q$}{znprimroot$(q)$}
-\li{structure of $(\ZZ/n\ZZ)^*$}{znstar$(n)$}
-\li{discrete logarithm of $x$ in base $g$}{znlog$(x,g,\{o\})$}
 \li{continued fraction of $x$}{contfrac$(x,\{b\},\{lmax\})$}
 \li{last convergent of continued fraction $x$}{contfracpnqn$(x)$}
-\li{best rational approximation to $x$}{bestappr$(x,k)$}
+\li{rational approximation to $x$}{bestappr$(x,k)${\rm, }bestapprPade}
 
 \section{True-False Tests}
 \li{is $x$ the disc. of a quadratic field?}{isfundamental$(x)$}
@@ -681,61 +683,74 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 
 \section{Elliptic Curves}
 %
-Elliptic curve initially given by $5$-tuple $E=$\kbd{[$a_1,a_2,a_3,a_4,a_6$]}.
+Elliptic curve initially given by $5$-tuple $v=$\kbd{[$a_1,a_2,a_3,a_4,a_6$]}.
+\li{Initialize \var{ell} struct}{E = ellinit$(v,\{Domain\})$}
+\leavevmode
 Points are \kbd{[x,y]}, the origin is \kbd{[0]}.
-\hfill\break
-\li{Initialize elliptic struct. $\var{ell}$, i.e create}{ellinit$(E,\{\fl\})$}
-\leavevmode\strut\hskip1em
-$a_1,a_2,a_3,a_4,a_6,b_2,b_4,b_6,b_8,c_4,c_6,disc,j$. This data can be
-recovered by typing \kbd{\var{ell}.a1},$\dots$,\kbd{\var{ell}.j}.
-If $\fl$ omitted, also
-\hfill\break
-\li{$\bullet$ $E$ defined over $\RR$}{}
+Struct members accessed as \kbd{E.}\var{member}:\hfill\break
+$\bullet$ All domains:
+\kbd{E.a1},\kbd{a2},\kbd{a3},\kbd{a4},\kbd{a6},
+\kbd{b2},\kbd{b4},\kbd{b6},\kbd{b8},
+\kbd{c4},\kbd{c6}, \kbd{disc}, \kbd{j}\hfill\break
+\li{$\bullet$ $E$ defined over $\RR$ or $\CC$}{}
 \beginindentedkeys
-\li{$x$-coords. of points of order $2$}{\var{ell}.roots}
-\li{real and complex periods}{\var{ell}.omega}
-\li{associated quasi-periods}{\var{ell}.eta}
-\li{volume of complex lattice}{\var{ell}.area}
+\li{$x$-coords. of points of order $2$}{E.roots}
+\li{periods / quasi-periods}{E.omega{,\rm }E.eta}
+\li{volume of complex lattice}{E.area}
 \endindentedkeys
-\li{$\bullet$ $E$ defined over $\QQ_p$, $|j|_p>1$}{}
+\li{$\bullet$ $E$ defined over $\QQ_p$}{}
 \beginindentedkeys
-\li{$x$-coord. of unit $2$ torsion point}{\var{ell}.roots}
-\li{Tate's $[u^2, u, q]$}{\var{ell}.tate}
-\li{Mestre's $w$}{\var{ell}.w}
+\li{residual characteristic}{E.p}
+\li{If $|j|_p>1$: Tate's $[u^2, u, q, [a,b]]$}{E.tate}
 \endindentedkeys
-\li{change curve $E$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangecurve$(ell,v)$}
+\li{$\bullet$ $E$ defined over $\FF_q$}{}
+\beginindentedkeys
+\li{characteristic}{E.p}
+\li{$\#E(\FF_q)$/cyclic structure/generators}{E.no{\rm, }E.cyc{\rm, }E.gen}
+\endindentedkeys
+\li{$\bullet$ $E$ defined over $\QQ$}{}
+\beginindentedkeys
+\li{generators of $E(\QQ)$ (require \kbd{elldata})}{E.gen}
+\endindentedkeys
+\li{$[a_1,a_2,a_3,a_4,a_6]$ from $j$-invariant}{ellfromj$(j)$}
+\li{change curve $E$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangecurve$(E,v)$}
 \li{change point $z$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangepoint$(z,v)$}
-\li{add points $P+Q$ / $P-Q$}{elladd$(ell,P,Q)${\rm, }ellsub}
-\li{negate point}{ellneg$(ell,P)$}
-\li{compute $n\cdot z$}{ellmul$(ell,z,n)$}
-\li{check if $z$ is on $E$}{ellisoncurve$(ell,z)$}
-\li{order of torsion point $z$}{ellorder$(ell,z)$}
-\li{$y$-coordinates of point(s) for $x$}{ellordinate$(ell,x)$}
-\li{point $[\wp(z),\wp'(z)]$ corresp. to $z$}{ellztopoint$(ell,z)$}
-\li{complex $z$ such that $p=[\wp(z),\wp'(z)]$}{ellpointtoz$(ell,p)$}
+\li{add points $P+Q$ / $P-Q$}{elladd$(E,P,Q)${\rm, }ellsub}
+\li{negate point}{ellneg$(E,P)$}
+\li{compute $n\cdot z$}{ellmul$(E,z,n)$}
+\li{$n$-division polynomial $f_n(x)$}{elldivpol$(E,n,\{x\})$}
+\li{check if $z$ is on $E$}{ellisoncurve$(E,z)$}
+\li{order of torsion point $z$}{ellorder$(E,z)$}
+\li{$y$-coordinates of point(s) for $x$}{ellordinate$(E,x)$}
+\li{point $[\wp(z),\wp'(z)]$ corresp. to $z$}{ellztopoint$(E,z)$}
+\li{complex $z$ such that $p=[\wp(z),\wp'(z)]$}{ellpointtoz$(E,p)$}
 
 \subsec{Curves over finite fields, Pairings}
-\li{random point on $E$}{random$(ell)$}
-\li{structure $\ZZ/d_1\ZZ\times \ZZ/d_2\ZZ$ of $E(\FF_p)$}{ellgroup$(ell,p)$}
-\li{Weil pairing of $m$-torsion pts $x,y$}{ellweilpairing$(ell,x,y, m)$}
-\li{Tate pairing of $x,y$; $x$ $m$-torsion}{elltatepairing$(ell,x,y, m)$}
+\li{random point on $E$}{random$(E)$}
+\li{$\#E(\FF_q)$}{ellcard$(E)$}
+\li{structure $\ZZ/d_1\ZZ\times \ZZ/d_2\ZZ$ of $E(\FF_q)$}{ellgroup$(E)$}
+\li{Weil pairing of $m$-torsion pts $x,y$}{ellweilpairing$(E,x,y, m)$}
+\li{Tate pairing of $x,y$; $x$ $m$-torsion}{elltatepairing$(E,x,y, m)$}
+\li{Discrete log, find $n$ s.t. $P=[n]Q$}{elllog$(E,P,Q,\{ord\})$}
 
 \subsec{Curves over $\QQ$ and the $L$-function}
-\li{canonical bilinear form taken at $z_1$, $z_2$}{ellbil$(ell,z_1,z_2)$}
-\li{canonical height of $z$}{ellheight$(ell,z,\{\fl\})$}
-\li{height regulator matrix for pts in $x$}{ellheightmatrix$(ell,x)$}
-\li{cond, min mod, Tamagawa num \kbd{[}$N,v,c$\kbd{]}}{ellglobalred$(ell)$}
-\li{Kodaira type of $p$-fiber of $E$}{elllocalred$(ell,p)$}
-\li{minimal model of $E/\QQ$} {ellminimalmodel$(ell,\{$\&$v\})$}
-\li{$p$th coeff $a_p$ of $L$-function, $p$ prime}{ellap$(ell,p)$}
-\li{$k$th coeff $a_k$ of $L$-function}{ellak$(ell,k)$}
-\li{vector of first $n$ $a_k$'s in $L$-function}{ellan$(ell,n)$}
-\li{$L(E,s)$, set $A\approx1$}{elllseries$(ell,s,\{A\})$}
-\li{order of vanishing at $1$}{ellanalyticrank$(ell,\{\var{eps}\})$}
-\li{$L^{(r)}(E,1)$}{ellL1$(ell,r)$}
-\li{root number for $L(E,.)$ at $p$}{ellrootno$(ell,\{p\})$}
-\li{torsion subgroup with generators}{elltors$(ell)$}
-\li{modular parametrization of $E$}{elltaniyama$(ell)$}
+\li{canonical bilinear form taken at $z_1$, $z_2$}{ellbil$(E,z_1,z_2)$}
+\li{canonical height of $z$}{ellheight$(E,z,\{\fl\})$}
+\li{height regulator matrix for pts in $x$}{ellheightmatrix$(E,x)$}
+\li{cond, min mod, Tamagawa num \kbd{[}$N,v,c$\kbd{]}}{ellglobalred$(E)$}
+\li{reduction of $y^2+Qy = P$ (genus $2$)}{genus2red$(Q,P,\{p\})$}
+\li{Kodaira type of $p$-fiber of $E$}{elllocalred$(E,p)$}
+\li{minimal model of $E/\QQ$} {ellminimalmodel$(E,\{$\&$v\})$}
+\li{$p$-th coeff $a_p$ of $L$-function, $p$ prime}{ellap$(E,p)$}
+\li{$k$-th coeff $a_k$ of $L$-function}{ellak$(E,k)$}
+\li{vector of first $n$ $a_k$'s in $L$-function}{ellan$(E,n)$}
+\li{$L(E,s)$}{elllseries$(E,s)$}
+\li{$L^{(r)}(E,1)$}{ellL1$(E,r)$}
+\li{return a Heegner point on $E$ of rank $1$}{ellheegner$(E)$}
+\li{order of vanishing at $1$}{ellanalyticrank$(E,\{\var{eps}\})$}
+\li{root number for $L(E,.)$ at $p$}{ellrootno$(E,\{p\})$}
+\li{torsion subgroup with generators}{elltors$(E)$}
+\li{modular parametrization of $E$}{elltaniyama$(E)$}
 
 \subsec{Elldata package, Cremona's database:}
 \li{db code $\leftrightarrow$ $[\var{conductor}, \var{class}, \var{index}]$}{ellconvertname$(s)$}
@@ -745,12 +760,14 @@ If $\fl$ omitted, also
 \li{loop over curves with cond.~from $a$ to $b$}{forell$(E, a,b,\seq)$}
 
 \section{Elliptic \& Modular Functions}
+$w = [\omega_1,\omega_2]$ or \var{ell} struct (\kbd{E.omega}), $\tau=\omega_1/\omega_2$.\hfill\break
 %
 \li{arithmetic-geometric mean}{agm$(x,y)$}
 \li{elliptic $j$-function $1/q+744+\cdots$}{ellj$(x)$}
-\li{Weierstrass $\sigma$ function}{ellsigma$(ell,z,\{\fl\})$}
-\li{Weierstrass $\wp$ function}{ellwp$(ell,\{z\},\{\fl\})$}
-\li{Weierstrass $\zeta$ function}{ellzeta$(ell,z)$}
+\li{Weierstrass $\sigma$/$\wp$/$\zeta$ function}
+   {ellsigma$(w,z)${\rm, }ellwp{\rm, }ellzeta}
+\li{periods/quasi-periods}{ellperiods$(E,\{\fl\})${\rm, }elleta$(w)$}
+\li{$(2i\pi/\omega_2)^k E_k(\tau)$}{elleisnum$(w,k,\{\fl\})$}
 \li{modified Dedekind $\eta$ func. $\prod(1-q^n)$}{eta$(x,\{\fl\})$}
 \li{Jacobi sine theta function}{theta$(q,z)$}
 \li{k-th derivative at z=0 of \kbd{theta}$(q,z)$}{thetanullk$(q,k)$}
@@ -877,11 +894,8 @@ $($\kbd{nfelt}$)$\kbd{add}, \kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
 
 \li{integral basis of field def. by $f=0$}{nfbasis$(f)$}
 \li{field discriminant of field $f=0$}{nfdisc$(f)$}
-\li{Galois group of field $f=0$, $\deg f\le 11$}{polgalois$(f)$}
-\li{smallest poly defining $f=0$}{polredabs$(f,\{\fl\})$}
-\li{small polys defining subfields of $f=0$}{polred$(f,\{\fl\},\{p\})$}
-\li{poly of degree $\le k$ with root $x\in\CC$}{algdep$(x,k)$}
-\li{small linear rel.\ on coords of vector $x$}{lindep$(x)$}
+\li{smallest poly defining $f=0$ (slow)}{polredabs$(f,\{\fl\})$}
+\li{small poly defining $f=0$ (fast)}{polredbest$(f,\{\fl\})$}
 \li{are fields $f=0$ and $g=0$ isomorphic?}{nfisisom$(f,g)$}
 \li{is field $f=0$ a subfield of $g=0$?}{nfisincl$(f,g)$}
 \li{compositum of $f=0$, $g=0$}{polcompositum$(f,g,\{\fl\})$}
@@ -895,11 +909,16 @@ $($\kbd{nfelt}$)$\kbd{add}, \kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
 \li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
 \li{quadratic Hilbert symbol (at $p$)}{nfhilbert$(\var{nf},a,b,\{p\})$}
 %
-\subsec{Dedekind Zeta Function $\zeta_K$}
+\subsec{Linear and algebraic relations}
+\li{poly of degree $\le k$ with root $x\in\CC$}{algdep$(x,k)$}
+\li{alg. dep. with pol.~coeffs for series $s$}{seralgdep$(s,x,y)$}
+\li{small linear rel.\ on coords of vector $x$}{lindep$(x)$}
+\subsec{Dedekind Zeta Function $\zeta_K$, Hecke $L$ series}
 \li{$\zeta_K$ as Dirichlet series, $N(I)<b$}{dirzetak$(\var{nf},b)$}
 \li{init \var{nfz}\ for field $f=0$}{zetakinit$(f)$}
 \li{compute $\zeta_K(s)$}{zetak$(\var{nfz},s,\{\fl\})$}
 \li{Artin root number of $K$}{bnrrootnumber$(\var{bnr},\var{chi},\{\fl\})$}
+\li{$L(1,\chi)$, for all $\chi$ trivial on $H$}{bnrL1$(\var{bnr},\{H\},\{\fl\})$}
 
 \section{Class Groups \& Units (bnf, bnr)}
 \leavevmode
@@ -933,8 +952,7 @@ $a_1,\{a_2\},\{a_3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \title{PARI-GP Reference Card (2)}
 \centerline{(PARI-GP version \PARIversion)}
 
-\section{Ideals}
-Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
+\section{Ideals: {\rm elements, primes, or matrix of generators in HNF}}
 \li{is $id$ an ideal in \var{nf} ?}{nfisideal$(\var{nf},id)$}
 \li{is $x$ principal in \var{bnf} ?}{bnfisprincipal$(\var{bnf},x)$}
 \li{principal ideal generated by $x$}{idealprincipal$(\var{nf},x)$}
@@ -969,6 +987,7 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{solve $M x = B$ in $(\ZZ_K/pr)^*$}{nfsolvemodpr$(\var{nf},M,B,prmod)$}
 
 \section{Galois theory over $\QQ$}
+\li{Galois group of field $\QQ[x]/(f)$}{polgalois$(f)$}
 \li{initializes a Galois group structure $G$}{galoisinit$(\var{pol},\{den\})$}
 \li{action of $p$ in nfgaloisconj form}{galoispermtopol$(G,\{p\})$}
 \li{identify as abstract group}{galoisidentify$(G)$}
