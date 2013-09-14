@@ -259,18 +259,15 @@ Send comments and corrections to \<Karim.Belabas@math.u-bordeaux.fr>
 
 \title{PARI-GP Reference Card}
 \centerline{(PARI-GP version \PARIversion)}
-Note: optional arguments are surrounded by braces $\{\}$.
-
-\section{Starting \& Stopping GP}
-\li{to enter GP, just type its name:}{gp}
-\li{to exit GP, type}{\\q {\rm or }quit}
-
+Note: optional arguments are surrounded by braces $\{\}$.\hfill\break
+To start the calculator, type its name in the terminal: \kbd{gp}\hfill\break
+To exit \kbd{gp}, type \kbd{quit}, \kbd{\\q}, or \kbd{<C-D>} at prompt.\hfill
 \section{Help}
 \li{describe function}{?{\it function}}
 \li{extended description}{??{\it keyword}}
 \li{list of relevant help topics}{???{\it pattern}}
 
-\section{Input/Output \& Defaults}
+\section{Input/Output}
 \li{output previous line, the lines before}
   {\%{\rm, }\%`{\rm, }\%``{\rm, etc.}}
 \li{output from line $n$}{\%$n$}
@@ -279,9 +276,9 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \li{extend statements on several lines}{\{$\seq_1$; $\seq_2$;\}}
 \li{comment}{/* $\dots$ */}
 \li{one-line comment, rest of line ignored}{\\\\ \dots}
-\li{set default $d$ to \var{val}} {default$(\{d\},\{\var{val}\},\{\fl\})$}
 
-\section{Metacommands}
+\section{Metacommands \& Defaults}
+\li{set default $d$ to \var{val}} {default$(\{d\},\{\var{val}\},\{\fl\})$}
 \li{toggle timer on/off}{\#}
 \li{print time for last result}{\#\#}
 \li{print defaults}{\\d}
@@ -320,18 +317,22 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \li{\typ{LIST}. Lists}{List$($[$x,y,z$]$)$}
 \li{\typ{STR}. Strings}{"abc"}
 
+\section{Reserved Variable Names}
+\li{$\pi=3.14\dots$, $\gamma=0.57\dots$, $C=0.91\dots$}{Pi{\rm, }Euler{\rm, }Catalan}
+\li{square root of $-1$}{I}
+\li{big-oh notation}{O}
 
 % ****************************************
 % This goes at the bottom of page 1
 \shortcopyrightnotice
 \newcolumn
 
-\section{Reserved Variable Names}
-\li{$\pi=3.14\dots$, $\gamma=0.57\dots$, $C=0.91\dots$}{Pi{\rm, }Euler{\rm, }Catalan}
-\li{square root of $-1$}{I}
-\li{big-oh notation}{O}
+\section{Information about an Object}
+\li{PARI type of object $x$}{type$(x)$}
+\li{length of $x$ / size of $x$ in memory}{\#$x${\rm, }sizebyte$(x)$}
+\li{real or $p$-adic precision of $x$}{precision$(x)${\rm, }padicprec}
 
-\section{Standard Operators}
+\section{Operators}
 \li{basic operations}{+{\rm,} - {\rm,} *{\rm,} /{\rm,} \pow}
 \li{\kbd{i=i+1}, \kbd{i=i-1}, \kbd{i=i*j}, \dots}
   {i++{\rm,} i--{\rm,} i*=j{\rm,}\dots}
@@ -350,10 +351,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{apply differential operator}{diffop}
 \li{restore $x$ as a formal variable}{$x$='$x$}
 \li{simultaneous assignment $x\leftarrow v_1$, $y\leftarrow v_2$}{[x,y] = v}
-\section{Info about an Object, Select Components}
-\li{PARI type of object $x$}{type$(x)$}
-\li{length of $x$ / size of $x$ in memory}{\#$x${\rm, }sizebyte$(x)$}
-\li{real or $p$-adic precision of $x$}{precision$(x)${\rm, }padicprec}
+\section{Select Components}
 \li{$n$-th component of $x$}{component$(x,n)$}
 \li{$n$-th component of vector/list $x$}{$x$[$n$]}
 \li{components $a,a+1,\dots,b$ of vector $x$}{$x$[$a$..$b$]}
@@ -379,10 +377,6 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{square of $L^2$ norm of vector $x$}{norml2$(x)$}
 \li{lift of $x$ from Mods}{lift{\rm,} centerlift$(x)$}
 
-\section{Random Numbers}
-\li{random integer/prime in $[0,N[$}{random$(N)${\rm, }randomprime}
-\li{get/set random seed}{getrand{\rm, }setrand$(s)$}
-
 \begingroup
 \outer\def\subsec#1{\filbreak
   \vskip 0.05ex plus 0.05ex
@@ -407,6 +401,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{insert $x$ in list $L$ at position $i$}{listinsert$(L,x,i)$}
 \li{sort the list $L$ in place}{listsort$(L,\{\fl\})$}
 
+\newpage
 \section{Programming}
 \subsec{Functions and closures}
 \leavevmode
@@ -469,6 +464,10 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{infinite product $a\le X\le\infty$}{prodinf$(X\,$=$\;a,\expr)$}
 \li{real root of \expr\ between $a$ and $b$}{solve$(X\,$=$\;a,b,\expr)$}
 \endgroup
+
+\section{Random Numbers}
+\li{random integer/prime in $[0,N[$}{random$(N)${\rm, }randomprime}
+\li{get/set random seed}{getrand{\rm, }setrand$(s)$}
 
 % This goes at the top of page 4 (=1st column on back of reference card)
 
@@ -751,6 +750,7 @@ $\bullet$ All domains:
 \li{root number for $L(E,.)$ at $p$}{ellrootno$(E,\{p\})$}
 \li{torsion subgroup with generators}{elltors$(E)$}
 \li{modular parametrization of $E$}{elltaniyama$(E)$}
+\shortcopyrightnotice
 
 \subsec{Elldata package, Cremona's database:}
 \li{db code $\leftrightarrow$ $[\var{conductor}, \var{class}, \var{index}]$}{ellconvertname$(s)$}
@@ -775,48 +775,6 @@ $w = [\omega_1,\omega_2]$ or \var{ell} struct (\kbd{E.omega}), $\tau=\omega_1/\o
 \li{Riemann's zeta $\zeta(s)=\sum n^{-s}$}{zeta$(s)$}
 %
 \bigskip
-\section{Graphic Functions}
-\li{crude graph of \expr\ between $a$ and $b$}{plot$(X\,$=$\;a,b,expr)$}
-\subsec{High-resolution plot {\rm (immediate plot)}}
-\li{plot \expr\ between $a$ and $b$}{ploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
-\li{plot points given by lists $lx$, $ly$}{plothraw$(lx,ly,\{\fl\})$}
-\li{terminal dimensions}{plothsizes$()$}
-%
-\subsec{Rectwindow functions}
-\li{init window $w$, with size $x$,$y$}{plotinit$(w,x,y)$}
-\li{erase window $w$}{plotkill$(w)$}
-\li{copy $w$ to $w_2$ with offset $(dx,dy)$}{plotcopy$(w,w_2,dx,dy)$}
-\li{clips contents of $w$}{plotclip$(w)$}
-\li{scale coordinates in $w$}{plotscale$(w,x_1,x_2,y_1,y_2)$}
-\li{\kbd{ploth} in $w$}{plotrecth$(w,X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
-\li{\kbd{plothraw} in $w$}{plotrecthraw$(w,data,\{\fl\})$}
-\li{draw window $w_1$ at $(x_1,y_1)$, \dots} {plotdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
-%
-\subsec{Low-level Rectwindow Functions}
-%\li{}{plotlinetype$(w,)$}
-%\li{}{plotpointtype$(w,)$}
-%\li{}{plotterm$(w,)$}
-\li{set current drawing color in $w$ to $c$}{plotcolor$(w,c)$}
-\li{current position of cursor in $w$}{plotcursor$(w)$}
-%
-\li{write $s$ at cursor's position}{plotstring$(w,s)$}
-\li{move cursor to $(x,y)$}{plotmove$(w,x,y)$}
-\li{move cursor to $(x+dx,y+dy)$}{plotrmove$(w,dx,dy)$}
-\li{draw a box to $(x_2,y_2)$}{plotbox$(w,x_2,y_2)$}
-\li{draw a box to $(x+dx,y+dy)$}{plotrbox$(w,dx,dy)$}
-\li{draw polygon}{plotlines$(w,lx,ly,\{\fl\})$}
-\li{draw points}{plotpoints$(w,lx,ly)$}
-\li{draw line to $(x+dx,y+dy)$}{plotrline$(w,dx,dy)$}
-\li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
-\li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
-%
-\subsec{Postscript Functions}
-\li{as {\tt ploth}}{psploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
-\li{as {\tt plothraw}}{psplothraw$(lx,ly,\{\fl\})$}
-\li{as {\tt plotdraw}}{psdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
-\shortcopyrightnotice
-\newcolumn
-
 \section{Binary Quadratic Forms}
 %
 \li{create $ax^2+bxy+cy^2$ (distance $d$) }{Qfb$(a,b,c,\{d\})$}
@@ -841,6 +799,7 @@ $w = [\omega_1,\omega_2]$ or \var{ell} struct (\kbd{E.omega}), $\tau=\omega_1/\o
 \li{class group of $\QQ(\sqrt{D})$}{quadclassunit$(D,\{\fl\},\{t\})$}
 \li{Hilbert class field of $\QQ(\sqrt{D})$}{quadhilbert$(D,\{\fl\})$}
 \li{ray class field modulo $f$ of $\QQ(\sqrt{D})$}{quadray$(D,f,\{\fl\})$}
+\bigskip
 
 \section{General Number Fields: Initializations}
 A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
@@ -881,6 +840,7 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \li{modulus}{\var{bnr}.mod}
 \li{structure of $(\ZZ_K/m)^*$}{\var{bnr}.zkst}
 \endindentedkeys
+\medskip
 
 \section{Basic Number Field Arithmetic (nf)}
 Elements are \typ{INT}, \typ{FRAC}, \typ{POL}, \typ{POLMOD}, or \typ{COL} (on
@@ -948,10 +908,6 @@ $a_1,\{a_2\},\{a_3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \li{rel.\ eq.\ for class field def'd by $sub$}{rnfkummer$(\var{bnr},sub,\{d\})$}
 \li{same, using Stark units (real field)}{bnrstark$(\var{bnr},sub,\{\fl\})$}
 
-\newcolumn
-\title{PARI-GP Reference Card (2)}
-\centerline{(PARI-GP version \PARIversion)}
-
 \section{Ideals: {\rm elements, primes, or matrix of generators in HNF}}
 \li{is $id$ an ideal in \var{nf} ?}{nfisideal$(\var{nf},id)$}
 \li{is $x$ principal in \var{bnf} ?}{bnfisprincipal$(\var{bnf},x)$}
@@ -998,16 +954,22 @@ $a_1,\{a_2\},\{a_3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \li{fixed field}{galoisfixedfield$(G,\var{perm},\{\fl\},\{v\})$}
 \li{Frobenius at maximal ideal $P$}{idealfrobenius$(\var{nf},G,P)$}
 \li{ramification groups at $P$}{idealramgroups$(\var{nf},G,P)$}
+
+\newcolumn
+\title{PARI-GP Reference Card (2)}
+\centerline{(PARI-GP version \PARIversion)}
+\medskip
+
 \li{is $G$ abelian?}{galoisisabelian$(G,\{\fl\})$}
 \li{abelian number fields/$\QQ$}{galoissubcyclo(N,H,\{\fl\},\{v\})}
 \li{query the \kbd{galpol} package}{galoisgetpol(a,b,\{s\})}
 
 \section{Relative Number Fields (rnf)}
-Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
+Extension $L/K$ is defined by $T\in K[x]$.
 \hfill\break
 %
-\li{absolute equation of $L$}{rnfequation$(\var{nf},g,\{\fl\})$}
-\li{is $L/K$ abelian?}{rnfisabelian$(\var{nf},g)$}
+\li{absolute equation of $L$}{rnfequation$(\var{nf},T,\{\fl\})$}
+\li{is $L/K$ abelian?}{rnfisabelian$(\var{nf},T)$}
 \li{relative {\tt nfalgtobasis}}{rnfalgtobasis$(\var{rnf},x)$}
 \li{relative {\tt nfbasistoalg}}{rnfbasistoalg$(\var{rnf},x)$}
 \li{relative {\tt idealhnf}}{rnfidealhnf$(\var{rnf},x)$}
@@ -1022,24 +984,7 @@ Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \li{lift $x$ to the relative field}{rnfeltup$(\var{rnf},x)$}
 \li{push $x$ down to the base field}{rnfeltdown$(\var{rnf},x)$}
 \leavevmode idem for $x$ ideal:
-\kbd{$($rnfideal$)$reltoabs}, \kbd{abstorel}, \kbd{up}, \kbd{down}\hbadness
-10000\break
-%
-%
-\subsec{Projective $\ZZ_K$-modules, maximal order}
-\li{relative {\tt polred}}{rnfpolred$(\var{nf},g)$}
-\li{relative {\tt polredabs}}{rnfpolredabs$(\var{nf},g)$}
-\li{characteristic poly.\ of $a$ mod $g$}{rnfcharpoly$(\var{nf},g,a,\{v\})$}
-\li{relative Dedekind criterion, prime $pr$}{rnfdedekind$(\var{nf},g,pr)$}
-\li{discriminant of relative extension}{rnfdisc$(\var{nf},g)$}
-\li{pseudo-basis of $\ZZ_L$}{rnfpseudobasis$(\var{nf},g)$}
-%\li{relative HNF basis of $order$}{rnfhnfbasis$(\var{bnf},order)$}
-\li{relative HNF / SNF}{nfhnf$(\var{nf},x)${\rm, }nfsnf}
-\li{reduced basis for $order$}{rnflllgram$(\var{nf},g,order)$}
-\li{determinant of pseudo-matrix $A$}{rnfdet$(\var{nf},A)$}
-\li{Steinitz class of $order$}{rnfsteinitz$(\var{nf},order)$}
-\li{is \var{order} a free $\ZZ_K$-module?}{rnfisfree$(\var{bnf},\var{order})$}
-\li{true basis of \var{order}, if it is free}{rnfbasis$(\var{bnf},\var{order})$}
+\kbd{$($rnfideal$)$reltoabs}, \kbd{abstorel}, \kbd{up}, \kbd{down}\hfill
 %
 \subsec{Norms}
 \li{absolute norm of ideal $x$}{rnfidealnormabs$(\var{rnf},x)$}
@@ -1048,6 +993,65 @@ Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \li{is $x\in\QQ$ a norm from $K$?}{bnfisnorm$(\var{bnf},x,\{\fl\})$}
 \li{initialize $T$ for norm eq.~solver}{rnfisnorminit$(K,pol,\{\fl\})$}
 \li{is $a\in K$ a norm from $L$?}{rnfisnorm$(T,a,\{\fl\})$}
+%
+\subsec{Maximal order $\ZZ_L$ as a $\ZZ_K$-module}
+\li{relative {\tt polred}}{rnfpolred$(\var{nf},T)$}
+\li{relative {\tt polredabs}}{rnfpolredabs$(\var{nf},T)$}
+\li{characteristic poly.\ of $a$ mod $T$}{rnfcharpoly$(\var{nf},T,a,\{v\})$}
+\li{relative Dedekind criterion, prime $pr$}{rnfdedekind$(\var{nf},T,pr)$}
+\li{discriminant of relative extension}{rnfdisc$(\var{nf},T)$}
+\li{pseudo-basis of $\ZZ_L$}{rnfpseudobasis$(\var{nf},T)$}
+%
+\subsec{General $\ZZ_K$-modules:
+  {\rm $M = [{\rm matrix}, {\rm vec.~of~ideals}] \subset L$}}
+\li{relative HNF / SNF}{nfhnf$(\var{nf},M)${\rm, }nfsnf}
+\li{reduced basis for $M$}{rnflllgram$(\var{nf},T,M)$}
+\li{determinant of pseudo-matrix $M$}{rnfdet$(\var{nf},M)$}
+\li{Steinitz class of $M$}{rnfsteinitz$(\var{nf},M)$}
+\li{$\ZZ_K$-basis of $M$ if $\ZZ_K$-free, or $0$}{rnfhnfbasis$(\var{bnf},M)$}
+\li{$n$-basis of $M$, or $(n+1)$-generating set}{rnfbasis$(\var{bnf},M)$}
+\li{is $M$ a free $\ZZ_K$-module?}{rnfisfree$(\var{bnf},M)$}
+\newpage
+
+\section{Graphic Functions}
+\li{crude graph of \expr\ between $a$ and $b$}{plot$(X\,$=$\;a,b,expr)$}
+\subsec{High-resolution plot {\rm (immediate plot)}}
+\li{plot \expr\ between $a$ and $b$}{ploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
+\li{plot points given by lists $lx$, $ly$}{plothraw$(lx,ly,\{\fl\})$}
+\li{terminal dimensions}{plothsizes$()$}
+%
+\subsec{Rectwindow functions}
+\li{init window $w$, with size $x$,$y$}{plotinit$(w,x,y)$}
+\li{erase window $w$}{plotkill$(w)$}
+\li{copy $w$ to $w_2$ with offset $(dx,dy)$}{plotcopy$(w,w_2,dx,dy)$}
+\li{clips contents of $w$}{plotclip$(w)$}
+\li{scale coordinates in $w$}{plotscale$(w,x_1,x_2,y_1,y_2)$}
+\li{\kbd{ploth} in $w$}{plotrecth$(w,X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
+\li{\kbd{plothraw} in $w$}{plotrecthraw$(w,data,\{\fl\})$}
+\li{draw window $w_1$ at $(x_1,y_1)$, \dots} {plotdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
+%
+\subsec{Low-level Rectwindow Functions}
+%\li{}{plotlinetype$(w,)$}
+%\li{}{plotpointtype$(w,)$}
+%\li{}{plotterm$(w,)$}
+\li{set current drawing color in $w$ to $c$}{plotcolor$(w,c)$}
+\li{current position of cursor in $w$}{plotcursor$(w)$}
+%
+\li{write $s$ at cursor's position}{plotstring$(w,s)$}
+\li{move cursor to $(x,y)$}{plotmove$(w,x,y)$}
+\li{move cursor to $(x+dx,y+dy)$}{plotrmove$(w,dx,dy)$}
+\li{draw a box to $(x_2,y_2)$}{plotbox$(w,x_2,y_2)$}
+\li{draw a box to $(x+dx,y+dy)$}{plotrbox$(w,dx,dy)$}
+\li{draw polygon}{plotlines$(w,lx,ly,\{\fl\})$}
+\li{draw points}{plotpoints$(w,lx,ly)$}
+\li{draw line to $(x+dx,y+dy)$}{plotrline$(w,dx,dy)$}
+\li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
+\li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
+%
+\subsec{Postscript Functions}
+\li{as {\tt ploth}}{psploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
+\li{as {\tt plothraw}}{psplothraw$(lx,ly,\{\fl\})$}
+\li{as {\tt plotdraw}}{psdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
 \vfill
 \copyrightnotice
 \bye
