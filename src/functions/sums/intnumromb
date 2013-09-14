@@ -40,10 +40,10 @@ Doc: numerical integration of \var{expr} (smooth in $]a,b[$), with respect to
  can of course be accomplished by just multiplying by an appropriate constant.
 
  Note that \idx{infinity} can be represented with essentially no loss of
- accuracy by a huge number. However beware of real underflow when dealing with
- rapidly decreasing functions. For example, if one wants to compute the
- $\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one can
- infinity equal to 10 for example, and certainly not to \kbd{1e1000}.
+ accuracy by an appropriate huge number. However beware of real underflow
+ when dealing with rapidly decreasing functions. For example, in order to
+ compute the $\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one can
+ set infinity equal to 10 for example, and certainly not to \kbd{1e1000}.
 
  \synt{intnumromb}{void *E, GEN (*eval)(void*,GEN), GEN a, GEN b, long flag, long prec},
  where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
