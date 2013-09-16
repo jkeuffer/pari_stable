@@ -95,7 +95,7 @@ struct Flxq_log_rel
   ulong nbtest;
 };
 
-GEN
+static GEN
 cindex_Flx(long c, long d, ulong p, long v)
 {
   GEN P = cgetg(d+3, t_VECSMALL);
