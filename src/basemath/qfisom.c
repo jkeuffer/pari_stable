@@ -1346,17 +1346,16 @@ scpforms(GEN b, struct qfauto *qf)
 static GEN
 gen_comb(long cdep, GEN A, GEN e, struct qfauto *qf, long lim)
 {
-  long i;
-  long dim = lg(A)-1;
+  long i, dim = lg(A)-1;
   GEN comb = cgetg(dim+1,t_VEC);
-  pari_sp av = avma;
   for (i = 1; i <= dim; ++i)
   {
+    pari_sp av = avma;
     GEN trans, ccoef, cF, B, BI;
     GEN sumveclist, sumvecbase;
     GEN list = scpvecs(&sumveclist, i, e, cdep, qf);
     GEN M = zm_to_ZM(sumveclist);
-    GEN T = lllgramint(gmul(gmul(shallowtrans(M),A),M));
+    GEN T = lllgramint(qf_apply_ZM(A,M));
     if (lim && lg(T)-1>=lim) return NULL;
     B = ZM_mul(M,T);
     BI = RgM_solve(B,NULL);
@@ -1365,7 +1364,6 @@ gen_comb(long cdep, GEN A, GEN e, struct qfauto *qf, long lim)
     ccoef = ZM_trunc_to_zm(RgM_mul(BI,M));
     cF = scpforms(sumvecbase, qf);
     gel(comb,i) = gerepilecopy(av, mkvec4(list, trans, ccoef, cF));
-    av=avma;
   }
   return comb;
 }
