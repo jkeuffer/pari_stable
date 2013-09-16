@@ -1865,21 +1865,16 @@ read_main(const char *s)
   avma = top;
 }
 
-GEN
-externstr(const char *s)
+static GEN
+get_lines(FILE *F)
 {
   pari_sp av = avma;
   long i, nz = 16;
   GEN z = cgetg(nz + 1, t_VEC);
-  pariFILE *F;
-  Buffer *b;
+  Buffer *b = new_buffer();
   input_method IM;
-
-  check_secure(s);
-  F = try_pipe(s, mf_IN);
-  b = new_buffer();
   IM.fgets = &fgets;
-  IM.file = F->file;
+  IM.file = F;
   for(i = 1;;)
   {
     char *s = b->buf, *e;
@@ -1889,9 +1884,25 @@ externstr(const char *s)
     if (*e == '\n') *e = 0;
     gel(z,i++) = strtoGENstr(s);
   }
-  delete_buffer(b);
-  pari_fclose(F);
-  setlg(z, i); return gerepilecopy(av, z);
+  delete_buffer(b); setlg(z, i);
+  return gerepilecopy(av, z);
+}
+
+GEN
+externstr(const char *s)
+{
+  pariFILE *F;
+  GEN z;
+  check_secure(s);
+  F = try_pipe(s, mf_IN);
+  z = get_lines(F->file);
+  pari_fclose(F); return z;
+}
+GEN
+readstr(const char *s)
+{
+  GEN z = get_lines(switchin(s));
+  popinfile(); return z;
 }
 
 GEN
