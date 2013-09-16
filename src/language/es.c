@@ -129,14 +129,14 @@ filtre0(filtre_t *F)
 
       case '\\':
         if (!*s) {
-          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
+          if (*F->buf->buf == '?') break; /* '?...\' */
           t--;
           if (!F->more_input) F->more_input = 1;
           goto END;
         }
         if (*s == '\r') s++; /* DOS */
         if (*s == '\n') {
-          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
+          if (*F->buf->buf == '?') break; /* '?...\' */
           t--; s++;
           if (!*s)
           {
@@ -166,11 +166,9 @@ filtre0(filtre_t *F)
 
   if (t != F->t) /* non empty input */
   {
-    c = t[-1]; /* = last input char */
+    c = t[-1]; /* last char */
     if (c == '=')
-    {
-      if (t-1 != F->t && t[-2] != '?') F->more_input = 2;
-    }
+    { if (*F->buf->buf != '?') F->more_input = 2; }
     else if (! F->wait_for_brace) F->more_input = 0;
     else if (c == RBRACE)       { F->more_input = 0; t--; F->wait_for_brace--;}
   }
