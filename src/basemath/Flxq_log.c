@@ -454,11 +454,11 @@ INLINE GEN Flx_frob(GEN u, ulong p) { return Flx_inflate(u, p); }
 static GEN
 rel_Coppersmith(long r, GEN u, GEN v, long h, GEN R, long d, ulong p)
 {
-  GEN b, F, G, M;
+  GEN a, b, F, G, M;
   if (degpol(Flx_gcd(u,v,p))) return NULL;
-  GEN a = Flx_add(Flx_shift(u, h), v, p);
+  a = Flx_add(Flx_shift(u, h), v, p);
   if (lgpol(a)==0 || !Flx_is_smooth(a, r, p)) return NULL;
-  b  = Flx_add(Flx_mul(R, Flx_frob(u, p), p), Flx_shift(Flx_frob(v, p),d), p);
+  b = Flx_add(Flx_mul(R, Flx_frob(u, p), p), Flx_shift(Flx_frob(v, p),d), p);
   if (!Flx_is_smooth(b, r, p)) return NULL;
   F = factorel(a, p); G = factorel(b, p);
   M = mkmat2(vecsmall_concat(gel(F, 1), vecsmall_append(gel(G, 1), 2*p)),

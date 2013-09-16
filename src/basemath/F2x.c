@@ -1169,7 +1169,7 @@ rel_Coppersmith(GEN u, GEN v, long h, GEN R, long r, long n, long d)
   GEN b, F, G, M;
   GEN a = F2x_add(F2x_shift(u, h), v);
   if (!F2x_is_smooth(a, r)) return NULL;
-  b  = F2x_add(F2x_mul(R, F2x_pow2n(u, n)), F2x_shift(F2x_pow2n(v, n),d));
+  b = F2x_add(F2x_mul(R, F2x_pow2n(u, n)), F2x_shift(F2x_pow2n(v, n),d));
   if (!F2x_is_smooth(b, r)) return NULL;
   F = F2x_factorel(a);
   G = F2x_factorel(b);
