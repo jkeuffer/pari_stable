@@ -1400,6 +1400,7 @@ init_flags(struct qfcand *cand, GEN A, struct fingerprint *fp,
       pari_err_TYPE("qfisominit",flags);
     cdep = gtos(gel(flags,1));
     bach = minss(gtos(gel(flags,2)),lg(fp->e)-1);
+    if (cdep<0 || bach<0) pari_err_FLAG("qfisom");
     cand->cdep = cdep;
     cand->comb = cdep ? gen_comb(cdep, zm_to_ZM(A), fp->e, qf, 0): NULL;
     cand->bacher_pol = init_bacher(bach, fp, qf);
