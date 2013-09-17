@@ -359,9 +359,11 @@ bachcomp(GEN pol, long I, long S, GEN V, GEN W, GEN Fv)
     }
   }
   if (nlist != sum)
-  /* the number of vectors with scalar product S is already different */
-    return 0;
-  if (nlist == 0) return 1;
+  {
+    /* the number of vectors with scalar product S is already different */
+    avma=av; return 0;
+  }
+  if (nlist == 0) { avma=av; return 1; }
   /* listxy is the list of the nxy vectors from list that have scalar product S
      with v[list[i]] */
   listxy = cgetg(nlist+1,t_VECSMALL);
