@@ -1147,8 +1147,8 @@ init_qfauto(GEN F, long max, struct qfauto *qf, GEN norm)
 {
   long i, j, k;
   GEN W, v;
-  GEN M = minim_raw(zm_to_ZM(gel(F,1)), stoi(max), NULL);
-  GEN V = gel(M, 3);
+  GEN M = minim(zm_to_ZM(gel(F,1)), stoi(max), NULL);
+  GEN V = ZM_to_zm(gel(M, 3));
   long n = lg(V)-1, f = lg(F)-1, dim = lg(gel(F,1))-1;
   for (i = 1; i <= n; ++i)
   {
