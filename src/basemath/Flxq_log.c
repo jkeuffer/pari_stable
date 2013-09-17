@@ -65,7 +65,7 @@ has_deg1_auto(GEN T, ulong p)
 }
 
 static void
-smallirred_Flx_next(GEN a, long p, ulong n, long sv)
+smallirred_Flx_next(GEN a, long p)
 {
   do
   {
@@ -82,7 +82,7 @@ smallirred_Flx(long p, ulong n, long sv)
 {
   GEN a = zero_zv(n+2);
   a[1] = sv; a[3] = 1; a[n+2] = 1;
-  smallirred_Flx_next(a, p, n, sv);
+  smallirred_Flx_next(a, p);
   return a;
 }
 
@@ -436,7 +436,7 @@ Flxq_log_index_cubic(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
     W = check_kernel(r, M, nbi, rel.off + rel.nb - nbi, T, p, m);
     if (W) break;
     if (DEBUGLEVEL) timer_start(&ti);
-    smallirred_Flx_next(T,p,n,get_Flx_var(T0));
+    smallirred_Flx_next(T,p);
   }
   if (DEBUGLEVEL) timer_start(&ti);
   Ao = Flxq_log_rec(W, a, r, T, p, m);
