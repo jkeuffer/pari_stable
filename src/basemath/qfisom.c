@@ -1720,6 +1720,9 @@ qfisom(GEN F, GEN FF, GEN flags)
   long max;
   GEN norm = init_qfisom(F, &fp, &cand, &qf, flags, &max);
   init_qfauto(FF, max, &qff, norm);
+  if (lg(qf.W)!=lg(qff.W)
+      || !zvV_equal(vecvecsmall_sort(qf.W), vecvecsmall_sort(qff.W)))
+    { avma=av; return gen_0; }
   G = mkvec(scalar_Flm(-1, qff.dim));
   res = isometry(&qf, &qff, &fp, G, &cand);
   if (!res) { avma=av; return gen_0; }
