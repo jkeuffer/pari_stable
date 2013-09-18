@@ -453,11 +453,10 @@ operate(long nr, GEN A, GEN V)
 static GEN
 orbit(GEN pt, long ipt, long npt, GEN H, GEN V)
 {
-  pari_sp av = avma;
   long i, cnd, im;
   long n = lg(V)-1, nH = lg(H)-1, norb = npt+16, no = npt;
   GEN flag = zero_Flv(2*n+1)+n+1; /*We need negative indices*/
-  pari_sp av2 = avma;
+  pari_sp av = avma;
   GEN orb = cgetg(norb+1,t_VECSMALL);
   for (i = 1; i <= npt; ++i)
   {
@@ -474,14 +473,13 @@ orbit(GEN pt, long ipt, long npt, GEN H, GEN V)
         if (no==norb)
         {
           norb<<=1;
-          orb = gerepileuptoleaf(av2, vecsmall_lengthen(orb, norb));
+          orb = gerepileuptoleaf(av, vecsmall_lengthen(orb, norb));
         }
         orb[++no] = im;
         flag[im] = 1;
       }
     }
-  setlg(orb,no+1);
-  return gerepilecopy(av,orb);
+  setlg(orb,no+1); return orb;
 }
 
 /* return the length of the orbit of pt under the first nG matrices in G */
