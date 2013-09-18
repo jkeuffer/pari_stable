@@ -1164,8 +1164,7 @@ init_qfauto(GEN F, long max, struct qfauto *qf, GEN norm)
         max = l;
     }
   }
-  if (max > MAXENTRY)
-    pari_err(e_MISC,"qfisom: lattice too large");
+  if (max > MAXENTRY) pari_err_OVERFLOW("qfisom [lattice too large]");
   qf->p = unextprime(2*max+1);
   V = vecvecsmall_sort_uniq(V);
   if (!norm)
@@ -1198,8 +1197,7 @@ init_qfauto(GEN F, long max, struct qfauto *qf, GEN norm)
       for (k = 1; k <= dim; ++k)
       {
         vij[k] = zv_dotproduct(gel(Fi,k), Vj);
-        if (labs(vij[k]) > max)
-          pari_err(e_MISC,"qfisom: lattice too large");
+        if (labs(vij[k]) > max) pari_err_OVERFLOW("qfisom [lattice too large]");
       }
     }
   }
