@@ -442,9 +442,8 @@ operate(long nr, GEN A, GEN V)
   pari_sp av = avma;
   long im,eps;
   GEN w = zm_zc_mul(A,gel(V,labs(nr)));
-  if (nr < 0)
-    w = zv_neg(w);
   eps = zv_canon(w);
+  if (nr < 0) eps = -eps; /* -w */
   im = vecvecsmall_search(V,w,0);
   if (!im) pari_err_BUG("qfauto, image of vector not found");
   avma = av;
