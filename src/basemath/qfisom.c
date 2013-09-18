@@ -539,7 +539,7 @@ orbdelete(GEN orb1, GEN orb2)
 }
 
 static long
-orbsubstract(GEN Cs, GEN pt, long ipt, long npt, GEN H, GEN V, long *len)
+orbsubtract(GEN Cs, GEN pt, long ipt, long npt, GEN H, GEN V, long *len)
 {
   pari_sp av = avma;
   long nC;
@@ -1053,7 +1053,7 @@ autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
       nC = 1;
     }
     /* delete the orbit of the step-th base-vector from the candidates */
-    nC = orbsubstract(gel(C,step), fp->e, step-1, 1, H, V, &(G->ord[step]));
+    nC = orbsubtract(gel(C,step), fp->e, step-1, 1, H, V, &(G->ord[step]));
     while (nC > 0  &&  (im = mael(C,step,1)) != 0)
     {
       found = 0;
@@ -1077,7 +1077,7 @@ autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
         /* x[0]...x[step] can not be continued to an automorphism */
       {
         /* delete the orbit of im from the candidates for x[step] */
-        nC = orbsubstract(gel(C,step),mkvecsmall(im), 0, 1, H, V, NULL);
+        nC = orbsubtract(gel(C,step),mkvecsmall(im), 0, 1, H, V, NULL);
         bad[++nbad] = im;
       }
       else
@@ -1094,8 +1094,8 @@ autom(struct group *G, struct qfauto *qf, struct fingerprint *fp,
         for (nH = 0, i = step; i <= dim; ++i)
           for (j = 1; j <= G->ng[i]; ++j)
             gel(H,++nH) = gmael(G->g,i,j);
-        nC = orbsubstract(gel(C,step), fp->e, step-1, 1, H, V, &(G->ord[step]));
-        nC = orbsubstract(gel(C,step), bad, 0, nbad, H, V, NULL);
+        nC = orbsubtract(gel(C,step), fp->e, step-1, 1, H, V, &(G->ord[step]));
+        nC = orbsubtract(gel(C,step), bad, 0, nbad, H, V, NULL);
       }
     }
     /* test, whether on step STAB some generators may be omitted */
@@ -1647,7 +1647,7 @@ iso(long step, GEN x, GEN C, struct qfauto *qf, struct qfauto *qff,
       if (found == 1)
         return 1;
       /* delete the orbit of the chosen vector from the list of candidates */
-      orbsubstract(gel(C,step), x, step-1, 1, G, qff->V, NULL);
+      orbsubtract(gel(C,step), x, step-1, 1, G, qff->V, NULL);
     }
     else
     {
