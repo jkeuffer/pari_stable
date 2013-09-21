@@ -3721,7 +3721,16 @@ eulerphi(GEN n)
   GEN Q, F, P, E;
   long i, l;
 
-  if ((F = chk_arith(n,"eulerphi"))) {}
+  if ((F = chk_arith(n,"eulerphi")))
+  {
+    if (typ(n) == t_VEC && lgefint(gel(n,1)) == 3)
+    {
+      ulong e;
+      F = mkmat2(ZV_to_nv(gel(F,1)), ZV_to_nv(gel(F,2)));
+      e = eulerphiu_fact(F);
+      avma = av; return utoipos(e);
+    }
+  }
   else if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
   else
     F = absi_factor(n);
