@@ -1,6 +1,10 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
+Done for version 2.6.2 (released ??/??/2013):
+  Fixed
+    1- eulerphi(t_INT factorization) corrupted the input
+
 Done for version 2.6.1 (released 20/09/2013):
 
   Fixed

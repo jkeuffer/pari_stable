@@ -3718,7 +3718,7 @@ GEN
 eulerphi(GEN n)
 {
   pari_sp av = avma;
-  GEN F, P, E;
+  GEN Q, F, P, E;
   long i, l;
 
   if ((F = chk_arith(n,"eulerphi"))) {}
@@ -3727,15 +3727,16 @@ eulerphi(GEN n)
     F = absi_factor(n);
   P = gel(F,1);
   E = gel(F,2); l = lg(P);
+  Q = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
     GEN p = gel(P,i), q;
     ulong v = itou(gel(E,i));
     q = subiu(p,1);
     if (v != 1) q = mulii(q, v == 2? p: powiu(p, v-1));
-    gel(P,i) = q;
+    gel(Q,i) = q;
   }
-  return gerepileuptoint(av, ZV_prod(P));
+  return gerepileuptoint(av, ZV_prod(Q));
 }
 
 static GEN
