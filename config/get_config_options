@@ -125,7 +125,7 @@ Options: some names can be abbreviated to one character (e.g -h = -help)
 Build Options:
   --host=<arch-osname>  target achitecture
   --kernel=<kern>       kernel used
-  --graphic=<gr>        graphic library used (none, X11, Qt, fltk, win32)
+  --graphic=<gr>        graphic library used (none, X11, Qt, fltk, ps, win32)
   --time=<fun>          timing function to use (getrusage, clock_gettime,
                           times, ftime)
   --builddir=<dir>      directory where the object files will be created
