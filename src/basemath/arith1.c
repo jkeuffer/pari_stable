@@ -515,6 +515,31 @@ END:
   return e;
 }
 
+long
+logint0(GEN B, GEN y, GEN *ptq)
+{
+  long e;
+  if (typ(B) != t_INT) pari_err_TYPE("logint",B);
+  if (signe(B)<=0)
+    pari_err_DOMAIN("logint", "x" ,"<=", gen_0, B);
+  if (typ(y) != t_INT) pari_err_TYPE("logint",y);
+  if (signe(y)<=0 || equali1(y))
+    pari_err_DOMAIN("logint", "b" ,"<=", gen_1, y);
+  if (equaliu(y, 2))
+  {
+    e = expi(B);
+    if (ptq) *ptq = int2n(e);
+    return e;
+  }
+  e = logint(B,y,ptq)-1;
+  if (ptq)
+  {
+    pari_sp av = avma;
+    *ptq = gerepileuptoint(av, diviiexact(*ptq, y));
+  }
+  return e;
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**                     INTEGRAL SQUARE ROOT                        **/

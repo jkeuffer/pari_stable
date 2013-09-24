@@ -1280,6 +1280,7 @@ long    kross(long x, long y);
 long    krouu(ulong x, ulong y);
 GEN     lcmii(GEN a, GEN b);
 long    logint(GEN B, GEN y, GEN *ptq);
+long    logint0(GEN B, GEN y, GEN *ptq);
 GEN     mpfact(long n);
 GEN     mulu_interval(ulong a, ulong b);
 GEN     odd_prime_divisors(GEN q);

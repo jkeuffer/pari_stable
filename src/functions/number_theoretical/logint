@@ -1,0 +1,12 @@
+Function: logint
+Section: number_theoretical
+C-Name: logint0
+Prototype: lGGD&
+Help: logint(x,b,&z): b being an integer > 1, and x an integer > 0, return the
+ largest integer e so that b^e <= x. If present, set z to b^e.
+Description:
+ (gen,2):small        expi($1)
+ (gen,gen,&int):small logint0($1, $2, &$3)
+Doc: Return the largest integer $e$ so that $b^e \leq x$. If present, set $z$ to
+ $b^e$. The parameter $b$ must be a integer strictly larger than $1$, and $x$
+ must be a positive integer.
