@@ -461,6 +461,64 @@ istotient(GEN n, GEN *px)
 
 /*********************************************************************/
 /**                                                                 **/
+/**                     INTEGRAL LOGARITHM                          **/
+/**                                                                 **/
+/*********************************************************************/
+
+/* y > 1 and B > 0 integers. Return e such that y^(e-1) <= B < y^e, i.e
+ * e = 1 + floor(log_y B). Set *ptq = y^e if non-NULL */
+long
+logint(GEN B, GEN y, GEN *ptq)
+{
+  pari_sp av = avma, av2;
+  long eB, ey, e, i, fl;
+  GEN q,pow2, r = y;
+
+  if (typ(B) != t_INT) B = ceil_safe(B);
+  eB = expi(B); /* 2^eB <= B < 2^(eB + 1) */
+  ey = expi(y); /* result e satisfies e > eB / (ey+1) */
+  if (eB <= 13 * ey) /* e small, be naive */
+  {
+    for (e=1;; e++)
+    { /* here, r = y^e */
+      fl = cmpii(r, B);
+      if (fl > 0) goto END;
+      r = mulii(r,y);
+    }
+  }
+  /* e > 13 ey / (ey + 1) >= 6.5 */
+
+  /* binary splitting: compute bits of e one by one */
+  /* compute pow2[i] = y^(2^i) [i < crude upper bound for log_2 log_y(B)] */
+  pow2 = new_chunk((long)log2(eB)+2);
+  gel(pow2,0) = y;
+  for (i=0,q=r;; )
+  { /* r = y^2^i */
+    fl = cmpii(r,B);
+    if (!fl) { e = 1L<<i; e++; r = mulii(r,y); goto END; }
+    if (fl > 0) break;
+    q = r; r = sqri(q);
+    i++; gel(pow2,i) = r;
+  }
+
+  av2 = avma;
+  for (i--, e=1L<<i;;)
+  { /* y^e = q < B <= r = q * y^(2^i) */
+    if (!fl) break; /* B = r */
+    /* q < B < r */
+    if (--i < 0) { if (fl > 0) e++; break; }
+    r = mulii(q, gel(pow2,i));
+    fl = cmpii(r, B);
+    if (fl <= 0) { e += (1L<<i); q = r = gerepileuptoint(av2, r); }
+  }
+  if (fl <= 0) { e++; r = mulii(r,y); }
+END:
+  if (ptq) *ptq = gerepileuptoint(av, r); else avma = av;
+  return e;
+}
+
+/*********************************************************************/
+/**                                                                 **/
 /**                     INTEGRAL SQUARE ROOT                        **/
 /**                                                                 **/
 /*********************************************************************/
