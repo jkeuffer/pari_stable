@@ -1,4 +1,4 @@
-.TH TEX2MAIL 1 "3 Mars 2001"
+.TH TEX2MAIL 1 "26 March 2001"
 .SH NAME
 tex2mail \- TeX to ascii math prettyprinter
 .SH SYNOPSIS
@@ -11,7 +11,7 @@ tex2mail \- TeX to ascii math prettyprinter
 .IR number ]
 [-by_par=
 .IR number ]
-[-TeX] 
+[-TeX]
 [-ragged]
 [-noindent]
 
@@ -23,14 +23,14 @@ used by the PARI-GP calculator for output method
 Under gp, prettyprint mode can be set by
 .B default(output, 3)
 (or \\o3). By default, this switches gp main output to TeX format, filtered
-by 
+by
 
 .RS
 tex2mail \-TeX \-noindent \-ragged \-by_par
 .RE
 
-Flags passed to tex2mail can be modified via the 
-.IR prettyprinter 
+Flags passed to tex2mail can be modified via the
+.IR prettyprinter
 default in gp.
 
 .SH OPTIONS
@@ -62,7 +62,7 @@ assume \\noindent everywhere.
 
  % at the end of a line followed by \\n\\n is recognized as end of paragraph
 .SH AUTHOR
-Ilya Zakharevitch 
+Ilya Zakharevitch
 
 .SH SEE ALSO
 .IR gp (1),

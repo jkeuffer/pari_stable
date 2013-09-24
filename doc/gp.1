@@ -1,6 +1,6 @@
-.TH GP 1 "10 August 2004"
+.TH GP 1 "11 September 2013"
 .SH NAME
-gp \- PARI calculator
+gp \- The PARI calculator
 .SH SYNOPSIS
 .B gp
 .RB [ -s
@@ -20,31 +20,15 @@ gp \- PARI calculator
 [ file1 file2 ...]
 
 .SH DESCRIPTION
-Invokes the PARI-GP calculator, loading the file1, file2, ... (written in the
-GP language) on startup. gp is an advanced programmable calculator,
-which computes symbolically as long as possible, numerically where needed,
-and contains a wealth of number-theoretic functions (elliptic curves, class
-field theory...). It can be programmed with the GP scripting language. Its
-basic data types are
-.TP
-numbers
-integers, real numbers, exact rational numbers, algebraic numbers,
-.BR p "-adic numbers,"
-modular integers (integers modulo
-.BR n "),"
-complex numbers,
-.TP
-polynomials, rational functions,
-and power series,
-.TP
-integral binary quadratic forms,
-.TP
-matrices, vectors,
-and lists,
-.TP
-character strings,
-.PP
-and recursive combinations of these.
+Invokes the PARI-GP calculator
+\&\fBgp\fR; gp is an advanced programmable calculator, specializing in number
+theory, which computes symbolically as long as possible, numerically where
+needed, and contains a wealth of arithmetic functions: factorizations,
+elliptic curves, Galois theory, class field theory... Commands, written in
+the GP scripting language, are input interactively or loaded from files.
+
+If present at the end of the command line, files 'file1', 'file2', ...
+are loaded on startup; they must be written in the GP language.
 
 .SH OPTIONS
 Command line options are available in both short form (-f) and POSIX-like
@@ -76,10 +60,10 @@ Quiet mode. Do not print headers or history numbers and do not say goodbye.
 
 .TP
 .B \-D, \--default key=val
-performs 
+performs
 .BR default(key,
 .BR val) ";"
-on startup, overriding values from the 
+on startup, overriding values from the
 .B gprc
 preferences file. 'val' must be a constant value and is not allowed to
 involve any computation (e.g. 1+1 is forbidden). Any number of such
@@ -88,17 +72,17 @@ default-setting statements may appear on the command line.
 .TP
 .B \-s limit
 Size of gp internal stack allocated on startup. When gp runs out of space, it
-interrupts the current computation and raises a 
+interrupts the current computation and raises a
 .BI "stack overflow"
 exception. If this occurs frequently, start with a bigger stack. The stack
 size can also be
 increased from within gp, using
 .BR default(parisize, limit) ";"
-it may be convenient to set 
+it may be convenient to set
 .B stacksize
-from your 
+from your
 .B .gprc.
-Note that computations with a 
+Note that computations with a
 .B smaller
 stack may be more efficient due to better data locality. Most computations
 should need less than 20MB.
@@ -108,8 +92,8 @@ should need less than 20MB.
 gp can be run in an
 .I Emacs
 shell (see GP User's manual for details). This flag is then required for
-smooth interaction with the relevant
-.I Emacs
+smooth interaction with the 
+.I PariEmacs
 package (pari.el). It is set automatically by the pari.el package, and will
 produce nice display oddities if you set it outside of an
 .I Emacs
@@ -208,13 +192,6 @@ default psfile used for postscript output (as above)
 .I gphelp
 default external help program (as above)
 .TP
-.I pari.el
-elisp package to run pari in an
-.I Emacs
-shell. Must be loaded from your
-.I .emacs
-file.
-.TP
 .I *.gp
 GP programs
 
@@ -223,13 +200,13 @@ GP programs
 .I $GPRC
 place to look for the user's preference file (gprc); if the file does not exist,
 we then check in $HOME/.gprc, /etc/gprc, and finally for a file named 'gprc'
-in PARI's 
+in PARI's
 .B datadir.
 
 .TP
 .I $GP_DATA_DIR
 directory containing data installed by optional PARI packages.
-For example, the Galois resolvents files in directory 
+For example, the Galois resolvents files in directory
 .I galdata/
 needed by the
 .B polgalois
@@ -242,7 +219,7 @@ overrides PARI's 'datadir', defined at Configure time.
 
 .TP
 .I $GP_POSTSCRIPT_VIEWER
-an application able to display PostScript files, used by the 
+an application able to display PostScript files, used by the
 .I plotps
 graphic engine. This engine is a fallback used to output hi-res plots even
 when no compatible graphical library was available on your platform at
