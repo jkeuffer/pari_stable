@@ -663,7 +663,7 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
       *lex+=2; yylloc->end = *lex; return KSL;
     }
   yylloc->end = *lex+1;
-  return *(*lex)++;
+  return (unsigned char) *(*lex)++;
 }
 
 /********************************************************************/
