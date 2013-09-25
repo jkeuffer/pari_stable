@@ -1420,6 +1420,7 @@ szeta_odd(long k, long prec)
 
   q = mpexp(pi2); kk = k+1; /* >= 4 */
   y = NULL; /* gcc -Wall */
+  mpbern(kk>>1,prec);
   if ((k&3)==3)
   {
     for (n=0; n <= kk>>1; n+=2)
@@ -1507,7 +1508,7 @@ GEN
 bernreal(long n, long prec)
 {
   GEN B, storeB;
-  long k;
+  long k, lbern;
   if (n <= 1)
     switch(n)
     {
@@ -1519,10 +1520,12 @@ bernreal(long n, long prec)
 
   k = n >> 1;
   if (!bernzone && k < 100) mpbern(k, prec);
-  if (bernzone && k < lg(bernzone))
+  lbern = bernzone? lg(bernzone): 0;
+  if (k < lbern)
   {
     B = gel(bernzone,k);
-    if (typ(B) != t_REAL || realprec(B) >= prec) return gtofp(B, prec);
+    if (typ(B) != t_REAL) return fractor(B, prec);
+    if (realprec(B) >= prec) return rtor(B, prec);
   }
   /* not cached, must compute */
   if (n * log(n) > prec2nbits_mul(prec, LOG2))
@@ -1532,7 +1535,7 @@ bernreal(long n, long prec)
     storeB = bernfrac_using_zeta(n);
     B = fractor(storeB, prec);
   }
-  if (bernzone && k < lg(bernzone))
+  if (k < lbern)
   {
     GEN old = gel(bernzone, k);
     gel(bernzone, k) = gclone(storeB);
@@ -1663,6 +1666,7 @@ czeta(GEN s0, long prec)
   if (DEBUGLEVEL>2) timer_printf(&T,"sum from 1 to N-1");
 
   invn2 = divri(unr, mulss(nn,nn)); lim2 = lim<<1;
+  mpbern(lim,prec);
   tes = bernreal(lim2, prec);
   {
     GEN s1, s2, s3, s4, s5;

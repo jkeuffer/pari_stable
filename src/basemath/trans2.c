@@ -742,7 +742,7 @@ void
 mpbern(long nb, long prec)
 {
   const pari_sp av = avma;
-  long n, n_is_small = 1;
+  long n, n_is_small = 1, lbern = 0;
   GEN B;
   pari_timer T;
 
@@ -751,15 +751,17 @@ mpbern(long nb, long prec)
   if (nb < BERN_MINNB) nb = BERN_MINNB;
   if (bernzone)
   { /* don't recompute known Bernoulli */
-    long i, N = minss(lg(bernzone)-1, nb+1);
-    /* skip B_0, ..., B_10, always included as t_FRAC */
+    long i, N;
+    lbern = lg(bernzone);
+    N = minss(lbern-1, nb);
+    /* skip B_2, ..., B_{2*MINNB}, always included as t_FRAC */
     for (n = BERN_MINNB+1; n <= N; n++)
     {
       GEN c = gel(bernzone,n);
-      /* also stop if prec = oo */
+      /* also stop if prec = 0 (compute exactly) */
       if (typ(c) == t_REAL && realprec(c) < prec) break;
     }
-    if (n > N) return;
+    if (n > nb) return;
     B = cgetg_block(nb+1, t_VEC);
     for (i = 1; i <= n; i++) gel(B,i) = gel(bernzone,i);
   }
@@ -771,7 +773,7 @@ mpbern(long nb, long prec)
     gel(B,3) = gclone(mkfrac(gen_1, utoipos(42)));
     gel(B,4) = gel(B,2);
     gel(B,5) = gclone(mkfrac(utoipos(5), utoipos(66)));
-    n = BERN_MINNB;
+    n = BERN_MINNB+1;
   }
   avma = av;
   if (DEBUGLEVEL) {
@@ -783,10 +785,10 @@ mpbern(long nb, long prec)
   /* B_{2n} = (2n-1) / (4n+2) -
    * sum_{a = 1}^{n-1} (2n)...(2n+2-2a) / (2...(2a-1)2a) B_{2a} */
   n_is_small = 1;
-  for (n++; n <= nb; n++, avma = av)
-  {
+  for (; n <= nb; n++, avma = av)
+  { /* compute and store B[n] = B_{2n} */
     GEN S;
-    if (bernzone)
+    if (n < lbern)
     {
       GEN old = gel(bernzone,n);
       if (typ(old) != t_REAL || realprec(old) >= prec)
@@ -1194,6 +1196,7 @@ cxgamma(GEN s0, int dolog, long prec)
   nnx = gaddgs(s, nn);
   a = ginv(nnx); invn2 = gsqr(a);
   av2 = avma; avlim = stack_lim(av2,3);
+  mpbern(lim,prec);
   tes = divrunu(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
   if (DEBUGLEVEL>5) timer_printf(&T,"Bernoullis");
   for (i = 2*lim-2; i > 1; i -= 2)
@@ -1611,6 +1614,7 @@ cxpsi(GEN s0, long prec)
   if (DEBUGLEVEL>2) timer_printf(&T,"sum from 0 to N-1");
 
   in2 = gsqr(a);
+  mpbern(lim,prec);
   av2 = avma; tes = divru(bernreal(2*lim, prec), 2*lim);
   for (k=2*lim-2; k>=2; k-=2)
   {

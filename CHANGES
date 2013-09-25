@@ -5,6 +5,7 @@ Done for version 2.6.2 (released ??/??/2013):
   Fixed
     1- eulerphi(t_INT factorization) corrupted the input
 BA  2- 8bit chars were interpreted as end of input
+    3- Bernoulli numbers were no longer cached [2.6.0]
 
 Done for version 2.6.1 (released 20/09/2013):
 
