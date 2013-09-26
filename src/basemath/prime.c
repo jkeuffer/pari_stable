@@ -611,7 +611,7 @@ BLS_test(GEN N, GEN f)
   c2 = dvmdii(q, f, &c1);
   /* N = 1 + f c1 + f^2 c2, 0 <= c_i < f; check whether it is of the form
    * (1 + f a)(1 + fb) */
-  return ! Z_issquare(subii(c2, shifti(c1,2)));
+  return ! Z_issquare(subii(sqri(c1), shifti(c2,2)));
 }
 
 /*assume N>1, p^e || N-1. Find a witness a(p) such that
