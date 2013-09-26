@@ -49,6 +49,7 @@ case "$arch" in
     esac; prettya=$arch;;
   m68k)          asmarch=m68k;          prettya='Motorola 68k';;
   sh3)           asmarch=none;          prettya=SH-3 ;;
+  sh4)           asmarch=none;          prettya=SH-4 ;;
   sh5)           asmarch=none;          prettya=SH-5 ;;
   vax)           asmarch=none;          prettya=VAX ;;
   fx2800)        asmarch=none;          prettya='Alliant FX/2800' ;;
