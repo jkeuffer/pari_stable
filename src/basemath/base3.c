@@ -1726,11 +1726,23 @@ Idealstar(GEN nf, GEN ideal, long flag)
   R1 = nf_get_r1(nf);
   if (typ(ideal) == t_VEC && lg(ideal) == 3)
   {
-    arch = gel(ideal,2); ideal = gel(ideal,1);
-    i = typ(arch);
-    if (!is_vec_t(i) || lg(arch) != R1+1)
-      pari_err_TYPE("Idealstar [incorrect archimedean component]",arch);
-    archp = vec01_to_indices(arch);
+    arch = gel(ideal,2);
+    ideal= gel(ideal,1);
+    switch(typ(arch))
+    {
+      case t_VEC:
+        if (lg(arch) != R1+1)
+          pari_err_TYPE("Idealstar [incorrect archimedean component]",arch);
+        archp = vec01_to_indices(arch);
+        break;
+      case t_VECSMALL:
+        archp = arch;
+        arch = vec01_to_indices(archp);
+        break;
+      default:
+        pari_err_TYPE("Idealstar [incorrect archimedean component]",arch);
+        return NULL;
+    }
   }
   else
   {
