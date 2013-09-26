@@ -33,18 +33,20 @@ case "$arch" in
         4) asmarch=ppc;;
         8) asmarch=ppc64;;
         esac;                           prettya='PowerPC' ;;
-  arm*)
-    exe=$osname-$arch-endian$$
-    echo $n "Checking supported ARM kernel: $c"
-    cmd="$CC $CFLAGS -I../src/kernel/arm kernel.c -o $exe"; . log_cmd
-    if test -r $exe; then
-      asmarch=arm;
-    else
-      asmarch=none;
-    fi;
-    echo "$asmarch"
-    rm -f $exe
-    prettya=$arch;;
+  arm*)  case "$sizeof_long" in
+    4)
+      exe=$osname-$arch-endian$$
+      echo $n "Checking supported ARM kernel: $c"
+      cmd="$CC $CFLAGS -I../src/kernel/arm kernel.c -o $exe"; . log_cmd
+      if test -r $exe; then
+        asmarch=arm;
+      else
+        asmarch=none;
+      fi;
+      echo "$asmarch"
+      rm -f $exe;;
+    8) asmarch=none;;
+    esac; prettya=$arch;;
   m68k)          asmarch=m68k;          prettya='Motorola 68k';;
   sh3)           asmarch=none;          prettya=SH-3 ;;
   sh5)           asmarch=none;          prettya=SH-5 ;;
