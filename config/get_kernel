@@ -62,6 +62,10 @@ esac
 #   Modifications for pretty name and asm file
 #
 
+cat << EOM
+==========================================================================
+EOM
+
 tmp_kern=auto-auto
 if test  -n "$kernel"; then
   tmp_kern=$kernel

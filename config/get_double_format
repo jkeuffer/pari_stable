@@ -48,5 +48,4 @@ case $doubleformat in
 esac
 cat <<EOT
 The internal word representation of a double is $_format.
-==========================================================================
 EOT
