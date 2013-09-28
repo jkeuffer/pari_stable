@@ -28,6 +28,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 */
 
 static void
+Fl_c4c6_to_a4a6(ulong c4, ulong c6, ulong p, ulong *a4, ulong *a6)
+{
+  *a4 = Fl_neg(Fl_mul(c4, 27, p), p);
+  *a6 = Fl_neg(Fl_mul(c6, 54, p), p);
+}
+static void
 c4c6_to_a4a6(GEN c4, GEN c6, GEN p, GEN *a4, GEN *a6)
 {
   *a4 = Fp_neg(Fp_mulu(c4, 27, p), p);
@@ -39,6 +45,13 @@ ell_to_a4a6(GEN E, GEN p, GEN *a4, GEN *a6)
   GEN c4 = Rg_to_Fp(ell_get_c4(E),p);
   GEN c6 = Rg_to_Fp(ell_get_c6(E),p);
   c4c6_to_a4a6(c4, c6, p, a4, a6);
+}
+static void
+Fl_ell_to_a4a6(GEN E, ulong p, ulong *a4, ulong *a6)
+{
+  ulong c4 = Rg_to_Fl(ell_get_c4(E),p);
+  ulong c6 = Rg_to_Fl(ell_get_c6(E),p);
+  Fl_c4c6_to_a4a6(c4, c6, p, a4, a6);
 }
 
 static GEN
@@ -3868,16 +3881,11 @@ ellrootno(GEN e, GEN p)
 static long
 ellap_small_goodred(GEN E, ulong p)
 {
-  pari_sp av = avma;
-  GEN a4, a6, pp;
-  long c;
+  ulong a4, a6;
   if (p == 2) return 3 - cardmod2(E);
   if (p == 3) return 4 - cardmod3(E);
-  pp=utoi(p);
-  ell_to_a4a6(E,pp,&a4,&a6);
-  c = itos(Fp_ellcard(a4, a6, pp));
-  avma = av;
-  return p+1-c;
+  Fl_ell_to_a4a6(E, p, &a4, &a6);
+  return Fl_elltrace(a4, a6, p);
 }
 
 static void
