@@ -190,3 +190,14 @@ e=ellminimalmodel(ellinit([1,1]));
 e=ellchangecurve(e,1)
 e=ellchangecurve(e,[2,0,0,0])
 ellinit(ellinit([0,1]*Mod(1,5),ffgen(ffinit(5,2))));
+
+J=[0,1728,-3375,8000,54000,-32768,287496,-884736,-12288000,16581375,-884736000,-147197952000,-262537412640768000];
+{
+for (i=1,#J,
+  my(e = ellinit(ellfromj(J[i])));
+  my(v = ellan(e,200));
+  print("\n", e.j);
+  forprime(p = 127, 200, print1(v[p]," "))
+);
+}
+

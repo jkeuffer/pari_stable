@@ -1024,83 +1024,114 @@ ap_j1728(GEN a4,GEN p)
   return centermod(mulii(a, Fp_pow(a4, e, p)), p);
 }
 static GEN
-ap_j8000(GEN p)
+ap_j8000(GEN a6, GEN p)
 {
   GEN a, b;
-  long r = mod8(p);
+  long r = mod8(p), s = 1;
   if (r != 1 && r != 3) return gen_0;
   (void)cornacchia2(utoipos(8),p, &a,&b);
   switch(Mod16(a)) {
-    case 2: case 6:   if (Mod4(b)) a = negi(a);
+    case 2: case 6:   if (Mod4(b)) s = -s;
       break;
-    case 10: case 14: if (!Mod4(b)) a = negi(a);
+    case 10: case 14: if (!Mod4(b)) s = -s;
       break;
   }
-  return a;
+  if (kronecker(mulis(a6, 42), p) < 0) s = -s;
+  return s > 0? a: negi(a);
 }
 static GEN
-ap_j287496(GEN p)
+ap_j287496(GEN a6, GEN p)
 {
   GEN a, b;
+  long s = 1;
   if (mod4(p) != 1) return gen_0;
   (void)cornacchia2(utoipos(4),p, &a,&b);
   if (Mod4(a)==0) a = b;
   if (Mod2(a)==1) a = shifti(a,1);
-  if (Mod8(a)==6) a = negi(a);
-  if (krosi(2,p) < 0) a = negi(a);
-  return a;
+  if (Mod8(a)==6) s = -s;
+  if (krosi(2,p) < 0) s = -s;
+  if (kronecker(mulis(a6, -14), p) < 0) s = -s;
+  return s > 0? a: negi(a);
 }
 static GEN
-ap_cm(int CM, GEN p)
+ap_cm(int CM, long A6B, GEN a6, GEN p)
 {
   GEN a, b;
+  long s = 1;
   if (krosi(CM,p) < 0) return gen_0;
   (void)cornacchia2(utoipos(-CM),p, &a, &b);
   if ((CM&3) == 0) CM >>= 2;
-  if ((krois(a, -CM) > 0) ^ (CM == -7)) a = negi(a);
-  return a;
+  if ((krois(a, -CM) > 0) ^ (CM == -7)) s = -s;
+  if (kronecker(mulis(a6,A6B), p) < 0) s = -s;
+  return s > 0? a: negi(a);
 }
-static GEN
-ec_ap_cm(GEN J,long A6B,GEN a6,int CM,GEN jd,GEN jn,GEN p)
+/* is jn/jd = J (mod p) */
+static int
+is_CMj(long J, GEN jn, GEN jd, GEN p)
+{ return remii(subii(mulis(jd,J), jn), p) == gen_0; }
+#ifndef LONG_IS_64BIT
+/* is jn/jd = -(2^32 a + b) (mod p) */
+static int
+u2_is_CMj(ulong a, ulong b, GEN jn, GEN jd, GEN p)
 {
-  GEN a;
-  if (!equalii(modii(mulii(jd,J),p), jn)) return NULL;
-  if      (CM == -8)  a = ap_j8000(p);
-  else if (CM == -16) a = ap_j287496(p);
-  else                a = ap_cm(CM,p);
-  if (kronecker(mulis(a6,A6B), p) < 0) a = negi(a);
-  return a;
+  GEN mJ = uu32toi(a,b);
+  return remii(addii(mulii(jd,mJ), jn), p) == gen_0;
 }
-
+#endif
 static GEN
-u2tonegi(ulong a, ulong b) { GEN z = uu32toi(a,b); setsigne(z, -1); return z; }
-
+ec_ap_cm(int CM, GEN a4, GEN a6, GEN p)
+{
+  switch(CM)
+  {
+    case  -3: return ap_j0(a6, p);
+    case  -4: return ap_j1728(a4, p);
+    case  -8: return ap_j8000(a6, p);
+    case -16: return ap_j287496(a6, p);
+    case  -7: return ap_cm(CM, -2, a6, p);
+    case -11: return ap_cm(CM, 21, a6, p);
+    case -12: return ap_cm(CM, 22, a6, p);
+    case -19: return ap_cm(CM, 1, a6, p);
+    case -27: return ap_cm(CM, 253, a6, p);
+    case -28: return ap_cm(-7, -114, a6, p); /* yes, -7 ! */
+    case -43: return ap_cm(CM, 21, a6, p);
+    case -67: return ap_cm(CM, 217, a6, p);
+    case -163:return ap_cm(CM, 185801, a6, p);
+    default: return NULL;
+  }
+}
+long
+Fl_elltrace_CM(int CM, ulong a4, ulong a6, ulong p)
+{
+  pari_sp av = avma;
+  GEN a;
+  if (p < 127) return p+1-Fl_ellcard_naive(a4, a6, p);
+  a = ec_ap_cm(CM, utoi(a4), utoi(a6), utoipos(p));
+  avma = av; return itos(a);
+}
 static GEN
 CM_ellap(GEN a4, GEN a6, GEN jn, GEN jd, GEN p)
 {
-  pari_sp av = avma;
-  GEN a, t;
-
-#define CHECK(CM,J,A6B) a = ec_ap_cm(J,A6B,a6,CM,jd,jn,p); if (a) goto DONE;
-  if (!signe(a4)) { a = ap_j0(a6,p); goto DONE;}
-  if (!signe(a6)) { a = ap_j1728(a4,p); goto DONE;}
-  CHECK(-7,  utoineg(3375), -2);
-  CHECK(-8,  utoipos(8000), 42);
-  CHECK(-12, utoipos(54000), 22);
-  CHECK(-11, utoineg(32768), 21);
-  CHECK(-16, utoipos(287496), -14);
-  CHECK(-19, utoineg(884736), 1);
-  CHECK(-27, utoineg(12288000), 253);
-  CHECK(-7,  utoipos(16581375), -114);
-  CHECK(-43, utoineg(884736000), 21);
-  t = u2tonegi(0x00000022UL, 0x45ae8000UL); /* -27878400*5280 */
-  CHECK(-67, t, 217);
-  t = u2tonegi(0x03a4b862UL, 0xc4b40000UL); /* -640320^3 */
-  CHECK(-163, t, 185801);
+#define CHECK(CM,J) if (is_CMj(J,jn,jd,p)) return ec_ap_cm(CM,a4,a6,p);
+  if (!signe(a4)) return ap_j0(a6,p);
+  if (!signe(a6)) return ap_j1728(a4,p);
+  CHECK(-7,  -3375);
+  CHECK(-8,  8000);
+  CHECK(-12, 54000);
+  CHECK(-11, -32768);
+  CHECK(-16, 287496);
+  CHECK(-19, -884736);
+  CHECK(-27, -12288000);
+  CHECK(-28, 16581375);
+  CHECK(-43, -884736000);
+#ifdef LONG_IS_64BIT
+  CHECK(-67, -147197952000);
+  CHECK(-163, -262537412640768000);
+#else
+  if (Z_is_CMj(0x00000022UL,0x45ae8000UL,jn,jd,p) return ec_ap_cm(-67,a4,a6,p);
+  if (Z_is_CMj(0x03a4b862UL,0xc4b40000UL,jn,jd,p) return ec_ap_cm(-163,a4,a6,p);
+#endif
 #undef CHECK
-  avma = av; return NULL;
-DONE:
-  return gerepileuptoint(av, icopy(a));
+  return NULL;
 }
 
 static GEN
@@ -1134,7 +1165,7 @@ Fp_ellcard(GEN a4, GEN a6, GEN p)
   long lp = expi(p);
   ulong pp = p[2];
   if (lp < 7)
-    return utoi(Fl_ellcard_naive(itou(a4), itou(a6), pp));
+    return utoi(Fl_ellcard_naive(umodiu(a4,pp), umodiu(a6,pp), pp));
   { GEN a = Fp_ellcard_CM(a4,a6,p); if (a) return a; }
   if (lp >= 56)
   { GEN a = Fp_ellcard_SEA(a4, a6, p, 0); if (a) return a; }

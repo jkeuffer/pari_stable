@@ -3879,13 +3879,13 @@ ellrootno(GEN e, GEN p)
 
 /* assume e has good reduction mod p */
 static long
-ellap_small_goodred(GEN E, ulong p)
+ellap_small_goodred(int CM, GEN E, ulong p)
 {
   ulong a4, a6;
   if (p == 2) return 3 - cardmod2(E);
   if (p == 3) return 4 - cardmod3(E);
   Fl_ell_to_a4a6(E, p, &a4, &a6);
-  return Fl_elltrace(a4, a6, p);
+  return CM? Fl_elltrace_CM(CM, a4, a6, p): Fl_elltrace(a4, a6, p);
 }
 
 static void
@@ -3899,12 +3899,40 @@ checkell_int(GEN e)
       typ(ell_get_a6(e)) != t_INT) pari_err_TYPE("anellsmall [not an integral model]",e);
 }
 
+static int
+ell_get_CM(GEN e)
+{
+  GEN j = ell_get_j(e);
+  int CM = 0;
+  if (typ(j) == t_INT) switch(itos_or_0(j))
+  {
+    case 0:
+      if (!signe(j)) CM = -3;
+      break;
+    case 1728: CM = -4; break;
+    case -3375: CM = -7; break;
+    case  8000: CM = -8; break;
+    case 54000: CM = -12; break;
+    case -32768: CM = -11; break;
+    case 287496: CM = -16; break;
+    case -884736: CM = -19; break;
+    case -12288000: CM = -27; break;
+    case  16581375: CM = -28; break;
+    case -884736000: CM = -43; break;
+#ifdef LONG_IS_64BIT
+    case -147197952000: CM = -67; break;
+    case -262537412640768000: CM = -163; break;
+#endif
+  }
+  return CM;
+}
 GEN
 anellsmall(GEN e, long n0)
 {
   pari_sp av;
   ulong p, m, SQRTn, n = (ulong)n0;
   GEN an, D;
+  int CM;
 
   checkell_int(e);
   if (n0 <= 0) return cgetg(1,t_VEC);
@@ -3915,6 +3943,7 @@ anellsmall(GEN e, long n0)
   }
   SQRTn = (ulong)sqrt(n);
   D = ell_get_disc(e);
+  CM = ell_get_CM(e);
 
   an = cgetg(n+1,t_VECSMALL); an[1] = 1;
   av = avma;
@@ -3949,7 +3978,7 @@ anellsmall(GEN e, long n0)
     }
     else /* good reduction */
     {
-      ap = ellap_small_goodred(e, p);
+      ap = ellap_small_goodred(CM, e, p);
 GOOD_RED:
       if (p <= SQRTn) {
         ulong pk, oldpk = 1;
@@ -4867,6 +4896,7 @@ torsbound(GEN e)
   pari_sp av = avma, av2;
   long m, b, bold, nb;
   forprime_t S;
+  int CM = ell_get_CM(e);
   nb = expi(D) >> 3;
   /* nb = number of primes to try ~ 1 prime every 8 bits in D */
   b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
@@ -4879,7 +4909,7 @@ torsbound(GEN e)
     if (!p) pari_err_BUG("torsbound [ran out of primes]");
     if (!umodiu(D, p)) continue;
 
-    b = ugcd(b, p+1 - ellap_small_goodred(e, p));
+    b = ugcd(b, p+1 - ellap_small_goodred(CM, e, p));
     avma = av2;
     if (b == 1) break;
     if (b == bold) m++; else { bold = b; m = 0; }
