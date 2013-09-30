@@ -598,13 +598,14 @@ FpE_tatepairing(GEN P, GEN Q, GEN m, GEN a4, GEN p)
 /**                                                                   **/
 /***********************************************************************/
 
-static ulong /*assume p < 500 */
+/*assume a4,a6 reduced mod p and 3 < p < 1627 */
+static ulong
 Fl_ellcard_naive(ulong a4, ulong a6, ulong p)
 {
   ulong i;
   long a = p+1;
   for(i=0; i<p; i++)
-    a += krouu((i*i+a4)*i+a6,p);
+    a += krouu((i*i+a4)*i+a6,p); /* no overflow */
   return a;
 }
 
