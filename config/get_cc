@@ -36,7 +36,7 @@ if test -z "$CC"; then
       *) echo ..."I could not find cc.";; esac
   # GNU Compilers
   gcc=`./locate gcc '' $pathspace`
-  if test -z "$gcc"; then
+  if test -z "$gcc" -a -n "$cc"; then
     exe=$osname-$arch-gnu$$
     $cc $extraflag -o $exe gnu.c
     if $RUNTEST $exe; then gcc=$cc; fi; rm -f $exe
@@ -82,7 +82,7 @@ cmd="$CC $CFLAGS $extraflag -o $exe ansi.c"; . log_cmd
 if test -s $exe; then
   $RUNTEST $exe
 fi
-if test $? != 0; then cat << EOT
+if test $? != 0 -o ! -s $exe; then cat << EOT
 ###
 ### C compiler does not work. PARI/GP requires an ANSI C compiler! Aborting.
 ###
