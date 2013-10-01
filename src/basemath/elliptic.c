@@ -3936,11 +3936,8 @@ anellsmall(GEN e, long n0)
 
   checkell_int(e);
   if (n0 <= 0) return cgetg(1,t_VEC);
-  if (n >= LGBITS) {
-    char *s = stack_malloc(128);
-    sprintf(s,"anell for n >= %lu", LGBITS);
-    pari_err_IMPL(s);
-  }
+  if (n >= LGBITS)
+    pari_err_IMPL( stack_sprintf("ellan for n >= %lu", LGBITS) );
   SQRTn = (ulong)sqrt(n);
   D = ell_get_disc(e);
   CM = ell_get_CM(e);
