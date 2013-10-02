@@ -1127,8 +1127,8 @@ CM_ellap(GEN a4, GEN a6, GEN jn, GEN jd, GEN p)
   CHECK(-67, -147197952000);
   CHECK(-163, -262537412640768000);
 #else
-  if (u2_is_CMj(0x00000022UL,0x45ae8000UL,jn,jd,p) return ec_ap_cm(-67,a4,a6,p);
-  if (u2_is_CMj(0x03a4b862UL,0xc4b40000UL,jn,jd,p) return ec_ap_cm(-163,a4,a6,p);
+  if (u2_is_CMj(0x00000022UL,0x45ae8000UL,jn,jd,p)) return ec_ap_cm(-67,a4,a6,p);
+  if (u2_is_CMj(0x03a4b862UL,0xc4b40000UL,jn,jd,p)) return ec_ap_cm(-163,a4,a6,p);
 #endif
 #undef CHECK
   return NULL;
