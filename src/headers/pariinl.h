@@ -1321,7 +1321,7 @@ affgr(GEN x, GEN y)
     case t_REAL: affrr(x,y); break;
     case t_FRAC: rdiviiz(gel(x,1),gel(x,2), y); break;
     case t_QUAD: av = avma; affgr(quadtofp(x,realprec(y)), y); avma = av; break;
-    default: pari_err_TYPE2("",x,y);
+    default: pari_err_TYPE2("=",x,y);
   }
 }
 
