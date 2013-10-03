@@ -755,7 +755,7 @@ add_ser_scal(GEN y, GEN x)
   avma = av; /* first coeff is rational 0 */
   i = 3;
   while (i<ly && isrationalzero(gel(y,i))) i++;
-  if (i == ly) return zeroser(vy, ly-1);
+  if (i == ly) return zeroser(vy, ly-2);
   t = gel(y,i);
   while (i<ly && isexactzero(gel(y,i))) i++;
   if (i == ly)
