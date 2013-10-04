@@ -14,7 +14,7 @@ case $x in
    echo ..."Found gmp header in $gmp_include"
    GMPINCLUDE="-I$gmp_include"
    ;;
-  *) echo ..."But no header file has been found"
+  *) echo ..."gmp header file not found by Configure, trying to proceed"
      gmp=;;
 esac
 

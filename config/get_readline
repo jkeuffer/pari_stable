@@ -20,7 +20,7 @@ case $x in
       RLINCLUDE="-I$rl_include"
     fi
      ;;
-  *) echo ..."But no header file has been found"
+  *) echo ..."readline header file not found by Configure, trying to proceed"
      readline=;;
 esac
 
