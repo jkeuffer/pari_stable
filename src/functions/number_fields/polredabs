@@ -23,7 +23,7 @@ Doc: returns a canonical defining polynomial $P$ for the number field
  of this order computation (as per \tet{nfcertify}: we try to prove that the
  order is maximal); if it fails, the routine returns $0$ instead of $P$.
  In order to force an output in that case as well, you may either use
- \tet{polredbest} or \kbd{polredabs(,16)}
+ \tet{polredbest}, or \kbd{polredabs(,16)}, or
  \bprog
    polredabs([T, nfbasis([T, listP])])
  @eprog\noindent (In all three cases, the result is no longer canonical.)
