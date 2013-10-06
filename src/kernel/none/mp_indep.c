@@ -239,7 +239,8 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
 #ifdef KARAMULR_VARIANT
     GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2);
 #else
-    GEN hi = muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
+    GEN hi = (x==y)?  sqrispec_mirror(x+2, lz-2):
+                     muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
 #endif
     garde = hi[lz];
     if (hi[2] < 0)

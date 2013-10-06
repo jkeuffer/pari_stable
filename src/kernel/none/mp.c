@@ -1644,6 +1644,7 @@ muliispec(GEN a, GEN b, long na, long nb)
   return gerepileuptoint(av, addshiftw(c,c0, n0));
 }
 
+#define sqrispec_mirror sqrispec
 #define muliispec_mirror muliispec
 
 /* x % (2^n), assuming n >= 0 */

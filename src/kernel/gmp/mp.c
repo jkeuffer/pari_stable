@@ -1153,30 +1153,39 @@ sqrispec(GEN x, long nx)
 
   lz = (nx<<1)+2;
   zd = cgeti(lz);
+#ifdef mpn_sqr
+  mpn_sqr(LIMBS(zd), (mp_limb_t *)x, nx);
+#else
   mpn_mul_n(LIMBS(zd), (mp_limb_t *)x, (mp_limb_t *)x, nx);
+#endif
   if (zd[lz-1]==0) lz--;
 
   zd[1] = evalsigne(1) | evallgefint(lz);
   return zd;
 }
 
+INLINE GEN
+sqrispec_mirror(GEN x, long nx)
+{
+  GEN cx=new_chunk(nx);
+  GEN z;
+  xmpn_mirrorcopy((mp_limb_t *)cx,(mp_limb_t *)x,nx);
+  z=sqrispec(cx, nx);
+  xmpn_mirror(LIMBS(z), NLIMBS(z));
+  return z;
+}
+
 /* We must have nx>=ny. This lets garbage on the stack.
-   This handle squares correctly (mpn_mul is optimized
-   for squares).
 */
 
 INLINE GEN
 muliispec_mirror(GEN x, GEN y, long nx, long ny)
 {
-  GEN cx=new_chunk(nx),cy;
+  GEN cx=new_chunk(nx);
+  GEN cy=new_chunk(ny);
   GEN z;
   xmpn_mirrorcopy((mp_limb_t *)cx,(mp_limb_t *)x,nx);
-  if (x==y) cy=cx; /*If nx<ny cy will be too short*/
-  else
-  {
-    cy=new_chunk(ny);
-    xmpn_mirrorcopy((mp_limb_t *)cy,(mp_limb_t *)y,ny);
-  }
+  xmpn_mirrorcopy((mp_limb_t *)cy,(mp_limb_t *)y,ny);
   z=muliispec(cx, cy, nx, ny);
   xmpn_mirror(LIMBS(z), NLIMBS(z));
   return z;
