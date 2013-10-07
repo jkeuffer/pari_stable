@@ -197,30 +197,6 @@ mulur(ulong x, GEN y)
   return mulur_2(x, y, s);
 }
 
-#ifdef KARAMULR_VARIANT
-static GEN addshiftw(GEN x, GEN y, long d);
-static GEN
-karamulrr1(GEN y, GEN x, long ly, long lz)
-{
-  long i, l, lz2 = (lz+2)>>1, lz3 = lz-lz2;
-  GEN lo1, lo2, hi;
-
-  hi = muliispec_mirror(x,y, lz2,lz2);
-  i = lz2; while (i<lz && !x[i]) i++;
-  lo1 = muliispec_mirror(y,x+i, lz2,lz-i);
-  i = lz2; while (i<ly && !y[i]) i++;
-  lo2 = muliispec_mirror(x,y+i, lz2,ly-i);
-  if (signe(lo1))
-  {
-    if (ly!=lz) { lo2 = addshiftw(lo1,lo2,1); lz3++; }
-    else lo2 = addii(lo1,lo2);
-  }
-  l = lgefint(lo2)-(lz3+2);
-  if (l > 0) hi = addiispec(hi+2,lo2+2, lgefint(hi)-2,l);
-  return hi;
-}
-#endif
-
 /* set z <-- x*y, floating point multiplication.
  * lz = lg(z) = lg(x) <= ly <= lg(y), sz = signe(z). flag = lg(x) < lg(y) */
 INLINE void
@@ -236,12 +212,8 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
   if (lz > MULRR_MULII_LIMIT)
   {
     pari_sp av = avma;
-#ifdef KARAMULR_VARIANT
-    GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2);
-#else
     GEN hi = (x==y)?  sqrispec_mirror(x+2, lz-2):
                      muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
-#endif
     garde = hi[lz];
     if (hi[2] < 0)
     {
