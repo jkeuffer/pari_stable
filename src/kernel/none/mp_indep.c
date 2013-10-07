@@ -197,6 +197,116 @@ mulur(ulong x, GEN y)
   return mulur_2(x, y, s);
 }
 
+/* set z <-- x^2 != 0, floating point multiplication.
+ * lz = lg(z) = lg(x) */
+INLINE void
+sqrz_i(GEN z, GEN x, long lz)
+{
+  long ez = expo(x) << 1;
+  long i, j, lzz, p1;
+  ulong garde;
+  GEN x1;
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  if (lz > MULRR_MULII_LIMIT)
+  {
+    pari_sp av = avma;
+    GEN hi = sqrispec_mirror(x+2, lz-2);
+    garde = hi[lz];
+    if (hi[2] < 0)
+    {
+      ez++;
+      for (i=2; i<lz ; i++) z[i] = hi[i];
+    }
+    else
+    {
+      shift_left(z,hi,2,lz-1, garde, 1);
+      garde <<= 1;
+    }
+    if (garde & HIGHBIT)
+    { /* round to nearest */
+      i = lz; do ((ulong*)z)[--i]++; while (i>1 && z[i]==0);
+      if (i == 1) { z[2] = (long)HIGHBIT; ez++; }
+    }
+    z[1] = evalsigne(1)|evalexpo(ez);
+    avma = av; return;
+  }
+  if (lz == 3)
+  {
+    garde = mulll(x[2],x[2]);
+    if (hiremainder & HIGHBIT)
+    {
+      ez++;
+      /* hiremainder < (2^BIL-1)^2 / 2^BIL, hence hiremainder+1 != 0 */
+      if (garde & HIGHBIT) hiremainder++; /* round properlx */
+    }
+    else
+    {
+      hiremainder = (hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
+      if (garde & (HIGHBIT-1))
+      {
+        hiremainder++; /* round properlx */
+        if (!hiremainder) { hiremainder = HIGHBIT; ez++; }
+      }
+    }
+    z[1] = evalsigne(1) | evalexpo(ez);
+    z[2] = hiremainder; return;
+  }
+
+  lzz = lz-1; p1 = x[lzz];
+  if (p1)
+  {
+    (void)mulll(p1,x[3]);
+    garde = addmul(p1,x[2]);
+    z[lzz] = hiremainder;
+  }
+  else
+  {
+    garde = 0;
+    z[lzz] = 0;
+  }
+  for (j=lz-2, x1=x-j; j>=3; j--)
+  {
+    p1 = x[j]; x1++;
+    if (p1)
+    {
+      (void)mulll(p1,x1[lz+1]);
+      garde = addll(addmul(p1,x1[lz]), garde);
+      for (i=lzz; i>j; i--)
+      {
+        hiremainder += overflow;
+        z[i] = addll(addmul(p1,x1[i]), z[i]);
+      }
+      z[j] = hiremainder+overflow;
+    }
+    else z[j]=0;
+  }
+  p1 = x[2]; x1++;
+  garde = addll(mulll(p1,x1[lz]), garde);
+  for (i=lzz; i>2; i--)
+  {
+    hiremainder += overflow;
+    z[i] = addll(addmul(p1,x1[i]), z[i]);
+  }
+  z[2] = hiremainder+overflow;
+
+  if (z[2] < 0)
+    ez++;
+  else
+  {
+    shift_left(z,z,2,lzz, garde, 1);
+    garde <<= 1;
+  }
+  if (garde & HIGHBIT)
+  { /* round to nearest */
+    i = lz; do ((ulong*)z)[--i]++; while (i>2 && z[i]==0);
+    if (z[i] == 0) { z[2] = (long)HIGHBIT; ez++; }
+  }
+  z[1] = evalsigne(1) | evalexpo(ez);
+}
+
+
 /* set z <-- x*y, floating point multiplication.
  * lz = lg(z) = lg(x) <= ly <= lg(y), sz = signe(z). flag = lg(x) < lg(y) */
 INLINE void
@@ -209,11 +319,12 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
+  if (x == y) return sqrz_i(z,x,lz);
+
   if (lz > MULRR_MULII_LIMIT)
   {
     pari_sp av = avma;
-    GEN hi = (x==y)?  sqrispec_mirror(x+2, lz-2):
-                     muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
+    GEN hi = muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
     garde = hi[lz];
     if (hi[2] < 0)
     {
@@ -313,10 +424,12 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
 GEN
 mulrr(GEN x, GEN y)
 {
-  long flag, ly, lz, sx = signe(x), sy = signe(y);
+  long flag, ly, lz, sx, sy;
   GEN z;
 
-  if (!sx || !sy) return real_0_bit(expo(x) + expo(y));
+  if (x == y) return sqrr(x);
+  sx = signe(x); if (!sx) return real_0_bit(expo(x) + expo(y));
+  sy = signe(y); if (!sy) return real_0_bit(expo(x) + expo(y));
   if (sy < 0) sx = -sx;
   lz = lg(x);
   ly = lg(y);
@@ -334,7 +447,7 @@ sqrr(GEN x)
 
   if (!sx) return real_0_bit(2*expo(x));
   lz = lg(x); z = cgetr(lz);
-  mulrrz_i(z, x,x, lz,0, 1);
+  sqrz_i(z, x, lz);
   return z;
 }
 
