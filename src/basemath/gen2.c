@@ -140,7 +140,7 @@ GEN
 cgetp(GEN x)
 {
   GEN y = cgetg(5,t_PADIC);
-  y[1] = evalprecp(precp(x)) | _evalvalp(0);
+  y[1] = (x[1]&PRECPBITS) | _evalvalp(0);
   gel(y,2) = icopy(gel(x,2));
   gel(y,3) = icopy(gel(x,3));
   gel(y,4) = cgeti(lgefint(gel(x,3))); return y;

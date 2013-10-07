@@ -469,11 +469,16 @@ check.
 (second codeword of \typ{INT}, \typ{REAL}, \typ{POL}, \typ{SER})
 
 \fun{long}{evalprecp}{long x} convert $p$-adic ($X$-adic) precision~\kbd{x}
-to bitmask (second codeword of \typ{PADIC}, \typ{SER})
+to bitmask (second codeword of \typ{PADIC}, \typ{SER}). Raise overflow error
+if \kbd{x} is so large that the corresponding precision cannot be
+represented.
+
+\fun{long}{_evalprecp}{long x} same as \kbd{evalprecp} \emph{without} the
+overflow check.
 
 \fun{long}{evalvalp}{long x} convert $p$-adic ($X$-adic) valuation~\kbd{x} to
 bitmask (second codeword of \typ{PADIC}, \typ{SER}). Raise overflow error if
-\kbd{x} is so large that the corresponding valuation cannot be represented
+\kbd{x} is so large that the corresponding valuation cannot be represented.
 
 \fun{long}{_evalvalp}{long x} same as \kbd{evalvalp} \emph{without} the
 overflow check.

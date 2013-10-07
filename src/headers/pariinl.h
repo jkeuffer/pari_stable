@@ -272,7 +272,7 @@ zeropadic(GEN p, long e)
   gel(y,4) = gen_0;
   gel(y,3) = gen_1;
   gel(y,2) = icopy(p);
-  y[1] = evalvalp(e) | evalprecp(0);
+  y[1] = evalvalp(e) | _evalprecp(0);
   return y;
 }
 INLINE GEN
@@ -282,7 +282,7 @@ zeropadic_shallow(GEN p, long e)
   gel(y,4) = gen_0;
   gel(y,3) = gen_1;
   gel(y,2) = p;
-  y[1] = evalvalp(e) | evalprecp(0);
+  y[1] = evalvalp(e) | _evalprecp(0);
   return y;
 }
 /* O(pol_x(v)^e) */

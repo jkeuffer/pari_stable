@@ -3286,6 +3286,7 @@ INLINE int    equalsi(long x, GEN y);
 INLINE int    equalui(ulong x, GEN y);
 INLINE long   evalexpo(long x);
 INLINE long   evallg(long x);
+INLINE long   evalprecp(long x);
 INLINE long   evalvalp(long x);
 INLINE long   expi(GEN x);
 INLINE long   expu(ulong x);

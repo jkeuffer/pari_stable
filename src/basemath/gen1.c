@@ -2396,7 +2396,7 @@ divpp(GEN x, GEN y) {
   a = precp(x);
   b = precp(y); if (a > b) { M = gel(y,3); } else { M = gel(x,3); b = a; }
   z = cgetg(5, t_PADIC);
-  z[1] = evalprecp(b) | evalvalp(valp(x) - valp(y));
+  z[1] = _evalprecp(b) | evalvalp(valp(x) - valp(y));
   gel(z,2) = icopy(gel(x,2));
   gel(z,3) = icopy(M); av = avma;
   gel(z,4) = gerepileuptoint(av, remii(mulii(gel(x,4), Fp_inv(gel(y,4), M)), M) );
@@ -3273,7 +3273,7 @@ ginv(GEN x)
 
     case t_PADIC: z = cgetg(5,t_PADIC);
       if (!signe(gel(x,4))) pari_err_INV("ginv",x);
-      z[1] = evalprecp(precp(x)) | evalvalp(-valp(x));
+      z[1] = _evalprecp(precp(x)) | evalvalp(-valp(x));
       gel(z,2) = icopy(gel(x,2));
       gel(z,3) = icopy(gel(x,3));
       gel(z,4) = Fp_inv(gel(x,4),gel(z,3)); return z;

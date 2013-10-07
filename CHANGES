@@ -10,6 +10,7 @@ BA  2- 8bit chars were interpreted as end of input
     5- [Configure] confusing error messages when C compiler doesn't work
     6- scalar + t_SER = 0 => wrong valuation (1+O(x)-1 => O(x^2))
 BA  7- squaring of t_REAL was not faster than multiply
+    8-  1+O(2^(2^18)) => O(2^0) (silent overflow)
 
 Done for version 2.6.1 (released 20/09/2013):
 

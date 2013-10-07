@@ -38,6 +38,13 @@ evalexpo(long x)
   if (v & ~EXPOBITS) pari_err_OVERFLOW("expo()");
   return v;
 }
+INLINE long
+evalprecp(long x)
+{
+  long v = _evalprecp(x);
+  if (x & ~((1UL<<(BITS_IN_LONG-VALPnumBITS))-1)) pari_err_OVERFLOW("precp()");
+  return v;
+}
 
 /* Inhibit some area gerepile-wise: declare it to be a non recursive
  * type, of length l. Thus gerepile won't inspect the zone, just copy it.
