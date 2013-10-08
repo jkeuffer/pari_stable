@@ -19,3 +19,4 @@ for (i = 1,10^4,
   d = eulerphi(i);
   if (!istotient(d, &n) || eulerphi(n) != d, error(i)))
 }
+Mod(1,2)-Mod(2,4)

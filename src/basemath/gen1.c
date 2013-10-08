@@ -1279,7 +1279,7 @@ gsub(GEN x, GEN y)
         return sub_intmod_same(z, X, gel(x,2), gel(y,2));
       gel(z,1) = gcdii(X,Y);
       av = avma; p1 = subii(gel(x,2),gel(y,2));
-      gel(z,2) = gerepileuptoint(av, remii(p1, gel(z,1))); return z;
+      gel(z,2) = gerepileuptoint(av, modii(p1, gel(z,1))); return z;
     }
     case t_FRAC: return addsub_frac(x,y, subii);
     case t_COMPLEX: z = cgetg(3,t_COMPLEX);
