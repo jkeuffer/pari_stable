@@ -1127,6 +1127,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   ell = itos(gell);
   if (ell == 1) return pol_x(0);
   if (!uisprime(ell)) pari_err_IMPL("kummer for composite relative degree");
+  if (all < -1 && umodiu(bnr_get_no(bnr), ell))
+    return cgetg(1, t_VEC);
   if (bnf_get_tuN(bnf) % ell == 0)
     return rnfkummersimple(bnr, subgroup, gell, all);
 
