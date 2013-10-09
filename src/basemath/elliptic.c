@@ -3455,7 +3455,9 @@ ellglobalred(GEN E)
 }
 
 static GEN doellrootno(GEN e);
-/* only update E[1..14] */
+/* Return E = ellminimalmodel(e), but only update E[1..14].
+ * insert MINIMALMODEL, GLOBALRED, ROOTNO in both e (regular insertion)
+ * and E (shallow insert) */
 GEN
 ellanal_globalred(GEN e, GEN *ch)
 {
@@ -3473,6 +3475,7 @@ ellanal_globalred(GEN e, GEN *ch)
   {
     v = gel(S,2);
     E = gcopy(gel(S,3));
+    obj_insert_shallow(E, Q_MINIMALMODEL, mkvec(gel(S,1)));
   }
   if (ch) *ch = v;
   S = ellglobalred_i(e);
