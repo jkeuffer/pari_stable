@@ -32,6 +32,7 @@ dft target::
 	@echo "For pari maintainers..."
 	@echo "	dbg	                Compile gp binary suitable for debugging"
 	@echo "	prf	                Compile gp binary suitable for profiling"
+	@echo "	gcov	                Compile gp binary suitable for test coverage reporting"
 	@echo "	distrib,alpha,beta,release  Create a new distribution"
 	@echo "	nsis                    Create a NSIS installer for win32"
 	@echo "	snapshot                Create a snapshot"
@@ -57,6 +58,11 @@ dbg gp.dbg::
 prf gp.prf::
 	@dir=\`config/objdir\`.prf; echo "Making gp in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure -pg first!"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) gp
+
+gcov gp.gcov::
+	@dir=\`config/objdir\`.gcov; echo "Making gp in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Please run Configure -gcov first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) gp
 
 doc docps docpdf gpman cleandoc::

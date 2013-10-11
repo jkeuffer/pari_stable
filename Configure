@@ -128,6 +128,7 @@ case "$osname" in
 esac
 ####################### CONFIGURE - CLEANUP #################################
 rm -f gmon.out # created by Configure -pg
+rm -f *.gcno *.gcda # created by Configure -gcov
 ####################### CONFIGURE - SPIT ####################################
 . ./get_tests #_test_list
 # Now spit out the results

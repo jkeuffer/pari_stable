@@ -20,6 +20,7 @@ if test -z "$dfltobjdir"; then
     full)      objdir=$objdir;;
     debugging) objdir=$objdir.dbg ;;
     profiling) objdir=$objdir.prf ;;
+    gcov)      objdir=$objdir.gcov ;;
   esac
 fi
 

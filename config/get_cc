@@ -7,10 +7,10 @@ if test "$fastread" != yes; then
 ==========================================================================
 The default is to fully optimize the compilation. You may choose to build
   an executable for debugging or profiling instead. Choose among :
-       full       debugging       profiling
+       full       debugging       profiling         gcov
 EOT
   echo $n ..."Which optimization do you prefer ? $c"
-  dflt=$optimization; rep='full debugging profiling'; . ./myread
+  dflt=$optimization; rep='full debugging profiling gcov'; . ./myread
   optimization=$ans
 fi
 
@@ -144,6 +144,7 @@ if test -n "$__gnuc__"; then
 
   # omit-frame-pointer incompatible with -pg
   PRFFLAGS="-pg $OPTFLAGS"
+  GCOVFLAGS="-fprofile-arcs -ftest-coverage"
   case "$optimization" in
     full) case "$osname" in
            mingw) ;;
@@ -174,6 +175,7 @@ case "$optimization" in
   full)      suffix=;     cflags="$OPTFLAGS $cflags";;
   profiling) suffix=.prf; cflags="$PRFFLAGS $cflags";;
   debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 $DBGFLAGS $cflags";;
+  gcov)      suffix=.gcov; cflags="$GCOVFLAGS $cflags";;
 esac
 
 CFLAGS="$cflags $CFLAGS $CPPFLAGS"

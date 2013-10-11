@@ -340,6 +340,8 @@ cleantest:
 	\$(RM) *.dif gp.out pari.ps
 cleanobj:
 	-\$(RM) *\$(_O) mpker.c *.s mpinl.h parilvl0.h parilvl1.h libpari* $exec kerntest
+	-\$(RM) gmon.out
+	-\$(RM) *.gcno *.gcda
 cleandesc:
 	-\$(RM) $desc/\$(DESC) *\$(TMPSUF)
 cleantune:
@@ -522,6 +524,24 @@ dotest-$i::
 	@\$(DOTEST) $i
 EOT
 done
+
+if test "$optimization" = gcov; then
+  cat >> $file << EOT
+
+.PHONY: lcov-report lcov-reset
+LCOV_TRACE = lcov.info
+LCOV_REPORT= lcov-report
+
+lcov-report:
+	rm -f \$(LCOV_TRACE)
+	rm -rf \$(LCOV_REPORT)
+	lcov -c -d . -b . -o \$(LCOV_TRACE)
+	genhtml -t "PARI/GP lcov report" -o \$(LCOV_REPORT) \$(LCOV_TRACE)
+
+lcov-reset:
+	rm -f *.gcda
+EOT
+fi
 
 if test -z "$DLLD"; then
   cat >> $file << EOT
