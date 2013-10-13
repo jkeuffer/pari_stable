@@ -13,6 +13,7 @@ BA  2- 8bit chars were interpreted as end of input
 BA  7- squaring of t_REAL was not faster than multiply
     8- 1+O(2^(2^18)) => O(2^0) (silent overflow)
 PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
+   10- memory corruption in subgrouplist: e.g. subgrouplist([53835600, 29], 5)
 
   Added
 EP  1- Configure option for gcov/lcov support
