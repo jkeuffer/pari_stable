@@ -421,7 +421,7 @@ init_powlist(long k, GEN p)
   GEN z = new_chunk(k+1);
   long i;
   gel(z,0) = gen_1; gel(z,1) = p;
-  for (i=1; i<=k; i++) gel(z,i) = mulii(p, gel(z,i-1));
+  for (i=2; i<=k; i++) gel(z,i) = mulii(p, gel(z,i-1));
   return z;
 }
 
@@ -432,7 +432,7 @@ subgroup_engine(subgp_iter *T)
   pari_sp av = avma;
   GEN B,L,fa,primlist,p,listL,indexsubq = NULL;
   GEN cyc = T->cyc;
-  long i,j,k,imax,nbprim, n = lg(cyc);
+  long i,j,k,imax,lprim, n = lg(cyc);
 
   if (typ(cyc) != t_VEC)
   {
@@ -453,9 +453,9 @@ subgroup_engine(subgp_iter *T)
   }
   if (!signe(gel(cyc,1))) pari_err_TYPE("forsubgroup [infinite group]", cyc);
   fa = Z_factor(gel(cyc,1)); primlist = gel(fa,1);
-  nbprim = lg(primlist);
-  listL = new_chunk(n); imax = k = 0;
-  for (i=1; i<nbprim; i++)
+  listL = cgetg_copy(primlist, &lprim);
+  imax = k = 0;
+  for (i=1; i<lprim; i++)
   {
     L = new_chunk(n); p = gel(primlist,i);
     for (j=1; j<n; j++)
@@ -474,7 +474,7 @@ subgroup_engine(subgp_iter *T)
   B = T->bound;
   parse_bound(T);
 
-  if (nbprim == 2)
+  if (lprim == 2)
   {
     T->subq = NULL;
     if (T->boundtype == b_EXACT)
