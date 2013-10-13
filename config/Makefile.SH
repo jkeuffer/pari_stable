@@ -531,11 +531,12 @@ if test "$optimization" = gcov; then
 .PHONY: lcov-report lcov-reset
 LCOV_TRACE = lcov.info
 LCOV_REPORT= lcov-report
+LCOV_FLAGS=
 
 lcov-report:
 	rm -f \$(LCOV_TRACE)
 	rm -rf \$(LCOV_REPORT)
-	lcov -c -d . -b . -o \$(LCOV_TRACE)
+	lcov -c \$(LCOV_FLAGS) -d . -b . -o \$(LCOV_TRACE)
 	genhtml -t "PARI/GP lcov report" -o \$(LCOV_REPORT) \$(LCOV_TRACE)
 
 lcov-reset:
