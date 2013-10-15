@@ -549,7 +549,7 @@ do_exhaustive(GEN P, GEN N, long x, GEN B)
 GEN
 zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 {
-  GEN Q, R, N0, M, sh, short_pol, *Xpowers, z, r, sol, nsp, P, tst, Z;
+  GEN Q, R, N0, M, sh, short_pol, *Xpowers, sol, nsp, P, Z;
   long delta, i, j, row, d, l, dim, t, bnd = 10;
   const ulong X_SMALL = 1000;
 
@@ -577,6 +577,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   if (!gequal1(gel(P,d+2)))
   {
+    GEN r, z;
     gel(P,d+2) = bezout(gel(P,d+2), N, &z, &r);
     for (j = 0; j < d; j++) gel(P,j+2) = modii(mulii(gel(P,j+2), z), N);
   }
@@ -672,14 +673,14 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   sol = cgetg(1, t_VEC);
   for (i = -bnd + 1; i < bnd; i++)
   {
-    r = nfrootsQ(R);
+    GEN r = nfrootsQ(R);
     if (DEBUGLEVEL >= 2) err_printf("Roots: %Ps\n", r);
 
     for (j = 1; j < lg(r); j++)
     {
-      z = gel(r,j);
+      GEN z = gel(r,j), tst;
+      if (typ(z) != t_INT) continue;
       tst = gcdii(FpX_eval(P, z, N), N);
-
       if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
       {
         for (l = 1; l < lg(sol) && !equalii(z, gel(sol,l)); l++) /*empty*/;
