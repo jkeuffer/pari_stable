@@ -358,9 +358,9 @@ static GEN
 get_gell(GEN bnr, GEN subgp, long all)
 {
   GEN gell;
-  if (all && all != -1) gell = stoi(all);
-  else if (subgp)       gell = det(subgp);
-  else                  gell = det(diagonal_shallow(bnr_get_cyc(bnr)));
+  if (all && all != -1) return utoipos(labs(all));
+  if (!subgp) return ZV_prod(bnr_get_cyc(bnr));
+  gell = det(subgp);
   if (typ(gell) != t_INT) pari_err_TYPE("rnfkummer",gell);
   return gell;
 }
@@ -1123,11 +1123,11 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (DEBUGLEVEL) timer_printf(&t, "[rnfkummer] conductor");
   bnr      = gel(p1,2);
   subgroup = gel(p1,3);
-  gell = get_gell(bnr,subgroup,all<-1?-all:all);
+  gell = get_gell(bnr,subgroup,all);
   ell = itos(gell);
   if (ell == 1) return pol_x(0);
   if (!uisprime(ell)) pari_err_IMPL("kummer for composite relative degree");
-  if (all < -1 && umodiu(bnr_get_no(bnr), ell))
+  if (all && all != -1 && umodiu(bnr_get_no(bnr), ell))
     return cgetg(1, t_VEC);
   if (bnf_get_tuN(bnf) % ell == 0)
     return rnfkummersimple(bnr, subgroup, gell, all);
