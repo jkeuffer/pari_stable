@@ -902,11 +902,11 @@ pol_from_Newton(GEN S)
   long i, k, l = lg(S);
   GEN C = cgetg(l+1, t_VEC), c = C + 1;
   gel(c,0) = gen_1;
-  c[1] = S[1];
+  gel(c,1) = gel(S,1); /* gen_0 in our case */
   for (k = 2; k < l; k++)
   {
     GEN s = gel(S,k);
-    for (i = 1; i < k; i++) s = gadd(s, gmul(gel(S,i), gel(c,k-i)));
+    for (i = 2; i < k-1; i++) s = gadd(s, gmul(gel(S,i), gel(c,k-i)));
     gel(c,k) = gdivgs(s, -k);
   }
   return gtopoly(C, 0);
