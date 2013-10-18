@@ -62,6 +62,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     machinery allows fast primes up to primelimit^2 which is more than
     enough even with a small table. The default value of 500.000 is already
     larger than necessary
+  - removed optional flag to factorpadic() / factorpadic0() [ enabling
+    Buchman-Lenstra + round2 ] Use the default factorpadic(T, p, r), both
+    under GP and in library mode.
 
 * Specific to the PARI library:
 ===============================

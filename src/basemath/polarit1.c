@@ -459,7 +459,7 @@ padicappr(GEN f, GEN a)
 
 /*******************************************************************/
 /*                                                                 */
-/*                      FACTORIZATION in Zp[X]                     */
+/*             FACTORIZATION in Zp[X], using ROUND4                */
 /*                                                                 */
 /*******************************************************************/
 
@@ -476,92 +476,6 @@ cmp_padic(GEN x, GEN y)
   return cmpii(gel(x,4), gel(y,4));
 }
 
-/*******************************/
-/*   Using Buchmann--Lenstra   */
-/*******************************/
-
-/* factor T = nf_get_pol(nf) in Zp to precision k. Shallow */
-static GEN
-padicff2(GEN nf, GEN unscale, GEN p, long k)
-{
-  GEN z, mat, D, U, fa, pk, dec_p, Ui, mulx;
-  GEN invzk = nf_get_invzk(nf);
-  long i, l, v = nf_get_varn(nf);
-
-  if (lg(invzk) == 2)
-  { /* trivial case deg = 1 */
-    z = nf_get_pol(nf);
-    retmkcol( ZX_to_ZpX_normalized(z, p, powiu(p, k), k) );
-  }
-  mulx = zk_scalar_or_multable(nf, gel(invzk,2)); /* mul by (x mod T) */
-  dec_p = idealprimedec(nf,p);
-  fa = cgetg_copy(dec_p, &l);
-  D = NULL; /* -Wall */
-  for (i=1; i<l; i++)
-  {
-    GEN P = gel(dec_p,i);
-    long e = pr_get_e(P), ef = e * pr_get_f(P);
-    D = ZM_snfall_i(idealpows(nf,P, k*e), &U, NULL, 1);
-    Ui= ZM_inv(U, gen_1); setlg(Ui, ef+1); /* cf ZM_snf_group */
-    U = rowslice(U, 1, ef);
-    mat = ZM_mul(U, ZM_mul(mulx, Ui));
-    gel(fa,i) = ZM_charpoly(mat); setvarn(gel(fa,i), v);
-  }
-  pk = gel(D,1); /* = p^k */
-  z = cgetg(l,t_COL); pk = icopy(pk);
-  for (i=1; i<l; i++)
-  {
-    GEN t = gel(fa,i);
-    if (unscale != gen_1) t = Q_primpart(ZX_unscale(t, unscale));
-    gel(z,i) = ZX_to_ZpX_normalized(t,p,pk,k);
-  }
-  return z;
-}
-
-static GEN
-padicff(GEN x, GEN p, long k)
-{
-  GEN nf = zerovec(9); /* dummy nf */
-  nfmaxord_t S;
-  nfmaxord(&S, mkvec2(x, mkvec(p)), nf_ROUND2);
-  gel(nf,1) = S.T;
-  gel(nf,3) = S.dK;
-  gel(nf,4) = dvdii(S.index, p)? p: gen_1;
-  nf_set_multable(nf, S.basis, NULL);
-  return padicff2(nf, S.unscale, p, k);
-}
-
-/* shallow */
-static GEN
-padic_trivfact(GEN x, GEN p, long r)
-{ retmkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)), mkcol(gen_1)); }
-
-static GEN
-factorpadic2(GEN f, GEN p, long prec)
-{
-  pari_sp av = avma;
-  GEN fa,ex,y;
-  long i,l, n = degpol(f);
-
-  if (n==0) return trivial_fact();
-
-  f = QpX_to_ZX(f, p);
-  if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
-  fa = ZX_squff(f, &ex);
-  l = lg(fa); n = 0;
-  for (i=1; i<l; i++)
-  {
-    gel(fa,i) = padicff(gel(fa,i),p,prec);
-    n += lg(gel(fa,i))-1;
-  }
-
-  y = fact_from_DDF(fa,ex,n);
-  return gerepilecopy(av, sort_factor_pol(y, cmp_padic));
-}
-
-/***********************/
-/*   Using ROUND 4     */
-/***********************/
 static int
 expo_is_squarefree(GEN e)
 {
@@ -650,6 +564,7 @@ factorpadic(GEN f,GEN p,long prec)
   return gerepilecopy(av, sort_factor_pol(y, cmp_padic));
 }
 
+/* deprecated: backward compatibility */
 GEN
 factorpadic0(GEN f,GEN p,long r,long flag)
 {
@@ -660,8 +575,8 @@ factorpadic0(GEN f,GEN p,long r,long flag)
     pari_err_DOMAIN("factorpadic", "precision", "<=",gen_0,stoi(r));
   switch(flag)
   {
-     case 0: return factorpadic(f,p,r);
-     case 1: return factorpadic2(f,p,r);
+    case 0: case 1:
+       return factorpadic(f,p,r);
      default: pari_err_FLAG("factorpadic");
   }
   return NULL; /* not reached */
