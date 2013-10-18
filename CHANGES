@@ -15,6 +15,7 @@ BA  7- squaring of t_REAL was not faster than multiply
 PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    10- memory corruption in subgrouplist: e.g. subgrouplist([53835600, 29], 5)
    11- SEGV in zncoppersmith (when auxilliary polynomial was non-monic)
+   12- division by 0 in Fl_ellcard_Shanks [2.6.1, #1474]
 
   Added
 EP  1- Configure option for gcov/lcov support
