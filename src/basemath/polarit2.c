@@ -240,6 +240,7 @@ RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
               t[5]=1; break;
             case t_INTMOD:
               assign_or_fail(gel(d,1),p);
+              if (!signe(p) || mod4(p) != 3) return 0;
               assign_or_fail(pcx,pol);
               t[6]=1; break;
             case t_PADIC:
@@ -630,7 +631,13 @@ factor(GEN x)
           switch (t2)
           {
             case t_INT: p1 = polfnf(x,pol); break;
-            case t_INTMOD: p1 = factorff(x,p,pol); break;
+            case t_INTMOD:
+              pol = RgX_to_FpX(pol, p);
+              if (FpX_is_squarefree(pol,p) && FpX_nbfact(pol, p) == 1)
+              {
+                p1 = factorff(x,p,pol); break;
+              }
+            /*fall through*/
             default: pari_err_IMPL("factor for general polynomial");
               return NULL; /* not reached */
           }

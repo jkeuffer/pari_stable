@@ -2292,7 +2292,9 @@ qtop(GEN x, GEN p, long d)
   b = gel(P,3);
   av = avma; D = quad_disc(x);
   if (equaliu(p,2)) d += 2;
-  z = gmul2n(gsub(Qp_sqrt(cvtop(D,p,d)), b), -1);
+  z = Qp_sqrt(cvtop(D,p,d));
+  if (!z) pari_err_SQRTN("Qp_sqrt",D);
+  z = gmul2n(gsub(z, b), -1);
 
   z = gadd(u, gmul(v, z));
   if (typ(z) != t_PADIC) /* t_INTMOD for t_QUAD of t_INTMODs... */
