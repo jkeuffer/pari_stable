@@ -671,9 +671,9 @@ good first step.
 message and a \kbd{.dif} file in the relevant object directory \kbd{Oxxx}.
 In fact, we compared the output to a non-existing template, so this must fail.
 
-\item Go to the relevant \kbd{Oxxx} directory, then
+\item Now
 \bprog
-  patch -p0 < fun.dif
+  patch -p1 < Oxxx/fun.dif
 @eprog\noindent
 generates a template output in the right place \kbd{src/test/32/fun}, for
 instance on a 32-bit machine.
