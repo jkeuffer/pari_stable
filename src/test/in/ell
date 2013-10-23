@@ -29,6 +29,7 @@ a=ffgen(ffinit(2,8),'a); E=ellinit([a,1,0,0,1]);
 P=[a^3,ellordinate(E,a^3)[1]]; Q=ellmul(E,P,113);
 e=elllog(E,P,Q,242)
 ellmul(E,Q,e) == P
+ellpow(E,Q,e) == P
 
 p=655637;
 E=ellinit([123,47], p);
