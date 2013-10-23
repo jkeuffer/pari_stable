@@ -13,3 +13,5 @@ o = [2*x+3*y, 2+x+y+O(x^2), 2+x+y+O(y^2)];
     printsep(" ",pollead(v), pollead(v,x), pollead(v,y))
   )
 }
+polgraeffe(x^2+x+1)
+polgraeffe(x^3+x+1)
