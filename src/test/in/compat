@@ -476,6 +476,7 @@ regula(17)
 kill(y);print(x+y);
 resultant(x^3-1,x^3+1)
 resultant2(x^3-1.,x^3+1.)
+bezoutres(x^2+1, x^2-1)
 reverse(tan(x))
 rhoreal(qfr(3,10,-20,1.5))
 rhorealnod(qfr(3,10,-20,1.5),18)
