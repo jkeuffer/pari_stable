@@ -24,7 +24,6 @@ bnfcertify(bnf)
 dobnf(x^4+24*x^2+585*x+1791,,[0.1,0.1])
 bnrconductor(bnf,[[25,13;0,1],[1,1]])
 bnrconductorofchar(bnr,[2])
-\\ bnfdecodemodule(bnf,
 bnfisprincipal(bnf,[5,1;0,1],0)
 bnfisprincipal(bnf,[5,1;0,1])
 bnfisunit(bnf,Mod(3405*x-27466,x^2-x-57))
@@ -57,14 +56,12 @@ idealaddtoone(nf,idx,idy)
 idealaddtoone(nf,[idy,idx])
 idealappr(nf,idy)
 idealappr(nf,idealfactor(nf,idy),1)
-\\ idealchinese
 idealcoprime(nf,idx,idx)
 idealdiv(nf,idy,idt)
 idealdiv(nf,idx2,idx,1)
 idealfactor(nf,idz)
 idealhnf(nf,vp[2],3)
 ideallist(bnf,20)
-\\ ideallistarch
 bid=idealstar(nf2,54)
 ideallog(nf2,y,bid)
 idealmin(nf,idx,[1,2,3])
@@ -100,7 +97,6 @@ nfeltpow(nf,bb,5)
 nfeltreduce(nf,ba,idx)
 nfeltval(nf,ba,vp)
 nffactor(nf2,x^3+x)
-\\ nffactormod
 aut=nfgaloisconj(nf3)
 nfgaloisapply(nf3,aut[5],Mod(x^5,x^6+108))
 nfhilbert(nf,3,5)
@@ -132,24 +128,12 @@ polredord(x^3-12*x+45*x-1)
 polsubcyclo(31,5)
 setrand(1);poltschirnhaus(x^5-x-1)
 \\
-\\ rnfalgtobasis
 p=x^5-5*x+y; aa=rnfpseudobasis(nf2,p)
 rnfbasis(bnf2,aa)
-\\ rnfcharpoly
-\\ rnfdet
 rnfdisc(nf2,p)
-\\ rnfeltabstorel
-\\ rnfeltreltoabs
 rnfequation(nf2,p)
 rnfequation(nf2,p,1)
 rnfhnfbasis(bnf2,aa)
-\\ rnfidealabstorel
-\\ rnfidealdown
-\\ rnfidealhnf
-\\ rnfidealnormabs
-\\ rnfidealnormrel
-\\ rnfidealreltoabs
-\\ rnfidealtwoelt
 rnfisfree(bnf2,aa)
 rnfsteinitz(nf2,aa)
 \\
