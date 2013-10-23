@@ -6,3 +6,12 @@
     if (N != M, print(E," bad for N = ",N))
   );
 }
+ellidentify(ellinit([1,1]))
+ellsearch("11a1")
+ellsearch("11a")
+ellsearch("11b")
+ellsearch("11")
+ellsearch([11,0,1])
+ellsearch([11,0])
+ellsearch([11])
+ellsearch(11)
