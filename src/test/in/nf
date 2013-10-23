@@ -32,7 +32,13 @@ k=bnfinit(z^2+19*z+6,1); bnfisunit(k,k.fu[1]^2)
 nf=nfinit(x^2+x+1);
 p = 67452192952521724999; pi = idealprimedec(nf,p)[1];
 q = 762234946175168528650011228121; qi = idealprimedec(nf,q)[1];
-idealfactor(nf, idealdiv(nf,pi,qi))
+f=idealfactor(nf, idealdiv(nf,pi,qi))
+id=idealfactorback(nf,f)
+idealnumden(nf,id)
+idealnumden(nf,pi)
+idealnumden(nf,1)
+idealnumden(nf,1/2)
+idealnumden(nf,x/2)
 
 \\#1180
 setrand(1);quadclassunit(572).no
