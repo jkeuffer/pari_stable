@@ -23,6 +23,8 @@ matdiagonal(List([0]))
 g(L)=for(i=1,5,listput(L,5-i));L;
 l=List([10,9,8,7,6,5]); g(l)
 l
+listkill(l)
+listcreate()
 
 subst(List([x,x^2+y]),x,1)
 substvec(List([x,y]), [x,y], [y,x])

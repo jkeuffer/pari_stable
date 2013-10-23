@@ -15,8 +15,9 @@ List([Vecsmall([1, 2, 3]), 2])
 
 List([10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
 List([10, 9, 8, 7, 6, 5])
+List([])
 List([1, y + 1])
 List([y, x])
 List([y, y*x])
-108
-Total time spent: 36
+103
+Total time spent: 28
