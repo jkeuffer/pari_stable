@@ -2396,7 +2396,7 @@ ellwp0(GEN w, GEN z, long flag, long prec)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q;
-    if (!check_periods(w,&T)) pari_err_TYPE("ellwp",w);
+    if (!get_periods(w,NULL,&T,prec)) pari_err_TYPE("ellwp",w);
     if (v <= 0) pari_err(e_IMPL,"ellwp(t_SER) away from 0");
     if (gequal0(y)) {
       avma = av;
@@ -2433,7 +2433,7 @@ ellzeta(GEN w, GEN z, long prec0)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q;
-    if (!check_periods(w,&T)) pari_err_TYPE("ellzeta",w);
+    if (!get_periods(w,NULL,&T,prec0)) pari_err_TYPE("ellzeta",w);
     if (v <= 0) pari_err(e_IMPL,"ellzeta(t_SER) away from 0");
     if (gequal0(y)) { avma = av; return zeroser(vy, -v); }
     P = ellwpseries0(&T, vy, lg(y)-2);
@@ -2504,7 +2504,7 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   {
     long vy = varn(y), v = valp(y);
     GEN P, Q;
-    if (!check_periods(w,&T)) pari_err_TYPE("ellsigma",w);
+    if (!get_periods(w,NULL,&T,prec0)) pari_err_TYPE("ellsigma",w);
     if (v <= 0) pari_err_IMPL("ellsigma(t_SER) away from 0");
     if (flag) pari_err_TYPE("log(ellsigma)",y);
     if (gequal0(y)) { avma = av; return zeroser(vy, -v); }

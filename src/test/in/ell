@@ -116,15 +116,33 @@ ellmul(ellinit([3,0]), [1,2], -quadgen(-4))
 logsigma(e,z='x)=if(type(z) != "t_POL" && type(z) != "t_SER", ellsigma(e,z,1));
 v = [ellwp,ellzeta,ellsigma,logsigma];
 e = ellinit([1,1]);
+w = ellperiods([1,I])
+w2 = ellperiods([1,I], 1)
+u = [e,w,w2];
+{
+for (i = 1, #v,
+  my(f = v[i]);
+  for (j = 1, #u,
+    my (a = u[j]);
+    print([i,j]);
+    print(f(a));
+    print(f(a, x+O(x^10)));
+    print(f(a, 1/3));
+    print(f(a, I/3));
+    print(f(a, (1+I)/3));
+  )
+)
+}
+elleta(e)
+elleta([1,I])
+v = [x->elleisnum(x,2),x->elleisnum(x,4,1),x->elleisnum(x,6,1),x->elleisnum(x,10)];
 {
 for (i = 1, #v,
   my(f = v[i]);
   print(f);
   print(f(e));
-  print(f(e, x+O(x^10)));
-  print(f(e, 1/3));
-  print(f(e, I/3));
-  print(f(e, (1+I)/3));
+  print(f(w));
+  print(f(w2));
 )
 }
 
