@@ -9,8 +9,13 @@
 
 [12, 1]
 266
+Vecsmall([0, 0, 0, 0, 0, 0, 0, 133, 0, 165, 0, 638, 0, 396, 0, 4268])
+Vecsmall([0, 0, 0, 133, 165, 638, 396, 4268])
   ***   at top-level: qfminim(L~*L,10^16)[
   ***                 ^--------------------
   *** qfminim: precision too low in qfminim.
 10000000000000000
-Total time spent: 16
+[0, 1]~
+[1, 0]~
+[-1, 1]~
+Total time spent: 20
