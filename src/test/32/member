@@ -234,6 +234,19 @@ ELLQp
 .tate: [6 + 8*11 + 5*11^2 + O(11^4), Mod(u, u^2 + (5 + 2*11 + 5*11^2 + 10*11
 ^3 + O(11^4))), 3*11 + 7*11^2 + O(11^4), [6 + 3*11 + O(11^4), 6 + 11 + 9*11^
 2 + 11^3 + O(11^4)]]
+FFELT
+.f: 3
+.mod: x^3 + x^2 + 1
+.p: 2
+.pol: x
+.f: 3
+.mod: x^3 + x^2 + x + 2
+.p: 3
+.pol: x
+.f: 2
+.mod: x^2 + x + 1
+.p: 18446744073709551629
+.pol: x
 INTMOD
 .mod: 3
 POLMOD
@@ -247,4 +260,4 @@ QUAD
 .pol: x^2 + 1
 .tu: [4, w]
 .zk: [1, x]
-Total time spent: 52
+Total time spent: 40
