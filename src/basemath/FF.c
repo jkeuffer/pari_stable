@@ -205,6 +205,18 @@ FF_mod(GEN x)
   }
 }
 
+long
+FF_f(GEN x)
+{
+  switch(x[1])
+  {
+  case t_FF_F2xq:
+    return F2x_degree(gel(x,3));
+  default:
+    return degpol(gel(x,3));
+  }
+}
+
 GEN
 FF_to_F2xq(GEN x)
 {

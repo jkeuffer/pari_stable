@@ -390,15 +390,18 @@ write
 @eprog\noindent
 The second (optional) parameter to \tet{ffgen} is only used to display
 the result; it is customary to use the name of the variable we assign the
-generator to. If \kbd{f} is a \typ{FFELT}, the following member functions are
+generator to. If \kbd{g} is a \typ{FFELT}, the following member functions are
 defined:
 
-\kbd{f.pol}: the polynomial (with reduced integer coefficients)
-expressing \kbd{f} in term of the field generator.
+\kbd{g.pol}: the polynomial (with reduced integer coefficients)
+expressing \kbd{g} in term of the field generator.
 
-\kbd{f.p}: the characteristic of the finite field.
+\kbd{g.p}: the characteristic of the finite field.
 
-\kbd{f.mod}: the minimal polynomial (with reduced integer
+\kbd{g.f}: the dimension of the definition field over its prime field; the
+cardinality of the definition field is thus $p^f$.
+
+\kbd{g.mod}: the minimal polynomial (with reduced integer
 coefficients) of the field generator.
 
 \subsec{Complex numbers (\typ{COMPLEX})}%

@@ -45,7 +45,11 @@ GEN
 member_f(GEN x)
 {
   GEN y = get_prid(x);
-  if (!y) member_err("f",x);
+  if (!y)
+  {
+    if (typ(x) == t_FFELT) return utoipos(FF_f(x));
+    member_err("f",x);
+  }
   return gel(y,4);
 }
 

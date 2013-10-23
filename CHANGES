@@ -19,6 +19,8 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
 
   Added
 EP  1- Configure option for gcov/lcov support
+    2- libpari function FF_f, member function g.f for t_FFELT
+       (definition field has p^f elements)
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
