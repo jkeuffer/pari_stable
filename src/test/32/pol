@@ -13,4 +13,7 @@ y^2 + 2*y - 4 x^2 + 2*x - 4 -4*x^2 + 2*x + 1
 2*y^2 + y 2*x^2 + x 2*x^2 + x
 y + 2*y^2 + O(y^4) (y + 2*y^2 + O(y^4)) + O(x^16) (y + 2*y^2 + O(y^4)) + O(x
 ^5)
-Total time spent: 8
+2 2 3
+y + 2 y + 2 (y + 2) + x + O(x^2)
+1 1 x + 2
+Total time spent: 0
