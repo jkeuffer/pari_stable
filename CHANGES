@@ -17,6 +17,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    11- SEGV in zncoppersmith (when auxilliary polynomial was non-monic)
    12- division by 0 in Fl_ellcard_Shanks [2.6.1, #1474]
    13- ellwp([1,I]) -> stack overflow [2.6.0]
+   14- sumdedekind(h < 0, k < 0) wrong result; if gcd(h,k) > 0 as well
 
   Added
 EP  1- Configure option for gcov/lcov support

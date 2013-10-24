@@ -2647,9 +2647,12 @@ sumdedekind_coprime(GEN h, GEN k)
   long s;
   if (lgefint(k) == 3 && (ulong)k[2] <= (2*(ulong)LONG_MAX) / 3)
   {
-    ulong kk = k[2];
-    GEN v = u_sumdedekind_coprime(umodiu(h, kk), kk);
-    long s1 = v[1], s2 = v[2];
+    ulong kk = k[2], hh = umodiu(h, kk);
+    long s1, s2;
+    GEN v;
+    if (signe(k) < 0) { k = negi(k); hh = Fl_neg(hh, kk); }
+    v = u_sumdedekind_coprime(hh, kk);
+    s1 = v[1]; s2 = v[2];
     return gerepileupto(av, gdiv(addis(mulis(k,s1), s2), muluu(12, kk)));
   }
   s = 1;
@@ -2700,8 +2703,7 @@ sumdedekind(GEN h, GEN k)
   if (typ(k) != t_INT) pari_err_TYPE("sumdedekind",k);
   d = gcdii(h,k);
   if (!is_pm1(d))
-    avma = av;
-  else {
+  {
     h = diviiexact(h, d);
     k = diviiexact(k, d);
   }
