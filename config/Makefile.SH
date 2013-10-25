@@ -515,11 +515,14 @@ dyntest-all: gp-dyn
 	@env dotestSUF=dyn make test-all
 statest-all: gp-sta
 	@env dotestSUF=sta make test-all
+
+test-env:: $exec dotest-env
+dotest-env::
+	@export AAA=XXX BBB=YYY; \$(DOTEST) env
 EOT
 for i in $test_extra $test_extra_out; do
   cat >> $file << EOT
-test-$i: $exec
-	@\$(DOTEST) $i
+test-$i: $exec dotest-$i
 dotest-$i::
 	@\$(DOTEST) $i
 EOT
