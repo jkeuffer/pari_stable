@@ -1,10 +1,10 @@
 # Format: filename_weight (weight = 1000 if omitted)
 #   individual times are printed as is, but accumulated time is weighed
 #   by (weight / 1000)
-_test_list='test_extra_out test_extra test_basic top_test_extra top_dotest_extra'
+_test_list='test_extra_OUT test_extra_out test_extra test_basic top_test_extra top_dotest_extra'
 
 # _not_ included in 'make test-all' (annoying)
-test_extra_out="ploth"
+test_extra_out="ploth io"
 
 # _not_ included automatically in Oxxx/Makefile (special cased there)
 test_extra_OUT="env"

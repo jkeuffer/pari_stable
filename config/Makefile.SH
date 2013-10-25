@@ -337,7 +337,7 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	$postconfig gp-sta
 
 cleantest:
-	\$(RM) *.dif gp.out pari.ps
+	\$(RM) *.dif gp.out io-testfile pari.ps
 cleanobj:
 	-\$(RM) *\$(_O) mpker.c *.s mpinl.h parilvl0.h parilvl1.h libpari* $exec kerntest
 	-\$(RM) gmon.out
@@ -516,13 +516,14 @@ dyntest-all: gp-dyn
 statest-all: gp-sta
 	@env dotestSUF=sta make test-all
 
-test-env:: $exec dotest-env
 dotest-env::
 	@export AAA=XXX BBB=YYY; \$(DOTEST) env
 EOT
+for i in $test_extra $test_extra_out $test_extra_OUT; do
+  echo "test-$i: $exec dotest-$i" >>$file
+done
 for i in $test_extra $test_extra_out; do
   cat >> $file << EOT
-test-$i: $exec dotest-$i
 dotest-$i::
 	@\$(DOTEST) $i
 EOT
@@ -537,13 +538,13 @@ LCOV_REPORT= lcov-report
 LCOV_FLAGS=
 
 lcov-report:
-	rm -f \$(LCOV_TRACE)
+	\$(RM) \$(LCOV_TRACE)
 	rm -rf \$(LCOV_REPORT)
 	lcov -c \$(LCOV_FLAGS) -d . -b . -o \$(LCOV_TRACE)
 	genhtml -t "PARI/GP lcov report" -o \$(LCOV_REPORT) \$(LCOV_TRACE)
 
 lcov-reset:
-	rm -f *.gcda
+	\$(RM) *.gcda
 EOT
 fi
 
