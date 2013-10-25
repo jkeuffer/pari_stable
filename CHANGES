@@ -18,6 +18,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    12- division by 0 in Fl_ellcard_Shanks [2.6.1, #1474]
    13- ellwp([1,I]) -> stack overflow [2.6.0]
    14- sumdedekind(h < 0, k < 0) wrong result; if gcd(h,k) > 0 as well
+   15- galoisexport(G, 1) -> SEGV
 
   Added
 EP  1- Configure option for gcov/lcov support

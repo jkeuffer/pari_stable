@@ -43,3 +43,11 @@ galoistest(P)=
        error("galoissubfields2")));
 }
 galoistest(x^4 + 431452248691495692750746750*x^3+447244936830156353775324765*x^2+5580140636706480467906000*x - 238676773812533681600);
+
+G=galoisinit(x);
+galoisexport(G);
+galoisexport(G,1);
+G=galoisinit(x^12-30*x^8-370*x^6+1665*x^4+23166*x^2+81);
+galoisexport(G)
+galoisexport(G, 1)
+

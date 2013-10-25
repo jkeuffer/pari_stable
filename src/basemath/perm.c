@@ -1012,10 +1012,10 @@ group_export_GAP(GEN G)
   GEN s, comma, g = grp_get_gen(G);
   long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("Group(())");
-  s = cgetg(2*l, t_VEC); k = 2;
+  s = cgetg(2*l, t_VEC);
   comma = strtoGENstr(", ");
   gel(s,1) = strtoGENstr("Group(");
-  for (i = 1; i < l; ++i)
+  for (i=1, k=2; i < l; ++i)
   {
     if (i > 1) gel(s,k++) = comma;
     gel(s,k++) = perm_to_GAP(gel(g,i));
@@ -1031,10 +1031,10 @@ group_export_MAGMA(GEN G)
   GEN s, comma, g = grp_get_gen(G);
   long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("PermutationGroup<1|>");
-  s = cgetg(2*l+2, t_VEC); k = 2;
-  gel(s,1) = gsprintf("PermutationGroup<%ld|",group_domain(G));
+  s = cgetg(2*l, t_VEC);
   comma = strtoGENstr(", ");
-  for (i = 1; i < l; ++i)
+  gel(s,1) = gsprintf("PermutationGroup<%ld|",group_domain(G));
+  for (i=1, k=2; i < l; ++i)
   {
     if (i > 1) gel(s,k++) = comma;
     gel(s,k++) = GENtoGENstr( vecsmall_to_vec(gel(g,i)) );
