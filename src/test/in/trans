@@ -16,6 +16,7 @@ sqrt(13+O(127^12))
 teichmuller(7+O(127^12))
 \\ A grande precision
 \p 500
+Catalan
 Euler
 acos(0.5)
 acosh(3)
