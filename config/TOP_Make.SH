@@ -45,7 +45,7 @@ all::
 	@\$(MAKE) gp
 	@-cd doc && \$(MAKE) doc
 
-gp bench test-kernel test-all $top_test_extra $top_dotest_extra install cleanall cleanobj cleantest nsis install-bin install-doc install-docpdf install-nodata install-data install-lib-sta install-bin-sta dobench dyntest-all statest-all tune::
+gp bench test-kernel test-all install cleanall cleanobj cleantest nsis install-bin install-doc install-docpdf install-nodata install-data install-lib-sta install-bin-sta dobench dyntest-all statest-all tune $top_test_extra $top_dotest_extra::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) \$@
