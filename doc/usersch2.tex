@@ -53,7 +53,7 @@ they are not. Do this as well if there is no mention of the GMP kernel.
 \subsec{Getting help}
 
 To get help, type a \kbd{?} and hit return. A menu appears, describing the
-eleven main categories of available functions and how to get more detailed
+main categories of available functions and how to get more detailed
 help. If you now type \kbd{?$n$} with $1\le n\le11$, you get the list of
 commands corresponding to category $n$ and simultaneously to Section $3.n$ of
 this manual. If you type \kbd{?}\var{functionname} where \var{functionname}
@@ -2649,7 +2649,7 @@ available (this means \kbd{perl} is present on your system and the PARI
 distribution was correctly installed), you can add more \kbd{?} signs for
 extended functionality:
 
-\kbd{??~\var{keyword}} yields the functions description as it stands in this
+\kbd{??~\var{keyword}} yields the function description as it stands in this
 manual, usually in Chapter~2 or~3. If you're not satisfied with the default
 chapter chosen, you can impose a given chapter by ending the keyword with
 \kbd{@} followed by the chapter number, e.g.~\kbd{??~Hello@2} will look in
@@ -2661,9 +2661,10 @@ e.g.~\kbd{readline} (the line editor), \kbd{integer}, \kbd{nf} (``number
 field'' as used in most algebraic number theory computations), \kbd{ell}
 (elliptic curves), etc.
 
-In case of conflicts between function and default names (e.g \tet{log},
-\tet{simplify}), the function has higher priority. To get the default help,
-use
+In case of conflicts between \emph{function} and \emph{default} names
+(e.g \tet{log},
+\tet{simplify}), the function has higher priority. To get the \emph{default}
+help, use
 \bprog
   ?? default(log)
   ?? default(simplify)

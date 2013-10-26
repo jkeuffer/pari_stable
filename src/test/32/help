@@ -1,0 +1,32 @@
+x: user defined variable
+
+sin(x): sine of x.
+
+f =
+  ()->1
+
+echo: default
+
+echo: default
+
+log: default
+
+new is aliased to:
+
+sin(x): sine of x.
+
+test1
+
+test2
+
+test3
+
+test4
+
+new is aliased to:
+
+test2
+
+does_not_exist: unknown identifier
+
+Total time spent: 0

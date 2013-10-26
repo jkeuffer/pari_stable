@@ -659,40 +659,64 @@ cut_trailing_garbage(char *s)
   while ( (c = *s++) )
   {
     if (c == '\\' && ! *s++) return; /* gobble next char, return if none. */
-    else
-      if (!is_keyword_char(c) && c != '@') { s[-1] = 0; return; }
+    if (!is_keyword_char(c) && c != '@') { s[-1] = 0; return; }
   }
 }
 
-/* don't mess readline display */
 static void
-aide_print(const char *s1, const char *s2) { pari_printf("%s: %s\n", s1, s2); }
+digit_help(char *s, long flag)
+{
+  long n = atoi(s);
+  if (n < 0 || n > 15) pari_err(e_SYNTAX,"no such section in help: ?",s,s);
+  if (n == 12)
+    community();
+  else if (flag & h_LONG)
+    external_help(s,3);
+  else
+    commands(n);
+  return;
+}
+
+static void
+simple_help(const char *s1, const char *s2) { pari_printf("%s: %s\n", s1, s2); }
+
+static void
+default_help(char *s, long flag)
+{
+  if (flag & h_LONG)
+    external_help(stack_strcat("se:def,",s),3);
+  else
+    simple_help(s,"default");
+}
 
 static void
 aide0(const char *s0, int flag)
 {
-  long n, long_help = flag & h_LONG;
-  entree *ep,*ep1;
-  char *s;
+  const long long_help = flag & h_LONG;
+  long n;
+  entree *ep;
+  char *s = get_sep(s0);
 
-  s = get_sep(s0);
-  if (isdigit((int)*s))
-  {
-    n = atoi(s);
-    if (n < 0 || n > 15) pari_err(e_SYNTAX,"no such section in help: ?",s,s);
-    if (n == 12)
-      community();
-    else if (long_help)
-      external_help(s,3);
-    else
-      commands(n);
-    return;
-  }
+  if (isdigit((int)*s)) { digit_help(s,flag); return; }
+  if (flag & h_APROPOS) { external_help(s,-1); return; }
   /* Get meaningful answer on '\ps 5' (e.g. from <F1>) */
   if (*s == '\\') { char *t = s+1; skip_alpha(&t); *t = '\0'; }
-  if (isalpha((int)*s)) cut_trailing_garbage(s);
+  if (isalpha((int)*s))
+  {
+    if (!strncmp(s, "default", 7))
+    { /* special-case ?default(dft_name), e.g. default(log) */
+      char *t = s+7;
+      skip_space(&t);
+      if (*t == '(')
+      {
+        t++; skip_space(&t);
+        cut_trailing_garbage(t);
+        if (pari_is_default(t)) { default_help(t,flag); return; }
+      }
+    }
+    cut_trailing_garbage(s);
+  }
 
-  if (flag & h_APROPOS) { external_help(s,-1); return; }
   if (long_help && (n = ok_external_help(&s))) { external_help(s,n); return; }
   switch (*s)
   {
@@ -702,69 +726,58 @@ aide0(const char *s0, int flag)
     case '.' : member_commands(); return;
   }
   ep = is_entry(s);
-  if (ep && long_help)
-  {
-    if (!strcmp(ep->name, "default"))
-    {
-      char *t = s+7, *e;
-      skip_space(&t);
-      if (*t == '(') {
-        t++; skip_space(&t);
-        e = t; skip_alpha(&e); *e = '\0'; /* safe: get_sep() made it a copy */
-        if (pari_is_default(t)) { external_help(t, 2); return; }
-      }
-    }
-  }
   if (!ep)
   {
-    if (long_help)
+    if (pari_is_default(s))
+      default_help(s,flag);
+    else if (long_help)
       external_help(s,3);
-    else
-    {
-      if (pari_is_default(s))
-        aide_print(s,"default");
-      else if (!cb_pari_whatnow(pariOut, s,1))
-        aide_print(s,"unknown identifier");
-    }
+    else if (!cb_pari_whatnow(pariOut, s,1))
+      simple_help(s,"unknown identifier");
     return;
   }
 
-  ep1 = ep;  ep = do_alias(ep); s0 = s;
-  if (ep1 != ep) { pari_printf("%s is aliased to:\n\n",s0); s0 = ep->name; }
-
+  if (EpVALENCE(ep) == EpALIAS)
+  {
+    pari_printf("%s is aliased to:\n\n",s);
+    ep = do_alias(ep);
+  }
   switch(EpVALENCE(ep))
   {
     case EpVAR:
-      if (typ((GEN)ep->value)==t_CLOSURE && typ(closure_get_text((GEN)ep->value))==t_VEC)
+      if (!ep->help)
       {
-        GEN str = closure_get_text((GEN)ep->value);
-        if (!ep->help || long_help)
-          pari_printf("%s(%s)=%s",ep->name,GSTR(gel(str,1)),GSTR(gel(str,2)));
-        if (!ep->help) return;
-        if (long_help) { pari_puts("\n\n"); long_help=0; }
+        if (typ((GEN)ep->value)!=t_CLOSURE)
+          simple_help(s, "user defined variable");
+        else
+        {
+          GEN str = closure_get_text((GEN)ep->value);
+          if (typ(str) == t_VEC)
+            pari_printf("%s =\n  %Ps\n", ep->name, ep->value);
+        }
+        return;
       }
-      else if (!ep->help) { aide_print(s, "user defined variable"); return; }
-      long_help=0; break;
+      break;
 
     case EpINSTALL:
-      if (!ep->help) { aide_print(s, "installed function"); return; }
-      long_help=0; break;
+      if (!ep->help) { simple_help(s, "installed function"); return; }
+      break;
 
     case EpNEW:
-      if (!ep->help) {
-        aide_print(s, "new identifier (no valence assigned)"); return;
-      };
-      long_help=0; break;
-  }
-  if (long_help) { external_help(ep->name,3); return; }
-  if (ep->help) { print_text(ep->help); return; }
+      if (!ep->help) { simple_help(s, "new identifier"); return; };
+      break;
 
-  pari_err_BUG("aide (no help found)");
+    default: /* built-in function */
+      if (!ep->help) pari_err_BUG("aide (no help found)"); /*paranoia*/
+      if (long_help) { external_help(ep->name,3); return; }
+  }
+  print_text(ep->help);
 }
 
 void
 aide(const char *s, long flag)
 {
+  pari_sp av = avma;
   if ((flag & h_RL) == 0)
   {
     if (*s == '?') { flag |= h_LONG; s++; }
@@ -772,6 +785,7 @@ aide(const char *s, long flag)
   }
   term_color(c_HELP); aide0(s,flag); term_color(c_NONE);
   if ((flag & h_RL) == 0) pari_putc('\n');
+  avma = av;
 }
 
 /********************************************************************/

@@ -19,6 +19,15 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    13- ellwp([1,I]) -> stack overflow [2.6.0]
    14- sumdedekind(h < 0, k < 0) wrong result; if gcd(h,k) > 0 as well
    15- galoisexport(G, 1) -> SEGV
+   16- ??default(log) no longer worked
+
+  Changed
+    1- default help text for a user function is now as in \u:
+       fun =
+         (args)->body
+    2- ? and addhelp: no longer include default help text for a user function
+       affected by addhelp. Use addhelp(f, Str(t, "\ntext")) to recover the
+       old behaviour
 
   Added
 EP  1- Configure option for gcov/lcov support

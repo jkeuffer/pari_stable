@@ -1112,12 +1112,12 @@ print_all_user_fun(int member)
   pari_sp av = avma;
   long iL = 0, lL = 1024;
   GEN L = cgetg(lL+1, t_VECSMALL);
-  const char *f;
   entree *ep;
   int i;
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
     {
+      const char *f;
       int is_member;
       if (EpVALENCE(ep) != EpVAR || typ((GEN)ep->value)!=t_CLOSURE) continue;
       f = ep->name;
@@ -1140,8 +1140,7 @@ print_all_user_fun(int member)
     for (i = 1; i <= iL; i++)
     {
       ep = (entree*)L[i];
-      f = ep->name;
-      pari_printf("%s =\n  %Ps\n\n", f, ep->value);
+      pari_printf("%s =\n  %Ps\n\n", ep->name, ep->value);
     }
   }
   avma = av;
