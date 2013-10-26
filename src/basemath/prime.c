@@ -1194,14 +1194,14 @@ primes_interval(GEN a, GEN b)
 static GEN
 primes_interval_i(ulong a, ulong b, ulong d)
 {
-  pari_sp av = avma;
   ulong p, i = 1, n = d + 1;
   forprime_t S;
-  GEN y;
+  GEN y = cgetg(n+1, t_VECSMALL);
+  pari_sp av = avma;
   u_forprime_init(&S, a, b);
-  y = cgetg(n+1, t_VECSMALL);
   while ((p = u_forprime_next(&S))) y[i++] = p;
-  setlg(y, i); return gerepileuptoleaf(av, y);
+  avma = av; setlg(y, i); stackdummy((pari_sp)(y + i), (pari_sp)(y + n+1));
+  return y;
 }
 GEN
 primes_interval_zv(ulong a, ulong b)
