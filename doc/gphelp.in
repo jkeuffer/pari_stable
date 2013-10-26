@@ -283,9 +283,9 @@ sub treat {
   {
     $_ = "users" if (/^$/);
     open_viewer_then_quit($_) if (/^(users|tutorial|refcard|libpari)$/);
+    if ($transl{$_}) { $_ = $transl{$_}; &choose_chap; }
   }
 
-  if (!$apropos && $transl{$_}) { $_ = $transl{$_}; &choose_chap; }
   s/(\W)/\\$1/g;
   s/_/\\\\_/g;
       ($pipe && open(DOC,"$pipe $docfile |"))
