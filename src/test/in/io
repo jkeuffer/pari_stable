@@ -14,4 +14,11 @@ write(F, 1)
 write(F, "1+2")
 readvec(F)
 del()
-
+\\
+writebin(F,1)
+system("md5sum "F)
+del()
+writebin(F)
+system("md5sum "F)
+read(F)
+del()
