@@ -2875,18 +2875,16 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
 {
   pari_sp av = avma, av2;
   long i, nbi, nbrow;
-  GEN pr, sz, l, Ao, Bo, K, d;
+  GEN C, c, Ci, ci, pr, sz, l, Ao, Bo, K, d, p_1;
   pari_timer ti;
   struct Fp_log_rel r;
-  GEN C, c, Ci, ci;
   ulong bnds = itou(roundr_safe(opt_param(sqrti(p),DEFAULTPREC)));
   ulong bnd = 4*bnds;
-  if (cmpii(sqru(bnds),m)>=0) return NULL;
-  if (!is_pm1(gcdii(m,diviiexact(subis(p,1),m))))
-  {
-    GEN d = coprime_part(subis(p,1), m);
-    m = diviiexact(subis(p,1), d);
-  }
+  if (cmpii(sqru(bnds),m)>=0 || bnd < 3UL) return NULL;
+
+  p_1 = subiu(p,1);
+  if (!is_pm1(gcdii(m,diviiexact(p_1,m))))
+    m = diviiexact(p_1, coprime_part(p_1, m));
   nbi = uprimepi(bnd);
   if (nbi<=1) return NULL;
   if (DEBUGLEVEL)
