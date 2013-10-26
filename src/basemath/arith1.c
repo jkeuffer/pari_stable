@@ -2885,14 +2885,13 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   p_1 = subiu(p,1);
   if (!is_pm1(gcdii(m,diviiexact(p_1,m))))
     m = diviiexact(p_1, coprime_part(p_1, m));
-  nbi = uprimepi(bnd);
-  if (nbi<=1) return NULL;
+  pr = primes_upto_zv(bnd);
+  nbi = lg(pr)-1;
   if (DEBUGLEVEL)
   {
     err_printf("bnd=%lu Size FB=%ld\n", bnd, nbi);
     timer_start(&ti);
   }
-  pr = primes_zv(nbi);
   C = sqrtremi(p, &c);
   av2 = avma;
   Ci = cgetg(nbi+1,t_VECSMALL);

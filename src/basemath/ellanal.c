@@ -31,7 +31,6 @@ struct bg_data
   GEN an; /* t_VECSMALL: cache of ap, n <= rootbnd */
   GEN ap; /* t_VECSMALL: cache of ap, p <= rootbnd */
   GEN p;  /* t_VECSMALL: primes <= rootbnd */
-  long lp;
 };
 
 typedef void bg_fun(void*el, GEN *psum, GEN n, GEN a, long jmax);
@@ -68,21 +67,20 @@ static void
 gen_BG_init(struct bg_data *bg, GEN E, GEN N, GEN bnd, GEN ap)
 {
   pari_sp av;
-  long i = 1;
+  long i = 1, l;
   bg->E = E; bg->N = N;
   bg->bnd = bnd;
   bg->rootbnd = itou(sqrtint(bnd));
-  bg->lp = uprimepi(bg->rootbnd);
-  bg->p = primes_zv(bg->lp);
+  bg->p = primes_upto_zv(bg->rootbnd);
+  l = lg(bg->p);
   if (ap)
   { /* reuse known values */
     i = lg(ap);
-    bg->ap = vecsmall_lengthen(ap, maxss(bg->lp,i-1));
+    bg->ap = vecsmall_lengthen(ap, maxss(l,i)-1);
   }
-  else bg->ap = cgetg(bg->lp+1, t_VECSMALL);
+  else bg->ap = cgetg(l, t_VECSMALL);
   av = avma;
-  for (  ; i <= bg->lp; i++, avma = av)
-    bg->ap[i] = itos(ellap(E, utoipos(bg->p[i])));
+  for (  ; i < l; i++, avma = av) bg->ap[i] = itos(ellap(E, utoipos(bg->p[i])));
   avma = av;
   bg->an = zero_zv(bg->rootbnd);
   bg->an[1] = 1;
@@ -91,7 +89,7 @@ gen_BG_init(struct bg_data *bg, GEN E, GEN N, GEN bnd, GEN ap)
 static GEN
 gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
 {
-  long i, j, lp = bg->lp, lim;
+  long i, j, lp = lg(bg->p)-1, lim;
   GEN bndov2 = shifti(bg->bnd, -1);
   pari_sp av = avma, av2;
   GEN sum, p;
