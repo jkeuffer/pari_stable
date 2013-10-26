@@ -1053,11 +1053,11 @@ primepi(GEN x)
   avma = av; return icopy(nn);
 }
 
-/* pi(x) <= x/log x * (1 + 1 /log x + 2.51/log^2 x)), x>=355991 [ Dusart ]
- * pi(x) <= x/(log x - 1.1), x >= 60184 [ Dusart ]
+/* pi(x) < x/log x * (1 + 1/log x + 2.51/log^2 x)), x>=355991 [ Dusart ]
+ * pi(x) < x/(log x - 1.1), x >= 60184 [ Dusart ]
+ * ? \p9
  * ? M = 0; for(x = 4, 60184, M = max(M, log(x) - x/primepi(x))); M
- * %1 = 1.1119625213904091133964707910302542917
- * */
+ * %1 = 1.11196252 */
 double
 primepi_upper_bound(double x)
 {
@@ -1067,12 +1067,54 @@ primepi_upper_bound(double x)
     return x * L * (1 + L + 2.51*L*L);
   }
   if (x >= 60184) return x / (log(x) - 1.1);
-  if (x < 4) {
-    if (x >= 3) return 2;
-    if (x >= 2) return 1;
-    return 0;
-  }
+  if (x < 5) return 2; /* don't bother */
   return x / (log(x) - 1.111963);
+}
+/* pi(x) > x/log x (1 + 1/log x), x >= 599 [ Dusart ]
+ * pi(x) > x / (log x + 2), x >= 55 [ Rosser ] */
+double
+primepi_lower_bound(double x)
+{
+  if (x >= 599)
+  {
+    double L = 1/log(x);
+    return x * L * (1 + L);
+  }
+  if (x < 55) return 0; /* don't bother */
+  return x / (log(x) + 2.);
+}
+GEN
+gprimepi_upper_bound(GEN x)
+{
+  pari_sp av = avma;
+  double L;
+  if (typ(x) != t_INT) x = gfloor(x);
+  if (expi(x) <= 1022)
+  {
+    avma = av;
+    return dbltor(primepi_upper_bound(gtodouble(x)));
+  }
+  x = itor(x, LOWDEFAULTPREC);
+  L = 1 / rtodbl(logr_abs(x));
+  x = mulrr(x, dbltor(L * (1 + L + 2.51*L*L)));
+  return gerepileuptoleaf(av, x);
+}
+GEN
+gprimepi_lower_bound(GEN x)
+{
+  pari_sp av = avma;
+  double L;
+  if (typ(x) != t_INT) x = gfloor(x);
+  if (cmpiu(x, 55) <= 0) return gen_0;
+  if (expi(x) <= 1022)
+  {
+    avma = av;
+    return dbltor(primepi_lower_bound(gtodouble(x)));
+  }
+  x = itor(x, LOWDEFAULTPREC);
+  L = 1 / rtodbl(logr_abs(x));
+  x = mulrr(x, dbltor(L * (1 + L)));
+  return gerepileuptoleaf(av, x);
 }
 
 GEN
@@ -1100,6 +1142,84 @@ primes_zv(long n)
   u_forprime_init(&S, 2, ULONG_MAX);
   for (i = 1; i <= n; i++) y[i] =  u_forprime_next(&S);
   avma = (pari_sp)y; return y;
+}
+GEN
+primes0(GEN N)
+{
+  switch(typ(N))
+  {
+    case t_INT: return primes(itos(N));
+    case t_VEC:
+      if (lg(N) == 3) return primes_interval(gel(N,1),gel(N,2));
+  }
+  pari_err_TYPE("primes", N);
+  return NULL;
+}
+
+GEN
+primes_interval(GEN a, GEN b)
+{
+  pari_sp av = avma;
+  forprime_t S;
+  long i, n;
+  GEN y, d, p;
+  if (typ(a) != t_INT) a = gceil(a);
+  if (typ(b) != t_INT) b = gfloor(b);
+  d = subii(b, a);
+  if (signe(d) < 0 || signe(b) <= 0) { avma = av; return cgetg(1, t_VEC); }
+  if (lgefint(b) == 3)
+  {
+    avma = av;
+    y = primes_interval_zv(itou(a), itou(b));
+    n = lg(y); settyp(y, t_VEC);
+    for (i = 1; i < n; i++) gel(y,i) = utoipos(y[i]);
+    return y;
+  }
+  /* at most d+1 primes in [a,b]. If d large, try better bound to lower
+   * memory use */
+  if (cmpiu(d,100000) > 0)
+  {
+    GEN D = gsub(gprimepi_upper_bound(b), gprimepi_lower_bound(a));
+    D = ceil_safe(D);
+    if (cmpii(D, d) < 0) d = D;
+  }
+  n = itos(d)+1;
+  forprime_init(&S, a, b);
+  y = cgetg(n+1, t_VEC); i = 1;
+  while ((p = forprime_next(&S))) gel(y, i++) = icopy(p);
+  setlg(y, i); return gerepileupto(av, y);
+}
+
+/* a <= b, at most d primes in [a,b]. Return them */
+static GEN
+primes_interval_i(ulong a, ulong b, ulong d)
+{
+  pari_sp av = avma;
+  ulong p, i = 1, n = d + 1;
+  forprime_t S;
+  GEN y;
+  u_forprime_init(&S, a, b);
+  y = cgetg(n+1, t_VECSMALL);
+  while ((p = u_forprime_next(&S))) y[i++] = p;
+  setlg(y, i); return gerepileuptoleaf(av, y);
+}
+GEN
+primes_interval_zv(ulong a, ulong b)
+{
+  ulong d;
+  if (!a) return primes_upto_zv(b);
+  if (b < a) return cgetg(1, t_VECSMALL);
+  d = b - a;
+  if (d > 100000UL) d = primepi_upper_bound(b) - primepi_lower_bound(a);
+  return primes_interval_i(a, b, d);
+}
+GEN
+primes_upto_zv(ulong b)
+{
+  ulong d;
+  if (b < 2) return cgetg(1, t_VECSMALL);
+  d = (b > 100000UL)? primepi_upper_bound(b): b;
+  return primes_interval_i(2, b, d);
 }
 
 /***********************************************************************/

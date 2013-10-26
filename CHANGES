@@ -28,11 +28,15 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
     2- ? and addhelp: no longer include default help text for a user function
        affected by addhelp. Use addhelp(f, Str(t, "\ntext")) to recover the
        old behaviour
+    3- primes([a,b]) now returns the primes in the interval [a,b]
 
   Added
 EP  1- Configure option for gcov/lcov support
     2- libpari function FF_f, member function g.f for t_FFELT
        (definition field has p^f elements)
+    3- libpari functions gprimepi_upper_bound, gprimepi_lower_bound,
+       primepi_lower_bound, primes_interval, primes_interval_zv,
+       primes_upto_zv, primes0
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

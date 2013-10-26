@@ -3009,36 +3009,63 @@ calling:
 \fun{void}{ifac_skip}{GEN part} removes the next scheduled factorization.
 
 \fun{int}{ifac_isprime}{GEN n} given $n$ whose prime divisors are $> 2^{14}$,
-returns the decision the factoring engine would take abount the compositeness
+returns the decision the factoring engine would take about the compositeness
 of $n$: $0$ if $n$ is a proven composite, and $1$ if we believe it to be
 prime; more precisely, $n$ is a proven prime if \tet{factor_proven} is
 set, and only a BPSW-pseudoprime otherwise.
 
-\subsec{Primality and compositeness tests}
+\subsec{Primes, primality and compositeness tests}
 
-\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
-$0$ otherwise.
+\subsubsec{Chebyshev's $\pi$ function, bounds}
 
-\fun{ulong}{uprimepi}{ulong n}, returns the number of primes $p\leq n$.
+\fun{ulong}{uprimepi}{ulong n}, returns the number of primes $p\leq n$
+(Chebyshev's $\pi$ function).
 
 \fun{double}{primepi_upper_bound}{double x} return a quick upper bound for
-$\pi(x)$, using $\pi(x) < x / (\log x - 1.11)$ for $x\geq 4$.
+$\pi(x)$, using Dusart bounds.
+
+\fun{GEN}{gprimepi_upper_bound}{GEN x} as \tet{primepi_upper_bound}, returns a
+\typ{REAL}.
+
+\fun{double}{primepi_lower_bound}{double x} return a quick lower bound for
+$\pi(x)$, using Dusart bounds.
+
+\fun{GEN}{gprimepi_lower_bound}{GEN x} as \tet{primepi_lower_bound}, returns
+a \typ{REAL} or \kbd{gen\_0}.
+
+\subsubsec{Primes, primes in intervals}
 
 \fun{ulong}{unextprime}{ulong n}, returns the smallest prime $\geq n$. Return
-$0$ if it cannot be represented as an \kbd{ulong} (bigger than $2^{64} - 59$
-or $2^{32} - 5$ depending on the word size).
+$0$ if it cannot be represented as an \kbd{ulong} ($n$ bigger than $2^{64} -
+59$ or $2^{32} - 5$ depending on the word size).
 
 \fun{ulong}{uprecprime}{ulong n}, returns the largest prime $\leq n$. Return
 $0$ if $n\leq 1$.
 
-\fun{ulong}{uprime}{long n} returns the $n$-th prime, assuming it belongs to
-the precomputed prime table. Error otherwise.
+\fun{ulong}{uprime}{long n} returns the $n$-th prime, assuming it fits in an
+\kbd{ulong} (overflow error otherwise).
 
 \fun{GEN}{prime}{long n} same as \kbd{utoi(uprime(n))}.
 
-\fun{GEN}{primes_zv}{long m} returns the $m$-th first primes, in a
-\typ{VECSMALL}, assuming they belong to the precomputed prime table.
-Error otherwise.
+\fun{GEN}{primes_zv}{long m} returns the first $m$ primes, in a
+\typ{VECSMALL}.
+
+\fun{GEN}{primes}{long m} return the first $m$ primes, as a \typ{VEC} of
+\typ{INT}s.
+
+\fun{GEN}{primes_interval}{GEN a, GEN b} return the primes in the interval
+$[a,b]$, as a \typ{VEC} of \typ{INT}s.
+
+\fun{GEN}{primes_interval_zv}{ulong a, ulong b} return the primes in the
+interval $[a,b]$, as a \typ{VECSMALL} of \kbd{ulongs}s.
+
+\fun{GEN}{primes_upto_zv}{ulong b} return the primes in the interval $[2,b]$,
+as a \typ{VECSMALL} of \kbd{ulongs}s.
+
+\subsubsec{Tests}
+
+\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
+$0$ otherwise.
 
 \fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 (fully proven) prime number and $0$ otherwise.
