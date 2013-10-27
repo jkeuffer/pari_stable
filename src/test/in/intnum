@@ -53,3 +53,18 @@ tab = sumnuminit(2,,-1);
 a = sumnumalt(n=1,2,1/(n^3+n+1),tab,1);
 b = sumalt(n=1,(-1)^n/(n^3+n+1));
 a - b
+
+\p96
+T=intnuminitgen(t,0,[1],exp(2*sinh(t)));
+intnum(x=0,[1],1/(1+x^2),T)
+T=intnuminitgen(t,0,[[1],1],exp(t-exp(-t)));
+intnum(x=0,[[1],1],exp(-x),T)
+intfourierexp(t=0,[[1],1], 1/2, exp(-t^2))
+intfouriercos(t=0,[[1],1], 1/2, exp(-t^2))
+intfouriersin(t=0,[[1],1], 1/2, exp(-t^2))
+
+\p38
+intnumromb(x=0,1,sin(x))
+intnumromb(x=0,1,sin(x), 1)
+intnumromb(x=1,100,exp(-x^2), 2)
+intnumromb(x=0,1,sin(x)/x, 3)
