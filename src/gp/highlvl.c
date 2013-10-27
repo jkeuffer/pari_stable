@@ -155,6 +155,7 @@ install0(char *name, char *code, char *gpname, char *lib)
 void
 gpinstall(char *s, char *code, char *gpname, char *lib)
 {
+  pari_sp av = avma;
   if (GP_DATA->secure)
   {
     char *msg = pari_sprintf("[secure mode]: about to install '%s'", s);
@@ -162,6 +163,10 @@ gpinstall(char *s, char *code, char *gpname, char *lib)
     pari_free(msg);
   }
   install0(s, code, gpname, lib);
+  if (!*gpname) gpname = s;
+  addhelp(gpname,
+          stack_sprintf("%s: installed function\nlibrary name: %s\nprototype: %s", gpname, s, code));
+  avma = av;
 }
 
 #include "highlvl.h"
