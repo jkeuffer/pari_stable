@@ -1342,6 +1342,7 @@ intnum(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
 typedef struct auxint_s {
   GEN a, R, pi;
   GEN (*f)(void*, GEN);
+  GEN (*w)(GEN, long);
   long prec;
   void *E;
 } auxint_t;
@@ -1376,35 +1377,20 @@ gettmpP(GEN x) { return mkvec2(mkvec(gen_1), x); }
 static GEN
 gettmpN(GEN tmpP) { return mkvec2(gneg(gel(tmpP,1)), gel(tmpP,2)); }
 
+/* w(Rt) f(a+it) */
 static GEN
-auxinvcos(void *E, GEN t)
+auxinv(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
-  GEN tmp = gcos(gmul(D->R, t), D->prec);
+  GEN tmp = D->w(gmul(D->R, t), D->prec);
   return gmul(tmp, D->f(D->E, gadd(D->a, mulcxI(t))));
 }
 static GEN
-auxinvsin(void *E, GEN t)
-{
-  auxint_t *D = (auxint_t*) E;
-  GEN tmp = gsin(gmul(D->R, t), D->prec);
-  return gmul(tmp, D->f(D->E, gadd(D->a, mulcxI(t))));
-}
-static GEN
-auxinvexp(void *E, GEN t)
-{
-  auxint_t *D = (auxint_t*) E;
-  GEN tmp = gexp(gmul(D->R, t), D->prec);
-  return gmul(tmp, D->f(D->E, gadd(D->a, mulcxI(t))));
-}
-
-static GEN
-intinvintern(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long flag, long prec)
+intinvintern(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long prec)
 {
   auxint_t D;
   GEN z, zR, zI, tmpP, tmpN;
 
-  if (typ(sig) != t_VEC) sig = mkvec2(sig, stoi(flag));
   if (lg(sig) != 3 || !isinR(gel(sig,1)) || !isinR(gel(sig,2)))
     pari_err_TYPE("integral transform",sig);
   if (gsigne(gel(sig,2)) < 0)
@@ -1419,16 +1405,19 @@ intinvintern(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long fla
     tmpP = gettmpP(mulcxI(gabs(x, prec)));
     tmpN = gettmpN(tmpP);
     tab = intnuminit0(tmpN, tmpP, tab, prec);
-    zR = intnum_i(&D, &auxinvcos, tmpN, tmpP, tab, prec);
+    D.w = gcos;
+    zR = intnum_i(&D, &auxinv, tmpN, tmpP, tab, prec);
     gel(tmpP,2) = gneg(gel(tmpP,2));
-    zI = intnum_i(&D, &auxinvsin, gettmpN(tmpP), tmpP, tab, prec);
+    D.w = gsin;
+    zI = intnum_i(&D, &auxinv, gettmpN(tmpP), tmpP, tab, prec);
     z = gadd(zR, mulcxI(zI));
   }
   else
   {
     D.R = mulcxI(x);
     tmpP = gettmpP(gel(sig,2));
-    z = intnum(&D, &auxinvexp, gettmpN(tmpP), tmpP, tab, prec);
+    D.w = gexp;
+    z = intnum(&D, &auxinv, gettmpN(tmpP), tmpP, tab, prec);
   }
   return gdiv(gmul(gexp(gmul(gel(sig,1), x), prec), z), Pi2n(1, prec));
 }
@@ -1438,7 +1427,8 @@ intinvintern(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long fla
 GEN
 intmellininv(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long prec)
 {
-  return intinvintern(E, eval, sig, gneg(glog(x, prec)), tab, 1, prec);
+  if (typ(sig) != t_VEC) sig = mkvec2(sig, gen_1);
+  return intinvintern(E, eval, sig, gneg(glog(x, prec)), tab, prec);
 }
 
 /* If sig = [sigR, e]: if e = 0, slowly decreasing, if e > 0, exponentially
@@ -1446,7 +1436,8 @@ intmellininv(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long pre
 GEN
 intlaplaceinv(void *E, GEN (*eval)(void*, GEN), GEN sig, GEN x, GEN tab, long prec)
 {
-  return intinvintern(E, eval, sig, x, tab, 0, prec);
+  if (typ(sig) != t_VEC) sig = mkvec2(sig, gen_0);
+  return intinvintern(E, eval, sig, x, tab, prec);
 }
 
 /* assume tab computed with additional weights f(sig + I*T) */
@@ -1504,25 +1495,19 @@ mytra(GEN a, GEN x, long flag, const char *name)
   return NULL;
 }
 
+/* w(ta) f(t) */
 static GEN
-auxfoursin(void *E, GEN t)
+auxfour(void *E, GEN t)
 {
   auxint_t *D = (auxint_t*) E;
-  return gmul(gsin(gmul(t, D->a), D->prec), D->f(D->E, t));
-}
-
-static GEN
-auxfourcos(void *E, GEN t)
-{
-  auxint_t *D = (auxint_t*) E;
-  return gmul(gcos(gmul(t, D->a), D->prec), D->f(D->E, t));
+  return gmul(D->w(gmul(t, D->a), D->prec), D->f(D->E, t));
 }
 
 GEN
 intfouriersin(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, long prec)
 {
   auxint_t D;
-  GEN z, tmp;
+  GEN tmp;
 
   if (gequal0(x)) return gcopy(x);
   tmp = gmul(x, Pi2n(1, prec));
@@ -1533,15 +1518,15 @@ intfouriersin(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, lo
   D.E = E;
   a = mytra(a,tmp,0,"a");
   b = mytra(b,tmp,0,"b");
-  z = intnum(&D, &auxfoursin, a, b, tab, prec);
-  return z;
+  D.w = gsin;
+  return intnum(&D, &auxfour, a, b, tab, prec);
 }
 
 GEN
 intfouriercos(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, long prec)
 {
   auxint_t D;
-  GEN z, tmp;
+  GEN tmp;
 
   if (gequal0(x)) return intnum(E, eval, a, b, tab, prec);
   tmp = gmul(x, Pi2n(1, prec));
@@ -1552,8 +1537,8 @@ intfouriercos(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN x, GEN tab, lo
   D.E = E;
   a = mytra(a,tmp,1,"a");
   b = mytra(b,tmp,1,"b");
-  z = intnum(&D, &auxfourcos, a, b, tab, prec);
-  return z;
+  D.w = gcos;
+  return intnum(&D, &auxfour, a, b, tab, prec);
 }
 
 GEN
