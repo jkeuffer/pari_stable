@@ -22,21 +22,13 @@ Doc: changes the help message for the symbol \kbd{sym}. The string \var{str}
  f =
    (x)->x^2
 
- gp>
- @eprog\noindent
- You may include the definition of a user function in a help text,
- or the value of a user variable (meant to remain constant), as follows:
+ @eprog\noindent Once addhelp is applied to $f$, the function code is no
+ longer included. It can still be consulted by typing the function name:
  \bprog
- gp> C = 2
- gp> addhelp(C, Str("Magic constant, C = ", C))
- gp> ?C
- Magic constant, C = 2
-
- gp> addhelp(f, Str("Square\n", f))
+ gp> addhelp(f, "Square")
  gp> ?f
  Square
- (x)->x^2
 
- gp>
- @eprog\noindent Both constructions use the variable value at the time of the
- \kbd{addhelp} call. Changing the value later will not update the help text.
+ gp> f
+ %2 = (x)->x^2
+ @eprog

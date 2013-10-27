@@ -65,6 +65,11 @@ This file lists the incompatible changes between Version 2.x and older versions
   - removed optional flag to factorpadic() / factorpadic0() [ enabling
     Buchman-Lenstra + round2 ] Use the default factorpadic(T, p, r), both
     under GP and in library mode.
+  - default help text for a user function is now as in \u: ?fun produces
+      fun =
+        (args)->body
+  - after addhelp(f,...), ?f no longer include default help text for a
+    user function (function code). Type 'f' to see the function code.
 
 * Specific to the PARI library:
 ===============================
