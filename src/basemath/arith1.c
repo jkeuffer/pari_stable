@@ -2880,7 +2880,7 @@ Fp_log_index(GEN a, GEN b, GEN m, GEN p)
   struct Fp_log_rel r;
   ulong bnds = itou(roundr_safe(opt_param(sqrti(p),DEFAULTPREC)));
   ulong bnd = 4*bnds;
-  if (cmpii(sqru(bnds),m)>=0 || bnd < 3UL) return NULL;
+  if (!bnds || cmpii(sqru(bnds),m)>=0) return NULL;
 
   p_1 = subiu(p,1);
   if (!is_pm1(gcdii(m,diviiexact(p_1,m))))
