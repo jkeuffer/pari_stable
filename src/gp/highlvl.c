@@ -58,7 +58,7 @@ gp_dlopen(char *name, int flag)
   return NULL;
 }
 
-static void
+static entree *
 install0(char *name, char *code, char *gpname, char *lib)
 {
   void *f, *handle;
@@ -83,7 +83,7 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",name,lib);
     pari_err(e_MISC,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
-  (void)install(f, gpname, code);
+  return install(f, gpname, code);
 }
 #else
 #  ifdef _WIN32
@@ -112,7 +112,7 @@ gp_LoadLibrary(char *name)
   }
   return NULL;
 }
-static void
+static entree *
 install0(char *name, char *code, char *gpname, char *lib)
 {
   FARPROC f;
@@ -143,29 +143,40 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",name,lib);
     pari_err(e_MISC,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
-  install((void*)f,gpname,code);
+  return install((void*)f,gpname,code);
 }
 #  else
-static void
+static entree *
 install0(char *name, char *code, char *gpname, char *lib)
-{ pari_err(e_ARCH,"install"); }
+{ pari_err(e_ARCH,"install"); return NULL; }
 #endif
 #endif
+
+static char *
+dft_help(const char *gp, const char *s, const char *code)
+{ return stack_sprintf("%s: installed function\nlibrary name: %s\nprototype: %s" , gp, s, code); }
 
 void
 gpinstall(char *s, char *code, char *gpname, char *lib)
 {
   pari_sp av = avma;
+  char *gp = *gpname? gpname: s;
+  entree *ep;
   if (GP_DATA->secure)
   {
     char *msg = pari_sprintf("[secure mode]: about to install '%s'", s);
     pari_ask_confirm(msg);
     pari_free(msg);
   }
-  install0(s, code, gpname, lib);
-  if (!*gpname) gpname = s;
-  addhelp(gpname,
-          stack_sprintf("%s: installed function\nlibrary name: %s\nprototype: %s", gpname, s, code));
+  ep = is_entry(gp);
+  if (ep && ep->valence == EpINSTALL
+      && strcmp(ep->code, code)
+      && !strcmp(ep->help, dft_help(gp,s,ep->code)))
+  { /* help is the default AND prototype changes: delete help */
+    pari_free((void*)ep->help); ep->help = NULL;
+  }
+  ep = install0(s, code, gpname, lib);
+  if (ep && !ep->help) addhelp(gp, dft_help(gp,s,code));
   avma = av;
 }
 
