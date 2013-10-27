@@ -56,4 +56,27 @@
 Mod(x^5 + x^2 + 2, x^6 + x^5 + x^4 + x^3 + x^2 + x + 1)
 Mod(z^2, z^3 + z^2 - 2*z - 1)
 [[1, -1/2; 0, 1], [Mat(1), Mat(1)]]
-Total time spent: 304
+[Mod(1/6*y + 2/3, y^2 - 40), -3]
+[Mod(1/2*y + 4, y^2 - 40), 1]
+[Mod(-1, y^3 - 21), -2]
+[Mod(-y + 3, y^3 - 21), 1]
+1: [2, 0]~
+1: Mod(2, x^2 - y)
+2: [Mod(y^2 + y, y^3 - 21), 1]~
+2: Mod(x + y, x^2 - y)
+3: [Mod(y, y^3 - 21), 0]~
+3: Mod(Mod(y, y^3 - 21), x^2 - y)
+4: [y, 0]~
+4: Mod(y, x^2 - y)
+5: error("inconsistent variables in poltobasis, z != x.")
+5: error("inconsistent variables in poltobasis, z != x.")
+6: error("inconsistent moduli in rnfalgtobasis: x^2 - y != y^2 + 1")
+6: error("inconsistent moduli in rnfbasistoalg: x^2 - y != y^2 + 1")
+7: error("inconsistent dimensions in rnfalgtobasis.")
+7: error("inconsistent operation 'RgV_RgC_mul' t_VEC (2 elts) , t_COL (1 elt
+s).")
+8: [1, 2]~
+8: Mod(2*x + Mod(-2*y^2 + 1, y^3 - 21), x^2 - y)
+9: [1, y]~
+9: Mod(y*x + Mod(-20, y^3 - 21), x^2 - y)
+Total time spent: 284

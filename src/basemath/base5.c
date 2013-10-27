@@ -125,7 +125,7 @@ makenfabs(GEN rnf)
   rnfeq = gel(rnf,11); pol = gel(rnfeq,1);
   nf = gel(rnf,10);
 
-  M = modulereltoabs(rnf, gel(rnf,7));
+  M = modulereltoabs(rnf, nf_get_zk(rnf));
   n = degpol(pol);
   M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
   if (d) M = RgM_Rg_div(ZM_hnfmodall(M, d, hnf_MODID|hnf_CENTER), d);
@@ -241,11 +241,9 @@ rnfelementabstorel(GEN rnf,GEN x)
       /* fall through */
     case t_POL:
     {
-      GEN k, T, pol, rnfeq = gel(rnf,11), nf = gel(rnf,10);
+      GEN k, rnfeq = gel(rnf,11), nf = gel(rnf,10);
       k = gel(rnfeq,3);
-      T = nf_get_pol(nf);
-      pol = gel(rnf,1);
-      return gerepileupto(av, eltabstorel(x, T, pol, k));
+      return gerepileupto(av, eltabstorel(x,nf_get_pol(nf),nf_get_pol(rnf),k));
     }
 
     default: return gcopy(x);
@@ -311,17 +309,24 @@ rnfelementdown(GEN rnf,GEN x)
   }
 }
 
-/* x est exprime sur la base relative */
+/* vector of rnf elt -> matrix of nf elts */
+static GEN
+rnfV_to_nfM(GEN rnf, GEN x)
+{
+  long i, l = lg(x);
+  GEN y = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++) gel(y,i) = rnfalgtobasis(rnf,gel(x,i));
+  return y;
+}
+
 static GEN
 rnfprincipaltohermite(GEN rnf,GEN x)
 {
   pari_sp av = avma;
-  GEN bas = gel(rnf,7), nf = gel(rnf,10);
-
+  GEN bas = nf_get_zk(rnf), nf = gel(rnf,10);
   x = rnfbasistoalg(rnf,x);
-  x = rnfalgtobasis(rnf, gmul(x, gmodulo(gel(bas,1), gel(rnf,1))));
-  settyp(x, t_MAT);
-  return gerepileupto(av, nfhnf(nf, mkvec2(x, gel(bas,2))));
+  x = gmul(x, gmodulo(gel(bas,1), nf_get_pol(rnf)));
+  return gerepileupto(av, nfhnf(nf, mkvec2(rnfV_to_nfM(rnf,x), gel(bas,2))));
 }
 
 GEN
@@ -333,7 +338,7 @@ rnfidealhermite(GEN rnf, GEN x)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      bas = gel(rnf,7); z = cgetg(3,t_VEC);
+      bas = nf_get_zk(rnf); z = cgetg(3,t_VEC);
       gel(z,1) = matid(rnf_get_degree(rnf));
       gel(z,2) = gmul(x, gel(bas,2)); return z;
 
@@ -448,7 +453,7 @@ rnfidealup(GEN rnf,GEN x)
 
   checkrnf(rnf); nf = gel(rnf,10);
   n = rnf_get_degree(rnf);
-  bas = gel(rnf,7); bas2 = gel(bas,2);
+  bas = nf_get_zk(rnf); bas2 = gel(bas,2);
 
   (void)idealtyp(&x, &I); /* I is junk */
   I = cgetg(n+1,t_VEC);
@@ -476,15 +481,16 @@ GEN
 rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
 {
   pari_sp av = avma;
-  GEN z, nf, x1, x2, p1, p2;
+  GEN z, nf, x1, x2, p1, p2, bas;
 
   z = rnfidealtwoelement(rnf,y);
   nf = gel(rnf,10);
+  bas = nf_get_zk(rnf);
   x = rnfidealhermite(rnf,x);
-  x1 = gmodulo(gmul(gmael(rnf,7,1), matbasistoalg(nf,gel(x,1))),gel(rnf,1));
+  x1 = gmodulo(gmul(gel(bas,1), matbasistoalg(nf,gel(x,1))), nf_get_pol(rnf));
   x2 = gel(x,2);
   p1 = gmul(gel(z,1), gel(x,1));
-  p2 = rnfalgtobasis(rnf, gmul(gel(z,2), x1)); settyp(p2, t_MAT);
+  p2 = rnfV_to_nfM(rnf, gmul(gel(z,2), x1));
   z = mkvec2(shallowconcat(p1, p2), shallowconcat(x2, x2));
   return gerepileupto(av, nfhnf(nf,z));
 }

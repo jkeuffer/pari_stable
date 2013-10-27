@@ -51,3 +51,19 @@ rnfeltdown(rnf, a)
 
 nf=nfinit(y); A = [[1,1/2;0,1],[1,1]];
 nfhnfmod(nf, A, nfdetint(nf,A))
+
+K=bnfinit(y^2-40);
+bnfisnorm(K,2, 0)
+bnfisnorm(K,6, 0)
+K=bnfinit(y^3-21);
+bnfisnorm(K,2)
+bnfisnorm(K,6)
+
+L=rnfinit(K,x^2-y);
+v = [2,x+y,Mod(y,K.pol),y,z,Mod(y,y^2+1),[1]~,[1,2]~,[1,y]~];
+{
+for (i=1,#v,
+  print(i, ": ", iferr(rnfalgtobasis(L,v[i]), E,E));
+  print(i, ": ", iferr(rnfbasistoalg(L,v[i]), E,E));
+)
+}

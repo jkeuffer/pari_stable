@@ -827,6 +827,7 @@ algtobasis(GEN nf, GEN x)
       return gerepileupto(av,poltobasis(nf,x));
 
     case t_COL:
+      if (lg(x)-1 != nf_get_degree(nf)) pari_err_DIM("nfalgtobasis");
       return gcopy(x);
 
     case t_INT:
@@ -844,31 +845,29 @@ rnfbasistoalg(GEN rnf,GEN x)
   GEN z, nf, T;
 
   checkrnf(rnf);
+  nf = gel(rnf,10);
+  T = nf_get_pol(rnf);
   switch(typ(x))
   {
-    case t_VEC: case t_COL:
-      z = cgetg_copy(x, &lx); nf = gel(rnf,10);
+    case t_COL:
+      z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = nf_to_scalar_or_alg(nf, gel(x,i));
-      z = RgV_RgC_mul(gmael(rnf,7,1), z);
-      T = gel(rnf,1);
+      z = RgV_RgC_mul(gel(nf_get_zk(rnf),1), z);
       return gerepileupto(av, gmodulo(z,T));
 
-    case t_MAT:
-      z = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(z,i) = rnfbasistoalg(rnf,gel(x,i));
-      return z;
-
     case t_POLMOD:
-      T = gel(rnf,1);
       if (!RgX_equal_var(T,gel(x,1)))
+      {
+        if (RgX_equal_var(nf_get_pol(nf), gel(x,1))) break;
         pari_err_MODULUS("rnfbasistoalg", T,gel(x,1));
+      }
       return gcopy(x);
-
-    default: z = cgetg(3,t_POLMOD);
-      T = gel(rnf,1);
-      gel(z,1) = RgX_copy(T);
-      gel(z,2) = gtopoly(x, varn(T)); return z;
+    case t_POL:
+      if (varn(x) == nf_get_varn(nf)) break;
+      if (varn(x) == varn(T)) return gmodulo(x, T);
+      pari_err_VAR( "poltobasis", x,T);
   }
+  retmkpolmod(scalarpol(x, varn(T)), RgX_copy(T));
 }
 
 GEN
@@ -948,25 +947,27 @@ RgC_to_nfC(GEN nf,GEN x)
 GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {
-  long i, lx;
-  GEN z;
+  GEN nf;
 
   checkrnf(rnf);
+  nf = gel(rnf,10);
   switch(typ(x))
   {
-    case t_VEC: case t_COL: case t_MAT:
-      z = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(z,i) = rnfalgtobasis(rnf,gel(x,i));
-      return z;
+    case t_COL:
+      if (lg(x)-1 != rnf_get_degree(rnf)) pari_err_DIM("rnfalgtobasis");
+      return gcopy(x);
 
     case t_POLMOD:
-      if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
-        pari_err_MODULUS("rnfalgtobasis", gel(rnf,1),gel(x,1));
-      x = gel(x,2);
-      if (typ(x) != t_POL) { GEN A = gel(rnf,8); return gmul(x, gel(A,1)); }
+      if (!RgX_equal_var(nf_get_pol(rnf),gel(x,1)))
+      {
+        if (RgX_equal_var(nf_get_pol(nf), gel(x,1))) break;
+        pari_err_MODULUS("rnfalgtobasis", nf_get_pol(rnf),gel(x,1));
+      }
+      x = gel(x,2); if (typ(x) != t_POL) break;
       /* fall through */
     case t_POL: {
       pari_sp av = avma;
+      if (varn(x) == nf_get_varn(nf)) break;
       return gerepileupto(av, poltobasis(rnf, x));
     }
   }
