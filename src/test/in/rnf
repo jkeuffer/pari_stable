@@ -68,3 +68,9 @@ for (i=1,#v,
   for (j=1,#f, print(iferr(f[j](L,v[i]), E,E)))
 )
 }
+{
+for (i=1,#v,
+  print(i,":");
+  print(iferr(rnfcharpoly(K,x^2-y,v[i]),E,E))
+)
+}

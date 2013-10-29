@@ -2549,31 +2549,28 @@ RgXQ_charpoly(GEN x, GEN T, long v)
 GEN
 rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
 {
-  long tx = typ(x), vQ = varn(Q), dQ = degpol(Q), vx, vT;
+  const char *f = "rnfcharpoly";
+  long dQ = degpol(Q);
   pari_sp av = avma;
   GEN T;
 
   if (v < 0) v = 0;
-  nf = checknf(nf); T = nf_get_pol(nf); vT = varn(T);
-  Q = RgX_nffix("rnfcharpoly", T,Q,0);
-  if (tx == t_POLMOD) {
-    GEN M = gel(x,1);
-    long vM = varn(M);
-    if      (vM == vQ)
-    { if (!RgX_equal(M,Q)) pari_err_MODULUS("rnfcharpoly", M,Q); }
-    else if (vM == vT)
-    { if (!RgX_equal(M,T)) pari_err_MODULUS("rnfcharpoly", M,T); }
-    else pari_err_MODULUS("rnfcharpoly", M,T);
-    x = gel(x, 2); tx = typ(x);
+  nf = checknf(nf); T = nf_get_pol(nf);
+  Q = RgX_nffix(f, T,Q,0);
+  switch(typ(x))
+  {
+    case t_INT:
+    case t_FRAC: return caract_const(av, x, v, dQ);
+    case t_POLMOD:
+      x = polmod_nffix2(f,T,Q, x,0);
+      break;
+    case t_POL:
+      x = varn(x) == varn(T)? Rg_nffix(f,T,x,0): RgX_nffix(f, T,x,0);
+      break;
+    default: pari_err_TYPE(f,x);
   }
-  if (tx != t_POL) {
-    if (!is_rational_t(tx)) pari_err_TYPE("rnfcharpoly",x);
-    return caract_const(av, x, v, dQ);
-  }
-  vx = varn(x);
-  if (vx == vT) return caract_const(av, mkpolmod(x,T), v, dQ);
-  if (vx != vQ) pari_err_VAR("rnfcharpoly", x,Q);
-  x = RgX_nffix("rnfcharpoly", T,x,0);
+  if (typ(x) != t_POL) return caract_const(av, x, v, dQ);
+  /* x a t_POL in variable vQ */
   if (degpol(x) >= dQ) x = RgX_rem(x, Q);
   if (dQ <= 1) return caract_const(av, constant_term(x), v, 1);
   return gerepilecopy(av, lift_if_rational( RgXQ_charpoly(x, Q, v) ));

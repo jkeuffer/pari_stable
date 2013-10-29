@@ -980,8 +980,10 @@ RgC_to_nfC(GEN nf,GEN x)
 /* x a t_POLMOD, supposedly in rnf = K[z]/(T), K = Q[y]/(Tnf) */
 GEN
 polmod_nffix(const char *f, GEN rnf, GEN x, int lift)
+{ return polmod_nffix2(f, rnf_get_nfpol(rnf), rnf_get_pol(rnf), x,lift); }
+GEN
+polmod_nffix2(const char *f, GEN T, GEN relpol, GEN x, int lift)
 {
-  GEN relpol = rnf_get_pol(rnf), T = rnf_get_nfpol(rnf);
   if (RgX_equal_var(gel(x,1),relpol))
   {
     x = gel(x,2);
@@ -998,7 +1000,6 @@ polmod_nffix(const char *f, GEN rnf, GEN x, int lift)
   }
   return Rg_nffix(f, T, x, lift);
 }
-
 GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {

@@ -1342,6 +1342,10 @@ for a vector of coefficients.
 a \typ{POLMOD} $x$ supposedly defining an element of \var{rnf}, check this
 and perform \tet{Rg_nffix} cleanups.
 
+\fun{GEN}{polmod_nffix2}{const char *f, GEN T, GEN P, GEN x, int lift} as
+\tet{polmod_nffix}, where the relative extension is explicitly defined
+as $L = (\Q[y]/(T))[x]/(P)$, instead of by an \kbd{rnf} structure.
+
 \fun{long}{numberofconjugates}{GEN T, long pinit} returns a quick
 multiple for the number of  $\Q$-automorphism of the (integral, monic)
 \typ{POL} $T$, from modular factorizations, starting from prime \kbd{pinit}

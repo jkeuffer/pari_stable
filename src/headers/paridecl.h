@@ -1408,6 +1408,7 @@ GEN     nfsqri(GEN nf, GEN x);
 GEN     nftrace(GEN nf, GEN x);
 long    nfval(GEN nf, GEN x, GEN vp);
 GEN     polmod_nffix(const char *f, GEN rnf, GEN x,int lift);
+GEN     polmod_nffix2(const char *f, GEN T, GEN relpol, GEN x, int lift);
 GEN     rnfalgtobasis(GEN rnf, GEN x);
 GEN     rnfbasistoalg(GEN rnf, GEN x);
 GEN     rnfeltnorm(GEN rnf, GEN x);
