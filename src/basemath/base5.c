@@ -178,27 +178,26 @@ modulereltoabs(GEN rnf, GEN x)
   setlg(M, k); return M;
 }
 
+/* only fill in nf[1,3,4,7,8,9] */
 static GEN
 makenfabs(GEN rnf)
 {
-  GEN M, d, rnfeq, pol, nf, NF = zerovec(9);
-  long n;
+  GEN M, d, nf = rnf_get_nf(rnf), pol = rnf_get_polabs(rnf), NF = zerovec(9);
+  long n = degpol(pol);
 
-  rnfeq = rnf_get_map(rnf); pol = gel(rnfeq,1);
-  nf = rnf_get_nf(rnf);
-
-  M = modulereltoabs(rnf, rnf_get_zk(rnf));
-  n = degpol(pol);
-  M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
-  if (d) M = RgM_Rg_div(ZM_hnfmodall(M, d, hnf_MODID|hnf_CENTER), d);
-  else   M = matid(n);
-
+  M = Q_remove_denom(modulereltoabs(rnf, rnf_get_zk(rnf)), &d);
+  if (d)
+  {
+    M = ZM_hnfmodall(RgXV_to_RgM(M,n), d, hnf_MODID|hnf_CENTER);
+    M = RgM_Rg_div(M, d);
+  }
+  else
+    M = matid(n);
   gel(NF,1) = pol;
   gel(NF,3) = mulii(powiu(nf_get_disc(nf), rnf_get_degree(rnf)),
                     idealnorm(nf, rnf_get_disc(rnf)));
   nf_set_multable(NF, M, NULL);
-  /* possibly wrong, but correct prime divisors [for idealprimedec] */
-  gel(NF,4) = Q_denom(nf_get_zk(NF));
+  gel(NF,4) = get_nfindex(nf_get_zk(NF));
   return NF;
 }
 
