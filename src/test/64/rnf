@@ -67,6 +67,8 @@ Mod(2, x^2 + Mod(-y, y^3 - 21))
 2
 2
 2
+4
+4
 2:
 [1/2, 0]~
 Mod(1/2, x^2 + Mod(-y, y^3 - 21))
@@ -74,6 +76,8 @@ Mod(1/2, x^2 + Mod(-y, y^3 - 21))
 1/2
 1/2
 1/2
+1
+1/4
 3:
 [Mod(y^2 + y, y^3 - 21), Mod(1, y^3 - 21)]~
 Mod(x + Mod(y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
@@ -81,13 +85,17 @@ error("incorrect type in rnfeltabstorel (t_POL).")
 Mod(x^2 + x, x^6 - 21)
 error("inconsistent variables in nf_to_scalar_or_basis, x != y.")
 error("incorrect type in rnfeltabstorel (t_POL).")
+error("incorrect type in rnfeltabstorel (t_POL).")
+error("incorrect type in rnfeltabstorel (t_POL).")
 4:
 [Mod(y, y^3 - 21), 0]~
 Mod(Mod(y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
-error("inconsistent moduli in rnfeltabstorel: y^3 - 21 != x^6 - 21")
+Mod(Mod(y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
 Mod(x^2, x^6 - 21)
 Mod(x^2, x^6 - 21)
 Mod(y, y^3 - 21)
+Mod(2*y, y^3 - 21)
+Mod(y^2, y^3 - 21)
 5:
 error("inconsistent moduli in rnfalgtobasis: x^6 - 21 != y^3 - 21")
 error("inconsistent moduli in rnfbasistoalg: x^6 - 21 != y^3 - 21")
@@ -95,26 +103,34 @@ Mod(x, x^2 + Mod(-y, y^3 - 21))
 Mod(x, x^6 - 21)
 Mod(x, x^6 - 21)
 error("domain error in rnfeltdown: element not in the base field")
+0
+Mod(-y, y^3 - 21)
 6:
 [Mod(y^2 + 1/2*y, y^3 - 21), Mod(1, y^3 - 21)]~
 Mod(x + Mod(1/2*y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
-error("inconsistent moduli in rnfeltabstorel: x^2 - y != x^6 - 21")
+Mod(x + Mod(1/2*y, y^3 - 21), x^2 - y)
 Mod(1/2*x^2 + x, x^6 - 21)
 error("inconsistent moduli in nf_to_scalar_or_basis: x^2 - y != y^3 - 21")
 error("domain error in rnfeltdown: element not in the base field")
+Mod(y, y^3 - 21)
+Mod(1/4*y^2 - y, y^3 - 21)
 7:
 [Mod(y, y^3 - 21), 0]~
 Mod(Mod(y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
-error("inconsistent variables in rnfeltabstorel, y != x.")
+Mod(Mod(y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
 Mod(x^2, x^6 - 21)
 Mod(x^2, x^6 - 21)
 Mod(y, y^3 - 21)
+Mod(2*y, y^3 - 21)
+Mod(y^2, y^3 - 21)
 8:
 error("incorrect priority in rnfalgtobasis: variable z >= y")
 error("inconsistent variables in rnfbasistoalg, z != x.")
 error("inconsistent variables in rnfeltabstorel, z != x.")
 error("inconsistent variables in eltreltoabs, z != y.")
 error("inconsistent variables in nf_to_scalar_or_basis, z != y.")
+error("inconsistent variables in rnfeltabstorel, z != x.")
+error("inconsistent variables in rnfeltabstorel, z != x.")
 error("inconsistent variables in rnfeltabstorel, z != x.")
 9:
 error("inconsistent moduli in rnfalgtobasis: y^2 + 1 != y^3 - 21")
@@ -123,6 +139,8 @@ error("inconsistent moduli in rnfeltabstorel: y^2 + 1 != x^6 - 21")
 error("inconsistent moduli in rnfeltreltoabs: y^2 + 1 != y^3 - 21")
 error("inconsistent moduli in nf_to_scalar_or_basis: y^2 + 1 != y^3 - 21")
 error("inconsistent moduli in rnfeltdown: y^2 + 1 != y^3 - 21")
+error("inconsistent moduli in rnfeltabstorel: y^2 + 1 != x^6 - 21")
+error("inconsistent moduli in rnfeltabstorel: y^2 + 1 != x^6 - 21")
 10:
 error("inconsistent dimensions in rnfalgtobasis.")
 error("inconsistent operation 'RgV_RgC_mul' t_VEC (2 elts) , t_COL (1 elts).
@@ -131,12 +149,16 @@ error("incorrect type in rnfeltabstorel (t_COL).")
 error("incorrect type in rnfeltreltoabs (t_COL).")
 error("incorrect type in nf_to_scalar_or_basis (t_COL).")
 error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
 11:
 [1, 2]~
 Mod(2*x + Mod(-2*y^2 + 1, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
 error("incorrect type in rnfeltabstorel (t_COL).")
 error("incorrect type in rnfeltreltoabs (t_COL).")
 error("incorrect type in nf_to_scalar_or_basis (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
 error("incorrect type in rnfeltabstorel (t_COL).")
 12:
 [1, Mod(y, y^3 - 21)]~
@@ -145,6 +167,8 @@ error("incorrect type in rnfeltabstorel (t_COL).")
 error("incorrect type in rnfeltreltoabs (t_COL).")
 error("incorrect type in nf_to_scalar_or_basis (t_COL).")
 error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
 13:
 error("incorrect type in rnfalgtobasis (t_COMPLEX).")
 error("incorrect type in nf_to_scalar_or_alg (t_COMPLEX).")
@@ -152,13 +176,17 @@ error("incorrect type in rnfeltabstorel (t_COL).")
 error("incorrect type in rnfeltreltoabs (t_COL).")
 error("incorrect type in nf_to_scalar_or_basis (t_COL).")
 error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
 14:
 error("incorrect type in rnfalgtobasis (t_POL).")
 error("incorrect type in rnfbasistoalg (t_POL).")
-error("inconsistent variables in rnfeltabstorel, y != x.")
+error("incorrect type in rnfeltabstorel (t_POL).")
 error("incorrect type in rnfeltup (t_COL).")
 error("incorrect type in rnfeltup (t_COL).")
 error("incorrect type in rnfeltdown (t_POL).")
+error("incorrect type in rnfeltabstorel (t_POL).")
+error("incorrect type in rnfeltabstorel (t_POL).")
 15:
 [y, 0]~
 Mod(Mod(y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
@@ -166,4 +194,6 @@ Mod(Mod(y, y^3 - 21), x^2 + Mod(-y, y^3 - 21))
 Mod(x^2, x^6 - 21)
 error("inconsistent variables in nf_to_scalar_or_basis, x != y.")
 Mod(y, y^3 - 21)
-Total time spent: 312
+Mod(2*y, y^3 - 21)
+Mod(y^2, y^3 - 21)
+Total time spent: 300

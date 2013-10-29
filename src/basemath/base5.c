@@ -76,10 +76,10 @@ rnfeltreltoabs(GEN rnf,GEN x)
 GEN
 eltabstorel(GEN rnfeq, GEN P)
 {
-  GEN T, k, relpol = gel(rnfeq,5);
-  if (is_scalar_t(typ(P))) return mkpolmod(P, relpol);
+  GEN k, T = gel(rnfeq,4), relpol = gel(rnfeq,5);
+  if (is_scalar_t(typ(P)))
+    return mkpolmod(P, QXQX_to_mod_shallow(relpol,T));
   k = gel(rnfeq,3);
-  T = gel(rnfeq,4);
   P = lift_intern(P);
   if (signe(k)) P = RgXQX_translate(P, deg1pol_shallow(k, gen_0, varn(T)), T);
   P = RgXQX_rem(P, relpol, T);
@@ -90,13 +90,21 @@ rnfeltabstorel(GEN rnf,GEN x)
 {
   const char *f = "rnfeltabstorel";
   pari_sp av = avma;
-  GEN pol;
+  GEN pol, T, P;
   checkrnf(rnf);
+  T = rnf_get_nfpol(rnf);
+  P = rnf_get_pol(rnf);
   switch(typ(x))
   {
     case t_INT: return icopy(x);
     case t_FRAC: return gcopy(x);
     case t_POLMOD:
+      if (RgX_equal_var(P, gel(x,1)))
+      {
+        x = polmod_nffix(f, rnf, x, 0);
+        return gerepilecopy(av, mkpolmod(x,P));
+      }
+      if (RgX_equal_var(T, gel(x,1))) { x = Rg_nffix(f, T, x, 0); goto END; }
       pol = rnf_get_polabs(rnf);
       if (!RgX_equal_var(pol, gel(x,1))) pari_err_MODULUS(f, gel(x,1),pol);
       x = gel(x,2);
@@ -115,13 +123,18 @@ rnfeltabstorel(GEN rnf,GEN x)
       pari_err_TYPE(f,x);
       return NULL;
   }
-  if (varn(x) != varn(pol)) pari_err_VAR(f, x,pol);
   if (!RgX_is_QX(x)) pari_err_TYPE(f,x);
+  if (varn(x) != varn(pol))
+  {
+    if (varn(x) == varn(T)) { x = Rg_nffix(f,T,x,0); goto END; }
+    pari_err_VAR(f, x,pol);
+  }
   switch(lg(x))
   {
     case 2: avma = av; return gen_0;
     case 3: return gerepilecopy(av, gel(x,2));
   }
+END:
   return gerepilecopy(av, eltabstorel(rnf_get_map(rnf), x));
 }
 

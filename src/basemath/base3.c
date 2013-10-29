@@ -155,6 +155,17 @@ nftrace(GEN nf, GEN x)
                        : gmulgs(x, nf_get_degree(nf));
   return gerepileupto(av, x);
 }
+GEN
+rnfelttrace(GEN rnf, GEN x)
+{
+  pari_sp av = avma;
+  checkrnf(rnf);
+  x = rnfeltabstorel(rnf, x);
+  x = (typ(x) == t_POLMOD)? rnfeltdown(rnf, gtrace(x))
+                          : gmulgs(x, rnf_get_degree(rnf));
+  return gerepileupto(av, x);
+}
+
 /* assume nf is a genuine nf, fa a famat */
 static GEN
 famat_norm(GEN nf, GEN fa)
@@ -175,6 +186,17 @@ nfnorm(GEN nf, GEN x)
   x = nf_to_scalar_or_alg(nf, x);
   x = (typ(x) == t_POL)? RgXQ_norm(x, nf_get_pol(nf))
                        : gpowgs(x, nf_get_degree(nf));
+  return gerepileupto(av, x);
+}
+
+GEN
+rnfeltnorm(GEN rnf, GEN x)
+{
+  pari_sp av = avma;
+  checkrnf(rnf);
+  x = rnfeltabstorel(rnf, x);
+  x = (typ(x) == t_POLMOD)? rnfeltdown(rnf, gnorm(x))
+                          : gpowgs(x, rnf_get_degree(rnf));
   return gerepileupto(av, x);
 }
 

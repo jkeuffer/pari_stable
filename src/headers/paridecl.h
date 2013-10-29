@@ -1410,6 +1410,8 @@ long    nfval(GEN nf, GEN x, GEN vp);
 GEN     polmod_nffix(const char *f, GEN rnf, GEN x,int lift);
 GEN     rnfalgtobasis(GEN rnf, GEN x);
 GEN     rnfbasistoalg(GEN rnf, GEN x);
+GEN     rnfeltnorm(GEN rnf, GEN x);
+GEN     rnfelttrace(GEN rnf, GEN x);
 GEN     set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 GEN     vec01_to_indices(GEN arch);
 GEN     vecmodii(GEN a, GEN b);
