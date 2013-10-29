@@ -652,6 +652,8 @@ RgX_isscalar(GEN x)
     if (!gequal0(gel(x, i))) return 0;
   return 1;
 }
+INLINE long
+RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
 
 INLINE int
 RgX_is_rational(GEN x)
@@ -692,6 +694,14 @@ RgV_is_ZV(GEN x)
   long i;
   for (i = lg(x)-1; i > 0; i--)
     if (typ(gel(x,i)) != t_INT) return 0;
+  return 1;
+}
+INLINE int
+RgV_is_QV(GEN x)
+{
+  long i;
+  for (i = lg(x)-1; i > 0; i--)
+    if (!is_rational_t(typ(gel(x,i)))) return 0;
   return 1;
 }
 
@@ -2428,7 +2438,31 @@ gal_get_orders(GEN gal) { return gel(gal,8); }
 
 /* assume rnf a genuine rnf */
 INLINE long
-rnf_get_degree(GEN rnf) { return degpol(gel(rnf,1)); }
+rnf_get_degree(GEN rnf) { return degpol(rnf_get_pol(rnf)); }
+INLINE long
+rnf_get_nfdegree(GEN rnf) { return degpol(nf_get_pol(rnf_get_nf(rnf))); }
+INLINE long
+rnf_get_absdegree(GEN rnf) { return degpol(gmael(rnf,11,1)); }
+INLINE GEN
+rnf_get_nf(GEN rnf) { return gel(rnf,10); }
+INLINE void
+rnf_get_nfzk(GEN rnf, GEN *b, GEN *cb) {*b=gmael(rnf,2,1); *cb=gmael(rnf,2,2);}
+INLINE GEN
+rnf_get_polabs(GEN rnf) { return gmael(rnf,11,1); }
+INLINE GEN
+rnf_get_pol(GEN rnf) { return gel(rnf,1); }
+INLINE long
+rnf_get_varn(GEN rnf) { return varn(gel(rnf,1)); }
+INLINE GEN
+rnf_get_nfpol(GEN rnf) { return gmael(rnf,10,1); }
+INLINE long
+rnf_get_nfvarn(GEN rnf) { return varn(gmael(rnf,10,1)); }
+INLINE GEN
+rnf_get_zk(GEN rnf) { return gel(rnf,7); }
+INLINE GEN
+rnf_get_map(GEN rnf) { return gel(rnf,11); }
+INLINE GEN
+rnf_get_invzk(GEN rnf) { return gel(rnf,8); }
 
 /* I integral (not necessarily HNF), G ZM, rounded Cholesky form of a weighted
  * T2 matrix. Return m in I with T2(m) small */

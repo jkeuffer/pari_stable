@@ -5326,6 +5326,9 @@ normalize the output of \kbd{nfroots}.
 coefficients are \kbd{QXQ}. Analogous to \kbd{QXQV\_to\_mod}.
 Used to normalize the output of \kbd{nffactor}.
 
+\fun{GEN}{QXQX_to_mod_shallow}{GEN z, GEN T} $v$ a polynomial with \kbd{QXQ}
+coefficients; replace them by \kbd{mkpolmod(.,T)}. Shallow function.
+
 The following functions are obsolete and should not be used: they receive a
 polynomial with arbitrary coefficients, apply \kbd{RgX\_to\_FpX}, a function
 from the modular kernel, then \kbd{*\_to\_mod}:
@@ -5867,6 +5870,9 @@ name of the caller).
 
 \fun{int}{RgV_is_ZV}{GEN x} Assuming \kbd{x} is a \typ{VEC}
 or \typ{COL} return $1$ if it is a \kbd{ZV}, and $0$ otherwise.
+
+\fun{int}{RgV_is_QV}{GEN P} return 1 is the \kbd{RgV}~$P$ has only
+\typ{INT} and \typ{FRAC} coefficients, and 0 otherwise.
 
 \fun{int}{ZV_equal0}{GEN x} returns 1 if all entries of the \kbd{ZV} $x$ are
 zero, and $0$ otherwise.

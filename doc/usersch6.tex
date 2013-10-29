@@ -257,10 +257,47 @@ to the \var{bnr}.
 
 \subsec{Extracting info from an \kbd{rnf} structure}
 
-These functions expect a true \var{rnf} argument.
+These functions expect a true \var{rnf} argument, associated to an extension
+$L/K$, $K = \Q[y]/(T)$, $L = K[x]/(P)$.
 
-\fun{long}{rnf_get_degree}{GEN rnf} returns the \emph{relative} degree of the
-extension.
+\fun{long}{rnf_get_degree}{GEN rnf} returns the \emph{relative} degree
+$[L:K]$.
+
+\fun{long}{rnf_get_absdegree}{GEN rnf} returns the absolute degree
+$[L:\Q]$.
+
+\fun{long}{rnf_get_nfdegree}{GEN rnf} returns the degree of the base
+field $[K:\Q]$.
+
+\fun{GEN}{rnf_get_nf}{GEN rnf} returns the base field $K$, an \var{nf}
+structure.
+
+\fun{GEN}{rnf_get_nfpol}{GEN rnf} returns the polynomial $T$ defining the
+base field $K$.
+
+\fun{long}{rnf_get_nfvarn}{GEN rnf} returns the variable $y$ associated to the
+base field $K$.
+
+\fun{void}{rnf_get_nfzk}{GEN rnf, GEN *b, GEN *cb} returns the integer basis
+of the base field $K$.
+
+\fun{GEN}{rnf_get_pol}{GEN rnf} returns the relative polynomial defining
+$L/K$.
+
+\fun{long}{rnf_get_varn}{GEN rnf} returns the variable $x$ associated to $L$.
+
+\fun{GEN}{rnf_get_zk}{GEN nf} returns the relative integer basis generating
+$\Z_L$ as a $\Z_K$-module, as a pseudo-matrix $(A,I)$ in HNF.
+
+\fun{GEN}{rnf_get_polabs}{GEN rnf} returns an absolute polynomial defining
+$L/\Q$.
+
+\fun{GEN}{rnf_get_invzk}{GEN rnf} contains $A^{-1}$, where $(A,I)$
+is the chosen pseudo-basis for $\Z_L$ over $\Z_K$.
+
+\fun{GEN}{rnf_get_map}{GEN rnf} returns technical data associated to the map
+$K\to L$. Currently, this contains data from \kbd{rnfequation},
+as well as the polynomials $T$ and $P$.
 
 \subsec{Extracting info from a \kbd{bid} structure}
 
@@ -1266,27 +1303,39 @@ remainder sequence associated to $A(Y)$ and $B(X-kY)$, leading to $C =
 \text{Res}_Y(A(Y), B(Y-kX))$. In particular $a := -h_0/h_1$ is a root of $A$
 in $\Q[X]/(C)$, and $X - ka$ is a root of $B$.
 
-\fun{GEN}{RgX_rnf_fix}{const char *f, GEN T, GEN B, int lift} check whether
-$B$ is a polynomials with coefficients in the number field defined by the
-absolute equation $T(y) = 0$, where $T$ is a \kbd{ZX} and returns a cleaned
-up version of $B$. The string $f$ is the calling function name, used to
-report errors.
+\fun{GEN}{Rg_nffix}{const char *f, GEN T, GEN c, int lift} given
+a \kbd{ZX} $T$ and a ``coefficient'' $c$ supposedly belonging to $\Q[y]/(T)$,
+check whether this is a the case and return a cleaned up version of $c$.
+The string $f$ is the calling function name, used to report errors.
 
-This means that $B$ is a \typ{POL} whose coefficients are
-\typ{INT}, \typ{FRAC}, \typ{POL} in the variable $y$ with rational
-coefficients, or \typ{POLMOD} modulo $T$ which lift to a rational \typ{POL}
-as above. The cleanup consists in the following improvements:
+This means that $c$ must be one of \typ{INT}, \typ{FRAC}, \typ{POL} in the
+variable $y$ with rational coefficients, or \typ{POLMOD} modulo $T$ which lift
+to a rational \typ{POL} as above. The cleanup consists in the following
+improvements:
 
 \item \typ{POL} coefficients are reduced modulo $T$.
 
-\item \typ{POL} and \typ{POLMOD} coefficients belonging to the base field are
-converted to rationals.
+\item \typ{POL} and \typ{POLMOD} belonging to $\Q$ are converted to rationals,
+\typ{INT} or \typ{FRAC}.
 
-\item if \kbd{lift} is non-zero, lift all \typ{POLMOD}, otherwise convert all
-\typ{POL} to \typ{POLMOD}s modulo $T$.
+\item if \kbd{lift} is non-zero, convert \typ{POLMOD} to \typ{POL},
+and otherwise convert \typ{POL} to \typ{POLMOD}s modulo $T$.
 
-\noindent For instance, \kbd{rnfequationall} applies \tet{RgX_rnf_fix} to its
-argument $B$ (with \kbd{lift} equal to $1$).
+\fun{GEN}{RgX_nffix}{const char *f, GEN T, GEN P, int lift} check whether
+$P$ is a polynomials with coefficients in the number field defined by the
+absolute equation $T(y) = 0$, where $T$ is a \kbd{ZX} and returns a cleaned
+up version of $P$. This checks whether $P$ is indeed a \typ{POL}
+with variable compatible with coefficients in $\Q[y]/(T)$, i.e.
+\bprog
+  varncmp(varn(P), varn(T)) < 0
+@eprog\noindent and applies \tet{Rg_nffix} to each coefficient.
+
+\fun{GEN}{RgV_nffix}{const char *f, GEN T, GEN P, int lift} as \tet{RgX_nffix}
+for a vector of coefficients.
+
+\fun{GEN}{polmod_nffix}{const char *f, GEN rnf, GEN x, int lift} given
+a \typ{POLMOD} $x$ supposedly defining an element of \var{rnf}, check this
+and perform \tet{Rg_nffix} cleanups.
 
 \fun{long}{numberofconjugates}{GEN T, long pinit} returns a quick
 multiple for the number of  $\Q$-automorphism of the (integral, monic)

@@ -2555,7 +2555,7 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
 
   if (v < 0) v = 0;
   nf = checknf(nf); T = nf_get_pol(nf); vT = varn(T);
-  Q = RgX_rnf_fix("rnfcharpoly", T,Q,0);
+  Q = RgX_nffix("rnfcharpoly", T,Q,0);
   if (tx == t_POLMOD) {
     GEN M = gel(x,1);
     long vM = varn(M);
@@ -2573,7 +2573,7 @@ rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
   vx = varn(x);
   if (vx == vT) return caract_const(av, mkpolmod(x,T), v, dQ);
   if (vx != vQ) pari_err_VAR("rnfcharpoly", x,Q);
-  x = RgX_rnf_fix("rnfcharpoly", T,x,0);
+  x = RgX_nffix("rnfcharpoly", T,x,0);
   if (degpol(x) >= dQ) x = RgX_rem(x, Q);
   if (dQ <= 1) return caract_const(av, constant_term(x), v, 1);
   return gerepilecopy(av, lift_if_rational( RgXQ_charpoly(x, Q, v) ));

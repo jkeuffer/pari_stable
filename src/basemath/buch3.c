@@ -1397,7 +1397,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
   checkbnr(bnr); bnf = bnr_get_bnf(bnr);
   nf = bnf_get_nf(bnf); cnd = gel(bnr_get_mod(bnr), 1);
-  polrel = RgX_rnf_fix("rnfnormgroup", nf_get_pol(nf),polrel,1);
+  polrel = RgX_nffix("rnfnormgroup", nf_get_pol(nf),polrel,1);
   if (!gequal1(leading_term(polrel)))
     pari_err_IMPL("rnfnormgroup for non-monic polynomials");
 

@@ -3145,7 +3145,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr, long flag)
   GEN z, dP;
 
   nf = checknf(nf);
-  P = RgX_rnf_fix("rnfdedekind", nf_get_pol(nf), P, 0);
+  P = RgX_nffix("rnfdedekind", nf_get_pol(nf), P, 0);
   dP = RgX_disc(P); P = lift_intern(P);
   if (!pr) {
     GEN fa = idealfactor(nf, dP);
@@ -3342,57 +3342,58 @@ rnfmaxord(GEN nf, GEN pol, GEN pr, long vdisc)
   return gerepilecopy(av, mkvec2(W, I));
 }
 
-static GEN
-RgX_simplify(GEN x)
+GEN
+Rg_nffix(const char *f, GEN T, GEN c, int lift)
 {
-  switch(lg(x))
+  switch(typ(c))
   {
-    case 2: return gen_0; break;
-    case 3: return gel(x,2); break;
-    default: return x;
+    case t_INT: case t_FRAC: return c;
+    case t_POL:
+      if (lg(c) >= lg(T)) c = RgX_rem(c,T);
+      break;
+    case t_POLMOD:
+      if (!RgX_equal_var(gel(c,1), T)) pari_err_MODULUS(f, gel(c,1),T);
+      c = gel(c,2);
+      switch(typ(c))
+      {
+        case t_POL: break;
+        case t_INT: case t_FRAC: return c;
+        default: pari_err_TYPE(f, c);
+      }
+      break;
+    default: pari_err_TYPE(f,c);
   }
+  /* typ(c) = t_POL */
+  if (varn(c) != varn(T)) pari_err_VAR(f, c,T);
+  switch(lg(c))
+  {
+    case 2: return gen_0;
+    case 3:
+      c = gel(c,2); if (is_rational_t(typ(c))) return c;
+      pari_err_TYPE(f,c);
+  }
+  if (!RgX_is_QX(c)) pari_err_TYPE(f, c);
+  return lift? c: mkpolmod(c, T);
 }
-
 /* check whether P is a polynomials with coeffs in number field Q[y]/(T) */
 GEN
-RgX_rnf_fix(const char *f, GEN T, GEN P, int lift)
+RgX_nffix(const char *f, GEN T, GEN P, int lift)
 {
-  long i, vT = varn(T), lP = lg(P);
-  GEN Q = cgetg(lP, t_POL);
+  long i, l, vT = varn(T);
+  GEN Q = cgetg_copy(P, &l);
   if (typ(P) != t_POL) pari_err_TYPE(stack_strcat(f," [t_POL expected]"), P);
   if (varncmp(varn(P), vT) >= 0) pari_err_PRIORITY(f, P, ">=", vT);
   Q[1] = P[1];
-  for (i=2; i<lP; i++)
-  {
-    GEN c = gel(P,i);
-    switch(typ(c))
-    {
-      case t_INT: case t_FRAC: break;
-      case t_POL:
-        if (varn(c) != vT) pari_err_VAR(f, c,T);
-        if (lg(c) >= lg(T)) c = RgX_rem(c,T);
-        if (!RgX_is_QX(c)) pari_err_TYPE(f, c);
-        c = RgX_simplify(c);
-        if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
-        break;
-      case t_POLMOD:
-        if (!RgX_equal_var(gel(c,1), T)) pari_err_MODULUS(f, gel(c,1),T);
-        c = gel(c,2);
-        switch(typ(c))
-        {
-          case t_POL:
-            if (!RgX_is_QX(c)) pari_err_TYPE(f, c);
-            c = RgX_simplify(c); break;
-          case t_INT: case t_FRAC: break;
-          default: pari_err_TYPE(f, c);
-        }
-        if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
-        break;
-      default: pari_err_TYPE(f,c);
-    }
-    gel(Q,i) = c;
-  }
-  return normalizepol_lg(Q, lP);
+  for (i=2; i<l; i++) gel(Q,i) = Rg_nffix(f, T, gel(P,i), lift);
+  return normalizepol_lg(Q, l);
+}
+GEN
+RgV_nffix(const char *f, GEN T, GEN P, int lift)
+{
+  long i, l;
+  GEN Q = cgetg_copy(P, &l);
+  for (i=1; i<l; i++) gel(Q,i) = Rg_nffix(f, T, gel(P,i), lift);
+  return Q;
 }
 
 /* determinant of the trace pairing */
@@ -3427,7 +3428,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   GEN A, nfT, fa, E, P, I, z, d, D, disc, pol = *ppol;
 
   nf = checknf(nf); nfT = nf_get_pol(nf);
-  pol = RgX_rnf_fix("rnfallbase", nfT,pol,0);
+  pol = RgX_nffix("rnfallbase", nfT,pol,0);
   if (!gequal1(leading_term(pol)))
     pari_err_IMPL("non-monic relative polynomials");
 

@@ -8,6 +8,4 @@ Doc: $\var{rnf}$ being a relative number
  field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an element of
  $L$ expressed as a polynomial or polmod with polmod coefficients, computes
  $x$ as an element of $K$ as a polmod, assuming $x$ is in $K$ (otherwise an
- error will occur). If $x$ is given on the relative integral basis, apply
- \kbd{rnfbasistoalg} first, otherwise PARI will believe you are dealing with a
- vector.
+ error will occur).

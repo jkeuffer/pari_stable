@@ -495,7 +495,6 @@ long    val_norm(GEN x, GEN p, long *vz);
 
 GEN     check_and_build_nfabs(GEN rnf);
 GEN     check_and_build_norms(GEN rnf);
-GEN     checkrnfeq(GEN x);
 
 /* buch1.c */
 

@@ -4,10 +4,7 @@ C-Name: rnfelementup
 Prototype: GG
 Help: rnfeltup(rnf,x): expresses x (belonging to the base field) on the
  relative field.
-Doc: $\var{rnf}$ being a relative number
- field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an element of
- $K$ expressed as a polynomial or polmod, computes $x$ as an element of the
- absolute extension $L/\Q$ as a polynomial modulo the absolute equation
- \kbd{\var{rnf}.pol}. If $x$ is given on the integral basis of $K$, apply
- \kbd{nfbasistoalg} first, otherwise PARI will believe you are dealing with a
- vector.
+Doc: $\var{rnf}$ being a relative number field extension $L/K$ as output by
+ \kbd{rnfinit} and $x$ being an element of $K$, computes $x$ as an element of
+ the absolute extension $L/\Q$ as a polynomial modulo the absolute equation
+ \kbd{\var{rnf}.pol}.

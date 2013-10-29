@@ -789,8 +789,7 @@ mulmat_pol(GEN A, GEN x)
   return z;
 }
 
-/* valid for t_POL, nf a genuine nf or an rnf !
- * No garbage collecting. No check.  */
+/* x a t_POL, nf a genuine nf. No garbage collecting. No check.  */
 GEN
 poltobasis(GEN nf, GEN x)
 {
@@ -840,34 +839,46 @@ algtobasis(GEN nf, GEN x)
 GEN
 rnfbasistoalg(GEN rnf,GEN x)
 {
+  const char *f = "rnfbasistoalg";
   long lx, i;
   pari_sp av = avma;
-  GEN z, nf, T;
+  GEN z, nf, relpol, T;
 
   checkrnf(rnf);
-  nf = gel(rnf,10);
-  T = nf_get_pol(rnf);
+  nf = rnf_get_nf(rnf);
+  T = nf_get_pol(nf);
+  relpol = QXQX_to_mod_shallow(rnf_get_pol(rnf), T);
   switch(typ(x))
   {
     case t_COL:
       z = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(z,i) = nf_to_scalar_or_alg(nf, gel(x,i));
-      z = RgV_RgC_mul(gel(nf_get_zk(rnf),1), z);
-      return gerepileupto(av, gmodulo(z,T));
+      for (i=1; i<lx; i++)
+      {
+        GEN c = nf_to_scalar_or_alg(nf, gel(x,i));
+        if (typ(c) == t_POL) c = mkpolmod(c,T);
+        gel(z,i) = c;
+      }
+      z = RgV_RgC_mul(gel(rnf_get_zk(rnf),1), z);
+      return gerepileupto(av, gmodulo(z,relpol));
 
     case t_POLMOD:
-      if (!RgX_equal_var(T,gel(x,1)))
-      {
-        if (RgX_equal_var(nf_get_pol(nf), gel(x,1))) break;
-        pari_err_MODULUS("rnfbasistoalg", T,gel(x,1));
-      }
-      return gcopy(x);
+      x = polmod_nffix(f, rnf, x, 0);
+      if (typ(x) != t_POL) break;
+      retmkpolmod(RgX_copy(x), RgX_copy(relpol));
     case t_POL:
-      if (varn(x) == nf_get_varn(nf)) break;
-      if (varn(x) == varn(T)) return gmodulo(x, T);
-      pari_err_VAR( "poltobasis", x,T);
+      if (varn(x) == varn(T))
+      {
+        if (!RgX_is_QX(x)) pari_err_TYPE(f,x);
+        x = gmodulo(x,T); break;
+      }
+      if (varn(x) == varn(relpol))
+      {
+        x = RgX_nffix(f,nf_get_pol(nf),x,0);
+        return gmodulo(x, relpol);
+      }
+      pari_err_VAR(f, x,relpol);
   }
-  retmkpolmod(scalarpol(x, varn(T)), RgX_copy(T));
+  retmkpolmod(scalarpol(x, varn(relpol)), RgX_copy(relpol));
 }
 
 GEN
@@ -944,34 +955,60 @@ RgC_to_nfC(GEN nf,GEN x)
   return z;
 }
 
+/* x a t_POLMOD, supposedly in rnf = K[z]/(T), K = Q[y]/(Tnf) */
+GEN
+polmod_nffix(const char *f, GEN rnf, GEN x, int lift)
+{
+  GEN relpol = rnf_get_pol(rnf), T = rnf_get_nfpol(rnf);
+  if (RgX_equal_var(gel(x,1),relpol))
+  {
+    x = gel(x,2);
+    if (typ(x) == t_POL && varn(x) == varn(relpol))
+    {
+      x = RgX_nffix(f, T, x, lift);
+      switch(lg(x))
+      {
+        case 2: return gen_0;
+        case 3: return gel(x,2);
+      }
+      return x;
+    }
+  }
+  return Rg_nffix(f, T, x, lift);
+}
+
 GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {
-  GEN nf;
+  const char *f = "rnfalgtobasis";
+  pari_sp av = avma;
+  GEN T, relpol;
 
   checkrnf(rnf);
-  nf = gel(rnf,10);
+  relpol = rnf_get_pol(rnf);
+  T = rnf_get_nfpol(rnf);
   switch(typ(x))
   {
     case t_COL:
-      if (lg(x)-1 != rnf_get_degree(rnf)) pari_err_DIM("rnfalgtobasis");
-      return gcopy(x);
+      if (lg(x)-1 != rnf_get_degree(rnf)) pari_err_DIM(f);
+      x = RgV_nffix(f, T, x, 0);
+      return gerepilecopy(av, x);
 
     case t_POLMOD:
-      if (!RgX_equal_var(nf_get_pol(rnf),gel(x,1)))
+      x = polmod_nffix(f, rnf, x, 0);
+      if (typ(x) != t_POL) break;
+      return gerepileupto(av, mulmat_pol(rnf_get_invzk(rnf), x));
+    case t_POL:
+      if (varn(x) == varn(T))
       {
-        if (RgX_equal_var(nf_get_pol(nf), gel(x,1))) break;
-        pari_err_MODULUS("rnfalgtobasis", nf_get_pol(rnf),gel(x,1));
+        if (!RgX_is_QX(x)) pari_err_TYPE(f,x);
+        x = mkpolmod(x,T); break;
       }
-      x = gel(x,2); if (typ(x) != t_POL) break;
-      /* fall through */
-    case t_POL: {
-      pari_sp av = avma;
-      if (varn(x) == nf_get_varn(nf)) break;
-      return gerepileupto(av, poltobasis(rnf, x));
-    }
+      x = RgX_nffix(f, T, x, 0);
+      if (degpol(x) >= degpol(relpol)) x = RgX_rem(x,relpol);
+      return gerepileupto(av, mulmat_pol(rnf_get_invzk(rnf), x));
   }
-  return scalarcol(x, rnf_get_degree(rnf));
+  return gerepileupto(av, scalarcol(x, rnf_get_degree(rnf)));
 }
 
 /* Given a and b in nf, gives an algebraic integer y in nf such that a-b.y

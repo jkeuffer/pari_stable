@@ -159,7 +159,7 @@ member_pol(GEN x) /* polynomial */
       case typ_POL: return x;
       case typ_Q  : return gel(x,1);
       case typ_GAL: return gal_get_pol(x);
-      case typ_RNF: return gmael(x,11,1);
+      case typ_RNF: return rnf_get_polabs(x);
     }
     if (typ(x)==t_POLMOD) return gel(x,2);
     if (typ(x)==t_FFELT) return FF_to_FpXQ(x);

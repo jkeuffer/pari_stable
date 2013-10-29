@@ -20,6 +20,9 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    14- sumdedekind(h < 0, k < 0) wrong result; if gcd(h,k) > 0 as well
    15- galoisexport(G, 1) -> SEGV
    16- ??default(log) no longer worked
+   17- rnfalgtobasis, rnfbasistoalg, rnfeltup, rnfeltdown, rnfeltabstorel,
+       rnfeltreltoabs were not treating their inputs consistently, and
+       accepted (or crashed on) too many incorrect inputs.
 
   Changed
     1- default help text for a user function is now as in \u:
@@ -37,6 +40,10 @@ EP  1- Configure option for gcov/lcov support
     3- libpari functions gprimepi_upper_bound, gprimepi_lower_bound,
        primepi_lower_bound, primes_interval, primes_interval_zv,
        primes_upto_zv, primes0
+    4- libpari functions rnf_get_absdegree, rnf_get_invzk, rnf_get_map,
+       rnf_get_nf, rnf_get_nfdegree, rnf_get_nfpol, rnf_get_nfvarn, rnf_get_pol,
+       rnf_get_polabs, rnf_get_zk, rnf_get_nfzk, rnf_get_varn, RgV_is_QV,
+       RgX_equal_var
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

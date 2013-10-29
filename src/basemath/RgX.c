@@ -122,9 +122,6 @@ RgX_equal(GEN x, GEN y)
     if (!gequal(gel(x,i),gel(y,i))) return 0;
   return 1;
 }
-long
-RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
-
 
 /* Returns 1 in the base ring over which x is defined */
 /* HACK: this also works for t_SER */
@@ -435,9 +432,10 @@ RgXQX_translate(GEN P, GEN c, GEN T)
 /**                       (not memory clean)                       **/
 /**                                                                **/
 /********************************************************************/
-/* to INT / FRAC / (POLMOD mod T), not memory clean because T not copied */
+/* to INT / FRAC / (POLMOD mod T), not memory clean because T not copied,
+ * but everything else is */
 static GEN
-RgXQ_to_mod(GEN x, GEN T)
+QXQ_to_mod_copy(GEN x, GEN T)
 {
   long d;
   switch(typ(x))
@@ -451,32 +449,57 @@ RgXQ_to_mod(GEN x, GEN T)
       return mkpolmod(RgX_copy(x), T);
   }
 }
-/* T a ZX, z lifted from (Q[Y]/(T(Y)))[X], apply RgXQ_to_mod to all coeffs.
- * Not memory clean because T not copied */
+/* pure shallow version */
 static GEN
-RgXQX_to_mod(GEN z, GEN T)
+QXQ_to_mod(GEN x, GEN T)
+{
+  long d;
+  switch(typ(x))
+  {
+    case t_INT:
+    case t_FRAC: return x;
+    default:
+      d = degpol(x);
+      if (d < 0) return gen_0;
+      if (d == 0) return gel(x,2);
+      return mkpolmod(x, T);
+  }
+}
+/* T a ZX, z lifted from (Q[Y]/(T(Y)))[X], apply QXQ_to_mod_copy to all coeffs.
+ * Not memory clean because T not copied, but everything else is */
+static GEN
+QXQX_to_mod(GEN z, GEN T)
 {
   long i,l = lg(z);
   GEN x = cgetg(l,t_POL);
-  for (i=2; i<l; i++) gel(x,i) = RgXQ_to_mod(gel(z,i), T);
+  for (i=2; i<l; i++) gel(x,i) = QXQ_to_mod_copy(gel(z,i), T);
   x[1] = z[1]; return normalizepol_lg(x,l);
 }
-/* Apply RgXQX_to_mod to all entries. Memory-clean ! */
+/* pure shallow version */
+GEN
+QXQX_to_mod_shallow(GEN z, GEN T)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) gel(x,i) = QXQ_to_mod(gel(z,i), T);
+  x[1] = z[1]; return normalizepol_lg(x,l);
+}
+/* Apply QXQX_to_mod to all entries. Memory-clean ! */
 GEN
 QXQXV_to_mod(GEN V, GEN T)
 {
   long i, l = lg(V);
   GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
-  for (i=1;i<l; i++) gel(z,i) = RgXQX_to_mod(gel(V,i), T);
+  for (i=1;i<l; i++) gel(z,i) = QXQX_to_mod(gel(V,i), T);
   return z;
 }
-/* Apply RgXQ_to_mod to all entries. Memory-clean ! */
+/* Apply QXQ_to_mod_copy to all entries. Memory-clean ! */
 GEN
 QXQV_to_mod(GEN V, GEN T)
 {
   long i, l = lg(V);
   GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
-  for (i=1;i<l; i++) gel(z,i) = RgXQ_to_mod(gel(V,i), T);
+  for (i=1;i<l; i++) gel(z,i) = QXQ_to_mod_copy(gel(V,i), T);
   return z;
 }
 

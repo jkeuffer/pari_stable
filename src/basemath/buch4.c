@@ -682,15 +682,17 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
     Zfa_pr_append(nf,rel,N,prod,S1,S2);
 }
 
+/* apply lift(rnfeltup) to all coeffs, without rnf structure */
 static GEN
-pol_up(GEN rnfeq, GEN x, long v)
+nfX_eltup(GEN nf, GEN rnfeq, GEN x)
 {
-  long i, l = lg(x);
-  GEN y = cgetg(l, t_POL); y[1] = x[1];
+  long i, l = lg(x), v = nf_get_varn(nf);
+  GEN a = gel(rnfeq,2), pol = gel(rnfeq,1), y = cgetg(l, t_POL);
+  y[1] = x[1];
   for (i=2; i<l; i++)
   {
-    GEN t = eltreltoabs(rnfeq, gel(x,i));
-    if (typ(t) == t_POL) setvarn(t, v);
+    GEN t = nf_to_scalar_or_alg(nf, gel(x,i));
+    if (typ(t) == t_POL) { t = RgX_RgXQ_eval(t, a, pol); setvarn(t, v); }
     gel(y,i) = t;
   }
   return y;
@@ -700,12 +702,12 @@ GEN
 rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   pari_sp av = avma;
-  long i, l, drel, vbas;
+  long i, l, drel;
   GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
   if (galois < 0 || galois > 2) pari_err_FLAG("rnfisnorminit");
-  T = get_bnfpol(T, &bnf, &nf); vbas = varn(T);
+  T = get_bnfpol(T, &bnf, &nf);
   if (!bnf) bnf = Buchall(nf? nf: T, nf_FORCE, DEFAULTPREC);
   if (!nf) nf = bnf_get_nf(bnf);
 
@@ -714,7 +716,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   drel = degpol(relpol);
   if (drel <= 2) galois = 1;
 
-  relpol = RgX_rnf_fix("rnfisnorminit", T, relpol, 1);
+  relpol = RgX_nffix("rnfisnorminit", T, relpol, 1);
   rnfeq = NULL; /* no reltoabs needed */
   if (nf_get_degree(nf) == 1) { /* over Q */
     polabs = relpol;
@@ -724,6 +726,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     polabs = gel(rnfeq,1);
     gel(rnfeq,2) = lift_intern(gel(rnfeq,2));
     k = gel(rnfeq,3);
+    rnfeq = shallowconcat(rnfeq, mkvec2(T,relpol));
   } else {
     long sk;
     polabs = rnfequationall(bnf, relpol, &sk, NULL);
@@ -735,8 +738,8 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 
   if (galois == 2)
   {
-    GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
-    galois = nfissplit(gsubst(nfabs, nf_get_varn(nfabs), pol_x(vbas)), P);
+    GEN P = rnfeq? nfX_eltup(nf, rnfeq, relpol): relpol;
+    galois = nfissplit(gsubst(nfabs, nf_get_varn(nfabs), pol_x(varn(T))), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
@@ -757,7 +760,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   gel(y,1) = bnf;
   gel(y,2) = bnfabs;
   gel(y,3) = relpol;
-  gel(y,4) = get_theta_abstorel(T, relpol, k);
+  gel(y,4) = mkvec5(gen_0,gen_0,k,T,relpol);
   gel(y,5) = prod;
   gel(y,6) = S1;
   gel(y,7) = S2;
@@ -775,7 +778,7 @@ GEN
 rnfisnorm(GEN T, GEN x, long flag)
 {
   pari_sp av = avma;
-  GEN bnf, rel, relpol, theta, nfpol;
+  GEN bnf, rel, relpol, rnfeq, nfpol;
   GEN nf, aux, H, U, Y, M, A, bnfS, sunitrel, futu, prod, S1, S2;
   long L, i, drel, itu;
 
@@ -784,7 +787,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   bnf = gel(T,1);
   rel = gel(T,2);
   relpol = gel(T,3);
-  theta = gel(T,4);
+  rnfeq = gel(T,4);
   drel = degpol(relpol);
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
@@ -825,8 +828,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   M = cgetg(L+1,t_MAT);
   for (i=1; i<L; i++)
   {
-    GEN u = poleval(gel(sunitrel,i), theta); /* abstorel */
-    if (typ(u) != t_POLMOD) u = mkpolmod(u, gel(theta,1));
+    GEN u = eltabstorel(rnfeq, gel(sunitrel,i));
     gel(sunitrel,i) = u;
     u = bnfissunit(bnf,bnfS, gnorm(u));
     if (lg(u) == 1) pari_err_BUG("rnfisnorm");
