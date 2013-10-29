@@ -92,8 +92,8 @@ Mod(y, y^3 - 21)
 error("inconsistent moduli in rnfalgtobasis: x^6 - 21 != y^3 - 21")
 error("inconsistent moduli in rnfbasistoalg: x^6 - 21 != y^3 - 21")
 Mod(x, x^2 + Mod(-y, y^3 - 21))
-error("inconsistent moduli in rnfeltreltoabs: x^6 - 21 != y^3 - 21")
-error("inconsistent moduli in nf_to_scalar_or_basis: x^6 - 21 != y^3 - 21")
+Mod(x, x^6 - 21)
+Mod(x, x^6 - 21)
 error("domain error in rnfeltdown: element not in the base field")
 6:
 [Mod(y^2 + 1/2*y, y^3 - 21), Mod(1, y^3 - 21)]~
