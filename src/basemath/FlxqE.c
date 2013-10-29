@@ -1002,11 +1002,11 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   if (DEBUGLEVEL) timer_printf(&ti,"Lift isogeny");
   c2 = getc2(act, S1, T2, q, p, N);
   if (DEBUGLEVEL) timer_printf(&ti,"c^2");
-  if (p>3)
+  if (p>3 && !ispcyc)
   {
     GEN c2p = Flx_to_ZX(Flxq_inv(ZX_to_Flx(c2,p),T,p));
     GEN tc2 = Teichmuller_lift(c2p,Xm, T2,sqx,T,p,N);
-    if (DEBUGLEVEL) timer_printf(&ti,"teichmuller");
+    if (DEBUGLEVEL) timer_printf(&ti,"Teichmuller/Fq");
     c2 = FpX_rem(FpX_mul(tc2,c2,q),T2,q);
   }
   c2 = gerepileupto(av2, c2);
@@ -1014,6 +1014,13 @@ Flxq_ellcard_Harley(GEN a4, GEN a6, GEN T, ulong p)
   Nc2 = (ispcyc? ZpXQ_sqrtnorm_pcyc: ZpXQ_sqrtnorm)(c2, T2, q, utoi(p), N);
   if (DEBUGLEVEL) timer_printf(&ti,"Norm");
   Np = get_norm(a4,a6,T,p,N);
+  if (p>3 && ispcyc)
+  {
+    GEN Ncpi =  utoi(Fl_inv(umodiu(Nc2,p), p));
+    GEN tNc2 = Zp_sqrtnlift(gen_1, subss(p,1), Ncpi, utoi(p),N);
+    if (DEBUGLEVEL) timer_printf(&ti,"Teichmuller/Fp");
+    Nc2 = Fp_mul(Nc2,tNc2,q);
+  }
   t = Fp_center(Fp_mul(Nc2,Np,q),q,shifti(q,-1));
   return gerepileupto(av, subii(addis(powuu(p,n),1),t));
 }
