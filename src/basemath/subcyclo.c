@@ -350,7 +350,6 @@ polsubcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
   long i,k;
   pari_timer ti;
   if (DEBUGLEVEL >= 6) timer_start(&ti);
-  if (DEBUGLEVEL >= 6) timer_printf(&ti, "polsubcyclo_cyclic");
   for (i=1; i<=d; i++, base = Fl_mul(base,z,n))
   {
     pari_sp av = avma;
@@ -418,8 +417,6 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   pari_sp av;
   GEN le, z, gl;
   long i, l, e, val;
-  pari_timer ti;
-  if (DEBUGLEVEL >= 1) timer_start(&ti);
   l = n+1; e = 1;
   while(!uisprime(l)) { l += n; e++; }
   if (DEBUGLEVEL >= 4) err_printf("Subcyclo: prime l=%ld\n",l);
@@ -429,14 +426,13 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
     i = d-(1+d)/(1+o);
     borne = mulii(binomial(utoipos(d),i),powuu(o,i));
   }
-  if (DEBUGLEVEL >= 4) err_printf("Subcyclo: borne=%Ps\n",borne);
+  if (DEBUGLEVEL >= 4) err_printf("Subcyclo: bound=2^%ld\n",expi(borne));
   val = logint(shifti(borne,2), gl, NULL);
   avma = av;
   if (DEBUGLEVEL >= 4) err_printf("Subcyclo: val=%ld\n",val);
   le = powiu(gl,val);
   z = utoipos( Fl_powu(pgener_Fl(l), e, l) );
   z = Zp_sqrtnlift(gen_1,utoipos(n),z,gl,val);
-  if (DEBUGLEVEL >= 1) timer_printf(&ti, "Zp_sqrtnlift");
   *ptr_val = val;
   *ptr_l = l;
   return gmodulo(z,le);
