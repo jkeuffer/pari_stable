@@ -195,7 +195,7 @@ makenfabs(GEN rnf)
 
   gel(NF,1) = pol;
   gel(NF,3) = mulii(powiu(nf_get_disc(nf), rnf_get_degree(rnf)),
-                    idealnorm(nf, gel(rnf,3)));
+                    idealnorm(nf, rnf_get_disc(rnf)));
   nf_set_multable(NF, M, NULL);
   /* possibly wrong, but correct prime divisors [for idealprimedec] */
   gel(NF,4) = Q_denom(nf_get_zk(NF));
@@ -205,7 +205,7 @@ makenfabs(GEN rnf)
 static GEN
 makenorms(GEN rnf)
 {
-  GEN f = gel(rnf,4);
+  GEN f = rnf_get_index(rnf);
   return typ(f) == t_INT? gen_1: RgM_det_triangular(f);
 }
 
@@ -404,7 +404,7 @@ rnfidealnormrel(GEN rnf, GEN id)
   if (rnf_get_degree(rnf) == 1) return matid(nf_get_degree(nf));
 
   z = prodid(nf, gel(rnfidealhermite(rnf,id),2));
-  return gerepileupto(av, idealmul(nf,z, gel(rnf,4)));
+  return gerepileupto(av, idealmul(nf,z, rnf_get_index(rnf)));
 }
 
 GEN
