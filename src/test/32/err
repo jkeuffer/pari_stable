@@ -522,7 +522,7 @@
   *** idealtwoelt: domain error in idealtwoelt2: element mod ideal != 0
   ***   at top-level: rnf=rnfinit(K,x^2-y);rnfeltdown(rnf,x)
   ***                                      ^-----------------
-  *** rnfeltdown: domain error in rnfelementdown: element not in the base field
+  *** rnfeltdown: domain error in rnfeltdown: element not in the base field
   ***   at top-level: matid(-1)
   ***                 ^---------
   *** matid: domain error in matid: size < 0
@@ -584,4 +584,4 @@
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
   ***   user warning: 1
-Total time spent: 20
+Total time spent: 24
