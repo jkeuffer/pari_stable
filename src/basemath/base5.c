@@ -340,7 +340,7 @@ rnfV_to_nfM(GEN rnf, GEN x)
 }
 
 static GEN
-rnfprincipaltohermite(GEN rnf,GEN x)
+rnfprincipaltohnf(GEN rnf,GEN x)
 {
   pari_sp av = avma;
   GEN bas = rnf_get_zk(rnf), nf = rnf_get_nf(rnf);
@@ -367,7 +367,7 @@ rnfidealhermite(GEN rnf, GEN x)
       return rnfidealabstorel(rnf, x);
 
     case t_POLMOD: case t_POL: case t_COL:
-      return rnfprincipaltohermite(rnf,x);
+      return rnfprincipaltohnf(rnf,x);
   }
   pari_err_TYPE("rnfidealhermite",x);
   return NULL; /* not reached */

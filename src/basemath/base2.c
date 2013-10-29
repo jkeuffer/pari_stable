@@ -3446,8 +3446,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
   if (!z) z = triv_order(n);
   A = gel(z,1); d = get_d(nf, pol, A);
   I = gel(z,2);
-
-  i=1; while (i<=n && ideal_is1(gel(I,i))) { gel(I,i) = gen_1; i++; }
+  i=1; while (i<=n && equali1(gel(I,i))) i++;
   if (i > n) { D = gen_1; if (pf) *pf = gen_1; }
   else
   {
