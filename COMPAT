@@ -103,6 +103,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     (used to return a t_COL / t_MAT of length 1)
   - the forvec_start() function has been replaced by a standard
     iterator: forvec_init() / forvec_next()
+  - renamed rnfelementxxx -> rnfeltxxx, rnfidealhermite -> rnfidealhnf
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

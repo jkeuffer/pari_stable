@@ -350,7 +350,7 @@ rnfprincipaltohnf(GEN rnf,GEN x)
 }
 
 GEN
-rnfidealhermite(GEN rnf, GEN x)
+rnfidealhnf(GEN rnf, GEN x)
 {
   GEN z, nf, bas;
 
@@ -369,7 +369,7 @@ rnfidealhermite(GEN rnf, GEN x)
     case t_POLMOD: case t_POL: case t_COL:
       return rnfprincipaltohnf(rnf,x);
   }
-  pari_err_TYPE("rnfidealhermite",x);
+  pari_err_TYPE("rnfidealhnf",x);
   return NULL; /* not reached */
 }
 
@@ -403,7 +403,7 @@ rnfidealnormrel(GEN rnf, GEN id)
   checkrnf(rnf); nf = rnf_get_nf(rnf);
   if (rnf_get_degree(rnf) == 1) return matid(nf_get_degree(nf));
 
-  z = prodid(nf, gel(rnfidealhermite(rnf,id),2));
+  z = prodid(nf, gel(rnfidealhnf(rnf,id),2));
   return gerepileupto(av, idealmul(nf,z, rnf_get_index(rnf)));
 }
 
@@ -416,7 +416,7 @@ rnfidealnormabs(GEN rnf, GEN id)
   checkrnf(rnf);
   if (rnf_get_degree(rnf) == 1) return gen_1;
   nf = rnf_get_nf(rnf);
-  z = prodidnorm(nf, gel(rnfidealhermite(rnf,id),2));
+  z = prodidnorm(nf, gel(rnfidealhnf(rnf,id),2));
   return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));
 }
 
@@ -427,7 +427,7 @@ rnfidealreltoabs(GEN rnf,GEN x)
   long i, l;
   GEN w;
 
-  x = rnfidealhermite(rnf,x);
+  x = rnfidealhnf(rnf,x);
   w = gel(x,1); l = lg(w); settyp(w, t_VEC);
   for (i=1; i<l; i++) gel(w,i) = lift_intern( rnfbasistoalg(rnf, gel(w,i)) );
   return gerepilecopy(av, modulereltoabs(rnf, x));
@@ -459,7 +459,7 @@ rnfidealabstorel(GEN rnf, GEN x)
 GEN
 rnfidealdown(GEN rnf,GEN x)
 {
-  pari_sp av = avma; x = rnfidealhermite(rnf,x);
+  pari_sp av = avma; x = rnfidealhnf(rnf,x);
   return gerepilecopy(av, gmael(x,2,1));
 }
 
@@ -506,7 +506,7 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   z = rnfidealtwoelement(rnf,y);
   nf = rnf_get_nf(rnf);
   bas = rnf_get_zk(rnf);
-  x = rnfidealhermite(rnf,x);
+  x = rnfidealhnf(rnf,x);
   x1 = gmodulo(gmul(gel(bas,1), matbasistoalg(nf,gel(x,1))), rnf_get_pol(rnf));
   x2 = gel(x,2);
   p1 = gmul(gel(z,1), gel(x,1));

@@ -15,6 +15,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define rnfidealhermite rnfidealhnf
 #define rnfelementabstorel rnfeltabstorel
 #define rnfelementreltoabs rnfeltreltoabs
 #define rnfelementdown rnfeltdown

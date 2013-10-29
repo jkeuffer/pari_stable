@@ -33,7 +33,8 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
     3- primes([a,b]) now returns the primes in the interval [a,b]
     4- install: add symbol name in library and GP prototype to default help
     5- the rnf structure format
-    6- library functions: rename rnfelementxxx -> rnfeltxxx
+    6- library functions: rename rnfelementxxx -> rnfeltxxx,
+       rnfidealhermite -> rnfidealhnf
 
   Added
 EP  1- Configure option for gcov/lcov support

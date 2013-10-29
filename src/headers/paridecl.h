@@ -1515,7 +1515,7 @@ GEN     rnfeltreltoabs(GEN rnf, GEN x);
 GEN     rnfeltup(GEN rnf, GEN x);
 GEN     rnfidealabstorel(GEN rnf, GEN x);
 GEN     rnfidealdown(GEN rnf, GEN x);
-GEN     rnfidealhermite(GEN rnf, GEN x);
+GEN     rnfidealhnf(GEN rnf, GEN x);
 GEN     rnfidealmul(GEN rnf,GEN x,GEN y);
 GEN     rnfidealnormabs(GEN rnf, GEN x);
 GEN     rnfidealnormrel(GEN rnf, GEN x);
