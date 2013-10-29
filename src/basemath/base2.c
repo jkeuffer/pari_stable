@@ -2985,7 +2985,7 @@ _msqr(void *data, GEN x)
 
 /* Compute W[h]^n mod (T,p) in the extension, assume n >= 0. T a ZX */
 static GEN
-rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
+rnfeltid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN y;
@@ -3287,7 +3287,7 @@ rnfmaxord(GEN nf, GEN pol, GEN pr, long vdisc)
     /* compute Ip =  pr-radical [ could use Ker(trace) if q large ] */
     MWmod = nfM_to_FqM(MW,nf,modpr);
     F = cgetg(n+1, t_MAT); gel(F,1) = gel(rnfId,1);
-    for (j=2; j<=n; j++) gel(F,j) = rnfelementid_powmod(MWmod, j, q1, T,p);
+    for (j=2; j<=n; j++) gel(F,j) = rnfeltid_powmod(MWmod, j, q1, T,p);
     Ip = FqM_ker(F,T,p);
     if (lg(Ip) == 1) { W = W0; I = I0; break; }
 

@@ -1,6 +1,6 @@
 Function: rnfeltreltoabs
 Section: number_fields
-C-Name: rnfelementreltoabs
+C-Name: rnfeltreltoabs
 Prototype: GG
 Help: rnfeltreltoabs(rnf,x): transforms the element x from relative to
  absolute representation.

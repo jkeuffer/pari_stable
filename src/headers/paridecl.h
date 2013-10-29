@@ -1506,10 +1506,10 @@ GEN     vecpow(GEN x, GEN n);
 
 /* base5.c */
 
-GEN     rnfelementabstorel(GEN rnf, GEN x);
-GEN     rnfelementdown(GEN rnf, GEN x);
-GEN     rnfelementreltoabs(GEN rnf, GEN x);
-GEN     rnfelementup(GEN rnf, GEN x);
+GEN     rnfeltabstorel(GEN rnf, GEN x);
+GEN     rnfeltdown(GEN rnf, GEN x);
+GEN     rnfeltreltoabs(GEN rnf, GEN x);
+GEN     rnfeltup(GEN rnf, GEN x);
 GEN     rnfidealabstorel(GEN rnf, GEN x);
 GEN     rnfidealdown(GEN rnf, GEN x);
 GEN     rnfidealhermite(GEN rnf, GEN x);

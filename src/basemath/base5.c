@@ -49,7 +49,7 @@ eltreltoabs(GEN rnfeq, GEN x)
   return gerepileupto(av, s);
 }
 GEN
-rnfelementreltoabs(GEN rnf,GEN x)
+rnfeltreltoabs(GEN rnf,GEN x)
 {
   const char *f = "rnfeltreltoabs";
   GEN pol;
@@ -61,10 +61,10 @@ rnfelementreltoabs(GEN rnf,GEN x)
     case t_FRAC: return gcopy(x);
     case t_POLMOD:
       x = polmod_nffix(f,rnf,x,0);
-      if (typ(x) == t_POLMOD) return rnfelementup(rnf,x);
+      if (typ(x) == t_POLMOD) return rnfeltup(rnf,x);
       retmkpolmod(eltreltoabs(rnf_get_map(rnf), x), RgX_copy(pol));
     case t_POL:
-      if (varn(x) == rnf_get_nfvarn(rnf)) return rnfelementup(rnf,x);
+      if (varn(x) == rnf_get_nfvarn(rnf)) return rnfeltup(rnf,x);
       retmkpolmod(eltreltoabs(rnf_get_map(rnf), x), RgX_copy(pol));
   }
   pari_err_TYPE(f,x); return NULL;
@@ -85,7 +85,7 @@ eltabstorel(GEN rnfeq, GEN P)
   return mkpolmod(QXQX_to_mod_shallow(P, T), QXQX_to_mod_shallow(relpol,T));
 }
 GEN
-rnfelementabstorel(GEN rnf,GEN x)
+rnfeltabstorel(GEN rnf,GEN x)
 {
   const char *f = "rnfeltabstorel";
   pari_sp av = avma;
@@ -254,7 +254,7 @@ rnfinit(GEN nf, GEN polrel)
 }
 
 GEN
-rnfelementup(GEN rnf, GEN x)
+rnfeltup(GEN rnf, GEN x)
 {
   pari_sp av = avma;
   GEN zknf, czknf, c;
@@ -273,7 +273,7 @@ static void
 fail(const char *f, GEN x)
 { pari_err_DOMAIN(f,"element","not in", strtoGENstr("the base field"),x); }
 GEN
-rnfelementdown(GEN rnf,GEN x)
+rnfeltdown(GEN rnf,GEN x)
 {
   const char *f = "rnfeltdown";
   pari_sp av = avma;
@@ -300,7 +300,7 @@ rnfelementdown(GEN rnf,GEN x)
       return gerepilecopy(av, x);
   }
   /* x defined mod the absolute equation */
-  z = rnfelementabstorel(rnf,x);
+  z = rnfeltabstorel(rnf,x);
   switch(typ(z))
   {
     case t_INT:
@@ -433,7 +433,7 @@ rnfidealabstorel(GEN rnf, GEN x)
   I = cgetg(N+1,t_VEC);
   for (j=1; j<=N; j++)
   {
-    GEN t = lift_intern( rnfelementabstorel(rnf, gel(x,j)) );
+    GEN t = lift_intern( rnfeltabstorel(rnf, gel(x,j)) );
     gel(A,j) = mulmat_pol(invbas, t);
     gel(I,j) = gen_1;
   }
@@ -477,7 +477,7 @@ rnfidealtwoelement(GEN rnf, GEN x)
   y = rnfidealreltoabs(rnf,x);
   y = matalgtobasis(NF, y); settyp(y, t_MAT);
   y = idealtwoelt(NF, ZM_hnf(y));
-  z = rnfelementabstorel(rnf, gmul(nf_get_zk(NF), gel(y,2)));
+  z = rnfeltabstorel(rnf, gmul(nf_get_zk(NF), gel(y,2)));
   return gerepilecopy(av, mkvec2(gel(y,1), z));
 }
 

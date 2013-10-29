@@ -1,6 +1,6 @@
 Function: rnfeltdown
 Section: number_fields
-C-Name: rnfelementdown
+C-Name: rnfeltdown
 Prototype: GG
 Help: rnfeltdown(rnf,x): expresses x on the base field if possible; returns
  an error otherwise.
