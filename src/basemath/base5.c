@@ -60,6 +60,7 @@ rnfeltreltoabs(GEN rnf,GEN x)
     case t_INT: return icopy(x);
     case t_FRAC: return gcopy(x);
     case t_POLMOD:
+      if (RgX_equal_var(gel(x,1), rnf_get_polabs(rnf))) return gcopy(x);
       x = polmod_nffix(f,rnf,x,0);
       if (typ(x) == t_POLMOD) return rnfeltup(rnf,x);
       retmkpolmod(eltreltoabs(rnf_get_map(rnf), x), RgX_copy(pol));
@@ -259,6 +260,8 @@ rnfeltup(GEN rnf, GEN x)
   pari_sp av = avma;
   GEN zknf, czknf, c;
   checkrnf(rnf);
+  if (typ(x) == t_POLMOD && RgX_equal_var(gel(x,1), rnf_get_polabs(rnf)))
+    return gcopy(x);
   x = nf_to_scalar_or_basis(rnf_get_nf(rnf), x);
   if (typ(x) != t_COL) return gerepilecopy(av, x);
   rnf_get_nfzk(rnf, &zknf, &czknf);

@@ -142,6 +142,7 @@ member_disc(GEN x) /* discriminant */
     {
       case typ_Q  : return quad_disc(x);
       case typ_ELL: return ell_get_disc(x);
+      case typ_RNF: return rnf_get_disc(x);
     }
     member_err("disc",x);
   }
@@ -203,7 +204,11 @@ GEN
 member_index(GEN x)
 {
   long t; GEN y = get_nf(x,&t);
-  if (!y) member_err("index",x);
+  if (!y)
+  {
+    if (t == typ_RNF) return rnf_get_index(x);
+    member_err("index",x);
+  }
   return nf_get_index(y);
 }
 

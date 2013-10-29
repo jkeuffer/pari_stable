@@ -2451,6 +2451,10 @@ INLINE GEN
 rnf_get_polabs(GEN rnf) { return gmael(rnf,11,1); }
 INLINE GEN
 rnf_get_pol(GEN rnf) { return gel(rnf,1); }
+INLINE GEN
+rnf_get_disc(GEN rnf) { return gel(rnf,3); }
+INLINE GEN
+rnf_get_index(GEN rnf) { return gel(rnf,4); }
 INLINE long
 rnf_get_varn(GEN rnf) { return varn(gel(rnf,1)); }
 INLINE GEN

@@ -44,8 +44,9 @@ EP  1- Configure option for gcov/lcov support
        primes_upto_zv, primes0
     4- libpari functions rnf_get_absdegree, rnf_get_invzk, rnf_get_map,
        rnf_get_nf, rnf_get_nfdegree, rnf_get_nfpol, rnf_get_nfvarn, rnf_get_pol,
-       rnf_get_polabs, rnf_get_zk, rnf_get_nfzk, rnf_get_varn, RgV_is_QV,
-       RgX_equal_var
+       rnf_get_polabs, rnf_get_zk, rnf_get_nfzk, rnf_get_varn, rnf_get_disc,
+       rnf_get_index, RgV_is_QV, RgX_equal_var
+    5- allow rnf.disc, rnf.index
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
