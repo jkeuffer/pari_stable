@@ -494,4 +494,21 @@ error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (2 elts).
 , 1/2; 0, 1/2, 0; 0, 0, 1/2]]]
 [[1, -347298; 0, 1], [[5900370, 2821959, 5374299; 0, 1, 0; 0, 0, 1], [1, 1/2
 , 1/2; 0, 1/2, 0; 0, 0, 1/2]]]
+  ***   at top-level: rnfdet(L,[[;],[]])
+  ***                 ^------------------
+  *** rnfdet: incorrect type in checknf [please apply nfinit()] (t_VEC).
+
+[1 0 0]
+
+[0 1 0]
+
+[0 0 1]
+
+
+[280970 12259/2 316839/2]
+
+[     0     1/2        0]
+
+[     0       0      1/2]
+
 Total time spent: 292
