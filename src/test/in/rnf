@@ -98,3 +98,9 @@ for (i=1,#V,
   )
 )
 }
+rnfidealmul(L, 0,1)
+rnfidealmul(L, 1,0)
+rnfidealmul(L, x,y)
+rnfidealmul(L, y,x)
+rnfidealmul(L, id,x)
+rnfidealmul(L, x,id)
