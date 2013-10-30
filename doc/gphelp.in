@@ -541,6 +541,7 @@ sub nl { push(@f_text, shift); }
 sub format_text {
   my($last_void) = 0;
   my($add_stuff) = 0;
+  my($noindent) = 0;
   my($init) = 1;
   my($cols) = ($ENV{'COLUMNS'} || 80) - 1;
   my($first) = $cols - length($indent);
@@ -557,9 +558,14 @@ sub format_text {
     {
       nl("$indent$_");
     }
-    elsif (s/^\@2//)       # end verbatim
+    elsif (s/^\@2//)       # end verbatim, add indent
     {
       nl("$indent$_");
+      $last_void = is_void($_);
+    }
+    elsif (s/^\@3//)       # end verbatim, no indent
+    {
+      nl("$_"); $noindent = 1;
       $last_void = is_void($_);
     }
     elsif (is_void($_))    # line is empty
@@ -569,10 +575,10 @@ sub format_text {
         nl(&fit_line($first));
       } else {
         nl("") if (!$last_void);
-        nl("\@[endbold]$indent" . &fit_line($first));
+        nl("\@[endbold]" . ($noindent?"":$indent) . &fit_line($first));
       }
       while (@w) { nl(&fit_line($cols)); }
-      $init = $last_void = $add_stuff = 0;
+      $noindent = $init = $last_void = $add_stuff = 0;
     }
     else
     {
@@ -901,10 +907,11 @@ sub basic_subst {
 
 sub presubst {
   chomp;
-  if ($in_prog && /(\\|\@)eprog/)
+  if ($in_prog && /\@eprog *(\\noindent)? */)
   {
+    my ($eprog) = $1? '@3': '@2';
     $in_prog = 0;
-    $_ = "\@2" . &code_subst($`) . $tr{endcode};
+    $_ = $eprog . &code_subst($`) . $tr{endcode};
     push(@text, $_);
     $_ = &basic_subst($');
   }
