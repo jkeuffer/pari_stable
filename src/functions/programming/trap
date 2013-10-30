@@ -49,11 +49,9 @@ Doc: THIS FUNCTION IS OBSOLETE: use \tet{iferr}, which has a nicer and much
 
  \kbd{e\_STACK}: the PARI stack overflows
 
- \kbd{e\_INV}: division by 0
+ \kbd{e\_INV}: impossible inverse
 
  \kbd{e\_IMPL}: not yet implemented
-
- \kbd{e\_INTMOD}: impossible inverse modulo
 
  \kbd{e\_OVERFLOW}: all forms of arithmetic overflow, including length
  or exponent overflow (when a larger value is supplied than the

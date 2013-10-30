@@ -243,3 +243,8 @@ thue(x*(x^3-2),0);
 direuler(p=2, 10, 2/(1-p*X))
 solve(x=0,1,x^2+1)
 warning(1)
+\\ backward compatibility. Eventually remove
+inv(x) = trap (e_INV, INFINITY, 1/x)
+inv(2)
+inv(0)
+trap (e_INV, INFINITY, log(0))
