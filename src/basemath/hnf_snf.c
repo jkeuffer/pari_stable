@@ -20,22 +20,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                HERMITE NORMAL FORM REDUCTION             **/
 /**                                                          **/
 /**************************************************************/
+static GEN
+hnfallgen(GEN x)
+{
+  GEN z = cgetg(3, t_VEC);
+  gel(z,1) = RgM_hnfall(x, (GEN*)(z+2), 1);
+  return z;
+}
 GEN
 mathnf0(GEN x, long flag)
 {
-  if (typ(x)!=t_MAT) pari_err_TYPE("mathnf0",x);
+  switch(typ(x))
+  {
+    case t_VEC:
+      if (RgV_is_ZV(x))
+        switch (flag)
+        {
+          case 0: retmkmat(mkcol(ZV_content(x)));
+          case 1:
+          case 4: return ZV_hnfgcdext(x);
+        }
+      x = gtomat(x); break;
+    case t_MAT: break;
+    default: pari_err_TYPE("mathnf0",x);
+  }
 
   switch(flag)
   {
-    case 0: RgM_check_ZM(x, "mathnf0"); return ZM_hnf(x);
-    case 1: RgM_check_ZM(x, "mathnf0"); return hnfall(x);
+    case 0: return RgM_is_ZM(x)? ZM_hnf(x): RgM_hnfall(x,NULL,1);
+    case 1: return RgM_is_ZM(x)? hnfall(x): hnfallgen(x);
     case 2: return RgM_hnfall(x, NULL, 1);
-    case 3:
-    {
-      GEN z = cgetg(3, t_VEC);
-      gel(z,1) = RgM_hnfall(x, (GEN*)(z+2), 1);
-      return z;
-    }
+    case 3: return hnfallgen(x);
     case 4: RgM_check_ZM(x, "mathnf0"); return hnflll(x);
     case 5: RgM_check_ZM(x, "mathnf0"); return hnfperm(x);
     default: pari_err_FLAG("mathnf");
@@ -1550,14 +1565,12 @@ reduce1(GEN A, GEN B, long k, long j, GEN lambda, GEN D)
   }
 }
 
-/* assume A is a ZV */
-GEN
-extendedgcd(GEN A)
+static GEN
+ZV_gcdext_i(GEN A)
 {
 #ifdef HNFLLL_QUALITY
   const long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
 #endif
-  pari_sp av = avma;
   long k, n = lg(A);
   GEN B, lambda, D;
 
@@ -1602,7 +1615,21 @@ extendedgcd(GEN A)
     togglesign_safe(&gel(A,n-1));
     ZV_togglesign(gel(B,n-1));
   }
-  return gerepilecopy(av, mkvec2(gel(A,n-1), B));
+  return mkvec2(gel(A,n-1), B);
+}
+GEN
+ZV_gcdext(GEN A)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, ZV_gcdext_i(A));
+}
+/* as ZV_gcdext, transforming the gcd into a t_MAT, for mathnf0 */
+static GEN
+ZV_hnfgcdext(GEN A)
+{
+  GEN z = ZV_gcdext_i(A);
+  gel(z,1) = mkmat(mkcol(gel(z,1)));
+  return gerepilecopy(av, z);
 }
 
 /* HNF with permutation. */

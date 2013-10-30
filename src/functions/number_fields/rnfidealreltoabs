@@ -13,5 +13,5 @@ Doc: $\var{rnf}$ being a relative
  \bprog
  \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form
  \\ associated to nf = nfinit( rnf.pol );
- idealgentoHNF(nf, y) = mathnf( Mat( nfalgtobasis(nf, y) ) );
+ idealgentoHNF(nf, y) = mathnf(matalgtobasis(nf, y));
  @eprog

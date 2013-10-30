@@ -2792,6 +2792,10 @@ coefficients such that $\kbd{au} + \kbd{bv} = d$.
 $d$ of \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout coefficients
 such that $\kbd{au} + \kbd{bv} = d$.
 
+\fun{GEN}{ZV_gcdext}{GEN A} given a vector of $n$ integers $A$, returns $[d,
+U]$, where $d$ is the GCD of the $A[i]$ and $U$ is a matrix
+in $\text{GL}_n(\Z)$ such that $AU = [D,0, \dots,0]$.
+
 \subsec{Pure powers}
 
 \fun{long}{Z_issquare}{GEN n} returns $1$ if the \typ{INT} $n$ is
@@ -5936,6 +5940,10 @@ assumed to have compatible dimensions).
 
 \fun{GEN}{ZV_content}{GEN x} returns the GCD of all the components
 of~\kbd{x}.
+
+\fun{GEN}{ZV_gcdext}{GEN A} given a vector of $n$ integers $A$, returns $[d,
+U]$, where $d$ is the content of $A$ and $U$ is a matrix
+in $\text{GL}_n(\Z)$ such that $AU = [D,0, \dots,0]$.
 
 \fun{GEN}{ZV_prod}{GEN x} returns the product of all the components
 of~\kbd{x} ($1$ for the empty vector).

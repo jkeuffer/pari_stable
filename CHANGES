@@ -35,6 +35,10 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
     5- the rnf structure format
     6- library functions: rename rnfelementxxx -> rnfeltxxx,
        rnfidealhermite -> rnfidealhnf
+    7- allow mathnf(t_VEC) [ apply Mat() automatically ], gives acces to the
+       ZV_gcdext() routine.
+    8- mathnf(,2) (generic vs integral t_MAT) is deprecated: we always test
+       the matrix entries and choose the appropriate routine
 
   Added
 EP  1- Configure option for gcov/lcov support
@@ -49,6 +53,7 @@ EP  1- Configure option for gcov/lcov support
        rnf_get_index, RgV_is_QV, RgX_equal_var
     5- allow rnf.disc, rnf.index
     6- functions rnfelttrace, rnfelttrace
+    7- function ZV_gcdext, based on ZM_hnflll (simplified)
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

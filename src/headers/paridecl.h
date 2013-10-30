@@ -2383,6 +2383,7 @@ GEN     ZM_hnf(GEN x);
 GEN     ZM_hnfall(GEN A, GEN *ptB, long remove);
 GEN     ZM_hnfcenter(GEN M);
 GEN     ZM_hnflll(GEN A, GEN *ptB, int remove);
+GEN     ZV_gcdext(GEN A);
 GEN     ZM_hnfmod(GEN x, GEN d);
 GEN     ZM_hnfmodall(GEN x, GEN dm, long flag);
 GEN     ZM_hnfmodid(GEN x, GEN d);
