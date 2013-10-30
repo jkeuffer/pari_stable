@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                HERMITE NORMAL FORM REDUCTION             **/
 /**                                                          **/
 /**************************************************************/
+static GEN ZV_hnfgcdext(GEN A);
 static GEN
 hnfallgen(GEN x)
 {
@@ -1627,6 +1628,7 @@ ZV_gcdext(GEN A)
 static GEN
 ZV_hnfgcdext(GEN A)
 {
+  pari_sp av = avma;
   GEN z = ZV_gcdext_i(A);
   gel(z,1) = mkmat(mkcol(gel(z,1)));
   return gerepilecopy(av, z);
