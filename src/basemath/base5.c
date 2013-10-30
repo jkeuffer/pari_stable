@@ -400,11 +400,9 @@ GEN
 rnfidealnormrel(GEN rnf, GEN id)
 {
   pari_sp av = avma;
-  GEN z, nf;
-  checkrnf(rnf); nf = rnf_get_nf(rnf);
-  if (rnf_get_degree(rnf) == 1) return matid(nf_get_degree(nf));
-
-  z = prodid(nf, gel(rnfidealhnf(rnf,id),2));
+  GEN nf, z = gel(rnfidealhnf(rnf,id), 2);
+  if (lg(z) == 1) return cgetg(1, t_MAT);
+  nf = rnf_get_nf(rnf); z = prodid(nf, z);
   return gerepileupto(av, idealmul(nf,z, rnf_get_index(rnf)));
 }
 
@@ -412,12 +410,9 @@ GEN
 rnfidealnormabs(GEN rnf, GEN id)
 {
   pari_sp av = avma;
-  GEN z, nf;
-
-  checkrnf(rnf);
-  if (rnf_get_degree(rnf) == 1) return gen_1;
-  nf = rnf_get_nf(rnf);
-  z = prodidnorm(nf, gel(rnfidealhnf(rnf,id),2));
+  GEN nf, z = gel(rnfidealhnf(rnf,id), 2);
+  if (lg(z) == 1) return gen_0;
+  nf = rnf_get_nf(rnf); z = prodidnorm(nf, z);
   return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));
 }
 
@@ -506,7 +501,7 @@ rnfidealtwoelement(GEN rnf, GEN x)
 }
 
 GEN
-rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
+rnfidealmul(GEN rnf,GEN x,GEN y)
 {
   pari_sp av = avma;
   GEN z, nf, x1, x2, p1, p2, bas;
