@@ -24,6 +24,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
        rnfeltreltoabs were not treating their inputs consistently, and
        accepted (or crashed on) too many incorrect inputs.
    18- rnfideal* did not handle correctly the 0 ideal
+   19- rnfidealtwoelt(non integral ideal) => crash
 
   Changed
     1- default help text for a user function is now as in \u:

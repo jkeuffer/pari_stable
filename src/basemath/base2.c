@@ -2146,16 +2146,16 @@ init_norm(norm_S *S, GEN nf, GEN p)
   GEN T = nf_get_pol(nf);
   long N = degpol(T);
 
-  S->r1 = nf_get_r1(nf);
   S->M = NULL; /* -Wall */
   S->D = NULL; /* -Wall */
   S->w = NULL; /* -Wall */
   S->T = NULL; /* -Wall */
-  if (typ(gel(nf,5)) == t_VEC) /* beware dummy nf from padicff */
+  if (typ(gel(nf,5)) == t_VEC) /* beware dummy nf from rnf/makenfabs */
   {
     GEN M = nf_get_M(nf);
     long ex = gexpo(M) + gexpo(mului(8 * N, p));
     /* enough prec to use embed_norm */
+    S->r1 = nf_get_r1(nf);
     if (N * ex <= prec2nbits(gprecision(M))) S->M = M;
   }
   if (!S->M)

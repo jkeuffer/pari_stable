@@ -349,6 +349,10 @@ rnfprincipaltohnf(GEN rnf,GEN x)
   return gerepileupto(av, nfhnf(nf, mkvec2(rnfV_to_nfM(rnf,x), gel(bas,2))));
 }
 
+/* pseudo-basis for the 0 ideal */
+static GEN
+rnfideal0() { retmkvec2(cgetg(1,t_MAT),cgetg(1,t_VEC)); }
+
 GEN
 rnfidealhnf(GEN rnf, GEN x)
 {
@@ -358,7 +362,7 @@ rnfidealhnf(GEN rnf, GEN x)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      if (isintzero(x)) retmkvec2(cgetg(1,t_MAT),cgetg(1,t_VEC));
+      if (isintzero(x)) return rnfideal0();
       bas = rnf_get_zk(rnf); z = cgetg(3,t_VEC);
       gel(z,1) = matid(rnf_get_degree(rnf));
       gel(z,2) = gmul(x, gel(bas,2)); return z;
@@ -442,7 +446,7 @@ rnfidealabstorel(GEN rnf, GEN x)
   N = lg(x)-1;
   if (N != rnf_get_absdegree(rnf))
   {
-    if (!N) retmkvec2(cgetg(1,t_MAT),cgetg(1,t_VEC));
+    if (!N) return rnfideal0();
     pari_err_DIM("rnfidealabstorel");
   }
   A = cgetg(N+1,t_MAT);
@@ -484,19 +488,22 @@ rnfidealup(GEN rnf,GEN x)
   return gerepilecopy(av, modulereltoabs(rnf, mkvec2(gel(bas,1), I)));
 }
 
-/* x a relative HNF ---> vector of 2 generators (relative polymods) */
+/* x a relative HNF => vector of 2 generators (relative polmods) */
 GEN
 rnfidealtwoelement(GEN rnf, GEN x)
 {
   pari_sp av = avma;
-  GEN y, z, NF;
+  GEN y, cy, z, NF;
 
-  checkrnf(rnf);
-  NF = check_and_build_nfabs(rnf);
   y = rnfidealreltoabs(rnf,x);
+  NF = check_and_build_nfabs(rnf);
   y = matalgtobasis(NF, y); settyp(y, t_MAT);
-  y = idealtwoelt(NF, ZM_hnf(y));
-  z = rnfeltabstorel(rnf, gmul(nf_get_zk(NF), gel(y,2)));
+  y = Q_primitive_part(y, &cy);
+  y = ZM_hnf(y);
+  if (lg(y) == 1) { avma = av; return mkvec2(gen_0, gen_0); }
+  y = idealtwoelt(NF, y);
+  if (cy) y = RgV_Rg_mul(y, cy);
+  z = rnfeltabstorel(rnf, coltoliftalg(NF, gel(y,2)));
   return gerepilecopy(av, mkvec2(gel(y,1), z));
 }
 
@@ -504,16 +511,17 @@ GEN
 rnfidealmul(GEN rnf,GEN x,GEN y)
 {
   pari_sp av = avma;
-  GEN z, nf, x1, x2, p1, p2, bas;
+  GEN nf, z, x1, x2, p1, p2, bas;
 
-  z = rnfidealtwoelement(rnf,y);
+  y = rnfidealtwoelement(rnf,y);
+  if (isintzero(gel(y,1))) { avma = av; return rnfideal0(); }
   nf = rnf_get_nf(rnf);
   bas = rnf_get_zk(rnf);
   x = rnfidealhnf(rnf,x);
   x1 = gmodulo(gmul(gel(bas,1), matbasistoalg(nf,gel(x,1))), rnf_get_pol(rnf));
   x2 = gel(x,2);
-  p1 = gmul(gel(z,1), gel(x,1));
-  p2 = rnfV_to_nfM(rnf, gmul(gel(z,2), x1));
+  p1 = gmul(gel(y,1), gel(x,1));
+  p2 = rnfV_to_nfM(rnf, gmul(gel(y,2), x1));
   z = mkvec2(shallowconcat(p1, p2), shallowconcat(x2, x2));
   return gerepileupto(av, nfhnf(nf,z));
 }

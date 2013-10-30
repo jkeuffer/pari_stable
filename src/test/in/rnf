@@ -89,7 +89,7 @@ m = rnfidealdown(L, Labs.zk*idL)
 rnfidealup(L, m)
 \\
 V=concat(v, [[;], [], 0, [[;],[]], idealprimedec(K,2)[1], idK, idL, Labs.zk*idL, id]);
-f=[rnfidealhnf,rnfidealreltoabs,rnfidealabstorel,rnfidealdown,rnfidealup,rnfidealnormrel,rnfidealnormabs];
+f=[rnfidealhnf,rnfidealreltoabs,rnfidealabstorel,rnfidealdown,rnfidealup,rnfidealnormrel,rnfidealnormabs,rnfidealtwoelt];
 {
 for (i=1,#V,
   print(i,":");
