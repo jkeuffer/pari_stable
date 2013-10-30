@@ -139,7 +139,7 @@ END:
 }
 
 
-/* x a t_VEC of rnf elements in 'alg' form */
+/* x a t_VEC of rnf elements in 'alg' form. Assume maximal rank or 0 */
 static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
@@ -147,6 +147,7 @@ modulereltoabs(GEN rnf, GEN x)
   long i, j, k, n, m;
   GEN zknf, czknf, M;
 
+  if (lg(W) == 1) return cgetg(1, t_VEC);
   rnf_get_nfzk(rnf, &zknf,&czknf);
   n = rnf_get_degree(rnf);
   m = rnf_get_nfdegree(rnf);
@@ -357,6 +358,7 @@ rnfidealhnf(GEN rnf, GEN x)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
+      if (isintzero(x)) retmkvec2(cgetg(1,t_MAT),cgetg(1,t_VEC));
       bas = rnf_get_zk(rnf); z = cgetg(3,t_VEC);
       gel(z,1) = matid(rnf_get_degree(rnf));
       gel(z,2) = gmul(x, gel(bas,2)); return z;
@@ -441,9 +443,13 @@ rnfidealabstorel(GEN rnf, GEN x)
 
   checkrnf(rnf);
   invbas = rnf_get_invzk(rnf);
-  N = rnf_get_absdegree(rnf);
   if (typ(x) != t_VEC) pari_err_TYPE("rnfidealabstorel",x);
-  if (lg(x)-1 != N) pari_err_DIM("rnfidealabstorel");
+  N = lg(x)-1;
+  if (N != rnf_get_absdegree(rnf))
+  {
+    if (!N) retmkvec2(cgetg(1,t_MAT),cgetg(1,t_VEC));
+    pari_err_DIM("rnfidealabstorel");
+  }
   A = cgetg(N+1,t_MAT);
   I = cgetg(N+1,t_VEC);
   for (j=1; j<=N; j++)
@@ -458,8 +464,11 @@ rnfidealabstorel(GEN rnf, GEN x)
 GEN
 rnfidealdown(GEN rnf,GEN x)
 {
-  pari_sp av = avma; x = rnfidealhnf(rnf,x);
-  return gerepilecopy(av, gmael(x,2,1));
+  pari_sp av = avma;
+  GEN I;
+  x = rnfidealhnf(rnf,x); I = gel(x,2);
+  if (lg(I) == 1) { avma = av; return cgetg(1,t_MAT); }
+  return gerepilecopy(av, gel(I,1));
 }
 
 /* lift ideal x to the relative extension, returns a Z-basis */

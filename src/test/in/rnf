@@ -74,3 +74,27 @@ for (i=1,#v,
   print(iferr(rnfcharpoly(K,x^2-y,v[i]),E,E))
 )
 }
+
+Labs = nfinit(L.pol);
+idL = idealhnf(Labs, x^3+x^2+10);
+idK = idealhnf(K, y^2+10*y+5);
+id = rnfidealabstorel(L,Labs.zk*idL)
+rnfidealnormabs(L,id) == idealnorm(Labs, idL);
+m = rnfidealreltoabs(L, id)
+mathnf(matalgtobasis(Labs,m)) == idL
+
+m = rnfidealup(L, idK)
+rnfidealdown(L, m) == idK
+m = rnfidealdown(L, Labs.zk*idL)
+rnfidealup(L, m)
+\\
+V=concat(v, [[;], [], 0, [[;],[]], idealprimedec(K,2)[1], idK, idL, Labs.zk*idL, id]);
+f=[rnfidealhnf,rnfidealreltoabs,rnfidealabstorel,rnfidealdown,rnfidealup];
+{
+for (i=1,#V,
+  print(i,":");
+  for (j=1, #f,
+    print(iferr(f[j](L,V[i]),E,E))
+  )
+)
+}

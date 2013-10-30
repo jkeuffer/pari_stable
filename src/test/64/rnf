@@ -224,4 +224,187 @@ error("incorrect type in rnfcharpoly (t_COL).")
 error("incorrect type in rnfcharpoly (t_POL).")
 15:
 x^2 + Mod(-2*y, y^3 - 21)*x + Mod(y^2, y^3 - 21)
-Total time spent: 276
+[[1, -66328; 0, 1], [[280970, 12259, 35869; 0, 1, 0; 0, 0, 1], [1, 1/2, 1/2;
+ 0, 1/2, 0; 0, 0, 1/2]]]
+[280970, x^2 + 12259, x^4 + 35869, -x^4 + x - 66328, -1/2*x^4 + 1/2*x^3 - 33
+164*x^2 + 1/2*x - 66349/2, 1/2*x^5 - 66329/2*x^4 - 21/2*x^2 + 1/2*x - 33164]
+1
+[18416, x^2 + 6979, x^4 + 3879, -9208*x^4 + 9208*x, -6979/2*x^4 + 1/2*x^3 + 
+6979/2*x - 21/2, 1/2*x^5 - 3879/2*x^4 - 21/2*x^2 + 3879/2*x]
+1
+
+[280970 12259 35869]
+
+[     0     1     0]
+
+[     0     0     1]
+
+[280970, x^2 + 12259, x^4 + 35869, -140485*x^4 + 140485*x, -12259/2*x^4 + 1/
+2*x^3 + 12259/2*x - 21/2, 1/2*x^5 - 35869/2*x^4 - 21/2*x^2 + 35869/2*x]
+1:
+[[1, 0; 0, 1], [2, 1]]
+[2, 2*x^2, 2*x^4, -x^4 + x, x^3 - 21, x^5 - 21*x^2]
+error("incorrect type in rnfidealabstorel (t_INT).")
+2
+[2, 2*x^2, 2*x^4, -x^4 + x, x^3 - 21, x^5 - 21*x^2]
+2:
+[[1, 0; 0, 1], [1/2, 1/4]]
+[1/2, 1/2*x^2, 1/2*x^4, -1/4*x^4 + 1/4*x, 1/4*x^3 - 21/4, 1/4*x^5 - 21/4*x^2
+]
+error("incorrect type in rnfidealabstorel (t_FRAC).")
+1/2
+[1/2, 1/2*x^2, 1/2*x^4, -1/4*x^4 + 1/4*x, 1/4*x^3 - 21/4, 1/4*x^5 - 21/4*x^2
+]
+3:
+[[1, 42; 0, 1], [[210, 189, 189; 0, 1, 0; 0, 0, 1], [1, 1/2, 1/2; 0, 1/2, 0;
+ 0, 0, 1/2]]]
+[210, x^2 + 189, x^4 + 189, -x^4 + x + 42, -1/2*x^4 + 1/2*x^3 + 21*x^2 + 1/2
+*x + 21/2, 1/2*x^5 + 41/2*x^4 - 21/2*x^2 + 1/2*x + 21]
+error("incorrect type in rnfidealabstorel (t_POL).")
+[210, 189, 189; 0, 1, 0; 0, 0, 1]
+error("inconsistent variables in nf_to_scalar_or_basis, x != y.")
+4:
+[[1, 0; 0, 1], [[21, 0, 0; 0, 1, 0; 0, 0, 1], [21/2, 0, 0; 0, 1/2, 0; 0, 0, 
+1/2]]]
+[21, x^2, x^4, -21/2*x^4 + 21/2*x, 1/2*x^3 - 21/2, 1/2*x^5 - 21/2*x^2]
+error("incorrect type in rnfidealabstorel (t_POLMOD).")
+[21, 0, 0; 0, 1, 0; 0, 0, 1]
+[21, x^2, x^4, -21/2*x^4 + 21/2*x, 1/2*x^3 - 21/2, 1/2*x^5 - 21/2*x^2]
+5:
+error("inconsistent moduli in rnfbasistoalg: x^6 - 21 != y^3 - 21")
+error("inconsistent moduli in rnfbasistoalg: x^6 - 21 != y^3 - 21")
+error("incorrect type in rnfidealabstorel (t_POLMOD).")
+error("inconsistent moduli in rnfbasistoalg: x^6 - 21 != y^3 - 21")
+error("inconsistent moduli in nf_to_scalar_or_basis: x^6 - 21 != y^3 - 21")
+6:
+[[1, -756; 0, 1], [[903/2, 84, 336; 0, 1/2, 0; 0, 0, 1/2], 1/4]]
+[903/2, 1/2*x^2 + 84, 1/2*x^4 + 336, -1/4*x^4 + 1/4*x - 189, 1/4*x^3 - 189*x
+^2 - 21/4, 1/4*x^5 - 189*x^4 - 21/4*x^2]
+error("incorrect type in rnfidealabstorel (t_POLMOD).")
+[903/2, 84, 336; 0, 1/2, 0; 0, 0, 1/2]
+error("inconsistent moduli in nf_to_scalar_or_basis: x^2 - y != y^3 - 21")
+7:
+[[1, 0; 0, 1], [[21, 0, 0; 0, 1, 0; 0, 0, 1], [21/2, 0, 0; 0, 1/2, 0; 0, 0, 
+1/2]]]
+[21, x^2, x^4, -21/2*x^4 + 21/2*x, 1/2*x^3 - 21/2, 1/2*x^5 - 21/2*x^2]
+error("incorrect type in rnfidealabstorel (t_POL).")
+[21, 0, 0; 0, 1, 0; 0, 0, 1]
+[21, x^2, x^4, -21/2*x^4 + 21/2*x, 1/2*x^3 - 21/2, 1/2*x^5 - 21/2*x^2]
+8:
+error("inconsistent variables in rnfbasistoalg, z != x.")
+error("inconsistent variables in rnfbasistoalg, z != x.")
+error("incorrect type in rnfidealabstorel (t_POL).")
+error("inconsistent variables in rnfbasistoalg, z != x.")
+error("inconsistent variables in nf_to_scalar_or_basis, z != y.")
+9:
+error("inconsistent moduli in rnfbasistoalg: y^2 + 1 != y^3 - 21")
+error("inconsistent moduli in rnfbasistoalg: y^2 + 1 != y^3 - 21")
+error("incorrect type in rnfidealabstorel (t_POLMOD).")
+error("inconsistent moduli in rnfbasistoalg: y^2 + 1 != y^3 - 21")
+error("inconsistent moduli in nf_to_scalar_or_basis: y^2 + 1 != y^3 - 21")
+10:
+error("inconsistent operation 'RgV_RgC_mul' t_VEC (2 elts) , t_COL (1 elts).
+")
+error("inconsistent operation 'RgV_RgC_mul' t_VEC (2 elts) , t_COL (1 elts).
+")
+error("incorrect type in rnfidealabstorel (t_COL).")
+error("inconsistent operation 'RgV_RgC_mul' t_VEC (2 elts) , t_COL (1 elts).
+")
+error("incorrect type in nf_to_scalar_or_basis (t_COL).")
+11:
+[[1, -5371968; 0, 1], [[10743937, 8099895, 3524829; 0, 1, 0; 0, 0, 1], 1/2]]
+[10743937, x^2 + 8099895, x^4 + 3524829, -1/2*x^4 + 1/2*x - 2685984, 1/2*x^3
+ - 2685984*x^2 - 21/2, 1/2*x^5 - 2685984*x^4 - 21/2*x^2]
+error("incorrect type in rnfidealabstorel (t_COL).")
+[10743937, 8099895, 3524829; 0, 1, 0; 0, 0, 1]
+error("incorrect type in nf_to_scalar_or_basis (t_COL).")
+12:
+[[1, [0, 0, -18]~; 0, 1], [379, 1/2]]
+[379, 379*x^2, 379*x^4, -19/2*x^4 + 1/2*x, 1/2*x^3 - 399/2, 1/2*x^5 - 399/2*
+x^2]
+error("incorrect type in rnfidealabstorel (t_COL).")
+379
+error("incorrect type in nf_to_scalar_or_basis (t_COL).")
+13:
+error("incorrect type in nf_to_scalar_or_alg (t_COMPLEX).")
+error("incorrect type in nf_to_scalar_or_alg (t_COMPLEX).")
+error("incorrect type in rnfidealabstorel (t_COL).")
+error("incorrect type in nf_to_scalar_or_alg (t_COMPLEX).")
+error("incorrect type in nf_to_scalar_or_basis (t_COL).")
+14:
+error("incorrect type in rnfbasistoalg (t_POL).")
+error("incorrect type in rnfbasistoalg (t_POL).")
+error("incorrect type in rnfidealabstorel (t_POL).")
+error("incorrect type in rnfbasistoalg (t_POL).")
+error("incorrect type in idealhnf [integer vector] (t_COL).")
+15:
+[[1, 0; 0, 1], [[21, 0, 0; 0, 1, 0; 0, 0, 1], [21/2, 0, 0; 0, 1/2, 0; 0, 0, 
+1/2]]]
+[21, x^2, x^4, -21/2*x^4 + 21/2*x, 1/2*x^3 - 21/2, 1/2*x^5 - 21/2*x^2]
+error("incorrect type in rnfidealabstorel (t_POL).")
+[21, 0, 0; 0, 1, 0; 0, 0, 1]
+error("inconsistent variables in nf_to_scalar_or_basis, x != y.")
+16:
+error("incorrect type in rnfidealhnf (t_MAT).")
+error("incorrect type in rnfidealhnf (t_MAT).")
+error("incorrect type in rnfidealabstorel (t_MAT).")
+error("incorrect type in rnfidealhnf (t_MAT).")
+[]
+17:
+[[;], []]
+[]
+[[;], []]
+[;]
+error("incorrect type in idealtyp (t_VEC).")
+18:
+[[;], []]
+[]
+error("incorrect type in rnfidealabstorel (t_INT).")
+[;]
+[]
+19:
+[[;], []]
+[]
+error("inconsistent dimensions in rnfidealabstorel.")
+[;]
+[]
+20:
+error("inconsistent dimensions in rnfidealabstorel.")
+error("inconsistent dimensions in rnfidealabstorel.")
+error("inconsistent dimensions in rnfidealabstorel.")
+error("inconsistent dimensions in rnfidealabstorel.")
+[2, x^2 + 1, x^4 + 1, -x^4 + x, -1/2*x^4 + 1/2*x^3 + 1/2*x - 21/2, 1/2*x^5 -
+ 1/2*x^4 - 21/2*x^2 + 1/2*x]
+21:
+error("incorrect type in rnfidealhnf (t_MAT).")
+error("incorrect type in rnfidealhnf (t_MAT).")
+error("incorrect type in rnfidealabstorel (t_MAT).")
+error("incorrect type in rnfidealhnf (t_MAT).")
+[18416, x^2 + 6979, x^4 + 3879, -9208*x^4 + 9208*x, -6979/2*x^4 + 1/2*x^3 + 
+6979/2*x - 21/2, 1/2*x^5 - 3879/2*x^4 - 21/2*x^2 + 3879/2*x]
+22:
+error("incorrect type in rnfidealhnf (t_MAT).")
+error("incorrect type in rnfidealhnf (t_MAT).")
+error("incorrect type in rnfidealabstorel (t_MAT).")
+error("incorrect type in rnfidealhnf (t_MAT).")
+error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (6 elts).
+")
+23:
+[[1, -66328; 0, 1], [[280970, 12259, 35869; 0, 1, 0; 0, 0, 1], [1, 1/2, 1/2;
+ 0, 1/2, 0; 0, 0, 1/2]]]
+[280970, x^2 + 12259, x^4 + 35869, -x^4 + x - 66328, -1/2*x^4 + 1/2*x^3 - 33
+164*x^2 + 1/2*x - 66349/2, 1/2*x^5 - 66329/2*x^4 - 21/2*x^2 + 1/2*x - 33164]
+[[1, -66328; 0, 1], [[280970, 12259, 35869; 0, 1, 0; 0, 0, 1], [1, 1/2, 1/2;
+ 0, 1/2, 0; 0, 0, 1/2]]]
+[280970, 12259, 35869; 0, 1, 0; 0, 0, 1]
+error("incorrect type in idealtyp (t_VEC).")
+24:
+[[1, -66328; 0, 1], [[280970, 12259, 35869; 0, 1, 0; 0, 0, 1], [1, 1/2, 1/2;
+ 0, 1/2, 0; 0, 0, 1/2]]]
+[280970, x^2 + 12259, x^4 + 35869, -x^4 + x - 66328, -1/2*x^4 + 1/2*x^3 - 33
+164*x^2 + 1/2*x - 66349/2, 1/2*x^5 - 66329/2*x^4 - 21/2*x^2 + 1/2*x - 33164]
+error("inconsistent dimensions in rnfidealabstorel.")
+[280970, 12259, 35869; 0, 1, 0; 0, 0, 1]
+error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (2 elts).
+")
+Total time spent: 296
