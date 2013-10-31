@@ -9,3 +9,7 @@ check(3^100,2^128+1)
 sumdigits(0)
 sumdigits(123456789123456789123456789)
 sumdigits(100000!)
+default(realprecision,38);
+binary(0.)
+binary(0.005)
+binary(1.1)
