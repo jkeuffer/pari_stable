@@ -584,4 +584,10 @@
   ***                             ^------
   ***   domain error in solve: f(a)f(b) > 0
   ***   user warning: 1
+(x)->trap(e_INV,INFINITY,1/x)
+1/2
+INFINITY
+  ***   at top-level: trap(e_INV,INFINITY,log(0))
+  ***                                     ^-------
+  *** log: domain error in log: argument = 0
 Total time spent: 24
