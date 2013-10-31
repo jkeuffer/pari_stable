@@ -2146,6 +2146,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
   GEN T = nf_get_pol(nf);
   long N = degpol(T);
 
+  S->r1 = 0;   /* -Wall */
   S->M = NULL; /* -Wall */
   S->D = NULL; /* -Wall */
   S->w = NULL; /* -Wall */
