@@ -2829,7 +2829,6 @@ Rg_to_ff(GEN nf, GEN x0, GEN modpr)
       w = ZV_pvalrem(x, p, &x);
       if (w < v) pari_err_INV("Rg_to_ff", mkintmod(gen_0,p));
       if (w != v) return gen_0;
-      x = ZC_Z_divexact(x, powiu(p, v));
     }
     if (!is_pm1(den)) x = ZC_Z_mul(x, Fp_inv(den, p));
     x = FpC_red(x, p);
