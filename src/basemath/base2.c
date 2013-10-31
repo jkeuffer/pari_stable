@@ -2823,8 +2823,12 @@ Rg_to_ff(GEN nf, GEN x0, GEN modpr)
     if (v)
     {
       GEN tau = modpr_TAU(modpr);
+      long w;
       if (!tau) pari_err_TYPE("zk_to_ff", x0);
       x = nfmuli(nf,x, nfpow_u(nf, tau, v));
+      w = ZV_pvalrem(x, p, &x);
+      if (w < v) pari_err_INV("Rg_to_ff", mkintmod(gen_0,p));
+      if (w != v) return gen_0;
       x = ZC_Z_divexact(x, powiu(p, v));
     }
     if (!is_pm1(den)) x = ZC_Z_mul(x, Fp_inv(den, p));
