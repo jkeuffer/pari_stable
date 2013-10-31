@@ -1,1 +1,17 @@
 nfeltmulmodpr(nfinit(x),x,x,1);
+K=nfinit(y^2+1);
+P = nfmodprinit(K,idealprimedec(K,2)[1])
+v=[0,1/3,y,z,[1/3,1]~];
+f=[nfeltdivmodpr,nfeltmulmodpr];
+{
+for (i=1,#v,
+  for (j=i,#v,
+    print([i,j],":");
+    for (k=1, #f,
+      print(iferr(f[k](K,v[i],v[j],P),E,E))
+    )
+  )
+)
+}
+f=[(K,x)->nfeltpowmodpr(K,x,-3),nfeltreducemodpr];
+for(i=1,#v, print(nfeltiferr(f[k](K,v[i],v[j]),E,E))
