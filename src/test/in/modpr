@@ -27,3 +27,4 @@ P = nfmodprinit(K,idealprimedec(K,2)[2]); test(P);
 K=nfinit(y^2-1105);
 P = nfmodprinit(K,idealprimedec(K,2)[1]);
 nfeltreducemodpr(K,(-y+1)/2,P)
+nffactormod(K, x^3+y*x^2+y*x+1, P)
