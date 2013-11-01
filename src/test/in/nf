@@ -39,6 +39,7 @@ idealnumden(nf,pi)
 idealnumden(nf,1)
 idealnumden(nf,1/2)
 idealnumden(nf,x/2)
+nffactorback(nf, [3, x+1, [1,2]~], [1, 2, 3])
 
 \\#1180
 setrand(1);quadclassunit(572).no
@@ -55,3 +56,11 @@ setrand(1);bnfinit(x^2+1635847).no
 \\#1381
 K = bnfinit(x^2+23); L = bnrdisclist(K, 10); s = L[1][2];
 bnfdecodemodule(K, s[1][1])
+
+default(realprecision,19);
+K=bnfinit(x^5-x^4+x^3+100*x+20,1);
+A=idealpow(K,idealprimedec(K,5)[2],150);
+bnfisprincipal(K,A);
+default(realprecision,115);
+K=nfnewprec(K);
+bnfisprincipal(K,A)
