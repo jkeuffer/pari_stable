@@ -2883,25 +2883,29 @@ nfkermodpr(GEN nf, GEN x, GEN modpr)
 GEN
 nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
 {
+  const char *f = "nfsolvemodpr";
   pari_sp av = avma;
   GEN T, p, modpr;
-  long tb = typ(b);
 
   nf = checknf(nf);
   modpr = nf_to_Fq_init(nf, &pr,&T,&p);
-  if (typ(a)!=t_MAT) pari_err_TYPE("nfsolvemodpr",a);
+  if (typ(a)!=t_MAT) pari_err_TYPE(f,a);
   a = nfM_to_FqM(a, nf, modpr);
-  switch(tb)
+  switch(typ(b))
   {
     case t_MAT:
       b = nfM_to_FqM(b, nf, modpr);
-      a = FqM_to_nfM(FqM_gauss(a,b,T,p), modpr);
+      b = FqM_gauss(a,b,T,p);
+      if (!b) pari_err_INV(f,a);
+      a = FqM_to_nfM(b, modpr);
       break;
     case t_COL:
       b = nfV_to_FqV(b, nf, modpr);
-      a = FqV_to_nfV(FqM_gauss(a,b,T,p), modpr);
+      b = FqM_gauss(a,b,T,p);
+      if (!b) pari_err_INV(f,a);
+      a = FqV_to_nfV(b, modpr);
       break;
-    default: pari_err_TYPE("nfsolvemodpr",b);
+    default: pari_err_TYPE(f,b);
   }
   return gerepilecopy(av, a);
 }

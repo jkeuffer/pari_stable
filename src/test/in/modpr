@@ -28,3 +28,10 @@ K=nfinit(y^2-1105);
 P = nfmodprinit(K,idealprimedec(K,2)[1]);
 nfeltreducemodpr(K,(-y+1)/2,P)
 nffactormod(K, x^3+y*x^2+y*x+1, P)
+m=[1,y;[1/2,1/2]~,1]; v = [1,y]~
+nfkermodpr(K, m, P)
+nfsolvemodpr(K, m, v, P)
+m=[y,y^2;y^2,y^3]
+nfkermodpr(K, m, P)
+nfsolvemodpr(K, m, v, P)
+nfsolvemodpr(K, m, m, P)

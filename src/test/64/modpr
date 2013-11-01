@@ -332,7 +332,7 @@ error("inconsistent variables in poltobasis, z != y.")
 error("incorrect type in Rg_to_ff (t_COL).")
 error("incorrect type in Rg_to_ff (t_COL).")
 *6:
-error("impossible inverse in Flxq_inv: Vecsmall([65536]).")
+error("impossible inverse in Flxq_inv: Vecsmall([70368744177664]).")
 [0, 0, 0]~
 [1, 0]~
 

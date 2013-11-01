@@ -29,6 +29,8 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
        (now an e_INV error)
    21- rnfbasis: wrong result due to a mistake in gen_if_principal
        [2.6.0, revert d62f0de01]
+   22- nfsolvemodpr(nf,a,b,P): a must be invertible, as in matsolve
+       (was not documented, used to SEGV). Raise an error if not.
 
   Changed
     1- default help text for a user function is now as in \u:
