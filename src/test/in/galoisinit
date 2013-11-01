@@ -50,4 +50,9 @@ galoisexport(G,1);
 G=galoisinit(x^12-30*x^8-370*x^6+1665*x^4+23166*x^2+81);
 galoisexport(G)
 galoisexport(G, 1)
-
+G=galoisinit(x^12-24*x^10-10*x^9+216*x^8+180*x^7-844*x^6-1080*x^5+1056*x^4+2200*x^3+720*x^2-240*x-80);
+L=galoissubgroups(G)
+apply(H->galoisisnormal(G,H),L)
+apply(H->galoisisabelian(H),L)
+apply(H->galoisisabelian(H,1),L)
+apply(H->galoisisabelian(H,2),L)
