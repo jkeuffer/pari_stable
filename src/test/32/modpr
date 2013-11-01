@@ -334,4 +334,5 @@ error("incorrect type in Rg_to_ff (t_COL).")
 *6:
 error("impossible inverse in Flxq_inv: Vecsmall([70368744177664]).")
 [0, 0, 0]~
+[1, 0]~
 Total time spent: 8
