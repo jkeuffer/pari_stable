@@ -41,6 +41,7 @@ typedef void bg_fun(void*el, GEN *psum, GEN n, GEN a, long jmax);
 static void
 gen_BG_add(void *E, bg_fun *fun, struct bg_data *bg, GEN *psum, GEN n, long i, GEN a, GEN lasta)
 {
+  pari_sp av = avma, lim = stack_lim(av,2);
   long j;
   ulong nn = itou_or_0(n);
   if (nn && nn <= bg->rootbnd) bg->an[nn] = itos(a);
@@ -60,6 +61,11 @@ gen_BG_add(void *E, bg_fun *fun, struct bg_data *bg, GEN *psum, GEN n, long i, G
     nexta = mulis(a, bg->ap[j]);
     if (i == j && umodiu(bg->N, p)) nexta = subii(nexta, mului(p, lasta));
     gen_BG_add(E, fun, bg, psum, pn, j, nexta, a);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"gen_BG_add, p=%lu",p);
+      *psum = gerepilecopy(av, *psum);
+    }
   }
 }
 
@@ -95,7 +101,7 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
   GEN sum, p;
   forprime_t S;
   (void)forprime_init(&S, utoipos(bg->p[lp]+1), bg->bnd);
-  av2 = avma; lim = stack_lim(av2,2);
+  av2 = avma; lim = stack_lim(av2,1);
   if(DEBUGLEVEL)
     err_printf("1st stage, using recursion for p <= %ld\n", bg->p[lp]);
   sum = gcopy(sum0);
@@ -104,7 +110,7 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
     ulong pp = bg->p[i];
     long ap = bg->ap[i];
     gen_BG_add(E, fun, bg, &sum, utoipos(pp), i, stoi(ap), gen_1);
-    if (low_stack(lim, stack_lim(av,2)))
+    if (low_stack(lim, stack_lim(av2,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"ellL1, p=%lu",pp);
       sum = gerepileupto(av2, sum);
@@ -128,7 +134,7 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
       n = muliu(p, j);
       fun(E, &sum, n, a, j);
     }
-    if (low_stack(lim, stack_lim(av,2)))
+    if (low_stack(lim, stack_lim(av2,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"ellL1, p=%Ps",p);
       sum = gerepilecopy(av2, sum);
@@ -141,7 +147,7 @@ gen_BG_rec(void *E, bg_fun *fun, struct bg_data *bg, GEN sum0)
     GEN ap = ellap(bg->E, p);
     if (!signe(ap)) continue;
     fun(E, &sum, p, ap, 0);
-    if (low_stack(lim, stack_lim(av,2)))
+    if (low_stack(lim, stack_lim(av2,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"ellL1, p=%Ps",p);
       sum = gerepilecopy(av2, sum);
