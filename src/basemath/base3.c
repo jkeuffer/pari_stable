@@ -2114,8 +2114,9 @@ static GEN
 zlog_unitsarch(GEN sgnU, GEN bid)
 {
   GEN lists = gel(bid,4), arch = gmael(bid,1,2);
-  return Flm_Flc_mul(gmael(lists, lg(lists)-1, 3),
-                     rowpermute(sgnU, vec01_to_indices(arch)), 2);
+  GEN listslast = gel(lists,lg(lists)-1);
+  GEN m = rowpermute(sgnU, vec01_to_indices(arch));
+  return Flm_mul(gel(listslast,3), m, 2);
 }
 
 /*  flag & nf_GEN : generators, otherwise no
@@ -2245,7 +2246,7 @@ join_arch(ideal_data *D, GEN x) {
 static GEN
 join_archunit(ideal_data *D, GEN x) {
   GEN bid = join_arch(D, gel(x,1)), U = gel(x,2);
-  U = ZM_mul(gel(bid,5), vconcat(U, zlog_unitsarch(D->sgnU, bid)));
+  U = ZM_mul(gel(bid,5), vconcat(U, zm_to_ZM(zlog_unitsarch(D->sgnU, bid))));
   return mkvec2(bid, U);
 }
 

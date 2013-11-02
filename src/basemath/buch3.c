@@ -1819,11 +1819,16 @@ factormul(GEN fa1,GEN fa2)
 static long
 get_nz(GEN bnf, GEN ideal, GEN arch, long clhray)
 {
-  GEN arch2 = leafcopy(arch), mod = mkvec2(ideal, arch2);
+  GEN arch2, mod;
   long nz = 0, l = lg(arch), k, clhss;
+  if (typ(arch) == t_VECSMALL)
+    arch2 = indices_to_vec01(arch,nf_get_r1(bnf_get_nf(bnf)));
+  else
+    arch2 = leafcopy(arch);
+  mod = mkvec2(ideal, arch2);
   for (k = 1; k < l; k++)
   { /* FIXME: this is wasteful. Use the same algorithm as bnrconductor */
-    if (signe(gel(arch,k)))
+    if (signe(gel(arch2,k)))
     {
       gel(arch2,k) = gen_0; clhss = itos(bnrclassno(bnf,mod));
       gel(arch2,k) = gen_1;
@@ -1839,7 +1844,7 @@ get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel)
 {
   long n, R1;
   GEN dlk;
-  if (nz < 0) return NULL;
+  if (nz < 0) mkvec3(gen_0,gen_0,gen_0); /*EMPTY*/
   n  = clhray * degk;
   R1 = clhray * nz;
   dlk = factordivexact(factorpow(Z_factor(utoipos(Nf)),clhray), idealrel);
