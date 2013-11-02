@@ -1698,6 +1698,7 @@ GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
 GEN     ABC_to_bnr(GEN A, GEN B, GEN C, GEN *H, int gen);
 GEN     Buchray(GEN bnf, GEN module, long flag);
 GEN     bnrclassno(GEN bignf,GEN ideal);
+GEN     bnrclassno0(GEN A,GEN B,GEN C);
 GEN     bnrclassnolist(GEN bnf,GEN listes);
 GEN     bnrconductor0(GEN A, GEN B, GEN C, long flag);
 GEN     bnrconductor(GEN bnr, GEN H0, long flag);

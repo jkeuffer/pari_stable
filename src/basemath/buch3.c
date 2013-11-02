@@ -344,6 +344,25 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 /**                                                                **/
 /********************************************************************/
 static GEN
+check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL)
+{
+  GEN h, D = NULL;
+  if (H && gequal0(H)) H = NULL;
+  if (H)
+  {
+    D = diagonal_shallow(bnr_get_cyc(bnr));
+    if (typ(H) != t_MAT) pari_err_TYPE("check_subgroup",H);
+    RgM_check_ZM(H, "check_subgroup");
+    H = ZM_hnf(H);
+    if (!hnfdivide(H, D)) pari_err_OP("subgroup",H,D);
+    h = ZM_det_triangular(H);
+    if (equalii(h, *clhray)) H = NULL; else *clhray = h;
+  }
+  if (!H && !triv_is_NULL) H = D? D: diagonal_shallow(bnr_get_cyc(bnr));
+  return H;
+}
+
+static GEN
 get_dataunit(GEN bnf, GEN bid)
 {
   GEN D, cyc = bid_get_cyc(bid), U = init_units(bnf), nf = bnf_get_nf(bnf);
@@ -374,9 +393,10 @@ Buchray(GEN bnf, GEN module, long flag)
   cyc = bnf_get_cyc(bnf);
   gen = bnf_get_gen(bnf); ngen = lg(cyc)-1;
 
-  bid = Idealstar(nf,module, nf_GEN|nf_INIT);
+  bid = checkbid_i(module);
+  if (!bid) bid = Idealstar(nf,module,nf_GEN|nf_INIT);
   cycbid = bid_get_cyc(bid);
-  genbid = bid_get_gen_nocheck(bid);
+  genbid = bid_get_gen(bid);
   Ri = lg(cycbid)-1; lh = ngen+Ri;
   if (Ri || add_gen || do_init)
   {
@@ -504,6 +524,32 @@ bnrclassno(GEN bnf,GEN ideal)
   if (lg(cycbid) == 1) { avma = av; return icopy(h); }
   D = get_dataunit(bnf, bid); /* (Z_K/f)^* / units ~ Z^n / D */
   return gerepileuptoint(av, mulii(h, ZM_det_triangular(ZM_hnf(D))));
+}
+GEN
+bnrclassno0(GEN A, GEN B, GEN C)
+{
+  pari_sp av = avma;
+  GEN h, H = NULL;
+  /* adapted from ABC_to_bnr, avoid costly bnrinit if possible */
+  if (typ(A) == t_VEC)
+    switch(lg(A))
+    {
+      case 7: /* bnr */
+        checkbnr(A); H = B;
+        break;
+      case 11: /* bnf */
+        if (!B) pari_err_TYPE("bnrclassno [bnf+missing conductor]",A);
+        if (!C) return bnrclassno(A, B);
+        A = Buchray(A, B, nf_INIT); H = C;
+        break;
+      default: checkbnf(A);/*error*/
+    }
+  else checkbnf(A);/*error*/
+
+  h = bnr_get_no(A);
+  H = check_subgroup(A, H, &h, 1);
+  if (!H) { avma = av; return icopy(h); }
+  return gerepileuptoint(av, h);
 }
 
 GEN
@@ -1228,25 +1274,6 @@ bnrisconductor0(GEN A,GEN B,GEN C)
 {
   GEN H, bnr = ABC_to_bnr(A,B,C,&H, 0);
   return bnrisconductor(bnr, H);
-}
-
-static GEN
-check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL)
-{
-  GEN h, D = NULL;
-  if (H && gequal0(H)) H = NULL;
-  if (H)
-  {
-    D = diagonal_shallow(bnr_get_cyc(bnr));
-    if (typ(H) != t_MAT) pari_err_TYPE("check_subgroup",H);
-    RgM_check_ZM(H, "check_subgroup");
-    H = ZM_hnf(H);
-    if (!hnfdivide(H, D)) pari_err_OP("subgroup",H,D);
-    h = ZM_det_triangular(H);
-    if (equalii(h, *clhray)) H = NULL; else *clhray = h;
-  }
-  if (!H && !triv_is_NULL) H = D? D: diagonal_shallow(bnr_get_cyc(bnr));
-  return H;
 }
 
 /* return bnrisprincipal(bnr, (x)), assuming z = ideallog(x) */

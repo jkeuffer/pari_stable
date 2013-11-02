@@ -97,7 +97,10 @@ checksqmat(GEN x, long N)
 GEN
 checkbid_i(GEN bid)
 {
-  if (typ(bid)!=t_VEC || lg(bid)!=6 || lg(gel(bid,1))!=3) return NULL;
+  GEN f;
+  if (typ(bid)!=t_VEC || lg(bid)!=6) return NULL;
+  f = gel(bid,1);
+  if (typ(f)!=t_VEC || lg(f)!=3) return NULL;
   return bid;
 }
 void

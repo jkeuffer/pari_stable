@@ -32,6 +32,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    22- nfsolvemodpr(nf,a,b,P): a must be invertible, as in matsolve
        (was not documented, used to SEGV). Raise an error if not.
    23- various bnrdisclist crashes
+   24- bnrclassno(bnf, prime ideal) -> SEGV
 
   Changed
     1- default help text for a user function is now as in \u:
@@ -48,6 +49,9 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
        ZV_gcdext() routine.
     8- mathnf(,2) (generic vs integral t_MAT) is deprecated: we always test
        the matrix entries and choose the appropriate routine
+    9- bnrclassno: allow all standard ways to define class fiels (A,B,C),
+       not only bnf + module
+   10- bnrinit(bnf,f): allow using idealstar(bnf,f) in place of f
 
   Added
 EP  1- Configure option for gcov/lcov support

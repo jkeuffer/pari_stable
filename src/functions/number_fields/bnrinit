@@ -11,7 +11,10 @@ Description:
 Doc: $\var{bnf}$ is as
  output by \kbd{bnfinit}, $f$ is a modulus, initializes data linked to
  the ray class group structure corresponding to this module, a so-called
- \var{bnr} structure. The following member functions are available
+ \var{bnr} structure. One can input the associated \var{bid} with generators
+ for $f$ instead of the module itself, saving some time.
+
+ The following member functions are available
  on the result: \kbd{.bnf} is the underlying \var{bnf},
  \kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the
  modulus; finally, \kbd{.clgp}, \kbd{.no}, \kbd{.cyc}, \kbd{.gen} refer to the
