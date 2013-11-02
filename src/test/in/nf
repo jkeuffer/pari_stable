@@ -61,6 +61,6 @@ default(realprecision,19);
 K=bnfinit(x^5-x^4+x^3+100*x+20,1);
 A=idealpow(K,idealprimedec(K,5)[2],150);
 bnfisprincipal(K,A);
-default(realprecision,115);
+default(realprecision,173);
 K=nfnewprec(K);
 bnfisprincipal(K,A)
