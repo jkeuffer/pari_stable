@@ -538,9 +538,33 @@ sub is_void {
 
 sub nl { push(@f_text, shift); }
 
+sub split_words { my ($txt) = @_;
+  $txt =~ s/^ +//;
+  for ( split(/\s+/, $txt) )
+  {
+    s/\Q$tr{nbrk}/ /g;
+    my ($w) = $_;
+    # these codes will be replaced by 1 character
+    s/\@\[(obr|cbr|ouml|uuml|agrav|eacute|ldollar|lt|gt|\{|\})]/\@/g;
+    s/\@\[pm]/+\/-/g;
+    # the rest will be replaced by zero-width characters
+    s/\@\[\w+\]//g;
+    my ($l) = length($_);
+    # zero-width word
+    if (!$l && $#w >= 0) { $w[$#w] .= $w; next; }
+    push(@l, $l);
+    push(@w, $w);
+  }
+  # first word might still be zero-width
+  if ($#w >= 1 && !$l[0])
+  {
+    splice(@w, 0,2, "$w[0]$w[1]");
+    splice(@l, 0,1);
+  }
+}
+
 sub format_text {
   my($last_void) = 0;
-  my($add_stuff) = 0;
   my($noindent) = 0;
   my($init) = 1;
   my($cols) = ($ENV{'COLUMNS'} || 80) - 1;
@@ -552,48 +576,41 @@ sub format_text {
     {
       nl(&fit_line($first)) if (@w);
       nl("") if (!$last_void && !is_void($_)); # add empty line
-      nl("$indent$_");
+      nl("$indent$_"); next;
     }
-    elsif (s/^\@0//)    # verbatim lines
+    if (s/^\@0//)    # verbatim lines
     {
-      nl("$indent$_");
+      nl("$indent$_"); next;
     }
-    elsif (s/^\@2//)       # end verbatim, add indent
+
+    if (s/^\@2//)       # end verbatim, add indent
     {
-      nl("$indent$_");
-      $last_void = is_void($_);
+      nl("") if (!$last_void);
+      $last_void = 1;
+      split_words($_); next;
     }
-    elsif (s/^\@3//)       # end verbatim, no indent
+
+    if (s/^\@3//)       # end verbatim + no indent
     {
-      nl("$_"); $noindent = 1;
-      $last_void = is_void($_);
+      nl("") if (!$last_void);
+      $noindent = 1;
+      $last_void = 1;
+      split_words($_); next;
     }
-    elsif (is_void($_))    # line is empty
-    {
-      next if (!$add_stuff);
-      if ($init) {
-        nl(&fit_line($first));
-      } else {
-        nl("") if (!$last_void);
-        nl("\@[endbold]" . ($noindent?"":$indent) . &fit_line($first));
-      }
-      while (@w) { nl(&fit_line($cols)); }
-      $noindent = $init = $last_void = $add_stuff = 0;
+
+    if (!is_void($_)) { split_words($_); next; }
+
+    # line is empty, split out previous paragraph
+    next if (!@l || !$l[0]); # nothing
+    if ($init) {
+      nl(&fit_line($first));
+    } else {
+      nl("") if (!$last_void);
+      nl("\@[endbold]" . ($noindent? "": $indent) 
+                       . &fit_line($noindent? $cols: $first));
     }
-    else
-    {
-      $add_stuff = 1; s/^ +//;
-      @_ = split(/\s+/, $_);
-      for (@_)
-      {
-	s/\Q$tr{nbrk}/ /g; push(@w, $_);
-        # these codes will be replaced by 1 character
-        s/\@\[(obr|cbr|ouml|uuml|agrav|eacute|ldollar|lt|gt|\{|\})]/\@/g;
-        s/\@\[pm]/+\/-/g;
-        # the rest will be replaced by zero-width characters
-	s/\@\[\w+\]//g;    push(@l, length($_));
-      }
-    }
+    while (@w) { nl(&fit_line($cols)); }
+    $noindent = $init = $last_void = 0;
   }
 }
 
@@ -804,6 +821,7 @@ sub basic_subst {
   s/\\secref\{([^\}]*)\}/Section [$tr{startbold}Label: $1$tr{endbold}]/g unless $to_pod;
   s/\\label\{[^\}]*\}//g unless $to_pod;
 
+  s/\\noindent\b */\@3/;
   s/\\(noindent|medskip|bigskip|smallskip|left|right)(?![a-zA-Z])[ \t]*//g;
   s/\\vfill *(\\eject)?//g;
   s/\\(q|quad)(?![a-zA-Z])\s*/  /g;
@@ -847,10 +865,10 @@ sub basic_subst {
   s/(^|\s)\{(\w+)\}/$1$2/g;
 
   s/\\p(?![a-zA-Z])/$tr{startbold}p$tr{endbold}$1/g;
-  s/\\point\{([^\}]*)\}/$tr{startbold}* $1$tr{endbold}/g;
-  s/(\\bullet|\\item)/$tr{startbold}*$tr{endbold}/g;
-  s/\\misctitle\{([^\}]*)\}/$tr{startbold}$1.$tr{endbold}/g;
-  s/\\subsec\{([^\}]*)\}/$tr{startbold}$1.$tr{endbold}/g unless $to_pod;
+  s/\\point\{([^\}]*)\}/\@3$tr{startbold}* $1$tr{endbold}/g;
+  s/(\\bullet|\\item)/\@3$tr{startbold}*$tr{endbold}/g;
+  s/\\misctitle\{([^\}]*)\}/\@3$tr{startbold}$1.$tr{endbold}/g;
+  s/\\subsec\{([^\}]*)\}/\@3$tr{startbold}$1.$tr{endbold}/g unless $to_pod;
   s/\\teb\{([^\}]*)\}/\\sidx{$1}$tr{startbold}$1$tr{endbold}/g;
   s/\\tet\{([^\}]*)\}/\\sidx{$1}$tr{startcode}$1$tr{endcode}/g;
   s/\\tev\{([^\}]*)\}/\\sidx{$1}$tr{startit}$1$tr{endit}/g;
