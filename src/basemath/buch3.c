@@ -1875,8 +1875,7 @@ get_discray(disc_data *D, GEN V, GEN z, long N)
   {
     GEN pr = gel(P,k), p = pr_get_p(pr);
     long e, ep = E[k], f = pr_get_f(pr);
-    long S = 0, norm = N, Npr, clhss;
-    Npr = upowuu(p[2],f);
+    long S = 0, norm = N, Npr = upowuu(p[2],f), clhss;
     for (e=1; e<=ep; e++)
     {
       GEN fad;
@@ -1901,8 +1900,8 @@ GEN
 discrayabslist(GEN bnf, GEN L)
 {
   pari_sp av = avma;
-  long i, j, lz, l = lg(L);
-  GEN nf, v, z, V, D, d, h;
+  long i, l = lg(L);
+  GEN nf, V, D, h;
   disc_data ID;
 
   chk_listBU(L, "discrayabslist");
@@ -1917,7 +1916,8 @@ discrayabslist(GEN bnf, GEN L)
   D = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
-    z = gel(L,i); lz = lg(z);
+    GEN z = gel(L,i), v, d;
+    long j, lz = lg(z);
     gel(V,i) = v = cgetg(lz,t_VEC);
     gel(D,i) = d = cgetg(lz,t_VEC);
     for (j=1; j<lz; j++) {

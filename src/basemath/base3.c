@@ -2216,18 +2216,15 @@ static GEN
 join_bid_arch(GEN nf, GEN bid1, GEN arch)
 {
   pari_sp av = avma;
-  long i, lx1;
-  GEN f1, G1, fa1, lists1, U;
+  GEN f1, G1, fa1, U;
   GEN lists, cyc, y, u1 = NULL, x, sarch, gen;
 
   checkbid(bid1);
   f1 = gel(bid1,1); G1 = gel(bid1,2); fa1 = gel(bid1,3);
   x = gel(f1,1);
   sarch = nfarchstar(nf, x, arch);
-  lists1 = gel(bid1,4); lx1 = lg(lists1);
-  lists = cgetg(lx1,t_VEC);
-  for (i=1; i<lx1-1; i++) lists[i] = lists1[i];
-  gel(lists,i) = sarch;
+  lists = leafcopy(gel(bid1,4));
+  gel(lists,lg(lists)-1) = sarch;
 
   gen = (lg(G1)>3)? gen_1: NULL;
   cyc = diagonal_shallow(shallowconcat(gel(G1,2), gel(sarch,1)));
