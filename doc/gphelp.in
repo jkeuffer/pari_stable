@@ -865,9 +865,10 @@ sub basic_subst {
   s/(^|\s)\{(\w+)\}/$1$2/g;
 
   s/\\p(?![a-zA-Z])/$tr{startbold}p$tr{endbold}$1/g;
-  s/\\point\{([^\}]*)\}/\@3$tr{startbold}* $1$tr{endbold}/g;
-  s/(\\bullet|\\item)/\@3$tr{startbold}*$tr{endbold}/g;
-  s/\\misctitle\{([^\}]*)\}/\@3$tr{startbold}$1.$tr{endbold}/g;
+  s/^ *\\point\{([^\}]*)\}/\@3$tr{startbold}* $1$tr{endbold}/g;
+  s/^ *\@\[dollar]\\bullet\@\[dollar]/\@3$tr{startbold}*$tr{endbold}/g;
+  s/^ *(\\bullet|\\item)/\@3$tr{startbold}*$tr{endbold}/g;
+  s/^ *\\misctitle\{([^\}]*)\}/\@3$tr{startbold}$1.$tr{endbold}/g;
   s/\\subsec\{([^\}]*)\}/\@3$tr{startbold}$1.$tr{endbold}/g unless $to_pod;
   s/\\teb\{([^\}]*)\}/\\sidx{$1}$tr{startbold}$1$tr{endbold}/g;
   s/\\tet\{([^\}]*)\}/\\sidx{$1}$tr{startcode}$1$tr{endcode}/g;
