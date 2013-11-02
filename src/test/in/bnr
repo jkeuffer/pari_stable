@@ -1,3 +1,4 @@
+default(realprecision,38);
 subgrouplist(bnrinit(bnfinit(x^3-x-1),10));
 bnrL1(bnrinit(bnfinit(x^2+1),10,1),1);
 setrand(5);bnrL1(bnrinit(bnfinit(y^2+6),1,1),0);
@@ -33,3 +34,7 @@ bnrdisc(bnf,m,H,3)
 bnrdisc(bnf,[5,3;0,1],H,2)
 bnrdisc(bnf,[5,3;0,1],H,3)
 bnrclassno(bnf, idealprimedec(bnf,5)[1])
+
+bnr=bnrinit(bnf,[7,[1,1]],1);
+bnrrootnumber(bnr, [2,1])
+
