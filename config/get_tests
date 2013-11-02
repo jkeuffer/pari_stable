@@ -24,7 +24,13 @@ test_basic="\
   nfields_200\
 "
 
-pattern_out=`echo $test_extra_out $test_extra_OUT | sed -e 's/ /|/g'`
+pattern_out=
+for i in $test_extra_out $test_extra_OUT; do
+  case $pattern_out in
+  "") pattern_out="\\\\b$i\\\\b";;
+  *) pattern_out="$pattern_out|\\\\b$i\\\\b";;
+  esac
+done
 # included in 'make test-all' in addition to regular components of 'make bench'
 test_extra=`ls "$TOP"/src/test/in | egrep -v "CVS|$pattern_out"`
 test_extra=`echo $test_extra | sed -e 's/\n/ /g'`
