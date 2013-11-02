@@ -19,38 +19,39 @@ Iterator:
 Wrapper: (,vG,,)
 Description:
  (small,closure,?gen,?gen):void forpart(${2 cookie}, ${2 wrapper}, $1, $3, $4)
-Help: forpart(X=k,seq,{a=k},{n=k}): evaluate sequence seq where the Vecsmall X
- goes going over the partitions of k, ordered lexicographically. Optional
+Help: forpart(X=k,seq,{a=k},{n=k}): evaluate seq where the Vecsmall X
+ goes over the partitions of k, ordered lexicographically. Optional
  parameter n (n=nmax or n=[nmin,nmax]) restricts the length of the partition.
  Optional parameter a (a=amax or a=[amin,amax]) restricts the range of the
- parts X[i]. Zeros are removed unless one sets amin=0 to get X of fixed
+ parts. Zeros are removed unless one sets amin=0 to get X of fixed
  length nmax (=k by default).
 Doc: evaluate \var{seq} over the partitions $X=[x_1,\dots x_n]$ of the
  integer $k$, i.e.~increasing sequences $x_1\leq x_2\dots \leq x_n$ of sum
- $x_1+\dots + x_n=k$.
+ $x_1+\dots + x_n=k$. By convention, $0$ admits only the empty partition and
+ negative numbers have no partitions.
 
- Optional parameters $n$ and $a$ are as follows:
+ \noindent Optional parameters $n$ and $a$ are as follows:
 
- \item $n=nmax$ (resp. $n=[nmin,nmax]$) restricts partitions to length less
- than $nmax$ (resp. length between $nmin$ and $nmax$), where the length is
- the number of non-zero entries.
+ \item $n=\var{nmax}$ (resp. $n=[\var{nmin},\var{nmax}]$) restricts
+ partitions to length less than $\var{nmax}$ (resp. length between
+ $\var{nmin}$ and $nmax$), where the \emph{length} is the number of nonzero
+ entries.
 
- \item $a=amax$ (resp. $a=[amin,amax]$) restricts the components of $X$ to
-  integers less than $amax$ (resp. between $amin$ and $amax$).
+ \item $a=\var{amax}$ (resp. $a=[\var{amin},\var{amax}]$) restricts the parts
+ to integers less than $\var{amax}$ (resp. between $\var{amin}$ and
+ $\var{amax}$).
 
- By default, remove zero entries on the left except if $amin\leq0$, in which
- case $X$ is of constant length $nmax$.
-
- Examples:
+ By default, parts are positive and we remove zero entries unless $amin\leq0$,
+ in which case $X$ is of constant length $\var{nmax}$.
  \bprog
- \\ max 3 non-zero terms less than 4
+ \\ at most 3 non-zero parts, all <= 4
  ? forpart(v=5,print(Vec(v)),4,3)
  [1, 4]
  [2, 3]
  [1, 1, 3]
  [1, 2, 2]
 
- \\ between 2 and 4 terms less than 5, fill with zeros
+ \\ between 2 and 4 parts less than 5, fill with zeros
  ? forpart(v=5,print(Vec(v)),[0,5],[2,4])
  [0, 0, 1, 4]
  [0, 0, 2, 3]

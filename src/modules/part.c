@@ -406,7 +406,8 @@ void
 forpart0(GEN k, GEN code, GEN abound, GEN nbound)
 {
   pari_sp av = avma;
-  if (typ(k) != t_INT || signe(k)<0) pari_err_TYPE("forpart",k);
+  if (typ(k) != t_INT) pari_err_TYPE("forpart",k);
+  if (signe(k)<0) return;
   push_lex(gen_0, code);
   forpart((void*)code, &gp_evalvoid, itos(k), abound, nbound);
   pop_lex(1);
