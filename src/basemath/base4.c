@@ -2369,10 +2369,10 @@ idealchinese(GEN nf, GEN x, GEN w)
   if (!is_vec_t(ty) || lg(w) != r) pari_err_TYPE("idealchinese",w);
   if (r == 1) return scalarcol_shallow(gen_1,N);
 
-  w = Q_remove_denom(w, &den);
+  w = Q_remove_denom(matalgtobasis(nf,w), &den);
   if (den)
   {
-    GEN p = gen_indexsort(x, (void*)&cmp_prime_ideal, cmp_nodata);
+    GEN p = gen_indexsort(L, (void*)&cmp_prime_ideal, cmp_nodata);
     GEN fa = idealfactor(nf, den); /* sorted */
     L = vecpermute(L, p);
     e = vecpermute(e, p);

@@ -40,6 +40,15 @@ idealnumden(nf,1)
 idealnumden(nf,1/2)
 idealnumden(nf,x/2)
 nffactorback(nf, [3, x+1, [1,2]~], [1, 2, 3])
+v = [x,0,[0,1/7^4]~,Mod(x,nf.pol)];
+F = idealfactor(nf, 2*3*7);
+P = F[,1];
+F[,2] *= 3;
+y=idealchinese(nf, F, v)
+vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-y),P[i]))
+F[,2] = [0,1,-2,3]~;
+y=idealchinese(nf, F, v)
+vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-y),P[i]))
 
 \\#1180
 setrand(1);quadclassunit(572).no
