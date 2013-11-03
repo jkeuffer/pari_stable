@@ -34,6 +34,11 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    23- various bnrdisclist crashes
    24- bnrclassno(bnf, prime ideal) -> SEGV
    25- forpart(x=k,) raised an exception if k < 0 [ now empty loop ]
+   26- deriv(constant) now returns 0 in the base ring (not gen_0).
+   27- inconsistencies and mistakes in deriv / intformal of t_POLMOD: forbid
+       integration wrt the main variable of x.mod, deriv(Mod(x, x^2),x) was
+       Mod(1,x^2) and deriv(Mod(y,x^2),y) was 0 instead of respectively 0 and
+       Mod(1,x^2)
 
   Changed
     1- default help text for a user function is now as in \u:

@@ -1613,19 +1613,26 @@ deriv(GEN x, long v)
   pari_sp av;
   GEN y;
 
-  tx = typ(x); if (is_const_t(tx)) return gen_0;
+  tx = typ(x);
+  if (is_const_t(tx))
+    switch(tx)
+    {
+      case t_INTMOD: retmkintmod(gen_0, icopy(gel(x,1)));
+      case t_FFELT: return FF_zero(x);
+      default: return gen_0;
+    }
   if (v < 0 && tx!=t_CLOSURE) v = gvar9(x);
   switch(tx)
   {
     case t_POLMOD:
-      if (varncmp(v, varn(x[1]))) return gen_0;
-      y = cgetg(3,t_POLMOD);
-      gel(y,1) = RgX_copy(gel(x,1));
-      gel(y,2) = deriv(gel(x,2),v); return y;
-
+    {
+      GEN a = gel(x,2), b = gel(x,1);
+      if (v == varn(b)) return RgX_get_0(b);
+      retmkpolmod(deriv(a,v), RgX_copy(b));
+    }
     case t_POL:
       vx = varn(x);
-      if (varncmp(vx, v) > 0) return gen_0;
+      if (varncmp(vx, v) > 0) return RgX_get_0(x);
       if (varncmp(vx, v) == 0) return RgX_deriv(x);
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = deriv(gel(x,i),v);
@@ -1633,7 +1640,7 @@ deriv(GEN x, long v)
 
     case t_SER:
       vx = varn(x);
-      if (varncmp(vx, v) > 0) return gen_0;
+      if (varncmp(vx, v) > 0) return RgX_get_0(x);
       if (varncmp(vx, v) == 0) return derivser(x);
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (j=2; j<lx; j++) gel(y,j) = deriv(gel(x,j),v);
@@ -1888,16 +1895,16 @@ integ(GEN x, long v)
   GEN y,p1;
 
   tx = typ(x);
-  if (v < 0) { v = gvar(x); if (v == NO_VARIABLE) v = 0; }
+  if (v < 0) { v = gvar9(x); if (v == NO_VARIABLE) v = 0; }
   if (is_scalar_t(tx))
   {
-    if (tx == t_POLMOD && varncmp(v, varn(x[1])) > 0)
+    if (tx == t_POLMOD)
     {
-      y = cgetg(3,t_POLMOD);
-      gel(y,1) = RgX_copy(gel(x,1));
-      gel(y,2) = integ(gel(x,2),v); return y;
+      GEN a = gel(x,2), b = gel(x,1);
+      vx = varn(b);
+      if (varncmp(v, vx) > 0) retmkpolmod(integ(a,v), RgX_copy(b));
+      if (v == vx) pari_err_PRIORITY("intformal",x,"=",v);
     }
-    if (gequal0(x)) return gen_0;
     return deg1pol(x, gen_0, v);
   }
 

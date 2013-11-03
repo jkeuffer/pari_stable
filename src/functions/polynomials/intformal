@@ -21,3 +21,14 @@ Doc: \idx{formal integration} of $x$ with respect to the variable $v$ (wrt.
  The argument $x$ can be of any type. When $x$ is a rational function, we
  assume that the base ring is an integral domain of characteristic zero.
 
+   By  definition,   the main variable of a \typ{POLMOD} is the main variable
+ among the  coefficients  from  its  two  polynomial  components
+ (representative and modulus); in other words, assuming a polmod represents an
+ element of $R[X]/(T(X))$, the variable $X$ is a mute variable and the
+ integral is taken with respect to the main variable used in the base ring $R$.
+ In particular, it is meaningless to integrate with respect to the main
+ variable of \kbd{x.mod}:
+ \bprog
+ ? intformal(Mod(1,x^2+1), 'x)
+ *** intformal: incorrect priority in intformal: variable x = x
+ @eprog
