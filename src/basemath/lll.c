@@ -742,8 +742,6 @@ rescale_to_int(GEN x)
   return grndtoi(gmul2n(x, -emin), &e);
 }
 
-/* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
- * Quality ratio = D in ]0.25, 1[. Suggested values: 0.75 or 0.99 */
 GEN
 lllfp(GEN x, double D, long flag)
 {
