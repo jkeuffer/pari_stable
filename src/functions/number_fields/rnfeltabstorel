@@ -20,6 +20,6 @@ Doc: $\var{rnf}$ being a relative
  ? rnfeltabstorel(L, Mod(x, x^2-y))
   ***   at top-level: rnfeltabstorel(L,Mod
   ***                 ^--------------------
-  *** rnfeltabstorel: inconsistent moduli in rnfeltabstorel: x^2 - y != x^4 + 1
+  *** rnfeltabstorel: inconsistent moduli in rnfeltabstorel: x^2-y != x^4+1
  @eprog
 
