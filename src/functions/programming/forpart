@@ -28,9 +28,14 @@ Help: forpart(X=k,seq,{a=k},{n=k}): evaluate seq where the Vecsmall X
 Doc: evaluate \var{seq} over the partitions $X=[x_1,\dots x_n]$ of the
  integer $k$, i.e.~increasing sequences $x_1\leq x_2\dots \leq x_n$ of sum
  $x_1+\dots + x_n=k$. By convention, $0$ admits only the empty partition and
- negative numbers have no partitions.
-
- \noindent Optional parameters $n$ and $a$ are as follows:
+ negative numbers have no partitions. A partition is given by a
+ \typ{VECSMALL}, where parts are sorted in nondecreasing order:
+ \bprog
+ ? forpart(X=3, print(X))
+ Vecsmall([3])
+ Vecsmall([1, 2])
+ Vecsmall([1, 1, 1])
+ @eprog\noindent Optional parameters $n$ and $a$ are as follows:
 
  \item $n=\var{nmax}$ (resp. $n=[\var{nmin},\var{nmax}]$) restricts
  partitions to length less than $\var{nmax}$ (resp. length between

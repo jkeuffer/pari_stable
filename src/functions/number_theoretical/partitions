@@ -10,7 +10,7 @@ Help: partitions(k,{a=k},{n=k})): vector of partitions of the integer k.
 Doc: returns the vector of partitions of the integer $k$ as a sum of positive
  integers (parts); for $k < 0$, it returns the empty set \kbd{[]}, and for $k
  = 0$ the trivial partition (no parts). A partition is given by a
- \typ{VECSMALL}, where parts are sorted in increasing order:
+ \typ{VECSMALL}, where parts are sorted in nondecreasing order:
  \bprog
  ? partitions(3)
  %1 = [Vecsmall([3]), Vecsmall([1, 2]), Vecsmall([1, 1, 1])]
