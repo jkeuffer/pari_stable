@@ -7,3 +7,7 @@ mathnf([x,x^2+1; x^3+x+1, x+2]*Mod(1,5))
 v=[116085838, 181081878, 314252913,10346840];
 [H,U]=mathnf(v, 1); [v*U, norml2(U)]
 [H,U]=mathnf(v, 5); [v*U, norml2(U)]
+mathnf([])
+mathnf([],1)
+mathnf([;])
+mathnf([;],1)

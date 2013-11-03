@@ -23,5 +23,13 @@
 [[0, 0, 0, 1], 2833319]
 ? [H,U]=mathnf(v,5);[v*U,norml2(U)]
 [[0, 0, 0, 1], 765585180708864230567243002686057927228240493]
+? mathnf([])
+[;]
+? mathnf([],1)
+[[;], [;]]
+? mathnf([;])
+[;]
+? mathnf([;],1)
+[[;], [;]]
 ? print("Total time spent: ",gettime);
-Total time spent: 4
+Total time spent: 8

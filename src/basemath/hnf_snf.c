@@ -37,9 +37,12 @@ mathnf0(GEN x, long flag)
       if (RgV_is_ZV(x))
         switch (flag)
         {
-          case 0: retmkmat(mkcol(ZV_content(x)));
+          case 0:
+            if (lg(x) == 1) return cgetg(1, t_MAT);
+            retmkmat(mkcol(ZV_content(x)));
           case 1:
-          case 4: return ZV_hnfgcdext(x);
+          case 4:
+            return ZV_hnfgcdext(x);
         }
       x = gtomat(x); break;
     case t_MAT: break;
@@ -1575,6 +1578,7 @@ ZV_gcdext_i(GEN A)
   long k, n = lg(A);
   GEN B, lambda, D;
 
+  if (n == 1) retmkvec2(gen_1, cgetg(1,t_MAT));
   A = leafcopy(A);
   B = matid(n-1);
   lambda = zeromatcopy(n-1,n-1);
@@ -1629,7 +1633,9 @@ static GEN
 ZV_hnfgcdext(GEN A)
 {
   pari_sp av = avma;
-  GEN z = ZV_gcdext_i(A);
+  GEN z;
+  if (lg(A) == 1) retmkvec2(cgetg(1,t_MAT),cgetg(1,t_MAT));
+  z = ZV_gcdext_i(A);
   gel(z,1) = mkmat(mkcol(gel(z,1)));
   return gerepilecopy(av, z);
 }
