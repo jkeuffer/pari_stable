@@ -750,7 +750,7 @@ lllfp(GEN x, double D, long flag)
   long n = lg(x)-1;
   pari_sp av = avma;
   GEN h;
-  if (n <= 1) return matid(n);
+  if (n <= 1) return lll_trivial(x,flag);
   h = ZM_lll(rescale_to_int(x), D, flag);
   return gerepilecopy(av, h);
 }

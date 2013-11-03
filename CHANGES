@@ -41,6 +41,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
        Mod(1,x^2)
    28- idealchinese with t_POLMOD inputs -> input error
    29- idealchinese with denominators -> SEGV
+   30- qflll(Mat(0)) returned Mat(1)
 
   Changed
     1- default help text for a user function is now as in \u:
