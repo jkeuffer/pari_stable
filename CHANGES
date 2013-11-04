@@ -63,6 +63,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
     9- bnrclassno: allow all standard ways to define class fiels (A,B,C),
        not only bnf + module
    10- bnrinit(bnf,f): allow using idealstar(bnf,f) in place of f
+   11- Let Set(t_VECSMALL v) behave as Set(Vec(v))
 
   Added
 EP  1- Configure option for gcov/lcov support

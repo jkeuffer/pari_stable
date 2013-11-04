@@ -1756,13 +1756,15 @@ merge_factor_i(GEN f, GEN g)
 GEN
 gtoset(GEN x)
 {
-  long tx, lx;
+  long lx;
   if (!x) return cgetg(1, t_VEC);
-  tx = typ(x); lx = lg(x);
-  if (!is_vec_t(tx))
+  switch(typ(x))
   {
-    if (tx != t_LIST) return mkveccopy(x);
-    x = list_data(x); lx = x? lg(x): 1;
+    case t_VEC:
+    case t_COL: lx = lg(x); break;
+    case t_LIST: x = list_data(x); lx = x? lg(x): 1; break;
+    case t_VECSMALL: lx = lg(x); x = zv_to_ZV(x); break;
+    default: return mkveccopy(x);
   }
   if (lx==1) return cgetg(1,t_VEC);
   x = gen_sort_uniq(x, (void*)&cmp_universal, cmp_nodata);
