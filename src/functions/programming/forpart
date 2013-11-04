@@ -20,11 +20,10 @@ Wrapper: (,vG,,)
 Description:
  (small,closure,?gen,?gen):void forpart(${2 cookie}, ${2 wrapper}, $1, $3, $4)
 Help: forpart(X=k,seq,{a=k},{n=k}): evaluate seq where the Vecsmall X
- goes over the partitions of k, ordered lexicographically. Optional
- parameter n (n=nmax or n=[nmin,nmax]) restricts the length of the partition.
- Optional parameter a (a=amax or a=[amin,amax]) restricts the range of the
- parts. Zeros are removed unless one sets amin=0 to get X of fixed
- length nmax (=k by default).
+ goes over the partitions of k. Optional parameter n (n=nmax or n=[nmin,nmax])
+ restricts the length of the partition. Optional parameter a (a=amax or
+ a=[amin,amax]) restricts the range of the parts. Zeros are removed unless one
+ sets amin=0 to get X of fixed length nmax (=k by default).
 Doc: evaluate \var{seq} over the partitions $X=[x_1,\dots x_n]$ of the
  integer $k$, i.e.~increasing sequences $x_1\leq x_2\dots \leq x_n$ of sum
  $x_1+\dots + x_n=k$. By convention, $0$ admits only the empty partition and
