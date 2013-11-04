@@ -1507,6 +1507,7 @@ sumpos(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
 
         long ex;
         affgr(eval(E, addii(r,a)), reel);
+        if (!signe(reel)) break;
         ex = expo(reel) + kk; shiftr_inplace(reel, kk);
         x = mpadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);

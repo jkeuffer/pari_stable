@@ -42,6 +42,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    28- idealchinese with t_POLMOD inputs -> input error
    29- idealchinese with denominators -> SEGV
    30- qflll(Mat(0)) returned Mat(1)
+   31- infinite loop in sumpos: sumpos(n=1,-log(cos(1/n))) [#1481]
 
   Changed
     1- default help text for a user function is now as in \u:

@@ -114,3 +114,7 @@
 0.94608307036718301494135331382317964744
 ? print("Total time spent: ",gettime);
 Total time spent: 9252
+? sumpos(n=1,-log(cos(1/n)))
+0.94536905472633293521954432593129671808
+? print("Total time spent: ",gettime);
+Total time spent: 12869
