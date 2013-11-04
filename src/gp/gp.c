@@ -1728,7 +1728,12 @@ break_loop(int numerr)
     avma = av;
     if ((er=setjmp(env[nenv])))
     {
-      if (er<0) { s_env.n=1; longjmp(env[s_env.n-1], er); }
+      if (er < 0)
+      {
+        s_env.n = 1;
+        frame_level = oldframe_level;
+        longjmp(env[s_env.n-1], er);
+      }
       gp_context_restore(&rec);
       iferr_env = NULL;
       closure_err(dbg_level);

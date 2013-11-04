@@ -70,5 +70,25 @@ break> i
 100
 break> break
 
+? f()=1/0
+()->1/0
+? f();
+  ***   at top-level: f()
+  ***                 ^---
+  ***   in function f: 1/0
+  ***                   ^--
+  *** _/_: impossible inverse in gdiv: 0.
+  ***   Break loop: type 'break' to go back to GP prompt
+break> allocatemem(10^7)
+  ***   Warning: new stack size = 10000000 (9.537 Mbytes).
+? for(i=1,10,if(i==2,1/0));
+  ***   at top-level: for(i=1,10,if(i==2,1/0))
+  ***                                     ^----
+  *** _/_: impossible inverse in gdiv: 0.
+  ***   Break loop: type 'break' to go back to GP prompt
+break> i
+2
+break> break
+
 ? print("Total time spent: ",gettime);
-Total time spent: 4
+Total time spent: 0

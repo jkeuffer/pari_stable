@@ -30,3 +30,9 @@ z
 iferrname("e_VAR",vector(10000,i,1/(i-100)),E,Vec(E))
 i
 break
+f()=1/0
+f();
+allocatemem(10^7)
+for(i=1,10,if(i==2,1/0));
+i
+break
