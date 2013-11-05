@@ -2844,7 +2844,9 @@ nfmulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
   GEN z, p, pr = modpr, T;
 
   nf = checknf(nf); modpr = nf_to_Fq_init(nf,&pr,&T,&p);
-  z = Fq_mul(nf_to_Fq(nf,x,modpr), nf_to_Fq(nf,y,modpr),T,p);
+  x = nf_to_Fq(nf,x,modpr);
+  y = nf_to_Fq(nf,y,modpr);
+  z = Fq_mul(x,y,T,p);
   return gerepileupto(av, algtobasis(nf, Fq_to_nf(z,modpr)));
 }
 
