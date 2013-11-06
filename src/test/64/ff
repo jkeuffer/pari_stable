@@ -161,13 +161,13 @@ Mod(6687681666819568403, 18446744073944432641)
 ^2 - 10, x^2 - 8, x^2 - 3, x^2 - 2]~
 ? #polrootsff(x^107+2*x^3+1,3,ffinit(3,107,'a))
 107
-? t=ffprimroot(ffgen(ffinit(2,61)));fflog(t^1234567891012345678,t)
+? t=ffprimroot(ffgen(2^61));fflog(t^1234567891012345678,t)
 1234567891012345678
-? t=ffprimroot(ffgen(ffinit(3,23)));fflog(t^12345678910,t)
+? t=ffprimroot(ffgen(3^23));fflog(t^12345678910,t)
 12345678910
-? t=ffprimroot(ffgen(ffinit(5,23)));fflog(t^1234567891012345,t)
+? t=ffprimroot(ffgen(5^23));fflog(t^1234567891012345,t)
 1234567891012345
-? t=ffprimroot(ffgen(ffinit(5,17)));fflog(t^123456789101,t)
+? t=ffprimroot(ffgen(5^17));fflog(t^123456789101,t)
 123456789101
 ? print("Total time spent: ",gettime);
-Total time spent: 1448
+Total time spent: 1248

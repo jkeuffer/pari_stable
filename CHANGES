@@ -79,6 +79,7 @@ EP  1- Configure option for gcov/lcov support
     5- allow rnf.disc, rnf.index
     6- functions rnfelttrace, rnfelttrace
     7- function ZV_gcdext, based on ZM_hnflll (simplified)
+    8- allow ffgen(p^f) instead of ffgen(ffinit(p,f))
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

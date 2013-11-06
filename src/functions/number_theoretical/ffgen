@@ -2,13 +2,36 @@ Function: ffgen
 Section: number_theoretical
 C-Name: ffgen
 Prototype: GDn
-Help: ffgen(P,{v}): return the generator g=X mod P(X) of the finite field
- defined by the polynomial P(X). If v is given, the variable name is used to
- display g, else the variable of the polynomial P is used.
-Doc: return the generator $g=X \pmod{P(X)}$ of the
- finite field defined by the polynomial $P$ (which must have \typ{INTMOD}
- coefficients). If \kbd{v} is given, the variable name is used to display $g$,
- else the variable of the polynomial $P$ is used.
+Help: ffgen(q,{v}): return a generator X mod P(X) for the finite field with
+ q elements. If v is given, the variable name is used to display g, else the
+ variable 'x' is used. Alternative syntax, q = P(X) a polynomial with t_INTMOD
+ coefficients, return the generator X mod P(X) of the finite field defined
+ by P. If v is given, the variable name is used to display g, else the
+ variable of the polynomial P is used.
+
+Doc: return a \typ{FFELT} generator for the finite field with $q$ elements;
+ $q = p^f$ must be a prime power. This functions computes an irreducible
+ monic polynomial $P\in\F_p[X]$ of degree~$f$ (via \tet{ffinit}) and
+ returns $g = X \pmod{P(X)}$. If \kbd{v} is given, the variable name is used
+ to display $g$, else the variable $x$ is used.
+ \bprog
+ ? g = ffgen(8, 't);
+ ? g.mod
+ %2 = t^3 + t^2 + 1
+ ? g.p
+ %3 = 2
+ ? g.f
+ %4 = 3
+ ? ffgen(6)
+  ***   at top-level: ffgen(6)
+  ***                 ^--------
+  *** ffgen: not a prime number in ffgen: 6.
+ @eprog\noindent Alternative syntax: instead of a prime power $q$, one may
+ input directly the polynomial $P$ (monic, irreducible, with \typ{INTMOD}
+ coefficients), and the function returns the generator $g = X \pmod{P(X)}$,
+ inferring $p$ from the coefficients of $P$. If \kbd{v} is given, the
+ variable name is used to display $g$, else the variable of the polynomial
+ $P$ is used.
 Variant:
- To create an a generator for a prime finite field, the function
+ To create a generator for a prime finite field, the function
  \fun{GEN}{p_to_GEN}{GEN p, long v} returns \kbd{1+ffgen(x*Mod(1,p),v)}.

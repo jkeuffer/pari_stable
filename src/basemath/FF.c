@@ -1443,9 +1443,22 @@ ffgen(GEN T, long v)
 {
   GEN A, p = NULL, ff;
   long d;
-  if (typ(T) != t_POL) pari_err_TYPE("ffgen",T);
-  d = degpol(T); p = NULL;
-  if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err_TYPE("ffgen",T);
+  switch(typ(T))
+  {
+    case t_POL:
+      d = degpol(T); p = NULL;
+      if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err_TYPE("ffgen",T);
+      break;
+    case t_INT:
+      d = Z_isanypower(T, &p);
+      if (!d) { d = 1; p = T; }
+      if (!BPSW_psp(p)) pari_err_PRIME("ffgen",p);
+      T = ffinit(p, d, v);
+      break;
+    default:
+      pari_err_TYPE("ffgen",T);
+      return NULL;
+  }
   ff = cgetg(5,t_FFELT);
   T = RgX_to_FpX(T, p);
   if (v < 0) v = varn(T);

@@ -11,4 +11,4 @@ Doc: computes a monic polynomial of degree $n$ which is irreducible over
 
  It is useful in conjunction with \tet{ffgen}; for instance if
  \kbd{P = ffinit(3,2)}, you can represent elements in $\F_{3^2}$ in term of
- \kbd{g = ffgen(P,g)}.
+ \kbd{g = ffgen(P,'t)}. This can be abbreviated as \kbd{g = ffgen(3^2, 't)}.
