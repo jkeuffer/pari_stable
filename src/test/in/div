@@ -11,4 +11,15 @@ for (i=1,#v,
   )
 )
 }
-\\ [2,3], Mat(2);
+w=[x + O(x^2),[2,3],Mat(2)];
+{
+for (i=1,#w,
+  for(j=1,#v,
+    print("* ",[i,j]);
+    print(iferr(w[i]/v[j],E,E));
+    print(iferr(w[i]\v[j],E,E));
+    print(iferr(w[i]%v[j],E,E));
+    print(iferr(w[i]\/v[j],E,E));
+  )
+)
+}
