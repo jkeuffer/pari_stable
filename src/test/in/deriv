@@ -13,3 +13,4 @@ for (i=1,#v,
   iferr(print(intformal(u,'y)),E,print(E));
 )
 }
+intformal(1-A,Y)

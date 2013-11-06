@@ -41,4 +41,5 @@ Mat(y)
 Mat(x)
 Mat(1/2*y*x^2)
 Mat(1/2*y^2*x)
+-Y*A + Y
 Total time spent: 4
