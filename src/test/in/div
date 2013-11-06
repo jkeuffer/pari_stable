@@ -1,0 +1,14 @@
+default(realprecision,38);
+v=[4,3.1,1/2,x^2+1, Mod(x,x^2+1),ffgen(3^5,'t),quadgen(5)];
+{
+for (i=1,#v,
+  for(j=i,#v,
+    print("* ",[i,j]);
+    print(iferr(v[i]/v[j],E,E));
+    print(iferr(v[i]\v[j],E,E));
+    print(iferr(v[i]%v[j],E,E));
+    print(iferr(v[i]\/v[j],E,E));
+  )
+)
+}
+\\ [2,3], Mat(2);
