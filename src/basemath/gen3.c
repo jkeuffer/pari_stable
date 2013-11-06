@@ -583,7 +583,7 @@ static GEN
 polmod_mod(GEN x, GEN y)
 {
   GEN z, T = gel(x,1);
-  if (RgX_equal_var(T, y)) return gcopy(x);
+  if (RgX_equal(T, y)) return gcopy(x);
   z = cgetg(3,t_POLMOD); T = RgX_gcd(T,y);
   gel(z,1) = T;
   gel(z,2) = grem(gel(x,2), T);
