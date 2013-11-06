@@ -544,12 +544,16 @@ example, it is possible to write
   for (i = 1, 5, v[i] = 1/i)
 @eprog\noindent
 but this would fail if the vector \kbd{v} had not been created beforehand.
+Of course, the above example is better written as
+\bprog
+  v = vector(5, i, 1/i);
+@eprog
+
 Another useful way to create vectors and matrices is to extract them from
-larger ones, using \kbd{vecextract}. For instance, if \kbd{h} is the
-$20\times 20$ Hilbert matrix as above,
+larger ones. For instance, if \kbd{h} is the $20\times 20$ Hilbert matrix as above,
 \bprog
   h = mathilbert(20);
-  vecextract(h, "11..20", "11..20")
+  h[11..20, 11..20]
 @eprog\noindent is its lower right quadrant.
 
 \medskip The last PARI types which we have not yet played with are closely
@@ -594,7 +598,7 @@ may be lifted back to $\Z$ with either \kbd{lift} or \kbd{centerlift}. Type
 \kbd{a\pow (n-1)}. The result is definitely \emph{not} equal to
 \kbd{Mod(1,n)}, thus \emph{proving} that \kbd{n} is not a prime. If we had
 obtained \kbd{Mod(1,n)} on the other hand, it would have given us a hint that
-\kbd{n} is maybe prime, but never a proof.
+\kbd{n} is maybe prime, but not a proof.
 
 To find the factors is another story. In this case, the integer $n$ is small
  enough to let trial division run to completion. Type \kbd{\#} to turn on the
@@ -724,6 +728,37 @@ polynomial of \kbd{b}, and expresses \kbd{a} in terms of this new polmod,
 i.e.~in terms of \kbd{a}. We will see this in more detail in the number
 field section.
 
+An important special case of the above construction allows to work in finite
+fields, by choosing an irreductible polynomial $T$ of degree $f$ over $\F_p$
+and considering $\F_p[t]/(T)$. As in
+\bprog
+  T = ffinit(5, 6, 't); \\ @com degree 6, irreducible over $\F_5$
+  g = Mod(t, T)
+@eprog\noindent Try a few elementary operations involving $g$, such as
+$g^{100}$. This special case of \typ{POLMOD}s is in fact so important that we
+now introduce a final dedicated number theoretical type \typ{FFELT}, for
+``finite field element'', to simplify work with finite fields: \kbd{g =
+ffgen(5\pow6, 't)} computes a suitable polynomial $T$ as above and returns
+the generator $t \mod T(t)$. This has major advantages over the generic
+\typ{POLMOD} solution: elements are printed in a simplified way (in lifted
+form), and functions can assume that $T$ is indeed irreducible. A few dedicated
+functions  \kbd{ffprimroot} (analog of \kbd{znprimroot}), \kbd{fforder}
+(analog of \kbd{znorder}), \kbd{fflog} (analog of \kbd{znlog}) are available.
+Rational expressions in the variable $t$ can be mapped to such a finite
+field by substituting $t$ by $g$, for instance
+\bprog
+  ? g = ffgen(5^6, 't);
+  ? g.mod  \\ @com irreducible over $\F_5$, defines $\F_{5^6}$
+  %2 = t^6 + t^5 + t^4 + t^3 + t^2 + t + 1
+  ? Q = x^2 + t*x + 1
+  ? factor(subst(Q,t,g))
+  %3 =
+  [    x + (t^5 + 3*t^4 + t^3 + 4*t + 1) 1]
+
+  [x + (4*t^5 + 2*t^4 + 4*t^3 + 2*t + 4) 1]
+@eprog\noindent factors the polynomial $Q \in \F_{5^6}[x]$, where
+$\F_{5^6} = \F_5[t]/(\kbd{g.mod})$.
+
 \section{Elementary Arithmetic Functions}
 
 Since PARI is aimed at number theorists, it is not surprising that there
@@ -758,7 +793,7 @@ you prove it?
 
 In many cases, one wants to perform some task only when an arithmetic
 condition is satisfied. \kbd{gp} gives you the following functions: \kbd{isprime}
-as mentioned above, \kbd{Z\_issquare}, \kbd{isfundamental} to test whether an
+as mentioned above, \kbd{issquare}, \kbd{isfundamental} to test whether an
 integer is a fundamental discriminant (i.e.~$1$ or the discriminant of a
 quadratic field), and the \kbd{forprime}, \kbd{fordiv} and \kbd{sumdiv}
 loops. Assume for example that we want to compute the product of all the
@@ -785,7 +820,10 @@ have written
 %
 (which is actually faster since we only compute the order of $2$ in $\Z/p\Z$,
 instead of looking for a generator by trying successive elements whose orders
-have to be computed as well.)
+have to be computed as well.) Once we know a primitive root $g$, we can write
+any non-zero element of $\Z/p\Z$ as $g^x$ for some unique $x$ in $\Z/(p-1)\Z$.
+Computing such a discrete logarithm is a hard problem in general, performed
+by the function \kbd{znlog}.
 
 Arithmetic functions related to quadratic fields, binary quadratic forms and
 general number fields will be seen in the next sections.
@@ -817,7 +855,7 @@ in $\Z/101\Z$ and the $p$-adic ring $\Z_{101}$ (to $100$ words of accuracy)
 respectively. Let \kbd{H = 1/h} the inverse of \kbd{h}:
 \bprog
   H = 1/h;  \\ @com integral
-  L = vecextract( primes(10000), "-50.." );  \\ @com extract the last 50 elements
+  L = primes([10^5, 10^5 + 1000]);  \\ @com pick a few primes
   v = vector(#L, i, matdet(H * Mod(1,L[i])));
   centerlift( chinese(v) )
 @eprog\noindent
@@ -1336,7 +1374,16 @@ one and the same. There is a crucial rule in all routines involving relative
 extensions: the variable associated to the base field is required to have
 lower priority than the variables of polynomials whose coefficients are taken
 in that base field. Have a look at the section on \emph{Variable priorities}
-in the user's manual (see ``The GP programming language'').
+in the user's manual (see ``The GP programming language''). A simpler way
+to accomplish the above, using \typ{FFELT}s is
+\bprog
+  g = ffgen(3^3, 't);
+  T = subst(g.mod, t, x);
+  factor(T * g^0)
+@eprog\noindent Multiplying by $g^0 = 1$ seems to do ``nothing'', but it has
+the interesting effect of mapping all coefficients of $T$ to $\F_{27}$. The
+generic function \kbd{factor} then does the right thing. (Typing
+\kbd{factor(T)} directly would factor it over $\Q$, not what we wanted.)
 
 Similarly, type
 \bprog
@@ -1593,7 +1640,7 @@ It seems reasonable to take the numbers with smallest height as
 possible generators of the Mordell-Weil group. Let's try the first
 four: type
 \bprog
-  m = ellheightmatrix(e, vecextract(v,[1,2,3,4])); matdet(m)
+  m = ellheightmatrix(e, v[1..4]); matdet(m)
 @eprog\noindent
 Since the curve has no torsion, the determinant being close to zero
 implies that the first four points are dependent. To find the
