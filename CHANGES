@@ -691,6 +691,7 @@ BA 142- new default strictargs for mandatory arguments
         no graphic library is available; dumps the hi-res plot to a temporary
         PostScript file, then opens a PostScript viewer ('open -W' by default,
         $GP_POSTSCRIPT_VIEWER otherwise). Works around #1354 on OS/X.
+PMo149- GP function lambertw / library functions mplambertW, glambertW
 
   Removed
     1- dropped DOS support
