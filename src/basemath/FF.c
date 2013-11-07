@@ -1449,8 +1449,8 @@ ffgen(GEN T, long v)
       d = degpol(T); p = NULL;
       if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err_TYPE("ffgen",T);
       T = RgX_to_FpX(T, p);
-      if (!FpX_is_squarefree(T,p) || FpX_nbfact(T, p) != 1)
-        pari_err_IRREDPOL("ffgen",T);
+      /* testing for irreducibility is too costly */
+      if (!FpX_is_squarefree(T,p)) pari_err_IRREDPOL("ffgen",T);
       break;
     case t_INT:
       d = Z_isanypower(T, &p);
