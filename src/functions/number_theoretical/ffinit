@@ -7,8 +7,10 @@ Description:
  (int, small, ?var):pol        ffinit($1, $2, $3)
 Doc: computes a monic polynomial of degree $n$ which is irreducible over
   $\F_p$, where $p$ is assumed to be prime. This function uses a fast variant
-  of Adleman-Lenstra's algorithm.
+  of Adleman and Lenstra's algorithm.
 
  It is useful in conjunction with \tet{ffgen}; for instance if
  \kbd{P = ffinit(3,2)}, you can represent elements in $\F_{3^2}$ in term of
- \kbd{g = ffgen(P,'t)}. This can be abbreviated as \kbd{g = ffgen(3^2, 't)}.
+ \kbd{g = ffgen(P,'t)}. This can be abbreviated as
+ \kbd{g = ffgen(3\pow2, 't)}, where the defining polynomial $P$ can be later
+ recovered as \kbd{g.mod}.
