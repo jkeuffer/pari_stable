@@ -1441,26 +1441,27 @@ FFX_roots(GEN P, GEN x)
 GEN
 ffgen(GEN T, long v)
 {
-  GEN A, p = NULL, ff;
+  GEN A, p = NULL, ff = cgetg(5,t_FFELT);
   long d;
   switch(typ(T))
   {
     case t_POL:
       d = degpol(T); p = NULL;
       if (d < 1 || !RgX_is_FpX(T, &p) || !p) pari_err_TYPE("ffgen",T);
+      T = RgX_to_FpX(T, p);
+      if (!FpX_is_squarefree(T,p) || FpX_nbfact(T, p) != 1)
+        pari_err_IRREDPOL("ffgen",T);
       break;
     case t_INT:
       d = Z_isanypower(T, &p);
       if (!d) { d = 1; p = T; }
       if (!BPSW_psp(p)) pari_err_PRIME("ffgen",p);
-      T = ffinit(p, d, v);
+      T = init_Fq(p, d, v);
       break;
     default:
       pari_err_TYPE("ffgen",T);
       return NULL;
   }
-  ff = cgetg(5,t_FFELT);
-  T = RgX_to_FpX(T, p);
   if (v < 0) v = varn(T);
   if (lgefint(p)==3)
   {
