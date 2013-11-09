@@ -528,37 +528,88 @@ _quot(GEN x, GEN y)
   if (gsigne(y) < 0 && !gequal(f,q)) f = gaddgs(f, 1);
   return f;
 }
+/* y t_REAL, x \ y */
 static GEN
-_quotsg(long x, GEN y)
+_quotsr(long x, GEN y)
 {
-  GEN q = gdivsg(x,y), f = gfloor(q);
-  if (gsigne(y) < 0 && !gequal(f,q)) f = gaddgs(f, 1);
+  GEN q, f;
+  if (!x) return gen_0;
+  q = divsr(x,y); f = floorr(q);
+  if (signe(y) < 0 && signe(subir(f,q))) f = addiu(f, 1);
+  return f;
+}
+/* x t_REAL, x \ y */
+static GEN
+_quotrs(GEN x, long y)
+{
+  GEN q = divrs(x,y), f = floorr(q);
+  if (y < 0 && signe(subir(f,q))) f = addiu(f, 1);
   return f;
 }
 static GEN
-_quotgs(GEN x, long y)
+_quotri(GEN x, GEN y)
 {
-  GEN q = gdivgs(x,y), f = gfloor(q);
-  if (y < 0 && !gequal(f,q)) f = gaddgs(f, 1);
+  GEN q = divri(x,y), f = floorr(q);
+  if (signe(y) < 0 && signe(subir(f,q))) f = addiu(f, 1);
   return f;
 }
+
+/* y t_FRAC, x \ y */
+static GEN
+_quotsf(long x, GEN y)
+{ return truedivii(mulis(gel(y,2),x), gel(y,1)); }
+/* x t_FRAC, x \ y */
+static GEN
+_quotfs(GEN x, long y)
+{ return truedivii(gel(x,1),mulis(gel(x,2),y)); }
+/* x t_FRAC, y t_INT, x \ y */
+static GEN
+_quotfi(GEN x, GEN y)
+{ return truedivii(gel(x,1),mulii(gel(x,2),y)); }
+
 static GEN
 quot(GEN x, GEN y)
+{ pari_sp av = avma; return gerepileupto(av, _quot(x, y)); }
+static GEN
+quotrs(GEN x, long y)
+{ pari_sp av = avma; return gerepileuptoleaf(av, _quotrs(x,y)); }
+static GEN
+quotfs(GEN x, long s)
+{ pari_sp av = avma; return gerepileuptoleaf(av, _quotfs(x,s)); }
+static GEN
+quotsr(long x, GEN y)
+{ pari_sp av = avma; return gerepileuptoleaf(av, _quotsr(x, y)); }
+static GEN
+quotsf(long x, GEN y)
+{ pari_sp av = avma; return gerepileuptoleaf(av, _quotsf(x, y)); }
+static GEN
+quotfi(GEN x, GEN y)
+{ pari_sp av = avma; return gerepileuptoleaf(av, _quotfi(x, y)); }
+static GEN
+quotri(GEN x, GEN y)
+{ pari_sp av = avma; return gerepileuptoleaf(av, _quotri(x, y)); }
+
+static GEN
+modrs(GEN x, long y)
 {
   pari_sp av = avma;
-  return gerepileupto(av, _quot(x, y));
+  GEN q = _quotrs(x,y);
+  if (!signe(q)) { avma = av; return rcopy(x); }
+  return gerepileuptoleaf(av, subri(x, mulis(q,y)));
 }
 static GEN
-quotgs(GEN x, long y)
+modsr(long x, GEN y)
 {
   pari_sp av = avma;
-  return gerepileupto(av, _quotgs(x, y));
+  GEN q = _quotsr(x,y);
+  if (!signe(q)) { avma = av; return stoi(x); }
+  return gerepileuptoleaf(av, subsr(x, mulir(q,y)));
 }
 static GEN
-quotsg(long x, GEN y)
+modsf(long x, GEN y)
 {
   pari_sp av = avma;
-  return gerepileupto(av, _quotsg(x, y));
+  return gerepileupto(av, gred_frac2(modii(mulis(gel(y,2),x), gel(y,1)), gel(y,2)));
 }
 
 /* assume y a t_REAL, x a t_INT, t_FRAC or t_REAL.
@@ -596,6 +647,7 @@ gmod(GEN x, GEN y)
   long i,lx,ty, tx = typ(x);
   GEN z,p1;
 
+  if (tx == t_INT && !is_bigint(x)) return gmodsg(itos(x),y);
   if (is_matvec_t(tx))
   {
     z = cgetg_copy(x, &lx);
@@ -606,6 +658,7 @@ gmod(GEN x, GEN y)
   switch(ty)
   {
     case t_INT:
+      if (!is_bigint(y)) return gmodgs(x,itos(y));
       switch(tx)
       {
         case t_INT:
@@ -702,11 +755,12 @@ gmodgs(GEN x, long y)
   }
   switch(tx)
   {
-    case t_INT:
-      return modis(x,y);
+    case t_INT: return modis(x,y);
+    case t_REAL: return modrs(x,y);
 
     case t_INTMOD: z=cgetg(3, t_INTMOD);
-      i = cgcd(smodis(gel(x,1), y), y);
+      u = (ulong)labs(y);
+      i = ugcd(umodiu(gel(x,1), u), u);
       gel(z,1) = utoi(i);
       gel(z,2) = modis(gel(x,2), i); return z;
 
@@ -732,15 +786,10 @@ gmodsg(long x, GEN y)
 {
   switch(typ(y))
   {
-    case t_INT:
-      return modsi(x,y);
-    case t_REAL: case t_FRAC: {
-      pari_sp av = avma;
-      return gerepileupto(av, gaddsg(x, gneg(gmul(_quotsg(x,y),y))));
-    }
-
-    case t_POL:
-      return degpol(y)? stoi(x): gen_0;
+    case t_INT: return modsi(x,y);
+    case t_REAL: return modsr(x,y);
+    case t_FRAC: return modsf(x,y);
+    case t_POL: return degpol(y)? stoi(x): gen_0;
   }
   pari_err_TYPE2("%",stoi(x),y);
   return NULL; /* not reached */
@@ -828,6 +877,7 @@ gdivent(GEN x, GEN y)
 {
   long tx = typ(x);
 
+  if (tx == t_INT && !is_bigint(x)) return gdiventsg(itos(x),y);
   if (is_matvec_t(tx))
   {
     long i, lx;
@@ -838,10 +888,12 @@ gdivent(GEN x, GEN y)
   switch(typ(y))
   {
     case t_INT:
+      if (!is_bigint(y)) return gdiventgs(x,itos(y));
       switch(tx)
-      { /* equal to, but more efficient than, quot(x,y) */
+      {
         case t_INT: return truedivii(x,y);
-        case t_REAL: case t_FRAC: return quot(x,y);
+        case t_REAL: return quotri(x,y);
+        case t_FRAC: return quotfi(x,y);
         case t_POL: return gdiv(x,y);
       }
       break;
@@ -865,9 +917,10 @@ gdiventgs(GEN x, long y)
   GEN z;
   switch(typ(x))
   {
-    case t_INT: return truedivis(x,y); /* = quotgs(x,y) */
-    case t_REAL: case t_FRAC: return quotgs(x,y);
-    case t_POL: return gdivgs(x,y);
+    case t_INT:  return truedivis(x,y);
+    case t_REAL: return quotrs(x,y);
+    case t_FRAC: return quotfs(x,y);
+    case t_POL:  return gdivgs(x,y);
     case t_VEC: case t_COL: case t_MAT:
       z = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(z,i) = gdiventgs(gel(x,i),y);
@@ -881,9 +934,10 @@ gdiventsg(long x, GEN y)
 {
   switch(typ(y))
   {
-    case t_INT: return truedivsi(x,y); /* = quotsg(x,y) */
-    case t_REAL: case t_FRAC: return quotsg(x,y);
-    case t_POL: return degpol(y)? gen_0: gdivsg(x,y);
+    case t_INT:  return truedivsi(x,y);
+    case t_REAL: return quotsr(x,y);
+    case t_FRAC: return quotsf(x,y);
+    case t_POL:  return degpol(y)? gen_0: gdivsg(x,y);
   }
   pari_err_TYPE2("\\",stoi(x),y);
   return NULL; /* not reached */
@@ -893,9 +947,8 @@ gdiventsg(long x, GEN y)
 static GEN
 quotrem(GEN x, GEN y, GEN *r)
 {
-  pari_sp av;
   GEN q = quot(x,y);
-  av = avma;
+  pari_sp av = avma;
   *r = gerepileupto(av, gsub(x, gmul(q,y)));
   return q;
 }

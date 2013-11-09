@@ -156,7 +156,7 @@ error("forbidden division t_REAL \\ t_INTMOD.")
 * [4, 2]
 1/8
 0
-error("impossible inverse in Fp_inv: Mod(2, 4).")
+error("impossible inverse in Fl_inv: Mod(2, 4).")
 0
 * [4, 3]
 0.16129032258064516129032258064516129032
@@ -652,4 +652,4 @@ Mat(Mod(1, 3))
 error("forbidden division t_INT \\ t_INTMOD.")
 error("forbidden division t_INT % t_INTMOD.")
 error("forbidden division t_INT \\ t_INTMOD.")
-Total time spent: 8
+Total time spent: 4
