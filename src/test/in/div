@@ -1,5 +1,5 @@
 default(realprecision,38);
-v=[3,4,3.1,1/2,x^2+1, Mod(x,x^2+1),ffgen(3^5,'t),quadgen(5),2+O(3^3),Mod(2,3)];
+v=[3,4,3.1,1/2,x^2+1, Mod(x,x^2+1),ffgen(3^5,'t),quadgen(5),2+O(3^3),Mod(2,3), 2^64 + 1];
 {
 for (i=1,#v,
   for(j=1,#v,
