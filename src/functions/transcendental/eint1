@@ -12,10 +12,11 @@ Doc: exponential integral $\int_x^\infty \dfrac{e^{-t}}{t}\,dt =
  $n$-dimensional vector $[\kbd{eint1}(x),\dots,\kbd{eint1}(nx)]$. Contrary to
  other transcendental functions, and to the default case ($n$ omitted), the
  values are correct up to a bounded \emph{absolute}, rather than relative,
- error. (In the most important application, to the computation of
- $L$-functions via approximate functional equations, those values appear
- as weights in long sums and small individual relative errors are less
- useful than controlling the absolute error.) This is faster than repeatedly
- calling \kbd{eint1($i$ * x)}, but less precise.
+ error $10^-n$, where $n$ is \kbd{precision}$(x)$ if $x$ is a \typ{REAL}
+ and defaults to \kbd{realprecision} otherwise. (In the most important
+ application, to the computation of $L$-functions via approximate functional
+ equations, those values appear as weights in long sums and small individual
+ relative errors are less useful than controlling the absolute error.) This is
+ faster than repeatedly calling \kbd{eint1($i$ * x)}, but less precise.
 
 Variant: Also available is \fun{GEN}{eint1}{GEN x, long prec}.
