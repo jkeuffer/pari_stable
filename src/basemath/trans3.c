@@ -635,13 +635,14 @@ incgamcf_0(GEN x, GEN expx)
     z = divsr(-n, addsr(n<<1,x));
     for (i=n-1; i >= 1; i--)
       z = divsr(-i, addrr(addsr(i<<1,x), mulur(i,z))); /* -1 / (2 + z + x/i) */
-    return divrr(addrr(real_1(l),z), mulrr(expx, x));
+    return divrr(addrr(real_1(l),z), mulrr(expx? expx: mpexp(x), x));
   }
   else
   {
-    GEN S, t, H, run = real_1(l+EXTRAPRECWORD);
-    n = -prec2nbits(l)-1;
-    x = rtor(x, l+EXTRAPRECWORD);
+    long prec = l + EXTRAPRECWORD;
+    GEN S, t, H, run = real_1(prec);
+    n = -prec2nbits(prec);
+    x = rtor(x, prec);
     S = z = t = H = run;
     for (i = 2; expo(t) - expo(S) >= n; i++)
     {
@@ -649,7 +650,8 @@ incgamcf_0(GEN x, GEN expx)
       z = divru(mulrr(x,z), i);   /* z = x^(i-1)/i! */
       t = mulrr(z, H); S = addrr(S, t);
     }
-    return subrr(mulrr(x, divrr(S,expx)), addrr(mplog(x), mpeuler(l)));
+    return subrr(mulrr(x, divrr(S,expx? expx: mpexp(x))),
+                 addrr(mplog(x), mpeuler(prec)));
   }
 }
 
@@ -952,7 +954,7 @@ eint1(GEN x, long prec)
   if (signe(x) >= 0)
   {
     av = avma;
-    return gerepileuptoleaf(av, incgamcf_0(x, mpexp(x)));
+    return gerepileuptoleaf(av, incgamcf_0(x, NULL));
   }
   /* rewritten from code contributed by Manfred Radimersky */
   res = cgetg(3, t_COMPLEX);

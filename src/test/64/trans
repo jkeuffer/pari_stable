@@ -434,6 +434,6 @@ x^17 - 1
 5.2043097453468479398562848599360610966 E-9 - 3.2690639869786982176409251733
 763732423 E-8*I
 ? getheap
-[180, 5850]
+[180, 5851]
 ? print("Total time spent: ",gettime);
-Total time spent: 24
+Total time spent: 20

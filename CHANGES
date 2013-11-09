@@ -44,6 +44,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
    30- qflll(Mat(0)) returned Mat(1)
    31- infinite loop in sumpos: sumpos(n=1,-log(cos(1/n))) [#1481]
 BA 32- doing allocatemem in the break loop would corrupt the new break loop
+   33- relative error in eint1 was larger than expected
 
   Changed
     1- default help text for a user function is now as in \u:
