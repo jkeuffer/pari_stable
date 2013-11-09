@@ -1,6 +1,6 @@
 default(realprecision,38)
 #1
-#1. == if (#1==1, 2, 4)
+#1. == if (#(2^32)==1, 2, 4)
 length([x])
 length(List())
 length(List([1,2,3]))
