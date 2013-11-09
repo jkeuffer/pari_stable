@@ -767,27 +767,19 @@ truedvmdii(GEN x, GEN y, GEN *z)
   pari_sp av;
   GEN r, q, *gptr[2];
   if (!is_bigint(y)) return truedvmdis(x, itos(y), z);
+  if (z == ONLY_REM) return modii(x,y);
 
   av = avma;
   q = dvmdii(x,y,&r); /* assume that r is last on stack */
-
   switch(signe(r))
   {
     case 0:
-      if (z == ONLY_REM) { avma = av; return gen_0; }
       if (z) *z = gen_0;
       return q;
     case 1:
-      if (z == ONLY_REM) return gerepileuptoint(av,r);
       if (z) *z = r; else cgiv(r);
       return q;
     case -1: break;
-  }
-
-  if (z == ONLY_REM)
-  { /* r += sign(y) * y, that is |y| */
-    r = subiispec(y+2,r+2, lgefint(y)-2,lgefint(r)-2);
-    return gerepileuptoint(av, r);
   }
   q = addis(q, -signe(y));
   if (!z) return gerepileuptoint(av, q);
@@ -801,15 +793,16 @@ truedvmdis(GEN x, long y, GEN *z)
 {
   pari_sp av = avma;
   long r;
-  GEN q = divis_rem(x,y,&r);
+  GEN q;
+
+  if (z == ONLY_REM) return modis(x, y);
+  q = divis_rem(x,y,&r);
 
   if (r >= 0)
   {
-    if (z == ONLY_REM) { avma = av; return utoi(r); }
     if (z) *z = utoi(r);
     return q;
   }
-  if (z == ONLY_REM) { avma = av; return utoi(r + labs(y)); }
   q = gerepileuptoint(av, addis(q, (y < 0)? 1: -1));
   if (z) *z = utoi(r + labs(y));
   return q;
@@ -818,14 +811,12 @@ GEN
 truedvmdsi(long x, GEN y, GEN *z)
 {
   long q, r;
+  if (z == ONLY_REM) return modsi(x, y);
   q = sdivsi_rem(x,y,&r);
   if (r >= 0) {
-    if (z == ONLY_REM) return utoi(r);
     if (z) *z = utoi(r);
     return stoi(q);
   }
-  if (z == ONLY_REM) /* r += sign(y) * y, that is |y| */
-    return subiuspec(y+2,(ulong)-r, lgefint(y)-2);
   q = q - signe(y);
   if (!z) return stoi(q);
 
