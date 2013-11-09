@@ -2,16 +2,32 @@ Function: variable
 Section: conversions
 C-Name: gpolvar
 Prototype: DG
-Help: variable({x}): main variable of object x. Gives p for p-adic x, error
- for scalars. Returns the list of user variables if x is omitted.
+Help: variable({x}): main variable of object x. Gives p for p-adic x, 0
+ if no variable can be associated to x. Returns the list of user variables if
+ x is omitted.
 Description:
  (pol):var:parens:copy        $var:1
  (gen):gen        gpolvar($1)
 Doc:
- gives the main variable of the object $x$, and
- $p$ if $x$ is a $p$-adic number. Gives an error if $x$ has no variable
- associated to it. If $x$ is omitted, returns the list of user variables known
- to the interpreter, by order of decreasing priority. (Highest priority is $x$,
+ gives the main variable of the object $x$ (the variable with the highest
+ priority used in $x$), and $p$ if $x$ is a $p$-adic number. Return $0$ if
+ $x$ has no variable associated to it.
+ \bprog
+ ? variable(x^2 + y)
+ %1 = x
+ ? variable(1 + O(5^2))
+ %2 = 5
+ ? variable([x,y,z,t])
+ %3 = x
+ ? variable(1)
+ %4 = 0
+ @eprog\noindent The construction
+ \bprog
+    if (!variable(x),...)
+ @eprog\noindent can be used to test whether a variable is attached to $x$.
+
+ If $x$ is omitted, returns the list of user variables known to the
+ interpreter, by order of decreasing priority. (Highest priority is $x$,
  which always come first.)
 
 Variant: However, in library mode, this function should not be used for $x$

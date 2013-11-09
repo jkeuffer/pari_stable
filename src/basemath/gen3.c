@@ -30,22 +30,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 long
 gvar(GEN x)
 {
-  long i, v, w;
+  long i, v, w, lx;
   switch(typ(x))
   {
     case t_POL: case t_SER: return varn(x);
     case t_POLMOD: return varn(gel(x,1));
     case t_RFRAC:  return varn(gel(x,2));
     case t_VEC: case t_COL: case t_MAT:
-      v = NO_VARIABLE;
-      for (i=1; i < lg(x); i++) { w=gvar(gel(x,i)); if (varncmp(w,v) < 0) v=w; }
-      return v;
-    case t_VECSMALL:
-    case t_STR:
+      lx = lg(x); break;
     case t_LIST:
-      pari_err_TYPE("gvar",x);
+      x = list_data(x);
+      lx = x? lg(x): 1; break;
+    default:
+      return NO_VARIABLE;
   }
-  return NO_VARIABLE;
+  v = NO_VARIABLE;
+  for (i=1; i < lx; i++) { w = gvar(gel(x,i)); if (varncmp(w,v) < 0) v = w; }
+  return v;
 }
 /* T main polynomial in R[X], A auxiliary in R[X] (possibly degree 0).
  * Guess and return the main variable of R */

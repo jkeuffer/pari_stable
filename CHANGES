@@ -66,6 +66,9 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    11- Let Set(t_VECSMALL v) behave as Set(Vec(v))
    12- ffgen(T) now checks whether T is squarefree (testing for
        irreducibility is too expensive)
+   13- variable() no longer raises exceptions: if no variable can be
+       associated to the object, return 0. Thus "if (!variable(x), )" may be
+       used to test wether x has a "variable".
 
   Added
 EP  1- Configure option for gcov/lcov support

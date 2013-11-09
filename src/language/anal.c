@@ -913,7 +913,7 @@ gpolvar(GEN x)
   }
   if (typ(x)==t_PADIC) return gcopy( gel(x,2) );
   v = gvar(x);
-  if (v==NO_VARIABLE) pari_err_TYPE("gpolvar",x);
+  if (v==NO_VARIABLE) return gen_0;
   return pol_x(v);
 }
 
