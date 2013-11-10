@@ -26,3 +26,11 @@ test(f, F, N = 4) = {
   );
 }
 for(k = 1, #fun, test(fun[k], FUN[k]));
+default(realprecision,1155);
+a=sqrt(2)/2;
+sin(asin(a)) - a
+cos(acos(a)) - a
+tan(atan(a)) - a
+sinh(asinh(a)) - a
+cosh(acosh(a)) - a
+tanh(atanh(a)) - a
