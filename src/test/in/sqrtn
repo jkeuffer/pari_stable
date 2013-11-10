@@ -28,3 +28,10 @@ sqrtn(2., 10, &z)
 z
 sqrtn(10+O(3^8), 10, &z)
 z
+sqrtn(1+O(3^3), -3)
+sqrtn(1,1)
+sqrtn(1,-1,&z)
+z
+sqrtn(Mod(2,4),3)
+sqrtn(Mod(2,4),3,&z)
+sqrtn(1, 3)
