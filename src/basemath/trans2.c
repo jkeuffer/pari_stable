@@ -337,7 +337,7 @@ rfix(GEN x,long prec)
   switch(typ(x))
   {
     case t_INT: return itor(x, prec);
-    case t_FRAC: return rdivii(gel(x,1),gel(x,2), prec);
+    case t_FRAC: return fractor(x, prec);
     case t_REAL: break;
     default: pari_err_TYPE("rfix (conversion to t_REAL)",x);
   }

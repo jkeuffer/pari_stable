@@ -387,43 +387,36 @@ mpcatalan(long prec) { return rtor(constcatalan(prec), prec); }
 GEN
 transc(GEN (*f)(GEN,long), GEN x, long prec)
 {
-  pari_sp tetpil, av = avma;
-  GEN p1, y;
+  pari_sp av = avma;
   long lx, i;
+  GEN y;
 
   if (prec < 3) pari_err_BUG("transc [prec < 3]");
   switch(typ(x))
   {
-    case t_INT:
-      p1 = itor(x, prec); tetpil=avma;
-      return gerepile(av,tetpil,f(p1,prec));
-
-    case t_FRAC:
-      p1 = rdivii(gel(x,1), gel(x,2), prec); tetpil=avma;
-      return gerepile(av,tetpil,f(p1,prec));
-
-    case t_QUAD:
-      p1 = quadtofp(x, prec); tetpil = avma;
-      return gerepile(av,tetpil,f(p1,prec));
-
-    case t_POL: case t_RFRAC:
-      return gerepileupto(av, f(toser_i(x), prec));
+    case t_INT:  return gerepileupto(av, f(itor(x,prec),prec));
+    case t_FRAC: return gerepileupto(av, f(fractor(x, prec),prec));
+    case t_QUAD: return gerepileupto(av, f(quadtofp(x,prec),prec));
+    case t_POL:
+    case t_RFRAC:return gerepileupto(av, f(toser_i(x), prec));
 
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = f(gel(x,i),prec);
       return y;
 
-    case t_POLMOD:
-      p1 = cleanroots(gel(x,1),prec); lx = lg(p1);
-      for (i=1; i<lx; i++) gel(p1,i) = poleval(gel(x,2),gel(p1,i));
-      tetpil = avma; y = cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) gel(y,i) = f(gel(p1,i),prec);
-      return gerepile(av,tetpil,y);
+    case t_POLMOD: {
+      GEN v = cleanroots(gel(x,1),prec);
+      lx = lg(v);
+      for (i=1; i<lx; i++) gel(v,i) = poleval(gel(x,2),gel(v,i));
+      y = cgetg(lx,t_COL);
+      for (i=1; i<lx; i++) gel(y,i) = f(gel(v,i),prec);
+      return gerepileupto(av, y);
+    }
 
     default: pari_err_TYPE("a transcendental function",x);
   }
-  return f(x,prec);
+  return NULL;
 }
 
 /*******************************************************************/
