@@ -1,0 +1,2 @@
+default(realprecision,38);
+polylog(3,0.9)
