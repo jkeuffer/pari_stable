@@ -75,10 +75,45 @@ bessel_get_lim(double B, double L)
   return lim;
 }
 
+static GEN jbesselintern(GEN n, GEN z, long flag, long prec);
+static GEN kbesselintern(GEN n, GEN z, long flag, long prec);
+static GEN
+jbesselvec(GEN n, GEN x, long fl, long prec)
+{
+  long i, l;
+  GEN y = cgetg_copy(x, &l);
+  for (i=1; i<l; i++) gel(y,i) = jbesselintern(n,gel(x,i),fl,prec);
+  return y;
+}
+static GEN
+jbesselhvec(GEN n, GEN x, long prec)
+{
+  long i, l;
+  GEN y = cgetg_copy(x, &l);
+  for (i=1; i<l; i++) gel(y,i) = jbesselh(n,gel(x,i),prec);
+  return y;
+}
+static GEN
+polylogvec(long m, GEN x, long prec)
+{
+  long l, i;
+  GEN y = cgetg_copy(x, &l);
+  for (i=1; i<l; i++) gel(y,i) = gpolylog(m,gel(x,i),prec);
+  return y;
+}
+static GEN
+kbesselvec(GEN n, GEN x, long fl, long prec)
+{
+  long i, l;
+  GEN y = cgetg_copy(x, &l);
+  for (i=1; i<l; i++) gel(y,i) = kbesselintern(n,gel(x,i),fl,prec);
+  return y;
+}
+
 static GEN
 jbesselintern(GEN n, GEN z, long flag, long prec)
 {
-  long i, lz, ki;
+  long i, ki;
   pari_sp av = avma;
   GEN y;
 
@@ -115,18 +150,11 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
     }
 
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(z, &lz);
-      for (i=1; i<lz; i++)
-        gel(y,i) = jbesselintern(n,gel(z,i),flag,prec);
-      return y;
+      return jbesselvec(n, z, flag, prec);
 
     case t_POLMOD:
-      y = cleanroots(gel(z,1), prec); lz = lg(y);
-      for (i=1; i<lz; i++) {
-        GEN t = poleval(gel(z,2), gel(y,i));
-        gel(y,i) = jbesselintern(n,t,flag,prec);
-      }
-      return gerepilecopy(av,y);
+      y = jbesselvec(n, polmod_to_embed(z, prec), flag, prec);
+      return gerepileupto(av,y);
 
     case t_PADIC: pari_err_IMPL("p-adic jbessel function");
     default:
@@ -166,7 +194,7 @@ _jbesselh(long k, GEN z, long prec)
 GEN
 jbesselh(GEN n, GEN z, long prec)
 {
-  long k, i, lz;
+  long k, i;
   pari_sp av;
   GEN y;
 
@@ -205,18 +233,11 @@ jbesselh(GEN n, GEN z, long prec)
     }
 
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(z, &lz);
-      for (i=1; i<lz; i++) gel(y,i) = jbesselh(n,gel(z,i),prec);
-      return y;
+      return jbesselhvec(n, z, prec);
 
     case t_POLMOD:
       av = avma;
-      y = cleanroots(gel(z,1), prec); lz = lg(y);
-      for (i=1; i<lz; i++) {
-        GEN t = poleval(gel(z,2), gel(y,i));
-        gel(y,i) = jbesselh(n,t,prec);
-      }
-      return gerepilecopy(av, y);
+      return gerepileupto(av, jbesselhvec(n, polmod_to_embed(z,prec), prec));
 
     case t_PADIC: pari_err_IMPL("p-adic jbesselh function");
     default:
@@ -397,7 +418,7 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
 static GEN
 kbesselintern(GEN n, GEN z, long flag, long prec)
 {
-  long i, k, ki, lz, lim, precnew, fl, fl2, ex;
+  long i, k, ki, lim, precnew, fl, fl2, ex;
   pari_sp av = avma;
   GEN p1, p2, y, p3, pp, pm, s, c;
   double B, L;
@@ -471,17 +492,11 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       return gerepilecopy(av, gprec_wtrunc(p1,prec));
 
     case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(z, &lz);
-      for (i=1; i<lz; i++) gel(y,i) = kbesselintern(n,gel(z,i),flag,prec);
-      return y;
+      return kbesselvec(n,z,flag,prec);
 
     case t_POLMOD:
-      y = cleanroots(gel(z,1), prec); lz = lg(y);
-      for (i=1; i<lz; i++) {
-        GEN t = poleval(gel(z,2), gel(y,i));
-        gel(y,i) = kbesselintern(n,t,flag,prec);
-      }
-      return gerepilecopy(av, y);
+      y = kbesselvec(n,polmod_to_embed(z,prec),flag,prec);
+      return gerepileupto(av, y);
 
     case t_PADIC: pari_err_IMPL("p-adic Bessel K function");
     default:
@@ -2302,7 +2317,7 @@ polylogP(long m, GEN x, long prec)
 GEN
 gpolylog(long m, GEN x, long prec)
 {
-  long i, lx, n, v;
+  long i, n, v;
   pari_sp av = avma;
   GEN a, y, p1;
 
@@ -2320,15 +2335,11 @@ gpolylog(long m, GEN x, long prec)
   {
     case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
       return polylog(m,x,prec);
-
     case t_POLMOD:
-      p1=cleanroots(gel(x,1),prec); lx=lg(p1);
-      for (i=1; i<lx; i++) gel(p1,i) = poleval(gel(x,2),gel(p1,i));
-      y=cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) gel(y,i) = polylog(m,gel(p1,i),prec);
-      return gerepileupto(av, y);
-
+      return gerepileupto(av, polylogvec(m, polmod_to_embed(x, prec), prec));
     case t_INTMOD: case t_PADIC: pari_err_IMPL( "padic polylogarithm");
+    case t_VEC: case t_COL: case t_MAT:
+      return polylogvec(m, x, prec);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (!m) { avma = av; return mkfrac(gen_m1,gen_2); }
@@ -2349,11 +2360,6 @@ gpolylog(long m, GEN x, long prec)
           a = gadd(gpolylog(i, a0, prec), integ(gmul(yprimeovery, a), vy));
       }
       return gerepileupto(av, a);
-
-    case t_VEC: case t_COL: case t_MAT:
-      y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = gpolylog(m,gel(x,i),prec);
-      return y;
   }
   pari_err_TYPE("gpolylog",x);
   return NULL; /* not reached */

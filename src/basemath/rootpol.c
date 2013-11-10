@@ -2118,6 +2118,23 @@ roots(GEN p, long l) { return roots_aux(p,l, 0); }
 GEN
 cleanroots(GEN p, long l) { return roots_aux(p,l, 1); }
 
+/* private variant of conjvec. Allow non rational coefficients, shallow
+ * function. */
+GEN
+polmod_to_embed(GEN x, long prec)
+{
+  GEN v, T = gel(x,1), A = gel(x,2);
+  long i, l;
+  if (typ(A) != t_POL || varn(A) != varn(T))
+  {
+    checkvalidpol(T);
+    return const_col(degpol(T), A);
+  }
+  v = cleanroots(T,prec); l = lg(v);
+  for (i=1; i<l; i++) gel(v,i) = poleval(A,gel(v,i));
+  return v;
+}
+
 GEN
 QX_complex_roots(GEN p, long l)
 {
