@@ -21,4 +21,5 @@ for(i=1,#F,print(F[i](1,[1]~)));
 for(i=1,#F,print(F[i](1,Mat(1))));
 besseljh(2,0.)
 besselk(1,1000)
+besselk(1e-5,20)
 besselk(I,1000)

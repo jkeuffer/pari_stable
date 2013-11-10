@@ -264,7 +264,7 @@ kbessel2(GEN nu, GEN x, long prec)
   pari_sp av = avma;
   GEN p1, x2, a;
 
-  if (typ(x)==t_REAL) prec = lg(x);
+  if (typ(x)==t_REAL) prec = realprec(x);
   x2 = gshift(x,1);
   a = gtofp(gaddgs(gshift(nu,1), 1), prec);
   p1 = hyperu(gshift(a,-1),a,x2,prec);
@@ -291,7 +291,7 @@ kbessel1(GEN nu, GEN gx, long prec)
   y = cgetr(l); l1=lnew+1;
   av = avma; x = gtofp(gx, lnew); nu = gtofp(nu, lnew);
   nu2 = gmul2n(sqrr(nu), 2); togglesign(nu2);
-  n = (long) (prec2nbits_mul(l,LOG2) + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
+  n = (long) (prec2nbits_mul(l,LOG2) + PI*fabs(rtodbl(nu))) / 2;
   n2 = n<<1; pitemp=mppi(l1);
   r = gmul2n(x,1);
   if (cmprs(x, n) < 0)
@@ -418,18 +418,18 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
 static GEN
 kbesselintern(GEN n, GEN z, long flag, long prec)
 {
-  long i, k, ki, lim, precnew, fl, fl2, ex;
+  const char *f = flag? "besseln": "besselk";
+  const long flK = (flag == 0);
+  long i, k, ki, lim, precnew, fl2, ex;
   pari_sp av = avma;
   GEN p1, p2, y, p3, pp, pm, s, c;
   double B, L;
 
-  fl = (flag & 1) == 0;
   switch(typ(z))
   {
     case t_INT: case t_FRAC: case t_QUAD:
     case t_REAL: case t_COMPLEX:
-      if (gequal0(z))
-        pari_err_DOMAIN(flag? "besseln": "besselk", "argument", "=", gen_0, z);
+      if (gequal0(z)) pari_err_DOMAIN(f, "argument", "=", gen_0, z);
       i = precision(z); if (i) prec = i;
       i = precision(n); if (i && prec > i) prec = i;
       ex = gexpo(z);
@@ -440,7 +440,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       precnew = prec;
       if (L >= HALF_E) {
         long rab = nbits2extraprec((long) (L/(HALF_E*LOG2)));
-        if (fl) rab *= 2;
+        if (flK) rab *= 2;
          precnew += 1 + rab;
       }
       z = gtofp(z, precnew);
@@ -449,14 +449,14 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
         GEN z2 = gmul2n(z, -1);
         k = labs(ki);
         B = prec2nbits_mul(prec,LOG2/2) / L;
-        if (fl) B += 0.367879;
+        if (flK) B += 0.367879;
         lim = bessel_get_lim(B, L);
         p1 = gmul(gpowgs(z2,k), _kbessel1(k,z,flag,lim,precnew));
         p2 = gadd(mpeuler(precnew), glog(z2,precnew));
         p3 = jbesselintern(stoi(k),z,flag,precnew);
         p2 = gsub(gmul2n(p1,-1),gmul(p2,p3));
         p2 = gprec_wtrunc(p2, prec);
-        if (fl) {
+        if (flK) {
           if (k & 1) p2 = gneg(p2);
         }
         else
@@ -473,7 +473,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       if (ex < 0)
       {
         long rab = nbits2extraprec(-ex);
-        if (fl) rab *= 2;
+        if (flK) rab *= 2;
         precnew += rab;
       }
       if (i && i < precnew) {
@@ -484,7 +484,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 
       pp = jbesselintern(n,      z,flag,precnew);
       pm = jbesselintern(gneg(n),z,flag,precnew);
-      if (fl)
+      if (flK)
         p1 = gmul(gsub(pm,pp), Pi2n(-1,precnew));
       else
         p1 = gsub(gmul(c,pp),pm);
@@ -498,7 +498,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       y = kbesselvec(n,polmod_to_embed(z,prec),flag,prec);
       return gerepileupto(av, y);
 
-    case t_PADIC: pari_err_IMPL("p-adic Bessel K function");
+    case t_PADIC: pari_err_IMPL(stack_strcat("p-adic ",f));
     default:
       if (!(y = toser_i(z))) break;
       if (issmall(n,&ki))
@@ -507,11 +507,11 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
         return gerepilecopy(av, _kbessel1(k,y,flag+2,lg(y)-2,prec));
       }
       if (!issmall(gmul2n(n,1),&ki))
-        pari_err_DOMAIN(flag? "besseln": "besselk", "2n mod Z", "!=", gen_0,n);
+        pari_err_DOMAIN(f, "2n mod Z", "!=", gen_0,n);
       k = labs(ki); n = gmul2n(stoi(k),-1);
       fl2 = (k&3)==1;
       pm = jbesselintern(gneg(n),y,flag,prec);
-      if (fl)
+      if (flK)
       {
         pp = jbesselintern(n,y,flag,prec);
         p2 = gpowgs(y,-k); if (fl2 == 0) p2 = gneg(p2);
@@ -523,7 +523,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       else p1 = pm;
       return gerepileupto(av, fl2? gneg(p1): gcopy(p1));
   }
-  pari_err_TYPE("kbesselintern",z);
+  pari_err_TYPE(f,z);
   return NULL; /* not reached */
 }
 
