@@ -660,6 +660,7 @@ void    pari_init_rand(void);
 
 GEN     FFT(GEN x, GEN Omega);
 GEN     FFTinit(long k, long prec);
+GEN     polmod_to_embed(GEN x, long prec);
 
 /* subcyclo.c */
 
