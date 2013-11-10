@@ -34,3 +34,7 @@ tan(atan(a)) - a
 sinh(asinh(a)) - a
 cosh(acosh(a)) - a
 tanh(atanh(a)) - a
+default(realprecision,38);
+cotan(a)
+cotan(I)
+cotan(a+I)

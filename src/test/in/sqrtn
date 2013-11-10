@@ -24,3 +24,7 @@ sqrtn(0*ffgen(ffinit(3,2)),-2)
 sqrtn(0*ffgen(ffinit(2,2)),-2)
 
 sqrtnint(10^1000,1001)
+sqrtn(2., 10, &z)
+z
+sqrtn(10+O(3^8), 10, &z)
+z
