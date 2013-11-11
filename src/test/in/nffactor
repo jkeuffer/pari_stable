@@ -92,3 +92,13 @@ factor((x^2-1)*(x^2-2)*(x^2-5))
 
 \\#1446
 factor((x^80-1)/(x-1))
+
+\\also exercises Flx_extgcd above half-gcd threshold
+test(T,p)=
+{
+  v=polhensellift(T,lift(factormod(T,p)[,1]),p,10);
+  valuation(T-factorback(v),p);
+}
+\\also exercises FqX_extgcd above half-gcd threshold
+test(polcyclo(503),3)
+test(polcyclo(211),18446744073709551667)
