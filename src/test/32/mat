@@ -6,4 +6,26 @@
   *** _/_: impossible inverse in gdiv: [Mod(0, 2), Mod(0, 2); Mod(0, 2), Mod(0, 2)].
 1
 1
-Total time spent: 36
+[;]
+
+[1]
+
+
+[1 2 3]
+
+[2 3 4]
+
+
+[1 1]
+
+[1 5]
+
+
+[1 0]
+
+[0 1]
+
+  ***   at top-level: matdiagonal([1,2;3,4
+  ***                 ^--------------------
+  *** matdiagonal: incorrect type in diagonal (t_MAT).
+Total time spent: 60
