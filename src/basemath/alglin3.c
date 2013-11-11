@@ -436,8 +436,8 @@ matslice0(GEN A, long x1, long x2, long y1, long y2)
   /* lA > 1 */
   rlB = vecslice_parse_arg(lg(gel(A,1)), &x1, &x2, &rskip);
   t = typ(gel(A,1));
-  if (is_row) return t_COL ? rowslice_i(A, lB, x1, y1, skip):
-                             rowsmallslice_i(A, lB, x1, y1, skip);
+  if (is_row) return t == t_COL ? rowslice_i(A, lB, x1, y1, skip):
+                                  rowsmallslice_i(A, lB, x1, y1, skip);
   slice = t == t_COL? &vecslice_i: &vecsmallslice_i;
 
   B = cgetg(lB, t_MAT);
