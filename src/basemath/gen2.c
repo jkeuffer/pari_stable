@@ -54,46 +54,6 @@ map_proto_lG(long f(GEN), GEN x)
 }
 
 GEN
-map_proto_GG(GEN f(GEN,GEN), GEN x, GEN n)
-{
-  if (is_matvec_t(typ(x)))
-  {
-    long l, i;
-    GEN y = cgetg_copy(x, &l);
-    for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,gel(x,i),n);
-    return y;
-  }
-  if (is_matvec_t(typ(n)))
-  {
-    long l, i;
-    GEN y = cgetg_copy(n, &l);
-    for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,x,gel(n,i));
-    return y;
-  }
-  return f(x,n);
-}
-
-GEN
-map_proto_lGG(long f(GEN,GEN), GEN x, GEN n)
-{
-  long l, i;
-  GEN y;
-  if (is_matvec_t(typ(x)))
-  {
-    y = cgetg_copy(x, &l);
-    for (i=1; i<l; i++) gel(y,i) = map_proto_lGG(f,gel(x,i),n);
-    return y;
-  }
-  if (is_matvec_t(typ(n)))
-  {
-    y = cgetg_copy(n, &l);
-    for (i=1; i<l; i++) gel(y,i) = map_proto_lGG(f,x,gel(n,i));
-    return y;
-  }
-  return stoi(f(x,n));
-}
-
-GEN
 map_proto_lGL(long f(GEN,long), GEN x, long y)
 {
   if (is_matvec_t(typ(x)))
@@ -104,19 +64,6 @@ map_proto_lGL(long f(GEN,long), GEN x, long y)
     return t;
   }
   return stoi(f(x,y));
-}
-
-GEN
-map_proto_GL(GEN f(GEN,long), GEN x, long y)
-{
-  if (is_matvec_t(typ(x)))
-  {
-    long l, i;
-    GEN t = cgetg_copy(x, &l);
-    for (i=1; i<l; i++) gel(t,i) = map_proto_GL(f,gel(x,i),y);
-    return t;
-  }
-  return f(x,y);
 }
 
 GEN

@@ -90,6 +90,7 @@ EP  1- Configure option for gcov/lcov support
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
        Use the default = round4
+    2- useless wrappers map_proto_GG, map_proto_GL, map_proto_lGG
 
 Done for version 2.6.1 (released 20/09/2013):
 
