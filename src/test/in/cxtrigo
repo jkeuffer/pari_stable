@@ -35,6 +35,9 @@ sinh(asinh(a)) - a
 cosh(acosh(a)) - a
 tanh(atanh(a)) - a
 default(realprecision,38);
+a *= 1.;
 cotan(a)
 cotan(I)
+cotan(a+I)
+tanh(I)
 cotan(a+I)
