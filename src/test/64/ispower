@@ -1163,5 +1163,6 @@ Mod(1, 5)*x^2 + Mod(3, 5)*x + Mod(2, 5)
 1
 0
 1
+1
 t^2 + t + 1
-Total time spent: 2688
+Total time spent: 2708
