@@ -530,12 +530,12 @@ FpX_halfgcd_split(GEN x, GEN y, GEN p)
   GEN y1, r, q;
   long l = lgpol(x), n = l>>1, k;
   if (lgpol(y)<=n) return matid2_FpXM(varn(x));
-  R = FpX_halfgcd(RgX_shift(x,-n),RgX_shift(y,-n),p);
+  R = FpX_halfgcd(RgX_shift_shallow(x,-n),RgX_shift_shallow(y,-n),p);
   V = FpXM_FpX_mul2(R,x,y,p); y1 = gel(V,2);
   if (lgpol(y1)<=n) return gerepilecopy(av, R);
   q = FpX_divrem(gel(V,1), y1, p, &r);
   k = 2*n-degpol(y1);
-  S = FpX_halfgcd(RgX_shift(y1,-k), RgX_shift(r,-k),p);
+  S = FpX_halfgcd(RgX_shift_shallow(y1,-k), RgX_shift_shallow(r,-k),p);
   return gerepileupto(av, FpXM_mul2(S,FpX_FpXM_qmul(q,R,p),p));
 }
 

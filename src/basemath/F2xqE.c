@@ -537,7 +537,7 @@ _can_iter(void *E, GEN f2, GEN q)
   GEN f0, f1, z;
   (void) E;
   RgX_even_odd(f2, &f0, &f1);
-  z = ZX_add(ZX_sub(f2, FpX_sqr(f0, q)), RgX_shift(FpX_sqr(f1, q), 1));
+  z = ZX_add(ZX_sub(f2, FpX_sqr(f0, q)), RgX_shift_shallow(FpX_sqr(f1, q), 1));
   return mkvec3(z,f0,f1);
 }
 
@@ -548,7 +548,7 @@ _can_invd(void *E, GEN V, GEN v, GEN q, long M)
 {
   GEN F;
   (void)E; (void)q;
-  F = mkvec2(ZX_shifti(gel(v,2),1), ZX_shifti(RgX_shift(gel(v,3),1),1));
+  F = mkvec2(ZX_shifti(gel(v,2),1), ZX_shifti(RgX_shift_shallow(gel(v,3),1),1));
   return gen_Z2X_Dixon(F, V, M, NULL, _can_lin, _can_lins, _can_invls);
 }
 

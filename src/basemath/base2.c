@@ -3119,7 +3119,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
   {
     gel(A,j) = RgX_to_RgV(pal,m);
     gel(I,j) = prinvp;
-    if (j < m+d) pal = RgXQX_rem(RgX_shift(pal,1),P,nfT);
+    if (j < m+d) pal = RgXQX_rem(RgX_shift_shallow(pal,1),P,nfT);
   }
   /* the modulus is integral */
   base = nfhnfmod(nf,base, ZM_Z_mul(idealpows(nf, prinvp, d), powiu(p, m-d)));

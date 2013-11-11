@@ -493,9 +493,9 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN T, GEN p)
     for (j = 4; j < lg(tsil); j++)
     {
       long o = j - 2;
-      GEN D = FqX_add(RgX_shift(Dpsi2, 1), FqX_mulu(psi2, o-1, T, p), T, p);
+      GEN D = FqX_add(RgX_shift_shallow(Dpsi2, 1), FqX_mulu(psi2, o-1, T, p), T, p);
       GEN E = FqX_Fq_mul(D, Fq_mulu(gel(tsil, j), o, T, p), T, p);
-      r = FqX_add(r, RgX_shift(E, o-2), T, p);
+      r = FqX_add(r, RgX_shift_shallow(E, o-2), T, p);
     }
     gel(list, k) = gerepileupto(btop, r);
   }

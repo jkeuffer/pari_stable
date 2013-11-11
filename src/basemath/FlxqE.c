@@ -495,7 +495,7 @@ _can_iter(void *E, GEN f, GEN q)
   GEN h1c = ZX_mul(gel(h,1), h1s);
   GEN h3c = ZX_mul(gel(h,3), h3s);
   GEN th = ZX_mul(ZX_sub(h2s,ZX_mulu(h13,3)),gel(h,2));
-  GEN y = FpX_sub(f,ZX_add(RgX_shift(h3c,2),ZX_add(RgX_shift(th,1),h1c)),q);
+  GEN y = FpX_sub(f,ZX_add(RgX_shift_shallow(h3c,2),ZX_add(RgX_shift_shallow(th,1),h1c)),q);
   (void) E;
   return mkvecn(7,y,h1s,h2s,h3s,h12,h13,h23);
 }
@@ -505,8 +505,8 @@ _can_invd(void *E, GEN V, GEN v, GEN qM, long M)
 {
   GEN h1s=gel(v,2), h2s=gel(v,3), h3s=gel(v,4);
   GEN h12=gel(v,5), h13=gel(v,6), h23=gel(v,7);
-  GEN F = mkvec3(ZX_sub(h1s,RgX_shift(h23,1)),RgX_shift(ZX_sub(h2s,h13),1),
-                 ZX_sub(RgX_shift(h3s,2),RgX_shift(h12,1)));
+  GEN F = mkvec3(ZX_sub(h1s,RgX_shift_shallow(h23,1)),RgX_shift_shallow(ZX_sub(h2s,h13),1),
+                 ZX_sub(RgX_shift_shallow(h3s,2),RgX_shift_shallow(h12,1)));
   (void)E;
   return gen_ZpX_Dixon(ZXV_Z_mul(F, utoi(3)), V, qM, utoi(3), M, NULL,
                                                  _can_lin, _can_invl);
@@ -585,7 +585,7 @@ _can5_iter(void *E, GEN f, GEN q)
   V = cgetg(p+1,t_VEC);
   gel(V,1) = ZX_mulu(gel(d,1), p);
   for(i=2; i<= (long)p; i++)
-    gel(V,i) = ZX_mulu(RgX_shift(gel(d,p+2-i), 1), p);
+    gel(V,i) = ZX_mulu(RgX_shift_shallow(gel(d,p+2-i), 1), p);
   return gerepilecopy(av, mkvec2(ZX_sub(f,P),V));
 }
 
