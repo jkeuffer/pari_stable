@@ -1,8 +1,6 @@
 /*   This file contains declarations/definitions of functions that
  *   _can_ be inlined.
  */
-/* $Id$ */
-
 #ifndef WINCE
 #  include "../src/kernel/ix86/level0.h"
 #else

@@ -1,5 +1,4 @@
-/*
-Copyright (C) 2006  The PARI group.
+/* Copyright (C) 2006  The PARI group.
 
 This file is part of the PARI package.
 

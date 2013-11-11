@@ -1,7 +1,5 @@
 #line 2 "../src/kernel/mips64/asm0.h"
-/* $Id$
-
-Copyright (C) 2013  The PARI group.
+/* Copyright (C) 2013  The PARI group.
 
 This file is part of the PARI/GP package.
 

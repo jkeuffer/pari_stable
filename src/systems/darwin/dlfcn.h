@@ -1,7 +1,5 @@
-/* $Id$ */
-/*
-Copyright (c) 2002 Jorge Acereda  <jacereda@users.sourceforge.net> &
-                   Peter O'Gorman <ogorman@users.sourceforge.net>
+/* Copyright (c) 2002 Jorge Acereda  <jacereda@users.sourceforge.net> &
+                      Peter O'Gorman <ogorman@users.sourceforge.net>
 
 Portions may be copyright others, see the AUTHORS file included with this
 distribution.

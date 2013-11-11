@@ -1,6 +1,4 @@
-/* $Id: asm0.h 12466 2010-06-24 14:53:41Z kb $
-
-Copyright (C) 2000  The PARI group.
+/* Copyright (C) 2000  The PARI group.
 
 This file is part of the PARI/GP package.
 
