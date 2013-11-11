@@ -7,6 +7,7 @@ check(5^100,3)
 check(3^100,2^64-1)
 check(3^100,2^128+1)
 sumdigits(0)
+sumdigits(129)
 sumdigits(123456789123456789123456789)
 sumdigits(100000!)
 default(realprecision,38);
