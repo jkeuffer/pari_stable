@@ -1320,7 +1320,8 @@ nboft(long k, long p)
   pari_sp av = avma;
   long s, n;
 
-  k = itos( gceil(gdiv(mulsi(k, sqrs(p)), sqrs(p-1))) );
+  if (k <= 0) return 0;
+  k = itou( gceil(gdiv(mului(k, sqru(p)), sqru(p-1))) );
   avma = av;
   for (s=0, n=0; n+s < k; n++, s += u_lval(n, p));
   return n;
