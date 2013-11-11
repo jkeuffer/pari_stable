@@ -481,10 +481,19 @@ vecrangess(long a, long b)
 GEN
 genindexselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
-  long l = lg(A), i, lv = 1;
-  GEN v = cgetg(l, t_VECSMALL);
-  pari_sp av = avma;
-  for (i = 1; i < l; i++) {
+  long l, i, lv;
+  GEN v;
+  pari_sp av;
+  if (typ(A) == t_LIST)
+  {
+    A = list_data(A);
+    l = A? lg(A): 1;
+  }
+  else
+    l = lg(A);
+  v = cgetg(l, t_VECSMALL);
+  av = avma;
+  for (i = lv = 1; i < l; i++) {
     if (f(E, gel(A,i))) v[lv++] = i;
     avma = av;
   }
