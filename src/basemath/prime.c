@@ -649,9 +649,9 @@ check_prime(GEN p)
 static int
 selfridge_init(GEN N, GEN *pF, GEN *pf)
 {
-  GEN cbrtN = gsqrtn(N, utoi(3), NULL, nbits2prec((expi(N)+2)/3));
+  GEN cbrtN = sqrtnint(N, 3);
   GEN N_1 = addis(N,-1);
-  GEN F = Z_factor_until(N_1, sqri(floorr(cbrtN)));
+  GEN F = Z_factor_until(N_1, sqri(cbrtN));
   GEN f = factorback(F); /* factored part of N-1, f^3 > N */
   *pF = gel(F,1);
   *pf = f;
