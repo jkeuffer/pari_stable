@@ -1,4 +1,15 @@
-znprimroot(9223372036854775837)
+znprimroot(2)
+znprimroot(4)
+znprimroot(8)
+p=9223372036854775837;
+znprimroot(p)
+znprimroot(p^2)
+znprimroot(2*p^2)
+znstar(0)
+znstar(1)
+znstar(10)
+znstar(14)
+znstar(247)
 Mod(10,148)^(2^64)
 do(n)= {
   g = Mod(3,n); phi = eulerphi(n); o = znorder(g, phi); G = g^(phi-1);
