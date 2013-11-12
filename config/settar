@@ -1,6 +1,6 @@
 #!/bin/sh
 dir=$1;
-status=$2; # true status (probably 'development')
+status=$2; # true status (probably 'snapshot')
 STATUS=$3; # status we're being coerced into
 
 case "$STATUS" in
@@ -8,25 +8,21 @@ case "$STATUS" in
   snapshot) STATUS="development git-"`git log -1 --pretty=format:%h`;
             dir=`git describe`;;
 esac
-tarfile=$dir.tar
-v='config/version'
-
-if test "$status" != "$STATUS"; then
-  mv $v $v.old
-  sed -e "s/stat=.*/stat=\'$STATUS\'/" $v.old > $v
-  tar cf $tarfile `config/get_MANIFEST`
-  mv $v.old $v
-else
-  tar cf $tarfile `config/get_MANIFEST`
-fi
-
 if test -d $dir; then
   echo "Remove $dir before building a new release"; exit 1
 fi
+
+tarfile=$dir.tar
+tar cf $tarfile `config/get_MANIFEST`
 mkdir $dir && mv $tarfile $dir
 cd $dir && tar xf $tarfile && rm -f $tarfile && cd ..
+if test "$status" != "$STATUS"; then
+  v=$dir/config/version
+  mv $v $v.old
+  sed -e "s/^stat=.*/stat=\'$STATUS\'/" $v.old > $v
+  rm -f $v.old
+fi
 tar cf $tarfile $dir
-rm -f config/gitversion
 rm -rf $dir
 rm -f $tarfile.gz
-gzip  $tarfile
+gzip $tarfile
