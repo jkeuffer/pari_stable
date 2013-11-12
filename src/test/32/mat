@@ -28,4 +28,15 @@
   ***   at top-level: matdiagonal([1,2;3,4
   ***                 ^--------------------
   *** matdiagonal: incorrect type in diagonal (t_MAT).
-Total time spent: 60
+
+[1    0     0    0 0]
+
+[1    1     0    0 0]
+
+[1  3/2     1    0 0]
+
+[1  7/4   7/4    1 0]
+
+[1 15/8 35/16 15/8 1]
+
+Total time spent: 164
