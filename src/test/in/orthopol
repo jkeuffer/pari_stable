@@ -15,3 +15,6 @@ H=polhermite(5);
 subst(H,x,2) == polhermite(5,2)
 L=pollegendre(5);
 subst(L,x,2) == pollegendre(5,2)
+polchebyshev(-1,2,2)
+polchebyshev(-2,2,2)
+polchebyshev(4,2,2)

@@ -16,3 +16,10 @@ poliscyclo(polcyclo(12345))
 }
 poliscycloprod((x-1)^2)
 poliscycloprod((x+1)^2*(x-1))
+test(n,t)= if (polcyclo(n,t) != subst(polcyclo(n),x,t), error([n,t]));
+test(5,1);test(5,-1);
+test(10,1);test(10,-1);
+test(40,1);test(40,-1);
+test(2,-1);
+test(10,-1);
+test(11,-1);
