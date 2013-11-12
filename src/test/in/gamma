@@ -15,3 +15,6 @@ gamma(x)
 gamma(1000)
 psi(2^400)
 psi(-1.5)
+
+binomial(2^64+1,2)
+binomial(1001.,1000)
