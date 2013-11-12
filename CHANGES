@@ -46,6 +46,7 @@ PB  9- Mod(1, 2) - Mod(2, 4) => Mod(-1,2) [#1469]
 BA 32- doing allocatemem in the break loop would corrupt the new break loop
    33- relative error in eint1 was larger than expected
    34- select(t_LIST,,1) [ indirect select ] didn't work
+   35- vecsort(List(),,4) -> SEGV
 
   Changed
     1- default help text for a user function is now as in \u:

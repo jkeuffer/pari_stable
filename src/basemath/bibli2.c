@@ -1503,7 +1503,14 @@ vecsort0(GEN x, GEN k, long flag)
     x = flag & cmp_IND? gen_indexsort(x, E, CMP): gen_sort(x, E, CMP);
   if (flag & cmp_REV) { /* reverse order */
     long j, lx;
-    GEN y = (typ(x) == t_LIST)? list_data(x): x;
+    GEN y;
+    if (typ(x)==t_LIST)
+    {
+      y = list_data(x);
+      if (!y) return x;
+    }
+    else
+      y = x;
     lx = lg(y);
     for (j=1; j<=(lx-1)>>1; j++) swap(gel(y,j), gel(y,lx-j));
   }

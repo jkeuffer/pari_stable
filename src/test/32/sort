@@ -20,4 +20,11 @@ error("incorrect type in lexicographic vecsort, index too large (t_INT).")
 4, 1]]
 1
 0
-Total time spent: 0
+Vecsmall([1, 2, 3, 4])
+List([1, 2, 3, 4])
+[1, 2, 3, 4]
+Vecsmall([4, 6, 2, 1])
+[4, 3, 2, 1]
+Vecsmall([1, 2, 6, 4])
+List([])
+Total time spent: 8
