@@ -11,3 +11,13 @@ t=(precision(1.,77)*x+1);
 precision(t)
 precision(1./t)
 precision(Qfb(1,0,-2));
+
+padicprec(1,2)  == padicprec(0,2)
+padicprec(1/2,2)== padicprec(0,2)
+padicprec(O(2^2),3)
+padicprec(O(2^2),2)
+t=1+O(2^3);
+padicprec(t,2)
+padicprec((x+2)*t, 2)
+padicprec((1+2*x+O(x^2))*t, 2)
+padicprec([2,4]*t, 2)
