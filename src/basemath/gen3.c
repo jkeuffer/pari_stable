@@ -797,29 +797,19 @@ gmodsg(long x, GEN y)
 GEN
 gmodulsg(long x, GEN y)
 {
-  GEN z;
-
   switch(typ(y))
   {
-    case t_INT: z = cgetg(3,t_INTMOD);
-      gel(z,1) = absi(y);
-      gel(z,2) = modsi(x,y); return z;
-
-    case t_POL: z = cgetg(3,t_POLMOD);
-      gel(z,1) = RgX_copy(y);
-      gel(z,2) = stoi(x); return z;
+    case t_INT:
+      if (!is_bigint(y)) return gmodulss(x,itos(y));
+      retmkintmod(modsi(x,y), absi(y));
+    case t_POL: retmkpolmod(stoi(x),RgX_copy(y));
   }
   pari_err_TYPE2("%",stoi(x),y); return NULL; /* not reached */
 }
 
 GEN
 gmodulss(long x, long y)
-{
-  GEN z = cgetg(3,t_INTMOD);
-  y = labs(y);
-  gel(z,1) = stoi(y);
-  gel(z,2) = modss(x, y); return z;
-}
+{ retmkintmod(modss(x, y), utoi(labs(y))); }
 
 GEN
 gmodulo(GEN x,GEN y)
@@ -827,6 +817,7 @@ gmodulo(GEN x,GEN y)
   long tx = typ(x), l, i;
   GEN z;
 
+  if (tx == t_INT && !is_bigint(x)) return gmodulsg(itos(x), y);
   if (is_matvec_t(tx))
   {
     z = cgetg_copy(x, &l);
@@ -836,7 +827,6 @@ gmodulo(GEN x,GEN y)
   switch(typ(y))
   {
     case t_INT: retmkintmod(Rg_to_Fp(x,y), absi(y));
-
     case t_POL:
       if (tx == t_POLMOD)
       {
