@@ -32,3 +32,4 @@ test(30, -1.0)
 z15 = Mod(t,polcyclo(15,t));
 test(15, z15)
 test(30, z15)
+test(105, z15)
