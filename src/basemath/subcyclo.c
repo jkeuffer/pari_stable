@@ -123,12 +123,15 @@ znstar_generate(long n, GEN V)
   setlg(ord,r+1); return gerepilecopy(av, mkvec3(gen,ord,bits));
 }
 
+static ulong
+znstar_order(GEN H) { return zv_prod(gel(H,2)); }
+
 /* Return the lists of element of H.
  * This can be implemented with znstar_coset_func instead. */
 GEN
 znstar_elts(long n, GEN H)
 {
-  long card = group_order(H);
+  long card = znstar_order(H);
   GEN gen = gel(H,1), ord = gel(H,2);
   GEN sg = cgetg(1 + card, t_VECSMALL);
   long k, j, l;
@@ -202,7 +205,7 @@ znstar_cosets(long n, long phi_n, GEN H)
 {
   long    k;
   long    c = 0;
-  long    card   = group_order(H);
+  long    card   = znstar_order(H);
   long    index  = phi_n/card;
   GEN     cosets = cgetg(index+1,t_VECSMALL);
   pari_sp ltop = avma;
@@ -648,7 +651,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     H = znstar_reduce_modulus(H, cnd);
     n = cnd;
   }
-  card = group_order(H);
+  card = znstar_order(H);
   phi_n = eulerphiu(n);
   if (card == phi_n)
   {
