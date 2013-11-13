@@ -647,17 +647,17 @@ gmod(GEN x, GEN y)
   GEN z,p1;
 
   if (tx == t_INT && !is_bigint(x)) return gmodsg(itos(x),y);
+  ty = typ(y);
+  if (ty == t_INT && !is_bigint(y)) return gmodgs(x,itos(y));
   if (is_matvec_t(tx))
   {
     z = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(z,i) = gmod(gel(x,i),y);
     return z;
   }
-  ty = typ(y);
   switch(ty)
   {
     case t_INT:
-      if (!is_bigint(y)) return gmodgs(x,itos(y));
       switch(tx)
       {
         case t_INT:
