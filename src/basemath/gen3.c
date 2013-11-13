@@ -874,9 +874,11 @@ gmodulo(GEN x,GEN y)
 GEN
 gdivent(GEN x, GEN y)
 {
-  long tx = typ(x);
+  long tx = typ(x), ty;
 
   if (tx == t_INT && !is_bigint(x)) return gdiventsg(itos(x),y);
+  ty = typ(y);
+  if (ty == t_INT && !is_bigint(y)) return gdiventgs(x,itos(y));
   if (is_matvec_t(tx))
   {
     long i, lx;
@@ -884,10 +886,9 @@ gdivent(GEN x, GEN y)
     for (i=1; i<lx; i++) gel(z,i) = gdivent(gel(x,i),y);
     return z;
   }
-  switch(typ(y))
+  switch(ty)
   {
     case t_INT:
-      if (!is_bigint(y)) return gdiventgs(x,itos(y));
       switch(tx)
       {
         case t_INT: return truedivii(x,y);
