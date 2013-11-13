@@ -14,6 +14,7 @@ precision(Qfb(1,0,-2));
 
 padicprec(1,2)  == padicprec(0,2)
 padicprec(1/2,2)== padicprec(0,2)
+padicprec(Mod(1,9),3)
 padicprec(O(2^2),3)
 padicprec(O(2^2),2)
 t=1+O(2^3);
