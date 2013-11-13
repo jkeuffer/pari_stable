@@ -765,7 +765,7 @@ ZpXQ_inv(GEN a, GEN T, GEN p, long e)
 
 struct _ZpXQ_sqrtn
 {
-  GEN T, a, p, n, ai;
+  GEN T, a, n, ai;
 };
 
 static GEN
@@ -790,7 +790,7 @@ GEN
 ZpXQ_sqrtnlift(GEN a, GEN n, GEN x, GEN T, GEN p, long e)
 {
   struct _ZpXQ_sqrtn d;
-  d.a = a; d.T = T; d.p = p; d.n = n;
+  d.a = a; d.T = T; d.n = n;
   d.ai = ZpXQ_inv(ZX_Z_mul(a, n),T,p,(e+1)>>1);
   return gen_ZpX_Newton(x, p, e, &d, _sqrtn_eval, _sqrtn_invd);
 }
