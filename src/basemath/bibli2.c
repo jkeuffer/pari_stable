@@ -750,13 +750,10 @@ dirmul(GEN x, GEN y)
     if (gequal0(c)) continue;
     if (gequal1(c))
       for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gel(y,k));
+    else if (gequalm1(c))
+      for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
     else
-    {
-      if (gequalm1(c))
-        for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
-      else
-        for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
-    }
+      for (k=dy,i=j*dy; i<=nz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGLEVEL) err_printf("doubling stack in dirmul\n");
@@ -783,17 +780,14 @@ dirdiv(GEN x, GEN y)
   z = zerovec(nz);
   for (j=dx; j<=nz; j++)
   {
-    p1=gel(x,j); gel(z,j) = p1;
-    if (gequal0(p1)) continue;
-    if (gequal1(p1))
+    GEN c = gel(x,j); gel(z,j) = c;
+    if (gequal0(c)) continue;
+    if (gequal1(c))
       for (i=j+j; i<=nz; i+=j) gel(x,i) = gsub(gel(x,i),gel(y,i/j));
+    else if (gequalm1(c))
+      for (i=j+j; i<=nz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
     else
-    {
-      if (gequalm1(p1))
-        for (i=j+j; i<=nz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
-      else
-        for (i=j+j; i<=nz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,gel(y,i/j)));
-    }
+      for (i=j+j; i<=nz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(c,gel(y,i/j)));
   }
   return gerepilecopy(av,z);
 }
