@@ -545,7 +545,7 @@ lcov-report:
 	genhtml --legend -t \$(LCOV_TITLE) -o \$(LCOV_REPORT) \$(LCOV_TRACE)
 
 lcov-reset:
-	\$(RM) *.gcda *.gcdno
+	\$(RM) *.gcda *.gcno
 EOT
 fi
 
