@@ -397,28 +397,42 @@ GEN
 polcyclo_eval(long n, GEN x)
 {
   pari_sp av= avma;
-  GEN P, md, xd, yn, yd;
-  long l, s, i, j, q, mu, tx;
+  GEN P, md, xd, yneg, ypos;
+  long l, s, i, j, q, tx;
+  long root_of_1 = 0;
 
   if (!x) return polcyclo(n, 0);
   tx = typ(x);
   if (gcmpX(x)) return polcyclo(n, varn(x));
   if (n <= 0) pari_err_DOMAIN("polcyclo", "index", "<=", gen_0, stoi(n));
   if (n == 1) return gsubgs(x, 1);
-  /* n >= 2 */
-  P = gel(factoru(n), 1); l = lg(P)-1;
-  s = P[1]; for (i = 2; i <= l; i++) s *= P[i];
-  q = n/s;
-  if (tx == t_INT && is_pm1(x))
-  {
-    avma = av;
-    if (signe(x) > 0 || !odd(q)) return l == 1? utoipos(P[1]): gen_1;
-    /* return Phi_s(-1) */
-    if (n == 2) return gen_0;
-    if (!odd(n) && l == 2) return utoipos(P[2]);
-    return gen_1;
+  if (tx == t_INT && !signe(x)) return gen_1;
+  while ((n & 3) == 0) { n >>= 1; x = gsqr(x); } /* Phi_4n(x) = Phi_2n(x^2) */
+  /* n not divisible by 4 */
+  if (n == 2) return gerepileupto(av, gaddgs(x,1));
+  if (!odd(n)) { n >>= 1; x = gneg(x); } /* Phi_2n(x) = Phi_n(-x) for n>1 odd */
+  /* n odd > 2.  s largest squarefree divisor of n */
+  P = gel(factoru(n), 1); s = zv_prod(P);
+  /* replace n by largest squarefree divisor */
+  q = n/s; if (q != 1) { x = gpowgs(x, q); n = s; }
+  l = lg(P)-1;
+  /* n squarefree odd > 2, l distinct prime divisors. Now handle x = 1 or -1 */
+  if (tx == t_INT) { /* shortcut */
+    if (is_pm1(x))
+    {
+      avma = av;
+      if (signe(x) > 0 && l == 1) return utoipos(P[1]);
+      return gen_1;
+    }
+  } else {
+    if (gequal1(x))
+    { /* n is prime, return n; multiply by x to keep the type */
+      if (l == 1) return gerepileupto(av, gmulgs(x,n));
+      return gerepilecopy(av, x); /* else 1 */
+    }
+    if (gequalm1(x)) return gerepilecopy(av, x); /* -1 */
   }
-  if (q != 1) { x = gpowgs(x, q); n = s; } /* replace n by squarefree part */
+  /* Heuristic: evaluation will probably not improve things */
   if (tx == t_POL || tx == t_MAT || lg(x) > n)
     return gerepileupto(av, poleval(polcyclo(n,0), x));
 
@@ -426,21 +440,57 @@ polcyclo_eval(long n, GEN x)
   md = cgetg((1L<<l) + 1, t_VECSMALL); /* the mu(d), where d | n */
   gel(xd, 1) = x;
   md[1] = 1;
-  mu = odd(l)? -1: 1; /* mu(n) */
-  if (mu == 1) { yd = gen_1; yn = gsubgs(x,1); }
-  else         { yn = gen_1; yd = gsubgs(x,1); }
-  for (i = 1; i <= l; i++) /* compute Prod_{d|n} (x^d-1)^mu(n/d) */
+  /* Use Phi_n(x) = Prod_{d|n} (x^d-1)^mu(n/d).
+   * If x has exact order D, n = Dq, then the result is 0 if q = 1. Otherwise
+   * the factors with x^d-1, D|d are omitted and we multiply at the end by
+   *   prod_{d | q} d^mu(q/d) = q if prime, 1 otherwise */
+  /* We store the factors with mu(d)= 1 (resp.-1) in ypos (resp yneg).
+   * At the end we return ypos/yneg if mu(n)=1 and yneg/ypos if mu(n)=-1 */
+  ypos = gsubgs(x,1);
+  yneg = gen_1;
+  for (i = 1; i <= l; i++)
   {
     long ti = 1L<<(i-1), p = P[i];
     for (j = 1; j <= ti; j++) {
-      GEN X = gpowgs(gel(xd,j), p);
+      GEN X = gpowgs(gel(xd,j), p), t = gsubgs(X,1);
       gel(xd,ti+j) = X;
       md[ti+j] = -md[j];
-      if (mu == md[ti+j]) yn = gmul(yn, gsubgs(X,1));
-      else                yd = gmul(yd, gsubgs(X,1));
+      if (gequal0(t))
+      { /* x^d = 1; root_of_1 := the smallest index ti+j such that X == 1
+        * (whose bits code d: bit i-1 is set iff P[i] | d). If no such index
+        * exists, then root_of_1 remains 0. Do not multiply with X-1 if X = 1,
+        * we handle these factors at the end */
+        if (!root_of_1) root_of_1 = ti+j;
+      }
+      else
+      {
+        if (md[ti+j] == 1) ypos = gmul(ypos, t);
+        else               yneg = gmul(yneg, t);
+      }
     }
   }
-  return gerepileupto(av, gdiv(yn,yd));
+  ypos = odd(l)? gdiv(yneg,ypos): gdiv(ypos,yneg);
+  if (root_of_1)
+  {
+    GEN X = gel(xd,(1<<l)); /* = x^n = 1 */
+    long bitmask_q = (1<<l) - root_of_1;
+    /* bitmask_q encodes q = n/d: bit (i-1) is 1 iff P[i] | q */
+
+    /* x is a root of unity.  If bitmask_q = 0, then x was a primitive n-th
+     * root of 1 and the result is zero. Return X - 1 to preserve type. */
+    if (!bitmask_q) return gerepileupto(av, gsubgs(X, 1));
+    /* x is a primitive d-th root of unity, where d|n and d<n: we
+     * must multiply ypos by if(isprime(n/d), n/d, 1) */
+    ypos = gmul(ypos, X); /* multiply by X = 1 to preserve type */
+    /* If bitmask_q = 1<<(i-1) for some i <= l, then q == P[i] and we multiply
+     * by P[i]; otherwise q is composite and nothing more needs to be done */
+    if (!(bitmask_q & (bitmask_q-1))) /* detects power of 2, since bitmask!=0 */
+    {
+      i = vals(bitmask_q)+1; /* q = P[i] */
+      ypos = gmulgs(ypos, P[i]);
+    }
+  }
+  return gerepileupto(av, ypos);
 }
 /********************************************************************/
 /**                                                                **/

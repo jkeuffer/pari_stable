@@ -23,3 +23,12 @@ test(40,1);test(40,-1);
 test(2,-1);
 test(10,-1);
 test(11,-1);
+
+\\ roots of 1
+test(20, I)
+test(10, Mod(3,11))
+test(10, 2 + O(11))
+test(30, -1.0)
+z15 = Mod(t,polcyclo(15,t));
+test(15, z15)
+test(30, z15)
