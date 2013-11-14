@@ -46,6 +46,9 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    33- relative error in eint1 was larger than expected
    34- select(t_LIST,,1) [ indirect select ] didn't work
    35- vecsort(List(),,4) -> SEGV
+   36- factorpadic / polrootspadic lost accuracy when converting output from
+       integers to t_PADICs (factorpadic(t^2 + 3^5, 3, 5) -> irreducible factor
+       (1 + O(3^5))*t^2 + O(3^5)*t + O(3^0)
 
   Changed
     1- default help text for a user function is now as in \u:

@@ -2,6 +2,7 @@ padicappr(x,O(2))
 padicappr(x^2+1+O(3), Mod(-1+O(5^10),y^2-2))
 padicappr(x^2+1+O(3), -1+O(5^10))
 factorpadic(y^3+5*y,7,8,1)
+factorpadic(y^2+3^5,3,5)
 
 test(p, e = 1)=
 { my (N = 7*p^2);

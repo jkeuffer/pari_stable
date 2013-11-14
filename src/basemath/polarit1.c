@@ -178,7 +178,8 @@ Z_to_Zp(GEN x, GEN p, GEN pr, long r)
   if (!sx) return zeropadic_shallow(p,r);
   v = Z_pvalrem(x,p,&x);
   if (v) {
-    r -= v; if (r <= 0) return zeropadic_shallow(p,r);
+    if (r <= v) return zeropadic_shallow(p,r);
+    r -= v;
     pr = powiu(p,r);
   }
   y = cgetg(5,t_PADIC);
