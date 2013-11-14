@@ -20,7 +20,7 @@ patchlevel_verbose=
 case "$stat" in # $stat rewritten by config/settar ?
   *git-*) patchlevel_verbose="[ $stat ]";;
   *) if test -d "$TOP/.git"; then
-       t=`git rev-list HEAD --count 2>/dev/null` # ~ svn revision number
+       t=`git rev-list HEAD 2>/dev/null | wc -l` # ~ svn revision number
        T=`git log -1 --pretty=format:%h` # commit hash
        if test -z "$t"; then t=0; fi
        vcsversion=$t-$T
