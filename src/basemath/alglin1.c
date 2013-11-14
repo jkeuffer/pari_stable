@@ -906,7 +906,8 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
   {
     pari_sp av = avma;
     ulong pp = (ulong)p[2];
-    GEN d = FlxqM_gauss_pivot(FqM_to_FlxM(x, T, p), ZX_to_Flx(T,pp), pp, rr);
+    GEN Tp = ZXT_to_FlxT(T, pp);
+    GEN d = FlxqM_gauss_pivot(FqM_to_FlxM(x, T, p), Tp, pp, rr);
     return d ? gerepileuptoleaf(av, d): d;
   }
   ff = get_Fq_field(&E, T, p);
@@ -980,7 +981,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     pari_sp ltop=avma;
     ulong l= p[2];
     GEN Ml = FqM_to_FlxM(x, T, p);
-    GEN Tl = ZX_to_Flx(T,l);
+    GEN Tl = ZXT_to_FlxT(T,l);
     GEN p1 = FlxM_to_ZXM(FlxqM_ker(Ml,Tl,l));
     return gerepileupto(ltop,p1);
   }

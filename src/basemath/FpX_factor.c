@@ -2313,7 +2313,8 @@ FpXQX_Berlekamp_ker(GEN u, GEN T, GEN p)
   if (lgefint(p)==3)
   {
     ulong pp=p[2];
-    GEN Tp = ZX_to_Flx(T,pp), Sp = ZXX_to_FlxX(u,pp,varn(T));
+    long v = get_FpX_var(T);
+    GEN Tp = ZXT_to_FlxT(T,pp), Sp = ZXX_to_FlxX(u,pp,v);
     return FlxM_to_ZXM(FlxqX_Berlekamp_ker(Sp, Tp, pp));
   } else
   {
