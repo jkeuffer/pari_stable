@@ -2792,14 +2792,16 @@ FlxX_swap(GEN x, long n, long ws)
 }
 
 static GEN
-zxX_to_Kronecker_spec(GEN P, long lp, GEN Q)
+zxX_to_Kronecker_spec(GEN P, long lp, long n)
 { /* P(X) = sum Pi(Y) * X^i, return P( Y^(2n-1) ) */
-  long i, j, k, l, N = (degpol(Q)<<1) + 1;
+  long i, j, k, l, N = (n<<1) + 1;
   GEN y = cgetg((N-2)*lp + 2, t_VECSMALL) + 2;
   for (k=i=0; i<lp; i++)
   {
     GEN c = gel(P,i);
     l = lg(c);
+    if (l-3 >= n)
+      pari_err_BUG("zxX_to_Kronecker, P is not reduced mod Q");
     for (j=2; j < l; j++) y[k++] = c[j];
     if (i == lp-1) break;
     for (   ; j < N; j++) y[k++] = 0;
@@ -2811,7 +2813,7 @@ zxX_to_Kronecker_spec(GEN P, long lp, GEN Q)
 GEN
 zxX_to_Kronecker(GEN P, GEN Q)
 {
-  GEN z = zxX_to_Kronecker_spec(P+2, lg(P)-2, Q);
+  GEN z = zxX_to_Kronecker_spec(P+2, lg(P)-2, degpol(Q));
   z[1] = P[1]; return z;
 }
 
@@ -3056,8 +3058,9 @@ FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  kx= zxX_to_Kronecker_spec(x,lx,get_Flx_mod(T));
-  ky= zxX_to_Kronecker_spec(y,ly,get_Flx_mod(T));
+  long dT =  get_Flx_degree(T);
+  kx= zxX_to_Kronecker_spec(x,lx,dT);
+  ky= zxX_to_Kronecker_spec(y,ly,dT);
   z = Flx_mul(ky, kx, p);
   z = Kronecker_to_FlxqX(z,T,p);
   return gerepileupto(ltop,z);
