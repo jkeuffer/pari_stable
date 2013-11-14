@@ -1,1 +1,7 @@
-quadgen(5)^0
+default(realprecision,38);
+w=quadgen(5);
+w^0
+w+1.
+w+(I+0.)
+1.*w
+(I+0.)*w

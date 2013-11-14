@@ -34,3 +34,5 @@ gamma(s)
 p=2^64+13;
 gamma(3 + O(p^2))
 gamma(-3 + O(p^2))
+
+I + O(5^3)
