@@ -919,8 +919,10 @@ incgam(GEN s, GEN x, long prec) { return incgam0(s, x, NULL, prec); }
 GEN
 mpeint1(GEN x, GEN expx)
 {
+  GEN z = cgetr(lg(x));
   pari_sp av = avma;
-  return gerepileuptoleaf(av, incgamcf_0(x, expx));
+  affrr(incgamcf_0(x, expx), z);
+  avma = av; return z;
 }
 
 static GEN
@@ -964,11 +966,7 @@ eint1(GEN x, long prec)
     x = gtofp(x, prec);
     if (typ(x) != t_REAL) return cxeint1(x, prec);
   }
-  if (signe(x) >= 0)
-  {
-    av = avma;
-    return gerepileuptoleaf(av, incgamcf_0(x, NULL));
-  }
+  if (signe(x) >= 0) return mpeint1(x,NULL);
   /* rewritten from code contributed by Manfred Radimersky */
   res = cgetg(3, t_COMPLEX);
   av = avma;

@@ -92,7 +92,7 @@ small([128, 1])], [0, 0, 0, 0, 0, 0, 0, 0]]
 ? l=elllseries(ccurve,2)
 0.38157540826071121129371040958008663665
 ? elllseries(ccurve,2,1.2)-l
-1.4693679385278593850 E-38
+1.3224311446750734465 E-38
 ? tcurve=ellinit([1,0,1,-19,26]);
 ? ellorder(tcurve,[1,2])
 6
@@ -131,4 +131,4 @@ small([128, 1])], [0, 0, 0, 0, 0, 0, 0, 0]]
 ? getheap
 [74, 5254]
 ? print("Total time spent: ",gettime);
-Total time spent: 12
+Total time spent: 8
