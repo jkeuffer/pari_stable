@@ -2348,7 +2348,7 @@ FqX_split_Berlekamp(GEN *t, GEN T, GEN p)
   GEN u = *t, a,b,vker,pol;
   long vu = varn(u), vT = varn(T), dT = degpol(T);
   long d, i, ir, L, la, lb;
-
+  T = FpX_get_red(T, p);
   vker = FpXQX_Berlekamp_ker(u,T,p);
   vker = RgM_to_RgXV(vker,vu);
   d = lg(vker)-1;
