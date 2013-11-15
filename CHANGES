@@ -76,6 +76,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
        associated to the object, return 0. Thus "if (!variable(x), )" may be
        used to test wether x has a "variable".
 JD 14- polcyclo(n, x) now works for all roots of 1
+   15- quadpoly no longer accepts vector/matrix arguments, see 2.6.0,C94
 
   Added
 EP  1- Configure option for gcov/lcov support

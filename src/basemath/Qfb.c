@@ -40,50 +40,43 @@ check_quaddisc_imag(GEN x, long *r, const char *f)
   if (sx > 0) pari_err_DOMAIN(f, "disc",">",gen_0,x);
 }
 
-static GEN
-Zquadpoly(GEN x, long v)
+/* X^2 - X - (D-1)/4 or X^2 - D/4 */
+GEN
+quadpoly(GEN D)
 {
-  long res, sx;
-  GEN y, p1;
-
-  check_quaddisc(x, &sx, &res, "quadpoly");
-  y = cgetg(5,t_POL);
-  y[1] = evalsigne(1) | evalvarn(v);
-
-  p1 = shifti(x,-2); togglesign(p1);
-  /* p1 = - floor(x/4) [ = -x/4 or (1-x)/4 ] */
-  if (!res) gel(y,3) = gen_0;
+  long res, s;
+  GEN b, c, y = cgetg(5,t_POL);
+  check_quaddisc(D, &s, &res, "quadpoly");
+  y[1] = evalsigne(1) | evalvarn(0);
+  if (res)
+  {
+    pari_sp av = avma;
+    b = gen_m1;
+    c = gerepileuptoint(av, shifti(subui(1,D), -2));
+  }
   else
   {
-    if (sx < 0) p1 = gerepileuptoint((pari_sp)y, addsi(1,p1));
-    gel(y,3) = gen_m1;
+    b = gen_0;
+    c = shifti(D,-2); togglesign(c);
   }
-  gel(y,2) = p1;
+  gel(y,2) = c;
+  gel(y,3) = b;
   gel(y,4) = gen_1; return y;
 }
 
 GEN
 quadpoly0(GEN x, long v)
 {
-  if (is_matvec_t(typ(x)))
-  {
-    long i, l;
-    GEN y = cgetg_copy(x, &l);
-    for (i=1; i<l; i++) gel(y,i) = quadpoly0(gel(x,i),v);
-    return y;
-  }
-  if (v < 0) v = 0;
-  return Zquadpoly(x,v);
+  GEN T = quadpoly(x);
+  if (v > 0) setvarn(T, v);
+  return T;
 }
-
-GEN
-quadpoly(GEN x) { return quadpoly0(x, -1); }
 
 GEN
 quadgen(GEN x)
 {
   GEN y = cgetg(4,t_QUAD);
-  gel(y,1) = Zquadpoly(x,0); gel(y,2) = gen_0; gel(y,3) = gen_1; return y;
+  gel(y,1) = quadpoly(x); gel(y,2) = gen_0; gel(y,3) = gen_1; return y;
 }
 
 /***********************************************************************/
