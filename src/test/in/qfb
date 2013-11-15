@@ -16,3 +16,6 @@ qfbred(q3,1)
 q=Qfb(1009, 60, 99108027750247771)
 qfbnupow(q, 8839368315)
 qfbred(Qfb(22000957029, 25035917443, 7122385192))
+p=2^64+13;
+qfbprimeform(-4,p)
+qfbprimeform(5,p)
