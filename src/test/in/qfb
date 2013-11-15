@@ -3,6 +3,7 @@ vec(x) = [component(x,1), component(x,2), component(x,3)];
 vec( qfbred(Qfb(6,6,-1),1) )
 default(realprecision,38)
 q=Qfb(7, 30, -14)^2;
+qfbpowraw(q,-1)
 q*q^2
 q^0
 q^1
