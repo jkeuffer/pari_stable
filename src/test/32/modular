@@ -50,4 +50,10 @@ Mod(Mod(1, y), x)
   ***   at top-level: Mod(1,"a")
   ***                 ^----------
   *** Mod: forbidden division t_INT % t_STR.
+  ***   at top-level: Mod(0,0)
+  ***                 ^--------
+  *** Mod: impossible inverse in %: 0.
+  ***   at top-level: Mod(0,Pol(0))
+  ***                 ^-------------
+  *** Mod: impossible inverse in %: 0.
 Total time spent: 4

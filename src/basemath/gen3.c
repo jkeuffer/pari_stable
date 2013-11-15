@@ -802,14 +802,19 @@ gmodulsg(long x, GEN y)
     case t_INT:
       if (!is_bigint(y)) return gmodulss(x,itos(y));
       retmkintmod(modsi(x,y), absi(y));
-    case t_POL: retmkpolmod(stoi(x),RgX_copy(y));
+    case t_POL:
+      if (!signe(y)) pari_err_INV("%", y);
+      retmkpolmod(stoi(x),RgX_copy(y));
   }
   pari_err_TYPE2("%",stoi(x),y); return NULL; /* not reached */
 }
 
 GEN
 gmodulss(long x, long y)
-{ retmkintmod(modss(x, y), utoi(labs(y))); }
+{
+  if (!y) pari_err_INV("%",gen_0);
+  retmkintmod(modss(x, y), utoi(labs(y)));
+}
 
 GEN
 gmodulo(GEN x,GEN y)
@@ -828,6 +833,7 @@ gmodulo(GEN x,GEN y)
   {
     case t_INT: retmkintmod(Rg_to_Fp(x,y), absi(y));
     case t_POL:
+      if (!signe(y)) pari_err_INV("%", y);
       if (tx == t_POLMOD)
       {
         long vx = varn(gel(x,1)), vy = varn(y);

@@ -11,3 +11,5 @@ test([1,2;3,4], [-1,2;-4,2]);
 Mod(Mod(1,y),x)
 Mod(Mod(1,x),y)
 Mod(1,"a")
+Mod(0,0)
+Mod(0,Pol(0))
