@@ -498,6 +498,7 @@ FpXQX_invBarrett_Newton(GEN S, GEN T, GEN p)
 
   /* initialize */
   gel(x,0) = Fq_inv(gel(q,0), T, p);
+  if (lQ>1) gel(q,1) = Fq_red(gel(q,1), T, p);
   if (lQ>1 && signe(gel(q,1)))
   {
     GEN u = gel(q, 1);
