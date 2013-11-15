@@ -45,6 +45,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
        gel(_v,1) = (x);\
        gel(_v,2) = (y);\
        gel(_v,3) = (z); return _v; } while(0)
+#define retmkqfr(x,y,z,d)\
+  do { GEN _v = cgetg(5, t_QFR);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z);\
+       gel(_v,4) = (d); return _v; } while(0)
+#define retmkquad(x,y,z)\
+  do { GEN _v = cgetg(4, t_QUAD);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y);\
+       gel(_v,3) = (z); return _v; } while(0)
 #define retmkvec4(x,y,z,t)\
   do { GEN _v = cgetg(5, t_VEC);\
        gel(_v,1) = (x);\

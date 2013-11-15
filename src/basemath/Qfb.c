@@ -40,25 +40,32 @@ check_quaddisc_imag(GEN x, long *r, const char *f)
   if (sx > 0) pari_err_DOMAIN(f, "disc",">",gen_0,x);
 }
 
+/* X^2 + b X + c is the canonical quadratic t_POL of discriminant D.
+ * Dodd is non-zero iff D is odd */
+static void
+quadpoly_bc(GEN D, long Dodd, GEN *b, GEN *c)
+{
+  if (Dodd)
+  {
+    pari_sp av = avma;
+    *b = gen_m1;
+    *c = gerepileuptoint(av, shifti(subui(1,D), -2));
+  }
+  else
+  {
+    *b = gen_0;
+    *c = shifti(D,-2); togglesign(*c);
+  }
+}
 /* X^2 - X - (D-1)/4 or X^2 - D/4 */
 GEN
 quadpoly(GEN D)
 {
-  long res, s;
+  long Dmod4, s;
   GEN b, c, y = cgetg(5,t_POL);
-  check_quaddisc(D, &s, &res, "quadpoly");
+  check_quaddisc(D, &s, &Dmod4, "quadpoly");
   y[1] = evalsigne(1) | evalvarn(0);
-  if (res)
-  {
-    pari_sp av = avma;
-    b = gen_m1;
-    c = gerepileuptoint(av, shifti(subui(1,D), -2));
-  }
-  else
-  {
-    b = gen_0;
-    c = shifti(D,-2); togglesign(c);
-  }
+  quadpoly_bc(D, Dmod4, &b,&c);
   gel(y,2) = c;
   gel(y,3) = b;
   gel(y,4) = gen_1; return y;
@@ -74,10 +81,7 @@ quadpoly0(GEN x, long v)
 
 GEN
 quadgen(GEN x)
-{
-  GEN y = cgetg(4,t_QUAD);
-  gel(y,1) = quadpoly(x); gel(y,2) = gen_0; gel(y,3) = gen_1; return y;
-}
+{ retmkquad(quadpoly(x), gen_0, gen_1); }
 
 /***********************************************************************/
 /**                                                                   **/
@@ -87,21 +91,14 @@ quadgen(GEN x)
 GEN
 qfi(GEN x, GEN y, GEN z)
 {
-  GEN t = cgetg(4,t_QFI);
   if (signe(x) < 0) pari_err_IMPL("negative definite t_QFI");
-  gel(t,1) = icopy(x);
-  gel(t,2) = icopy(y);
-  gel(t,3) = icopy(z); return t;
+  retmkqfi(icopy(x),icopy(y),icopy(z));
 }
 GEN
 qfr(GEN x, GEN y, GEN z, GEN d)
 {
-  GEN t = cgetg(5,t_QFR);
   if (typ(d) != t_REAL) pari_err_TYPE("qfr",d);
-  gel(t,1) = icopy(x);
-  gel(t,2) = icopy(y);
-  gel(t,3) = icopy(z);
-  gel(t,4) = rcopy(d); return t;
+  retmkqfr(icopy(x),icopy(y),icopy(z),rcopy(d));
 }
 
 GEN
@@ -301,23 +298,15 @@ qfr3_1(struct qfr_data *S)
   qfr_1_fill(y, S); return y;
 }
 
+/* Assume D < 0 is the discriminant of a t_QFI */
 static GEN
 qfi_1_by_disc(GEN D)
 {
-  GEN y = cgetg(4,t_QFI);
-  long r;
-
-  check_quaddisc_imag(D, &r, "qfi_1_by_disc");
+  GEN b,c, y = cgetg(4,t_QFI);
+  quadpoly_bc(D, mod2(D), &b,&c);
   gel(y,1) = gen_1;
-  gel(y,2) = r? gen_1: gen_0;
-  /* upon return, y[3] = (1-D) / 4 or -D / 4, whichever is an integer */
-  gel(y,3) = shifti(D,-2);
-  if (r) {
-    pari_sp av = avma;
-    gel(y,3) = gerepileuptoint(av, addis(gel(y,3),-1));
-  }
-  /* at this point y[3] < 0 */
-  setsigne(y[3], 1); return y;
+  gel(y,2) = b;
+  gel(y,3) = c; return y;
 }
 GEN
 qfi_1(GEN x)
@@ -1173,26 +1162,31 @@ primeform_u(GEN x, ulong p)
 GEN
 primeform(GEN x, GEN p, long prec)
 {
+  const char *f = "primeform";
   pari_sp av;
   long s, sx = signe(x), sp = signe(p);
   GEN y, b, absp;
 
-  if (typ(x) != t_INT) pari_err_TYPE("primeform",x);
-  if (typ(p) != t_INT) pari_err_TYPE("primeform",p);
-  if (!sp) pari_err_DOMAIN("primeform","p","=",gen_0,p);
-  if (!sx) pari_err_DOMAIN("primeform","D","=",gen_0,x);
+  if (typ(x) != t_INT) pari_err_TYPE(f,x);
+  if (typ(p) != t_INT) pari_err_TYPE(f,p);
+  if (!sp) pari_err_DOMAIN(f,"p","=",gen_0,p);
+  if (!sx) pari_err_DOMAIN(f,"D","=",gen_0,x);
   if (lgefint(p) == 3)
   {
-    if (p[2] == 1) {
+    ulong pp = p[2];
+    if (pp == 1) {
       if (sx < 0) {
+        long r;
         if (sp < 0) pari_err_IMPL("negative definite t_QFI");
+        r = mod4(x);
+        if (r && r != 3) pari_err_DOMAIN(f,"disc % 4",">", gen_1,x);
         return qfi_1_by_disc(x);
       }
       y = qfr_1_by_disc(x,prec);
       if (sp < 0) { gel(y,1) = gen_m1; togglesign(gel(y,3)); }
       return y;
     }
-    y = primeform_u(x, p[2]);
+    y = primeform_u(x, pp);
     if (sx < 0) {
       if (sp < 0) pari_err_IMPL("negative definite t_QFI");
       return y;
@@ -1213,9 +1207,9 @@ primeform(GEN x, GEN p, long prec)
     gel(y,4) = real_0(prec);
   }
   /* 2 or 3 mod 4 */
-  if (s & 2) pari_err_DOMAIN("primeform", "disc % 4", ">",gen_1, x);
+  if (s & 2) pari_err_DOMAIN(f, "disc % 4", ">",gen_1, x);
   absp = absi(p); av = avma;
-  b = Fp_sqrt(x, absp); if (!b) pari_err_SQRTN("primeform", mkintmod(x,absp));
+  b = Fp_sqrt(x, absp); if (!b) pari_err_SQRTN(f, mkintmod(x,absp));
   s &= 1; /* s = x mod 2 */
   /* mod(b) != mod2(x) ? [Warning: we may have b == 0] */
   if ((!signe(b) && s) || mod2(b) != s) b = gerepileuptoint(av, subii(absp,b));
