@@ -10,18 +10,18 @@ Doc: there are three possible values: 0
  means that, independently of the default \kbd{format} for reals which we
  explained above, you can print results in three ways:
 
- $\bullet$ \tev{raw format}, i.e.~a format which is equivalent to what you
+ \item \tev{raw format}, i.e.~a format which is equivalent to what you
  input, including explicit multiplication signs, and everything typed on a
  line instead of two dimensional boxes. This can have several advantages, for
  instance it allows you to pick the result with a mouse or an editor, and to
  paste it somewhere else.
 
- $\bullet$ \tev{prettymatrix format}: this is identical to raw format, except
+ \item \tev{prettymatrix format}: this is identical to raw format, except
  that matrices are printed as boxes instead of horizontally. This is
  prettier, but takes more space and cannot be used for input. Column vectors
  are still printed horizontally.
 
- $\bullet$ \tev{external prettyprint}: pipes all \kbd{gp}
+ \item \tev{external prettyprint}: pipes all \kbd{gp}
  output in TeX format to an external prettyprinter, according to the value of
  \tet{prettyprinter}. The default script (\tet{tex2mail}) converts its input
  to readable two-dimensional text.

@@ -14,13 +14,13 @@ Doc: this default is only usable if \kbd{gp}
  default are strings \kbd{"$a_1$,\dots,$a_k$"} where $k\le7$ and each
  $a_i$ is either
 
- \noindent $\bullet$ the keyword \kbd{no} (use the default color, usually
+ \noindent\item the keyword \kbd{no} (use the default color, usually
  black on transparent background)
 
- \noindent $\bullet$ an integer between 0 and 15 corresponding to the
+ \noindent\item an integer between 0 and 15 corresponding to the
  aforementioned colormap
 
- \noindent $\bullet$ a triple $[c_0,c_1,c_2]$ where $c_0$ stands for foreground
+ \noindent\item a triple $[c_0,c_1,c_2]$ where $c_0$ stands for foreground
  color, $c_1$ for background color, and $c_2$ for attributes (0 is default, 1
  is bold, 4 is underline).
 

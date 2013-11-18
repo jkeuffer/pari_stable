@@ -17,9 +17,9 @@ Doc:
  components. It allows to specify the invariants used, which can make the
  computation faster or slower. The components are
 
- $\bullet$ \kbd{fl[1]} Depth of scalar product combination to use.
+ \item \kbd{fl[1]} Depth of scalar product combination to use.
 
- $\bullet$ \kbd{fl[2]} Maximum level of Bacher polynomials to use.
+ \item \kbd{fl[2]} Maximum level of Bacher polynomials to use.
 
  Since this function computes the minimal vectors, it can become very lengthy
  as the dimension of $G$ grows.

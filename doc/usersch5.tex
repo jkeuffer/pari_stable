@@ -1329,7 +1329,7 @@ atoms:
 
 \settabs\+\indent&\kbd{Dxxx}\quad&\cr
 
-\noindent $\bullet$ Return type: \kbd{GEN} by default (must be valid for
+\noindent\item Return type: \kbd{GEN} by default (must be valid for
 \kbd{gerepileupto}), otherwise the following can appear as the \emph{first}
 char of the code string:
 %
@@ -1341,7 +1341,7 @@ component of the input (obviously \cr
 \+&&\quad  not suitable for \kbd{gerepileupto}). Used for member functions, to
 avoid costly copies.\cr
 
-\noindent$\bullet$ Mandatory arguments, appearing in the same order as the
+\noindent\item Mandatory arguments, appearing in the same order as the
 input arguments they describe:
 %
 \+& \kbd{G} & \kbd{GEN}\cr
@@ -1369,7 +1369,7 @@ be quoted using '\kbd{\bs}'\cr
 \noindent A \tev{closure} is a GP function in compiled (bytecode) form. It
 can be efficiently evaluated using the \kbd{closure\_eval}$xxx$ functions.
 
-\noindent$\bullet$ Automatic arguments:
+\noindent\item Automatic arguments:
 %
 \+& \kbd{f} &  Fake \kbd{*long}. C function requires a pointer but we
 do not use the resulting \kbd{long}\cr
@@ -1377,13 +1377,13 @@ do not use the resulting \kbd{long}\cr
 \+& \kbd{P} &  series precision (default \kbd{seriesprecision},
  global variable \kbd{precdl} for the library)\cr
 
-\noindent $\bullet$ Syntax requirements, used by functions like
+\noindent\item Syntax requirements, used by functions like
  \kbd{for}, \kbd{sum}, etc.:
 %
 \+& \kbd{=} & separator \kbd{=} required at this point (between two
 arguments)\cr
 
-\noindent$\bullet$ Optional arguments and default values:
+\noindent\item Optional arguments and default values:
 %
 \+& \kbd{E*} & any number of expressions, possibly 0 (see \kbd{E})\cr
 \+& \kbd{s*} & any number of strings, possibly 0 (see \kbd{s})\cr

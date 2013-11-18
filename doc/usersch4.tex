@@ -59,7 +59,7 @@ handlers, see~\secref{se:pari_init_tech}.
 
 \noindent We have now at our disposal:
 
-$\bullet$ a PARI \tev{stack} containing nothing. This is a big
+\item a PARI \tev{stack} containing nothing. This is a big
 connected chunk of \kbd{size} bytes of memory, where all computations
 take place. In large computations, intermediate results quickly
 clutter up memory so some kind of garbage collecting is needed. Most
@@ -69,13 +69,13 @@ demanding on the programmer: you must do your own cleaning up when the
 intermediate results are not needed anymore. We will see later how (and when)
 this is done.
 
-$\bullet$ the following \emph{universal objects} (by definition, objects
+\item the following \emph{universal objects} (by definition, objects
 which do not belong to the stack): the integers $0$, $1$, $-1$, $2$ and
 $-2$ (respectively called \tet{gen_0}, \tet{gen_1}, \tet{gen_m1},
 \tet{gen_2} and \tet{gen_m2}), the fraction $\dfrac{1}{2}$ (\tet{ghalf}).
 All of these are of type \kbd{GEN}.
 
-$\bullet$ a \tev{heap} which is just a linked list of permanent
+\item a \tev{heap} which is just a linked list of permanent
 universal objects. For now, it contains exactly the ones listed above. You
 will probably very rarely use the heap yourself; and if so, only as a
 collection of copies of objects taken from the stack (called \idx{clone}s in
@@ -83,7 +83,7 @@ the sequel). Thus you need not bother with its internal structure, which may
 change as PARI evolves. Some complex PARI functions create clones for special
 garbage collecting purposes, usually destroying them when returning.
 
-$\bullet$ a table of primes (in fact of \emph{differences} between
+\item a table of primes (in fact of \emph{differences} between
 consecutive primes), called \teb{diffptr}, of type \kbd{byteptr}
 (pointer to \kbd{unsigned char}). Its use is described in
 \secref{se:primetable} later. Using it directly is deprecated,
@@ -91,7 +91,7 @@ high-level iterators provide a cleaner and more flexible interface, see
 \secref{se:primeiter} (such iterators use the private prime table, but extend
 it dynamically).
 
-$\bullet$ access to all the built-in functions of the PARI library.
+\item access to all the built-in functions of the PARI library.
 These are declared to the outside world when you include \kbd{pari.h}, but
 need the above things to function properly. So if you forget the call to
 \tet{pari_init}, you will get a fatal error when running your program.
@@ -351,7 +351,7 @@ not needed anymore. This is called ``\emph{garbage collecting}.''
 We are now going to describe briefly how this is done. We will see many
 concrete examples in the next subsection.
 
-\noindent$\bullet$
+\noindent\item
 First, PARI routines do their own garbage collecting, which means that
 whenever a documented function from the library returns, only its result(s)
 have been added to the stack, possibly up to a very small overhead
@@ -364,7 +364,7 @@ subroutines. Of course the objects that were on the stack \emph{before} the
 function call are left alone. Except for the ones listed below, PARI
 functions only collect their own garbage.
 
-\noindent$\bullet$
+\noindent\item
 It may happen that all objects that were created after a certain point can
 be deleted~--- for instance, if the final result you need is not a
 \kbd{GEN}, or if some search proved futile. Then, it is enough to record
@@ -381,7 +381,7 @@ avma = av; /*@Ccom restore it */
 be overwritten: they should no longer be accessed after \kbd{avma} has been
 restored.
 
-\noindent$\bullet$
+\noindent\item
 If you want to destroy (i.e.~give back the memory occupied by) the
 \emph{latest} PARI object on the stack (e.g.~the latest one obtained from a
 function call), you can use the function\sidx{destruction}%
@@ -392,7 +392,7 @@ function call), you can use the function\sidx{destruction}%
 \noindent where \kbd{z} is the object you want to give back. This is
 equivalent to the above where the initial \kbd{av} is computed from \kbd{z}.
 
-\noindent$\bullet$
+\noindent\item
 Unfortunately life is not so simple, and sometimes you will want
 to give back accumulated garbage \emph{during} a computation without losing
 recent data. We shall start with the lowest level function to get a feel for

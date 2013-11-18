@@ -974,7 +974,7 @@ expression is an \tev{lvalue} if something can be assigned to it. (The name
 comes from left-value, to the left of a \kbd{=} operator; e.g.
 \kbd{x}, or \kbd{v[1]} are lvalues, but \kbd{x + 1} is not.)
 
-\def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
+\def\point#1{\noindent\item #1\hfill\break\indent\strut}
 \point{Priority 14}
 %
 \kbd{:} as in \kbd{x:small}, is used to indicate to the GP2C compiler that the
@@ -2070,7 +2070,7 @@ devoted to special syntactical tricks which can be used with such arguments
 (and only here; you will get an error message if you try these outside of
 string context):
 
-$\bullet$ Writing two strings alongside one another will just concatenate
+\item Writing two strings alongside one another will just concatenate
 them, producing a longer string. Thus it is equivalent to type in
 \kbd{"a " "b"} or \kbd{"a b"}. A little tricky point in the first expression:
 the first whitespace is enclosed between quotes, and so is part of a string;
@@ -2078,7 +2078,7 @@ while the second (before the \kbd{"b"}) is completely optional and \kbd{gp}
 actually suppresses it, as it would with any number of whitespace characters
 at this point (i.e.~outside of any string).
 
-$\bullet$ If you insert any expression when a string is expected, it gets
+\item If you insert any expression when a string is expected, it gets
 ``expanded'': it is evaluated as a standard GP expression, and the final
 result (as would have been printed if you had typed it by itself) is then
 converted to a string, as if you had typed it directly. For instance \kbd{"a"
@@ -2592,7 +2592,7 @@ Some special defaults, corresponding to file names and prompts, expand further
 the resulting value at the time they are set. Two kinds of expansions may be
 performed:
 
-$\bullet$ \teb{time expansion}: the string is sent through the library
+\item \teb{time expansion}: the string is sent through the library
 function \tet{strftime}. This means that \kbd{\%}\var{char} combinations have
 a special meaning, usually related to the time and date. For instance,
 \kbd{\%H} = hour (24-hour clock) and \kbd{\%M} = minute [00,59] (on a Unix
@@ -2606,7 +2606,7 @@ instance,
 will prepend the time of day, in the form \kbd{(\var{hh}:\var{mm})}
 to \kbd{gp}'s usual prompt.
 
-$\bullet$ \teb{environment expansion}: When the string contains a sequence of
+\item \teb{environment expansion}: When the string contains a sequence of
 the form \kbd{\$\var{SOMEVAR}}, e.g.~\kbd{\$HOME}, the environment is
 searched and if \var{SOMEVAR} is defined, the sequence is replaced by the
 corresponding value. Also the \kbd{\til} symbol has the same meaning as in
@@ -2847,11 +2847,11 @@ recognized).
 \subsubsec{Preprocessor:}
 Two types of lines are first dealt with by a preprocessor:
 
-$\bullet$ comments are removed. This applies to all text surrounded by
+\item comments are removed. This applies to all text surrounded by
 \kbd{/*~\dots~*/} as well as to everything following \kbd{\bs\bs} on a given
 line.
 
-$\bullet$ lines starting with \kbd{\#if} \var{boolean} are treated as
+\item lines starting with \kbd{\#if} \var{boolean} are treated as
 comments if \var{boolean} evaluates to \kbd{false}, and read normally
 otherwise. The condition can be negated using either \kbd{\#if not} (or
 \kbd{\#if !}). If the rest of the current line is empty, the test applies to
@@ -2876,12 +2876,12 @@ After preprocessing, the remaining lines are executed as
 sequence of expressions (as usual, separated by \kbd{;} if necessary). Only
 two kinds of expressions are recognized:
 
-$\bullet$ \var{default} \kbd{=} \var{value}, where \var{default} is one of
+\item \var{default} \kbd{=} \var{value}, where \var{default} is one of
 the available defaults (see \secref{se:defaults}), which will be set to
 \var{value} on actual startup. Don't forget the quotes around strings
 (e.g.~for \kbd{prompt} or \kbd{help}).
 
-$\bullet$ \kbd{read "\var{some\_GP\_file}"} where \kbd{\var{some\_GP\_file}}
+\item \kbd{read "\var{some\_GP\_file}"} where \kbd{\var{some\_GP\_file}}
 is a regular GP script this time, which will be read just before \kbd{gp}
 prompts you for commands, but after initializing the defaults. In particular,
 file input is delayed until the \kbd{gprc} has been fully loaded. This is the
@@ -2931,7 +2931,7 @@ When \kbd{gp} is started, it looks for a customization file, or \kbd{gprc} in
 the following places (in this order, only the first one found will be
 loaded):
 
-\noindent$\bullet$ \kbd{gp} checks whether the environment variable
+\noindent\item \kbd{gp} checks whether the environment variable
 \tet{GPRC} is set. On Unix, this can be done with something like: \smallskip
 
 \settabs\+\indent&\kbd{GPRC=/my/dir/anyname; export GPRC}\quad&\cr
@@ -2946,18 +2946,18 @@ loaded):
 
 \noindent If so, the file named by \kbd{\$GPRC} is the \kbd{gprc}.
 
-\noindent$\bullet$ If \kbd{GPRC} is not set, and if the environment variable
+\noindent\item If \kbd{GPRC} is not set, and if the environment variable
 \kbd{HOME} is defined, \kbd{gp} then tries
 
 \kbd{\$HOME/.gprc} on a Unix system
 
 \kbd{\$HOME\bs gprc.txt} on a DOS, OS/2, or Windows system.
 
-\noindent$\bullet$ If no gprc was found among the user files mentioned above
+\noindent\item If no gprc was found among the user files mentioned above
 we look for \kbd{/etc/gprc} for a system-wide gprc file (you will need root
 privileges to set up such a file yourself).
 
-\noindent$\bullet$ Finally, we look in pari's \kbd{datadir} for a file named
+\noindent\item Finally, we look in pari's \kbd{datadir} for a file named
 
 \kbd{.gprc} on a Unix system
 
@@ -3061,9 +3061,9 @@ yours and GP's), and variables.
   If, at any time, only one completion is meaningful, \kbd{gp} will provide it
 together with
 
-$\bullet$ an ending comma if we are completing a default,
+\item an ending comma if we are completing a default,
 
-$\bullet$ a pair of parentheses if we are completing a function name. In
+\item a pair of parentheses if we are completing a function name. In
 that case hitting \kbd{<TAB>} again will provide the argument list as given
 by the online help\footnote{*}{recall that you can always undo the effect
 of the preceding keys by hitting \kbd{C-\_}}.

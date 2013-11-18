@@ -28,24 +28,24 @@ The download page on our website
 \kbd{http://pari.math.u-bordeaux.fr/download.html} contains pointers on how
 to get these.
 
-  $\bullet$ GNU \kbd{MP} library. This provides an alternative multiprecision
+  \item GNU \kbd{MP} library. This provides an alternative multiprecision
 kernel, which is faster than PARI's native one, but unfortunately binary
 incompatible, so the resulting PARI library SONAME is libpari-gmp.
 
-  $\bullet$ GNU \kbd{readline} library. This provides line editing under
+  \item GNU \kbd{readline} library. This provides line editing under
 \kbd{gp}, an automatic context-dependent completion, and an editable history
 of commands.
 
-  $\bullet$ GNU \kbd{emacs} and the \tet{PariEmacs} package. The \kbd{gp}
+  \item GNU \kbd{emacs} and the \tet{PariEmacs} package. The \kbd{gp}
 calculator can be run in an Emacs buffer, with all the obvious advantages if
 you are familiar with this editor. Note that \kbd{readline} is still useful
 in this case since it provides a better automatic completion than is provided
 by Emacs's GP-mode.
 
-  $\bullet$ GNU \kbd{gzip/gunzip/gzcat} package enables \kbd{gp} to read
+  \item GNU \kbd{gzip/gunzip/gzcat} package enables \kbd{gp} to read
 compressed data.
 
-  $\bullet$ \kbd{perl} provides extended online help (full text from the
+  \item \kbd{perl} provides extended online help (full text from the
 manual) about functions and concepts. The script handling this online help
 can be used under \kbd{gp} or independently.
 
@@ -279,10 +279,10 @@ one of the assembler micro-kernels
 
 Level 1: \kbd{auto} (as detected), \kbd{none} (native code only), or \kbd{gmp}
 
-\noindent$\bullet$ A fully qualified kernel name is of the form
+\noindent\item A fully qualified kernel name is of the form
 \kbd{\var{Level0}-\var{Level1}}, the default value being \kbd{auto-auto}.
 
-\noindent$\bullet$ A \emph{name} not containing a dash '\kbd{-}' is an alias
+\noindent\item A \emph{name} not containing a dash '\kbd{-}' is an alias
 for a fully qualified kernel name. An alias stands for
 \kbd{\emph{name}-none}, but \kbd{gmp} stands for \kbd{auto-gmp}.
 
@@ -300,7 +300,7 @@ You can invoke \kbd{Configure} with one of the following arguments:
 
 \misctitle{Known problems}
 
-$\bullet$ on Linux: Linux distributions have separate \kbd{readline} and
+\item on Linux: Linux distributions have separate \kbd{readline} and
 \kbd{readline-devel} packages. You need both of them installed to
 compile gp with readline support. If only \kbd{readline} is installed,
 \kbd{Configure} will complain. \kbd{Configure} may also complain about a
@@ -309,7 +309,7 @@ missing libncurses.so, in which case, you have to install the
 \kbd{readline-devel} without \kbd{ncurses-devel}, which is a bug in
 their package dependency handling).
 
-$\bullet$ on OS X.4 or higher: these systems comes equipped with a fake
+\item on OS X.4 or higher: these systems comes equipped with a fake
 \kbd{readline}, which is not sufficient for our purpose. As a result, gp is
 built without readline support. Since \kbd{readline} is not trivial to
 install in this environment, a step by step solution can be found in the PARI
@@ -322,12 +322,12 @@ FAQ, see
 
 \subsubsec{Known problems} if \kbd{BUG} shows up in \kbd{make bench}
 
-$\bullet$ \kbd{program}: the GP function \kbd{install} may not be available on
+\item \kbd{program}: the GP function \kbd{install} may not be available on
 your platform, triggering an error message (``not yet available for this
 architecture''). Have a look at the \kbd{MACHINES} files to check if your
 system is known not to support it, or has never been tested yet.
 
-$\bullet$ If when running \kbd{gp-dyn}, you get a message of the form
+\item If when running \kbd{gp-dyn}, you get a message of the form
 
 \kbd{ld.so: warning: libpari.so.$xxx$ has older revision than expected $xxx$}
 
@@ -338,7 +338,7 @@ disable this variable in any case if anything \emph{very} wrong occurs with
 the \kbd{gp-dyn} binary, like an Illegal Instruction on startup. It does not
 affect \kbd{gp-sta}.
 
-$\bullet$ Some implementations of the \kbd{diff} utility (on HPUX for
+\item Some implementations of the \kbd{diff} utility (on HPUX for
 instance) output \kbd{No differences encountered} or some similar
 message instead of the expected empty input, thus producing a spurious
 \kbd{[BUG]} message.
@@ -409,21 +409,21 @@ risk of breaking them by installing a new pari library.
 \subsec{Extra packages} The following optional packages endow PARI with some
 extra capabilities:
 
-$\bullet$ \kbd{elldata}: This package contains the elliptic curves in
+\item \kbd{elldata}: This package contains the elliptic curves in
 John Cremona's database. It is needed by the functions \kbd{ellidentify},
 \kbd{ellsearch}, \kbd{forell} and can be used by \kbd{ellinit} to initialize a curve given by its standard code.
 
-$\bullet$ \kbd{galdata}: The default \kbd{polgalois} function can only
+\item \kbd{galdata}: The default \kbd{polgalois} function can only
 compute Galois groups of polynomials of degree less or equal to 7. Install
 this package if you want to handle polynomials of degree bigger than 7 (and
 less than 11).
 
-$\bullet$ \kbd{seadata}: This package contains the database of modular
+\item \kbd{seadata}: This package contains the database of modular
 polynomials extracted from the ECHIDNA databases and computed by David R.
 Kohel. It is needed by the functions \kbd{ellap} and \kbd{ellgroup} for
 primes larger than $10^{20}$.
 
-$\bullet$ \kbd{galpol}: This package contains the GALPOL database of polynomials
+\item \kbd{galpol}: This package contains the GALPOL database of polynomials
 defining Galois extensions of the rationals, accessed by \kbd{galoisgetpol}.
 
 \medskip
@@ -524,15 +524,15 @@ should be directed there. Instructions and archives can be consulted at
   http://pari.math.u-bordeaux1.fr/lists-index.html
 @eprog\noindent The most important are:
 
-$\bullet$ \kbd{pari-announce} (\emph{read-only}): to announce major version
+\item \kbd{pari-announce} (\emph{read-only}): to announce major version
 changes. You cannot write to this one, but you should probably subscribe.
 
-$\bullet$ \kbd{pari-dev}: for everything related to the development of PARI,
+\item \kbd{pari-dev}: for everything related to the development of PARI,
 including suggestions, technical questions or patch submissions. Bug reports
 can be discussed here, but as a rule it is better to submit them directly
 to the BTS.
 
- $\bullet$ \kbd{pari-users}: for everything else.
+\item \kbd{pari-users}: for everything else.
 
 \noindent You may send an email to the last two without being subscribed.
 To subscribe, send an message respectively to
