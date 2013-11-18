@@ -506,7 +506,10 @@ sub fit_loop {
        return if ($miss == 0);
     }
 #  print "5:$miss "; print @_;print "\n";
-    for (@_) { $miss--; s/$/ /;
+    for (@_)
+    {
+       next if (/^ *$/);
+       $miss--; s/$/ /;
        return if ($miss == 0);
     }
   }
@@ -518,11 +521,11 @@ sub fit_line {
   my($rem) = $_[0];
   for (@l)
   {
-     $l2 = $l; $l += ($_ + 1);
-     last if ($l > $rem);
+     my ($l2) = $l; $l += ($_ + 1);
+     if ($l > $rem) { $l = $l2; last; }
      $wi++;
   }
-  $miss = $rem - $l2;
+  $miss = $rem - $l;
   splice(@l, 0, $wi);
   @a = splice(@w, 0, $wi-1); &fit_loop(@a);
   push(@a, shift(@w)); return join(' ', @a);
@@ -821,7 +824,7 @@ sub basic_subst {
   s/\\secref\{([^\}]*)\}/Section [$tr{startbold}Label: $1$tr{endbold}]/g unless $to_pod;
   s/\\label\{[^\}]*\}//g unless $to_pod;
 
-  s/\\noindent\b */\@3/;
+  s/ *\\noindent\b */\@3/;
   s/\\(medskip|bigskip|smallskip|left|right)(?![a-zA-Z])[ \t]*//g;
   s/\\vfill *(\\eject)?//g;
   s/\\(q|quad)(?![a-zA-Z])\s*/  /g;
@@ -833,7 +836,7 @@ sub basic_subst {
   s/\\big\b//g;
 
   s/\\settabs.*//;
-  s/^\\\+/$tr{nbrk}/gm;
+  s/^\\\+/\n$tr{nbrk}/gm;
   s/\\\+//g;
   s/\\cr(?![a-zA-Z])//g;
   s/\\B(?![a-zA-Z])/\\kbd{BIL}/g;
@@ -945,7 +948,14 @@ sub presubst {
     s/^/\@0/ if ($in_prog > 2);
   }
   else { $_ = &basic_subst($_); }
-  push(@text, $_);
+  if (/^ *$/)
+  {
+    push(@text,"\n");
+  }
+  else
+  {
+    for (split(/\n/, $_)) { push(@text, $_); }
+  }
 }
 
 sub code_subst {
