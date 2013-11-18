@@ -187,6 +187,7 @@ BA 19- Port of the program ISOM by Bernt Souvignier for computation of
    22- arithmetic functions now accept factorization matrices, you can use any
        of f(N), f(factor(N)) or f([N, factor(N)])
    23- GP function readstr
+   24- allow lists of elements in chinese()
 
   Changed
     1- gp --primelimit lim (gp -p lim) is deprecated. Use the generic form

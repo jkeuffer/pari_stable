@@ -70,8 +70,14 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
   if (!y)
   {
     pari_sp av = avma;
-    long tx = typ(x);
-    if (!is_vec_t(tx)) pari_err_TYPE("association",x);
+    switch(typ(x))
+    {
+      case t_LIST:
+        x = list_data(x); if (!x) return gen_1;
+      case t_VEC:
+      case t_COL: break;
+      default: pari_err_TYPE("association",x);
+    }
     return gerepileupto(av, divide_conquer_prod(x,f));
   }
   return f(x,y);
