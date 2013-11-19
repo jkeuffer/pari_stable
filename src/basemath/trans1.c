@@ -1687,16 +1687,17 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   {
   case t_INTMOD:
     {
-      GEN p = gel(x,1);
+      GEN p = gel(x,1), s;
       z = gen_0;
       y = cgetg(3,t_INTMOD);  gel(y,1) = icopy(p);
       if (zetan) { z = cgetg(3,t_INTMOD); gel(z,1) = gel(y,1); }
-      gel(y,2) = Fp_sqrtn(gel(x,2),n,p,zetan);
-      if (!y[2]) {
+      s = Fp_sqrtn(gel(x,2),n,p,zetan);
+      if (!s) {
         if (zetan) {avma=av; return gen_0;}
         if (!BPSW_psp(p)) pari_err_PRIME("sqrtn [modulus]",p);
         pari_err_SQRTN("gsqrtn",x);
       }
+      gel(y,2) = s;
       if (zetan) { gel(z,2) = *zetan; *zetan = z; }
       return y;
     }
