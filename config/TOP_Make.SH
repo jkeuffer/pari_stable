@@ -2,9 +2,6 @@ file=Makefile
 echo "Extracting $file"
 rm -f $file
 
-dbgobjdir=`echo "$objdir" | sed -e 's/\.[dbgprf]*$//'`
-dbgobjdir=$dbgobjdir.dbg
-
 dosversion=`echo $version|sed -e 's/\.//g'`
 dosversion="_$dosversion$patch"
 __status__=$status
@@ -69,6 +66,36 @@ doc docps docpdf gpman cleandoc::
 	cd doc && \$(MAKE) \$@
 
 clean:: cleandoc cleanall
+
+clean.dbg::
+	@dir=\`config/objdir\`.dbg; echo "Making clean in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Nothing to be done"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) clean
+
+clean.prf::
+	@dir=\`config/objdir\`.prf; echo "Making clean in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Nothing to be done"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) clean
+
+clean.gcov::
+	@dir=\`config/objdir\`.gcov; echo "Making clean in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Nothing to be done"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) clean
+
+bench.dbg::
+	@dir=\`config/objdir\`.dbg; echo "Making bench in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Please run Configure -g first!"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) bench
+
+bench.prf::
+	@dir=\`config/objdir\`.prf; echo "Making bench in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Please run Configure -pg first!"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) bench
+
+bench.gcov::
+	@dir=\`config/objdir\`.gcov; echo "Making bench in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Please run Configure -gcov first!"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) bench
 
 distrib:
 	$config_dir/settar \$(VERS) $__status__
