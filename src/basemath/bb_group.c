@@ -118,23 +118,25 @@ sliding_window_pow(GEN x, GEN n, long e, void *E, GEN (*sqr)(void*,GEN),
 
 /* assume n != 0, t_INT. Compute x^|n| using leftright binary powering */
 static GEN
-leftright_binary_powu(GEN x, long n, void *E, GEN (*sqr)(void*,GEN),
+leftright_binary_powu(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
                                               GEN (*mul)(void*,GEN,GEN))
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
-  GEN  y = x;
-  long m = (long) n, j = 1+bfffo(m);
+  GEN  y;
+  int j;
 
-  /* normalize, i.e set highest bit to 1 (we know m != 0) */
-  m<<=j; j = BITS_IN_LONG-j;
+  if (n == 1) return gcopy(x);
+  y = x; j = 1+bfffo(n);
+  /* normalize, i.e set highest bit to 1 (we know n != 0) */
+  n<<=j; j = BITS_IN_LONG-j;
   /* first bit is now implicit */
-  for (; j; m<<=1,j--)
+  for (; j; n<<=1,j--)
   {
     y = sqr(E,y);
-    if (m < 0) y = mul(E,y,x); /* first bit set: multiply by base */
+    if (n & HIGHBIT) y = mul(E,y,x); /* first bit set: multiply by base */
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"leftright_powu (%ld)", j);
+      if (DEBUGMEM>1) pari_warn(warnmem,"leftright_powu (%d)", j);
       y = gerepilecopy(av, y);
     }
   }
@@ -191,24 +193,22 @@ GEN
 gen_powu_fold_i(GEN x, ulong n, void *E, GEN  (*sqr)(void*,GEN),
                                          GEN (*msqr)(void*,GEN))
 {
-  GEN y;
-  long m, j;
   pari_sp av = avma, lim = stack_lim(av, 1);
+  GEN y;
+  int j;
 
   if (n == 1) return gcopy(x);
-  m = (long)n; j = 1+bfffo(m);
-  y = x;
-
-  /* normalize, i.e set highest bit to 1 (we know m != 0) */
-  m<<=j; j = BITS_IN_LONG-j;
+  y = x; j = 1+bfffo(n);
+  /* normalize, i.e set highest bit to 1 (we know n != 0) */
+  n<<=j; j = BITS_IN_LONG-j;
   /* first bit is now implicit */
-  for (; j; m<<=1,j--)
+  for (; j; n<<=1,j--)
   {
-    if (m < 0) y = msqr(E,y); /* first bit set: multiply by base */
+    if (n & HIGHBIT) y = msqr(E,y); /* first bit set: multiply by base */
     else y = sqr(E,y);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"gen_powu_fold (%ld)", j);
+      if (DEBUGMEM>1) pari_warn(warnmem,"gen_powu_fold (%d)", j);
       y = gerepilecopy(av, y);
     }
   }
@@ -223,37 +223,39 @@ gen_powu_fold(GEN x, ulong n, void *E, GEN (*sqr)(void*,GEN),
   return gerepilecopy(av, gen_powu_fold_i(x,n,E,sqr,msqr));
 }
 
-/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
+/* assume N != 0, t_INT. Compute x^|N| using left-right binary powering */
 GEN
-gen_pow_fold_i(GEN x, GEN n, void *E, GEN (*sqr)(void*,GEN),
+gen_pow_fold_i(GEN x, GEN N, void *E, GEN (*sqr)(void*,GEN),
                                       GEN (*msqr)(void*,GEN))
 {
-  long ln = lgefint(n);
-  if (ln == 3) return gen_powu_fold_i(x, n[2], E, sqr, msqr);
+  long ln = lgefint(N);
+  if (ln == 3) return gen_powu_fold_i(x, N[2], E, sqr, msqr);
   else
   {
-    GEN nd = int_MSW(n), y = x;
-    long i, m = *nd, j = 1+bfffo((ulong)m);
+    GEN nd = int_MSW(N), y = x;
+    ulong n = *nd;
+    long i;
+    int j = 1+bfffo(n);
     pari_sp av = avma, lim = stack_lim(av, 1);
 
-    /* normalize, i.e set highest bit to 1 (we know m != 0) */
-    m<<=j; j = BITS_IN_LONG-j;
+    /* normalize, i.e set highest bit to 1 (we know n != 0) */
+    n<<=j; j = BITS_IN_LONG-j;
     /* first bit is now implicit */
     for (i=ln-2;;)
     {
-      for (; j; m<<=1,j--)
+      for (; j; n<<=1,j--)
       {
-        if (m < 0) y = msqr(E,y); /* first bit set: multiply by base */
+        if (n & HIGHBIT) y = msqr(E,y); /* first bit set: multiply by base */
         else y = sqr(E,y);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) pari_warn(warnmem,"gen_pow_fold (%ld)", j);
+          if (DEBUGMEM>1) pari_warn(warnmem,"gen_pow_fold (%d)", j);
           y = gerepilecopy(av, y);
         }
       }
       if (--i == 0) return y;
-      nd=int_precW(nd);
-      m = *nd; j = BITS_IN_LONG;
+      nd = int_precW(nd);
+      n = *nd; j = BITS_IN_LONG;
     }
   }
 }
