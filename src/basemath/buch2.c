@@ -28,6 +28,7 @@ static const long MINFAIL = 10;
 /* small_norm */
 static const long BNF_RELPID = 4;
 static const long BMULT = 8;
+static const long maxtry_ELEMENT = 1000*1000;
 static const long maxtry_DEP = 20;
 static const long maxtry_FACT = 500;
 /* rnd_rel */
@@ -2413,7 +2414,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M,
   GEN r, u, gx, inc=const_vecsmall(N, 1), ideal;
   GEN Nideal = nbrelpid ? NULL : idealnorm(nf, ideal0);
   double BOUND;
-  long j, k, skipfirst, nbrelideal = 0, dependent = 0, try_factor = 0;
+  long j, k, skipfirst, nbrelideal=0, dependent=0, try_elt=0,  try_factor=0;
 
   u = ZM_lll(ZM_mul(F->G0, ideal0), 0.99, LLL_IM);
   ideal = ZM_mul(ideal0,u); /* approximate T2-LLL reduction */
@@ -2457,6 +2458,7 @@ Fincke_Pohst_ideal(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M,
       }
       for(;; step(fp->x,fp->y,inc,k))
       {
+        if (++try_elt > maxtry_ELEMENT) return 0;
         if (!fl)
         {
           p = (double)fp->x[k] + fp->z[k];
