@@ -547,15 +547,11 @@ GEN
 RgX_to_RgV(GEN x, long N)
 {
   long i, l;
-  GEN z = cgetg(N+1,t_COL);
-  if (typ(x) != t_POL)
-  {
-    gel(z,1) = x;
-    for (i=2; i<=N; i++) gel(z,i) = gen_0;
-    return z;
-  }
+  GEN z;
+  if (typ(x) != t_POL) return scalarcol_shallow(x, N);
   l = lg(x)-1; x++;
   if (l > N+1) l = N+1; /* truncate higher degree terms */
+  z = cgetg(N+1,t_COL);
   for (i=1; i<l ; i++) gel(z,i) = gel(x,i);
   for (   ; i<=N; i++) gel(z,i) = gen_0;
   return z;
