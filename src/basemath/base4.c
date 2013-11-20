@@ -2707,7 +2707,7 @@ nfhnf(GEN nf, GEN x)
       gel(A,j) = colcomb1(nf, gneg(c), gel(A,j),gel(A,def));
     }
     def--;
-    if (low_stack(lim, stack_lim(av1,2)))
+    if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nfhnf, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);

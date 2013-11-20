@@ -775,7 +775,7 @@ divide_conquer_assoc(GEN x, void *data, GEN (*mul)(void *,GEN,GEN))
     for (i=1; i<lx-1; i+=2)
       gel(x,k++) = mul(data,gel(x,i),gel(x,i+1));
     if (i < lx) gel(x,k++) = gel(x,i);
-    if (low_stack(lim,stack_lim(av,1)))
+    if (low_stack(lim,stack_lim(ltop,1)))
       gerepilecoeffs(ltop,x+1,k-1);
   }
   return gel(x,1);
