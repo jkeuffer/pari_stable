@@ -1950,7 +1950,7 @@ row_zm(GEN x, long i) { return row_Flm(x,i); }
 INLINE GEN
 ZC_hnfrem(GEN x, GEN y) { return ZC_hnfremdiv(x,y,NULL); }
 INLINE GEN
-ZM_hnfrem(GEN x, GEN y) { return ZM_hnfremdiv(x,y,NULL); }
+ZM_hnfrem(GEN x, GEN y) { return ZM_hnfdivrem(x,y,NULL); }
 INLINE GEN
 ZM_lll(GEN x, double D, long f) { return ZM_lll_norms(x,D,f,NULL); }
 INLINE void

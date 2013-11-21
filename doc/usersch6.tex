@@ -1957,7 +1957,7 @@ Stack clean \emph{unless} $x$ is already reduced (in which case, returns $x$
 itself, not a copy). If $Q$ is not \kbd{NULL}, set it to the \kbd{ZC} such that
 $x = yQ + R$.
 
-\fun{GEN}{ZM_hnfremdiv}{GEN x, GEN y, GEN *Q} reduce
+\fun{GEN}{ZM_hnfdivrem}{GEN x, GEN y, GEN *Q} reduce
 each column of the \kbd{ZM} $x$ using \kbd{ZC\_hnfremdiv}. If $Q$ is not
 \kbd{NULL}, set it to the \kbd{ZM} such that $x = yQ + R$.
 

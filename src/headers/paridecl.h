@@ -777,7 +777,7 @@ GEN     ZM_add(GEN x, GEN y);
 GEN     ZM_copy(GEN x);
 GEN     ZM_det_triangular(GEN mat);
 int     ZM_equal(GEN A, GEN B);
-GEN     ZM_hnfremdiv(GEN x, GEN y, GEN *Q);
+GEN     ZM_hnfdivrem(GEN x, GEN y, GEN *Q);
 int     ZM_ishnf(GEN x);
 int     ZM_isidentity(GEN x);
 long    ZM_max_lg(GEN x);

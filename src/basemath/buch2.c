@@ -2992,8 +2992,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   * 1) gain is negligible (avoid computing z^0 if lo < lo0)
   * 2) when computing ga, the products XU and VY use the original matrices
   */
-  Ur  = ZM_hnfremdiv(U, D, &Y);
-  Uir = ZM_hnfremdiv(Ui,W, &X);
+  Ur  = ZM_hnfdivrem(U, D, &Y);
+  Uir = ZM_hnfdivrem(Ui,W, &X);
  /* [x] = logarithmic embedding of x (arch. component)
   * NB: z = idealred(I) --> I = y z[1], with [y] = - z[2]
   * P invertible diagonal matrix (\pm 1) which is only implicitly defined

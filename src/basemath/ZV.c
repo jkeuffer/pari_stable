@@ -697,7 +697,7 @@ ZC_hnfremdiv(GEN x, GEN y, GEN *Q)
 
 /* x = y Q + R, may return some columns of x (not copies) */
 GEN
-ZM_hnfremdiv(GEN x, GEN y, GEN *Q)
+ZM_hnfdivrem(GEN x, GEN y, GEN *Q)
 {
   long lx = lg(x), i;
   GEN R = cgetg(lx, t_MAT);
