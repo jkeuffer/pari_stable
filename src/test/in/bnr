@@ -1,5 +1,10 @@
 default(realprecision,38);
-subgrouplist(bnrinit(bnfinit(x^3-x-1),10));
+K=bnfinit(x^3-x-1);
+subgrouplist(bnrinit(K,10))
+K=bnrinit(K,20);
+subgrouplist(K)
+subgrouplist(K, 2)
+subgrouplist(K, 2, 1)
 bnrL1(bnrinit(bnfinit(x^2+1),10,1),1);
 setrand(5);bnrL1(bnrinit(bnfinit(y^2+6),1,1),0);
 bnrL1(bnrinit(bnfinit(x),[5,[1]],1));
