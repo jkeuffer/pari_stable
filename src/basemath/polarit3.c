@@ -553,13 +553,24 @@ Fq_powu(GEN x, ulong n, GEN pol, GEN p)
 GEN
 Fq_sqrt(GEN x, GEN T, GEN p)
 {
-  if (typ(x) == t_INT) return Fp_sqrt(x,p);
+  if (typ(x) == t_INT)
+  {
+    if (!T || odd(get_FpX_degree(T))) return Fp_sqrt(x,p);
+    x = Z_to_FpX(x,p,varn(T));
+  }
   return FpXQ_sqrt(x,T,p);
 }
 GEN
 Fq_sqrtn(GEN x, GEN n, GEN T, GEN p, GEN *zeta)
 {
-  if (typ(x) == t_INT) return Fp_sqrtn(x,n,p,zeta);
+  if (typ(x) == t_INT)
+  {
+    long d;
+    if (!T) return Fp_sqrtn(x,n,p,zeta);
+    d = get_FpX_degree(T);
+    if (ugcd(umodiu(n,d),d) == 1) return Fp_sqrtn(x,n,p,zeta);
+    x = Z_to_FpX(x,p,varn(T));
+  }
   return FpXQ_sqrtn(x,n,T,p,zeta);
 }
 

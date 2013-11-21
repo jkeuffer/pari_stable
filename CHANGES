@@ -52,6 +52,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    37- Mod(0,0) is no longer valid => division by 0 (as Mod(x,0) for x != 0)
    38- RgX_to_RgV no longer accepts other types than t_POL. Use Rg_to_RgV for
        a more permissive function
+   39- broken Fq_sqrt when T != NULL and t_INT input
 
   Changed
     1- default help text for a user function is now as in \u:
