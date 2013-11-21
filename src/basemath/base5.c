@@ -69,19 +69,24 @@ rnfeltreltoabs(GEN rnf,GEN x)
   pari_err_TYPE(f,x); return NULL;
 }
 
+static GEN
+eltabstorel_lift(GEN rnfeq, GEN P)
+{
+  GEN k, T = gel(rnfeq,4), relpol = gel(rnfeq,5);
+  if (is_scalar_t(typ(P))) return P;
+  k = gel(rnfeq,3);
+  P = lift_intern(P);
+  if (signe(k)) P = RgXQX_translate(P, deg1pol_shallow(k, gen_0, varn(T)), T);
+  P = RgXQX_rem(P, relpol, T);
+  return QXQX_to_mod_shallow(P, T);
+}
 /* rnfeq = [pol,a,k,T,relpol], P a t_POL or scalar
  * Return Mod(P(x + k Mod(y, T(y))), pol(x)) */
 GEN
 eltabstorel(GEN rnfeq, GEN P)
 {
-  GEN k, T = gel(rnfeq,4), relpol = gel(rnfeq,5);
-  if (is_scalar_t(typ(P)))
-    return mkpolmod(P, QXQX_to_mod_shallow(relpol,T));
-  k = gel(rnfeq,3);
-  P = lift_intern(P);
-  if (signe(k)) P = RgXQX_translate(P, deg1pol_shallow(k, gen_0, varn(T)), T);
-  P = RgXQX_rem(P, relpol, T);
-  return mkpolmod(QXQX_to_mod_shallow(P, T), QXQX_to_mod_shallow(relpol,T));
+  GEN T = gel(rnfeq,4), relpol = gel(rnfeq,5);
+  return mkpolmod(eltabstorel_lift(rnfeq,P), QXQX_to_mod_shallow(relpol,T));
 }
 GEN
 rnfeltabstorel(GEN rnf,GEN x)
@@ -177,13 +182,12 @@ modulereltoabs(GEN rnf, GEN x)
   setlg(M, k); return M;
 }
 
-/* only fill in nf[1,3,4,7,8,9] */
+/* Z-basis for absolute maximal order, as a t_MAT */
 static GEN
-makenfabs(GEN rnf)
+rnf_basM(GEN rnf)
 {
-  GEN M, d, nf = rnf_get_nf(rnf), pol = rnf_get_polabs(rnf), NF = zerovec(9);
+  GEN M, d, pol = rnf_get_polabs(rnf);
   long n = degpol(pol);
-
   M = Q_remove_denom(modulereltoabs(rnf, rnf_get_zk(rnf)), &d);
   if (d)
   {
@@ -192,6 +196,15 @@ makenfabs(GEN rnf)
   }
   else
     M = matid(n);
+  return M;
+}
+
+/* only fill in nf[1,3,4,7,8,9] */
+static GEN
+makenfabs(GEN rnf)
+{
+  GEN nf = rnf_get_nf(rnf), pol = rnf_get_polabs(rnf), NF = zerovec(9);
+  GEN M = rnf_basM(rnf);
   gel(NF,1) = pol;
   gel(NF,3) = mulii(powiu(nf_get_disc(nf), rnf_get_degree(rnf)),
                     idealnorm(nf, rnf_get_disc(rnf)));
@@ -947,71 +960,15 @@ rnfpolred(GEN nf, GEN pol, long prec)
   return gerepilecopy(av,w);
 }
 
-/* Let K = Q[X]/T = nf. Given a relative polynomial pol in K[X], L = K[X]/(pol),
- * compute a pseudo-basis for Z_L, then an absolute basis */
-static GEN
-makebasis(GEN nf, GEN pol, GEN rnfeq)
-{
-  GEN T = nf_get_pol(nf), TAB = gel(nf,9), W, I, polabs, a, B, ZK, p1, den, A;
-  pari_sp av = avma;
-  long i, j, k, N = degpol(pol), n = degpol(T), nN = n*N;
-
-  polabs= gel(rnfeq,1); /* in Z[X], L = Q[X] / polabs, and pol | polabs */
-  a     = gel(rnfeq,2); a = lift_intern(a); /* root of T in Q[X]/polabs */
-  p1 = rnfpseudobasis(nf,pol);
-  W = gel(p1,1);
-  I = gel(p1,2);
-  if (DEBUGLEVEL>1) err_printf("relative basis computed\n");
-
-  A = QXQ_powers(a, n-1, polabs);
-  /* ZK = integer basis of K, as elements of L */
-  ZK = RgV_RgM_mul(A, RgXV_to_RgM(nf_get_zk(nf),n));
-
-  W = RgV_RgM_mul(pol_x_powers(N, varn(pol)), W); /* vector of nfX */
-  B = cgetg(nN+1, t_MAT);
-  for(i=k=1; i<=N; i++)
-  {
-    GEN w = gel(W,i), id = gel(I,i);
-    if (typ(id) == t_MAT)
-    {
-      w = typ(w) == t_COL? tablemulvec(TAB, w, id): RgM_Rg_mul(id,w);
-      for(j=1; j<=n; j++)
-      {
-        p1 = grem(RgV_dotproduct(ZK, gel(w,j)), polabs);
-        gel(B,k++) = RgX_to_RgV(p1, nN);
-      }
-    }
-    else
-    { /* scalar */
-      if (typ(id) != t_INT || !is_pm1(id)) w = gmul(w, id);
-      for(j=1; j<=n; j++)
-      {
-        p1 = grem(gmul(gel(ZK,j), w), polabs);
-        gel(B,k++) = RgX_to_RgV(p1, nN);
-      }
-    }
-  }
-  B = Q_remove_denom(B, &den);
-  if (den) {
-    B = ZM_hnfmodid(B, den);
-    B = RgM_Rg_div(B, den);
-    B = RgM_to_RgXV(B, varn(polabs));
-  }
-  else
-    B = pol_x_powers(nN, varn(polabs));
-  return gerepilecopy(av, mkvec2(polabs, B));
-}
-
 /* relative polredabs. Returns relative polynomial by default (flag = 0)
  * flag & nf_ORIG: + element (base change)
- * flag & nf_ADDZK: + integer basis
  * flag & nf_ABSOLUTE: absolute polynomial */
 GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
   pari_timer ti;
-  GEN listP = NULL, red, bas, elt, pol, T, a;
-  long ty = typ(relpol), fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
+  GEN listP = NULL, red, bas, elt, pol, T, rnfeq;
+  long ty = typ(relpol), fl = nf_RAW;
   pari_sp av = avma;
 
   if (ty == t_VEC) {
@@ -1024,37 +981,28 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (DEBUGLEVEL>1) timer_start(&ti);
   T = nf_get_pol(nf);
   relpol = RgX_nffix("rnfpolredabs", T, relpol, 0);
-  if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
-    pari_err_IMPL("this combination of flags in rnfpolredabs");
   if (flag & nf_PARTIALFACT)
   {
     long sa;
     fl |= nf_PARTIALFACT;
     bas = rnfequationall(nf, relpol, &sa, NULL);
     if (listP) bas = mkvec2(bas, listP);
-    a = stoi(sa);
+    rnfeq = mkvec5(gen_0,gen_0,stoi(sa),T,relpol);
   }
   else
   {
-    GEN eq = rnfequation2(nf,relpol), rel;
-    a = gel(eq,3);
-    /* relpol( X + Mod(-a y, T(y)) )*/
-    rel = RgXQX_translate(relpol, deg1pol_shallow(negi(a),gen_0,varn(T)), T);
-    bas = makebasis(nf, rel, eq);
-    if (DEBUGLEVEL>1)
-    {
-      timer_printf(&ti, "absolute basis");
-      err_printf("original absolute generator: %Ps\n", gel(eq,1));
-    }
+    GEN rnf = rnfinit(nf, relpol), M = rnf_basM(rnf);
+    rnfeq = rnf_get_map(rnf);
+    pol = gel(rnfeq,1);
+    bas = mkvec2(pol, RgM_to_RgXV(M, varn(pol)));
+    if (DEBUGLEVEL>1) timer_printf(&ti, "absolute basis");
   }
   red = polredabs0(bas, fl);
   pol = gel(red,1);
   if (DEBUGLEVEL>1) err_printf("reduced absolute generator: %Ps\n",pol);
-  if (flag & nf_ABSOLUTE)
-    return gerepilecopy(av, (flag & nf_ADDZK)? red: pol);
+  if (flag & nf_ABSOLUTE) return gerepilecopy(av, pol);
 
-  elt = RgXQX_translate(gel(red,2), deg1pol_shallow(a,gen_0,varn(T)), T);
-  elt = RgX_nffix("rnfpolredabs", T, elt, 0);
+  elt = eltabstorel_lift(rnfeq, gel(red,2));
   pol = RgXQ_charpoly(elt, relpol, varn(relpol));
   pol = lift_if_rational(pol);
   if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(RgXQ_reverse(elt,relpol),pol));
