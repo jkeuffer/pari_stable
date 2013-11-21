@@ -2577,13 +2577,16 @@ get_proj_modT(GEN basis, GEN T, GEN p)
   for (i = 1; i < l; i++)
   {
     GEN cx, w = gel(basis,i);
-    if (typ(w) != t_INT)
+    if (typ(w) == t_INT)
+      w = scalarcol_shallow(w, f);
+    else
     {
       w = Q_primitive_part(w, &cx);
       w = FpXQ_red(w, T, p);
       if (cx) w = FpX_Fp_mul(w, Rg_to_Fp(cx, p), p);
+      w = RgX_to_RgV(w, f);
     }
-    gel(z,i) = RgX_to_RgV(w, f); /* w_i mod (T,p) */
+    gel(z,i) = w; /* w_i mod (T,p) */
   }
   return z;
 }

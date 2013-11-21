@@ -668,6 +668,7 @@ GEN     QXQ_powers(GEN a, long n, GEN T);
 GEN     QXQX_to_mod_shallow(GEN z, GEN T);
 GEN     QXQV_to_mod(GEN V, GEN T);
 GEN     QXQXV_to_mod(GEN V, GEN T);
+GEN     Rg_to_RgV(GEN x, long N);
 GEN     RgM_to_RgXV(GEN x, long v);
 GEN     RgM_to_RgXX(GEN x, long v,long w);
 GEN     RgV_to_RgX(GEN x, long v);

@@ -548,13 +548,17 @@ RgX_to_RgV(GEN x, long N)
 {
   long i, l;
   GEN z;
-  if (typ(x) != t_POL) return scalarcol_shallow(x, N);
   l = lg(x)-1; x++;
   if (l > N+1) l = N+1; /* truncate higher degree terms */
   z = cgetg(N+1,t_COL);
   for (i=1; i<l ; i++) gel(z,i) = gel(x,i);
   for (   ; i<=N; i++) gel(z,i) = gen_0;
   return z;
+}
+GEN
+Rg_to_RgV(GEN x, long N)
+{
+  return (typ(x) == t_POL)? RgX_to_RgV(x,N): scalarcol_shallow(x, N);
 }
 
 /* vector of polynomials (in v) whose coeffs are given by the columns of x */
@@ -574,7 +578,7 @@ RgXV_to_RgM(GEN v, long n)
 {
   long j, N = lg(v);
   GEN y = cgetg(N, t_MAT);
-  for (j=1; j<N; j++) gel(y,j) = RgX_to_RgV(gel(v,j), n);
+  for (j=1; j<N; j++) gel(y,j) = Rg_to_RgV(gel(v,j), n);
   return y;
 }
 
@@ -597,7 +601,7 @@ RgXX_to_RgM(GEN v, long n)
 {
   long j, N = lg(v)-1;
   GEN y = cgetg(N, t_MAT);
-  for (j=1; j<N; j++) gel(y,j) = RgX_to_RgV(gel(v,j+1), n);
+  for (j=1; j<N; j++) gel(y,j) = Rg_to_RgV(gel(v,j+1), n);
   return y;
 }
 

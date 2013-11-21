@@ -795,7 +795,7 @@ nf_to_scalar_or_alg(GEN nf, GEN x)
   return NULL; /* not reached */
 }
 
-/* gmul(A, RgX_to_RgV(x)), A t_MAT (or t_VEC) of compatible dimensions */
+/* gmul(A, RgX_to_Rg(x)), A t_MAT (or t_VEC) of compatible dimensions */
 GEN
 mulmat_pol(GEN A, GEN x)
 {
