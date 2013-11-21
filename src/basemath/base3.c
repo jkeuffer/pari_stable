@@ -1389,8 +1389,9 @@ static GEN
 zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 {
   pari_sp av = avma;
-  long a, b, e = itos(ep), f = pr_get_f(pr);
+  long a, e = itos(ep), f = pr_get_f(pr);
   GEN p = pr_get_p(pr), list, g, g0, y, u,v, prh, prb, pre;
+  ulong mask;
 
   if(DEBUGLEVEL>3) err_printf("treating pr^%ld, pr = %Ps\n",e,pr);
   if (f == 1)
@@ -1414,20 +1415,24 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     g0 = makeprimetoideal(x,u,v,g);
   }
 
-  list = vectrunc_init(e+1);
   y = mkvec5(mkvec(addis(powiu(p,f), -1)),
              mkvec(g),
              mkvec(g0),
              mkvec(nfsign_arch(nf,g0,arch)),
              gen_1);
+  if (e == 1) return gerepilecopy(av, mkvec(y));
+  list = vectrunc_init(e+1);
   vectrunc_append(list, y);
+  mask = quadratic_prec_mask(e);
   prb = prh;
-  for (a = b = 1; a < e; a = b)
+  a = 1;
+  while (mask > 1)
   {
     GEN pra = prb, gen, z, s, U;
-    long i, l;
+    long i, l, b = a << 1;
 
-    b <<= 1;
+    if (mask & 1) b--;
+    mask >>= 1;
     /* compute 1 + pr^a / 1 + pr^b, 2a <= b */
     if(DEBUGLEVEL>3) err_printf("  treating a = %ld, b = %ld\n",a,b);
     prb = (b >= e)? pre: idealpows(nf,pr,b);
@@ -1442,6 +1447,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     }
     y = mkvec5(gel(z,1), gel(z,2), gen, s, U);
     vectrunc_append(list, y);
+    a = b;
   }
   return gerepilecopy(av, list);
 }
