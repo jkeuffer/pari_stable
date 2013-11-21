@@ -2905,6 +2905,7 @@ GEN     Fq_powu(GEN x, ulong n, GEN pol, GEN p);
 GEN     Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p);
 GEN     Fq_sqr(GEN x, GEN T, GEN p);
 GEN     Fq_sqrt(GEN x, GEN T, GEN p);
+GEN     Fq_sqrtn(GEN x, GEN n, GEN T, GEN p, GEN *zeta);
 GEN     FqC_add(GEN x, GEN y, GEN T, GEN p);
 GEN     FqC_sub(GEN x, GEN y, GEN T, GEN p);
 GEN     FqC_Fq_mul(GEN x, GEN y, GEN T, GEN p);

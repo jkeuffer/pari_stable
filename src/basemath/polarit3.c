@@ -553,11 +553,14 @@ Fq_powu(GEN x, ulong n, GEN pol, GEN p)
 GEN
 Fq_sqrt(GEN x, GEN T, GEN p)
 {
-  if (typ(x) == t_POL)
-    return FpXQ_sqrt(x,T,p);
-  else
-    return Fp_sqrt(x,p);
-  return NULL;
+  if (typ(x) == t_INT) return Fp_sqrt(x,p);
+  return FpXQ_sqrt(x,T,p);
+}
+GEN
+Fq_sqrtn(GEN x, GEN n, GEN T, GEN p, GEN *zeta)
+{
+  if (typ(x) == t_INT) return Fp_sqrtn(x,n,p,zeta);
+  return FpXQ_sqrtn(x,n,T,p,zeta);
 }
 
 struct _Fq_field
@@ -1205,8 +1208,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l, GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) timer_printf(&T,"pows [P,Q]");
       if (!signe(Bn)) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
       z = Fq_div(An,Bn,U,l);
-      if (typ(z)==t_INT) z = scalarpol(z,MAXVARN);
-      L = FpXQ_sqrtn(z,ipg,U,l,NULL);
+      L = Fq_sqrtn(z,ipg,U,l,NULL);
       if (!L) pari_err_IRREDPOL("FpX_ffintersect", mkvec2(P,Q));
       if (DEBUGLEVEL>=4) timer_printf(&T,"FpXQ_sqrtn");
       B = FqX_Fq_mul(B,L,U,l);

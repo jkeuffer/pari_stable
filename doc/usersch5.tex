@@ -4349,6 +4349,12 @@ and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}. $T =
 \fun{GEN}{Fq_sqrt}{GEN x, GEN T, GEN p} returns a square root of \kbd{x}.
 Return \kbd{NULL} if \kbd{x} is not a square.
 
+\fun{GEN}{Fq_sqrtn}{GEN x, GEN n, GEN T, GEN p, GEN *zn} returns an
+\kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
+\kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to
+a primitive \kbd{n}-th root of the unity. Assumes that \kbd{T} is irreducible
+mod \kbd{p}.
+
 \fun{GEN}{FpXQ_charpoly}{GEN x, GEN T, GEN p} returns the characteristic
 polynomial of \kbd{x}
 
