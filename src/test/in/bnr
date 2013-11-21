@@ -38,3 +38,4 @@ bnrclassno(bnf, idealprimedec(bnf,5)[1])
 bnr=bnrinit(bnf,[7,[1,1]],1);
 bnrrootnumber(bnr, [2,1])
 
+bnfnarrow(bnfinit(x^2-92))
