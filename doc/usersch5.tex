@@ -2794,7 +2794,7 @@ such that $\kbd{au} + \kbd{bv} = d$.
 
 \fun{GEN}{ZV_gcdext}{GEN A} given a vector of $n$ integers $A$, returns $[d,
 U]$, where $d$ is the GCD of the $A[i]$ and $U$ is a matrix
-in $\text{GL}_n(\Z)$ such that $AU = [D,0, \dots,0]$.
+in $\text{GL}_n(\Z)$ such that $AU = [0,\dots,0,D]$.
 
 \subsec{Pure powers}
 
@@ -7489,7 +7489,7 @@ Assumes that \kbd{x} is non-zero.
 \kbd{v}, whose constant coefficient is (a copy of) \kbd{x}.
 
 \fun{GEN}{deg1pol}{GEN a, GEN b,long v} creates the degree 1 \typ{POL}
-$a + b \kbd{pol\_x}(v)$
+$a \kbd{pol\_x}(v) + b$
 
 \fun{GEN}{zeropol}{long v} is identical \kbd{pol\_0}.
 
@@ -7825,7 +7825,7 @@ is given by the vector $x$. Shallow function.
 \typ{POL} $a \kbd{pol\_x}(v)^0$.
 
 \fun{GEN}{deg1pol_shallow}{GEN a, GEN b,long v} returns the degree 1
-\typ{POL} $a + b \kbd{pol\_x}(v)$
+\typ{POL} $a\kbd{pol\_x}(v) + b$
 
 \fun{GEN}{zeropadic_shallow}{GEN p, long n} returns a (shallow) $0$
 \typ{PADIC} equal to $O(\kbd{p}^\kbd{n})$.

@@ -419,7 +419,9 @@ struct bb_algebra
 };
 @eprog
 
-Note that, in contrast of black box group, elements can have non canonical forms, and
+Note that, in contrast with black box group, elements can have non canonical
+forms, and
+
 \kbd{add} and \kbd{smul} are not required to return a canonical form.
 
 \kbd{red(E,x)} returns the canonical form of $x$.
@@ -434,30 +436,30 @@ Note that, in contrast of black box group, elements can have non canonical forms
 
 \kbd{zero(E)} returns the zero element.
 
-An algebra is thus described by a \kbd{struct bb\_algebra} as above and auxiliary
-data typecast to \kbd{void*}. The following functions operate on black box
-algebra:
+An algebra is thus described by a \kbd{struct bb\_algebra} as above and
+auxiliary data typecast to \kbd{void*}. The following functions operate on
+black box algebra:
 
 \fun{GEN}{gen_bkeval}{GEN P, long d, GEN x, int use_sqr, void *E,
           const struct bb_field *ff, GEN cmul(void *E, GEN P, long a, GEN x)}
 $x$ being an element of the black box algebra, and $P$ some black box
 polynomial of degree $d$ over the base field,  returns $P(x)$. The function
-\kbd{cmul(E,P,a,y)} must return the coefficient of degree $a$ of $P$ multiplied
-by $y$.
+\kbd{cmul(E,P,a,y)} must return the coefficient of degree $a$ of $P$
+multiplied by $y$.
 
-The flag \kbd{use\_sqr} has the same meaning as for
-\kbd{gen\_powers}. This implement an algorithm of Brent and Kung (1978).
+The flag \kbd{use\_sqr} has the same meaning as for \kbd{gen\_powers}. This
+implements an algorithm of Brent and Kung (1978).
 
-\fun{GEN}{gen_bkeval_powers}{GEN P, long d, GEN V, void *E, const struct bb_field *ff,
-                                      GEN cmul(void *E, GEN P, long a, GEN x)}
-as \kbd{gen\_RgX\_bkeval} assuming $V$ was output by \kbd{gen\_powers(x, l, E, ff)}
-for some $l\geq 1$. For optimal performance, $l$ should be computed by
-\kbd{brent\_kung\_optpow}.
+\fun{GEN}{gen_bkeval_powers}{GEN P, long d, GEN V, void *E,
+ const struct bb_field *ff, GEN cmul(void *E, GEN P, long a, GEN x)}
+as \tet{gen_RgX_bkeval} assuming $V$ was output by
+\tet{gen_powers}$(x, l, E, \var{ff})$ for some $l\geq 1$. For optimal
+performance, $l$ should be computed by \tet{brent_kung_optpow}.
 
 \fun{long}{brent_kung_optpow}{long d, long n, long m} returns the optimal
-parameter $l$ for the evaluation of $n/m$ polynomials of degree $d$ Fractional
-values can be used if the evaluations are done with different accuracies, and
-thus have different weights.
+parameter $l$ for the evaluation of $n/m$ polynomials of degree $d$.
+Fractional values can be used if the evaluations are done with different
+accuracies, and thus have different weights.
 
 \section{Black box free $\Z_p$-modules}
 
