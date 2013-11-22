@@ -419,10 +419,8 @@ struct bb_algebra
 };
 @eprog
 
-Note that, in contrast with black box group, elements can have non canonical
-forms, and
-
-\kbd{add} and \kbd{smul} are not required to return a canonical form.
+Note that, in contrast with black box groups, elements can have non canonical
+forms, but only \kbd{add} is allowed to return a non canonical form.
 
 \kbd{red(E,x)} returns the canonical form of $x$.
 
@@ -445,7 +443,7 @@ black box algebra:
 $x$ being an element of the black box algebra, and $P$ some black box
 polynomial of degree $d$ over the base field,  returns $P(x)$. The function
 \kbd{cmul(E,P,a,y)} must return the coefficient of degree $a$ of $P$
-multiplied by $y$.
+multiplied by $y$. \kbd{cmul} is allowed to return a non canonical form.
 
 The flag \kbd{use\_sqr} has the same meaning as for \kbd{gen\_powers}. This
 implements an algorithm of Brent and Kung (1978).
