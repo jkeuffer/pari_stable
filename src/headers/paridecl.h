@@ -2293,6 +2293,8 @@ GEN     gsubstpol(GEN x, GEN v, GEN y);
 GEN     gsubstvec(GEN x, GEN v, GEN y);
 GEN     gtocol(GEN x);
 GEN     gtocol0(GEN x, long n);
+GEN     gtocolrev(GEN x);
+GEN     gtocolrev0(GEN x, long n);
 GEN     gtopoly(GEN x, long v);
 GEN     gtopolyrev(GEN x, long v);
 GEN     gtoser(GEN x, long v, long precdl);

@@ -18,7 +18,7 @@ matsize(vecextract(A, [1,2], []))
 matsize(vecextract(A, Vecsmall([1,2]), []))
 matsize(vecextract(matid(6), 3, 0))
 
-fun = [Vec,Vecrev,Col,Vecsmall];
+fun = [Vec,Vecrev,Col,Colrev,Vecsmall];
 obj = [1, 'x, Pol([5,4,3,2,1]), List([1,2,3]), List([1,2,3,4,5])];
 {
   for(i=1, #fun,

@@ -101,6 +101,7 @@ EP  1- Configure option for gcov/lcov support
    10- mathnfmodid(m, d): allow d an arbitrary vector of positive integers.
        The old syntax (d an integer, representing a vector of equal integers)
        is still allowed
+LGr11- GP function Colrev
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
