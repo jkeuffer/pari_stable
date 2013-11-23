@@ -25,41 +25,8 @@ case "$osname" in
 esac
 
 if test -z "$CC"; then
-  echo Looking for the compilers ...
-  # Native Compilers
-  cc=`./locate cc '' $pathspace`
-  case "$osname" in
-    hpux) if test "$cc" = /usr/ccs/bin/cc -a -f /opt/ansic/bin/cc; then
-            cc=/opt/ansic/bin/cc; fi ;;  # This is a better compiler
-  esac
-  case "$cc" in ?:/*|/*) echo ..."cc is $cc";;
-      *) echo ..."I could not find cc.";; esac
-  # GNU Compilers
-  gcc=`./locate gcc '' $pathspace`
-  if test -z "$gcc" -a -n "$cc"; then
-    exe=$osname-$arch-gnu$$
-    $cc $extraflag -o $exe gnu.c
-    if $RUNTEST $exe; then gcc=$cc; fi; rm -f $exe
-  fi
-  case "$gcc" in
-?:/*|/*) echo ..."gcc is $gcc";;
-      *) echo ..."I could not find gcc."; gcc=;;
-  esac
-  if test -n "$gcc"; then
-    # avoid internationalization trouble by setting LANG=C
-    __gnuc__=`env LANG=C LC_ALL=C LC_MESSAGES=C $gcc -v 2>&1 | grep ' version '`
-    if test -z "$__gnuc__"; then __gnuc__=unknown; fi
-    echo GNU compatible compiler: $__gnuc__
-  fi
-  case "$osname" in
-    aix)   __gnuc__=;; # Native compilers are faster
-    hpux)  __gnuc__=;; # versions older than 2.7 cannot build PIC code
-                       # gp built with recent versions has bugs
-    concentrix) case "$__gnuc__" in 2.[78].*);; *)
-              __gnuc__=;; esac;;
-  esac
-  # Choosing the compiler
-  if test -n "$__gnuc__"; then CC=$gcc; else CC=$cc; fi
+  echo Choosing C compiler ...
+  if test -n "$gcc"; then CC=$gcc; else CC=$cc; fi
 fi
 
 if test "$fastread" != yes; then
@@ -67,18 +34,24 @@ if test "$fastread" != yes; then
 ==========================================================================
 Only ANSI C and C++ compilers are supported.  Choosing the GNU compiler
 gcc/g++ enables the inlining of kernel routines (about 20% speedup; if you
-use g++, it is a good idea to include the -fpermissive flag).  If you choose
-not to use gcc, the C++ version of Pari will be a little faster because of
-general inlining, but can be used in library mode only with C++ programs.
-We strongly recommand using gcc all the way through.
+use g++, include the -fpermissive flag). We strongly recommand using gcc all
+the way through.
 EOT
   echo $n ..."Which C compiler shall I use ? $c"
   dflt=$CC; rep=; . ./myread
   CC=$ans
 fi
+if test -z "$CC"; then cat <<EOT
+###
+### Could not find a C compiler. Please install cc/gcc or set \$CC
+###
+EOT
+  exit 1;
+fi
 
 exe=$osname-$arch-ansi$$
-cmd="$CC $CFLAGS $extraflag -o $exe ansi.c"; . log_cmd
+cmd="$CC $CFLAGS $extraflag -o $exe ansi.c";
+ . log_cmd
 if test -s $exe; then
   $RUNTEST $exe
 fi
@@ -98,7 +71,8 @@ if test -z "$__gnuc__"; then
   $CC $extraflag -o $exe gnu.c
   if $RUNTEST $exe; then
     # avoid internationalization trouble by setting LANG=C
-    __gnuc__=`env LANG=C LC_ALL=C LC_MESSAGES=C $CC -v 2>&1 | grep ' version '`
+    __gnuc__=`env LANG=C LC_ALL=C LC_MESSAGES=C $CC -v 2>&1 |\
+      grep ' version ' | tr '\n' , | sed -e 's/,$//'`
     echo GNU compatible compiler: $__gnuc__
   fi
   rm -f $exe $exe$exe_suff
