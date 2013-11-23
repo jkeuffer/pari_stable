@@ -891,7 +891,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   }
   (void)ZM_hnfall(shallowconcat(P, subgroup), &U, 1);
   setlg(U, l); for (j=1; j<l; j++) setlg(U[j], l);
-  return ZM_hnfmodid(shallowconcat(U, diagonal_shallow(raycycz)), gel(raycycz,1));
+  return ZM_hnfmodid(U, raycycz);
 }
 
 static GEN

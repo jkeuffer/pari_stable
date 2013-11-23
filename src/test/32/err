@@ -532,9 +532,6 @@
   ***   at top-level: modreverse(Mod(-x^3+
   ***                 ^--------------------
   *** modreverse: domain error in modreverse: deg(minpoly(z)) < 4
-  ***   at top-level: bnrconductor(bnfinit
-  ***                 ^--------------------
-  *** bnrconductor: inconsistent subgroup t_MAT (1x1) , t_MAT (1x1).
   ***   at top-level: rnfnormgroup(bnrinit
   ***                 ^--------------------
   *** rnfnormgroup: domain error in rnfnormgroup: rnfisabelian(bnr,pol) = 0
@@ -590,4 +587,4 @@ INFINITY
   ***   at top-level: trap(e_INV,INFINITY,log(0))
   ***                                     ^-------
   *** log: domain error in log: argument = 0
-Total time spent: 24
+Total time spent: 20

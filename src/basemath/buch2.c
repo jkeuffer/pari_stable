@@ -3107,24 +3107,28 @@ codeprimes(GEN Vbase, long N)
 static GEN
 makecycgen(GEN bnf)
 {
-  GEN cyc,gen,h,nf,y,GD,D;
+  GEN cyc,gen,h,nf,y,GD;
   long e,i,l;
 
   if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building cycgen)");
   nf = bnf_get_nf(bnf);
-  cyc = bnf_get_cyc(bnf); D = diagonal_shallow(cyc);
+  cyc = bnf_get_cyc(bnf);
   gen = bnf_get_gen(bnf); GD = gmael(bnf,9,3);
   h = cgetg_copy(gen, &l);
   for (i=1; i<l; i++)
   {
-    if (cmpiu(gel(cyc,i), 5) < 0)
+    GEN gi = gel(gen,i), ci = gel(cyc,i);
+    if (cmpiu(ci, 5) < 0)
     {
-      GEN N = ZM_det_triangular(gel(gen,i));
-      y = isprincipalarch(bnf,gel(GD,i), N, gel(cyc,i), gen_1, &e);
-      if (y && !fact_ok(nf,y,NULL,gen,gel(D,i))) y = NULL;
-      if (y) { gel(h,i) = to_famat_shallow(y,gen_1); continue; }
+      GEN N = ZM_det_triangular(gi);
+      y = isprincipalarch(bnf,gel(GD,i), N, ci, gen_1, &e);
+      if (y && fact_ok(nf,y,NULL,mkvec(gi),mkvec(ci)))
+      {
+        gel(h,i) = to_famat_shallow(y,gen_1);
+        continue;
+      }
     }
-    y = isprincipalfact(bnf, NULL, gen, gel(D,i), nf_GENMAT|nf_FORCE);
+    y = isprincipalfact(bnf, NULL, mkvec(gi), mkvec(ci), nf_GENMAT|nf_FORCE);
     h[i] = y[2];
   }
   return h;

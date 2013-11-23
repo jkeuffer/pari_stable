@@ -969,7 +969,7 @@ hnf_i(GEN A, int remove)
 GEN
 ZM_hnf(GEN x) { return lg(x) > 8? ZM_hnfall(x, NULL, 1): hnf_i(x, 1); }
 
-/* u*z[1..k] mod b, in place */
+/* u*z[1..k] mod p, in place */
 static void
 FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
 {
@@ -989,10 +989,10 @@ FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
   }
 }
 static void
-FpV_red_part_ip(GEN z, GEN p, long k)
+FpV_red_part_ipvec(GEN z, GEN p, long k)
 {
   long i;
-  for (i = 1; i <= k; i++) gel(z,i) = modii(gel(z,i), p);
+  for (i = 1; i <= k; i++) gel(z,i) = modii(gel(z,i), gel(p,i));
 }
 
 /* return x * U, in echelon form (mod p^m), where (det(U),p) = 1.
@@ -1134,13 +1134,33 @@ GEN
 ZM_hnfmodall_i(GEN x, GEN dm, long flag)
 {
   pari_sp av, lim;
-  const long modid = (flag & hnf_MODID);
   const long center = (flag & hnf_CENTER);
-  long li, co, i, j, k, def, ldef, ldm;
-  GEN a, b, p1, p2, u, dm2;
+  long moddiag = (flag & hnf_MODID);
+  long li, co, i, j, k, def, ldef;
+  GEN a, b, p1, p2, u, dm2, LDM;
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
-  li = lgcols(x); dm2 = shifti(dm, -1);
+  li = lgcols(x); if (li == 1) return cgetg(1,t_MAT);
+  if (typ(dm) == t_INT)
+  {
+    long ldm = lgefint(dm);
+    dm2 = shifti(dm, -1);
+    dm = const_vec(li-1,dm);
+    dm2= const_vec(li-1,dm2);
+    LDM= const_vecsmall(li-1,ldm);
+  }
+  else
+  {
+    if (lg(dm) != li) pari_err_DIM("ZM_hnfmod");
+    moddiag = 1;
+    dm2 = cgetg(li, t_VEC);
+    LDM = cgetg(li, t_VECSMALL);
+    for (i=1; i<li; i++)
+    {
+      gel(dm2,i) = shifti(gel(dm,i),-1);
+      LDM[i] = lgefint(gel(dm,i));
+    }
+  }
   av = avma; lim = stack_lim(av,1);
   x = RgM_shallowcopy(x);
 
@@ -1148,29 +1168,31 @@ ZM_hnfmodall_i(GEN x, GEN dm, long flag)
   if (li > co)
   {
     ldef = li - co;
-    if (!modid)
+    if (!moddiag)
       pari_err_DOMAIN("ZM_hnfmod","nb lines",">", strtoGENstr("nb columns"), x);
   }
-  /* To prevent coeffs explosion, only reduce mod dm when lg() > ldm */
-  ldm = lgefint(dm);
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
-    gcoeff(x,i,def) = centermodii(gcoeff(x,i,def), dm,dm2);
+    GEN d = gel(dm,i), d2 = gel(dm2,i);
+    gcoeff(x,i,def) = centermodii(gcoeff(x,i,def), d,d2);
     for (j = def-1; j; j--)
     {
-      gcoeff(x,i,j) = centermodii(gcoeff(x,i,j), dm,dm2);
+      gcoeff(x,i,j) = centermodii(gcoeff(x,i,j), d,d2);
       a = gcoeff(x,i,j);
       if (!signe(a)) continue;
 
       k = (j==1)? def: j-1;
-      gcoeff(x,i,k) = centermodii(gcoeff(x,i,k), dm,dm2);
+      gcoeff(x,i,k) = centermodii(gcoeff(x,i,k), d,d2);
       ZC_elem(a,gcoeff(x,i,k), x,NULL, j,k);
       p1 = gel(x,j);
       p2 = gel(x,k);
+      /* prevent coeffs explosion: reduce mod dm when lg() > ldm */
       for (k = 1; k < i; k++)
       {
-        if (lgefint(gel(p1,k)) > ldm) gel(p1,k) = centermodii(gel(p1,k), dm,dm2);
-        if (lgefint(gel(p2,k)) > ldm) gel(p2,k) = centermodii(gel(p2,k), dm,dm2);
+        if (lgefint(gel(p1,k)) > LDM[k])
+          gel(p1,k) = centermodii(gel(p1,k), gel(dm,k),gel(dm2,k));
+        if (lgefint(gel(p2,k)) > LDM[k])
+          gel(p2,k) = centermodii(gel(p2,k), gel(dm,k),gel(dm2,k));
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
@@ -1178,46 +1200,42 @@ ZM_hnfmodall_i(GEN x, GEN dm, long flag)
         x = gerepilecopy(av, x);
       }
     }
-    if (modid && !signe(gcoeff(x,i,def)))
+    if (moddiag && !signe(gcoeff(x,i,def)))
     { /* missing pivot on line i, insert column */
       GEN a = cgetg(co + 1, t_MAT);
       for (k = 1; k <= def; k++) gel(a,k) = gel(x,k);
-      gel(a,k++) = Rg_col_ei(dm, li-1, i);
+      gel(a,k++) = Rg_col_ei(gel(dm,i), li-1, i);
       for (     ; k <= co;  k++) gel(a,k) = gel(x,k-1);
       ldef--; if (ldef < 0) ldef = 0;
       co++; def++; x = a;
     }
   }
-  x += co - li;
-  if (modid)
-  { /* w[li] is an accumulator, discarded at the end */
-    GEN w = cgetg(li+1, t_MAT);
-    for (i = li-1; i > ldef; i--) gel(w,i) = gel(x,i);
-    for (        ; i > 0;    i--) gel(w,i) = Rg_col_ei(dm, li-1, i);
-    x = w;
+  if (co < li)
+  { /* implies moddiag, add missing diag(dm) components */
+    GEN a = cgetg(li+1, t_MAT);
+    for (k = 1; k <= li-co; k++) gel(a,k) = Rg_col_ei(gel(dm,k), li-1, k);
+    for (i = 1; i < co; i++) gel(a,k-1+i) = gel(x,i);
+    gel(a,li) = zerocol(li-1); x = a;
+  }
+  else
+  {
+    x += co - li;
+    x[0] = evaltyp(t_MAT) | evallg(li); /* kill 0 columns */
+  }
+  if (moddiag)
+  { /* one column extra: an accumulator, discarded at the end */
+    if (lg(x) == li) x = shallowconcat(x, zerocol(li-1));
+    /* add up missing diag(dm) components */
     for (i = li-1; i > 0; i--)
-    { /* check that dm*Id \subset L + add up missing dm*Id components */
-      GEN d, c;
-      d = bezout(gcoeff(x,i,i),dm, &u,NULL);
-      gcoeff(x,i,i) = d;
-      if (is_pm1(d))
-      {
-        FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
-        continue;
-      }
-      c = cgetg(li, t_COL);
-      for (j = 1; j < i; j++) gel(c,j) = remii(gcoeff(x,j,i),d);
-      for (     ; j <li; j++) gel(c,j) = gen_0;
-      if (!equalii(dm, d)) c = ZC_Z_mul(c, diviiexact(dm, d));
-      gel(x,li) = c;
-      FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
-      for (j = i - 1; j > ldef; j--)
+    {
+      gcoeff(x, i, li) = gel(dm,i);
+      for (j = i; j > 0; j--)
       {
         GEN a = gcoeff(x, j, li);
         if (!signe(a)) continue;
         ZC_elem(a, gcoeff(x,j,j), x, NULL, li,j);
-        FpV_red_part_ip(gel(x,li), dm, j-1);
-        FpV_red_part_ip(gel(x,j),  dm, j-1);
+        FpV_red_part_ipvec(gel(x,li), dm, j-1);
+        FpV_red_part_ipvec(gel(x,j),  dm, j-1);
         if (low_stack(lim, stack_lim(av,1)))
         {
           if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnfmod[2]. i=%ld", i);
@@ -1228,7 +1246,7 @@ ZM_hnfmodall_i(GEN x, GEN dm, long flag)
   }
   else
   {
-    b = dm;
+    b = gel(dm,1);
     for (i = li-1; i > 0; i--)
     {
       GEN d = bezout(gcoeff(x,i,i),b, &u,NULL);
@@ -1240,18 +1258,17 @@ ZM_hnfmodall_i(GEN x, GEN dm, long flag)
   x[0] = evaltyp(t_MAT) | evallg(li); /* kill 0 columns / discard accumulator */
   if (flag & hnf_PART) return x;
 
-  if (modid) b = const_vec(li-1, dm);
-  else
+  if (!moddiag)
   { /* compute optimal value for dm */
     b = cgetg(li, t_VEC); gel(b,1) = gcoeff(x,1,1);
     for (i = 2; i < li; i++) gel(b,i) = mulii(gel(b,i-1), gcoeff(x,i,i));
+    dm = b;
   }
-  dm = b;
 
-  for (i = li-2; i > 0; i--)
+  for (i = li-1; i > 0; i--)
   {
     GEN diag = gcoeff(x,i,i);
-    ldm = lgefint(gel(dm,i));
+    if (signe(diag) < 0) { gel(x,i) = ZC_neg(gel(x,i)); diag = gcoeff(x,i,i); }
     for (j = i+1; j < li; j++)
     {
       b = gcoeff(x,i,j);
@@ -1261,7 +1278,7 @@ ZM_hnfmodall_i(GEN x, GEN dm, long flag)
       ZC_lincomb1_inplace(gel(x,j), gel(x,i),b);
       p1 = gel(x,j);
       for (k=1; k<i; k++)
-        if (lgefint(gel(p1,k)) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
+        if (lgefint(gel(p1,k)) > LDM[k]) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnfmod[3]. i=%ld", i);
@@ -1285,15 +1302,29 @@ ZM_hnfmodid(GEN x, GEN d) { return ZM_hnfmodall(x,d,hnf_MODID); }
 static GEN
 allhnfmod(GEN x, GEN dm, int flag)
 {
-  if (typ(dm)!=t_INT) pari_err_TYPE("allhnfmod",dm);
   if (typ(x)!=t_MAT) pari_err_TYPE("allhnfmod",x);
   RgM_check_ZM(x, "allhnfmod");
-  return signe(dm)? ZM_hnfmodall(x, dm, flag): ZM_hnf(x);
+  if (isintzero(dm)) return ZM_hnf(x);
+  return ZM_hnfmodall(x, dm, flag);
 }
 GEN
-hnfmod(GEN x, GEN d) { return allhnfmod(x, d, 0); }
+hnfmod(GEN x, GEN d)
+{
+  if (typ(d) != t_INT) pari_err_TYPE("mathnfmod",d);
+  return allhnfmod(x, d, 0);
+}
 GEN
-hnfmodid(GEN x, GEN d) { return allhnfmod(x, d, hnf_MODID); }
+hnfmodid(GEN x, GEN d)
+{
+  switch(typ(d))
+  {
+    case t_INT: break;
+    case t_VEC: case t_COL:
+      if (RgV_is_ZV(d)) break;
+    default: pari_err_TYPE("mathnfmodid",d);
+  }
+  return allhnfmod(x, d, hnf_MODID);
+}
 
 /* M a ZM in HNF. Normalize with *centered* residues */
 GEN

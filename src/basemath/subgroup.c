@@ -21,7 +21,7 @@ typedef struct slist {
 } slist;
 
 typedef struct {
-  GEN hnfgroup, gen;
+  GEN cyc, gen;
   ulong count;
   slist *list;
 } sublist_t;
@@ -121,7 +121,7 @@ static long
 list_fun(void *E, GEN x)
 {
   sublist_t *S = (sublist_t*)E;
-  GEN H = ZM_hnf(shallowconcat(S->hnfgroup,x));
+  GEN H = ZM_hnfmodid(x, S->cyc);
   if (!S->gen || subgroup_conductor_ok(H, S->gen)) addcell(S, H);
   return 0;
 }
@@ -601,7 +601,7 @@ subgrouplist_i(GEN CYC, GEN bound, GEN expoI, GEN gen)
   n = lg(cyc)-1; /* not necessarily = N */
 
   S.list = sublist = (slist*) pari_malloc(sizeof(slist));
-  S.hnfgroup = diagonal_shallow(cyc);
+  S.cyc = cyc;
   S.gen = gen;
   S.count = 0;
   T.fun = &list_fun;

@@ -31,5 +31,15 @@
 [;]
 ? mathnf([;],1)
 [[;], [;]]
+? mathnfmodid(matrix(0,2),[])
+[;]
+? mathnfmodid([0,7;-1,0;-1,-1],[6,2,2])
+
+[2 1 1]
+
+[0 1 0]
+
+[0 0 1]
+
 ? print("Total time spent: ",gettime);
 Total time spent: 8

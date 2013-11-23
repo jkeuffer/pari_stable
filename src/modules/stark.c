@@ -315,20 +315,19 @@ InitQuotient(GEN C)
   return mkvec4(h, D, U, C);
 }
 
-/* Let s: A -> B given by P, and let DA, DB be resp. the matrix of the
-   relations of A and B, compute the kernel of s. If DA = 0 then A is free */
+/* Let s: A -> B given by P, and let cycA, cycB be the cyclic structure of
+ * A and B, compute the kernel of s. */
 static GEN
-ComputeKernel0(GEN P, GEN DA, GEN DB)
+ComputeKernel0(GEN P, GEN cycA, GEN cycB)
 {
   pari_sp av = avma;
-  long nbA = lg(DA)-1, rk;
-  GEN U;
+  long nbA = lg(cycA)-1, rk;
+  GEN U, DB = diagonal_shallow(cycB);
 
-  rk = nbA + lg(DB) - lg(ZM_hnfall(shallowconcat(P, DB), &U, 1));
+  rk = nbA + lg(cycB) - lg(ZM_hnfall(shallowconcat(P, DB), &U, 1));
   U = vecslice(U, 1,rk);
   U = rowslice(U, 1,nbA);
-  if (!gequal0(DA)) U = shallowconcat(U, DA);
-  return gerepileupto(av, ZM_hnf(U));
+  return gerepileupto(av, ZM_hnfmodid(U, cycA));
 }
 
 /* Let m and n be two moduli such that n|m and let C be a congruence
@@ -338,11 +337,8 @@ static GEN
 ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
 {
   pari_sp av = avma;
-  GEN Mrm, Mrq, P;
-  Mrm  = diagonal_shallow(bnr_get_cyc(bnrm));
-  Mrq  = diagonal_shallow(gel(dtQ,2));
-  P = ZM_mul(gel(dtQ,3), bnrsurjection(bnrm, bnrn));
-  return gerepileupto(av, ComputeKernel0(P, Mrm, Mrq));
+  GEN P = ZM_mul(gel(dtQ,3), bnrsurjection(bnrm, bnrn));
+  return gerepileupto(av, ComputeKernel0(P, bnr_get_cyc(bnrm), gel(dtQ,2)));
 }
 
 static GEN
@@ -388,7 +384,7 @@ IsGoodSubgroup(GEN H, GEN bnr, GEN map)
   p2 = ZM_hnfall(p1, &p3, 0);
   setlg(p3, lg(H));
   for (j = 1; j < lg(p3); j++) setlg(p3[j], lg(H));
-  p1 = ZM_hnf(concat(p3, diagonal_shallow(bnr_get_cyc(bnr)))); /* H as a subgroup of bnr */
+  p1 = ZM_hnfmodid(p3, bnr_get_cyc(bnr)); /* H as a subgroup of bnr */
   modH = bnrconductor(bnr, p1, 0);
 
   /* is the signature correct? */
@@ -406,7 +402,7 @@ IsGoodSubgroup(GEN H, GEN bnr, GEN map)
   cycH = bnr_get_cyc(bnrH);
   p2 = ZM_mul(bnrsurjection(bnr, bnrH), p1);
   /* H as a subgroup of bnrH */
-  iH = ZM_hnf(shallowconcat(p2, diagonal_shallow(cycH)));
+  iH = ZM_hnfmodid(p2, cycH);
   qH = InitQuotient(iH);
 
   for (j = 1; j < lg(p4); j++)
@@ -2592,17 +2588,12 @@ LABDOUB:
 /********************************************************************/
 
 static GEN
-get_subgroup(GEN subgp, GEN cyc, const char *s)
+get_subgroup(GEN H, GEN cyc, const char *s)
 {
-  if (!subgp || gequal0(subgp)) return cyc;
-  if (typ(subgp) == t_MAT)
-  {
-    RgM_check_ZM(subgp, s);
-    subgp = ZM_hnf(subgp);
-    if (hnfdivide(subgp, cyc)) return subgp;
-  }
-  pari_err_TYPE(stack_strcat(s," [subgroup]"), subgp);
-  return NULL;
+  if (!H || gequal0(H)) return diagonal_shallow(cyc);
+  if (typ(H) != t_MAT) pari_err_TYPE(stack_strcat(s," [subgroup]"), H);
+  RgM_check_ZM(H, s);
+  return ZM_hnfmodid(H, cyc);
 }
 
 GEN
@@ -2610,7 +2601,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 {
   long N, newprec;
   pari_sp av = avma;
-  GEN bnf, p1, Mcyc, nf, data, dtQ;
+  GEN bnf, p1, cycbnr, nf, data, dtQ;
 
   /* check the bnr */
   checkbnr(bnr);
@@ -2623,12 +2614,11 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (!nf_get_varn(nf))
     pari_err_PRIORITY("bnrstark", nf_get_pol(nf), "=", 0);
   if (nf_get_r2(nf)) pari_err_DOMAIN("bnrstark", "r2", "!=", gen_0, nf);
-  Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
-  subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");
+  subgrp = get_subgroup(subgrp,bnr_get_cyc(bnr),"bnrstark");
 
   /* compute bnr(conductor) */
   p1     = bnrconductor(bnr, subgrp, 2);
-  bnr    = gel(p1,2); Mcyc = diagonal_shallow(bnr_get_cyc(bnr));
+  bnr    = gel(p1,2); cycbnr = bnr_get_cyc(bnr);
   subgrp = gel(p1,3);
   if (gequal1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
 
@@ -2648,10 +2638,8 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
     vec = cgetg(l, t_VEC);
     for (i = 1; i < l; i++)
     {
-      GEN t = gel(M,i);
       if (is_pm1(gel(cyc,i))) continue;
-      gel(M,i) = gel(Mcyc,i); H = ZM_hnf(shallowconcat(M, Mcyc));
-      gel(M,i) = t;
+      H = ZM_hnfmodid(vecsplice(M,i), cycbnr);
       gel(vec,j++) = bnrstark(bnr, H, prec);
     }
     setlg(vec, j); return gerepilecopy(av, vec);
@@ -2689,7 +2677,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   /* compute bnr(conductor) */
   if (!(flag & 2)) bnr = gel(bnrconductor(bnr, NULL, 2),2);
   cyc  = bnr_get_cyc(bnr);
-  subgp = get_subgroup(subgp, diagonal_shallow(cyc), "bnrL1");
+  subgp = get_subgroup(subgp, cyc, "bnrL1");
 
   cl = itou( ZM_det_triangular(subgp) );
   Qt = InitQuotient(subgp);

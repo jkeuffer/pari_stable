@@ -344,19 +344,17 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 static GEN
 check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL)
 {
-  GEN h, D = NULL;
+  GEN h, cyc = bnr_get_cyc(bnr);
   if (H && gequal0(H)) H = NULL;
   if (H)
   {
-    D = diagonal_shallow(bnr_get_cyc(bnr));
     if (typ(H) != t_MAT) pari_err_TYPE("check_subgroup",H);
     RgM_check_ZM(H, "check_subgroup");
-    H = ZM_hnf(H);
-    if (!hnfdivide(H, D)) pari_err_OP("subgroup",H,D);
+    H = ZM_hnfmodid(H, cyc);
     h = ZM_det_triangular(H);
     if (equalii(h, *clhray)) H = NULL; else *clhray = h;
   }
-  if (!H && !triv_is_NULL) H = D? D: diagonal_shallow(bnr_get_cyc(bnr));
+  if (!H && !triv_is_NULL) H = diagonal_shallow(cyc);
   return H;
 }
 
@@ -372,7 +370,7 @@ get_dataunit(GEN bnf, GEN bid)
     GEN v = zlog(nf, gel(U,i),gel(D,i), &S);
     gel(D,i) = vecmodii(ZM_ZC_mul(S.U, v), cyc);
   }
-  return shallowconcat(D, diagonal_shallow(cyc));
+  return D;
 }
 
 GEN
@@ -432,7 +430,13 @@ Buchray(GEN bnf, GEN module, long flag)
 
   cycgen = check_and_build_cycgen(bnf);
   /* (log(Units)|D) * u = (0 | H) */
-  H = ZM_hnfall( get_dataunit(bnf, bid), do_init? &u: NULL, 1);
+  if (do_init)
+  {
+    GEN D = shallowconcat(get_dataunit(bnf, bid), diagonal_shallow(cycbid));
+    H = ZM_hnfall(D, do_init? &u: NULL, 1);
+  }
+  else
+    H = ZM_hnfmodid(get_dataunit(bnf, bid), cycbid);
   logs = cgetg(ngen+1, t_MAT);
   /* FIXME: cycgen[j] is not necessarily coprime to bid, but it is made coprime
    * in famat_zlog using canonical uniformizers [from bid data]: no need to
@@ -521,7 +525,8 @@ bnrclassno(GEN bnf,GEN ideal)
   cycbid = bid_get_cyc(bid);
   if (lg(cycbid) == 1) { avma = av; return icopy(h); }
   D = get_dataunit(bnf, bid); /* (Z_K/f)^* / units ~ Z^n / D */
-  return gerepileuptoint(av, mulii(h, ZM_det_triangular(ZM_hnf(D))));
+  D = ZM_hnfmodid(D,cycbid);
+  return gerepileuptoint(av, mulii(h, ZM_det_triangular(D)));
 }
 GEN
 bnrclassno0(GEN A, GEN B, GEN C)
@@ -1236,11 +1241,10 @@ bnrsurjection(GEN bnr1, GEN bnr2)
 static GEN
 imageofgroup(GEN bnr, GEN bnr2, GEN H)
 {
-  GEN H2, Delta = diagonal_shallow( bnr_get_cyc(bnr2) ); /* SNF of Cl_n */
-
-  if (!H) return Delta;
+  GEN H2, cyc2 = bnr_get_cyc(bnr2);
+  if (!H) return diagonal_shallow(cyc2);
   H2 = ZM_mul(bnrsurjection(bnr, bnr2), H);
-  return ZM_hnf( shallowconcat(H2, Delta) ); /* s(H) in Cl_n */
+  return ZM_hnfmodid(H2, cyc2); /* s(H) in Cl_n */
 }
 
 /* convert A,B,C to [bnr, H] */
@@ -1721,9 +1725,8 @@ bnrconductorofchar(GEN bnr, GEN chi)
 static GEN
 get_classno(GEN t, GEN h)
 {
-  GEN bid = gel(t,1), cyc = bid_get_cyc(bid);
-  GEN m = shallowconcat(gel(t,2), diagonal_shallow(cyc));
-  return mulii(h, ZM_det_triangular(ZM_hnf(m)));
+  GEN bid = gel(t,1), m = gel(t,2), cyc = bid_get_cyc(bid);
+  return mulii(h, ZM_det_triangular(ZM_hnfmodid(m, cyc)));
 }
 
 static void
@@ -2036,12 +2039,12 @@ static GEN
 bnrclassnointern(GEN B, GEN h)
 {
   long lx = lg(B), j;
-  GEN b, m, qm, L = cgetg(lx,t_VEC);
+  GEN L = cgetg(lx,t_VEC);
   for (j=1; j<lx; j++)
   {
-    b = gel(B,j); qm = ZM_mul(gel(b,3),gel(b,4));
-    m = ZM_hnf( shallowconcat(qm, diagonal_shallow(gel(b,2))) );
-    gel(L,j) = mkvec2(gel(b,1), mkvecsmall( itou( mulii(h, ZM_det_triangular(m)) ) ));
+    GEN b = gel(B,j), qm = ZM_mul(gel(b,3),gel(b,4));
+    GEN m = ZM_det_triangular( ZM_hnfmodid(qm, gel(b,2)) );
+    gel(L,j) = mkvec2(gel(b,1), mkvecsmall( itou( mulii(h, m) ) ));
   }
   return L;
 }
@@ -2079,8 +2082,8 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
     cyc = gel(b,2); nc = lg(cyc)-1;
     /* [ qm   cyc 0 ]
      * [ matU  0  2 ] */
-    m = shallowconcat(vconcat(qm, matU), diagonal_shallow(shallowconcat(cyc, _2)));
-    m = ZM_hnf(m); mm = RgM_shallowcopy(m);
+    m = ZM_hnfmodid(vconcat(qm, matU), shallowconcat(cyc,_2));
+    mm = RgM_shallowcopy(m);
     H = cgetg(nbarch+1,t_VECSMALL);
     rowsel = cgetg(nc+r1+1,t_VECSMALL);
     for (k = 0; k < nbarch; k++)
@@ -2384,9 +2387,9 @@ subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound)
 {
   pari_sp av = avma;
   long l, i, j;
-  GEN D, Mr, U, T, subgrp, L;
+  GEN D, Mr, U, T, subgrp, L, cyc = bnr_get_cyc(bnr);
 
-  Mr = diagonal_shallow(bnr_get_cyc(bnr));
+  Mr = diagonal_shallow(cyc);
   D = ZM_snfall_i(hnf_solve(C, Mr), &U, NULL, 1);
   T = ZM_mul(C, RgM_inv(U));
   L = conductor_elts(bnr);
@@ -2394,7 +2397,7 @@ subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound)
   l = lg(subgrp);
   for (i = j = 1; i < l; i++)
   {
-    GEN H = ZM_hnf(shallowconcat(ZM_mul(T, gel(subgrp,i)), Mr));
+    GEN H = ZM_hnfmodid(ZM_mul(T, gel(subgrp,i)), cyc);
     if (subgroup_conductor_ok(H, L)) gel(subgrp, j++) = H;
   }
   setlg(subgrp, j);
