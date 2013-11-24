@@ -1254,8 +1254,8 @@ Z_isanypower_nosmalldiv(GEN *px)
     }
     if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
     /* x^(1/p) < 2^31 */
-    p = u_forprime_next(&T);
-    if (p)
+    p = T.p;
+    if (p <= e2)
     {
       logx = logr_abs( itor(x, DEFAULTPREC) );
       dlogx = rtodbl(logx);
