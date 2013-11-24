@@ -1173,18 +1173,27 @@ sqrispec_mirror(GEN x, long nx)
   return z;
 }
 
-/* We must have nx>=ny. This lets garbage on the stack.
-*/
-
+/* leaves garbage on the stack. */
 INLINE GEN
 muliispec_mirror(GEN x, GEN y, long nx, long ny)
 {
-  GEN cx=new_chunk(nx);
-  GEN cy=new_chunk(ny);
-  GEN z;
+  GEN cx, cy, z;
+  long s = 0;
+  while (nx && x[nx-1]==0) { nx--; s++; }
+  while (ny && y[ny-1]==0) { ny--; s++; }
+  cx=new_chunk(nx); cy=new_chunk(ny);
   xmpn_mirrorcopy((mp_limb_t *)cx,(mp_limb_t *)x,nx);
   xmpn_mirrorcopy((mp_limb_t *)cy,(mp_limb_t *)y,ny);
-  z=muliispec(cx, cy, nx, ny);
+  z =  nx>=ny ? muliispec(cx, cy, nx, ny): muliispec(cy, cx, ny, nx);
+  if (s)
+  {
+    long i, lz = lgefint(z) + s;
+    (void)new_chunk(s);
+    z -= s;
+    for (i=0; i<s; i++) z[2+i]=0;
+    z[1] = evalsigne(1) | evallgefint(lz);
+    z[0] = evaltyp(t_INT) | evallg(lz);
+  }
   xmpn_mirror(LIMBS(z), NLIMBS(z));
   return z;
 }
