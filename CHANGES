@@ -53,6 +53,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    38- RgX_to_RgV no longer accepts other types than t_POL. Use Rg_to_RgV for
        a more permissive function
    39- broken Fq_sqrt when T != NULL and t_INT input
+   40- ispower(1009^11) -> 0 [2.6.0]
 
   Changed
     1- default help text for a user function is now as in \u:

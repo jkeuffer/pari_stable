@@ -2065,13 +2065,14 @@ is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
   ulong p;
   pari_sp av = avma;
   if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
-  while ((p = u_forprime_next(T)) && size/p >= cutoffbits) {
+  while ((p = u_forprime_next(T))) {
     long v = 1;
     while (is_kth_power(x, p, pt)) {
       v *= p; x = *pt;
       size = expi(x);
     }
     if (v > 1) return v;
+    if (size/p < cutoffbits) break;
   }
   avma = av; return 0; /* give up */
 }
