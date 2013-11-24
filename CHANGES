@@ -81,6 +81,8 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
 JD 14- polcyclo(n, x) now works for all roots of 1
    15- quadpoly no longer accepts vector/matrix arguments, see 2.6.0,C94
    16- [libpari] renamed ZM_hnfremdiv -> ZM_hnfdivrem
+   17- x t_REAL * y t_INT: either convert y to t_REAL (as before) or use
+       integer multiplication (if lg(x) >> lg(y))
 
   Added
 EP  1- Configure option for gcov/lcov support
