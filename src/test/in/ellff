@@ -3,9 +3,11 @@ test(p,n=0,v='a,w=1)=
 {
   my(a=if(n,ffgen(p^n,v),p));
   my(E=ellinit([w,1,1-w,0,a+3],a));
-  my(G=ellgenerators(E)[1]);
-  my(P=random(E));
+  my(G=ellgenerators(E));
+  if (#G==0,return);
   [d1]=ellgroup(E);
+  my(P=random(E));
+  G=G[1];
   if(ellorder(E,G)!=d1,error([p,n,0]));
   if(ellmul(E,G,d1)!=[0],error([p,n,1]));
   if(ellmul(E,P,d1)!=[0],error([p,n,2]));
