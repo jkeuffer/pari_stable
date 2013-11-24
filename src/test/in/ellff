@@ -1,7 +1,7 @@
 \\package:seadata
 test(p,n=0,v='a,w=1)=
 {
-  my(a=if(n,ffgen(ffinit(p,n),v),p));
+  my(a=if(n,ffgen(p^n,v),p));
   my(E=ellinit([w,1,1-w,0,a+3],a));
   my(G=ellgenerators(E)[1]);
   my(P=random(E));
@@ -38,7 +38,7 @@ test(41);
 test(1073741827);
 test(nextprime(2^65),2);
 
-a=ffgen(ffinit(101,3),'a);
+a=ffgen(101^3,'a);
 E=ellinit([1,3],a); E.j
 E.disc
 P=random(E);Q=random(E);
@@ -58,19 +58,19 @@ check(a)=
 }
 {
   for(a=1,8,
-    g = ffprimroot(ffgen(ffinit(2,a),'t));
+    g = ffprimroot(ffgen(2^a,'t));
     for(i=0,2^a-2, check(g^i)));
   for(a=1,6,
-    g = ffprimroot(ffgen(ffinit(3,a),'t));
+    g = ffprimroot(ffgen(3^a,'t));
     for(i=0,3^a-2, check(g^i)));
   for(a=1,4,
-    g = ffprimroot(ffgen(ffinit(5,a),'t));
+    g = ffprimroot(ffgen(5^a,'t));
     for(i=0,5^a-2, check(g^i)));
 }
 
 checkt(p,n,f,B=100)=
 {
-  my(a=ffgen(ffinit(p,n),'a));
+  my(a=ffgen(p^n,'a));
   for(i=1,B,
     my(E,N,b);
     until(b,b=random(a));

@@ -19,9 +19,9 @@ test(2^64+1, 10);
 
 sqrtn(Mod(0,3),-2)
 sqrtn(O(3),-2)
-sqrtn(0*ffgen(ffinit(2^64+13,2)),-2)
-sqrtn(0*ffgen(ffinit(3,2)),-2)
-sqrtn(0*ffgen(ffinit(2,2)),-2)
+sqrtn(0*ffgen((2^64+13)^2),-2)
+sqrtn(0*ffgen(3^2),-2)
+sqrtn(0*ffgen(2^2),-2)
 
 sqrtnint(10^1000,1001)
 sqrtn(2., 10, &z)

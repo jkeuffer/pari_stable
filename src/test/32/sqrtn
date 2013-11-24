@@ -9,13 +9,13 @@
   ***   at top-level: sqrtn(O(3),-2)
   ***                 ^--------------
   *** sqrtn: impossible inverse in ginv: O(3).
-  ***   at top-level: sqrtn(0*ffgen(ffinit
+  ***   at top-level: sqrtn(0*ffgen((2^64+
   ***                 ^--------------------
   *** sqrtn: impossible inverse in FpXQ_sqrtn: 0.
-  ***   at top-level: sqrtn(0*ffgen(ffinit
+  ***   at top-level: sqrtn(0*ffgen(3^2),-
   ***                 ^--------------------
   *** sqrtn: impossible inverse in Flxq_sqrtn: Vecsmall([0]).
-  ***   at top-level: sqrtn(0*ffgen(ffinit
+  ***   at top-level: sqrtn(0*ffgen(2^2),-
   ***                 ^--------------------
   *** sqrtn: impossible inverse in F2xq_sqrtn: Vecsmall([0]).
 9
@@ -36,4 +36,4 @@
   *** sqrtn: impossible inverse in Fl_inv: Mod(2, 4).
 1.0000000000000000000000000000000000000
 0
-Total time spent: 0
+Total time spent: 4

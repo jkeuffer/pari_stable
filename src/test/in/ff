@@ -56,12 +56,12 @@ for(i=1,10,print(ffnbirred(11,i,1)));
 
 do(f,p,T)=centerlift(lift(polrootsff(f,p,T)));
 do(x^3+x^2+x-1,3,t^3+t^2+t-1)
-t = ffgen(ffinit(3,3),'t); do((x^3+x^2+x-1)*t^0, t.p, t.mod)
+t = ffgen(3^3,'t); do((x^3+x^2+x-1)*t^0, t.p, t.mod)
 polrootsff(x^4+1,2,y^2+y+1)
 
-t = ffgen(ffinit(7,4)); fflog(t^6,t^2)
+t = ffgen(7^4); fflog(t^6,t^2)
 
-t = ffgen(ffinit(2,64))^((2^64-1)\5);1/t
+t = ffgen(2^64)^((2^64-1)\5);1/t
 
 t = ffgen(('t^2+'t+1)*Mod(1,2));
 factorff(x^12 + t*x^10 + x^6 + (t+1)*x^2 + 1)

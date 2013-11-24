@@ -1,4 +1,4 @@
-ff(p,f) = ffgen(ffinit(p,f), 'a);
+ff(p,f) = ffgen(p^f, 'a);
 doell(a)= {
   my(e, P);
   e = ellinit([1,1,3,4,5]*a);

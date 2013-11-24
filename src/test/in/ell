@@ -25,7 +25,7 @@ testgroup(v,p)=
   forvec(v=vector(2,i,[0,4]), testgroup(v,5));
 }
 setrand(1)
-a=ffgen(ffinit(2,8),'a); E=ellinit([a,1,0,0,1]);
+a=ffgen(2^8,'a); E=ellinit([a,1,0,0,1]);
 P=[a^3,ellordinate(E,a^3)[1]]; Q=ellmul(E,P,113);
 e=elllog(E,P,Q,242)
 ellmul(E,Q,e) == P
@@ -66,8 +66,8 @@ ellinit(ellfromj(Mod(3,5))).j
 ellinit(ellfromj(j*Mod(1,2))).j
 ellinit(ellfromj(Mod(0,3))).j
 ellinit(ellfromj(j*Mod(1,3))).j
-a=ffgen(ffinit(2,5),'a);ellinit(ellfromj(a)).j
-a=ffgen(ffinit(3,5),'a);ellinit(ellfromj(a)).j
+a=ffgen(2^5,'a);ellinit(ellfromj(a)).j
+a=ffgen(3^5,'a);ellinit(ellfromj(a)).j
 elldivpol(ellinit([1,2,3,5,7]),4)
 elldivpol(ellinit([0,0,0,0,1]),8)
 
@@ -88,7 +88,7 @@ E.group
 ellminimalmodel(ellinit([1/5,1/4,1/3,1/2,1],1),&v)
 v
 
-j=ffgen(ffinit(2,5),'a);e = ellinit(ellfromj(j)); e.group; elllog(e,e.gen[1],e.gen[1])
+j=ffgen(2^5,'a);e = ellinit(ellfromj(j)); e.group; elllog(e,e.gen[1],e.gen[1])
 E = ellchangecurve(e,[3,7,1,0]);
 E.group
 
@@ -209,7 +209,7 @@ E=ellinit([-3,-60,480,0,0]); ellheight(E,[0,0])
 e=ellminimalmodel(ellinit([1,1]));
 e=ellchangecurve(e,1)
 e=ellchangecurve(e,[2,0,0,0])
-ellinit(ellinit([0,1]*Mod(1,5),ffgen(ffinit(5,2))));
+ellinit(ellinit([0,1]*Mod(1,5),ffgen(5^2)));
 
 J=[0,1728,-3375,8000,54000,-32768,287496,-884736,-12288000,16581375,-884736000,-147197952000,-262537412640768000];
 {
