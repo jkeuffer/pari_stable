@@ -1340,11 +1340,11 @@ ellrandom(GEN E)
     return FF_ellrandom(E);
   else
   {
-     pari_sp av = avma;
-     GEN p = fg, e = ellff_get_a4a6(E);
-     GEN P = random_FpE(gel(e,1),gel(e,2),p);
-     P = FpE_to_mod(FpE_changepoint(P,gel(e,3),p),p);
-     return gerepileupto(av, P);
+    pari_sp av = avma;
+    GEN p = fg, e = ellff_get_a4a6(E);
+    GEN P = random_FpE(gel(e,1),gel(e,2),p);
+    P = FpE_to_mod(FpE_changepoint(P,gel(e,3),p),p);
+    return gerepileupto(av, P);
   }
 }
 

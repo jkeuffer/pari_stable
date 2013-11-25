@@ -1130,6 +1130,10 @@ FF_ellinit(GEN E, GEN fg)
   return y;
 }
 
+static long
+F3x_equalm1(GEN x)
+{ return degpol(x)==0 && x[2] == 2; }
+
 GEN
 FF_ellrandom(GEN E)
 {
@@ -1145,10 +1149,20 @@ FF_ellrandom(GEN E)
     Q = FpXQE_changepoint(Q, FqV_to_FpXQV(gel(e,3), T) , T, p);
     break;
   case t_FF_F2xq:
-    Q = random_F2xqE(gel(e,1), gel(e,2), T);
-    Q = F2xqE_changepoint(Q, gel(e,3), T);
-    break;
+    {
+      long d = F2x_degree(T);
+      if (d<=2 && typ(gel(e,1))==t_VEC && F2x_equal1(gmael(e,1,1))
+        && ((d==1 && F2x_equal1(gmael(e,1,2)) && F2x_equal1(gel(e,2)))
+          || (d==2 && !lgpol(gmael(e,1,2)) && F2x_degree(gel(e,2))==1)))
+        return ellinf();
+      Q = random_F2xqE(gel(e,1), gel(e,2), T);
+      Q = F2xqE_changepoint(Q, gel(e,3), T);
+      break;
+    }
   default:
+    if (pp==3 && degpol(T)==1 && typ(gel(e,1))==t_VECSMALL
+        && F3x_equalm1(gel(e,1)) && F3x_equalm1(gel(e,2)))
+      return ellinf();
     Q = random_FlxqE(gel(e,1), gel(e,2), T, pp);
     Q = FlxqE_changepoint(Q, gel(e,3), T, pp);
   }

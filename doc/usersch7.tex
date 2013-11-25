@@ -273,7 +273,9 @@ In this subsection, we assume that \tet{ell_get_type}$(E)$ is \tet{t_ELL_Fq}.
 \fun{GEN}{FF_ellmul}{GEN E, GEN P, GEN n} returns $[n]P$ where $n$ is an
 integer and $P$ is a point on the curve $E$.
 
-\fun{GEN}{FF_ellrandom}{GEN E} returns a random point in $E(\F_q)$
+\fun{GEN}{FF_ellrandom}{GEN E} returns a random point in $E(\F_q)$.
+This function never returns the point at infinity, unless this is the
+only point on the curve.
 
 \fun{GEN}{FF_ellorder}{GEN E, GEN P, GEN o} returns the order of the point
 $P$, where $o$ is a multiple of the order of $P$, or its factorization.

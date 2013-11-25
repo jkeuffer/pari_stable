@@ -57,6 +57,7 @@ check(a)=
   my(E,P,N);
   E=ellinit(ellfromj(a),a);
   N=ellcard(E);
+  if ((N==1)!=(#random(E)==1),error(a));
   for(i=1,4,
     P=random(E);
     if(ellmul(E,P,N)!=[0],error(a)));
