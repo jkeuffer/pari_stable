@@ -1151,18 +1151,25 @@ FF_ellrandom(GEN E)
   case t_FF_F2xq:
     {
       long d = F2x_degree(T);
-      if (d<=2 && typ(gel(e,1))==t_VEC && F2x_equal1(gmael(e,1,1))
-        && ((d==1 && F2x_equal1(gmael(e,1,2)) && F2x_equal1(gel(e,2)))
-          || (d==2 && !lgpol(gmael(e,1,2)) && F2x_degree(gel(e,2))==1)))
-        return ellinf();
+      /* if #E(Fq) = 1 return [0] */
+      if (d<=2 && typ(gel(e,1)) == t_VEC)
+      { /* over F2 or F4, supersingular */
+        GEN v = gel(e,1), A6 = gel(e,2), a3 = gel(v,1), A4 = gel(v,2);
+        if (F2x_equal1(a3) &&
+             ((d==1 && F2x_equal1(A4) && F2x_equal1(A6))
+           || (d==2 && !lgpol(A4)     && F2x_degree(A6)==1))) return ellinf();
+      }
       Q = random_F2xqE(gel(e,1), gel(e,2), T);
       Q = F2xqE_changepoint(Q, gel(e,3), T);
       break;
     }
   default:
-    if (pp==3 && degpol(T)==1 && typ(gel(e,1))==t_VECSMALL
-        && F3x_equalm1(gel(e,1)) && F3x_equalm1(gel(e,2)))
-      return ellinf();
+    /* if #E(Fq) = 1 return [0] */
+    if (pp==3 && degpol(T)==1 && typ(gel(e,1))==t_VECSMALL)
+    { /* over F3, supersingular */
+      GEN mb4 = gel(e,1), b6 = gel(e,2);
+      if (F3x_equalm1(mb4) && F3x_equalm1(b6)) return ellinf();
+    }
     Q = random_FlxqE(gel(e,1), gel(e,2), T, pp);
     Q = FlxqE_changepoint(Q, gel(e,3), T, pp);
   }
