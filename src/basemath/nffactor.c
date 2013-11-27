@@ -1761,7 +1761,10 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   if (DEBUGLEVEL>2) { timer_start(&ti); timer_start(&ti_tot); }
   n = degpol(nfpol);
   /* deg = 1 => irreducible */
-  if (dpol == 1) return mkvec(QXQX_normalize(pol, nfpol));
+  if (dpol == 1) {
+    if (fl == FACTORS) return mkvec(QXQX_normalize(pol, nfpol));
+    return mkvec(gneg(gdiv(gel(pol,2),gel(pol,3))));
+  }
   if (typ(nf)==t_POL || nfsqff_use_Trager(n,dpol))
   {
     GEN z;

@@ -102,3 +102,5 @@ test(T,p)=
 \\also exercises FqX_extgcd above half-gcd threshold
 test(polcyclo(503),3)
 test(polcyclo(211),18446744073709551667)
+
+nfroots(a^2+1,x^2)
