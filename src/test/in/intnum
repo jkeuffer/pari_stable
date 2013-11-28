@@ -1,6 +1,6 @@
 default(echo,1);
 allocatemem(20 * 10^6);
-gettime; oo = [1];
+oo = [1];
 \p96
 intcirc(s=1, 0.5, zeta(s)) - 1
 intlaplaceinv(x=2, 1, 1/x) - 1

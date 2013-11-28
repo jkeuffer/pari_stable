@@ -1,5 +1,5 @@
    echo = 1 (on)
-? gettime;p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057]);
+? p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057]);
 ? fa=[11699,6;2392997,2;4987333019653,2];
 ? setrand(1);N=10^8;a=matrix(3,5,j,k,vectorv(5,l,random\N));
 ? nfpol=x^5-5*x^3+5*x+25;nf=nfinit(nfpol)
@@ -738,6 +738,6 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? sizebyte(%)
 288
 ? getheap
-[215, 90487]
+[216, 90493]
 ? print("Total time spent: ",gettime);
-Total time spent: 84
+Total time spent: 80

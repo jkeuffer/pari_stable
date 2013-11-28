@@ -1,7 +1,7 @@
    echo = 1 (on)
 ? default(compatible,3)
   *** default: Warning: user functions re-initialized.
-? gettime;+3
+? +3
 3
 ? -5
 -5
@@ -2568,6 +2568,6 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getstack()
 104
 ? getheap()
-[655, 107578]
+[656, 107584]
 ? print("Total time spent: ",gettime);
-Total time spent: 208
+Total time spent: 204

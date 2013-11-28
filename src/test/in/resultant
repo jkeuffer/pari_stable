@@ -1,4 +1,3 @@
-gettime();
 allocatemem(20*10^6);
 do(P,Q)=my(v=variable()); substvec(polresultant(P,Q), v, vector(#v,i,i));
 

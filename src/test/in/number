@@ -1,6 +1,6 @@
 default(realprecision,154); Pi; default(realprecision,38);
 \e
-gettime; addprimes([nextprime(10^9),nextprime(10^10)])
+addprimes([nextprime(10^9),nextprime(10^10)])
 bestappr(Pi,10000)
 gcdext(123456789,987654321)
 bigomega(12345678987654321)

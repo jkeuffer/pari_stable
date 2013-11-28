@@ -1,6 +1,6 @@
 \p 19
 \e
-gettime; intnum(x=0,Pi,sin(x))
+intnum(x=0,Pi,sin(x))
 intnum(x=0,4,exp(-x^2))
 intnum(x=1,[1],1/(1+x^2)) - Pi/4
 intnum(x=-0.5,0.5,1/sqrt(1-x^2)) - Pi/3

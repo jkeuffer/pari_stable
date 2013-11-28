@@ -1,5 +1,5 @@
    echo = 1 (on)
-? gettime;plotinit(0,500,500)
+? plotinit(0,500,500)
 ? plotmove(0,0,0);plotbox(0,500,500)
 ? plotmove(0,200,150)
 ? plotcursor(0)
@@ -61,6 +61,6 @@
 ? plotmove(0,200,200);plotstring(0,"(0,0)")
 ? psdraw([0,10,10])
 ? getheap
-[9, 137]
+[10, 143]
 ? print("Total time spent: ",gettime);
-Total time spent: 8
+Total time spent: 4

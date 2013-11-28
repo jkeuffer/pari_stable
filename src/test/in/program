@@ -1,6 +1,6 @@
 default(realprecision,38);
 \e
-gettime; alias(ln,log)
+alias(ln,log)
 ln(2)
 for(x=1,5,print(x!))
 fordiv(10,x,print(x))

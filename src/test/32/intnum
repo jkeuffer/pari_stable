@@ -1,6 +1,6 @@
 ? allocatemem(20*10^6);
   ***   Warning: new stack size = 20000000 (19.073 Mbytes).
-? gettime;oo=[1];
+? oo=[1];
 ? \p96
    realprecision = 96 significant digits
 ? intcirc(s=1,0.5,zeta(s))-1
@@ -115,4 +115,4 @@
 ? sumpos(n=1,-log(cos(1/n)))
 0.94536905472633293521954432593129672389
 ? print("Total time spent: ",gettime);
-Total time spent: 27266
+Total time spent: 20585

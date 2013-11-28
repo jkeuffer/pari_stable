@@ -1,5 +1,5 @@
    echo = 1 (on)
-? gettime;ellinit([-1,0])
+? ellinit([-1,0])
 [0, 0, 0, -1, 0, 0, -2, 0, -1, 48, 0, 64, 1728, Vecsmall([1]), [Vecsmall([12
 8, 1])], [0, 0, 0, 0, 0, 0, 0, 0]]
 ? ellinit([-17,0],1)
@@ -129,6 +129,6 @@ small([128, 1])], [0, 0, 0, 0, 0, 0, 0, 0]]
 ? precision(cmcurve)
 38
 ? getheap
-[74, 5254]
+[75, 5260]
 ? print("Total time spent: ",gettime);
 Total time spent: 8

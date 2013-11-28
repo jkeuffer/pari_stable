@@ -1,5 +1,5 @@
    echo = 1 (on)
-? gettime;apol=y^3+5*y+1
+? apol=y^3+5*y+1
 y^3 + 5*y + 1
 ? deriv((x+y)^5,y)
 5*x^4 + 20*y*x^3 + 30*y^2*x^2 + 20*y^3*x + 5*y^4
@@ -156,6 +156,6 @@ x + x^2 - 1/6*x^3 - 1/2*x^4 - 59/120*x^5 - 1/8*x^6 + 419/5040*x^7 + 59/720*x
 ? variable(name^4-other)
 name
 ? getheap
-[58, 7157]
+[59, 7163]
 ? print("Total time spent: ",gettime);
-Total time spent: 4
+Total time spent: 8

@@ -1,6 +1,6 @@
    realprecision = 19 significant digits
    echo = 1 (on)
-? gettime;intnum(x=0,Pi,sin(x))
+? intnum(x=0,Pi,sin(x))
 2.000000000000000000
 ? intnum(x=0,4,exp(-x^2))
 0.8862269117895689458
@@ -39,6 +39,6 @@
 ? 6/Pi^2*sumpos(n=1,n^-2)
 1.0000000000000000000000000000000000000
 ? getheap
-[20, 195]
+[21, 201]
 ? print("Total time spent: ",gettime);
-Total time spent: 16
+Total time spent: 12

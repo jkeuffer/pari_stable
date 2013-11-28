@@ -199,7 +199,6 @@ T11_1 = x^11+x^10-10*x^9-9*x^8+36*x^7+28*x^6-56*x^5-35*x^4+35*x^3+15*x^2-6*x-1;
 
 default(realprecision, 38);
 default(new_galois_format, 1)
-gettime();
 for (i = 1, 11, test(i))
 
 default(new_galois_format, 0)

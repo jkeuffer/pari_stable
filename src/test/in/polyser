@@ -1,6 +1,6 @@
 default(realprecision,154); Pi; default(realprecision,38);
 \e
-gettime; apol=y^3+5*y+1
+apol=y^3+5*y+1
 deriv((x+y)^5,y)
 ((x+y)^5)'
 dz=vector(30,k,1);dd=vector(30,k,k==1);dm=dirdiv(dd,dz)

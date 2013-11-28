@@ -1,4 +1,3 @@
-gettime();
 vec(x) = [component(x,1), component(x,2), component(x,3)];
 vec( qfbred(Qfb(6,6,-1),1) )
 default(realprecision,38)

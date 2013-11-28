@@ -1,5 +1,4 @@
 default(realprecision,38);
-gettime;
 allocatemem(20*10^6)
 count = 0;
 do(nf,f, H = 0, flag = 0)=

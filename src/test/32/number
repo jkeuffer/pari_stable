@@ -1,5 +1,5 @@
    echo = 1 (on)
-? gettime;addprimes([nextprime(10^9),nextprime(10^10)])
+? addprimes([nextprime(10^9),nextprime(10^10)])
 [1000000007, 10000000019]
 ? bestappr(Pi,10000)
 355/113
@@ -268,6 +268,6 @@ x^2 - x + 3
 [768, [12, 4, 4, 2, 2], [Mod(2641, 3120), Mod(2341, 3120), Mod(2497, 3120), 
 Mod(391, 3120), Mod(2081, 3120)]]
 ? getheap
-[87, 2733]
+[88, 2739]
 ? print("Total time spent: ",gettime);
-Total time spent: 24
+Total time spent: 28

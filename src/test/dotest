@@ -80,7 +80,7 @@ for testdata in $testlist; do
     for suf in $SUF; do
       file_diff=$testname-$suf.dif
       gp=$execdir/gp-$suf
-      (cat $file_in; echo 'print("Total time spent: ",gettime);') | $RUNTEST $gp -q --test  > $file_test 2>&1
+      (echo 'gettime();'; cat $file_in; echo 'print("Total time spent: ",gettime);') | $RUNTEST $gp -q --test  > $file_test 2>&1
       diff -c $file_out $file_test > $file_diff
       pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
       time=`${tail}1 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`

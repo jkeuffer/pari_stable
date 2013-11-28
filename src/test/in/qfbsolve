@@ -1,4 +1,3 @@
-gettime;
 qfbeval(V,v)=
 {
   my(x,y);
