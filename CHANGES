@@ -56,6 +56,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    40- ispower(1009^11) -> 0 [2.6.0]
    41- ellinit([0,1,1,0,1],2).group -> SEGV
    42- nfroots(nf, deg 1 polynomial) -> wrong result
+   43- Configure --time=ftime: wrong reported timings
 
   Changed
     1- default help text for a user function is now as in \u:

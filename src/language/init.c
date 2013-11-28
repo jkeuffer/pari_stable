@@ -2124,7 +2124,7 @@ timer_start(pari_timer *T)
 {
   struct timeb t;
   ftime(&t);
-  T->us = t.millitm * 1000;
+  T->us = ((long)t.millitm) * 1000;
   T->s  = t.time;
 }
 
