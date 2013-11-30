@@ -61,6 +61,12 @@ mt_err_recover(long er)
   }
 }
 
+void
+mt_sigint(void)
+{
+  if (pari_mt) pthread_cond_broadcast(&pari_mt->pcond);
+}
+
 int
 mt_is_parallel(void)
 {
@@ -105,7 +111,9 @@ mt_queue_run(void *arg)
       mq->input = NULL;
       pthread_cond_signal(&mq->cond1);
     } UNLOCK(&mq->mut1);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL);
     done = closure_callgenvec(mq->worker,work);
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL);
     LOCK(mq->pmut)
     {
       mq->output = done;
@@ -144,7 +152,19 @@ mtpthread_queue_get(struct mt_state *junk, long *workid, long *pending)
   LOCK(&mt->pmut)
   {
     while ((last = mt_queue_check(mt)) < 0)
+    {
       pthread_cond_wait(&mt->pcond, &mt->pmut);
+      if (PARI_SIGINT_pending)
+      {
+        int sig = PARI_SIGINT_pending;
+        PARI_SIGINT_pending = 0;
+        pthread_mutex_unlock(&mt->pmut);
+        PARI_SIGINT_block = 0;
+        raise(sig);
+        PARI_SIGINT_block = 1;
+        pthread_mutex_lock(&mt->pmut);
+      }
+    }
   } UNLOCK(&mt->pmut);
   BLOCK_SIGINT_END
   mq = mt->mq+last;

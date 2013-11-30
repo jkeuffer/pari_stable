@@ -378,14 +378,22 @@ pari_sighandler(int sig)
   {
 #ifdef SIGBREAK
     case SIGBREAK:
-      if (PARI_SIGINT_block==1) PARI_SIGINT_pending=SIGBREAK;
+      if (PARI_SIGINT_block==1)
+      {
+        PARI_SIGINT_pending=SIGBREAK;
+        mt_sigint();
+      }
       else pari_handle_SIGINT();
       return;
 #endif
 
 #ifdef SIGINT
     case SIGINT:
-      if (PARI_SIGINT_block==1) PARI_SIGINT_pending=SIGINT;
+      if (PARI_SIGINT_block==1)
+      {
+        PARI_SIGINT_pending=SIGINT;
+        mt_sigint();
+      }
       else pari_handle_SIGINT();
       return;
 #endif

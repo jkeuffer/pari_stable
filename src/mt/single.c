@@ -19,6 +19,9 @@ void mt_err_recover(long er) { (void)er; }
 void pari_mt_close(void) { }
 void mt_queue_reset(void) { }
 
+void
+mt_sigint(void) {}
+
 int
 mt_is_parallel(void)
 {
