@@ -296,7 +296,11 @@ extern ulong precreal;
 
 /* history */
 typedef struct {
-  GEN *res;    /* array of previous results, FIFO */
+  GEN z; /* result */
+  time_t t; /* time to obtain result */
+} gp_hist_cell;
+typedef struct {
+  gp_hist_cell *v; /* array of previous results, FIFO */
   size_t size; /* # res */
   ulong total; /* # of results computed since big bang */
 } gp_hist;
@@ -352,7 +356,6 @@ typedef struct {
   int secure, simplify, strictmatch, strictargs, chrono; /* libpari ? */
   pari_timer *T;
   ulong primelimit; /* deprecated */
-  long last_time; /* duration of last interactive gp command */
 } gp_data;
 extern gp_data *GP_DATA;
   /* GP_DATA->flags */

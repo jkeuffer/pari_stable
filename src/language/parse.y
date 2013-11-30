@@ -109,6 +109,9 @@ backticks: '`' {$$=1;}
 history: '%'           {$$=newopcall(OPhist,-1,-1,&@$);}
        | '%' KINTEGER  {$$=newopcall(OPhist,newintnode(&@2),-1,&@$);}
        | '%' backticks {$$=newopcall(OPhist,newnode(Fsmall,-$2,-1,&@$),-1,&@$);}
+       | '%' '#'          {$$=newopcall(OPhisttime,-1,-1,&@$);}
+       | '%' '#' KINTEGER {$$=newopcall(OPhisttime,newintnode(&@3),-1,&@$);}
+       | '%' '#' backticks{$$=newopcall(OPhisttime,newnode(Fsmall,-$3,-1,&@$),-1,&@$);}
 ;
 
 expr: KINTEGER %prec INT  {$$=newintnode(&@1);}

@@ -4541,13 +4541,13 @@ void gpwritebin(const char *s, GEN x) { char *t=wr_check(s); writebin(t, x); par
 /**                                                               **/
 /*******************************************************************/
 /* history management function:
- *   p > 0, called from %p
- *   p <= 0, called from %` (|p| backquotes, possibly 0) */
-GEN
-gp_history(gp_hist *H, long p, char *old, char *entry)
+ *   p > 0, called from %p or %#p
+ *   p <= 0, called from %` or %#` (|p| backquotes, possibly 0) */
+static gp_hist_cell *
+history(gp_hist *H, long p, char *old, char *entry)
 {
   ulong t = H->total, s = H->size;
-  GEN z;
+  gp_hist_cell *c;
 
   if (!t)
     pari_err(old?e_SYNTAX:e_MISC,"The result history is empty", old, entry);
@@ -4561,35 +4561,34 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
     sprintf(str, "History result %%%ld not available [%%%ld-%%%lu]", p,pmin,t);
     pari_err(e_SYNTAX, str, old, entry);
   }
-  z = H->res[ (p-1) % s ];
-  if (!z)
+  c = H->v + ((p-1) % s);
+  if (!c->z)
   {
     char *str = stack_malloc(128);
     sprintf(str, "History result %%%ld has been deleted (histsize changed)", p);
     pari_err(e_SYNTAX, str, old, entry);
   }
-  return z;
+  return c;
 }
-
-static GEN
-set_hist_entry(gp_hist *H, GEN x)
-{
-  int i = H->total % H->size;
-  H->total++;
-  if (H->res[i]) gunclone(H->res[i]);
-  return H->res[i] = gclone(x);
-}
-
+GEN
+gp_history(gp_hist *H, long p, char *old, char *entry)
+{ return history(H,p,old,entry)->z; }
 GEN
 pari_get_hist(long p)
-{
-  return gp_history(GP_DATA->hist, p, NULL,NULL);
-}
+{ return history(GP_DATA->hist, p, NULL,NULL)->z; }
+long
+pari_get_histtime(long p)
+{ return history(GP_DATA->hist, p, NULL,NULL)->t; }
 
-GEN
-pari_add_hist(GEN x)
+void
+pari_add_hist(GEN x, long time)
 {
-  return set_hist_entry(GP_DATA->hist, x);
+  gp_hist *H = GP_DATA->hist;
+  ulong i = H->total % H->size;
+  H->total++;
+  if (H->v[i].z) gunclone(H->v[i].z);
+  H->v[i].t = time;
+  H->v[i].z = gclone(x);
 }
 
 ulong

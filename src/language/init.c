@@ -801,7 +801,7 @@ pari_close_opts(ulong init_opts)
   if (pari_datadir) free(pari_datadir);
   if (init_opts&INIT_DFTm)
   { /* delete GP_DATA */
-    if (GP_DATA->hist->res) free((void*)GP_DATA->hist->res);
+    if (GP_DATA->hist->v) free((void*)GP_DATA->hist->v);
     if (GP_DATA->pp->cmd) free((void*)GP_DATA->pp->cmd);
     delete_dirs(GP_DATA->path);
     free((void*)GP_DATA->path->PATH);

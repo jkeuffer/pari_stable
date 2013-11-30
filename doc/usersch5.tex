@@ -239,11 +239,16 @@ The new context must be an ancestor of the current context.
 
 These functions allow to control the GP history (the \kbd{\%} operator).
 
-\fun{GEN}{pari_add_hist}{GEN x} adds \kbd{x} as the last history entry.
+\fun{void}{pari_add_hist}{GEN x, long t} adds \kbd{x} as the last history
+entry; $t$ is the time we used to compute it.
 
 \fun{GEN}{pari_get_hist}{long p}, if $p>0$ returns entry of index $p$
 (i.e. \kbd{\%p}), else returns entry of index $n+p$ where $n$ is the
 index of the last entry (used for \kbd{\%}, \kbd{\%`}, \kbd{\%``}, etc.).
+
+\fun{long}{pari_get_histtime}{long p} as \tet{pari_get_hist},
+returning the time used to compute the history entry, instead of the entry
+itself.
 
 \fun{ulong}{pari_nb_hist}{void} return the index of the last entry.
 

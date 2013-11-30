@@ -87,6 +87,8 @@ JD 14- polcyclo(n, x) now works for all roots of 1
    16- [libpari] renamed ZM_hnfremdiv -> ZM_hnfdivrem
    17- x t_REAL * y t_INT: either convert y to t_REAL (as before) or use
        integer multiplication (if lg(x) >> lg(y))
+   18- GP: all results are now stored in GP history, together with the time
+       to obtain them [ used to only store non-gnil results, and no timings ]
 
   Added
 EP  1- Configure option for gcov/lcov support
@@ -108,6 +110,7 @@ EP  1- Configure option for gcov/lcov support
        The old syntax (d an integer, representing a vector of equal integers)
        is still allowed
 LGr11- GP function Colrev
+   12- GP operator %#n to recover time used to compute history result %n
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

@@ -397,45 +397,45 @@ init_hist(gp_data *D, size_t s, ulong t)
   gp_hist *H = D->hist;
   H->total = t;
   H->size = s;
-  H->res = (GEN *) pari_calloc(s * sizeof(GEN));
+  H->v = (gp_hist_cell*)pari_calloc(s * sizeof(gp_hist_cell));
 }
 GEN
-sd_histsize(const char *v, long flag)
+sd_histsize(const char *s, long flag)
 {
   gp_hist *H = GP_DATA->hist;
   ulong n = H->size;
-  GEN r = sd_ulong(v,flag,"histsize",&n, 1,
+  GEN r = sd_ulong(s,flag,"histsize",&n, 1,
                      (LONG_MAX / sizeof(long)) - 1,NULL);
   if (n != H->size)
   {
     const ulong total = H->total;
     long g, h, k, kmin;
-    GEN *resG = H->res, *resH; /* G = old data, H = new one */
-    size_t sG = H->size, sH;
+    gp_hist_cell *v = H->v, *w; /* v = old data, w = new one */
+    size_t sv = H->size, sw;
 
     init_hist(GP_DATA, n, total);
     if (!total) return r;
 
-    resH = H->res;
-    sH   = H->size;
+    w = H->v;
+    sw= H->size;
     /* copy relevant history entries */
-    g     = (total-1) % sG;
-    h = k = (total-1) % sH;
-    kmin = k - minss(sH, sG);
+    g     = (total-1) % sv;
+    h = k = (total-1) % sw;
+    kmin = k - minss(sw, sv);
     for ( ; k > kmin; k--, g--, h--)
     {
-      resH[h] = resG[g];
-      resG[g] = NULL;
-      if (!g) g = sG;
-      if (!h) h = sH;
+      w[h]   = v[g];
+      v[g].z = NULL;
+      if (!g) g = sv;
+      if (!h) h = sw;
     }
     /* clean up */
-    for ( ; resG[g]; g--)
+    for ( ; v[g].z; g--)
     {
-      gunclone(resG[g]);
-      if (!g) g = sG;
+      gunclone(v[g].z);
+      if (!g) g = sv;
     }
-    pari_free((void*)resG);
+    pari_free((void*)v);
   }
   return r;
 }
@@ -786,7 +786,6 @@ default_gp_data(void)
   D->simplify    = 1;
   D->secure      = 0;
   D->use_readline= 0;
-  D->last_time   = 0;
   D->T    = &__T;
   D->hist = &__HIST;
   D->pp   = &__PP;

@@ -1015,7 +1015,7 @@ escape(char *tch, int ismain)
         {
           long i, l = lg(x);
           pari_warn(warner,"setting %ld history entries", l-1);
-          for (i=1; i<l; i++) (void)pari_add_hist(gel(x,i));
+          for (i=1; i<l; i++) pari_add_hist(gel(x,i), 0);
         }
       }
       break;
@@ -1071,7 +1071,9 @@ gp_format_time(long delay)
   s+=strlen(s);
   term_get_color(s, c_NONE);
   s+=strlen(s);
-  *s++ = '.'; *s++ = '\n'; *s = 0; return buf;
+  s[0] = '.';
+  s[1] = '\n';
+  s[2] = 0; return buf;
 }
 
 static int
@@ -1079,10 +1081,11 @@ chron(char *s)
 {
   if (*s)
   { /* if "#" or "##" timer metacommand. Otherwise let the parser get it */
+    char *t;
     if (*s == '#') s++;
     if (*s) return 0;
-    pari_puts( "  ***   last result computed in " );
-    pari_puts( gp_format_time(GP_DATA->last_time) );
+    t = gp_format_time(pari_get_histtime(0));
+    pari_printf("  ***   last result computed in %s", t);
   }
   else { GP_DATA->chrono ^= 1; (void)sd_timer(NULL,d_ACKNOWLEDGE); }
   return 1;
@@ -1590,6 +1593,7 @@ gp_main_loop(long flag)
   VOLATILE const long dorecover = flag & gp_RECOVER;
   VOLATILE const long ismain    = flag & gp_ISMAIN;
   VOLATILE GEN z = gnil;
+  VOLATILE long t = 0;
   VOLATILE pari_sp av = avma;
   filtre_t F;
   Buffer *b = filtered_buffer(&F);
@@ -1638,17 +1642,15 @@ gp_main_loop(long flag)
 
     if (!pari_last_was_newline()) pari_putc('\n');
 
-    GP_DATA->last_time = timer_delay(GP_DATA->T);
-    if (GP_DATA->chrono && GP_DATA->last_time)
+    t = timer_delay(GP_DATA->T);
+    if (t && GP_DATA->chrono)
     {
-      pari_puts( "time = " );
-      pari_puts( gp_format_time(GP_DATA->last_time) );
+      pari_puts("time = ");
+      pari_puts(gp_format_time(t));
     }
-    if (z == gnil) continue;
-
     if (GP_DATA->simplify) z = simplify_shallow(z);
-    z = pari_add_hist(z);
-    if (! is_silent(b->buf) ) gp_output(z, GP_DATA);
+    pari_add_hist(z, t);
+    if (z != gnil && ! is_silent(b->buf) ) gp_output(z, GP_DATA);
   }
 }
 
