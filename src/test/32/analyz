@@ -4,6 +4,6 @@
 ? sum(x=1,25,sum(y=1,100,x/y),0.0);
 ? sum(x=1,100,sum(y=1,100,x/y,0.0));
 ? getheap
-[6, 55]
+[7, 61]
 ? print("Total time spent: ",gettime);
 Total time spent: 20

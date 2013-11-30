@@ -121,6 +121,6 @@ O(x^12)
   ***                                 ^---
   *** _^_: impossible inverse in Fp_inv: Mod(131, 49649).
 ? getheap
-[60, 815]
+[61, 821]
 ? print("Total time spent: ",gettime);
-Total time spent: 4
+Total time spent: 0
