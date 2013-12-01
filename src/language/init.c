@@ -758,6 +758,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_seadata();
   pari_init_functions();
   pari_var_init();
+  (void)getabstime();
   try_to_recover = 1;
 }
 
@@ -2201,7 +2202,7 @@ timer(void)  { static THREAD pari_timer T; return timer_delay(&T);}
 long
 gettime(void)  { static THREAD pari_timer T; return timer_delay(&T);}
 
-static THREAD pari_timer timer2_T;
+static THREAD pari_timer timer2_T, abstimer_T;
 long
 timer2(void) {  return timer_delay(&timer2_T);}
 void
@@ -2211,6 +2212,8 @@ msgtimer(const char *format, ...)
   timer_vprintf(&timer2_T, format, args);
   va_end(args);
 }
+long
+getabstime(void)  { return timer_get(&abstimer_T);}
 
 /*******************************************************************/
 /*                                                                 */

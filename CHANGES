@@ -111,6 +111,7 @@ EP  1- Configure option for gcov/lcov support
        is still allowed
 LGr11- GP function Colrev
    12- GP operator %#n to recover time used to compute history result %n
+   13- GP function getabstime()
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
