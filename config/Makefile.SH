@@ -536,13 +536,14 @@ if test "$optimization" = gcov; then
 LCOV_TRACE = lcov.info
 LCOV_REPORT= lcov-report
 LCOV_FLAGS=
+GENHTML_FLAGS=
 LCOV_TITLE="PARI/GP v$version.$patch lcov report ($status)"
 
 lcov-report:
 	\$(RM) \$(LCOV_TRACE)
 	rm -rf \$(LCOV_REPORT)
 	lcov -c \$(LCOV_FLAGS) -d . -b . -o \$(LCOV_TRACE)
-	genhtml --legend -t \$(LCOV_TITLE) -o \$(LCOV_REPORT) \$(LCOV_TRACE)
+	genhtml \$(GENHTML_FLAGS) --legend -t \$(LCOV_TITLE) -o \$(LCOV_REPORT) \$(LCOV_TRACE)
 
 lcov-reset:
 	\$(RM) *.gcda
