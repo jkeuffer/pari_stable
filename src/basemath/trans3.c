@@ -2607,10 +2607,7 @@ inteta(GEN q)
     long l; /* gcc -Wall */
     pari_sp av = avma, lim = stack_lim(av, 3);
 
-    if (tx == t_SER)
-      l = lg(q)-2;
-    else
-      l = -prec2nbits(precision(q));
+    l = -prec2nbits(precision(q));
     for(;;)
     {
       GEN t = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -2619,10 +2616,7 @@ inteta(GEN q)
        * t = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
       y = gadd(y,t); qn = gmul(qn,q); ps = gmul(t,qn);
       y = gadd(y,ps);
-      if (tx == t_SER)
-        { if (valp(ps) >= l) return y; }
-      else
-        { if (gexpo(ps)-gexpo(y) < l) return y; }
+      if (gexpo(ps)-gexpo(y) < l) return y;
       if (low_stack(lim, stack_lim(av,3)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"eta");
