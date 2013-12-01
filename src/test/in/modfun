@@ -1,0 +1,6 @@
+eta(2+O(2^20))
+eta(x+x^2+x^3+x^4+O(x^5))
+ellj(2+O(2^20))
+ellj(x+x^2+x^3+x^4+O(x^5))
+theta(1/2,I)
+
