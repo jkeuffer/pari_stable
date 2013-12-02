@@ -1349,9 +1349,8 @@ gsubst(GEN x, long v, GEN y)
   {
     case t_MAT:
       if (ly==1) return cgetg(1,t_MAT);
-      if (ly != lgcols(y))
-        pari_err_TYPE2("substitution",x,y);
-      break;
+      if (ly == lgcols(y)) break;
+      /* fall through */
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
       pari_err_TYPE2("substitution",x,y);
       break; /* not reached */
