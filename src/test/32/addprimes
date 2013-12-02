@@ -21,4 +21,6 @@ Testing 210000630, addprimes = [1000033]
 Testing 210007560020790, addprimes = [1000033]
 Testing 210008190043470062370, addprimes = [1000033]
 Testing -210000630, addprimes = [1000033]
-Total time spent: 16
+[]
+[1009]
+Total time spent: 12

@@ -24,3 +24,6 @@ addprimes([p,q]);
 TEST();
 removeprimes(p);
 TEST();
+removeprimes(addprimes())
+addprimes([p,q,1009]);
+removeprimes([p,q])
