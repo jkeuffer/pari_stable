@@ -1257,20 +1257,13 @@ ggcd(GEN x, GEN y)
   if (varncmp(vy, vx) < 0) return cont_gcd(y,ty, x);
   if (varncmp(vy, vx) > 0) return cont_gcd(x,tx, y);
 
-  /* same main variable */
+  /* vx = vy: same main variable */
   switch(tx)
   {
     case t_POL:
       switch(ty)
       {
-        case t_POL:
-          if (vx != vy)
-          {
-            if (!signe(y)) return RgX_copy(x);
-            if (!signe(x)) return RgX_copy(y);
-            return gen_1;
-          }
-          return RgX_gcd(x,y);
+        case t_POL: return RgX_gcd(x,y);
         case t_SER:
           z = ggcd(content(x), content(y));
           return monomialcopy(z, minss(valp(y),gval(x,vx)), vx);
