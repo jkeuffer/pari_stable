@@ -3065,6 +3065,7 @@ mateigen(GEN x, long flag, long prec)
     T = Q_primpart(T);
     (void)ZX_gcd_all(T, ZX_deriv(T),  &T);
     R = nfrootsQ(T);
+    settyp(R, t_COL);
     if (lg(R)-1 < degpol(T))
     { /* add missing complex roots */
       T = RgX_div(T, roots_to_pol(R, 0));
