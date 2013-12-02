@@ -1229,79 +1229,86 @@ checkdeflate(GEN x)
   return (long)d;
 }
 
+/* deflate (non-leaf) x recursively */
+static GEN
+vdeflate(GEN x, long v, long d)
+{
+  long i = lontyp[typ(x)], lx;
+  GEN z = cgetg_copy(x, &lx);
+  if (i == 2) z[1] = x[1];
+  for (; i<lx; i++)
+  {
+    gel(z,i) = gdeflate(gel(x,i),v,d);
+    if (!z[i]) return NULL;
+  }
+  return z;
+
+}
+
+static GEN
+serdeflate(GEN x, long v, long d)
+{
+  long V, lx, vx = varn(x);
+  pari_sp av;
+  GEN y;
+  if (varncmp(vx, v) < 0) return vdeflate(x,v,d);
+  if (varncmp(vx, v) > 0) return gcopy(x);
+  av = avma;
+  V = valp(x);
+  lx = lg(x);
+  if (lx == 2) return zeroser(v, V / d);
+  y = ser2pol_i(x, lx);
+  if (V % d != 0 || checkdeflate(y) % d != 0) return NULL;
+  y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
+  setvalp(y, V/d); return gerepilecopy(av, y);
+}
+static GEN
+poldeflate(GEN x, long v, long d)
+{
+  long vx = varn(x);
+  pari_sp av;
+  if (varncmp(vx, v) < 0) return vdeflate(x,v,d);
+  if (varncmp(vx, v) > 0) return gcopy(x);
+  av = avma;
+  if (checkdeflate(x) % d != 0) return NULL;
+  return gerepilecopy(av, RgX_deflate(x,d));
+}
+static GEN
+listdeflate(GEN x, long v, long d)
+{
+  GEN y = NULL, z = listcreate();
+  if (list_data(x))
+  {
+    y = vdeflate(list_data(x),v,d);
+    if (!y) return NULL;
+  }
+  list_data(z) = y; return z;
+}
 /* return NULL if substitution fails */
 GEN
 gdeflate(GEN x, long v, long d)
 {
-  long i, lx, tx = typ(x);
-  GEN z;
-  if (is_scalar_t(tx)) return gcopy(x);
   if (d <= 0) pari_err_DOMAIN("gdeflate", "degree", "<=", gen_0,stoi(d));
-  if (tx == t_POL || tx == t_SER)
+  switch(typ(x))
   {
-    long vx = varn(x);
-    pari_sp av;
-    if (varncmp(vx, v) < 0)
-    {
-      z = cgetg_copy(x, &lx); z[1] = x[1];
-      for (i=2; i<lx; i++)
-      {
-        gel(z,i) = gdeflate(gel(x,i),v,d);
-        if (!z[i]) return NULL;
-      }
-      return z;
-    }
-    if (varncmp(vx, v) > 0) return gcopy(x);
-    av = avma;
-    if (tx == t_SER)
-    {
-      long V = valp(x);
-      GEN y;
-
-      lx = lg(x);
-      if (lx == 2) return zeroser(v, V / d);
-      y = ser2pol_i(x, lx);
-      if (V % d != 0 || checkdeflate(y) % d != 0)
-      {
-        const char *s = stack_sprintf("valuation(x) %% %ld", d);
-        pari_err_DOMAIN("gdeflate", s, "!=", gen_0,x);
-      }
-      y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
-      setvalp(y, V/d); return gerepilecopy(av, y);
-    }
-    /* t_POL */
-    if (checkdeflate(x) % d != 0) return NULL;
-    return gerepilecopy(av, RgX_deflate(x,d));
-  }
-  if (tx == t_RFRAC)
-  {
-    z = cgetg(3, t_RFRAC);
-    gel(z,1) = gdeflate(gel(x,1),v,d); if (!z[1]) return NULL;
-    gel(z,2) = gdeflate(gel(x,2),v,d); if (!z[2]) return NULL;
-    return z;
-  }
-  if (is_matvec_t(tx))
-  {
-    z = cgetg_copy(x, &lx);
-    for (i=1; i<lx; i++)
-    {
-      gel(z,i) = gdeflate(gel(x,i),v,d);
-      if (!z[i]) return NULL;
-    }
-    return z;
-  }
-  if (tx == t_LIST)
-  {
-    z = listcreate();
-    if (list_data(x))
-    {
-      GEN y = gdeflate(list_data(x),v,d);
-      if (!y) return NULL;
-      list_data(z) = y;
-    }
-    else
-      list_data(z) = NULL;
-    return z;
+    case t_INT:
+    case t_REAL:
+    case t_INTMOD:
+    case t_FRAC:
+    case t_FFELT:
+    case t_COMPLEX:
+    case t_PADIC:
+    case t_QUAD: return gcopy(x);
+    case t_POL: return poldeflate(x,v,d);
+    case t_SER: return serdeflate(x,v,d);
+    case t_POLMOD:
+      if (varncmp(varn(gel(x,1)), v) >= 0) return gcopy(x);
+      /* fall through */
+    case t_RFRAC:
+    case t_VEC:
+    case t_COL:
+    case t_MAT: return vdeflate(x,v,d);
+    case t_LIST: return listdeflate(x,v,d);
   }
   pari_err_TYPE("gdeflate",x);
   return NULL; /* not reached */
