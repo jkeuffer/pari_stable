@@ -2021,13 +2021,24 @@ roots_com(GEN q, long bit)
 }
 
 static GEN
-tocomplex(GEN x, long l)
+tocomplex(GEN x, long l, long bit)
 {
   GEN y;
-  if (typ(x) == t_COMPLEX) return cxtofp(x, l);
-  y = cgetg(3,t_COMPLEX);
-  gel(y,1) = gtofp(x, l);
-  gel(y,2) = real_0(l); return y;
+  if (typ(x) == t_COMPLEX)
+  {
+    if (signe(gel(x,1))) return mygprecrc(x, l, -bit);
+    x = gel(x,2);
+    y = cgetg(3,t_COMPLEX);
+    gel(y,1) = real_0_bit(-bit);
+    gel(y,2) = mygprecrc(x, l, -bit);
+  }
+  else
+  {
+    y = cgetg(3,t_COMPLEX);
+    gel(y,1) = mygprecrc(x, l, -bit);
+    gel(y,2) = real_0_bit(-bit);
+  }
+  return y;
 }
 
 /* x,y are t_COMPLEX of t_REALs or t_REAL, compare lexicographically,
@@ -2078,10 +2089,10 @@ clean_roots(GEN L, long l, long bit, long clean)
     if (clean && isrealappr(c,ex))
     {
       if (typ(c) == t_COMPLEX) c = gel(c,1);
-      c = gtofp(c, l);
+      c = mygprecrc(c, l, -bit);
     }
     else
-      c = tocomplex(c, l);
+      c = tocomplex(c, l, bit);
     gel(res,i) = c;
   }
   gen_sort_inplace(res, (void*)ex, &cmp_complex_appr, NULL);

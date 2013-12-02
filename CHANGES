@@ -58,6 +58,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    42- nfroots(nf, deg 1 polynomial) -> wrong result
    43- Configure --time=ftime: wrong reported timings
    44- mateigen(rational matrix): inconsistent concatenation [#1489,2.6.0]
+   45- polroots(): wrong accuracy of (real) 0 components
 
   Changed
     1- default help text for a user function is now as in \u:
