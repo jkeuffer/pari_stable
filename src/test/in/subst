@@ -13,6 +13,7 @@ substpol(Mod(x*y^2, y^3*x^2+1), y^2,y)
 substpol(x*y^2/(y^3*x^2+1), y^2,y)
 substpol(List(), y^2,y)
 substpol(List(x^2*y^2), y^2,y)
+substpol(x^2+y^3*x^3+O(x^4),y^2, y)
 
 subst(1,x,[;])
 subst(1,x,Mat([1,2]))

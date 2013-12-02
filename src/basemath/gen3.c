@@ -1164,6 +1164,13 @@ mod_r(GEN x, long v, GEN T)
       if (w == v) pari_err_PRIORITY("subst", gel(x,1), "=", v);
       if (varncmp(v, w) < 0) return x;
       return gmodulo(mod_r(gel(x,2),v,T), mod_r(gel(x,1),v,T));
+    case t_SER:
+      w = varn(x);
+      if (w == v) break; /* fail */
+      if (varncmp(v, w) < 0) return x;
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i = 2; i < lx; i++) gel(y,i) = mod_r(gel(x,i),v,T);
+      return normalize(y);
     case t_POL:
       w = varn(x);
       if (w == v) return RgX_rem(x, T);
@@ -1245,6 +1252,8 @@ vdeflate(GEN x, long v, long d)
 
 }
 
+/* don't return NULL if substitution fails (fallback won't be able to handle
+ * t_SER anyway), fail with a meaningful message */
 static GEN
 serdeflate(GEN x, long v, long d)
 {
@@ -1258,7 +1267,11 @@ serdeflate(GEN x, long v, long d)
   lx = lg(x);
   if (lx == 2) return zeroser(v, V / d);
   y = ser2pol_i(x, lx);
-  if (V % d != 0 || checkdeflate(y) % d != 0) return NULL;
+  if (V % d != 0 || checkdeflate(y) % d != 0)
+  {
+    const char *s = stack_sprintf("valuation(x) %% %ld", d);
+    pari_err_DOMAIN("gdeflate", s, "!=", gen_0,x);
+  }
   y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
   setvalp(y, V/d); return gerepilecopy(av, y);
 }
