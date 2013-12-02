@@ -117,6 +117,7 @@ LGr11- GP function Colrev
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
        Use the default = round4
     2- useless wrappers map_proto_GG, map_proto_GL, map_proto_lGG
+    3- [libpari] useless functions gand, gor
 
 Done for version 2.6.1 (released 20/09/2013):
 

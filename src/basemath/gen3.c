@@ -3685,12 +3685,6 @@ GEN
 gne(GEN x, GEN y) { return _egal(x,y)? gen_0: gen_1; }
 
 GEN
-gand(GEN x, GEN y) { return gequal0(x)? gen_0: (gequal0(y)? gen_0: gen_1); }
-
-GEN
-gor(GEN x, GEN y) { return gequal0(x)? (gequal0(y)? gen_0: gen_1): gen_1; }
-
-GEN
 gnot(GEN x) { return gequal0(x)? gen_1: gen_0; }
 
 /*******************************************************************/
