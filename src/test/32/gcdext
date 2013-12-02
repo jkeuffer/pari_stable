@@ -38,4 +38,33 @@
 [0, 1, (10*T^3 + 3*T + 5)*z^6 + (11*T^3 + 15*T^2 + 10*T + 13)*z^4 + (14*T^3 
 + 13*T^2 + 15)*z^2 + (9 + 13*T + 14*T^2 + 11*T^3 + O(T^20))]
 Mod(1, 7)*x
-Total time spent: 4
+1 + I
+1
+1
+2
+w
+w
+Mod(2, 4)
+  ***   at top-level: gcd(1/2,Mod(2,4))
+  ***                 ^-----------------
+  *** gcd: inconsistent gcd t_INTMOD , t_FRAC.
+Mod(1, 4)
+2
+Mod(1, 5)
+Mod(1, 5)
+1/2
+1/2
+1
+1
+1
+Mod(1, x^3)
+Mod(x, x^3)
+1
+  ***   at top-level: gcd(t,1/x)
+  ***                 ^----------
+  *** gcd: inconsistent gcd t_POLMOD , t_RFRAC.
+1
+y
+x
+1/x^2
+Total time spent: 0
