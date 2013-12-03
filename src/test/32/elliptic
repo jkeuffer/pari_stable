@@ -129,6 +129,6 @@ small([128, 1])], [0, 0, 0, 0, 0, 0, 0, 0]]
 ? precision(cmcurve)
 28
 ? getheap
-[76, 5447]
+[76, 5432]
 ? print("Total time spent: ",gettime);
-Total time spent: 16
+Total time spent: 12
