@@ -1962,19 +1962,33 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
   return NULL;
 }
 
+/* compute g such that tau(Pmod[#])= tau(Pmod[g]) */
+
+static long
+get_image(GEN tau, GEN P, GEN Pmod, GEN p)
+{
+  pari_sp av = avma;
+  long g, gp = lg(Pmod)-1;
+  tau = RgX_to_FpX(tau, p);
+  tau = FpX_FpXQ_eval(gel(Pmod, gp), tau, P, p);
+  tau = FpX_normalize(FpX_gcd(P, tau, p), p);
+  for (g = 1; g <= gp; g++)
+    if (ZX_equal(tau, gel(Pmod,g))) { avma = av; return g; }
+  avma = av; return 0;
+}
+
 static GEN
 galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
           const struct galois_analysis *ga);
 static GEN
 galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb)
 {
-  GEN     P, PL, Pden, PM, Pp;
-  GEN     tau, PG, Pg;
-  long    g, gp, lP;
-  long    x=varn(Tp);
+  GEN  P, PL, Pden, PM, Pp;
+  GEN  tau, PG, Pg;
+  long g, lP;
+  long x=varn(Tp);
   P=gel(V,3);
   PL=gel(V,2);
-  gp=lg(Pmod)-1;
   Pp = FpX_red(P,ip);
   if (DEBUGLEVEL>=6)
     err_printf("GaloisConj: Fixed field %Ps\n",P);
@@ -1984,13 +1998,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb)
     gel(PG,1) = mkvec( mkvecsmall2(2,1) );
     gel(PG,2) = mkvecsmall(2);
     tau = deg1pol_shallow(gen_m1, negi(gel(P,3)), x);
-    tau = RgX_to_FpX(tau, ip);
-    tau = FpX_FpXQ_eval(gel(Pmod,gp), tau,Pp,ip);
-    tau = FpX_gcd(Pp, tau,ip);
-    tau = FpX_normalize(tau, ip);
-    for (g = 1; g <= gp; g++)
-      if (ZX_equal(tau, gel(Pmod,g))) break;
-    if (g == lg(Pmod)) return NULL;
+    g = get_image(tau, Pp, Pmod, ip);
+    if (!g) return NULL;
     Pg = mkvecsmall(g);
   }
   else
@@ -2022,15 +2031,10 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb)
     {
       pari_sp btop=avma;
       tau = permtopol(gmael(PG,1,j), PL, PM, Pden, mod, mod2, x);
-      tau = RgX_to_FpX(tau, ip);
-      tau = FpX_FpXQ_eval(gel(Pmod,gp), tau,Pp,ip);
-      tau = FpX_gcd(Pp, tau,ip);
-      tau = FpX_normalize(tau, ip);
-      for (g = 1; g < lg(Pmod); g++)
-        if (ZX_equal(tau, gel(Pmod,g))) break;
-      if (g == lg(Pmod)) return NULL;
-      avma=btop;
-      Pg[j]=g;
+      g = get_image(tau, Pp, Pmod, ip);
+      if (!g) return NULL;
+      Pg[j] = g;
+      avma = btop;
     }
   }
   return mkvec2(PG,Pg);
