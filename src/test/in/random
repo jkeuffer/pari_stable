@@ -18,3 +18,8 @@ randomprime()
 randomprime(10)
 randomprime([2^100, 2^100 + 2^20])
 for (i=1,10, a = random([15,20]); if (a < 15 || a > 20, print(a)))
+s=getrand();
+v=vector(10,i,random());
+setrand(s);
+w=vector(10,i,random());
+if(v != w,error("setrand"));
