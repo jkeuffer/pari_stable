@@ -25,6 +25,11 @@ znlog(6,Mod(2,7),znorder(Mod(2,7)))
 znlog(3,Mod(3,8),znorder(Mod(3,8)))
 znlog(5,Mod(2,401))
 
+znlog(7,3+O(2^3))
+znlog(7,3+O(2^3), znorder(Mod(3,8)))
+znlog(7,3+O(7^3))
+znlog(2,3+O(7^3))
+
 {
 for (i = 1,10^4,
   d = eulerphi(i);
