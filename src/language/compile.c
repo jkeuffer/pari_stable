@@ -1798,6 +1798,18 @@ closurefunc(entree *ep, long n, long mode)
 }
 
 static void
+compileseq(long n, int mode, long flag)
+{
+  pari_sp av = avma;
+  GEN L = listtogen(n, Fseq);
+  long i, l = lg(L)-1;
+  for(i = 1; i < l; i++)
+    compilenode(L[i],Gvoid,0);
+  compilenode(L[l],mode,flag&(FLreturn|FLsurvive));
+  avma = av;
+}
+
+static void
 compilenode(long n, int mode, long flag)
 {
   long x,y;
@@ -1812,9 +1824,7 @@ compilenode(long n, int mode, long flag)
   switch(tree[n].f)
   {
   case Fseq:
-    if (tree[x].f!=Fnoarg)
-      compilenode(x,Gvoid,0);
-    compilenode(y,mode,flag&(FLreturn|FLsurvive));
+    compileseq(n, mode, flag);
     return;
   case Fmatcoeff:
     compilematcoeff(n,mode);
@@ -2274,6 +2284,21 @@ optimizecall(long n)
   avma=av;
 }
 
+static void
+optimizeseq(long n)
+{
+  pari_sp av = avma;
+  GEN L = listtogen(n, Fseq);
+  long i, l = lg(L)-1, flags=-1L;
+  for(i = 1; i <= l; i++)
+  {
+    optimizenode(L[i]);
+    flags &= tree[L[i]].flags;
+  }
+  avma = av;
+  tree[n].flags = flags;
+}
+
 void
 optimizenode(long n)
 {
@@ -2290,10 +2315,7 @@ optimizenode(long n)
   switch(tree[n].f)
   {
   case Fseq:
-    if (tree[x].f!=Fnoarg)
-      optimizenode(x);
-    optimizenode(y);
-    tree[n].flags=tree[x].flags&tree[y].flags;
+    optimizeseq(n);
     return;
   case Frange:
     optimizenode(x);
