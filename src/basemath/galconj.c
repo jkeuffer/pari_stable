@@ -2073,6 +2073,68 @@ wpow(long s, long m, long e, long n)
   return w;
 }
 
+GEN
+galoisgenliftauto(GEN O, GEN gj, long s, long n, struct galois_test *td)
+{
+  long sr, k;
+  long deg = lg(gel(O,1))-1;
+  GEN  X  = cgetg(lg(O), t_VECSMALL);
+  GEN  oX = cgetg(lg(O), t_VECSMALL);
+  GEN  B  = perm_cycles(gj);
+  long oj = lg(gel(B,1)) - 1;
+  GEN  F  = factoru(oj);
+  GEN  Fp = gel(F,1);
+  GEN  Fe = gel(F,2);
+  GEN  pf = identity_perm(n);
+  if (DEBUGLEVEL >= 6)
+    err_printf("GaloisConj: %Ps of relative order %d\n", gj, oj);
+  for (k=lg(Fp)-1; k>=1; k--)
+  {
+    long f, dg = 1, el = oj, osel = 1, a = 0;
+    long p  = Fp[k], e  = Fe[k], op = oj / upowuu(p,e);
+    long i;
+    GEN  pf1 = NULL, w, wg, Be = cgetg(e+1,t_VEC);
+    gel(Be,e) = cyc_pow(B, op);
+    for(i=e-1; i>=1; i--) gel(Be,i) = cyc_pow(gel(Be,i+1), p);
+    w = wpow(Fl_powu(s,op,deg),deg,p,e);
+    wg = cgetg(e+2,t_VECSMALL);
+    wg[e+1] = deg;
+    for (i=e; i>=1; i--) wg[i] = ugcd(wg[i+1], w[i]);
+    for (i=1; i<lg(O); i++) oX[i] = 0;
+    for (f=1; f<=e; f++)
+    {
+      long sel, t;
+      GEN Bel = gel(Be,f);
+      dg *= p; el /= p;
+      sel = Fl_powu(s,el,deg);
+      if (DEBUGLEVEL >= 6) err_printf("GaloisConj: B=%Ps\n", Bel);
+      sr  = cgcd(stpow(sel,p,deg),deg);
+      if (DEBUGLEVEL >= 6)
+        err_printf("GaloisConj: exp %d: s=%ld [%ld] a=%ld w=%ld wg=%ld sr=%ld\n",
+            dg, sel, deg, a, w[f], wg[f+1], sr);
+      for (t = 0; t < sr; t++)
+        if ((a+t*w[f])%wg[f+1]==0)
+        {
+          long i, j, k, st;
+          for (i = 1; i < lg(X); i++) X[i] = 0;
+          for (i = 0; i < lg(X); i+=dg)
+            for (j = 1, k = p, st = t; k <= dg; j++, k += p)
+            {
+              X[k+i] = (oX[j+i] + st)%deg;
+              st = (t + st*osel)%deg;
+            }
+          pf1 = testpermutation(O, Bel, X, sel, p, sr, td);
+          if (pf1) break;
+        }
+      if (!pf1) return NULL;
+      for (i=1; i<lg(O); i++) oX[i] = X[i];
+      osel = sel; a = (a+t*w[f])%deg;
+    }
+    pf = perm_mul(pf, perm_pow(pf1, el));
+  }
+  return pf;
+}
+
 static GEN
 galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
           const struct galois_analysis *ga)
@@ -2081,7 +2143,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   struct galois_frobenius gf;
   pari_sp lbot, ltop2, ltop = avma;
   long p, deg, x, i, j, n = degpol(T), lP;
-  GEN sigma, Tmod, res, res1, res2, pf, ip, frob, O, PG, PG1, PG2, Pg;
+  GEN sigma, Tmod, res, res1, res2, ip, frob, O, PG, PG1, PG2, Pg;
 
   if (!ga->deg) return gen_0;
   x = varn(T);
@@ -2152,63 +2214,9 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   ltop2 = avma;
   for (j = 1; j < lP; j++)
   {
-    long sr, k;
-    GEN  X  = cgetg(lg(O), t_VECSMALL);
-    GEN  oX = cgetg(lg(O), t_VECSMALL);
-    GEN  gj = gel(PG1, j);
-    long s  = gf.psi[Pg[j]];
-    GEN  B  = perm_cycles(gj);
-    long oj = lg(gel(B,1)) - 1;
-    GEN  F  = factoru(oj);
-    GEN  Fp = gel(F,1);
-    GEN  Fe = gel(F,2);
-    if (DEBUGLEVEL >= 6)
-      err_printf("GaloisConj: G[%d]=%Ps of relative order %d\n", j, gj, oj);
-    B = perm_cycles(gel(PG1,j));
-    pf = identity_perm(n);
-    for (k=lg(Fp)-1; k>=1; k--)
-    {
-      long f, dg = 1, el = oj, osel = 1, a = 0;
-      long p  = Fp[k], e  = Fe[k], op = oj / upowuu(p,e);
-      GEN  pf1 = NULL, w, wg, Be = cgetg(e+1,t_VEC);
-      gel(Be,e) = cyc_pow(B, op);
-      for(i=e-1; i>=1; i--) gel(Be,i) = cyc_pow(gel(Be,i+1), p);
-      w = wpow(Fl_powu(s,op,deg),deg,p,e);
-      wg = cgetg(e+2,t_VECSMALL);
-      wg[e+1] = deg;
-      for (i=e; i>=1; i--) wg[i] = ugcd(wg[i+1], w[i]);
-      for (i=1; i<lg(O); i++) oX[i] = 0;
-      for (f=1; f<=e; f++)
-      {
-        long sel, t;
-        GEN Bel = gel(Be,f);
-        dg *= p; el /= p;
-        sel = Fl_powu(s,el,deg);
-        if (DEBUGLEVEL >= 6) err_printf("GaloisConj: B=%Ps\n", Bel);
-        sr  = cgcd(stpow(sel,p,deg),deg);
-        if (DEBUGLEVEL >= 6)
-          err_printf("GaloisConj: exp %d: s=%ld [%ld] a=%ld w=%ld wg=%ld sr=%ld\n",
-              dg, sel, deg, a, w[f], wg[f+1], sr);
-        for (t = 0; t < sr; t++)
-          if ((a+t*w[f])%wg[f+1]==0)
-          {
-            long i, j, k, st;
-            for (i = 1; i < lg(X); i++) X[i] = 0;
-            for (i = 0; i < lg(X); i+=dg)
-              for (j = 1, k = p, st = t; k <= dg; j++, k += p)
-              {
-                X[k+i] = (oX[j+i] + st)%deg;
-                st = (t + st*osel)%deg;
-              }
-            pf1 = testpermutation(O, Bel, X, sel, p, sr, &td);
-            if (pf1) break;
-          }
-        if (!pf1) { freetest(&td); avma = ltop; return gen_0; }
-        for (i=1; i<lg(O); i++) oX[i] = X[i];
-        osel = sel; a = (a+t*w[f])%deg;
-      }
-      pf = perm_mul(pf, perm_pow(pf1, el));
-    }
+    GEN pf = galoisgenliftauto(O, gel(PG1, j), gf.psi[Pg[j]], n, &td);
+    long k;
+    if (!pf) { freetest(&td); avma = ltop; return gen_0; }
     for (k = 1; k <= n; k++) gmael(res1, j+1,k) = gel(pf,k);
     res2[j+1] = PG2[j];
     avma = ltop2;
