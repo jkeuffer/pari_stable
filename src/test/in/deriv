@@ -14,3 +14,11 @@ for (i=1,#v,
 )
 }
 intformal(1-A,Y)
+a=intformal(Pol(0,x), y)
+b=intformal(Pol(0,y), x)
+variable(a)
+variable(b)
+a=intformal(O(x), y)
+b=intformal(O(y), x)
+variable(a)
+variable(b)

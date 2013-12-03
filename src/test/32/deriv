@@ -42,4 +42,12 @@ Mat(x)
 Mat(1/2*y*x^2)
 Mat(1/2*y^2*x)
 -Y*A + Y
-Total time spent: 4
+0
+0
+x
+x
+O(x)
+O(x)
+x
+x
+Total time spent: 0
