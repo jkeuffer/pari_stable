@@ -34,3 +34,5 @@ divrem(4,3/2)
 divrem(1,x)
 divrem(1,Pol(1))
 divrem(1,"a")
+
+(5/3) \/ 1

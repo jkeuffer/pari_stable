@@ -787,4 +787,5 @@ Mat(1)
   ***   at top-level: divrem(1,"a")
   ***                 ^-------------
   *** divrem: forbidden division t_INT \ t_STR.
+2
 Total time spent: 8
