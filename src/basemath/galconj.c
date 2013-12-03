@@ -2226,6 +2226,16 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   return gerepile(ltop, lbot, res);
 }
 
+static GEN
+conjcyclo(long N, long v)
+{
+  long i, k = 1, d = eulerphiu(N);
+  GEN L = cgetg(d+1,t_VEC);
+  for (i=1; i<=N; i++)
+    if (ugcd(i, N)==1) gel(L,k++) = monomial(gen_1, i, v);
+  return L;
+}
+
 /* T: polynomial or nf, den multiple of common denominator of solutions or
  * NULL (unknown). If T is nf, and den unknown, use den = denom(nf.zk) */
 static GEN
@@ -2238,7 +2248,10 @@ galoisconj4_main(GEN T, GEN den, long flag)
   long n;
   pari_timer ti;
 
-  T = get_nfpol(T, &nf); n = degpol(T);
+  T = get_nfpol(T, &nf);
+  n = poliscyclo(T);
+  if (n) return flag? galoiscyclo(n, varn(T)): conjcyclo(n, varn(T));
+  n = degpol(T);
   if (nf)
   { if (!den) den = Q_denom(nf_get_zk(nf)); }
   else

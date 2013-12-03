@@ -61,3 +61,6 @@ vector(#G.group, i, galoisfixedfield(G,G.group[i],1))
 galoisfixedfield(G,G.group[2])
 galoisfixedfield(G,G.group[2],2,y)
 galoissubcyclo(17,2)
+
+G=galoisinit(polcyclo(20))
+galoissubfields(G)

@@ -656,7 +656,6 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (card == phi_n)
   {
     avma = ltop;
-    if (flag==3) return galoiscyclo(n,v);
     return gscycloconductor(polcyclo(n,v),n,flag);
   }
   O = znstar_cosets(n, phi_n, H);
