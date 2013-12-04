@@ -2117,7 +2117,7 @@ galoisgenliftauto(GEN O, GEN gj, long s, long n, struct galois_test *td)
         {
           long i, j, k, st;
           for (i = 1; i < lg(X); i++) X[i] = 0;
-          for (i = 0; i < lg(X); i+=dg)
+          for (i = 0; i < lg(X)-1; i+=dg)
             for (j = 1, k = p, st = t; k <= dg; j++, k += p)
             {
               X[k+i] = (oX[j+i] + st)%deg;
