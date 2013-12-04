@@ -2182,7 +2182,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   {
     lbot = avma;
     res = cgetg(3, t_VEC);
-    gel(res,1) = mkvec( cyc_pow_perm(O,1) );
+    gel(res,1) = mkvec( vecsmall_copy(frob) );
     gel(res,2) = mkvecsmall(deg);
     return gerepile(ltop, lbot, res);
   }
@@ -2208,7 +2208,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   res = cgetg(3, t_VEC);
   gel(res,1) = res1 = cgetg(lP + 1, t_VEC);
   gel(res,2) = res2 = cgetg(lP + 1, t_VECSMALL);
-  gel(res1, 1) = cyc_pow_perm(O,1);
+  gel(res1, 1) = vecsmall_copy(frob);
   res2[1] = deg;
   for (i = 2; i < lg(res1); i++) gel(res1,i) = cgetg(n+1, t_VECSMALL);
   ltop2 = avma;
