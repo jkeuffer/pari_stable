@@ -921,11 +921,10 @@ group_abelianSNF(GEN G, GEN L)
 GEN
 abelian_group(GEN v)
 {
-  long card, i, d = 1, l = lg(v);
+  long card = zv_prod(v), i, d = 1, l = lg(v);
   GEN G = cgetg(3,t_VEC), gen = cgetg(l,t_VEC);
   gel(G,1) = gen;
   gel(G,2) = vecsmall_copy(v);
-  card = group_order(G);
   for(i=1; i<l; i++)
   {
     GEN p = cgetg(card+1, t_VECSMALL);
