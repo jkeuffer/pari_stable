@@ -841,6 +841,7 @@ GEN
 bernfrac(long n)
 {
   long k;
+  if (n < 0) pari_err_DOMAIN("bernfrac", "index", "<", gen_0, stoi(n));
   if (n == 0) return gen_1;
   if (n == 1) return mkfrac(gen_m1,gen_2);
   if (odd(n)) return gen_0;
