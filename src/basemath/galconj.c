@@ -2073,7 +2073,7 @@ wpow(long s, long m, long e, long n)
   return w;
 }
 
-GEN
+static GEN
 galoisgenliftauto(GEN O, GEN gj, long s, long n, struct galois_test *td)
 {
   long sr, k;
