@@ -2141,7 +2141,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 {
   struct galois_test td;
   struct galois_frobenius gf;
-  pari_sp lbot, ltop2, ltop = avma;
+  pari_sp ltop2, ltop = avma;
   long p, deg, x, i, j, n = degpol(T), lP;
   GEN sigma, Tmod, res, res1, res2, ip, frob, O, PG, PG1, PG2, Pg;
 
@@ -2153,10 +2153,9 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     pari_sp av = avma;
     if (DEBUGLEVEL >= 4) err_printf("GaloisConj:Testing A4 first\n");
     inittest(L, M, gb->bornesol, gb->ladicsol, &td);
-    lbot = avma;
     PG = a4galoisgen(&td);
     freetest(&td);
-    if (PG != gen_0) return gerepile(ltop, lbot, PG);
+    if (PG != gen_0) return gerepileupto(ltop, PG);
     avma = av;
   }
   if (n == 24 && ga->ord==3)
@@ -2164,10 +2163,9 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     pari_sp av = avma;
     struct galois_lift gl;
     if (DEBUGLEVEL >= 4) err_printf("GaloisConj:Testing S4 first\n");
-    lbot = avma;
     initlift(T, den, stoi(ga->p4), L, makeLden(L,den,gb), gb, &gl);
     PG = s4galoisgen(&gl);
-    if (PG != gen_0) return gerepile(ltop, lbot, PG);
+    if (PG != gen_0) return gerepileupto(ltop, PG);
     avma = av;
   }
   frob = galoisfindfrobenius(T, L, den, &gf, gb, ga);
@@ -2180,11 +2178,10 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   if (DEBUGLEVEL >= 9) err_printf("GaloisConj:Orbite:%Ps\n", O);
   if (deg == n)        /* cyclic */
   {
-    lbot = avma;
     res = cgetg(3, t_VEC);
     gel(res,1) = mkvec( vecsmall_copy(frob) );
     gel(res,2) = mkvecsmall(deg);
-    return gerepile(ltop, lbot, res);
+    return gerepileupto(ltop, res);
   }
   if (DEBUGLEVEL >= 9) err_printf("GaloisConj:Frobenius:%Ps\n", sigma);
   {
@@ -2204,7 +2201,6 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   PG1 = gmael(PG, 1, 1); lP = lg(PG1);
   PG2 = gmael(PG, 1, 2);
   Pg = gel(PG, 2);
-  lbot = avma;
   res = cgetg(3, t_VEC);
   gel(res,1) = res1 = cgetg(lP + 1, t_VEC);
   gel(res,2) = res2 = cgetg(lP + 1, t_VECSMALL);
@@ -2223,7 +2219,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   }
   if (DEBUGLEVEL >= 4) err_printf("GaloisConj:Fini!\n");
   freetest(&td);
-  return gerepile(ltop, lbot, res);
+  return gerepileupto(ltop, res);
 }
 
 static GEN
@@ -2510,7 +2506,7 @@ is_group(GEN g)
 GEN
 galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
-  pari_sp lbot, ltop = avma;
+  pari_sp ltop = avma;
   GEN T, L, P, S, PL, O, res, mod, mod2;
   long vT, n, i;
   if (flag<0 || flag>2) pari_err_FLAG("galoisfixedfield");
@@ -2541,7 +2537,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   S = fixedfieldinclusion(O, PL);
   S = vectopol(S, gal_get_invvdm(gal), gal_get_den(gal), mod, mod2, vT);
   if (flag==0)
-  { lbot = avma; res = cgetg(3, t_VEC); }
+    res = cgetg(3, t_VEC);
   else
   {
     GEN PM, Pden;
@@ -2561,12 +2557,12 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     if (y < 0) y = fetch_user_var("y");
     if (varncmp(y, vT) <= 0)
       pari_err_PRIORITY("galoisfixedfield", T, "<=", y);
-    lbot = avma; res = cgetg(4, t_VEC);
+    res = cgetg(4, t_VEC);
     gel(res,3) = fixedfieldfactor(L,O,gal_get_group(gal), PM,Pden,mod,mod2,vT,y);
   }
   gel(res,1) = gcopy(P);
   gel(res,2) = gmodulo(S, T);
-  return gerepile(ltop, lbot, res);
+  return gerepileupto(ltop, res);
 }
 
 /* gal a galois group output the underlying wss group */
