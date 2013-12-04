@@ -2174,15 +2174,10 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   Tmod = gf.Tmod;
   O = perm_cycles(frob);
   deg = lg(gel(O,1))-1;
-  sigma = permtopol(frob, L, M, den, gb->ladicabs, shifti(gb->ladicabs,-1), x);
   if (DEBUGLEVEL >= 9) err_printf("GaloisConj:Orbite:%Ps\n", O);
   if (deg == n)        /* cyclic */
-  {
-    res = cgetg(3, t_VEC);
-    gel(res,1) = mkvec( vecsmall_copy(frob) );
-    gel(res,2) = mkvecsmall(deg);
-    return gerepileupto(ltop, res);
-  }
+    return gerepilecopy(ltop, mkvec2(mkvec(frob), mkvecsmall(deg)));
+  sigma = permtopol(frob, L, M, den, gb->ladicabs, shifti(gb->ladicabs,-1), x);
   if (DEBUGLEVEL >= 9) err_printf("GaloisConj:Frobenius:%Ps\n", sigma);
   {
     pari_sp btop=avma;
