@@ -2143,7 +2143,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   struct galois_frobenius gf;
   pari_sp ltop2, ltop = avma;
   long p, deg, x, i, j, n = degpol(T), lP;
-  GEN sigma, Tmod, res, res1, res2, ip, frob, O, PG, PG1, PG2, Pg;
+  GEN sigma, Tmod, res, res1, ip, frob, O, PG, PG1, PG2, Pg;
 
   if (!ga->deg) return gen_0;
   x = varn(T);
@@ -2198,9 +2198,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   Pg = gel(PG, 2);
   res = cgetg(3, t_VEC);
   gel(res,1) = res1 = cgetg(lP + 1, t_VEC);
-  gel(res,2) = res2 = cgetg(lP + 1, t_VECSMALL);
+  gel(res,2) = vecsmall_prepend(PG2, deg);
   gel(res1, 1) = vecsmall_copy(frob);
-  res2[1] = deg;
   for (i = 2; i < lg(res1); i++) gel(res1,i) = cgetg(n+1, t_VECSMALL);
   ltop2 = avma;
   for (j = 1; j < lP; j++)
@@ -2209,7 +2208,6 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     long k;
     if (!pf) { freetest(&td); avma = ltop; return gen_0; }
     for (k = 1; k <= n; k++) gmael(res1, j+1,k) = gel(pf,k);
-    res2[j+1] = PG2[j];
     avma = ltop2;
   }
   if (DEBUGLEVEL >= 4) err_printf("GaloisConj:Fini!\n");
