@@ -2076,6 +2076,7 @@ wpow(long s, long m, long e, long n)
 static GEN
 galoisgenliftauto(GEN O, GEN gj, long s, long n, struct galois_test *td)
 {
+  pari_sp av = avma;
   long sr, k;
   long deg = lg(gel(O,1))-1;
   GEN  X  = cgetg(lg(O), t_VECSMALL);
@@ -2132,7 +2133,7 @@ galoisgenliftauto(GEN O, GEN gj, long s, long n, struct galois_test *td)
     }
     pf = perm_mul(pf, perm_pow(pf1, el));
   }
-  return pf;
+  return gerepileuptoleaf(av, pf);
 }
 
 static GEN
@@ -2141,8 +2142,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 {
   struct galois_test td;
   struct galois_frobenius gf;
-  pari_sp ltop2, ltop = avma;
-  long p, deg, x, i, j, n = degpol(T), lP;
+  pari_sp ltop = avma;
+  long p, deg, x, j, n = degpol(T), lP;
   GEN sigma, Tmod, res, res1, ip, frob, O, PG, PG1, PG2, Pg;
 
   if (!ga->deg) return gen_0;
@@ -2200,15 +2201,11 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   gel(res,1) = res1 = cgetg(lP + 1, t_VEC);
   gel(res,2) = vecsmall_prepend(PG2, deg);
   gel(res1, 1) = vecsmall_copy(frob);
-  for (i = 2; i < lg(res1); i++) gel(res1,i) = cgetg(n+1, t_VECSMALL);
-  ltop2 = avma;
   for (j = 1; j < lP; j++)
   {
     GEN pf = galoisgenliftauto(O, gel(PG1, j), gf.psi[Pg[j]], n, &td);
-    long k;
     if (!pf) { freetest(&td); avma = ltop; return gen_0; }
-    for (k = 1; k <= n; k++) gmael(res1, j+1,k) = gel(pf,k);
-    avma = ltop2;
+    gel(res1, j+1) = pf;
   }
   if (DEBUGLEVEL >= 4) err_printf("GaloisConj:Fini!\n");
   freetest(&td);
