@@ -24,7 +24,13 @@ x^2 - x + 1/6
 x^3 - 3/2*x^2 + 1/2*x
 x^4 - 2*x^3 + x^2 - 1/30
 x^5 - 5/2*x^4 + 5/3*x^3 - 1/6*x
-  ***   at top-level: bernfrac(-2)
+  ***   at top-level: bernfrac(-1)
   ***                 ^------------
   *** bernfrac: domain error in bernfrac: index < 0
-Total time spent: 0
+  ***   at top-level: bernreal(-1)
+  ***                 ^------------
+  *** bernreal: domain error in bernreal: index < 0
+  ***   at top-level: bernpol(-1)
+  ***                 ^-----------
+  *** bernpol: domain error in bernpol: index < 0
+Total time spent: 4

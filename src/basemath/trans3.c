@@ -1522,13 +1522,9 @@ bernreal(long n, long prec)
 {
   GEN B, storeB;
   long k, lbern;
-  if (n <= 1)
-    switch(n)
-    {
-      case 1: return real_m2n(-1,prec); /*-1/2*/
-      case 0: return real_1(prec);
-      default: return real_0(prec);
-    }
+  if (n < 0) pari_err_DOMAIN("bernreal", "index", "<", gen_0, stoi(n));
+  if (n == 0) return real_1(prec);
+  if (n == 1) return real_m2n(-1,prec); /*-1/2*/
   if (odd(n)) return real_0(prec);
 
   k = n >> 1;
