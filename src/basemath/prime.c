@@ -942,23 +942,44 @@ randomprime(GEN N)
     }
   switch(typ(N))
   {
-    case t_INT: a = gen_2; b = N; break; /* between 2 and N-1 */
+    case t_INT:
+      a = gen_2;
+      b = subiu(N,1); /* between 2 and N-1 */
+      d = subiu(N,2);
+      if (signe(d) <= 0)
+        pari_err_DOMAIN("randomprime","N", "<", gen_2, N);
+      break;
     case t_VEC:
-      if (lg(N) == 3) {
-        a = gel(N,1); if (typ(a) != t_INT) a = gceil(a);
-        b = gel(N,2); if (typ(b) != t_INT) b = gceil(b);
-        if (typ(a) == t_INT && typ(b) == t_INT)
-        {
-          if (cmpiu(a, 2) < 0) a = gen_2;
-          break;
-        }
-      } /*fall through*/
-    default: pari_err_TYPE("randomprime", N);
-             return NULL; /*notreached*/
+      if (lg(N) != 3) pari_err_TYPE("randomprime",N);
+      a = gel(N,1);
+      b = gel(N,2);
+      if (gcmp(b, a) < 0)
+        pari_err_DOMAIN("randomprime","b-a", "<", gen_0, mkvec2(a,b));
+      if (typ(a) != t_INT)
+      {
+        a = gceil(a);
+        if (typ(a) != t_INT) pari_err_TYPE("randomprime",a);
+      }
+      if (typ(b) != t_INT)
+      {
+        b = gfloor(b);
+        if (typ(b) != t_INT) pari_err_TYPE("randomprime",b);
+      }
+      if (cmpis(a, 2) < 0)
+      {
+        a = gen_2;
+        d = subiu(b,1);
+      }
+      else
+        d = addiu(subii(b,a), 1);
+      if (signe(d) <= 0)
+        pari_err_DOMAIN("randomprime","floor(b) - max(ceil(a),2)", "<",
+                        gen_0, mkvec2(a,b));
+      break;
+    default:
+      pari_err_TYPE("randomprime", N);
+      return NULL; /*notreached*/
   }
-  d = subii(b,a);
-  if (signe(d) < 0) pari_err_TYPE("randomprime([a,b]) (a > b)", N);
-  if (typ(N) != t_INT) d = addis(d,1);
   av2 = avma;
   for (;;)
   {

@@ -9,10 +9,19 @@ a^2
 4599253441901006*a^2 + 17319169765369271807*a + 5394713598728073384], 1]
 0.56071855301363810851584520787407920872
 Mod(5, 7)*x^3 + Mod(2, 7)*x^2 + Mod(1, 7)*x + Mod(6, 7)
-  ***   at top-level: randomprime(1)
+  ***   at top-level: randomprime(2)
   ***                 ^--------------
-  *** randomprime: incorrect type in randomprime([a,b]) (a > b) (t_INT).
+  *** randomprime: domain error in randomprime: N < 2
+  ***   at top-level: randomprime([0,1])
+  ***                 ^------------------
+  *** randomprime: domain error in randomprime: floor(b) - max(ceil(a),2) < 0
+  ***   at top-level: randomprime([2.5,2.4
+  ***                 ^--------------------
+  *** randomprime: domain error in randomprime: b-a < 0
+  ***   at top-level: randomprime([2.4,2.5
+  ***                 ^--------------------
+  *** randomprime: domain error in randomprime: floor(b) - max(ceil(a),2) < 0
 1051006573
 5
 1267650600228229401496703924683
-Total time spent: 8
+Total time spent: 4
