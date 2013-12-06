@@ -1767,27 +1767,32 @@ get_nfindex(GEN bas)
 /* Either nf type or ZX or [monic ZX, data], where data is either an integral
  * basis (deprecated), or listP data (nfbasis input format) to specify
  * a set of primes at with the basis order must be maximal.
- * 1) nf type: return t_VEC
+ * 1) nf type (or unrecognized): return t_VEC
  * 2) ZX or [ZX, listP]: return t_POL
  * 3) [ZX, order basis]: return 0 (deprecated) */
 static long
 nf_input_type(GEN x)
 {
+  GEN T, v;
   switch(typ(x))
   {
     case t_POL: return t_POL;
     case t_VEC:
-      if (lg(x) == 3 && typ(gel(x,1)) == t_POL) {
-        GEN v = gel(x,2);
-        switch(typ(v))
-        {
-          case t_INT: case t_MAT: return t_POL;
-          case t_VEC: return RgV_is_ZV(v)? t_POL: 0;
-        }
-        if (lg(gel(x,2))-1 == degpol(gel(x,1))) return t_POL;
+      if (lg(x) != 3) return t_VEC; /* nf or incorrect */
+      T = gel(x,1); v = gel(x,2);
+      if (typ(T) != t_POL) break; /* incorrect */
+      switch(typ(v))
+      {
+        case t_INT: case t_MAT: return t_POL;
+        case t_VEC:
+          if (RgV_is_ZV(v)) return t_POL;
+          break;
+        default: return t_VEC; /* incorrect */
       }
-    default: return t_VEC; /* nf */
+      if (!RgX_is_ZX(T) || lg(v)-1 != degpol(T)) break; /* incorrect */
+      return 0;
   }
+  return t_VEC; /* nf or incorrect */
 }
 
 static void
