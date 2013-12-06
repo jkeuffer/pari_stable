@@ -5,11 +5,14 @@ C-Name: allocatemem0
 Prototype: vDG
 Help: allocatemem({s=0}): allocates a new stack of s bytes. doubles the
  stack if s is omitted.
-Doc: this very special operation
- allows the user to change the stack size \emph{after} initialization. $x$
- must be a non-negative integer. If $x \neq 0$, a new stack of size
- $16*\ceil{x/16}$ bytes is allocated. If $x=0$, the size of
- the new stack is twice the size of the old one. The old stack is discarded.
+Doc: this special operation changes the stack size \emph{after}
+ initialization. $x$ must be a non-negative integer. If $x > 0$, a new stack
+ of at least $x$ bytes is allocated. We may allocate more than $x$ bytes if
+ $x$ is way too small, or for alignment reasons: the current formula is
+ $\max(16*\ceil{x/16}, 500032)$ bytes.
+
+ If $x=0$, the size of the new stack is twice the size of the old one. The
+ old stack is discarded.
 
  \misctitle{Warning} This function should be typed at the \kbd{gp} prompt in
  interactive usage, or left by itself at the start of batch files.
