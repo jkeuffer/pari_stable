@@ -759,9 +759,10 @@ mpbern(long nb, long prec)
       /* also stop if prec = 0 (compute exactly) */
       if (typ(c) == t_REAL && realprec(c) < prec) break;
     }
+    /* B[1], ..., B_[n-1] are OK */
     if (n > nb) return;
     B = cgetg_block(nb+1, t_VEC);
-    for (i = 1; i <= n; i++) gel(B,i) = gel(bernzone,i);
+    for (i = 1; i < n; i++) gel(B,i) = gel(bernzone,i);
   }
   else
   {
