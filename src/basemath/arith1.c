@@ -2150,7 +2150,7 @@ GEN
 chinese(GEN x, GEN y)
 {
   pari_sp av,tetpil;
-  long i,lx, tx = typ(x);
+  long tx = typ(x);
   GEN z,p1,p2,d,u,v;
 
   if (!y) return chinese1(x);
@@ -2194,15 +2194,23 @@ chinese(GEN x, GEN y)
       avma = (pari_sp)gel(z,2); return z;
     }
     case t_POL:
-      z = cgetg_copy(x, &lx); z[1] = x[1];
-      if (lx != lg(y) || varn(x) != varn(y)) break;
-      for (i=2; i<lx; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
+    {
+      long i, lx = lg(x), ly = lg(y);
+      if (varn(x) != varn(y)) break;
+      if (lx < ly) { swap(x,y); lswap(lx,ly); }
+      z = cgetg(lx, t_POL); z[1] = x[1];
+      for (i=2; i<ly; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
+      for (   ; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
       return z;
+    }
 
     case t_VEC: case t_COL: case t_MAT:
+    {
+      long i, lx;
       z = cgetg_copy(x, &lx); if (lx!=lg(y)) break;
       for (i=1; i<lx; i++) gel(z,i) = chinese(gel(x,i),gel(y,i));
       return z;
+    }
   }
   pari_err_OP("chinese",x,y);
   return NULL; /* not reached */
