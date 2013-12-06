@@ -37,3 +37,13 @@ Doc: this special operation changes the stack size \emph{after}
  anymore. (In particular byte-compiled expressions, which are allocated on
  the stack.) To avoid accessing obsolete pointers to the old stack, this
  routine ends by a \kbd{longjmp}.
+
+ \misctitle{Remark} If the operating system cannot allocate the desired
+ $x$ bytes, a loop halves the allocation size until it succeeds:
+ \bprog
+ ? allocatemem(5*10^10)
+  ***   Warning: not enough memory, new stack 50000000000.
+  ***   Warning: not enough memory, new stack 25000000000.
+  ***   Warning: not enough memory, new stack 12500000000.
+  ***   Warning: new stack size = 6250000000 (5960.464 Mbytes).
+ @eprog
