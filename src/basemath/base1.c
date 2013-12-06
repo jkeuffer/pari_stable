@@ -1769,7 +1769,7 @@ get_nfindex(GEN bas)
  * a set of primes at with the basis order must be maximal.
  * 1) nf type (or unrecognized): return t_VEC
  * 2) ZX or [ZX, listP]: return t_POL
- * 3) [ZX, order basis]: return 0 (deprecated) 
+ * 3) [ZX, order basis]: return 0 (deprecated)
  * incorrect: return -1 */
 static long
 nf_input_type(GEN x)
