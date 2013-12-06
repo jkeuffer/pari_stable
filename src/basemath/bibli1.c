@@ -1030,6 +1030,7 @@ forqfvec(void *E, long (*fun)(void *, GEN, GEN, double), struct qfvec *qv, GEN B
     BORNE = gfloor(BORNE);
     if (typ(BORNE) != t_INT) pari_err_TYPE("minim0",BORNE);
   }
+  if (n == 1) return;
   minim_alloc(n, &q, &x, &y, &z, &v);
   n--;
   for (j=1; j<=n; j++)
