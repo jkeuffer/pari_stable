@@ -375,7 +375,7 @@ shallowmatconcat(GEN v)
 {
   long i, j, h, l = lg(v), L = 0, H = 0;
   GEN M, maxh, maxl;
-  if (l == 1) return gcopy(v);
+  if (l == 1) return cgetg(1,t_MAT);
   switch(typ(v))
   {
     case t_VEC:
