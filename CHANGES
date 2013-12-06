@@ -61,6 +61,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    45- polroots(): wrong accuracy of (real) 0 components
    46- randomprime(2) -> SEGV [#1493, 2.6.0]
    47- forqfvec(v,[;],0,) -> SEGV [#1495]
+   48- poliscyclo(x^0) -> 2
 
   Changed
     1- default help text for a user function is now as in \u:

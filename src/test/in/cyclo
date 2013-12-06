@@ -1,4 +1,7 @@
 allocatemem(8000000);
+poliscyclo(1)
+poliscyclo(x^0)
+poliscyclo(x)
 for (i=1,100, if (poliscyclo(polcyclo(i)) != i, error(i)))
 for (i=1,100, if (!poliscycloprod(x^i-1), error(i)))
 poliscyclo(polcyclo(10^5))
