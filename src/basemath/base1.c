@@ -1769,27 +1769,41 @@ get_nfindex(GEN bas)
  * a set of primes at with the basis order must be maximal.
  * 1) nf type (or unrecognized): return t_VEC
  * 2) ZX or [ZX, listP]: return t_POL
- * 3) [ZX, order basis]: return 0 (deprecated) */
+ * 3) [ZX, order basis]: return 0 (deprecated) 
+ * incorrect: return -1 */
 static long
 nf_input_type(GEN x)
 {
-  GEN T, v;
+  GEN T, V;
+  long i, d, v;
   switch(typ(x))
   {
     case t_POL: return t_POL;
     case t_VEC:
       if (lg(x) != 3) return t_VEC; /* nf or incorrect */
-      T = gel(x,1); v = gel(x,2);
-      if (typ(T) != t_POL) break; /* incorrect */
-      switch(typ(v))
+      T = gel(x,1); V = gel(x,2);
+      if (typ(T) != t_POL) return -1;
+      switch(typ(V))
       {
         case t_INT: case t_MAT: return t_POL;
         case t_VEC:
-          if (RgV_is_ZV(v)) return t_POL;
+          if (RgV_is_ZV(V)) return t_POL;
           break;
-        default: return t_VEC; /* incorrect */
+        default: return -1;
       }
-      if (!RgX_is_ZX(T) || lg(v)-1 != degpol(T)) break; /* incorrect */
+      d = degpol(T); v = varn(T);
+      if (d<1 || !RgX_is_ZX(T) || !isint1(gel(T,d+2)) || lg(V)-1!=d) return -1;
+      for (i = 1; i <= d; i++)
+      { /* check integer basis */
+        GEN c = gel(V,i);
+        switch(typ(c))
+        {
+          case t_INT: break;
+          case t_POL: if (varn(c) == v && RgX_is_QX(c) && degpol(c) < d) break;
+          /* fall through */
+          default: return -1;
+        }
+      }
       return 0;
   }
   return t_VEC; /* nf or incorrect */
@@ -1839,13 +1853,17 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
       r1 = nf_get_r1(nf);
       break;
     }
-    default: /* monic integral polynomial + integer basis */
+    case 0: /* monic integral polynomial + integer basis */
       bas = gel(x,2); x = gel(x,1);
       T->x0 = x;
       index = NULL;
       dx = NULL;
       dK = NULL;
       r1 = sturm(x);
+      break;
+    case -1:
+      pari_err_TYPE("nfbasic_init", x);
+      return;
   }
   T->x     = x;
   T->unscale = unscale;

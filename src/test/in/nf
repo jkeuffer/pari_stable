@@ -44,11 +44,11 @@ v = [x,0,[0,1/7^4]~,Mod(x,nf.pol)];
 F = idealfactor(nf, 2*3*7);
 P = F[,1];
 F[,2] *= 3;
-y=idealchinese(nf, F, v)
-vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-y),P[i]))
+Y=idealchinese(nf, F, v)
+vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-Y),P[i]))
 F[,2] = [0,1,-2,3]~;
-y=idealchinese(nf, F, v)
-vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-y),P[i]))
+Y=idealchinese(nf, F, v)
+vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-Y),P[i]))
 
 \\#1180
 setrand(1);quadclassunit(572).no
@@ -79,4 +79,6 @@ l=ideallist(K,4,3);L=ideallistarch(K,l,[1])
 bnrdisclist(K,l)
 bnrdisclist(K,L)
 bnrdisclist(K,4,[1])
-nfinit(['y^3+2,[1,x]])
+nfinit([y^3+2,[1,x]])
+nfinit([y^3+2,[1,x,x^2]])
+nfinit([y^3+2,[1,y^5,y]])
