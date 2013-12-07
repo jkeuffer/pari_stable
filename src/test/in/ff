@@ -80,3 +80,8 @@ t = ffprimroot(ffgen(5^23)); fflog(t^1234567891012345,t)
 t = ffprimroot(ffgen(5^17)); fflog(t^123456789101,t)
 ffgen(x^2+x+Mod(1,3))
 conjvec(Mod(x, x^2+Mod(1,3)))
+t = ffgen(5^4,'t);
+factor((x^24-1)*t^0)
+factorff(Pol(0),t.p,t.mod)
+factorff(Pol(1),t.p,t.mod)
+factorff(x^4-t,t.p,t.mod)

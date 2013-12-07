@@ -2754,7 +2754,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
 
   switch(d)
   {
-    case -1: return prime_fact(f);
+    case -1: retmkmat2(mkcolcopy(f), mkvecsmall(1));
     case 0: return trivial_fact();
   }
   T = FpX_normalize(T, p);
