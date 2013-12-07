@@ -686,6 +686,8 @@ ZM_to_Flm(GEN x, ulong p)
 /*                          TO INTMOD                        */
 static GEN
 to_intmod(GEN x, GEN p) { retmkintmod(modii(x, p), p); }
+static GEN
+Fl_to_intmod(ulong x, GEN p) { retmkintmod(utoi(x), p); }
 
 GEN
 Fp_to_mod(GEN z, GEN p)
@@ -740,6 +742,32 @@ FpM_to_mod(GEN z, GEN p)
     gel(x,i) = cgetg(m,t_COL);
     y = gel(x,i); zi= gel(z,i);
     for (j=1; j<m; j++) gel(y,j) = to_intmod(gel(zi,j), p);
+  }
+  return x;
+}
+GEN
+Flc_to_mod(GEN z, ulong pp)
+{
+  long i, l = lg(z);
+  GEN p, x = cgetg(l, t_COL);
+  if (l == 1) return x;
+  p = utoipos(pp);
+  for (i=1; i<l; i++) gel(x,i) = Fl_to_intmod(z[i], p);
+  return x;
+}
+GEN
+Flm_to_mod(GEN z, ulong pp)
+{
+  long i, j, m, l = lg(z);
+  GEN p, x = cgetg(l,t_MAT), y, zi;
+  if (l == 1) return x;
+  m = lgcols(z);
+  p = utoipos(pp);
+  for (i=1; i<l; i++)
+  {
+    gel(x,i) = cgetg(m,t_COL);
+    y = gel(x,i); zi= gel(z,i);
+    for (j=1; j<m; j++) gel(y,j) = Fl_to_intmod(zi[j], p);
   }
   return x;
 }

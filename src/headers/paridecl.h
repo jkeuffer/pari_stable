@@ -43,8 +43,10 @@ GEN     isprincipalgenforce(GEN bnf,GEN x);
 
 GEN     F2c_to_Flc(GEN x);
 GEN     F2c_to_ZC(GEN x);
+GEN     F2c_to_mod(GEN x);
 GEN     F2m_to_Flm(GEN z);
 GEN     F2m_to_ZM(GEN z);
+GEN     F2m_to_mod(GEN z);
 ulong   F2v_dotproduct(GEN x, GEN y);
 void    F2v_add_inplace(GEN x, GEN y);
 GEN     F2x_F2xq_eval(GEN Q, GEN x, GEN T);
@@ -521,6 +523,7 @@ void    Flc_Fl_div_inplace(GEN x, ulong y, ulong p);
 GEN     Flc_Fl_mul(GEN x, ulong y, ulong p);
 void    Flc_Fl_mul_inplace(GEN x, ulong y, ulong p);
 void    Flc_Fl_mul_part_inplace(GEN x, ulong y, ulong p, long l);
+GEN     Flc_to_mod(GEN z, ulong pp);
 GEN     Flm_Fl_add(GEN x, ulong y, ulong p);
 GEN     Flm_Fl_mul(GEN y, ulong x, ulong p);
 void    Flm_Fl_mul_inplace(GEN y, ulong x, ulong p);
@@ -528,6 +531,7 @@ GEN     Flm_Flc_mul(GEN x, GEN y, ulong p);
 GEN     Flm_center(GEN z, ulong p, ulong ps2);
 GEN     Flm_mul(GEN x, GEN y, ulong p);
 GEN     Flm_neg(GEN y, ulong p);
+GEN     Flm_to_mod(GEN z, ulong pp);
 GEN     Flm_transpose(GEN x);
 GEN     Flv_add(GEN x, GEN y, ulong p);
 void    Flv_add_inplace(GEN x, GEN y, ulong p);
@@ -881,6 +885,7 @@ GEN     zx_to_ZX(GEN z);
 
 /* alglin1.c */
 
+GEN     F2m_F2c_invimage(GEN A, GEN y);
 GEN     F2m_deplin(GEN x);
 ulong   F2m_det(GEN x);
 ulong   F2m_det_sp(GEN x);
@@ -888,6 +893,7 @@ GEN     F2m_gauss(GEN a, GEN b);
 GEN     F2m_image(GEN x);
 GEN     F2m_indexrank(GEN x);
 GEN     F2m_inv(GEN x);
+GEN     F2m_invimage(GEN A, GEN B);
 GEN     F2m_ker(GEN x);
 GEN     F2m_ker_sp(GEN x, long deplin);
 long    F2m_rank(GEN x);

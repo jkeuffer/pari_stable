@@ -3875,6 +3875,10 @@ to have compatible dimensions).
 \fun{GEN}{F2m_image}{GEN x} gives a subset of the columns of $x$ that generate
 the image of $x$.
 
+\fun{GEN}{F2m_invimage}{GEN A, GEN B}
+
+\fun{GEN}{F2m_F2c_invimage}{GEN A, GEN y}
+
 \fun{GEN}{F2m_gauss}{GEN a, GEN b}
 
 \fun{GEN}{F2m_indexrank}{GEN x} $x$ being a matrix of rank $r$, returns a
@@ -5324,6 +5328,14 @@ Mod(1,p)}, a \typ{VEC} of \typ{VEC} with \typ{INTMOD} coefficients.
 
 \fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
 Mod(1,p)}, with \typ{INTMOD} coefficients.
+
+\fun{GEN}{F2c_to_mod}{GEN x}
+
+\fun{GEN}{F2m_to_mod}{GEN x}
+
+\fun{GEN}{Flc_to_mod}{GEN z}
+
+\fun{GEN}{Flm_to_mod}{GEN z}
 
 \fun{GEN}{FpXQC_to_mod}{GEN V, GEN T, GEN p} $V$ being a vector of \kbd{FpXQ},
 converts each entry to a \typ{POLMOD} with \typ{INTMOD} coefficients, and return
