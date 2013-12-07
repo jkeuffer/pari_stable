@@ -1861,7 +1861,7 @@ nfbasic_init(GEN x, long flag, nfbasic_t *T)
       dK = NULL;
       r1 = sturm(x);
       break;
-    case -1:
+    default: /* -1 */
       pari_err_TYPE("nfbasic_init", x);
       return;
   }
