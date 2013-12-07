@@ -1,9 +1,9 @@
 gettime();
 T=getabstime();
-for(i=1,10^6,)
+for(i=1,2*10^6,)
 T2=getabstime();
 t2=gettime();
-abs(t2 - (T2 - T)) < 2
-for(i=1,10^6,)
+abs(t2 - (T2 - T)) < 5
+for(i=1,2*10^6,)
 t3=gettime();
-abs(t2+t3 - (getabstime() - T)) < 2
+abs(t2+t3 - (getabstime() - T)) < 5
