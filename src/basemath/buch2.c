@@ -3749,6 +3749,7 @@ trim_list(FB_t *F)
 static void
 try_elt(RELCACHE_t *cache, FB_t *F, GEN nf, GEN x, FACT *fact)
 {
+  pari_sp av = avma;
   GEN R, Nx;
   long nz, tx = typ(x);
 
@@ -3763,6 +3764,7 @@ try_elt(RELCACHE_t *cache, FB_t *F, GEN nf, GEN x, FACT *fact)
   R = set_fact(F, fact, NULL, &nz);
   /* make sure we get maximal rank first, then allow all relations */
   (void) add_rel(cache, F, R, nz, x, 0);
+  avma = av;
 }
 
 GEN
