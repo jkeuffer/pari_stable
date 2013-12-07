@@ -594,10 +594,10 @@ Z_issquareall(GEN x, GEN *pt)
   }
   if (lgefint(x) == 3)
   {
-    ulong a;
-    if (!uissquareall((ulong)x[2], &a)) return 0;
-    if (pt) *pt = utoipos(a);
-    return 1;
+    ulong u = (ulong)x[2], a;
+    if (!pt) return uissquare(u);
+    if (!uissquareall(u, &a)) return 0;
+    *pt = utoipos(a); return 1;
   }
   if (!carremod(umodiu(x, 64*63*65*11))) return 0;
   av = avma; y = sqrtremi(x, &r);
