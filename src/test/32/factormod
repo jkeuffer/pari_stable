@@ -192,6 +192,7 @@ x + 9233, 1; x + 9244, 1; x + 9247, 1; x + 9261, 1; x + 9269, 1; x + 9270, 1
 
 [Mod(1, 41), Mod(3, 41), Mod(9, 41), Mod(14, 41), Mod(27, 41), Mod(32, 41), 
 Mod(38, 41), Mod(40, 41)]~
+[Mod(1, 5), Mod(2, 5)]~
   ***   at top-level: polrootsmod(Pol(0),2
   ***                 ^--------------------
   *** polrootsmod: zero polynomial in rootmod.
@@ -208,8 +209,7 @@ Mod(38, 41), Mod(40, 41)]~
 
 [2 1]
 
-[Mod(3, 17), Mod(5, 17), Mod(6, 17), Mod(7, 17), Mod(10, 17), Mod(11, 17), M
-od(12, 17), Mod(14, 17)]~
+[Mod(1, 7), Mod(2, 7), Mod(3, 7), Mod(5, 7), Mod(6, 7)]~
   ***   at top-level: polrootsmod(Pol(0),p
   ***                 ^--------------------
   *** polrootsmod: zero polynomial in rootmod.
@@ -227,6 +227,9 @@ od(12, 17), Mod(14, 17)]~
 [1 1]
 
 [1 1]
+
+
+[2 1]
 
 
 [Mod(1, 18446744073709551629)*x + Mod(2370518075556110396, 18446744073709551
