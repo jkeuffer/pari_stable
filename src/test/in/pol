@@ -16,3 +16,4 @@ o = [2*x+3*y, 2+x+y+O(x^2), 2+x+y+O(y^2)];
 polgraeffe(x^2+x+1)
 polgraeffe(x^3+x+1)
 polsym(2*x^4+1,4)
+norm(I*x+1)
