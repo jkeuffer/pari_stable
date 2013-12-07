@@ -2,3 +2,5 @@ print(lift(factorcantor(x^1024+1,12289)))
 setrand(4); lift(factormod(y^3-3*y-1,2238004061))
 \\#1451
 lift(factormod(x^31+x^30+x^29+x^28+x^26+x^24+x^23+x^21+x^16+x^15+x^14+x^11+x^10+x^9+x^8+x^7+x^3+x^2+x,2))
+polrootsmod(x^16-1,41,1)
+
