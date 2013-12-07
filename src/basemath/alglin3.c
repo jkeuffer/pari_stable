@@ -47,25 +47,18 @@ row_transposecopy(GEN A, long x0)
 GEN
 shallowtrans(GEN x)
 {
-  long i, dx, lx, tx = typ(x);
+  long i, dx, lx;
   GEN y;
-
-  if (! is_matvec_t(tx)) pari_err_TYPE("shallowtrans",x);
-  switch(tx)
+  switch(typ(x))
   {
-    case t_VEC:
-      y = leafcopy(x); settyp(y,t_COL); break;
-
-    case t_COL:
-      y = leafcopy(x); settyp(y,t_VEC); break;
-
+    case t_VEC: y = leafcopy(x); settyp(y,t_COL); break;
+    case t_COL: y = leafcopy(x); settyp(y,t_VEC); break;
     case t_MAT:
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
-      dx = lgcols(x); y = cgetg(dx,tx);
+      dx = lgcols(x); y = cgetg(dx,t_MAT);
       for (i = 1; i < dx; i++) gel(y,i) = row_transpose(x,i);
       break;
-
-    default: y = x; break;
+    default: pari_err_TYPE("shallowtrans",x); return NULL;
   }
   return y;
 }
@@ -73,25 +66,18 @@ shallowtrans(GEN x)
 GEN
 gtrans(GEN x)
 {
-  long i, dx, lx, tx = typ(x);
+  long i, dx, lx;
   GEN y;
-
-  if (! is_matvec_t(tx)) pari_err_TYPE("gtrans",x);
-  switch(tx)
+  switch(typ(x))
   {
-    case t_VEC:
-      y = gcopy(x); settyp(y,t_COL); break;
-
-    case t_COL:
-      y = gcopy(x); settyp(y,t_VEC); break;
-
+    case t_VEC: y = gcopy(x); settyp(y,t_COL); break;
+    case t_COL: y = gcopy(x); settyp(y,t_VEC); break;
     case t_MAT:
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
-      dx = lgcols(x); y = cgetg(dx,tx);
+      dx = lgcols(x); y = cgetg(dx,t_MAT);
       for (i = 1; i < dx; i++) gel(y,i) = row_transposecopy(x,i);
       break;
-
-    default: y = gcopy(x); break;
+    default: pari_err_TYPE("gtrans",x); return NULL;
   }
   return y;
 }
