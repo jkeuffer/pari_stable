@@ -410,21 +410,43 @@ static int
 is_modular_mul(GEN a, GEN b, GEN *z)
 {
   GEN p1 = NULL, p2 = NULL, p;
+  ulong pp;
   if (!RgM_is_FpM(a, &p1) || !p1) return 0;
   if (!RgM_is_FpM(b, &p2) || !p2) return 0;
   p = gcdii(p1, p2);
-  a = RgM_to_FpM(a, p);
-  b = RgM_to_FpM(b, p);
-  *z = FpM_to_mod(FpM_mul(a, b, p), p);
+  a = RgM_Fp_init(a, p, &pp);
+  switch(pp)
+  {
+  case 0:
+    b = RgM_to_FpM(b,p);
+    b = FpM_mul(a,b,p);
+    *z = FpM_to_mod(b,p);
+    break;
+  case 2:
+    b = RgM_to_F2m(b);
+    b = F2m_mul(a,b);
+    *z = F2m_to_mod(b);
+    break;
+  default:
+    b = RgM_to_Flm(b,pp);
+    b = Flm_mul(a,b,pp);
+    *z = Flm_to_mod(b,pp);
+  }
   return 1;
 }
 static int
 is_modular_sqr(GEN a, GEN *z)
 {
   GEN p = NULL;
+  ulong pp;
   if (!RgM_is_FpM(a, &p) || !p) return 0;
-  a = RgM_to_FpM(a, p);
-  *z = FpM_to_mod(FpM_mul(a, a, p), p);
+  a = RgM_Fp_init(a, p, &pp);
+  switch(pp)
+  {
+    case 0: *z = FpM_to_mod(FpM_mul(a,a, p), p); break;
+    case 2: *z = F2m_to_mod(F2m_mul(a,a)); break;
+    default:*z = Flm_to_mod(Flm_mul(a,a, pp), pp); break;
+  }
   return 1;
 }
 

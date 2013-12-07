@@ -3573,6 +3573,14 @@ coefficientwise.
 returns the \kbd{FpM} obtained by applying \kbd{RgC\_to\_FpC}
 columnwise.
 
+\fun{GEN}{RgM_Fp_init}{GEN z, GEN p, ulong *pp}, given an \kbd{RgM} $z$,
+whose entries can be mapped to $\F_p$ (as per \tet{Rg_to_Fp}), and a prime
+number $p$. This routine returns a normal form of $z$: either an
+\kbd{F2m} ($p = 2$), an \kbd{Flm} ($p$ fits into an \kbd{ulong})
+or an \kbd{FpM}. In the first two cases, \kbd{pp} is set to \kbd{itou}$(p)$,
+and to $0$ in the last.
+
+
 The functions above are generally used as follow:
 \bprog
 GEN add(GEN x, GEN y)
@@ -3833,6 +3841,8 @@ if no such matrix exist.
 
 \fun{long}{Flm_rank}{GEN x, ulong p}
 
+\fun{long}{Flm_suppl}{GEN x, ulong p}
+
 \fun{GEN}{Flm_image}{GEN x, ulong p}
 
 \fun{GEN}{Flm_transpose}{GEN x}
@@ -3889,7 +3899,9 @@ matrix obtained from these two vectors using is invertible.
 \fun{GEN}{F2m_mul}{GEN x, GEN y} multiplies  \kbd{x} and \kbd{y} (assumed to
 have compatible dimensions).
 
-\fun{long}{F2m_rank}{GEN x} rank of $x$.
+\fun{long}{F2m_rank}{GEN x} as \kbd{rank}.
+
+\fun{long}{F2m_suppl}{GEN x} as \kbd{suppl}.
 
 \fun{GEN}{matid_F2m}{long n} returns an \kbd{F2m} which is an $n \times n$
 identity matrix.

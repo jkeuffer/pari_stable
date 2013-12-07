@@ -31,6 +31,26 @@ matinverseimage(A*Mod(1,7),B)
 matinverseimage(A*Mod(1,2^64+13),B)
 matinverseimage(A*Mod(1,3037000507),B)
 
+A = [1,2,4;2,12,7;2,9,11];
+test(f)=
+{
+  print(f,":");
+  print(f(A*Mod(1,2)));
+  print(f(A*Mod(1,7)));
+  print(f(A*Mod(1,3037000507)));
+  print(f(A*Mod(1,2^64+13)));
+}
+test(matdet);
+test(matrank);
+test(matadjoint);
+test(matimage);
+test(matimagecompl);
+test(matindexrank);
+test(matker);
+test(x->x^(-1));
+test(x->x^2);
+test(x->A*x);
+
 trace(matid(3))
 trace([;])
 trace(Mat([1,2]))

@@ -120,7 +120,8 @@ LGr11- GP function Colrev
    12- GP operator %#n to recover time used to compute history result %n
    13- GP function getabstime()
    14- [libpari] Rg_to_F2, RgV_to_F2v, RgM_to_F2m, F2c_to_mod, F2m_to_mod,
-       Flc_to_mod, Flm_to_mod, F2m_F2c_invimage, F2m_invimage
+       Flc_to_mod, Flm_to_mod, F2m_F2c_invimage, F2m_invimage, F2m_suppl,
+       Flm_suppl, F2m_rank, Flm_rank
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

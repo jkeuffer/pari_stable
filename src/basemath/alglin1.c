@@ -705,7 +705,7 @@ FpM_init(GEN a, GEN p, ulong *pp)
   }
   *pp = 0; return a;
 }
-static GEN
+GEN
 RgM_Fp_init(GEN a, GEN p, ulong *pp)
 {
   if (lgefint(p) == 3)
@@ -723,8 +723,12 @@ FpM_det(GEN a, GEN p)
   ulong pp, d;
   void *E;
   a = FpM_init(a, p, &pp);
-  if (!pp) return gen_det(a, E, get_Fp_field(&E,p));
-  d = (pp==2)? F2m_det_sp(a): Flm_det_sp(a,pp);
+  switch(pp)
+  {
+  case 0: return gen_det(a, E, get_Fp_field(&E,p));
+  case 2: d = F2m_det_sp(a); break;
+  default:d = Flm_det_sp(a,pp); break;
+  }
   avma = av; return utoi(d);
 }
 
@@ -760,24 +764,6 @@ F2m_gauss_pivot(GEN x, long *rr)
   }
 
   *rr = r; avma = (pari_sp)d; return d;
-}
-
-GEN
-F2m_image(GEN x)
-{
-  long r;
-  GEN d = F2m_gauss_pivot(F2m_copy(x),&r);
-  /* d left on stack for efficiency */
-  return image_from_pivot(x,d,r);
-}
-
-long
-F2m_rank(GEN x)
-{
-  pari_sp av = avma;
-  long r;
-  (void)F2m_gauss_pivot(F2m_copy(x),&r);
-  avma = av; return lg(x)-1 - r;
 }
 
 /* Destroy x */
@@ -825,6 +811,29 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
   *rr = r; avma = (pari_sp)d; return d;
 }
 
+static GEN
+FpM_gauss_pivot(GEN x, GEN p, long *rr)
+{
+  ulong pp;
+  void *E;
+  if (lg(x)==1) { *rr = 0; return NULL; }
+  x = FpM_init(x, p, &pp);
+  switch(pp)
+  {
+  case 0: return gen_Gauss_pivot(x, rr, E, get_Fp_field(&E,p));
+  case 2: return F2m_gauss_pivot(x, rr);
+  default:return Flm_gauss_pivot(x, pp, rr);
+  }
+}
+
+GEN
+FpM_image(GEN x, GEN p)
+{
+  long r;
+  GEN d = FpM_gauss_pivot(x,p,&r);
+  /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
+}
 GEN
 Flm_image(GEN x, ulong p)
 {
@@ -833,32 +842,11 @@ Flm_image(GEN x, ulong p)
   /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
-
-long
-Flm_rank(GEN x, ulong p)
-{
-  pari_sp av = avma;
-  long r;
-  (void)Flm_gauss_pivot(Flm_copy(x),p,&r);
-  avma = av; return lg(x)-1 - r;
-}
-
-static GEN
-FpM_gauss_pivot(GEN x, GEN p, long *rr)
-{
-  ulong pp;
-  void *E;
-  if (lg(x)==1) { *rr = 0; return NULL; }
-  x = FpM_init(x, p, &pp);
-  if (!pp) return gen_Gauss_pivot(x, rr, E, get_Fp_field(&E,p));
-  return pp == 2? F2m_gauss_pivot(x, rr): Flm_gauss_pivot(x, pp, rr);
-}
-
 GEN
-FpM_image(GEN x, GEN p)
+F2m_image(GEN x)
 {
   long r;
-  GEN d = FpM_gauss_pivot(x,p,&r);
+  GEN d = F2m_gauss_pivot(F2m_copy(x),&r);
   /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
@@ -871,6 +859,23 @@ FpM_rank(GEN x, GEN p)
   (void)FpM_gauss_pivot(x,p,&r);
   avma = av; return lg(x)-1 - r;
 }
+long
+Flm_rank(GEN x, ulong p)
+{
+  pari_sp av = avma;
+  long r;
+  (void)Flm_gauss_pivot(Flm_copy(x),p,&r);
+  avma = av; return lg(x)-1 - r;
+}
+long
+F2m_rank(GEN x)
+{
+  pari_sp av = avma;
+  long r;
+  (void)F2m_gauss_pivot(F2m_copy(x),&r);
+  avma = av; return lg(x)-1 - r;
+}
+
 
 static GEN
 FlxqM_gauss_pivot(GEN x, GEN T, ulong p, long *rr)
@@ -942,18 +947,20 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   pari_sp av = avma;
   ulong pp;
   void *E;
+  GEN y;
 
   if (lg(x)==1) return cgetg(1,t_MAT);
   x = FpM_init(x, p, &pp);
-  if (!pp) return gen_ker(x, deplin, E, get_Fp_field(&E,p));
-  if (pp==2)
+  switch(pp)
   {
-    GEN y = F2m_ker_sp(x, deplin);
+  case 0: return gen_ker(x, deplin, E, get_Fp_field(&E,p));
+  case 2:
+    y = F2m_ker_sp(x, deplin);
     if (!y) return y;
     y = deplin? F2c_to_ZC(y): F2m_to_ZM(y);
     return gerepileupto(av, y);
-  } else {
-    GEN y = Flm_ker_sp(x, pp, deplin);
+  default:
+    y = Flm_ker_sp(x, pp, deplin);
     if (!y) return y;
     y = deplin? Flc_to_ZC(y): Flm_to_ZM(y);
     return gerepileupto(av, y);
@@ -1752,24 +1759,23 @@ FpM_gauss(GEN a, GEN b, GEN p)
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
   a = FpM_init(a,p,&pp);
-  if (!pp)
+  switch(pp)
   {
+  case 0:
     u = gen_Gauss(a,b,E, get_Fp_field(&E,p));
     return u ? gerepilecopy(av, iscol? gel(u,1): u): u;
-  }
-  if (pp == 2)
-  {
+  case 2:
     b = ZM_to_F2m(b);
     u = F2m_gauss_sp(a,b);
     if (!u) {avma = av; return u;}
     u = iscol? F2c_to_ZC(gel(u,1)): F2m_to_ZM(u);
-  }
-  else
-  {
+    break;
+  default:
     b = ZM_to_Flm(b, pp);
     u = Flm_gauss_sp(a,b, NULL, pp);
     if (!u) {avma = av; return u;}
     u = iscol? Flc_to_ZC(gel(u,1)): Flm_to_ZM(u);
+    break;
   }
   return gerepileupto(av, u);
 }
@@ -2462,11 +2468,9 @@ image(GEN x)
     x = RgM_Fp_init(x, p, &pp);
     switch(pp)
     {
-    case 0: x = FpM_to_mod(FpM_image(x,p), p);
-            break;
-    case 2: x = F2m_to_mod(F2m_image(x));
-            break;
-    default: x = Flm_to_mod(Flm_image(x,pp), pp);
+    case 0: x = FpM_to_mod(FpM_image(x,p), p); break;
+    case 2: x = F2m_to_mod(F2m_image(x)); break;
+    default:x = Flm_to_mod(Flm_image(x,pp), pp);
     }
     return gerepileupto(av, x);
   }
@@ -2740,7 +2744,7 @@ GEN
 F2m_invimage(GEN A, GEN B)
 {
   pari_sp av = avma;
-  GEN X = F2m_invimage_i(A,B,p);
+  GEN X = F2m_invimage_i(A,B);
   if (!X) { avma = av; return NULL; }
   return gerepileupto(av, X);
 }
@@ -2855,9 +2859,9 @@ get_suppl(GEN x, GEN d, long r)
   /* c = lines containing pivots (could get it from gauss_pivot, but cheap)
    * In theory r = 0 and d[j] > 0 for all j, but why take chances? */
   for (k = j = 1; j<=rx; j++)
-    if (d[j]) { c[ d[j] ] = 1; y[k++] = x[j]; }
+    if (d[j]) { c[ d[j] ] = 1; gel(y,k++) = gel(x,j); }
   for (j=1; j<=n; j++)
-    if (!c[j]) y[k++] = j;
+    if (!c[j]) gel(y,k++) = (GEN)j; /* HACK */
   avma = av;
 
   rx -= r;
@@ -2885,7 +2889,17 @@ suppl(GEN x)
 
   if (typ(x)!=t_MAT) pari_err_TYPE("suppl",x);
   if (RgM_is_FpM(x, &p) && p)
-    return gerepileupto(av, FpM_to_mod(FpM_suppl(RgM_to_FpM(x, p), p), p));
+  {
+    ulong pp;
+    x = RgM_Fp_init(x, p, &pp);
+    switch(pp)
+    {
+    case 0: x = FpM_to_mod(FpM_suppl(x,p), p); break;
+    case 2: x = F2m_to_mod(F2m_suppl(x)); break;
+    default:x = Flm_to_mod(Flm_suppl(x,pp), pp); break;
+    }
+    return gerepileupto(av, x);
+  }
   avma = av; init_suppl(x);
   d = gauss_pivot(X,&r);
   avma = av; return get_suppl(X,d,r);
@@ -2896,11 +2910,29 @@ FpM_suppl(GEN x, GEN p)
   pari_sp av = avma;
   GEN d;
   long r;
-
-  init_suppl(x);
-  d = FpM_gauss_pivot(x,p, &r);
+  init_suppl(x); d = FpM_gauss_pivot(x,p, &r);
   avma = av; return get_suppl(x,d,r);
 }
+GEN
+Flm_suppl(GEN x, ulong p)
+{
+  pari_sp av = avma;
+  GEN d;
+  long r;
+  init_suppl(x); d = Flm_gauss_pivot(x,p, &r);
+  avma = av; return get_suppl(x,d,r);
+
+}
+GEN
+F2m_suppl(GEN x)
+{
+  pari_sp av = avma;
+  GEN d;
+  long r;
+  init_suppl(x); d = F2m_gauss_pivot(x, &r);
+  avma = av; return get_suppl(x,d,r);
+}
+
 GEN
 FqM_suppl(GEN x, GEN T, GEN p)
 {
@@ -2953,63 +2985,18 @@ rank(GEN x)
   if (typ(x)!=t_MAT) pari_err_TYPE("rank",x);
   if (RgM_is_FpM(x, &p) && p)
   {
-    r = FpM_rank(RgM_to_FpM(x, p), p);
+    ulong pp;
+    x = RgM_Fp_init(x,p,&pp);
+    switch(pp)
+    {
+    case 0: r = FpM_rank(x,p); break;
+    case 2: r = F2m_rank(x); break;
+    default:r = Flm_rank(x,pp); break;
+    }
     avma = av; return r;
   }
   (void)gauss_pivot(x, &r);
   avma = av; return lg(x)-1 - r;
-}
-
-GEN
-F2m_indexrank(GEN x)
-{
-  long i,j,r;
-  GEN res,d,p1,p2;
-  pari_sp av = avma;
-  long n = lg(x)-1;
-  (void)new_chunk(3+n+1+n+1);
-  /* yield r = dim ker(x) */
-  d = F2m_gauss_pivot(F2m_copy(x),&r);
-  avma = av;
-  /* now r = dim Im(x) */
-  r = n - r;
-
-  res=cgetg(3,t_VEC);
-  p1 = cgetg(r+1,t_VECSMALL); gel(res,1) = p1;
-  p2 = cgetg(r+1,t_VECSMALL); gel(res,2) = p2;
-  if (d)
-  {
-    for (i=0,j=1; j<=n; j++)
-      if (d[j]) { i++; p1[i] = d[j]; p2[i] = j; }
-    vecsmall_sort(p1);
-  }
-  return res;
-}
-
-GEN
-Flm_indexrank(GEN x, ulong p)
-{
-  long i,j,r;
-  GEN res,d,p1,p2;
-  pari_sp av = avma;
-  long n = lg(x)-1;
-  (void)new_chunk(3+n+1+n+1);
-  /* yield r = dim ker(x) */
-  d = Flm_gauss_pivot(Flm_copy(x),p,&r);
-  avma = av;
-  /* now r = dim Im(x) */
-  r = n - r;
-
-  res=cgetg(3,t_VEC);
-  p1 = cgetg(r+1,t_VECSMALL); gel(res,1) = p1;
-  p2 = cgetg(r+1,t_VECSMALL); gel(res,2) = p2;
-  if (d)
-  {
-    for (i=0,j=1; j<=n; j++)
-      if (d[j]) { i++; p1[i] = d[j]; p2[i] = j; }
-    vecsmall_sort(p1);
-  }
-  return res;
 }
 
 /* d a t_VECSMALL of integers in 1..n. Return the vector of the d[i]
@@ -3064,10 +3051,20 @@ indexrank(GEN x) {
   long r;
   GEN d, p = NULL;
   if (typ(x)!=t_MAT) pari_err_TYPE("indexrank",x);
-  if (RgM_is_FpM(x, &p) && p)
-    return gerepileupto(av, FpM_indexrank(RgM_to_FpM(x, p), p));
   init_indexrank(x);
-  d = gauss_pivot(x,&r);
+  if (RgM_is_FpM(x, &p) && p)
+  {
+    ulong pp;
+    x = RgM_Fp_init(x,p,&pp);
+    switch(pp)
+    {
+    case 0: d = FpM_gauss_pivot(x,p,&r); break;
+    case 2: d = F2m_gauss_pivot(x,&r); break;
+    default:d = Flm_gauss_pivot(x,pp,&r); break;
+    }
+  }
+  else
+    d = gauss_pivot(x,&r);
   avma = av; return indexrank0(lg(x)-1, r, d);
 }
 
@@ -3078,6 +3075,24 @@ FpM_indexrank(GEN x, GEN p) {
   GEN d;
   init_indexrank(x);
   d = FpM_gauss_pivot(x,p,&r);
+  avma = av; return indexrank0(lg(x)-1, r, d);
+}
+GEN
+Flm_indexrank(GEN x, ulong p) {
+  pari_sp av = avma;
+  long r;
+  GEN d;
+  init_indexrank(x);
+  d = Flm_gauss_pivot(Flm_copy(x),p,&r);
+  avma = av; return indexrank0(lg(x)-1, r, d);
+}
+GEN
+F2m_indexrank(GEN x) {
+  pari_sp av = avma;
+  long r;
+  GEN d;
+  init_indexrank(x);
+  d = F2m_gauss_pivot(F2m_copy(x),&r);
   avma = av; return indexrank0(lg(x)-1, r, d);
 }
 
@@ -3713,11 +3728,18 @@ det(GEN a)
   if (n == 2) return RgM_det2(a);
   if (RgM_is_FpM(a, &p))
   {
-    pari_sp av;
+    pari_sp av = avma;
+    ulong pp, d;
     if (!p) return ZM_det_i(a, n); /* ZM */
     /* FpM */
-    av = avma;
-    return gerepilecopy(av, Fp_to_mod(FpM_det(RgM_to_FpM(a, p), p), p));
+    a = RgM_Fp_init(a,p,&pp);
+    switch(pp)
+    {
+    case 0: return gerepileupto(av, Fp_to_mod(FpM_det(a,p),p)); break;
+    case 2: d = F2m_det(a); break;
+    default:d = Flm_det(a,pp); break;
+    }
+    avma = av; return mkintmodu(d, pp);
   }
   pivot = get_pivot_fun(a, a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
