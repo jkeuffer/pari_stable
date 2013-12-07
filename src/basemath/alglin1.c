@@ -695,24 +695,26 @@ Flm_det(GEN x, ulong p)
   avma = av; return d;
 }
 
+static GEN
+FpM_init(GEN a, GEN p, ulong *pp)
+{
+  if (lgefint(p) == 3)
+  {
+    *pp = (ulong)p[2];
+    return (*pp==2)? ZM_to_F2m(a): ZM_to_Flm(a, *pp);
+  }
+  *pp = 0; return a;
+}
 GEN
 FpM_det(GEN a, GEN p)
 {
-  const struct bb_field *ff;
+  pari_sp av = avma;
+  ulong pp, d;
   void *E;
-  if (lgefint(p) == 3)
-  {
-    pari_sp av = avma;
-    ulong d, pp = (ulong)p[2];
-    if (pp==2)
-      d = F2m_det_sp(ZM_to_F2m(a));
-    else
-      d = Flm_det_sp(ZM_to_Flm(a, pp), pp);
-    avma = av;
-    return utoi(d);
-  }
-  ff = get_Fp_field(&E,p);
-  return gen_det(a, E, ff);
+  a = FpM_init(a, p, &pp);
+  if (!pp) return gen_det(a, E, get_Fp_field(&E,p));
+  d = (pp==2)? F2m_det_sp(a): Flm_det_sp(a,pp);
+  avma = av; return utoi(d);
 }
 
 /* Destroy x */
@@ -830,24 +832,15 @@ Flm_rank(GEN x, ulong p)
   avma = av; return lg(x)-1 - r;
 }
 
-
 static GEN
 FpM_gauss_pivot(GEN x, GEN p, long *rr)
 {
-  const struct bb_field *ff;
+  ulong pp;
   void *E;
-
   if (lg(x)==1) { *rr = 0; return NULL; }
-  if (lgefint(p) == 3)
-  {
-    ulong pp = (ulong)p[2];
-    if (pp == 2)
-      return F2m_gauss_pivot(ZM_to_F2m(x), rr);
-    else
-      return Flm_gauss_pivot(ZM_to_Flm(x, pp), pp, rr);
-  }
-  ff = get_Fp_field(&E,p);
-  return gen_Gauss_pivot(x, rr, E, ff);
+  x = FpM_init(x, p, &pp);
+  if (!pp) return gen_Gauss_pivot(x, rr, E, get_Fp_field(&E,p));
+  return pp == 2? F2m_gauss_pivot(x, rr): Flm_gauss_pivot(x, pp, rr);
 }
 
 GEN
@@ -935,31 +928,25 @@ FqM_rank(GEN x, GEN T, GEN p)
 static GEN
 FpM_ker_i(GEN x, GEN p, long deplin)
 {
-  const struct bb_field *ff;
+  pari_sp av = avma;
+  ulong pp;
   void *E;
 
   if (lg(x)==1) return cgetg(1,t_MAT);
-  if (lgefint(p) == 3)
+  x = FpM_init(x, p, &pp);
+  if (!pp) return gen_ker(x, deplin, E, get_Fp_field(&E,p));
+  if (pp==2)
   {
-    pari_sp av0 = avma;
-    ulong pp = (ulong)p[2];
-    if (pp==2)
-    {
-      GEN y = ZM_to_F2m(x);
-      y = F2m_ker_sp(y, deplin);
-      if (!y) return y;
-      y = deplin? F2c_to_ZC(y): F2m_to_ZM(y);
-      return gerepileupto(av0, y);
-    } else {
-      GEN y = ZM_to_Flm(x, pp);
-      y = Flm_ker_sp(y, pp, deplin);
-      if (!y) return y;
-      y = deplin? Flc_to_ZC(y): Flm_to_ZM(y);
-      return gerepileupto(av0, y);
-    }
+    GEN y = F2m_ker_sp(x, deplin);
+    if (!y) return y;
+    y = deplin? F2c_to_ZC(y): F2m_to_ZM(y);
+    return gerepileupto(av, y);
+  } else {
+    GEN y = Flm_ker_sp(x, pp, deplin);
+    if (!y) return y;
+    y = deplin? Flc_to_ZC(y): Flm_to_ZM(y);
+    return gerepileupto(av, y);
   }
-  ff = get_Fp_field(&E,p);
-  return gen_ker(x, deplin, E, ff);
 }
 
 GEN
@@ -1255,24 +1242,21 @@ is_modular_solve(GEN a, GEN b, GEN *u)
     a = FpM_inv(a,p);
     if (a) a = FpM_to_mod(a, p);
   }
-  else
+  else switch(typ(b))
   {
-    switch(typ(b))
-    {
-      case t_COL:
-        if (!RgV_is_FpV(b, &p)) return 0;
-        b = RgC_to_FpC(b, p);
-        a = FpM_gauss(a,b,p);
-        if (a) a = FpC_to_mod(a, p);
-        break;
-      case t_MAT:
-        if (!RgM_is_FpM(b, &p)) return 0;
-        b = RgM_to_FpM(b, p);
-        a = FpM_gauss(a,b,p);
-        if (a) a = FpM_to_mod(a, p);
-        break;
-      default: return 0;
-    }
+    case t_COL:
+      if (!RgV_is_FpV(b, &p)) return 0;
+      b = RgC_to_FpC(b, p);
+      a = FpM_gauss(a,b,p);
+      if (a) a = FpC_to_mod(a, p);
+      break;
+    case t_MAT:
+      if (!RgM_is_FpM(b, &p)) return 0;
+      b = RgM_to_FpM(b, p);
+      a = FpM_gauss(a,b,p);
+      if (a) a = FpM_to_mod(a, p);
+      break;
+    default: return 0;
   }
   *u = a; return 1;
 }
@@ -1681,37 +1665,34 @@ GEN
 FpM_gauss(GEN a, GEN b, GEN p)
 {
   pari_sp av = avma;
+  ulong pp;
   long li,aco;
   int iscol;
   GEN u;
-  const struct bb_field *ff;
   void *E;
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
-  if (lgefint(p) == 3)
+  a = FpM_init(a,p,&pp);
+  if (!pp)
   {
-    ulong pp = (ulong)p[2];
-    if (pp == 2)
-    {
-      a = ZM_to_F2m(a);
-      b = ZM_to_F2m(b);
-      u = F2m_gauss_sp(a,b);
-      if (!u) {avma = av; return u;}
-      u = iscol? F2c_to_ZC(gel(u,1)): F2m_to_ZM(u);
-    }
-    else
-    {
-      a = ZM_to_Flm(a, pp);
-      b = ZM_to_Flm(b, pp);
-      u = Flm_gauss_sp(a,b, NULL, pp);
-      if (!u) {avma = av; return u;}
-      u = iscol? Flc_to_ZC(gel(u,1)): Flm_to_ZM(u);
-    }
-    return gerepileupto(av, u);
+    u = gen_Gauss(a,b,E, get_Fp_field(&E,p));
+    return u ? gerepilecopy(av, iscol? gel(u,1): u): u;
   }
-  ff = get_Fp_field(&E,p);
-  u = gen_Gauss(a,b,E,ff);
-  return u ? gerepilecopy(av, iscol? gel(u,1): u): u;
+  if (pp == 2)
+  {
+    b = ZM_to_F2m(b);
+    u = F2m_gauss_sp(a,b);
+    if (!u) {avma = av; return u;}
+    u = iscol? F2c_to_ZC(gel(u,1)): F2m_to_ZM(u);
+  }
+  else
+  {
+    b = ZM_to_Flm(b, pp);
+    u = Flm_gauss_sp(a,b, NULL, pp);
+    if (!u) {avma = av; return u;}
+    u = iscol? Flc_to_ZC(gel(u,1)): Flm_to_ZM(u);
+  }
+  return gerepileupto(av, u);
 }
 
 GEN
