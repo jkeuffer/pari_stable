@@ -47,6 +47,7 @@ test(matimage);
 test(matimagecompl);
 test(matindexrank);
 test(matker);
+test(lindep);
 test(x->x^(-1));
 test(x->x^2);
 test(x->A*x);
