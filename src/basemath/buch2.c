@@ -2083,10 +2083,11 @@ nfsign_from_logarch(GEN LA, GEN invpi, GEN archp)
 GEN
 nfsign_units(GEN bnf, GEN archp, int add_zu)
 {
-  GEN y, A = bnf_get_logfu(bnf), invpi = invr( mppi(DEFAULTPREC) );
+  GEN invpi, y, A = bnf_get_logfu(bnf), nf = bnf_get_nf(bnf);
   long j = 1, RU = lg(A);
 
-  if (!archp) archp = identity_perm( nf_get_r1(bnf_get_nf(bnf)) );
+  invpi = invr( mppi(nf_get_prec(nf)) );
+  if (!archp) archp = identity_perm( nf_get_r1(nf) );
   if (add_zu) { RU++; A--; }
   y = cgetg(RU,t_MAT);
   if (add_zu)
