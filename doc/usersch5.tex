@@ -3907,6 +3907,8 @@ all columns.
 
 \fun{GEN}{ZV_to_F2v}{GEN x}
 
+\fun{GEN}{RgV_to_F2v}{GEN x}
+
 \fun{GEN}{F2m_to_Flm}{GEN x}
 
 \fun{GEN}{F2m_to_ZM}{GEN x}
@@ -3916,6 +3918,8 @@ all columns.
 \fun{GEN}{Flm_to_F2m}{GEN x}
 
 \fun{GEN}{ZM_to_F2m}{GEN x}
+
+\fun{GEN}{RgM_to_F2m}{GEN x}
 
 \fun{void}{F2v_add_inplace}{GEN x, GEN y} replaces $x$ by $x+y$. It is
 allowed for $y$ to be shorter than $x$.
@@ -5676,6 +5680,8 @@ a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
 underlying prime $\ell$ satisfying $p = \ell^n$ for some $n$ (less than the
 accuracy of the input). Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
 \kbd{Fl}.
+
+\fun{ulong}{Rg_to_F2}{GEN z}, as \tet{Rg_to_Fl} for $p = 2$.
 
 \fun{ulong}{padic_to_Fl}{GEN x, ulong p} special case of \tet{Rg_to_Fl},
 for a $x$ a \typ{PADIC}.

@@ -241,6 +241,29 @@ Rg_to_Fl(GEN x, ulong p)
   }
 }
 
+ulong
+Rg_to_F2(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_INT: return mpodd(x);
+    case t_FRAC:
+      if (!mpodd(gel(x,2))) (void)Fl_inv(0,2); /* error */
+      return mpodd(gel(x,1));
+    case t_PADIC:
+      if (!equaliu(gel(x,2),2)) pari_err_OP("",x, mkintmodu(1,2));
+      if (valp(x) < 0) (void)Fl_inv(0,2);
+      return valp(x) & 1;
+    case t_INTMOD: {
+      GEN q = gel(x,1), a = gel(x,2);
+      if (mpodd(q)) pari_err_MODULUS("Rg_to_F2", q, gen_2);
+      return mpodd(a);
+    }
+    default: pari_err_TYPE("Rg_to_F2",x);
+      return 0; /* not reached */
+  }
+}
+
 GEN
 RgX_to_Flx(GEN x, ulong p)
 {

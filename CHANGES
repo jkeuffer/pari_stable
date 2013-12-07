@@ -119,6 +119,7 @@ EP  1- Configure option for gcov/lcov support
 LGr11- GP function Colrev
    12- GP operator %#n to recover time used to compute history result %n
    13- GP function getabstime()
+   14- [libpari] Rg_to_F2, RgV_to_F2v, RgM_to_F2m
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
