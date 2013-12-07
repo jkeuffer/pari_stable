@@ -28,3 +28,7 @@ B=[4,10]~;
 matinverseimage(A*Mod(1,7),B)
 matinverseimage(A*Mod(1,2^64+13),B)
 matinverseimage(A*Mod(1,3037000507),B)
+
+trace(matid(3))
+trace([;])
+trace(Mat([1,2]))

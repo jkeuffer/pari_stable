@@ -79,4 +79,9 @@
 [Mod(0, 18446744073709551629), Mod(2, 18446744073709551629), Mod(0, 18446744
 073709551629)]~
 [Mod(0, 3037000507), Mod(2, 3037000507), Mod(0, 3037000507)]~
+3
+0
+  ***   at top-level: trace(Mat([1,2]))
+  ***                 ^-----------------
+  *** trace: inconsistent dimensions in gtrace.
 Total time spent: 60

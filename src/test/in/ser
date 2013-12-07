@@ -8,3 +8,5 @@ for (i=1,#f,
 )
 }
 O(x^-2)
+trace(I*x+1+O(x^2))
+norm(I*x+1+O(x^2))
