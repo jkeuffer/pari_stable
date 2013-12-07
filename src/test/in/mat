@@ -52,6 +52,8 @@ test(x->x^(-1));
 test(x->x^2);
 test(x->A*x);
 
+matdet([0,1,0;1,0,1;2,0,3]*Mod(1,2^64+13))
+
 trace(matid(3))
 trace([;])
 trace(Mat([1,2]))
