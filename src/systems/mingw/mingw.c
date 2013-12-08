@@ -120,18 +120,18 @@ int
 win32_terminal_width(void)
 {
   CONSOLE_SCREEN_BUFFER_INFO sbi;
-  if( !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbi) )
-      return 0;
-  return (sbi.srWindow.Right - sbi.srWindow.Left);
+  if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbi))
+    return 0;
+  return sbi.srWindow.Right - sbi.srWindow.Left + 1;
 }
 
 int
 win32_terminal_height(void)
 {
   CONSOLE_SCREEN_BUFFER_INFO sbi;
-  if( !GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbi) )
-      return 0;
-  return (sbi.srWindow.Bottom - sbi.srWindow.Top);
+  if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbi))
+    return 0;
+  return sbi.srWindow.Bottom - sbi.srWindow.Top + 1;
 }
 
 void
