@@ -2708,28 +2708,6 @@ Flm_invimage_i(GEN A, GEN B, ulong p)
   return Flm_mul(X, Flm_inv_upper_1(Y,p), p);
 }
 
-/* a <= b */
-GEN
-F2v_slice(GEN x, long a, long b)
-{
-  long i,j,k, l = b-a+1;
-  GEN z = cgetg(nbits2lg(l), t_VECSMALL);
-  z[1] = l;
-  for(i=a,k=1,j=BITS_IN_LONG; i<=b; i++,j++)
-  {
-    if (j==BITS_IN_LONG) { j=0; z[++k]=0; }
-    if (F2v_coeff(x,i)) z[k] |= 1UL<<j;
-  }
-  return z;
-}
-GEN
-F2m_rowslice(GEN x, long a, long b)
-{
-  long i, l;
-  GEN y = cgetg_copy(x, &l);
-  for (i = 1; i < l; i++) gel(y,i) = F2v_slice(gel(x,i),a,b);
-  return y;
-}
 static GEN
 F2m_invimage_i(GEN A, GEN B)
 {

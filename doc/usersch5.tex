@@ -3865,6 +3865,9 @@ $0$.
 
 \fun{void}{F2v_copy}{GEN x} returns a copy of $x$.
 
+\fun{GEN}{F2v_slice}{GEN x, long a, long b} returns the \kbd{F2v} with
+entries $x[a]$, \dots, $x[b]$. Assumes $a \leq b$.
+
 \fun{ulong}{F2m_coeff}{GEN x, long i, long j} returns the coefficient $(i,j)$
 of $x$.
 
@@ -3878,6 +3881,9 @@ of $x$.
 to $1$.
 
 \fun{void}{F2m_copy}{GEN x} returns a copy of $x$.
+
+\fun{GEN}{F2m_rowslice}{GEN x, long a, long b} returns the \kbd{F2m} built
+from the $a$-th to $b$-th rows of the \kbd{F2m} $x$. Assumes $a \leq b$.
 
 \fun{GEN}{F2m_F2c_mul}{GEN x, GEN y} multiplies  \kbd{x} and \kbd{y} (assumed
 to have compatible dimensions).
