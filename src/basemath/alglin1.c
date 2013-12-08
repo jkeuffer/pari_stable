@@ -716,16 +716,22 @@ RgM_Fp_init(GEN a, GEN p, ulong *pp)
   *pp = 0; return RgM_to_FpM(a,p);
 }
 
+static GEN
+FpM_det_gen(GEN a, GEN p)
+{
+  void *E;
+  const struct bb_field *S = get_Fp_field(&E,p);
+  return gen_det(a, E, S);
+}
 GEN
 FpM_det(GEN a, GEN p)
 {
   pari_sp av = avma;
   ulong pp, d;
-  void *E;
   a = FpM_init(a, p, &pp);
   switch(pp)
   {
-  case 0: return gen_det(a, E, get_Fp_field(&E,p));
+  case 0: return FpM_det_gen(a, p);
   case 2: d = F2m_det_sp(a); break;
   default:d = Flm_det_sp(a,pp); break;
   }
@@ -812,15 +818,21 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
 }
 
 static GEN
+FpM_gauss_pivot_gen(GEN x, GEN p, long *rr)
+{
+  void *E;
+  const struct bb_field *S = get_Fp_field(&E,p);
+  return gen_Gauss_pivot(x, rr, E, S);
+}
+static GEN
 FpM_gauss_pivot(GEN x, GEN p, long *rr)
 {
   ulong pp;
-  void *E;
   if (lg(x)==1) { *rr = 0; return NULL; }
   x = FpM_init(x, p, &pp);
   switch(pp)
   {
-  case 0: return gen_Gauss_pivot(x, rr, E, get_Fp_field(&E,p));
+  case 0: return FpM_gauss_pivot_gen(x, p, rr);
   case 2: return F2m_gauss_pivot(x, rr);
   default:return Flm_gauss_pivot(x, pp, rr);
   }
@@ -942,18 +954,24 @@ FqM_rank(GEN x, GEN T, GEN p)
 }
 
 static GEN
+FpM_ker_gen(GEN x, GEN p, long deplin)
+{
+  void *E;
+  const struct bb_field *S = get_Fp_field(&E,p);
+  return gen_ker(x, deplin, E, S);
+}
+static GEN
 FpM_ker_i(GEN x, GEN p, long deplin)
 {
   pari_sp av = avma;
   ulong pp;
-  void *E;
   GEN y;
 
   if (lg(x)==1) return cgetg(1,t_MAT);
   x = FpM_init(x, p, &pp);
   switch(pp)
   {
-  case 0: return gen_ker(x, deplin, E, get_Fp_field(&E,p));
+  case 0: return FpM_ker_gen(x,p,deplin);
   case 2:
     y = F2m_ker_sp(x, deplin);
     if (!y) return y;
@@ -1747,6 +1765,13 @@ Flm_inv(GEN a, ulong p) {
   return Flm_inv_sp(RgM_shallowcopy(a), NULL, p);
 }
 
+static GEN
+FpM_gauss_gen(GEN a, GEN b, GEN p)
+{
+  void *E;
+  const struct bb_field *S = get_Fp_field(&E,p);
+  return gen_Gauss(a,b, E, S);
+}
 GEN
 FpM_gauss(GEN a, GEN b, GEN p)
 {
@@ -1755,14 +1780,13 @@ FpM_gauss(GEN a, GEN b, GEN p)
   long li,aco;
   int iscol;
   GEN u;
-  void *E;
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
   a = FpM_init(a,p,&pp);
   switch(pp)
   {
   case 0:
-    u = gen_Gauss(a,b,E, get_Fp_field(&E,p));
+    u = FpM_gauss_gen(a,b,p);
     return u ? gerepilecopy(av, iscol? gel(u,1): u): u;
   case 2:
     b = ZM_to_F2m(b);
@@ -2429,19 +2453,14 @@ ker(GEN x)
   if (RgM_is_FpM(x, &p) && p)
   {
     ulong pp;
-    GEN y;
-    void *E;
     x = RgM_Fp_init(x, p, &pp);
     switch(pp)
     {
-    case 0: y = gen_ker(x, 0, E, get_Fp_field(&E,p));
-            y = FpM_to_mod(y, p);
-            break;
-    case 2: y = F2m_to_mod(F2m_ker_sp(x,0));
-            break;
-    default:y = Flm_to_mod(Flm_ker_sp(x,pp,0), pp);
+    case 0: x = FpM_to_mod(FpM_ker_gen(x,p,0),p); break;
+    case 2: x = F2m_to_mod(F2m_ker_sp(x,0)); break;
+    default:x = Flm_to_mod(Flm_ker_sp(x,pp,0), pp); break;
     }
-    return gerepileupto(av, y);
+    return gerepileupto(av, x);
   }
   return ker_aux(x,x);
 }
