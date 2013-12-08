@@ -842,24 +842,21 @@ GEN
 FpM_image(GEN x, GEN p)
 {
   long r;
-  GEN d = FpM_gauss_pivot(x,p,&r);
-  /* d left on stack for efficiency */
+  GEN d = FpM_gauss_pivot(x,p,&r); /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
 GEN
 Flm_image(GEN x, ulong p)
 {
   long r;
-  GEN d = Flm_gauss_pivot(Flm_copy(x),p,&r);
-  /* d left on stack for efficiency */
+  GEN d = Flm_gauss_pivot(Flm_copy(x),p,&r); /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
 GEN
 F2m_image(GEN x)
 {
   long r;
-  GEN d = F2m_gauss_pivot(F2m_copy(x),&r);
-  /* d left on stack for efficiency */
+  GEN d = F2m_gauss_pivot(F2m_copy(x),&r); /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
 
@@ -892,18 +889,16 @@ F2m_rank(GEN x)
 static GEN
 FlxqM_gauss_pivot(GEN x, GEN T, ulong p, long *rr)
 {
-  const struct bb_field *ff;
   void *E;
-  ff = get_Flxq_field(&E, T, p);
-  return gen_Gauss_pivot(x, rr, E, ff);
+  const struct bb_field *S = get_Flxq_field(&E, T, p);
+  return gen_Gauss_pivot(x, rr, E, S);
 }
 
 GEN
 FlxqM_image(GEN x, GEN T, ulong p)
 {
   long r;
-  GEN d = FlxqM_gauss_pivot(x,T,p,&r);
-  /* d left on stack for efficiency */
+  GEN d = FlxqM_gauss_pivot(x,T,p,&r); /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
 
@@ -917,10 +912,15 @@ FlxqM_rank(GEN x, GEN T, ulong p)
 }
 
 static GEN
+FqM_gauss_pivot_gen(GEN x, GEN T, GEN p, long *rr)
+{
+  void *E;
+  const struct bb_field *S = get_Fq_field(&E,T,p);
+  return gen_Gauss_pivot(x, rr, E, S);
+}
+static GEN
 FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
 {
-  const struct bb_field *ff;
-  void *E;
   if (lg(x)==1) { *rr = 0; return NULL; }
   if (!T) return FpM_gauss_pivot(x, p, rr);
   if (lgefint(p) == 3)
@@ -931,16 +931,14 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, long *rr)
     GEN d = FlxqM_gauss_pivot(FqM_to_FlxM(x, T, p), Tp, pp, rr);
     return d ? gerepileuptoleaf(av, d): d;
   }
-  ff = get_Fq_field(&E, T, p);
-  return gen_Gauss_pivot(x, rr, E, ff);
+  return FqM_gauss_pivot_gen(x, T, p, rr);
 }
 
 GEN
 FqM_image(GEN x, GEN T, GEN p)
 {
   long r;
-  GEN d = FqM_gauss_pivot(x,T,p,&r);
-  /* d left on stack for efficiency */
+  GEN d = FqM_gauss_pivot(x,T,p,&r); /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
 
@@ -992,10 +990,15 @@ GEN
 FpM_deplin(GEN x, GEN p) { return FpM_ker_i(x,p,1); }
 
 static GEN
+FqM_ker_gen(GEN x, GEN T, GEN p, long deplin)
+{
+  void *E;
+  const struct bb_field *S = get_Fq_field(&E,T,p);
+  return gen_ker(x,deplin,E,S);
+}
+static GEN
 FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
 {
-  const struct bb_field *ff;
-  void *E;
   if (!T) return FpM_ker_i(x,p,deplin);
   if (lg(x)==1) return cgetg(1,t_MAT);
 
@@ -1008,8 +1011,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     GEN p1 = FlxM_to_ZXM(FlxqM_ker(Ml,Tl,l));
     return gerepileupto(ltop,p1);
   }
-  ff = get_Fq_field(&E,T,p);
-  return gen_ker(x,deplin,E,ff);
+  return FqM_ker_gen(x, T, p, deplin);
 }
 
 GEN
@@ -1827,6 +1829,13 @@ FlxqM_inv(GEN a, GEN T, ulong p)
   return FlxqM_gauss(a, NULL, T, p);
 }
 
+static GEN
+FqM_gauss_gen(GEN a, GEN b, GEN T, GEN p)
+{
+  void *E;
+  const struct bb_field *S = get_Fq_field(&E,T,p);
+  return gen_Gauss(a,b,E,S);
+}
 GEN
 FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 {
@@ -1834,13 +1843,9 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   long li, aco = lg(a)-1;
   int iscol;
   GEN u;
-  const struct bb_field *ff;
-  void *E;
-
   if (!T) return FpM_gauss(a,b,p);
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, iscol?t_COL:t_MAT);
-  ff= get_Fq_field(&E,T,p);
-  u = gen_Gauss(a,b,E,ff);
+  u = FqM_gauss_gen(a,b,T,p);
   return u ? gerepilecopy(av, iscol? gel(u,1): u): u;
 }
 
