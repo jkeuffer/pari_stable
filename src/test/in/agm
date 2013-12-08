@@ -10,6 +10,9 @@ gagm(a,b)=
   a;
 }
 
-testagm(x)=my(eps=norm(agm(x,1)-gagm(x,1)));if(eps>10^-75,printf("error %s: %s\n",x,eps));
+testagm(x)= {
+  my(e = norm(agm(x,1)-gagm(x,1)));
+  if(e > 1.E-75, printf("error %s: %s\n",x,e));
+}
 
 for(i=-6,6,for(j=-6,6,testagm(1/6+i/3+j*I/3)));
