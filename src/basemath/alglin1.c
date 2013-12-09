@@ -2190,21 +2190,15 @@ keri(GEN x)
   return gerepileupto(av0, y);
 }
 
-GEN
-deplin(GEN x0)
+static GEN
+deplin_aux(GEN x0)
 {
   pari_sp av = avma;
-  long i,j,k,t,nc,nl;
+  long i, j, k, nl, nc = lg(x0)-1;
   GEN D, x, y, c, l, d, ck;
 
-  t = typ(x0);
-  if (t == t_MAT) x = RgM_shallowcopy(x0);
-  else
-  {
-    if (t != t_VEC) pari_err_TYPE("deplin",x0);
-    x = gtomat(x0);
-  }
-  nc = lg(x)-1; if (!nc) { avma=av; return cgetg(1,t_COL); }
+  if (!nc) { avma=av; return cgetg(1,t_COL); }
+  x = RgM_shallowcopy(x0);
   nl = nbrows(x);
   d = const_vec(nl, gen_1); /* pivot list */
   c = zero_zv(nl);
@@ -2240,7 +2234,63 @@ deplin(GEN x0)
   y = primitive_part(y, &c);
   return c? gerepileupto(av, y): gerepilecopy(av, y);
 }
+static GEN
+RgV_deplin(GEN v)
+{
+  pari_sp av = avma;
+  long n = lg(v)-1;
+  GEN y, p = NULL;
+  if (n <= 1)
+  {
+    if (n == 1 && gequal0(gel(v,1))) return mkcol(gen_1);
+    return cgetg(1, t_COL);
+  }
+  if (gequal0(gel(v,1))) return scalarcol_shallow(gen_1, n);
+  v = primpart(mkvec2(gel(v,1),gel(v,2)));
+  if (RgV_is_FpV(v, &p) && p) v = centerlift(v);
+  y = zerocol(n);
+  gel(y,1) = gneg(gel(v,2));
+  gel(y,2) = gcopy(gel(v,1));
+  return gerepileupto(av, y);
 
+}
+GEN
+deplin(GEN x)
+{
+  GEN p = NULL;
+  switch(typ(x))
+  {
+    case t_MAT: break;
+    case t_VEC: return RgV_deplin(x);
+    default: pari_err_TYPE("deplin",x);
+  }
+  if (RgM_is_FpM(x, &p) && p)
+  {
+    pari_sp av = avma;
+    ulong pp;
+    x = RgM_Fp_init(x, p, &pp);
+    switch(pp)
+    {
+    case 0:
+      x = FpM_ker_gen(x,p,1);
+      if (!x) { avma = av; return cgetg(1,t_COL); }
+      x = FpC_center(x,p,shifti(p,-1));
+      break;
+    case 2:
+      x = F2m_ker_sp(x,1);
+      if (!x) { avma = av; return cgetg(1,t_COL); }
+      x = F2c_to_ZC(x); break;
+    default:
+      x = Flm_ker_sp(x,pp,1);
+      if (!x) { avma = av; return cgetg(1,t_COL); }
+      x = Flv_center(x, pp, pp>>1);
+      x = zc_to_ZC(x);
+      break;
+    }
+    return gerepileupto(av, x);
+  }
+  return deplin_aux(x);
+}
 /*******************************************************************/
 /*                                                                 */
 /*         GAUSS REDUCTION OF MATRICES  (m lines x n cols)         */

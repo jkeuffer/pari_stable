@@ -191,8 +191,13 @@ Mod(18446744073709551628, 18446744073709551629)
 [0 1]
 
 [;]
+lindep:
+[1, 0, 1]~
+[1, -2, 1]~
+[1, -2, 1]~
+[1, -2, 1]~
   ***   Warning: new stack size = 1000000 (0.954 Mbytes).
 68
 2
 68
-Total time spent: 60
+Total time spent: 64

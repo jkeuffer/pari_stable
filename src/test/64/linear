@@ -12,7 +12,7 @@ z^2 - 5*z - 2
 ? charpoly(Mod(1,8191)*[1,2;3,4],z,2)
 z^2 + Mod(8186, 8191)*z + Mod(8189, 8191)
 ? lindep(Mod(1,7)*[2,-1;1,3])
-[Mod(6, 7), Mod(5, 7)]~
+[-3, 1]~
 ? lindep([(1-3*sqrt(2))/(3-2*sqrt(3)),1,sqrt(2),sqrt(3),sqrt(6)])
 [3, 3, -9, 2, -6]~
 ? lindep([(1-3*sqrt(2))/(3-2*sqrt(3)),1,sqrt(2),sqrt(3),sqrt(6)],14)
@@ -675,6 +675,6 @@ Vecsmall([4, 3, 2, 1])
 ? vector(10,x,1/x)
 [1, 1/2, 1/3, 1/4, 1/5, 1/6, 1/7, 1/8, 1/9, 1/10]
 ? getheap
-[96, 10160]
+[96, 10148]
 ? print("Total time spent: ",gettime);
-Total time spent: 16
+Total time spent: 8
