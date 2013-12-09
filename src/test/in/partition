@@ -15,7 +15,7 @@ test(N) = /* pentagonal numbers recurrence */
     if (s != numbpart(n), error([n, s]))
   );
 }
-test(2*10^4);
+test(10^4);
 
 numbpart(0)
 numbpart(52602)
