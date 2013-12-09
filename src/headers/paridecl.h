@@ -3661,6 +3661,7 @@ INLINE GEN    F2x_div(GEN x, GEN y);
 INLINE GEN    F2x_renormalize(GEN x, long lx);
 INLINE GEN    F2m_copy(GEN x);
 INLINE GEN    F2v_copy(GEN x);
+INLINE GEN    F2v_ei(long n, long i);
 INLINE GEN    Flm_copy(GEN x);
 INLINE GEN    Flv_copy(GEN x);
 INLINE int    Flx_equal1(GEN x);

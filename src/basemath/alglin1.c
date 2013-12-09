@@ -2464,11 +2464,12 @@ END:
   return gerepileuptoleaf(av0, d);
 }
 
+/* set *pr = dim Ker x */
 static GEN
-gauss_pivot(GEN x, long *rr) {
+gauss_pivot(GEN x, long *pr) {
   GEN data;
   pivot_fun pivot = get_pivot_fun(x, x, &data);
-  return RgM_pivots(x, data, rr, pivot);
+  return RgM_pivots(x, data, pr, pivot);
 }
 
 /* compute ker(x), x0 is a reference point when guessing whether x[i,j] ~ 0
@@ -2896,8 +2897,9 @@ RgM_invimage(GEN A, GEN B)
   return gerepileupto(av, RgM_mul(X, RgM_inv_upper(Y)));
 }
 
+/* r = dim Ker x */
 static GEN
-get_suppl(GEN x, GEN d, long r)
+get_suppl(GEN x, GEN d, long r, GEN(*ei)(long,long))
 {
   pari_sp av;
   GEN y, c;
@@ -2918,7 +2920,7 @@ get_suppl(GEN x, GEN d, long r)
 
   rx -= r;
   for (j=1; j<=rx; j++) gel(y,j) = gcopy(gel(y,j));
-  for (   ; j<=n; j++)  gel(y,j) = col_ei(n, y[j]);
+  for (   ; j<=n; j++)  gel(y,j) = ei(n, y[j]);
   return y;
 }
 
@@ -2954,7 +2956,7 @@ suppl(GEN x)
   }
   avma = av; init_suppl(x);
   d = gauss_pivot(X,&r);
-  avma = av; return get_suppl(X,d,r);
+  avma = av; return get_suppl(X,d,r,&col_ei);
 }
 GEN
 FpM_suppl(GEN x, GEN p)
@@ -2963,7 +2965,7 @@ FpM_suppl(GEN x, GEN p)
   GEN d;
   long r;
   init_suppl(x); d = FpM_gauss_pivot(x,p, &r);
-  avma = av; return get_suppl(x,d,r);
+  avma = av; return get_suppl(x,d,r,&col_ei);
 }
 GEN
 Flm_suppl(GEN x, ulong p)
@@ -2971,8 +2973,8 @@ Flm_suppl(GEN x, ulong p)
   pari_sp av = avma;
   GEN d;
   long r;
-  init_suppl(x); d = Flm_gauss_pivot(x,p, &r);
-  avma = av; return get_suppl(x,d,r);
+  init_suppl(x); d = Flm_gauss_pivot(Flm_copy(x),p, &r);
+  avma = av; return get_suppl(x,d,r,&vecsmall_ei);
 
 }
 GEN
@@ -2981,8 +2983,8 @@ F2m_suppl(GEN x)
   pari_sp av = avma;
   GEN d;
   long r;
-  init_suppl(x); d = F2m_gauss_pivot(x, &r);
-  avma = av; return get_suppl(x,d,r);
+  init_suppl(x); d = F2m_gauss_pivot(F2m_copy(x), &r);
+  avma = av; return get_suppl(x,d,r,&F2v_ei);
 }
 
 GEN
@@ -2995,7 +2997,7 @@ FqM_suppl(GEN x, GEN T, GEN p)
   if (!T) return FpM_suppl(x,p);
   init_suppl(x);
   d = FqM_gauss_pivot(x,T,p,&r);
-  avma = av; return get_suppl(x,d,r);
+  avma = av; return get_suppl(x,d,r,&col_ei);
 }
 
 GEN

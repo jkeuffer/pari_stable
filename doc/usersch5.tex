@@ -3922,6 +3922,10 @@ identity matrix.
 \fun{GEN}{zero_F2v}{long n} creates a \kbd{F2v} with \kbd{n} components set to
 $0$.
 
+\fun{GEN}{F2v_ei}{long n, long i} creates a \kbd{F2v} with \kbd{n} components
+set to $0$, but for the $i$-th one, which is set to $1$ ($i$-th vector in the
+canonical basis).
+
 \fun{GEN}{zero_F2m}{long m, long n} creates a \kbd{Flm} with \kbd{m} x \kbd{n}
 components set to $0$. Note that the result allocates a
 \emph{single} column, so modifying an entry in one column modifies it in

@@ -68,6 +68,7 @@ matrixqz(matrix(2,2),-1)
 
 A=[1,2,3;4,5,6;7,8,9];
 test(lindep)
+test(matsupplement)
 
 default(parisize,10^6); \\ need to exercise gerepile in matker+matimage
 p=2^64+13;

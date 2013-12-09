@@ -403,6 +403,8 @@ col_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
 vec_ei(long n, long i) { GEN e = zerovec(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
+F2v_ei(long n, long i) { GEN e = zero_F2v(n); F2v_set(e,i); return e; }
+INLINE GEN
 vecsmall_ei(long n, long i) { GEN e = zero_zv(n); e[i] = 1; return e; }
 INLINE GEN
 Rg_col_ei(GEN x, long n, long i) { GEN e = zerocol(n); gel(e,i) = x; return e; }
