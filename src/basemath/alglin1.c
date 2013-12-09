@@ -1307,13 +1307,13 @@ is_modular_solve(GEN a, GEN b, GEN *u)
         break;
       case 2:
         b = RgV_to_F2v(b);
-        a = F2m_gauss(a,b);
-        if (a) a = F2c_to_mod(a);
+        a = F2m_gauss(a,mkmat(b));
+        if (a) a = F2c_to_mod(gel(a,1));
         break;
       default:
         b = RgC_to_Flc(b, pp);
-        a = Flm_gauss(a,b,pp);
-        if (a) a = Flc_to_mod(a, pp);
+        a = Flm_gauss(a,mkmat(b),pp);
+        if (a) a = Flc_to_mod(gel(a,1), pp);
         break;
       }
       break;
