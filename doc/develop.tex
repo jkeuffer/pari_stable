@@ -728,57 +728,60 @@ it is actually valid. This is used by GP2C -C.
 
 PARI provides an abstraction for doing parallel computations.
 
-\fun{void}{mt_queue_start}{struct pari\_mt *pt, GEN worker} Let worker be a
-\typ{CLOSURE} object of arity $1$.  Initialize the structure \kbd{pt} for
-parallel evaluation of \kbd{worker}.
+\fun{void}{mt_queue_start}{struct pari\_mt *pt, GEN worker} Let \kbd{worker}
+be a \typ{CLOSURE} object of arity $1$.  Initialize the structure \kbd{pt}
+to evaluate \kbd{worker} in parallel.
 
-\fun{void}{mt_queue_submit}{struct pari\_mt *pt, long workid, GEN work} Submit
-\kbd{work} to be evaluated by \kbd{worker}, or \kbd{NULL} if no further works
-are to be submitted. The value \kbd{workid} is user-specified.
+\fun{void}{mt_queue_submit}{struct pari\_mt *pt, long taskid, GEN task} Submit
+\kbd{task} to be evaluated by \kbd{worker}, or \kbd{NULL} if no further task
+is left to be submitted. The value \kbd{taskid} is user-specified and allows
+to later match up results and submitted tasks.
 
-\fun{GEN}{mt_queue_get}{struct pari\_mt *pt, long *workid, long *pending}
-Return the result of the evaluation by \kbd{worker} of some of the previously
-submitted works. Set \kbd{pending} to the number of remaining pending works.
-Set \kbd{workid} to the value associate to this work by
-\kbd{mt\_queue\_submit}.  Returns \kbd{NULL} if more works need to be
+\fun{GEN}{mt_queue_get}{struct pari\_mt *pt, long *taskid, long *pending}
+Return the result of the evaluation by \kbd{worker} of one of the previously
+submitted tasks. Set \kbd{pending} to the number of remaining pending tasks.
+Set \kbd{taskid} to the value associate to this task by
+\kbd{mt\_queue\_submit}.  Returns \kbd{NULL} if more tasks need to be
 submitted.
 
 \fun{void}{mt_queue_end}{struct pari\_mt *pt} End the parallel execution.
 
-Call to \kbd{mt\_queue\_submit} and \kbd{mt\_queue\_get} must be alternated:
-each call to \kbd{mt\_queue\_submit}  must be followed by a call to
-\kbd{mt\_queue\_get} before any other call to \kbd{mt\_queue\_submit} and
-conversely for \kbd{mt\_queue\_get} with respect to \kbd{mt\_queue\_submit}.
+Calls to \tet{mt_queue_submit} and \tet{mt_queue_get} must alternate: each
+call to \tet{mt_queue_submit} must be followed by a call to
+\tet{mt_queue_get} before any other call to \tet{mt_queue_submit},
+and conversely.
 
-The first calls to \kbd{mt\_queue\_get} will return \kbd{NULL} until a
-sufficient number of works have been submitted. If no more works are to be
-submitted, \kbd{mt\_queue\_submit(handle,NULL)} should be used to allow for
-further calls to \kbd{mt\_queue\_get}.  If \kbd{mt\_queue\_get} set
-\kbd{pending} to $0$, then no more works are pending and it is safe to call
-\kbd{mt\_queue\_end}.
+The first call to \tet{mt_queue_get} will return \kbd{NULL} until a
+sufficient number of tasks have been submitted. If no more tasks are left
+to be submitted, use
+\bprog
+  mt_queue_submit(handle, id, NULL)
+@eprog\noindent
+to allow further calls to \tet{mt_queue_get}.  If \tet{mt_queue_get} sets
+\kbd{pending} to $0$, then no more tasks are pending and it is safe to call
+\tet{mt_queue_end}.
 
-The parameter \kbd{workid} can be chosen arbitrarily. It is associated to a
-work but is not available to \kbd{worker}.  It provides an efficient way to
-identify a result with its work. It is meaningless when the parameter
-\kbd{work} is \kbd{NULL}.
+The parameter \kbd{taskid} can be chosen arbitrarily. It is associated to a
+task but is not available to \kbd{worker}.  It provides an efficient way to
+match a tasks and results. It is ignored when the parameter \kbd{task} is
+\kbd{NULL}.
 
 \section{Initialization}
 
 This section is technical.
 
 \fun{void}{pari_mt_init}{void} \label{pari_mt_init}
-In some situation, when using MPI, it is necessary to
-run initialization code on the child nodes after PARI is initialized.
-This can be done as follow:
+When using MPI, it is sometimes necessary to run initialization code on the
+child nodes after PARI is initialized. This can be done as follow:
 
-\item call \tet{pari_init_opts} with the flag \kbd{INIT\_noIMTm}.
+\item call \tet{pari_init_opts} with the flag \tet{INIT_noIMTm}.
 This initializes PARI, but not the MT engine.
 
 \item call the required initialization code.
 
-\item call \kbd{pari\_mt\_init} to initialize the MT engine.
+\item call \tet{pari_mt_init} to initialize the MT engine.
 Note that under MPI, this function only returns on the master node. On the
-child nodes, it enters slave mode. Thus it is no more possible to run
+child nodes, it enters slave mode. Thus it is no longer possible to run
 initialization code on the child nodes.
 
 See the file \kbd{examples/pari-mt.c} for an example.
