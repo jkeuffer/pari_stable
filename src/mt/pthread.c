@@ -46,6 +46,20 @@ void mt_init_stack(size_t s) { }
 #define UNLOCK(x) while(0); pthread_mutex_unlock(x)
 
 void
+mt_sigint_block(void)
+{
+  if (mt_thread_no>=0)
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL);
+}
+
+void
+mt_sigint_unblock(void)
+{
+  if (mt_thread_no>=0)
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL);
+}
+
+void
 mt_err_recover(long er)
 {
   if (mt_thread_no>=0)

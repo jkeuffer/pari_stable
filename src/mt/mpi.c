@@ -185,9 +185,9 @@ mt_err_recover(long er)
 {
   if (pari_MPI_rank) longjmp(child_env,er);
 }
-
-void
-mt_sigint(void) {}
+void mt_sigint_block(void) { }
+void mt_sigint_unblock(void) { }
+void mt_sigint(void) {}
 
 int
 mt_is_parallel(void)

@@ -219,7 +219,7 @@ err_var(GEN x) { pari_err_TYPE("evaluator [variable name expected]", x); }
 INLINE void
 checkvalue(entree *ep)
 {
-  if (mt_is_thread())
+  if (MT_IS_THREAD)
     pari_err(e_MISC,"mt: global variable not supported: %s",ep->name);
   if (ep->valence==EpNEW)
   {

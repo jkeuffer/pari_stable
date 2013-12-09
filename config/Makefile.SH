@@ -111,7 +111,7 @@ OBJSGP=
 for f in $gp $graph; do
   OBJSGP="$OBJSGP $f\$(_O)"
 done
-HEADERS=mpinl.h
+HEADERS="mpinl.h parimt.h"
 for f in $hlist; do
   HEADERS="$HEADERS $src/headers/$f.h";
 done
@@ -369,7 +369,7 @@ install: install-nodata install-data
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)/pari
-	-for i in paricfg.h mpinl.h; do \\
+	-for i in paricfg.h mpinl.h parimt.h; do \\
 	  \$(INSTALL_DATA) \$\$i \$(INCLUDEDIR)/pari; done
 	-for i in $headerlist; do \\
 	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR)/pari; done
@@ -502,6 +502,9 @@ install-lib-dyn: \$(LIBPARI_DYN) install-lib-dyn-link
 nsis: gp
 	-cd $doc; \$(MAKE) docpdf
 	makensis pari.nsi
+
+parimt.h: $src/mt/$thread_engine.h
+	cat $src/mt/$thread_engine.h > parimt.h
 
 mpinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > mpinl.h

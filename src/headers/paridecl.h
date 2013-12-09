@@ -2821,6 +2821,8 @@ GEN     vecvecsmall_sort_uniq(GEN x);
 /* mt.c */
 
 void    mt_sigint(void);
+void    mt_sigint_block(void);
+void    mt_sigint_unblock(void);
 void    mt_err_recover(long er);
 void    mt_init_stack(size_t s);
 int     mt_is_thread(void);

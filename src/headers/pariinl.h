@@ -947,15 +947,18 @@ perm_conj(GEN s, GEN t)
 #define BLOCK_SIGALRM_START          \
 {                                    \
   int block=PARI_SIGINT_block;       \
-  PARI_SIGINT_block = 2;
+  PARI_SIGINT_block = 2;             \
+  MT_SIGINT_BLOCK(block);
 
 #define BLOCK_SIGINT_START           \
 {                                    \
   int block=PARI_SIGINT_block;       \
-  PARI_SIGINT_block = 1;
+  PARI_SIGINT_block = 1;             \
+  MT_SIGINT_BLOCK(block);
 
 #define BLOCK_SIGINT_END             \
   PARI_SIGINT_block = block;         \
+  MT_SIGINT_UNBLOCK(block);          \
   if (!block && PARI_SIGINT_pending) \
   {                                  \
     int sig = PARI_SIGINT_pending;   \

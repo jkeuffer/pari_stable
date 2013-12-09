@@ -53,6 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 BEGINEXTERN
 #include "paridecl.h"
 #include "paritune.h"
+#include "parimt.h"
 #ifndef PARI_NO_MPINL_H
 #  include "mpinl.h"
 #endif
