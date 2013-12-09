@@ -39,6 +39,7 @@ test(f)=
   print(f(A*Mod(1,7)));
   print(f(A*Mod(1,3037000507)));
   print(f(A*Mod(1,2^64+13)));
+  print(f(A*(1+O(101^3))));
 }
 test(matdet);
 test(matrank);
