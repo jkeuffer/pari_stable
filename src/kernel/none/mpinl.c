@@ -12,6 +12,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define PARI_NO_PARIINL_H
 #define INLINE
-#define DISABLE_INLINE
+#ifndef DISABLE_INLINE
+#  define DISABLE_INLINE
+#endif
 #include "pari.h"
 ulong hiremainder, overflow;
