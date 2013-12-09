@@ -65,6 +65,8 @@ matrixqz(matrix(2,2),-1)
 
 default(parisize,10^6); \\ need to exercise gerepile in matker+matimage
 p=2^64+13;
-A=matrix(70,70,i,j, Mod(i+j,p));
+A=matrix(70,70,i,j, i+j);
+Ap=Mod(A,p);
+#matker(Ap)
+#matimage(Ap)
 #matker(A)
-#matimage(A)
