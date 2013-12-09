@@ -753,6 +753,9 @@ get_red(struct red *S, struct igusa_p *Ip, GEN polh, GEN p, long alpha, long r)
       S->g = cyclic(1);
       return 9;
     default: pari_err_BUG("get_red [type]");
+      S->t = "";
+      S->pages = ""; /* gcc -Wall */
+      S->g = NULL;
       return -1; /*notreached*/
   }
 }
