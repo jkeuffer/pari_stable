@@ -59,7 +59,7 @@ for testdata in $testlist; do
   skip=""
   for pkg in $pkgs; do
     if test ! $x "$datadir/$pkg"; then
-      echo "! Skipping $testname: optional package $pkg not installed."
+      wrln "! Skipping $testname: optional package $pkg not installed."
       skip="true";
     fi
   done
