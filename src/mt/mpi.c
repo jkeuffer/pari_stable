@@ -287,7 +287,7 @@ mt_queue_start(struct pari_mt *pt, GEN worker)
     struct mt_mstate *mt = &pari_mt_data;
     long i, n = minss(pari_mt_nbthreads, pari_MPI_size-1);
     pari_mt = mt;
-    mt->workid = pari_malloc(sizeof(long)*(n+1));
+    mt->workid = (long*) pari_malloc(sizeof(long)*(n+1));
     for (i=1; i <= n; i++)
       send_request_GEN(PMPI_worker, worker, i);
     mt->n = n;

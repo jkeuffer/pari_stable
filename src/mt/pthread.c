@@ -258,12 +258,13 @@ mt_queue_start(struct pari_mt *pt, GEN worker)
   else
   {
     long NBT = pari_mt_nbthreads;
-    struct mt_pstate *mt = pari_malloc(sizeof(struct mt_pstate));
+    struct mt_pstate *mt =
+           (struct mt_pstate*) pari_malloc(sizeof(struct mt_pstate));
     long mtparisize = GP_DATA->threadsize? GP_DATA->threadsize: top-bot;
     long i;
-    mt->mq  = pari_malloc(sizeof(*mt->mq) *NBT);
-    mt->th  = pari_malloc(sizeof(*mt->th) *NBT);
-    mt->pth = pari_malloc(sizeof(*mt->pth)*NBT);
+    mt->mq  = (struct mt_queue *) pari_malloc(sizeof(*mt->mq)*NBT);
+    mt->th  = (pthread_t *) pari_malloc(sizeof(*mt->th)*NBT);
+    mt->pth = (struct pari_thread *) pari_malloc(sizeof(*mt->pth)*NBT);
     mt->pending = 0;
     mt->n = NBT;
     mt->nbint = 0;
@@ -286,7 +287,7 @@ mt_queue_start(struct pari_mt *pt, GEN worker)
       pthread_mutex_init(&mq->mut,NULL);
       pthread_mutex_init(&mq->mut1,NULL);
       pthread_mutex_init(&mq->mut2,NULL);
-      pari_thread_alloc(&mt->pth[i],mtparisize,(void*)mq);
+      pari_thread_alloc(&mt->pth[i],mtparisize,(GEN)mq);
     }
     if (DEBUGLEVEL) pari_warn(warner,"start threads");
     for (i=0;i<NBT;i++)
