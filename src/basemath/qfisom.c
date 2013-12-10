@@ -1370,7 +1370,7 @@ init_comb(struct qfcand *cand, GEN A, GEN e, struct qfauto *qf)
   GEN Am = zm_to_ZM(A);
   for (cand->cdep = 1; ; cand->cdep++)
   {
-    cand->comb = gen_comb(cand->cdep, Am, e, qf, dim>>1);
+    cand->comb = gen_comb(cand->cdep, Am, e, qf, (dim+1)>>1);
     if (!cand->comb) break;
   }
   cand->cdep= maxss(1, cand->cdep-1);
