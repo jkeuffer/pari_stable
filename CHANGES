@@ -98,6 +98,9 @@ JD 14- polcyclo(n, x) now works for all roots of 1
    19- chinese(t_POL,t_POL): allow polynomials of different degrees
    20- deplin(): use FpM/Flm/F2m routines if possible (like all other generic
        linear algebra routines)
+   21- FpM_gauss(a,b,) from modular kernel no longer allow all types of input:
+       split into FpM_FpC_gauss (b t_COL) and FpM_gauss (b t_MAT). Same for
+       all modular xxx_gauss functions
 
   Added
 EP  1- Configure option for gcov/lcov support

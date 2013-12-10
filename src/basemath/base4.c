@@ -2901,7 +2901,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
       break;
     case t_COL:
       b = nfV_to_FqV(b, nf, modpr);
-      b = FqM_gauss(a,b,T,p);
+      b = FqM_FqC_gauss(a,b,T,p);
       if (!b) pari_err_INV(f,a);
       a = FqV_to_nfV(b, modpr);
       break;

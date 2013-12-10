@@ -507,7 +507,7 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN T, GEN p)
   M = shallowtrans(RgXV_to_RgM(list, dim+2));
   N = vecslice(M, 1, dim);
   V = FqC_sub(Coefft, Coeff, T, p);
-  v = shallowconcat(FqM_gauss(N, V, T, p), mkcol2(gen_0, gen_0));
+  v = shallowconcat(FqM_FqC_gauss(N, V, T, p), mkcol2(gen_0, gen_0));
   K = FqM_ker(M, T, p);
   if (lg(K) != 3) pari_err_BUG("trace not determined in a unique way");
   K1 = FqC_Fq_mul(gel(K,1), Fq_inv(gcoeff(K,1,1), T, p), T, p);

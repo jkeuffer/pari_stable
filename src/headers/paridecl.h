@@ -887,6 +887,7 @@ GEN     zx_to_ZX(GEN z);
 
 /* alglin1.c */
 
+GEN     F2m_F2c_gauss(GEN a, GEN b);
 GEN     F2m_F2c_invimage(GEN A, GEN y);
 GEN     F2m_deplin(GEN x);
 ulong   F2m_det(GEN x);
@@ -900,6 +901,7 @@ GEN     F2m_ker(GEN x);
 GEN     F2m_ker_sp(GEN x, long deplin);
 long    F2m_rank(GEN x);
 GEN     F2m_suppl(GEN x);
+GEN     Flm_Flc_gauss(GEN a, GEN b, ulong p);
 GEN     Flm_Flc_invimage(GEN mat, GEN y, ulong p);
 GEN     Flm_deplin(GEN x, ulong p);
 ulong   Flm_det(GEN x, ulong p);
@@ -913,11 +915,13 @@ GEN     Flm_ker(GEN x, ulong p);
 GEN     Flm_ker_sp(GEN x, ulong p, long deplin);
 long    Flm_rank(GEN x, ulong p);
 GEN     Flm_suppl(GEN x, ulong p);
+GEN     FlxqM_FlxqC_gauss(GEN a, GEN b, GEN T, ulong p);
 GEN     FlxqM_gauss(GEN a, GEN b, GEN T, ulong p);
 GEN     FlxqM_ker(GEN x, GEN T, ulong p);
 GEN     FlxqM_image(GEN x, GEN T, ulong p);
 GEN     FlxqM_inv(GEN x, GEN T, ulong p);
 long    FlxqM_rank(GEN x, GEN T, ulong p);
+GEN     FpM_FpC_gauss(GEN a, GEN b, GEN p);
 GEN     FpM_FpC_invimage(GEN m, GEN v, GEN p);
 GEN     FpM_deplin(GEN x, GEN p);
 GEN     FpM_det(GEN x, GEN p);
@@ -930,6 +934,7 @@ GEN     FpM_invimage(GEN m, GEN v, GEN p);
 GEN     FpM_ker(GEN x, GEN p);
 long    FpM_rank(GEN x, GEN p);
 GEN     FpM_suppl(GEN x, GEN p);
+GEN     FqM_FqC_gauss(GEN a, GEN b, GEN T, GEN p);
 GEN     FqM_deplin(GEN x, GEN T, GEN p);
 GEN     FqM_gauss(GEN a, GEN b, GEN T, GEN p);
 GEN     FqM_ker(GEN x, GEN T, GEN p);

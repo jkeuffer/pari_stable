@@ -3675,7 +3675,11 @@ or \kbd{NULL} if none exist.
 
 \fun{GEN}{FpM_det}{GEN x, GEN p} as \kbd{det}
 
-\fun{GEN}{FpM_gauss}{GEN a, GEN b, GEN p} as \kbd{gauss}
+\fun{GEN}{FpM_gauss}{GEN a, GEN b, GEN p} as \kbd{gauss}, where $b$ is a 
+\kbd{FpM}.
+
+\fun{GEN}{FpM_FpC_gauss}{GEN a, GEN b, GEN p} as \kbd{gauss}, where $b$
+is a \kbd{FpC}.
 
 \fun{GEN}{FpM_image}{GEN x, GEN p} as \kbd{image}
 
@@ -3721,7 +3725,11 @@ reduced (i.e arbitrary \typ{INT}s and \kbd{ZX}s in the same variable as
 \fun{GEN}{FqM_deplin}{GEN x, GEN T, GEN p} returns a non-trivial kernel vector,
 or \kbd{NULL} if none exist.
 
-\fun{GEN}{FqM_gauss}{GEN a, GEN b, GEN T, GEN p} as \kbd{gauss}
+\fun{GEN}{FqM_gauss}{GEN a, GEN b, GEN T, GEN p}
+as \kbd{gauss}, where $b$ is a \kbd{FqM}.
+
+\fun{GEN}{FqM_FqC_gauss}{GEN a, GEN b, GEN T, GEN p}
+as \kbd{gauss}, where $b$ is a \kbd{FqC}.
 
 \fun{GEN}{FqM_ker}{GEN x, GEN T, GEN p} as \kbd{ker}
 
@@ -3826,7 +3834,11 @@ the square \kbd{Flm} $x$, as a \kbd{Flx}.
 \fun{ulong}{Flm_det_sp}{GEN x, ulong p}, as \kbd{Flm\_det}, in place
 (destroys~\kbd{x}).
 
-\fun{GEN}{Flm_gauss}{GEN a, GEN b, ulong p}
+\fun{GEN}{Flm_gauss}{GEN a, GEN b, ulong p} as \kbd{gauss}, where $b$ is a 
+\kbd{Flm}.
+
+\fun{GEN}{Flm_Flc_gauss}{GEN a, GEN b, ulong p} as \kbd{gauss}, where $b$ is
+a \kbd{Flc}.
 
 \fun{GEN}{Flm_indexrank}{GEN x, ulong p}
 
@@ -3903,6 +3915,11 @@ the image of $x$.
 \fun{GEN}{F2m_F2c_invimage}{GEN A, GEN y}
 
 \fun{GEN}{F2m_gauss}{GEN a, GEN b}
+as \kbd{gauss}, where $b$ is a \kbd{F2m}.
+
+\fun{GEN}{F2m_F2c_gauss}{GEN a, GEN b}
+as \kbd{gauss}, where $b$ is a \kbd{F2c}.
+
 
 \fun{GEN}{F2m_indexrank}{GEN x} $x$ being a matrix of rank $r$, returns a
 vector with two \typ{VECSMALL} components $y$ and $z$ of length $r$ giving a
@@ -3983,6 +4000,8 @@ and \kbd{y}
 \kbd{RgM\_Rg\_add\_shallow}.
 
 \fun{GEN}{FlxqM_gauss}{GEN a, GEN b, GEN T, ulong p}
+
+\fun{GEN}{FlxqM_FlxqC_gauss}{GEN a, GEN b, GEN T, ulong p}
 
 \fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
 
