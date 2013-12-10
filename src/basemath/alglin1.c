@@ -2612,7 +2612,7 @@ GEN
 ker(GEN x)
 {
   pari_sp av = avma;
-  GEN p = NULL;
+  GEN p = NULL, ff = NULL;
   if (RgM_is_FpM(x, &p) && p)
   {
     ulong pp;
@@ -2625,6 +2625,8 @@ ker(GEN x)
     }
     return gerepileupto(av, x);
   }
+  if (is_FFM(x, &ff))
+    return gerepileupto(av, FFM_ker(x, ff));
   return ker_aux(x,x);
 }
 GEN
