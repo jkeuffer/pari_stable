@@ -11,6 +11,7 @@ Doc: As \kbd{vector(N,i,expr)} but the evaluation of \kbd{expr} are done in
  parvector(10,i,quadclassunit(2^(100+i)+1).no)
  @eprog
  compute the class numbers in parallel.
+
 Function: _parvector_worker
 Section: programming/internals
 C-Name: parvector_worker
