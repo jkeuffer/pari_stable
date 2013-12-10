@@ -148,14 +148,16 @@ struct gp_context
   GEN err_data;
 };
 
+struct mt_state
+{
+  GEN worker;
+  GEN pending;
+  long workid;
+};
+
 struct pari_mt
 {
-  struct mt_state
-  {
-    GEN worker;
-    GEN pending;
-    long workid;
-  } mt;
+  struct mt_state mt;
   GEN (*get)(struct mt_state *mt, long *workid, long *pending);
   void (*submit)(struct mt_state *mt, long workid, GEN work);
   void (*end)(void);
