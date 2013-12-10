@@ -10,3 +10,5 @@ for (i=1,#f,
 O(x^-2)
 trace(I*x+1+O(x^2))
 norm(I*x+1+O(x^2))
+a=Ser(vector(200,i,i));
+a^2 == a*(a+1) - a \\ test RgX_mullow, RgX_sqrlow
