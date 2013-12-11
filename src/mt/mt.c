@@ -16,7 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "mt.h"
 
-GEN
+static GEN
 mtsingle_queue_get(struct mt_state *mt, long *workid, long *pending)
 {
   GEN done = mt->pending;
@@ -25,14 +25,14 @@ mtsingle_queue_get(struct mt_state *mt, long *workid, long *pending)
   return done;
 }
 
-void
+static void
 mtsingle_queue_submit(struct mt_state *mt, long workid, GEN work)
 {
   mt->pending = work? closure_callgenvec(mt->worker, work): NULL;
   mt->workid = workid;
 }
 
-void
+static void
 mtsingle_queue_end(void) {  }
 
 void
