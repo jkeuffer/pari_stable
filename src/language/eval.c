@@ -1513,6 +1513,9 @@ pareval(GEN C)
   struct pari_mt pt;
   GEN worker, V, done;
   if (!is_vec_t(typ(C))) pari_err_TYPE("pareval",C);
+  for (i=1; i<l; i++)
+    if (typ(gel(C,i))!=t_CLOSURE)
+      pari_err_TYPE("pareval",gel(C,i));
   worker = snm_closure(is_entry("_pareval_worker"), NULL);
   V = cgetg(l, t_VEC);
   mt_queue_start(&pt, worker);
