@@ -63,6 +63,8 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    47- forqfvec(v,[;],0,) -> SEGV [#1495]
    48- poliscyclo(x^0) -> 2
    49- truncation (precision) errors in bnfnarrow [#1491]
+   50- matadjoint assumed that n! is invertible. If this is not the case, now
+       use a safe algorithm
 
   Changed
     1- default help text for a user function is now as in \u:
@@ -129,6 +131,7 @@ LGr11- GP function Colrev
        Flm_suppl, F2m_rank, Flm_rank, F2m_rowslice, F2v_slice, F2v_ei
 BA 15- Parallel GP support (parapply, pareval, parfor, parforprime, parsum,
        parvector)
+   16- [libpari] get_characteristic
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

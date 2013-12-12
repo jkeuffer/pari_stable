@@ -8770,6 +8770,9 @@ impossible, but an inexact $0$ is allowed). By convention the degree of an
 exact $0$ polynomial is $-1$. If the leading coefficient of \kbd{x} is $0$,
 the result is undefined.
 
+\fun{GEN}{get_characteristic}{GEN x} returns the characteristic of the base
+ring over which the polynomial is defined.
+
 \fun{GEN}{resultant}{GEN x,GEN y} resultant of \kbd{x} and \kbd{y}, with respect
 to the main variable of highest priority. Uses either
 the subresultant algorithm (generic case), a modular algorithm (inputs in

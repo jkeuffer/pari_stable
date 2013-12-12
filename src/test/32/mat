@@ -1,9 +1,6 @@
-  ***   at top-level: Mat([1])+matrix(0,1)
-  ***                         ^------------
-  *** _+_: inconsistent addition t_MAT (1x1) + t_MAT (0x1).
-  ***   at top-level: 1/matrix(2,2,i,j,Mod(
-  ***                  ^--------------------
-  *** _/_: impossible inverse in gdiv: [Mod(0, 2), Mod(0, 2); Mod(0, 2), Mod(0, 2)].
+error("inconsistent addition t_MAT (1x1) + t_MAT (0x1).")
+error("impossible inverse in gdiv: [Mod(0, 2), Mod(0, 2); Mod(0, 2), Mod(0, 
+2)].")
 1
 1
 [;]
@@ -25,9 +22,7 @@
 
 [0 1]
 
-  ***   at top-level: matdiagonal([1,2;3,4
-  ***                 ^--------------------
-  *** matdiagonal: incorrect type in diagonal (t_MAT).
+error("incorrect type in diagonal (t_MAT).")
 
 [1    0     0    0 0]
 
@@ -100,13 +95,21 @@ matrank:
 3
 3
 matadjoint:
-  ***   at top-level: test(matadjoint)
-  ***                 ^----------------
-  ***   in function test: print(f,":");print(f(A*Mod(1,2)));print
-  ***                                        ^--------------------
-  ***   in function f: matadjoint
-  ***                  ^----------
-  *** matadjoint: impossible inverse in Fl_inv: Mod(0, 2).
+[Mod(1, 2), Mod(0, 2), Mod(0, 2); Mod(0, 2), Mod(1, 2), Mod(1, 2); Mod(0, 2)
+, Mod(1, 2), Mod(0, 2)]
+[Mod(6, 7), Mod(0, 7), Mod(1, 7); Mod(6, 7), Mod(3, 7), Mod(1, 7); Mod(1, 7)
+, Mod(2, 7), Mod(1, 7)]
+[Mod(69, 3037000507), Mod(14, 3037000507), Mod(3037000473, 3037000507); Mod(
+3037000499, 3037000507), Mod(3, 3037000507), Mod(1, 3037000507); Mod(3037000
+501, 3037000507), Mod(3037000502, 3037000507), Mod(8, 3037000507)]
+[Mod(69, 18446744073709551629), Mod(14, 18446744073709551629), Mod(184467440
+73709551595, 18446744073709551629); Mod(18446744073709551621, 18446744073709
+551629), Mod(3, 18446744073709551629), Mod(1, 18446744073709551629); Mod(184
+46744073709551623, 18446744073709551629), Mod(18446744073709551624, 18446744
+073709551629), Mod(8, 18446744073709551629)]
+[69 + O(101^3), 14 + O(101^3), 67 + 100*101 + 100*101^2 + O(101^3); 93 + 100
+*101 + 100*101^2 + O(101^3), 3 + O(101^3), 1 + O(101^3); 95 + 100*101 + 100*
+101^2 + O(101^3), 96 + 100*101 + 100*101^2 + O(101^3), 8 + O(101^3)]
 matimage:
 [Mod(1, 2), Mod(0, 2), Mod(0, 2); Mod(0, 2), Mod(0, 2), Mod(1, 2); Mod(0, 2)
 , Mod(1, 2), Mod(1, 2)]
@@ -230,9 +233,7 @@ Mod(18446744073709551628, 18446744073709551629)
 709551628, 18446744073709551629)]~
 3
 0
-  ***   at top-level: trace(Mat([1,2]))
-  ***                 ^-----------------
-  *** trace: inconsistent dimensions in gtrace.
+error("inconsistent dimensions in gtrace.")
 
 [1 0]
 
@@ -262,4 +263,4 @@ od(0, 18446744073709551629); Mod(7, 18446744073709551629), Mod(8, 1844674407
 68
 2
 68
-Total time spent: 56
+Total time spent: 60

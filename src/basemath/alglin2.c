@@ -87,6 +87,21 @@ easychar(GEN x, long v)
   pari_err_TYPE("easychar",x);
   return NULL; /* not reached */
 }
+/* compute charpoly by mapping to Fp first, return lift to Z */
+static GEN
+RgM_Fp_charpoly(GEN x, GEN p, long v)
+{
+  GEN T;
+  if (lgefint(p) == 3)
+  {
+    ulong pp = itou(p);
+    T = Flm_charpoly(RgM_to_Flm(x, pp), pp);
+    T = Flx_to_ZX(T);
+  }
+  else
+    T = FpM_charpoly(RgM_to_FpM(x, p), p);
+  setvarn(T, v); return T;
+}
 GEN
 charpoly(GEN x, long v)
 {
@@ -100,16 +115,8 @@ charpoly(GEN x, long v)
   else if (RgM_is_FpM(x, &p) && BPSW_psp(p))
   {
     pari_sp av = avma;
-    if (lgefint(p) == 3)
-    {
-      ulong pp = p[2];
-      T = Flm_charpoly(RgM_to_Flm(x, pp), pp);
-      T = Flx_to_ZX(T);
-    }
-    else
-      T = FpM_charpoly(RgM_to_FpM(x, p), p);
+    T = RgM_Fp_charpoly(x,p,v);
     T = gerepileupto(av, FpX_to_mod(T,p));
-    setvarn(T, v);
   }
   else if (isinexact(x))
     T = carhess(x, v);
@@ -156,6 +163,14 @@ caract(GEN x, long v)
   return fix_pol(av, RgX_Rg_div(T, mpfact(n)));
 }
 
+/* C = charpoly(x) */
+static GEN
+RgM_adj_from_char(GEN x, GEN C)
+{
+  C = RgX_shift_shallow(C, -1);
+  if (odd(lg(x))) C = RgX_neg(C); /* even dimension */
+  return RgX_RgM_eval(C, x);
+}
 /* assume x square matrice */
 static GEN
 mattrace(GEN x)
@@ -167,68 +182,86 @@ mattrace(GEN x)
   for (i = 2; i < lx; i++) t = gadd(t, gcoeff(x,i,i));
   return t;
 }
+static int
+bad_char(GEN q, long n)
+{
+  forprime_t S;
+  ulong p;
+  (void)u_forprime_init(&S, 2, n);
+  while ((p = u_forprime_next(&S)))
+    if (!umodiu(q, p)) return 1;
+  return 0;
+}
 /* Using traces: return the characteristic polynomial of x (in variable v).
  * If py != NULL, the adjoint matrix is put there. */
 GEN
 caradj(GEN x, long v, GEN *py)
 {
   pari_sp av, av0;
-  long i, k, l;
-  GEN p, y, t;
+  long i, k, n;
+  GEN T, y, t;
 
-  if ((p = easychar(x, v)))
+  if ((T = easychar(x, v)))
   {
     if (py)
     {
       if (typ(x) != t_MAT) pari_err_TYPE("matadjoint",x);
       *py = cgetg(1,t_MAT);
     }
-    return p;
+    return T;
   }
 
-  l = lg(x); av0 = avma;
-  p = cgetg(l+2,t_POL); p[1] = evalsigne(1) | evalvarn(v);
-  gel(p,l+1) = gen_1;
-  if (l == 1) { if (py) *py = cgetg(1,t_MAT); return p; }
+  n = lg(x)-1; av0 = avma;
+  T = cgetg(n+3,t_POL); T[1] = evalsigne(1) | evalvarn(v);
+  gel(T,n+2) = gen_1;
+  if (!n) { if (py) *py = cgetg(1,t_MAT); return T; }
   av = avma; t = gerepileupto(av, gneg(mattrace(x)));
-  gel(p,l) = t;
-  if (l == 2) {
-    p = fix_pol(av0, p);
-    if (py) *py = matid(1); return p;
+  gel(T,n+1) = t;
+  if (n == 1) {
+    T = fix_pol(av0, T);
+    if (py) *py = matid(1); return T;
   }
-  if (l == 3) {
+  if (n == 2) {
     GEN a = gcoeff(x,1,1), b = gcoeff(x,1,2);
     GEN c = gcoeff(x,2,1), d = gcoeff(x,2,2);
     av = avma;
-    gel(p,2) = gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
-    p = fix_pol(av0, p);
+    gel(T,2) = gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
+    T = fix_pol(av0, T);
     if (py) {
       y = cgetg(3, t_MAT);
       gel(y,1) = mkcol2(gcopy(d), gneg(c));
       gel(y,2) = mkcol2(gneg(b), gcopy(a));
       *py = y;
     }
-    return p;
+    return T;
   }
   /* l > 3 */
+  if (bad_char(get_characteristic(x), n))
+  { /* n! not invertible in base ring */
+    T = charpoly(x, v);
+    if (!py) return gerepileupto(av, T);
+    *py = RgM_adj_from_char(x, T);
+    gerepileall(av, 2, &T,py);
+    return T;
+  }
   av = avma; y = RgM_shallowcopy(x);
-  for (i = 1; i < l; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
-  for (k = 2; k < l-1; k++)
+  for (i = 1; i <= n; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
+  for (k = 2; k < n; k++)
   {
     GEN y0 = y;
     y = RgM_mul(y, x);
     t = gdivgs(mattrace(y), -k);
-    for (i = 1; i < l; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
+    for (i = 1; i <= n; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
     y = gclone(y);
-    gel(p,l-k+1) = gerepilecopy(av, t); av = avma;
+    gel(T,n-k+2) = gerepilecopy(av, t); av = avma;
     if (k > 2) gunclone(y0);
   }
   t = gmul(gcoeff(x,1,1),gcoeff(y,1,1));
-  for (i=2; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
-  gel(p,2) = gerepileupto(av, gneg(t));
-  p = fix_pol(av0, p);
-  if (py) *py = (l & 1)? RgM_neg(y): gcopy(y);
-  gunclone(y); return p;
+  for (i=2; i<=n; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
+  gel(T,2) = gerepileupto(av, gneg(t));
+  T = fix_pol(av0, T);
+  if (py) *py = odd(n)? gcopy(y): RgM_neg(y);
+  gunclone(y); return T;
 }
 
 GEN
@@ -241,15 +274,12 @@ adj(GEN x)
 GEN
 adjsafe(GEN x)
 {
-  long n = lg(x)-1;
   pari_sp av = avma;
   GEN C;
   if (typ(x) != t_MAT) pari_err_TYPE("matadjoint",x);
-  if (n <= 1) return gcopy(x);
-  C = carberkowitz(x, 0);
-  C = RgX_shift_shallow(C, -1);
-  if (!odd(n)) C = RgX_neg(C);
-  return gerepileupto(av, RgX_RgM_eval(C, x));
+  if (lg(x) < 3) return gcopy(x);
+  C = charpoly(x,0);
+  return gerepileupto(av, RgM_adj_from_char(x, C));
 }
 
 GEN

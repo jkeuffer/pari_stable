@@ -25,6 +25,55 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
  **                      Ring membership                               **
  **                                                                    **
  ************************************************************************/
+struct charact {
+  GEN q;
+  int isprime;
+};
+static void
+char_update_prime(struct charact *S, GEN p)
+{
+  if (!S->isprime) { S->isprime = 1; S->q = p; }
+  if (!equalii(p, S->q)) pari_err_MODULUS("characteristic", S->q, p);
+}
+static void
+char_update_int(struct charact *S, GEN n)
+{
+  if (S->isprime)
+  {
+    if (dvdii(n, S->q)) return;
+    pari_err_MODULUS("characteristic", S->q, n);
+  }
+  S->q = gcdii(S->q, n);
+}
+static void
+characteristic(struct charact *S, GEN x)
+{
+  const long tx = typ(x);
+  long i, l;
+  switch(tx)
+  {
+    case t_INTMOD:char_update_int(S, gel(x,1)); break;
+    case t_FFELT: char_update_prime(S, gel(x,4)); break;
+    case t_PADIC: char_update_prime(S, gel(x,2)); break;
+    case t_COMPLEX: case t_QUAD:
+    case t_POLMOD: case t_POL: case t_SER: case t_RFRAC:
+    case t_VEC: case t_COL: case t_MAT:
+      l = lg(x);
+      for (i=lontyp[tx]; i < l; i++) characteristic(S,gel(x,i));
+      break;
+    case t_LIST:
+      x = list_data(x);
+      if (x) characteristic(S, x);
+      break;
+  }
+}
+GEN
+get_characteristic(GEN x)
+{
+  struct charact S;
+  S.q = gen_0; S.isprime = 0;
+  characteristic(&S, x); return S.q;
+}
 
 int
 Rg_is_Fp(GEN x, GEN *pp)

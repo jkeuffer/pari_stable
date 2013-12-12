@@ -3011,6 +3011,7 @@ GEN     ffinit(GEN p, long n, long v);
 GEN     ffnbirred(GEN p, long n);
 GEN     ffnbirred0(GEN p, long n, long flag);
 GEN     ffsumnbirred(GEN p, long n);
+GEN     get_characteristic(GEN x);
 const struct bb_field *get_Fq_field(void **E, GEN T, GEN p);
 GEN     init_Fq(GEN p, long n, long v);
 GEN     pol_x_powers(long N, long v);

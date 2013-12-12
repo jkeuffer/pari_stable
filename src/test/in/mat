@@ -1,5 +1,5 @@
-Mat([1]) + matrix(0,1)
-1/matrix(2,2,i,j,Mod(0, 2))
+iferr(Mat([1]) + matrix(0,1),E,E)
+iferr(1/matrix(2,2,i,j,Mod(0, 2)),E,E)
 test(n)=
 {
   until(matrank(M)==n,M=matrix(n,n,i,j,random(Mod(1,2))));
@@ -17,7 +17,7 @@ Mat(List([1]))
 Mat([[1,2,3],[2,3,4]]~)
 Mat(Qfb(1,2,5))
 matdiagonal(matid(2))
-matdiagonal([1,2;3,4])
+iferr(matdiagonal([1,2;3,4]),E,E)
 matpascal(4,1/2)
 A=[1,2,3;4,5,6];B=[4,6;10,12]
 matinverseimage(A,B)
@@ -31,7 +31,6 @@ matinverseimage(A*Mod(1,7),B)
 matinverseimage(A*Mod(1,2^64+13),B)
 matinverseimage(A*Mod(1,3037000507),B)
 
-A = [1,2,4;2,12,7;2,9,11];
 test(f)=
 {
   print(f,":");
@@ -41,20 +40,24 @@ test(f)=
   print(f(A*Mod(1,2^64+13)));
   print(f(A*(1+O(101^3))));
 }
-test(matdet);
-test(matrank);
-test(matadjoint);
-test(matimage);
-test(matimagecompl);
-test(matindexrank);
-test(matker);
-test(lindep);
-test(x->matsolve(x,vectorv(#x,i,i)));
-test(x->matsolve(x,matrix(#x,#x,i,j,i+j)));
-test(x->x^(-1));
-test(x->x^2);
-test(x->A*x);
-
+testall()=
+{
+  test(matdet);
+  test(matrank);
+  test(matadjoint);
+  test(matimage);
+  test(matimagecompl);
+  test(matindexrank);
+  test(matker);
+  test(lindep);
+  test(x->matsolve(x,vectorv(#x,i,i)));
+  test(x->matsolve(x,matrix(#x,#x,i,j,i+j)));
+  test(x->x^(-1));
+  test(x->x^2);
+  test(x->A*x);
+}
+A = [1,2,4;2,12,7;2,9,11];
+testall();
 
 A=[0,1,0;1,0,1;2,0,3];
 matdet(A*Mod(1,3037000507))
@@ -63,7 +66,7 @@ matsolve(A*Mod(1,2^64+13),[1,2,3]~)
 
 trace(matid(3))
 trace([;])
-trace(Mat([1,2]))
+iferr(trace(Mat([1,2])),E,E)
 matrixqz([1/3,1/4;1/2,1/3])
 matrixqz(matrix(2,2),-1)
 
