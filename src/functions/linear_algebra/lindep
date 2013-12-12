@@ -6,8 +6,9 @@ Help: lindep(v,{flag=0}): integral linear dependencies between components of v.
  flag is optional, and can be 0: default, guess a suitable
  accuracy, or positive: accuracy to use for the computation, in decimal
  digits.
-Doc: \sidx{linear dependence} finds a small integral linear combination
- between components of $v$. If none can be found return an empty vector.
+Doc: \sidx{linear dependence} finds a small non-trivial integral linear
+ combination between components of $v$. If none can be found return an empty
+ vector.
 
  If $v$ is a vector with real/complex entries we use a floating point
  (variable precision) LLL algorithm. If $\fl = 0$ the accuracy is chosen

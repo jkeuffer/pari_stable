@@ -712,7 +712,11 @@ lindep2(GEN x, long bit)
   GEN re, im, M;
 
   if (! is_vec_t(tx)) pari_err_TYPE("lindep2",x);
-  if (lx<=2) return cgetg(1,t_COL);
+  if (lx<=2)
+  {
+    if (lx == 2 && gequal0(x)) return mkcol(gen_1);
+    return cgetg(1,t_COL);
+  }
   if (bit < 0) pari_err_DOMAIN("lindep2", "accuracy", "<", gen_0, stoi(bit));
   if (!bit)
   {
