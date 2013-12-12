@@ -223,3 +223,7 @@ for (i=1,#J,
 
 p=2^32+15;
 ellcard(ellinit([1,2,3,4,5], p))
+ellinit([1])
+E=ellinit([625,15625]);
+elllocalred(E,5)
+ellisoncurve(E,[0.,125.])
