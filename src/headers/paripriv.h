@@ -120,8 +120,6 @@ GEN  zbrent0(GEN a, GEN b, GEN code, long prec);
 
 /* mt */
 void mt_sigint(void);
-void mt_sigint_block(void);
-void mt_sigint_unblock(void);
 void mt_err_recover(long er);
 void mt_init_stack(size_t s);
 int  mt_is_thread(void);

@@ -789,5 +789,20 @@ See the file \kbd{examples/pari-mt.c} for an example.
 \fun{void}{pari_mt_close}{void} \label{pari_mt_close}
 cleanly stops the MT engine. It can not be restarted.
 
+As documented in the user's guide to the PARI library, \kbd{libpari} replaces a
+number of \kbd{libc} functions (\kbd{malloc}, \kbd{free}) by wrappers protected
+within \tet{BLOCK_SIGINT_START} / \tet{BLOCK_SIGINT_END} pairs, blocking
+\kbd{SIGINT} (and possibly \kbd{SIGALRM} as well) to avoid user interrupts that
+might leave the system in an inconsistent state. When the MT engine is enabled,
+the function 
+
+\fun{void}{mt_sigint_block}{void} is also called as part of
+\tet{BLOCK_SIGINT_START} to prevent a thread cancellation at the wrong time,
+which would have the same lethal effect as a bad \kbd{SIGINT}.
+
+\fun{void}{mt_sigint_unblock}{void} this voids the previous function effect, 
+allowing the thread to be canceled at any time. Part of \tet{BLOCK_SIGINT_END}.
+
+
 \vfill\eject
 \input index\end

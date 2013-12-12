@@ -2816,6 +2816,8 @@ GEN     vecvecsmall_sort_uniq(GEN x);
 
 /* mt.c */
 
+void    mt_sigint_block(void);
+void    mt_sigint_unblock(void);
 void    mt_queue_end(struct pari_mt *pt);
 GEN     mt_queue_get(struct pari_mt *pt, long *jobid, long *pending);
 void    mt_queue_start(struct pari_mt *pt, GEN worker);
