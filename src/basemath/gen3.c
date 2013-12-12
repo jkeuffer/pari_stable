@@ -1893,7 +1893,7 @@ ggrando(GEN x, long n)
     v = varn(x);
     m = n * RgX_val(x); break;
   case t_RFRAC:
-    if (!gequal0(gel(x,1))) pari_err_DOMAIN("O", "x", "=", gen_0, x);
+    if (gequal0(gel(x,1))) pari_err_DOMAIN("O", "x", "=", gen_0, x);
     v = gvar(x);
     m = n * gval(x,v); break;
     default:  pari_err_TYPE("O", x);
