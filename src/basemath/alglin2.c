@@ -236,7 +236,7 @@ caradj(GEN x, long v, GEN *py)
     return T;
   }
   /* l > 3 */
-  if (bad_char(get_characteristic(x), n))
+  if (bad_char(residual_characteristic(x), n))
   { /* n! not invertible in base ring */
     T = charpoly(x, v);
     if (!py) return gerepileupto(av, T);

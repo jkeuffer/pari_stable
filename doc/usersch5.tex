@@ -8770,13 +8770,17 @@ impossible, but an inexact $0$ is allowed). By convention the degree of an
 exact $0$ polynomial is $-1$. If the leading coefficient of \kbd{x} is $0$,
 the result is undefined.
 
-\fun{GEN}{get_characteristic}{GEN x} returns the ``characteristic'' of the
-base ring over which the polynomial is defined. If \typ{PADIC}s are not
-present in the structure, this is the usual characteristic (as defined by
-\typ{INTMOD} and \typ{FFELT} components). If a $p$-adic number is present
-on the other hand, the function return $p$ (instead of the expected $0$).
-The function raises an exception if incompatible primes arise from \typ{FFELT}
-and \typ{PADIC} components.
+\fun{GEN}{characteristic}{GEN x} returns the characteristic of the
+base ring over which the polynomial is defined (as defined by \typ{INTMOD}
+and \typ{FFELT} components). The function raises an exception if incompatible
+primes arise from \typ{FFELT} and \typ{PADIC} components. Shallow function.
+
+\fun{GEN}{residual_characteristic}{GEN x} returns a kind of ``residual
+characteristic'' of the base ring over which the polynomial is defined. This
+is defined as the gcd of all moduli \typ{INTMOD}s occuring in the structure,
+as well as primes $p$ arising from \typ{PADIC}s or \typ{FFELT}s. The function
+raises an exception if incompatible primes arise from \typ{FFELT} and
+\typ{PADIC} components. Shallow function.
 
 \fun{GEN}{resultant}{GEN x,GEN y} resultant of \kbd{x} and \kbd{y}, with respect
 to the main variable of highest priority. Uses either

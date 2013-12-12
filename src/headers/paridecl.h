@@ -3007,14 +3007,15 @@ int     ZM_incremental_CRT(GEN *H, GEN Hp, GEN *q, ulong p);
 GEN     ZM_init_CRT(GEN Hp, ulong p);
 int     ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN *q, ulong p);
 GEN     ZX_init_CRT(GEN Hp, ulong p, long v);
+GEN     characteristic(GEN x);
 GEN     ffinit(GEN p, long n, long v);
 GEN     ffnbirred(GEN p, long n);
 GEN     ffnbirred0(GEN p, long n, long flag);
 GEN     ffsumnbirred(GEN p, long n);
-GEN     get_characteristic(GEN x);
 const struct bb_field *get_Fq_field(void **E, GEN T, GEN p);
 GEN     init_Fq(GEN p, long n, long v);
 GEN     pol_x_powers(long N, long v);
+GEN     residual_characteristic(GEN x);
 
 /* prime.c */
 

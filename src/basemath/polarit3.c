@@ -46,7 +46,28 @@ char_update_int(struct charact *S, GEN n)
   S->q = gcdii(S->q, n);
 }
 static void
-characteristic(struct charact *S, GEN x)
+charact(struct charact *S, GEN x)
+{
+  const long tx = typ(x);
+  long i, l;
+  switch(tx)
+  {
+    case t_INTMOD:char_update_int(S, gel(x,1)); break;
+    case t_FFELT: char_update_prime(S, gel(x,4)); break;
+    case t_COMPLEX: case t_QUAD:
+    case t_POLMOD: case t_POL: case t_SER: case t_RFRAC:
+    case t_VEC: case t_COL: case t_MAT:
+      l = lg(x);
+      for (i=lontyp[tx]; i < l; i++) charact(S,gel(x,i));
+      break;
+    case t_LIST:
+      x = list_data(x);
+      if (x) charact(S, x);
+      break;
+  }
+}
+static void
+charact_res(struct charact *S, GEN x)
 {
   const long tx = typ(x);
   long i, l;
@@ -59,20 +80,27 @@ characteristic(struct charact *S, GEN x)
     case t_POLMOD: case t_POL: case t_SER: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       l = lg(x);
-      for (i=lontyp[tx]; i < l; i++) characteristic(S,gel(x,i));
+      for (i=lontyp[tx]; i < l; i++) charact_res(S,gel(x,i));
       break;
     case t_LIST:
       x = list_data(x);
-      if (x) characteristic(S, x);
+      if (x) charact_res(S, x);
       break;
   }
 }
 GEN
-get_characteristic(GEN x)
+characteristic(GEN x)
 {
   struct charact S;
   S.q = gen_0; S.isprime = 0;
-  characteristic(&S, x); return S.q;
+  charact(&S, x); return S.q;
+}
+GEN
+residual_characteristic(GEN x)
+{
+  struct charact S;
+  S.q = gen_0; S.isprime = 0;
+  charact_res(&S, x); return S.q;
 }
 
 int

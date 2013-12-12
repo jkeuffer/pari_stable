@@ -132,7 +132,8 @@ LGr11- GP function Colrev
        Flm_suppl, F2m_rank, Flm_rank, F2m_rowslice, F2v_slice, F2v_ei
 BA 15- Parallel GP support (parapply, pareval, parfor, parforprime, parsum,
        parvector)
-   16- [libpari] get_characteristic
+   16- [libpari] residual_characteristic
+   17- GP function characteristic()
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
