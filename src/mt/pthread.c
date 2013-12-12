@@ -109,6 +109,7 @@ static void*
 mt_queue_run(void *arg)
 {
   GEN args = pari_thread_start((struct pari_thread*) arg);
+  pari_sp av = avma;
   struct mt_queue *mq = (struct mt_queue *) args;
   mt_thread_no = mq->no;
   for(;;)
@@ -138,6 +139,7 @@ mt_queue_run(void *arg)
       while(mq->output)
         pthread_cond_wait(&mq->cond2, &mq->mut2);
     } UNLOCK(&mq->mut2);
+    avma = av;
   }
   return NULL;
 }
