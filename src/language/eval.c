@@ -1576,7 +1576,7 @@ parsum(GEN a, GEN b, GEN code, GEN x)
   b = gfloor(b);
   a = setloop(a);
   av2=avma; lim = stack_lim(av2,1);
-  for (; cmpii(a,b) <= 0 || pending; incloop(a))
+  for (; cmpii(a,b) <= 0 || pending; a = incloop(a))
   {
     mt_queue_submit(&pt, 0, cmpii(a,b) <= 0? mkvec(a): NULL);
     done = mt_queue_get(&pt, NULL, &pending);
@@ -1629,7 +1629,7 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
         stop = icopy(gel(done,1));
       }
     }
-    incloop(a);
+    a = incloop(a);
   }
   mt_queue_end(&pt);
   if (code2) pop_lex(2);
