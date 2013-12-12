@@ -2045,15 +2045,6 @@ long    gp_evalvoid(void *E, GEN x);
 long    loop_break(void);
 GEN     next0(long n);
 GEN     parapply(GEN V, GEN C);
-GEN     parapply_worker(GEN d, GEN code);
-GEN     pareval(GEN C);
-GEN     pareval_worker(GEN code);
-void    parfor(GEN a, GEN b, GEN code, GEN code2);
-GEN     parfor_worker(GEN i, GEN C);
-void    parforprime(GEN a, GEN b, GEN code, GEN code2);
-GEN     parsum(GEN a, GEN b, GEN code, GEN x);
-GEN     parvector(long n, GEN code);
-GEN     parvector_worker(GEN i, GEN C);
 void    pop_lex(long n);
 void    push_lex(GEN a, GEN C);
 GEN     return0(GEN x);
@@ -2825,12 +2816,6 @@ GEN     vecvecsmall_sort_uniq(GEN x);
 
 /* mt.c */
 
-void    mt_sigint(void);
-void    mt_sigint_block(void);
-void    mt_sigint_unblock(void);
-void    mt_err_recover(long er);
-void    mt_init_stack(size_t s);
-int     mt_is_thread(void);
 void    mt_queue_end(struct pari_mt *pt);
 GEN     mt_queue_get(struct pari_mt *pt, long *jobid, long *pending);
 void    mt_queue_start(struct pari_mt *pt, GEN worker);
