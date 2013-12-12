@@ -1,5 +1,5 @@
 Function: pareval
-Section: programming/control
+Section: programming/parallel
 C-Name: pareval
 Prototype: G
 Help: pareval(x): parallel evaluation of the elements of the vector of

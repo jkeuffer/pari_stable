@@ -1,8 +1,8 @@
 Function: parsum
-Section: programming/control
+Section: programming/parallel
 C-Name: parsum
 Prototype: V=GGJDG
-Help: parsum(i=a,b,expr{,x}): x plus the sum (X goes from a to b) of
+Help: parsum(i=a,b,expr,{x}): x plus the sum (X goes from a to b) of
  expression expr, evaluated in parallel (in random order)
 Doc: sum of expression \var{expr}, initialized at $x$, the formal parameter
  going from $a$ to $b$, evaluated in parallel in random order.
@@ -12,3 +12,4 @@ Doc: sum of expression \var{expr}, initialized at $x$, the formal parameter
  parsum(i=1,1000,ispseudoprime(2^prime(i)-1))
  @eprog
  returns the numbers of prime numbers in the first $1000$ Mersenne numbers.
+ %\syn{NO}

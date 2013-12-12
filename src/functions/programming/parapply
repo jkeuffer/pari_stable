@@ -1,5 +1,5 @@
 Function: parapply
-Section: programming/control
+Section: programming/parallel
 C-Name: parapply
 Prototype: GG
 Help: parapply(f, x): parallel evaluation of f on the elements of x.

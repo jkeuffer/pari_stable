@@ -1321,6 +1321,22 @@ the difference between \emph{strings} and \emph{keywords} (see
 them without any enclosing quotes. The former are dynamic objects, where
 everything outside quotes gets immediately expanded.
 
+%SECTION: programming/parallel
+
+\section{Parallel programming}
+
+These function are only available if PARI was configured using \kbd{Configure
+--mt=\dots}. Two multithread interfaces are supported:
+
+\item POSIX threads
+
+\item Message passing interface (MPI)
+
+As a rule, POSIX threads are well-suited for single systems, while MPI is used
+by most clusters. However the parallel GP interface does not depend on the
+chosen multithread interface: a properly written GP program will work
+identically with both.
+
 %SECTION: programming/specific
 
 \section{GP defaults}

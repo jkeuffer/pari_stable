@@ -73,7 +73,7 @@ sub library_syntax { my ($fun, $args) = @_;
     if ($c eq 'l') { $type = "long"; next; }
     if ($c eq 'v') { $type = "void"; next; }
 
-    if ($c =~ /^[GWIE]$/) {$args .= ", GEN " . shift(@ARGS); next;}
+    if ($c =~ /^[GWIJE]$/) {$args .= ", GEN " . shift(@ARGS); next;}
     if ($c eq 'L') {$args .= ", long " . shift(@ARGS); next;}
     if ($c eq 'n') {my ($v) = shift(@ARGS); push @vars,"\\kbd{$v}";
                     $args .= ", long " . $v; next;}
