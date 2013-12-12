@@ -129,15 +129,13 @@ static void
 checkcoordch(GEN z)
 { if (typ(z)!=t_VEC || lg(z) != 5) pari_err_TYPE("checkcoordch",z); }
 
-/* 4 X^3 + b2 X^2 + 2b4 X + b6 */
+/* 4 X^3 + b2 X^2 + 2b4 X + b6, N is the characteristic of the base 
+ * ring of NULL (char = 0) */
 static GEN
-RHSpol(GEN e)
+RHSpol(GEN e, GEN N)
 {
-  GEN z = cgetg(6, t_POL); z[1] = evalsigne(1);
-  gel(z,2) = ell_get_b6(e);
-  gel(z,3) = gmul2n(ell_get_b4(e),1);
-  gel(z,4) = ell_get_b2(e);
-  gel(z,5) = utoipos(4); return z;
+  GEN b2 = ell_get_b2(e), b6 = ell_get_b6(e), b42 = gmul2n(ell_get_b4(e),1);
+  return mkpoln(4, N? modsi(4,N): utoipos(4), b2, b42, b6);
 }
 
 static int
@@ -146,7 +144,7 @@ invcmp(void *E, GEN x, GEN y) { (void)E; return -gcmp(x,y); }
 static GEN
 doellR_roots(GEN e, long prec)
 {
-  GEN R = roots(RHSpol(e), prec);
+  GEN R = roots(RHSpol(e,NULL), prec);
   long s = ellR_get_sign(e);
   if (s > 0)
   { /* sort 3 real roots in decreasing order */
@@ -4824,7 +4822,7 @@ nagelllutz(GEN e)
   pari_sp av=avma;
 
   e = ellintegralmodel(e, &v);
-  pol = RgX_rescale(RHSpol(e), utoipos(4));
+  pol = RgX_rescale(RHSpol(e,NULL), utoipos(4));
   r = cgetg(17, t_VEC);
   gel(r,1) = ellinf();
   lr = ratroot(pol); nlr=lg(lr)-1;
@@ -5060,7 +5058,7 @@ t2points(GEN E, GEN *f2)
 {
   long i, l;
   GEN v;
-  *f2 = RHSpol(E);
+  *f2 = RHSpol(E,NULL);
   v = nfrootsQ(*f2); l = lg(v);
   for (i = 1; i < l; i++)
   {
@@ -5526,40 +5524,41 @@ ellfromj(GEN j)
   return ellfromj_simple(j);
 }
 
-/* n <= 4 */
+/* n <= 4, N is the characteristic of the base ring or NULL (char 0) */
 static GEN
-elldivpol4(GEN e, long n, long v)
+elldivpol4(GEN e, GEN N, long n, long v)
 {
   GEN b2,b4,b6,b8, res;
   if (n==0) return pol_0(v);
-  if (n<=2) return pol_1(v);
-  b2  = ell_get_b2(e); b4  = ell_get_b4(e);
-  b6  = ell_get_b6(e); b8  = ell_get_b8(e);
+  if (n<=2) return N? scalarpol_shallow(mkintmod(gen_1,N),v): pol_1(v);
+  b2 = ell_get_b2(e); b4 = ell_get_b4(e);
+  b6 = ell_get_b6(e); b8 = ell_get_b8(e);
   if (n==3)
-    res = mkpoln(5,utoi(3),b2,gmulsg(3,b4),gmulsg(3,b6),b8);
+    res = mkpoln(5, N? modsi(3,N): utoi(3),b2,gmulsg(3,b4),gmulsg(3,b6),b8);
   else
   {
     GEN b10 = gsub(gmul(b2, b8), gmul(b4, b6));
     GEN b12 = gsub(gmul(b8, b4), gsqr(b6));
-    res = mkpoln(7,gen_2,b2,gmulsg(5,b4),gmulsg(10,b6),gmulsg(10,b8),b10,b12);
+    res = mkpoln(7, N? modsi(2, N): gen_2,b2,gmulsg(5,b4),gmulsg(10,b6),gmulsg(10,b8),b10,b12);
   }
   setvarn(res, v); return res;
 }
 
-/* T = (2y + a1x + a3)^2 modulo the curve equation */
+/* T = (2y + a1x + a3)^2 modulo the curve equation. Store elldivpol(e,n,v)
+ * in t[n]. N is the caracteristic of the base ring or NULL (char 0) */
 static GEN
-elldivpol0(GEN e, GEN t, GEN T, long n, long v)
+elldivpol0(GEN e, GEN t, GEN N, GEN T, long n, long v)
 {
   GEN ret;
   long m = n/2;
   if (gel(t,n)) return gel(t,n);
-  if (n<=4) ret = elldivpol4(e, n, v);
+  if (n<=4) ret = elldivpol4(e, N, n, v);
   else if (odd(n))
   {
-    GEN t1 = RgX_mul(elldivpol0(e,t,T,m+2,v),
-                     gpowgs(elldivpol0(e,t,T,m,v),3));
-    GEN t2 = RgX_mul(elldivpol0(e,t,T,m-1,v),
-                     gpowgs(elldivpol0(e,t,T,m+1,v),3));
+    GEN t1 = RgX_mul(elldivpol0(e,t,N,T,m+2,v),
+                     gpowgs(elldivpol0(e,t,N,T,m,v),3));
+    GEN t2 = RgX_mul(elldivpol0(e,t,N,T,m-1,v),
+                     gpowgs(elldivpol0(e,t,N,T,m+1,v),3));
     if (odd(m))/*f_{4l+3} = f_{2l+3}f_{2l+1}^3 - T f_{2l}f_{2l+2}^3, m=2l+1*/
       ret = RgX_sub(t1, RgX_mul(T,t2));
     else       /*f_{4l+1} = T f_{2l+2}f_{2l}^3 - f_{2l-1}f_{2l+1}^3, m=2l*/
@@ -5567,11 +5566,11 @@ elldivpol0(GEN e, GEN t, GEN T, long n, long v)
   }
   else
   { /* f_2m = f_m(f_{m+2}f_{m-1}^2 - f_{m-2}f_{m+1}^2) */
-    GEN t1 = RgX_mul(elldivpol0(e,t,T,m+2,v),
-                     RgX_sqr(elldivpol0(e,t,T,m-1,v)));
-    GEN t2 = RgX_mul(elldivpol0(e,t,T,m-2,v),
-                     RgX_sqr(elldivpol0(e,t,T,m+1,v)));
-    ret = RgX_mul(elldivpol0(e,t,T,m,v), RgX_sub(t1,t2));
+    GEN t1 = RgX_mul(elldivpol0(e,t,N,T,m+2,v),
+                     RgX_sqr(elldivpol0(e,t,N,T,m-1,v)));
+    GEN t2 = RgX_mul(elldivpol0(e,t,N,T,m-2,v),
+                     RgX_sqr(elldivpol0(e,t,N,T,m+1,v)));
+    ret = RgX_mul(elldivpol0(e,t,N,T,m,v), RgX_sub(t1,t2));
   }
   gel(t,n) = ret;
   return ret;
@@ -5581,22 +5580,23 @@ GEN
 elldivpol(GEN e, long n, long v)
 {
   pari_sp av = avma;
-  GEN ret;
-  checkell(e);
+  GEN ret, D, N;
+  checkell(e); D = ell_get_disc(e);
   if (v==-1) v = 0;
-  if (varncmp(gvar(ell_get_disc(e)), v) <= 0)
-    pari_err_PRIORITY("elldivpol", e, "<=", v);
+  if (varncmp(gvar(D), v) <= 0) pari_err_PRIORITY("elldivpol", e, "<=", v);
+  N = characteristic(D);
+  if (!signe(N)) N = NULL;
   if (n<0) n = -n;
   if (n==1 || n==3)
-    ret = elldivpol4(e, n, v);
+    ret = elldivpol4(e, N, n, v);
   else
   {
-    GEN d2 = RHSpol(e); /* (2y + a1x + 3)^2 mod E */
+    GEN d2 = RHSpol(e, N); /* (2y + a1x + 3)^2 mod E */
     setvarn(d2,v);
     if (n <= 4)
-      ret = elldivpol4(e, n, v);
+      ret = elldivpol4(e, N, n, v);
     else
-      ret = elldivpol0(e, const_vec(n,NULL), RgX_sqr(d2), n, v);
+      ret = elldivpol0(e, const_vec(n,NULL), N,RgX_sqr(d2), n, v);
     if (n%2==0) ret = RgX_mul(ret, d2);
   }
   return gerepilecopy(av, ret);
