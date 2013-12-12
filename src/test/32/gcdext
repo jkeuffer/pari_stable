@@ -67,4 +67,40 @@ Mod(x, x^3)
 y
 x
 1/x^2
-Total time spent: 0
+1
+1
+1
+0
+1
+1
+error("forbidden gcd t_REAL , t_FFELT.")
+error("forbidden gcd t_REAL , t_FFELT.")
+error("forbidden gcd t_REAL , t_FFELT.")
+1
+1
+error("inconsistent gcd t_INTMOD , t_FFELT.")
+error("inconsistent gcd t_FRAC , t_FFELT.")
+error("inconsistent gcd t_FRAC , t_FFELT.")
+1
+1
+1
+error("inconsistent gcd t_FRAC , t_FFELT.")
+0
+1
+error("inconsistent gcd t_FRAC , t_FFELT.")
+error("forbidden gcd t_FFELT , t_COMPLEX.")
+error("forbidden gcd t_FFELT , t_COMPLEX.")
+error("forbidden gcd t_FFELT , t_COMPLEX.")
+error("forbidden gcd t_FFELT , t_QUAD.")
+error("forbidden gcd t_FFELT , t_QUAD.")
+error("forbidden gcd t_FFELT , t_QUAD.")
+1
+1
+error("inconsistent gcd t_FFELT , t_PADIC.")
+0
+1
+error("inconsistent gcd t_FFELT , t_PADIC.")
+error("inconsistent gcd t_FFELT , t_PADIC.")
+error("inconsistent gcd t_FFELT , t_PADIC.")
+error("inconsistent gcd t_FFELT , t_PADIC.")
+Total time spent: 4

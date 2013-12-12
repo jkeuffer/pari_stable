@@ -1119,6 +1119,10 @@ ggcd(GEN x, GEN y)
       case t_FRAC:
         return gcdqq(x,y);
 
+      case t_FFELT:
+        if (!FF_samefield(x,y)) pari_err_OP("gcd",x,y);
+        return FF_equal0(x) && FF_equal0(y)? FF_zero(y): FF_1(y);
+
       case t_COMPLEX:
         if (c_is_rational(x) && c_is_rational(y)) return gauss_gcd(x,y);
         return triv_cont_gcd(y,x);
@@ -1158,18 +1162,35 @@ ggcd(GEN x, GEN y)
             }
             gel(z,2) = p1; return z;
 
+          case t_REAL: return gen_1;
+
           case t_FRAC:
             return gcdiq(x,y);
 
           case t_COMPLEX:
             if (c_is_rational(y)) return gauss_gcd(x,y);
-          case t_QUAD:
             return triv_cont_gcd(y,x);
+
+          case t_FFELT:
+            if (!FF_equal0(y)) return FF_1(y);
+            return dvdii(x, gel(y,4))? FF_zero(y): FF_1(y);
 
           case t_PADIC:
             return padic_gcd(x,y);
 
-          default: return gen_1; /* t_REAL */
+          case t_QUAD:
+            return triv_cont_gcd(y,x);
+          default:
+            pari_err_TYPE2("gcd",x,y);
+        }
+
+      case t_REAL:
+        switch(ty)
+        {
+          case t_INTMOD:
+          case t_FFELT:
+          case t_PADIC: pari_err_TYPE2("gcd",x,y);
+          default: return gen_1;
         }
 
       case t_INTMOD:
@@ -1180,11 +1201,21 @@ ggcd(GEN x, GEN y)
             if (!is_pm1(p1)) pari_err_OP("gcd",x,y);
             return ggcd(gel(y,1), x);
 
+          case t_FFELT:
+          {
+            GEN p = gel(y,4);
+            if (!dvdii(gel(x,1), p)) pari_err_OP("gcd",x,y);
+            if (!FF_equal0(y)) return FF_1(y);
+            return dvdii(gel(x,2),p)? FF_zero(y): FF_1(y);
+          }
+
           case t_COMPLEX: case t_QUAD:
             return triv_cont_gcd(y,x);
 
           case t_PADIC:
             return padic_gcd(x,y);
+
+          default: pari_err_TYPE2("gcd",x,y);
         }
 
       case t_FRAC:
@@ -1192,18 +1223,48 @@ ggcd(GEN x, GEN y)
         {
           case t_COMPLEX:
             if (c_is_rational(y)) return gauss_gcd(x,y);
+          case t_FFELT:
+          {
+            GEN p = gel(y,4);
+            if (dvdii(gel(x,2), p)) pari_err_OP("gcd",x,y);
+            if (!FF_equal0(y)) return FF_1(y);
+            return dvdii(gel(x,1),p)? FF_zero(y): FF_1(y);
+          }
           case t_QUAD:
             return triv_cont_gcd(y,x);
 
           case t_PADIC:
             return padic_gcd(x,y);
+
+          default: pari_err_TYPE2("gcd",x,y);
+        }
+      case t_FFELT:
+        switch(ty)
+        {
+          case t_PADIC:
+          {
+            GEN p = gel(y,2);
+            long v = valp(y);
+            if (!equalii(p, gel(x,4)) || v < 0) pari_err_OP("gcd",x,y);
+            return (v && FF_equal0(x))? FF_zero(x): FF_1(x);
+          }
+          default: pari_err_TYPE2("gcd",x,y);
         }
 
-      case t_COMPLEX: /* ty = PADIC or QUAD */
-        return triv_cont_gcd(x,y);
+      case t_COMPLEX:
+        switch(ty)
+        {
+          case t_PADIC:
+          case t_QUAD: return triv_cont_gcd(x,y);
+          default: pari_err_TYPE2("gcd",x,y);
+        }
 
-      case t_PADIC: /* ty = QUAD */
-        return triv_cont_gcd(y,x);
+      case t_PADIC:
+        switch(ty)
+        {
+          case t_QUAD: return triv_cont_gcd(y,x);
+          default: pari_err_TYPE2("gcd",x,y);
+        }
 
       default: return gen_1; /* tx = t_REAL */
     }
