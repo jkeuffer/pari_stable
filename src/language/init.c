@@ -784,7 +784,7 @@ pari_close_opts(ulong init_opts)
 
   BLOCK_SIGINT_START;
   if ((init_opts&INIT_SIGm)) pari_sig_init(SIG_DFL);
-  pari_mt_close();
+  if (!(init_opts&INIT_noIMTm)) pari_mt_close();
 
   while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)

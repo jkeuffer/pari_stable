@@ -94,6 +94,10 @@ tampered with by PARI signal handler.
 
   \kbd{INIT\_DFTm}: frees the \kbd{GP\_DATA} environment structure.
 
+  \kbd{INIT\_noIMTm}: (technical, see \kbd{pari\_mt\_init} in the Developer's
+Guide for detail). Do not call \tet{pari_mt_close} to close the multi-thread
+engine.
+
 \fun{void}{pari_sig_init}{void (*f)(int)} install the signal handler \kbd{f}
 (see \kbd{signal(2)}): the signals \kbd{SIGBUS}, \kbd{SIGFPE}, \kbd{SIGINT},
 \kbd{SIGBREAK}, \kbd{SIGPIPE} and \kbd{SIGSEGV} are concerned.

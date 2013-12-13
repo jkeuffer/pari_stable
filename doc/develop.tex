@@ -821,7 +821,13 @@ initialization code on the child nodes.
 See the file \kbd{examples/pari-mt.c} for an example.
 
 \fun{void}{pari_mt_close}{void} \label{pari_mt_close}
-cleanly stops the MT engine. It can not be restarted.
+When using MPI, calling \tet{pari_close} will terminate the MPI execution
+environment. If this is undesirable, you should call \tet{pari_close_opts} with
+the flag \tet{INIT_noIMTm}.  This closes PARI without terminating the MPI
+execution environment It is allowed to call \kbd{pari\_mt\_close} later to
+terminate it.  Note that the once MPI is terminated it cannot be restarted, and
+that it is considered an error for a program to end without having terminated
+the MPI execution environment.
 
 \vfill\eject
 \input index\end
