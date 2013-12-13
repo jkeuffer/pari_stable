@@ -1597,7 +1597,7 @@ parsum(GEN a, GEN b, GEN code, GEN x)
 void
 parfor(GEN a, GEN b, GEN code, GEN code2)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   long running, pending = 0;
   long status = br_NONE;
   GEN worker = snm_closure(is_entry("_parfor_worker"), mkvec(code));
@@ -1608,15 +1608,16 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
 
   mt_queue_start(&pt, worker);
   b = b ? gfloor(b): NULL;
-  a = setloop(a);
+  a = mkvec(setloop(a));
   if (code2)
   {
     push_lex(gen_0, code2);
     push_lex(gen_0, NULL);
   }
-  while ((running = (!stop && (!b || cmpii(a,b) <= 0))) || pending)
+  av2 = avma;
+  while ((running = (!stop && (!b || cmpii(gel(a,1),b) <= 0))) || pending)
   {
-    mt_queue_submit(&pt, 0, running ? mkvec(a): NULL);
+    mt_queue_submit(&pt, 0, running ? a: NULL);
     done = mt_queue_get(&pt, NULL, &pending);
     if (code2 && done && (!stop || cmpii(gel(done,1),stop) < 0))
     {
@@ -1629,7 +1630,8 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
         stop = icopy(gel(done,1));
       }
     }
-    a = incloop(a);
+    gel(a,1) = incloop(gel(a,1));
+    avma = av2;
   }
   mt_queue_end(&pt);
   if (code2) pop_lex(2);
@@ -1640,7 +1642,7 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
 void
 parforprime(GEN a, GEN b, GEN code, GEN code2)
 {
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   long running, pending = 0;
   long status = br_NONE;
   GEN worker = snm_closure(is_entry("_parfor_worker"), mkvec(code));
@@ -1655,6 +1657,7 @@ parforprime(GEN a, GEN b, GEN code, GEN code2)
     push_lex(gen_0, code2);
     push_lex(gen_0, NULL);
   }
+  av2 = avma;
   while ((running = (!stop && forprime_next(&T))) || pending)
   {
     mt_queue_submit(&pt, 0, running ? mkvec(T.pp): NULL);
@@ -1670,6 +1673,7 @@ parforprime(GEN a, GEN b, GEN code, GEN code2)
         stop = icopy(gel(done,1));
       }
     }
+    avma = av2;
   }
   mt_queue_end(&pt);
   if (code2) pop_lex(2);
