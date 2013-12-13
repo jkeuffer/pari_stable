@@ -197,19 +197,53 @@ A typical low-level construct:
   for (i = 1; i < l; i++) gel(L, i) = gclone( ... );
 @eprog\noindent
 
-\section{Otherwise undocumented global variables}
+\section{Protection of non-interruptible code}
 
-\tet{PARI_SIGINT_block}: set this to $1$ (resp. $2$) if you want to block
-the signals \kbd{SIGINT} and \kbd{SIGALRM} (resp. only \kbd{SIGALRM}) in a
-critical part of your code.
-We set it to $1$ before calling \kbd{malloc}, \kbd{free} and such. (Because
-\kbd{SIGINT} is non-fatal for us, and we don't want to leave the system stack
-in an inconsistent state.). We set it to $2$ in the \kbd{SIGINT} handler itself
-to delay an eventual pending alarm.
+GP allows the user to interrupt a computation by issuing SIGINT
+(usually by entering control-C) or SIGALRM (usually using alarm()).
+To avoid such interruption to occurs in section of code which are not
+reentrant (in particular \kbd{malloc} and \kbd{free})
+the following mechanism is provided:
+
+\fun{}{BLOCK_SIGINT_START}{}
+  Start a non-interruptible block code. Block both \kbd{SIGINT} and \kbd{SIGARLM}.
+
+\fun{}{BLOCK_SIGALRM_START}{}
+  Start a non-interruptible block code. Block only \kbd{SIGARLM}.
+This is used in the \kbd{SIGINT} handler itself to delay an eventual pending
+alarm.
+
+\fun{}{BLOCK_SIGINT_END}{}
+  End a non-interruptible block code
+
+The above macros make use of the following global variables:
+
+\tet{PARI_SIGINT_block}: set to $1$ (resp. $2$) by \kbd{BLOCK\_SIGINT\_START}
+(resp. \kbd{BLOCK\_SIGALRM\_START}).
 
 \tet{PARI_SIGINT_pending}: Either $0$ (no signal was blocked), \kbd{SIGINT}
 (\kbd{SIGINT} was blocked) or \kbd{SIGALRM} (\kbd{SIGALRM} was blocked).
-Take action as appropriate.
+This need to be set by the signal handler.
+
+Inside a block, a auto variable \kbd{int block} is defined which holds the
+value of \kbd{PARI\_SIGINT\_block} when entering the block.
+
+\subsec{Multithread interruptions}
+
+To support multithread, \kbd{BLOCK\_SIGINT\_START} and
+\kbd{BLOCK\_SIGALRM\_START} calls \kbd{MT\_SIGINT\_BLOCK(block);}, and
+\kbd{BLOCK\_SIGINT\_END} calls \kbd{MT\_SIGINT\_UNBLOCK(block);}.
+
+\tet{MT_SIGINT_BLOCK} and \tet{MT_SIGINT_UNBLOCK} are defined by the
+multithread engine. They can calls the following public functions defined by
+the multithread engine.
+
+\fun{void}{mt_sigint_block}{void}
+
+\fun{void}{mt_sigint_unblock}{void}
+
+In practice this mechanism is used by the POSIX thread engine to protect against
+asychronous cancellation.
 
 \section{Black box groups}
 
@@ -788,21 +822,6 @@ See the file \kbd{examples/pari-mt.c} for an example.
 
 \fun{void}{pari_mt_close}{void} \label{pari_mt_close}
 cleanly stops the MT engine. It can not be restarted.
-
-As documented in the user's guide to the PARI library, \kbd{libpari} replaces a
-number of \kbd{libc} functions (\kbd{malloc}, \kbd{free}) by wrappers protected
-within \tet{BLOCK_SIGINT_START} / \tet{BLOCK_SIGINT_END} pairs, blocking
-\kbd{SIGINT} (and possibly \kbd{SIGALRM} as well) to avoid user interrupts that
-might leave the system in an inconsistent state. When the MT engine is enabled,
-the function 
-
-\fun{void}{mt_sigint_block}{void} is also called as part of
-\tet{BLOCK_SIGINT_START} to prevent a thread cancellation at the wrong time,
-which would have the same lethal effect as a bad \kbd{SIGINT}.
-
-\fun{void}{mt_sigint_unblock}{void} this voids the previous function effect, 
-allowing the thread to be canceled at any time. Part of \tet{BLOCK_SIGINT_END}.
-
 
 \vfill\eject
 \input index\end
