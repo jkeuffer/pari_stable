@@ -129,7 +129,7 @@ static void
 checkcoordch(GEN z)
 { if (typ(z)!=t_VEC || lg(z) != 5) pari_err_TYPE("checkcoordch",z); }
 
-/* 4 X^3 + b2 X^2 + 2b4 X + b6, N is the characteristic of the base 
+/* 4 X^3 + b2 X^2 + 2b4 X + b6, N is the characteristic of the base
  * ring of NULL (char = 0) */
 static GEN
 RHSpol(GEN e, GEN N)
