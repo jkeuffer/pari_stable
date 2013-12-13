@@ -23,8 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 GEN
 buchnarrow(GEN bnf)
 {
-  GEN nf, cyc, gen, GD, v, invpi, logs, p1, p2, R, basecl, met, u1, archp;
-  long r1, i, j, ngen, t, lo, c;
+  GEN nf, cyc, gen, A, NO, GD, v, invpi, logs, R, basecl, met, u1, archp;
+  long r1, j, ngen, t, RU;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf);
@@ -32,22 +32,27 @@ buchnarrow(GEN bnf)
 
   if (!r1) return gcopy( bnf_get_clgp(bnf) );
 
+  /* simplified version of nfsign_units; r1 > 0 so bnf.tu = -1 */
+  archp = identity_perm(r1);
+  A = bnf_get_logfu(bnf); RU = lg(A)+1;
+  invpi = invr( mppi(nf_get_prec(nf)) );
+  v = cgetg(RU,t_MAT); gel(v, 1) = const_vecsmall(r1, 1); /* nfsign(-1) */
+  for (j=2; j<RU; j++) gel(v,j) = nfsign_from_logarch(gel(A,j-1), invpi, archp);
+  /* up to here */
+
   cyc = bnf_get_cyc(bnf);
   gen = bnf_get_gen(bnf);
-  v = Flm_image(nfsign_units(bnf,NULL,1), 2);
+  v = Flm_image(v, 2);
   t = lg(v)-1;
   if (t == r1) { avma = av; return gcopy( bnf_get_clgp(bnf) ); }
+  NO = shifti(bnf_get_no(bnf), r1-t);
 
   ngen = lg(gen)-1;
-  p1 = cgetg(ngen+r1-t + 1,t_COL);
-  for (i=1; i<=ngen; i++) p1[i] = gen[i];
-  gen = p1;
-  v = archstar_full_rk(NULL, nf_get_M(nf), v, gen + (ngen - t));
+  gen = vec_lengthen(gen, r1 + (ngen-t));
+  v = archstar_full_rk(NULL, nf_get_M(nf), v, gen + (ngen-t));
   v = rowslice(v, t+1, r1);
 
-  logs = cgetg(ngen+1,t_MAT);
-  GD = gmael(bnf,9,3); invpi = invr( mppi(DEFAULTPREC) );
-  archp = identity_perm(r1);
+  logs = cgetg(ngen+1,t_MAT); GD = gmael(bnf,9,3);
   for (j=1; j<=ngen; j++)
   {
     GEN z = nfsign_from_logarch(gel(GD,j), invpi, archp);
@@ -59,28 +64,11 @@ buchnarrow(GEN bnf)
     vconcat(diagonal_shallow(cyc), logs),
     vconcat(zeromat(ngen, r1-t), scalarmat(gen_2,r1-t))
   );
-
   met = ZM_snf_group(R,NULL,&u1);
-  lo = lg(R); c = lg(met);
-
-  basecl = cgetg(c,t_VEC);
-  for (j=1; j<c; j++)
-  {
-    p1 = gcoeff(u1,1,j);
-    p2 = idealpow(nf,gel(gen,1),p1);
-    if (signe(p1) < 0) p2 = Q_primpart(p2);
-    for (i=2; i<lo; i++)
-    {
-      p1 = gcoeff(u1,i,j);
-      if (signe(p1))
-      {
-        p2 = idealmul(nf,p2, idealpow(nf,gel(gen,i),p1));
-        p2 = Q_primpart(p2);
-      }
-    }
-    gel(basecl,j) = p2;
-  }
-  return gerepilecopy(av, mkvec3(shifti(bnf_get_no(bnf), r1-t), met,basecl));
+  t = lg(met); basecl = cgetg(t,t_VEC);
+  for (j=1; j<t; j++)
+    gel(basecl,j) = Q_primpart( idealfactorback(nf,gen,gel(u1,j),0) );
+  return gerepilecopy(av, mkvec3(NO, met, basecl));
 }
 
 /********************************************************************/
