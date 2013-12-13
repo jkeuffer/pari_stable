@@ -989,39 +989,27 @@ compute_M0(GEN M_star,long N)
 static GEN
 lowerboundforregulator(GEN bnf, GEN units)
 {
-  long N,R1,R2,RU,i;
-  GEN nf,M0,M,G,bound,minunit,newminunit;
-  GEN vecminim,p1,pol,y;
+  long i, N, R2, RU = lg(units)-1;
+  GEN nf, M0, M, G, bound, minunit, vecminim;
 
-  nf = bnf_get_nf(bnf); N = nf_get_degree(nf);
-  nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
   if (!RU) return gen_1;
+  nf = bnf_get_nf(bnf);
+  N = nf_get_degree(nf);
+  R2 = nf_get_r2(nf);
 
   G = nf_get_G(nf);
   minunit = gnorml2(RgM_RgC_mul(G, gel(units,1))); /* T2(units[1]) */
   for (i=2; i<=RU; i++)
   {
-    newminunit = gnorml2(RgM_RgC_mul(G, gel(units,i)));
-    if (gcmp(newminunit,minunit) < 0) minunit = newminunit;
+    GEN t = gnorml2(RgM_RgC_mul(G, gel(units,i)));
+    if (gcmp(t,minunit) < 0) minunit = t;
   }
   if (gexpo(minunit) > 30) return NULL;
 
   vecminim = minimforunits(nf, itos(gceil(minunit)), bnf_get_tuN(bnf));
   if (!vecminim) return NULL;
   bound = gel(vecminim,3);
-  if (DEBUGLEVEL>1)
-  {
-    err_printf("M* = %Ps\n", bound);
-    if (DEBUGLEVEL>2)
-    {
-      pol = gaddgs(gsub(monomial(gen_1,N,0),monomial(bound,1,0)),N-1);
-      p1 = roots(pol,DEFAULTPREC);
-      y= real_i(gel(p1, 2 + (N&1)));
-      M0 = gmul2n(gmulsg(N*(N-1),sqrr(glog(y,DEFAULTPREC))),-2);
-      err_printf("pol = %Ps\n",pol);
-      err_printf("old method: y = %Ps, M0 = %.28Pg\n",y,M0);
-    }
-  }
+  if (DEBUGLEVEL>1) err_printf("M* = %Ps\n", bound);
   M0 = compute_M0(bound, N);
   if (DEBUGLEVEL>1) { err_printf("M0 = %.28Pg\n",M0); err_flush(); }
   M = gmul2n(divru(gdiv(powrs(M0,RU),hermiteconstant(RU)),N),R2);
