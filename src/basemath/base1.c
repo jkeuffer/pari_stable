@@ -740,6 +740,21 @@ nfpoleval(GEN nf, GEN pol, GEN s)
   return gerepileupto(av, res);
 }
 
+static GEN
+QX_table_nfpoleval(GEN nf, GEN pol, GEN m)
+{
+  pari_sp av = avma;
+  long i = lg(pol)-1;
+  GEN res, den;
+  if (i==1) return gen_0;
+  pol = Q_remove_denom(pol, &den);
+  res = scalarcol_shallow(gel(pol,i), nf_get_degree(nf));
+  for (i-- ; i>=2; i--)
+    res = ZC_Z_add(ZM_ZC_mul(m, res), gel(pol,i));
+  if (den) res = RgC_Rg_div(res, den);
+  return gerepileupto(av, res);
+}
+
 GEN
 FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p)
 {
@@ -883,14 +898,16 @@ galoisapply(GEN nf, GEN aut, GEN x)
 GEN
 nfgaloismatrix(GEN nf, GEN s)
 {
-  GEN zk, M;
+  GEN zk, M, m;
   long k, l;
   nf = checknf(nf);
   zk = nf_get_zk(nf);
   if (typ(s) != t_COL) s = algtobasis(nf, s); /* left on stack for efficiency */
+  m = zk_multable(nf, s);
   l = lg(s); M = cgetg(l, t_MAT);
   gel(M, 1) = col_ei(l-1, 1); /* s(1) = 1 */
-  for (k = 2; k < l; k++) gel(M, k) = ZC_galoisapply(nf, s, gel(zk, k));
+  for (k = 2; k < l; k++)
+    gel(M, k) = QX_table_nfpoleval(nf, gel(zk, k), m);
   return M;
 }
 
