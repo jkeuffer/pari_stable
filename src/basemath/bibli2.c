@@ -240,7 +240,29 @@ polhermite(long n, long v)
 GEN
 polhermite_eval(long n, GEN x)
 {
-  pari_sp av;
+  long i;
+  pari_sp av, av2;
+  GEN x2, u, v;
+
+  if (!x) return polhermite(n, 0);
+  if (gcmpX(x)) return polhermite(n, varn(x));
+  if (n==0) return gen_1;
+  if (n==1) return gmul2n(x,1);
+  av = avma; x2 = gmul2n(x,1); v = gen_1; u = x2;
+  av2= avma;
+  for (i=1; i<n; i++)
+  { /* u = H_i(x), v = H_{i-1}(x), compute t = H_{i+1}(x) */
+    GEN t;
+    if ((i & 0xff) == 0) gerepileall(av2,2,&u, &v);
+    t = gsub(gmul(x2, u), gmulsg(2*i,v));
+    v = u; u = t;
+  }
+  return gerepileupto(av, u);
+}
+GEN
+polhermite_eval2(long n, GEN x)
+{
+  pari_sp av, av2;
   long m;
   GEN a, x2, T;
 
@@ -248,22 +270,22 @@ polhermite_eval(long n, GEN x)
   if (gcmpX(x)) return polhermite(n, varn(x));
   if (n==0) return gen_1;
 
-  av = avma; x2 = gsqr(x);
+  av = avma; x2 = gsqr(x); av2 = avma;
   T = a = int2n(n);
   if (n < SQRTVERYBIGINT)
     for (m=1; 2*m<= n; m++)
     {
       T = gmul(T, x2);
-      av = avma;
       a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
+      if ((m & 0xff)==0) gerepileall(av2,2,&T,&a);
       togglesign(a); T = gadd(T, a);
     }
   else
     for (m=1; 2*m<= n; m++)
     {
       T = gmul(T, x2);
-      av = avma;
       a = diviuexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), 4*m);
+      if ((m & 0xff)==0) gerepileall(av2,2,&T,&a);
       togglesign(a); T = gadd(T, a);
     }
   if (odd(n)) T = gmul(T,x);
@@ -317,9 +339,9 @@ pollegendre(long n, long v)
 GEN
 pollegendre_eval(long n, GEN x)
 {
-  long k, l;
+  long i;
   pari_sp av;
-  GEN T, a, x2;
+  GEN u, v;
 
   if (!x) return pollegendre(n, 0);
   if (gcmpX(x)) return pollegendre(n, varn(x));
@@ -327,29 +349,15 @@ pollegendre_eval(long n, GEN x)
   if (n < 0) n = -n-1;
   if (n==0) return gen_1;
   if (n==1) return gcopy(x);
-
-  av = avma; x2 = gsqr(x);
-  T = a = binomialuu(n<<1,n);
-  if (n < SQRTVERYBIGINT)
-    for (k=1,l=n; l>1; k++,l-=2)
-    { /* l = n-2*k+2 */
-      T = gmul(T, x2);
-      av = avma;
-      a = diviuexact(muliu(a, l*(l-1)), 2*k*(n+l-1));
-      togglesign(a); a = gerepileuptoint(av, a);
-      T = gadd(T, a);
-    }
-  else
-    for (k=1,l=n; l>1; k++,l-=2)
-    { /* l = n-2*k+2 */
-      T = gmul(T, x2);
-      av = avma;
-      a = diviiexact(mulii(a, muluu(l, l-1)), muluu(2*k, n+l-1));
-      togglesign(a); a = gerepileuptoint(av, a);
-      T = gadd(T, a);
-    }
-  if (odd(n)) T = gmul(T,x);
-  return gerepileupto(av, gmul2n(T,-n));
+  av = avma; v = gen_1; u = x;
+  for (i=1; i<n; i++)
+  { /* u = P_i(x), v = P_{i-1}(x), compute t = P_{i+1}(x) */
+    GEN t;
+    if ((i & 0xff) == 0) gerepileall(av,2,&u, &v);
+    t = gdivgs(gsub(gmul(gmulsg(2*i+1,x), u), gmulsg(i,v)), i+1);
+    v = u; u = t;
+  }
+  return gerepileupto(av, u);
 }
 
 /* polcyclo(p) = X^(p-1) + ... + 1 */

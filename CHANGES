@@ -109,6 +109,7 @@ JD 14- polcyclo(n, x) now works for all roots of 1
        split into FpM_FpC_gauss (b t_COL) and FpM_gauss (b t_MAT). Same for
        all modular xxx_gauss functions
    22- O(1/x^2) --> error [ now equivalent to O(x^-2) ]
+   23- faster evaluated polhermite/pollegendre
 
   Added
 EP  1- Configure option for gcov/lcov support
