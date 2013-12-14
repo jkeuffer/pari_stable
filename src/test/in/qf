@@ -7,9 +7,15 @@ Q=[8,4,4,4,4,4,4,4,4,4,4,4;4,8,4,4,4,4,4,4,4,4,4,4;4,4,8,0,0,0,3,0,0,0,0,0;4,4,0
 qfminim(Q,,0,2)[1]
 qfrep(Q,16)
 qfrep(Q,8,1)
+qfminim(Q,,,1)
+qfminim(Q,8,,1)
+qfminim(Q,4,,1)
+qfminim([;],4,,1)
+qfminim([;],4,,2)
 
 L=[360815,2283021;-316840,2566404];
 qfminim(L~*L,10^16)[2]
 qfminim(L~*L,10^16,,2)[2]
 forqfvec(v, [3,2;2,3], 3, print(v))
+forqfvec(v, [3,2;2,3],, print(v))
 forqfvec(v,[;],3,)

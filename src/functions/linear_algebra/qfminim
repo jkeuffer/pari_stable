@@ -30,8 +30,9 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  pair $\pm v$ (at most $m$ such pairs, unless $m$ was omitted). The vectors
  are returned in no particular order.
 
- If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
- than $b$. If no explicit $b$ is provided, return a vector of smallish norm
+ If $\fl=1$, ignores $m$ and returns $[N,v]$, where $v$ is a non-zero vector
+ of length $N \leq b$, or $[]$ if no non-zero vector has length $\leq b$.
+ If no explicit $b$ is provided, return a vector of smallish norm
  (smallest vector in an LLL-reduced basis).
 
  In these two cases, $x$ must have \emph{integral} entries. The
