@@ -772,12 +772,22 @@ FpX_FpC_nfpoleval(GEN nf, GEN pol, GEN a, GEN p)
   return gerepileupto(av, res);
 }
 
-/* compute s(x) */
+/* compute s(x), not stack clean */
+static GEN
+table_galoisapply(GEN nf, GEN m, GEN x)
+{
+  x = nf_to_scalar_or_alg(nf, x);
+  if (typ(x) != t_POL) return scalarcol(x, nf_get_degree(nf));
+  return QX_table_nfpoleval(nf, x, m);
+}
+
+/* compute s(x), not stack clean */
 static GEN
 ZC_galoisapply(GEN nf, GEN s, GEN x)
 {
   x = nf_to_scalar_or_alg(nf, x);
-  return typ(x) == t_POL? nfpoleval(nf,x,s): scalarcol(x, nf_get_degree(nf));
+  if (typ(x) != t_POL) return scalarcol(x, nf_get_degree(nf));
+  return QX_table_nfpoleval(nf, x, zk_multable(nf, s));
 }
 
 static GEN
@@ -833,7 +843,7 @@ elt_galoisapply(GEN nf, GEN aut, GEN x)
     case t_FRAC: return gcopy(x);
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL: {
-      GEN y = basistoalg(nf,ZC_galoisapply(nf, aut, x));
+      GEN y = basistoalg(nf, ZC_galoisapply(nf, aut, x));
       return gerepileupto(av,y);
     }
     case t_COL:
@@ -886,9 +896,9 @@ galoisapply(GEN nf, GEN aut, GEN x)
     case t_MAT: /* ideal */
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
       if (nbrows(x) != nf_get_degree(nf)) break;
-      aut = algtobasis(nf, aut);
+      aut = zk_multable(nf, algtobasis(nf, aut));
       y = cgetg(lx,t_MAT);
-      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf, aut, gel(x,j));
+      for (j=1; j<lx; j++) gel(y,j) = table_galoisapply(nf, aut, gel(x,j));
       return gerepileupto(av, idealhnf_shallow(nf,y));
   }
   pari_err_TYPE("galoisapply",x);
