@@ -2176,7 +2176,7 @@ GEN
 ZX_ZXY_resultant_all(GEN A, GEN B0, long *plambda, GEN *LERS)
 {
   int checksqfree = plambda? 1: 0, delvar = 0, stable;
-  long lambda = plambda? *plambda: 0;
+  long lambda = plambda? *plambda: 0, cnt = 0;
   ulong bound, p, dp;
   pari_sp av = avma, av2 = 0, lim;
   long i,n, lb, degA = degpol(A), dres = degA*degpol(B0);
@@ -2336,8 +2336,8 @@ INIT:
     }
     /* could make it probabilistic for H ? [e.g if stable twice, etc]
      * Probabilistic anyway for H0, H1 */
-    if (DEBUGLEVEL>5)
-      err_printf("resultant mod %ld (bound 2^%ld, stable=%ld)\n", p,expi(q),stable);
+    if (DEBUGLEVEL>5 && (stable ||  ++cnt==100))
+    { cnt=0; err_printf("%ld%%%s ",100*expi(q)/bound,stable?"s":""); }
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -2347,6 +2347,7 @@ INIT:
   }
   if (!p) pari_err_OVERFLOW("ZX_ZXY_rnfequation [ran out of primes]");
 END:
+  if (DEBUGLEVEL>5) err_printf(" done\n");
   setvarn(H, vX); if (delvar) (void)delete_var();
   if (plambda) *plambda = lambda;
   if (LERS)
