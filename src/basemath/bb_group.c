@@ -546,7 +546,7 @@ gen_order(GEN a, GEN o, void *E, const struct bb_group *grp)
   {
     GEN t, y, p = gcoeff(m,i,1);
     long j, e = itos(gcoeff(m,i,2));
-    if (l == 1) {
+    if (l == 2) {
       t = gen_1;
       y = a;
     } else {
@@ -587,7 +587,7 @@ gen_factored_order(GEN a, GEN o, void *E, const struct bb_group *grp)
   {
     GEN t, y, p = gcoeff(m,i,1);
     long j, e = itos(gcoeff(m,i,2));
-    if (l == 1) {
+    if (l == 2) {
       t = gen_1;
       y = a;
     } else {
