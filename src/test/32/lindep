@@ -9,4 +9,10 @@ x^2 + (-y^3 - y^2 - 5*y - 1)
 []~
 [1]~
 []~
+[]~
+1
+  ***   at top-level: algdep(1,-1)
+  ***                 ^------------
+  *** algdep: domain error in algdep: degree < 0
+x^2 - 2
 Total time spent: 0
