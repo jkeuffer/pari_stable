@@ -1003,9 +1003,10 @@ ispolygonal(GEN x, GEN S, GEN *N)
 static int
 pow_check(ulong p, GEN *x, GEN *logx, double *dlogx, long *k)
 {
+  pari_sp av = avma;
   long e;
   GEN u = divru(*logx, p), y = grndtoi(mpexp(u), &e);
-  if (e >= -10 || !equalii(powiu(y, p), *x)) return 0;
+  if (e >= -10 || !equalii(powiu(y, p), *x)) { avma = av; return 0; }
   *k *= p; *x = y; *logx = u; *dlogx /= p; return 1;
 }
 

@@ -68,6 +68,8 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    51- leading coefficient of elldivpol ignored the characteristic,e.g.
        E=ellinit([a1,a2,a3,a4,a6*Mod(1,2)]); elldivpol(E,2)
    52- gcd involving a t_FFELT -> SEGV
+   53- oo loop in ispower for huge arguments / oo loop in prime iterator
+       in congruence classes [#1498, 2.6.0]
 
   Changed
     1- default help text for a user function is now as in \u:

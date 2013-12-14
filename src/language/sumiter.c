@@ -222,6 +222,20 @@ u_forprime_set_prime_table(forprime_t *T, ulong a)
     T->p = init_primepointer_lt(a, &T->d);
 }
 
+/* Set p so that p + q the smallest integer = c (mod q) and > original p.
+ * Assume 0 < c < q. Set p = 0 on overflow */
+static void
+arith_set(forprime_t *T)
+{
+  ulong r = T->p % T->q; /* 0 <= r <= min(p, q-1) */
+  pari_sp av = avma;
+  GEN d = adduu(T->p - r, T->c);
+  if (T->c > r) d = subiu(d, T->q);
+  /* d = c mod q,  d = c > r? p-r+c-q: p-r+c, so that
+   *  d <= p  and  d+q = c>r? p-r+c  : p-r+c+q > p */
+  T->p = itou_or_0(d); avma = av; /* d = 0 is impossible */
+}
+
 /* run through primes in arithmetic progression = c (mod q).
  * Assume (c,q)=1, 0 <= c < q */
 int
@@ -253,16 +267,22 @@ u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
   }
   /* b > maxp */
   if (a >= maxp)
-    T->p = a - 1;
+  {
+    if (T->q == 1)
+      T->p = a - 1;
+    else
+      arith_set(T);
+  }
   else
     u_forprime_set_prime_table(T, a);
 
   maxp2 = (maxp & HIGHMASK)? 0 : maxp*maxp;
+  /* FIXME: should sieve as well if q != 1, adapt sieve code */
   if (q != 1 || (maxp2 && maxp2 <= a)
-             || T->b - maxuu(a,maxp) < maxp / expu(b)) /* not worth sieving */
+             || T->b - maxuu(a,maxp) < maxp / expu(b))
   { if (!T->strategy) T->strategy = 3; }
   else
-  {
+  { /* worth sieving */
 #ifdef LONG_IS_64BIT
     const ulong UPRIME_MAX = 18446744073709551557UL;
 #else
@@ -270,10 +290,8 @@ u_forprime_arith_init(forprime_t *T, ulong a, ulong b, ulong c, ulong q)
 #endif
     ulong sieveb;
     if (b > UPRIME_MAX) b = UPRIME_MAX;
-    if (!maxp2) /* maxp^2 > ULONG_MAX */
-      sieveb = b;
-    else
-      sieveb = minuu(maxp2, b);
+    sieveb = b;
+    if (maxp2 && maxp2 < b) sieveb = maxp2;
     if (!T->strategy) T->strategy = 2;
     if (!odd(sieveb)) sieveb--;
     sieve_init(T, maxuu(maxp+2, a), sieveb);
@@ -374,17 +392,8 @@ u_forprime_next(forprime_t *T)
       if (!*(T->d))
       {
         T->strategy = T->sieve? 2: 3;
-        if (T->q != 1)
-        { /* make p + q the smallest integer = c (mod q) and > original p */
-          ulong r = T->p % T->q;
-          pari_sp av = avma;
-          GEN d = adduu(T->p - r, T->c);
-          if (T->c > r) d = subiu(d, T->q);
-          avma = av;
-          if (lgefint(d) > 3) return 0; /* overflow */
-          T->p = d[2];
-          /* T->p possibly not a prime ! */
-        }
+        if (T->q != 1) { arith_set(T); if (!T->p) return 0; }
+        /* T->p possibly not a prime if q != 1 */
         break;
       }
       else
