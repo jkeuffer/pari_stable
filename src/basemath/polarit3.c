@@ -2460,7 +2460,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
 {
   ulong Hp, dp, p;
   pari_sp av = avma, av2, lim;
-  long degA, degB;
+  long degA, degB, cnt=0;
   int stable;
   GEN q, a, b, H;
   forprime_t S;
@@ -2529,8 +2529,8 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     }
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
       stable = Z_incremental_CRT(&H, Hp, &q, p);
-    if (DEBUGLEVEL>5)
-      err_printf("resultant mod %ld (bound 2^%ld, stable = %d)\n",p,expi(q),stable);
+    if (DEBUGLEVEL>5 && (stable ||  cnt++==2000))
+    { cnt=0; err_printf("%ld%%%s ",100*expi(q)/bound,stable?"s":""); }
     if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -2538,6 +2538,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       gerepileall(av2, 2, &H,&q);
     }
   }
+  if (DEBUGLEVEL>5) err_printf("done\n");
   return gerepileuptoint(av, icopy(H));
 }
 
