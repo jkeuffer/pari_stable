@@ -1253,7 +1253,7 @@ Z_isanypower_nosmalldiv(GEN *px)
       e2 = (ulong)((expi(x) + 1) / LOG2_103);
       u_forprime_restrict(&T, e2);
     }
-    if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
+    if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%ld-bit\n", k, expi(x));
     /* x^(1/p) < 2^31 */
     p = T.p;
     if (p <= e2)

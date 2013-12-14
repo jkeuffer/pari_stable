@@ -1947,7 +1947,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   GEN y;
 
   if (!*mask) return 0; /* useful when running in a loop */
-  if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
+  if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %ld-bit integer\n", expi(x));
   if (lgefint(x) == 3) {
     ulong t;
     long e = uis_357_power(x[2], &t, mask);
@@ -2038,7 +2038,7 @@ is_kth_power(GEN x, ulong n, GEN *pt)
   }
   avma = av;
 
-  if (DEBUGLEVEL>4) err_printf("OddPwrs: passed modular checks\n");
+  if (DEBUGLEVEL>4) err_printf("\nOddPwrs: [%lu] passed modular checks\n",n);
   /* go to the horse's mouth... */
   y = roundr( sqrtnr(itor(x, nbits2prec((expi(x)+16*n)/n)), n) );
   if (!equalii(powiu(y, n), x)) {
@@ -2061,18 +2061,24 @@ is_kth_power(GEN x, ulong n, GEN *pt)
 int
 is_pth_power(GEN x, GEN *pt, forprime_t *T, ulong cutoffbits)
 {
-  long size = expi(x) /* not +1 */;
+  long cnt=0, size = expi(x) /* not +1 */;
   ulong p;
   pari_sp av = avma;
-  if (DEBUGLEVEL>4) err_printf("OddPwrs: examining %Ps\n", x);
   while ((p = u_forprime_next(T)) && size/p >= cutoffbits) {
     long v = 1;
+    if (DEBUGLEVEL>5 && cnt++==2000)
+      { cnt=0; err_printf("%lu%% ", 100*p*cutoffbits/size); }
     while (is_kth_power(x, p, pt)) {
       v *= p; x = *pt;
       size = expi(x);
     }
-    if (v > 1) return v;
+    if (v > 1)
+    {
+      if (DEBUGLEVEL>5) err_printf("\nOddPwrs: is a %ld power\n",v);
+      return v;
+    }
   }
+  if (DEBUGLEVEL>5) err_printf("\nOddPwrs: not a power\n",p);
   avma = av; return 0; /* give up */
 }
 
