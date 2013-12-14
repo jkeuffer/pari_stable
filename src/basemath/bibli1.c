@@ -503,7 +503,7 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
   double tau, beta, rho;
   long delta, t;
   tau = gtodouble(glog(X, DEFAULTPREC)) / logN;
-  beta = gtodouble(glog(B, DEFAULTPREC)) / logN;
+  beta = B? gtodouble(glog(B, DEFAULTPREC)) / logN: 1.;
   if (tau >= beta * beta / d)
     pari_err_OVERFLOW("zncoppersmith [bound too large]");
   /* TODO : remove P0 completely ! */
@@ -524,26 +524,29 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
   }
 }
 
+static int
+sol_OK(GEN x, GEN N, GEN B)
+{ return B? (cmpii(gcdii(x,N),B) >= 0): !signe(resii(x,N)); }
+/* deg(P) > 0, x >= 0. Find all j such that gcd(P(j), N) >= B, |j| <= x */
 static GEN
 do_exhaustive(GEN P, GEN N, long x, GEN B)
 {
-  GEN tst, sol = vecsmalltrunc_init(2*x + 2);
-  long j, l;
-
-  for (j = -x; j <= x; j++)
+  GEN Pe, Po, sol = vecsmalltrunc_init(2*x + 2);
+  pari_sp av;
+  long j;
+  RgX_even_odd(P, &Pe,&Po); av = avma;
+  if (sol_OK(gel(P,2), N,B)) vecsmalltrunc_append(sol, 0);
+  for (j = 1; j <= x; j++, avma = av)
   {
-    tst = gcdii(FpX_eval(P, stoi(j), N), N);
-
-    if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
-    {
-      for (l = 1; l < lg(sol) && j != sol[l]; l++) /*empty*/;
-      if (l == lg(sol)) vecsmalltrunc_append(sol, j);
-    }
+    GEN j2 = sqru(j), E = FpX_eval(Pe,j2,N), O = FpX_eval(Po,j2,N);
+    if (sol_OK(addmuliu(E,O,j), N,B)) vecsmalltrunc_append(sol, j);
+    if (sol_OK(submuliu(E,O,j), N,B)) vecsmalltrunc_append(sol,-j);
   }
-  return zv_to_ZV(sol);
+  vecsmall_sort(sol); return zv_to_ZV(sol);
 }
 
-/* General Coppersmith, look for a root x0 <= p, p >= B, p | N, |x0| <= X */
+/* General Coppersmith, look for a root x0 <= p, p >= B, p | N, |x0| <= X.
+ * B = N coded as NULL */
 GEN
 zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 {
@@ -560,19 +563,17 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     if (typ(X) != t_INT) pari_err_TYPE("zncoppersmith",X);
   }
   if (signe(X) < 0) pari_err_DOMAIN("zncoppersmith", "X", "<", gen_0, X);
-  if (!B) B = N;
-  if (typ(B) != t_INT) B = gceil(B);
+  d = degpol(P0);
+  if (d == 0) { avma = av; return cgetg(1, t_VEC); }
+  if (d < 0) pari_err_ROOTS0("zncoppersmith");
+  if (B && typ(B) != t_INT) B = gceil(B);
 
   if (cmpiu(X, X_SMALL) <= 0)
     return gerepileupto(av, do_exhaustive(P0, N, itos(X), B));
 
-  /* bnd-hack is only for the case B = N */
-  if (!equalii(B,N)) bnd = 1;
-
-  P = leafcopy(P0); d = degpol(P);
-  if (d == 0) { avma = av; return cgetg(1, t_VEC); }
-  if (d < 0) pari_err_ROOTS0("zncoppersmith");
-
+  if (B && equalii(B,N)) B = NULL;
+  if (B) bnd = 1; /* bnd-hack is only for the case B = N */
+  P = leafcopy(P0);
   if (!gequal1(gel(P,d+2)))
   {
     GEN r, z;
@@ -629,7 +630,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     }
     /* Z is the upper bound for the L^1 norm of the polynomial,
        ie. N^delta if B = N, B^delta otherwise */
-    if (B != N) Z = powiu(B, delta); else Z = N0;
+    if (B) Z = powiu(B, delta); else Z = N0;
 
     if (DEBUGLEVEL >= 2)
     {
@@ -673,21 +674,15 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   {
     GEN r = nfrootsQ(R);
     if (DEBUGLEVEL >= 2) err_printf("Roots: %Ps\n", r);
-
     for (j = 1; j < lg(r); j++)
     {
-      GEN z = gel(r,j), tst;
-      if (typ(z) != t_INT) continue;
-      tst = gcdii(FpX_eval(P, z, N), N);
-      if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
-      {
-        for (l = 1; l < lg(sol) && !equalii(z, gel(sol,l)); l++) /*empty*/;
-        if (l == lg(sol)) sol = shallowconcat(sol, z);
-      }
+      GEN z = gel(r,j);
+      if (typ(z) == t_INT && sol_OK(FpX_eval(P,z,N), N,B))
+        sol = shallowconcat(sol, z);
     }
     if (i < bnd) gel(R,2) = addii(gel(R,2), Z);
   }
-  return gerepilecopy(av, sol);
+  return gerepileupto(av, ZV_sort_uniq(sol));
 }
 
 /********************************************************************/
