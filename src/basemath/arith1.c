@@ -1000,16 +1000,6 @@ ispolygonal(GEN x, GEN S, GEN *N)
 /**                        PERFECT POWER                            **/
 /**                                                                 **/
 /*********************************************************************/
-static int
-pow_check(ulong p, GEN *x, GEN *logx, double *dlogx, long *k)
-{
-  pari_sp av = avma;
-  long e;
-  GEN u = divru(*logx, p), y = grndtoi(mpexp(u), &e);
-  if (e >= -10 || !equalii(powiu(y, p), *x)) { avma = av; return 0; }
-  *k *= p; *x = y; *logx = u; *dlogx /= p; return 1;
-}
-
 static long
 polispower(GEN x, GEN K, GEN *pt)
 {
@@ -1226,6 +1216,30 @@ gisanypower(GEN x, GEN *pty)
   return 0; /* not reached */
 }
 
+/* v_p(x) = e != 0 for some p; return ispower(x,,&x), updating x.
+ * No need to optimize for 2,3,5,7 powers (done before) */
+static long
+split_exponent(ulong e, GEN *x)
+{
+  GEN fa, P, E;
+  long i, j, l, k = 1;
+  if (e == 1) return 1;
+  fa = factoru(e);
+  P = gel(fa,1);
+  E = gel(fa,2); l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    ulong p = P[i];
+    for (j = 0; j < E[i]; j++)
+    {
+      GEN y;
+      if (!is_kth_power(*x, p, &y)) break;
+      k *= p; *x = y;
+    }
+  }
+  return k;
+}
+
 static long
 Z_isanypower_nosmalldiv(GEN *px)
 { /* any prime divisor of x is > 102 */
@@ -1243,7 +1257,8 @@ Z_isanypower_nosmalldiv(GEN *px)
   if (u_forprime_init(&T, 11, e2))
   {
     GEN logx = NULL;
-    ulong p;
+    const ulong Q = 30011; /* prime */
+    ulong p, xmodQ;
     double dlogx = 0;
     /* cut off at x^(1/p) ~ 2^30 bits which seems to be about optimum;
      * for large p the modular checks are no longer competitively fast */
@@ -1254,6 +1269,9 @@ Z_isanypower_nosmalldiv(GEN *px)
       u_forprime_restrict(&T, e2);
     }
     if (DEBUGLEVEL>4) err_printf("Z_isanypower: now k=%ld, x=%ld-bit\n", k, expi(x));
+    xmodQ = umodiu(x, Q);
+    /* test Q | x, just in case */
+    if (!xmodQ) return k * split_exponent(Z_lval(x,Q), px);
     /* x^(1/p) < 2^31 */
     p = T.p;
     if (p <= e2)
@@ -1263,8 +1281,17 @@ Z_isanypower_nosmalldiv(GEN *px)
       e2 = (ulong)(dlogx / LOG103); /* >= log_103(x) */
     }
     while (p && p <= e2)
-    {
-      if (pow_check(p, &x, &logx, &dlogx, &k)) {
+    { /* is x a p-th power ? By computing y = round(x^(1/p)).
+       * Check whether y^p = x, first mod Q, then exactly. */
+      pari_sp av = avma;
+      long e;
+      GEN logy = divru(logx, p), y = grndtoi(mpexp(logy), &e);
+      ulong ymodQ = umodiu(y,Q);
+      if (e >= -10 || Fl_powu(ymodQ, p % (Q-1), Q) != xmodQ
+                   || !equalii(powiu(y, p), x)) avma = av;
+      else
+      {
+        k *= p; x = y; xmodQ = ymodQ; logx = logy; dlogx /= p;
         e2 = (ulong)(dlogx / LOG103); /* >= log_103(x) */
         u_forprime_restrict(&T, e2);
         continue; /* if success, retry same p */
@@ -1285,8 +1312,8 @@ static ulong tinyprimes[] = {
 static long
 Z_isanypower_aux(GEN x, GEN *pty)
 {
-  long ex, v, i, j, l, k;
-  GEN y, fa, P, E, Pe, Ee;
+  long ex, v, i, l, k;
+  GEN y, P, E;
   ulong mask, e = 0;
 
   if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
@@ -1314,7 +1341,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
 
   if (e)
   { /* Bingo. Result divides e */
-    long v3, v5, v7, le;
+    long v3, v5, v7;
     ulong e2 = e;
     v = u_lvalrem(e2, 2, &e2);
     if (v)
@@ -1338,20 +1365,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
         case 7: k *= 7; if (--v7 == 0) mask &= ~4; break;
       }
     }
-
-    if (e2 == 1) goto END;
-    fa = factoru(e2);
-    Pe = gel(fa,1); le = lg(Pe);
-    Ee = gel(fa,2);
-    for (i = 1; i < le; i++)
-    {
-      ulong p = Pe[i];
-      for (j = 0; j < Ee[i]; j++)
-      {
-        if (!is_kth_power(x, p, &y)) break;
-        k *= p; x = y;
-      }
-    }
+    k *= split_exponent(e2, &x);
   }
   else
     k = Z_isanypower_nosmalldiv(&x);
