@@ -4092,8 +4092,10 @@ ifactor_sign(GEN n, ulong all, long hint, long sn)
     if (k > 1) affii(x, n);
     avma = av; STOREi(&nb, n, k);
     if (DEBUGLEVEL >= 2) {
-      pari_warn(warner, "IFAC: untested integer declared prime");
-      err_printf("\t%Ps\n", n);
+      pari_warn(warner,
+        "IFAC: untested %ld-bit integer declared prime", expi(n));
+      if (expi(n) <= 256)
+        err_printf("\t%Ps\n", n);
     }
     return aux_end(M,n,nb);
   }
