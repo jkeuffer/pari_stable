@@ -12,8 +12,9 @@ znstar(14)
 znstar(247)
 Mod(10,148)^(2^64)
 do(n)= {
-  g = Mod(3,n); phi = eulerphi(n); o = znorder(g, phi); G = g^(phi-1);
-  [znlog(G,g), znlog(G,g,o), znlog(G,g,[o,factor(o)])];
+  g = Mod(3,n); phi = eulerphi(n); G = g^(phi-1);
+  o = znorder(g, phi); fo = factor(o);
+  [znlog(G,g), znlog(G,g,o), znlog(G,g,fo), znlog(G,g,[o,fo])];
 }
 do(2^5*5^3*7)
 do(2^3*5^2*nextprime(10^10)^2)
