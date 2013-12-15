@@ -1627,12 +1627,13 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
       {
         status = br_status;
         br_status = br_NONE;
-        stop = icopy(gel(done,1));
+        stop = gerepileuptoint(av2, gel(done,1));
       }
     }
     gel(a,1) = incloop(gel(a,1));
-    avma = av2;
+    if (!stop) avma = av2;
   }
+  avma = av2;
   mt_queue_end(&pt);
   if (code2) pop_lex(2);
   br_status = status;
@@ -1670,11 +1671,12 @@ parforprime(GEN a, GEN b, GEN code, GEN code2)
       {
         status = br_status;
         br_status = br_NONE;
-        stop = icopy(gel(done,1));
+        stop = gerepileuptoint(av2, gel(done,1));
       }
     }
-    avma = av2;
+    if (!stop) avma = av2;
   }
+  avma = av2;
   mt_queue_end(&pt);
   if (code2) pop_lex(2);
   br_status = status;
