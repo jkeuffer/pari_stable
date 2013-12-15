@@ -140,6 +140,7 @@ BA 15- Parallel GP support (parapply, pareval, parfor, parforprime, parsum,
        parvector)
    16- [libpari] residual_characteristic
    17- GP function characteristic()
+   18- [libpari] muluui, diviuuexact
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

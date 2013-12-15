@@ -46,24 +46,14 @@ polchebyshev1(long n, long v) /* Assume 4*n < LONG_MAX */
   a = int2n(n-1);
   gel(r--,0) = a;
   gel(r--,0) = gen_0;
-  if (n < SQRTVERYBIGINT)
-    for (k=1,l=n; l>1; k++,l-=2)
-    {
-      av = avma;
-      a = diviuexact(muliu(a, l*(l-1)), 4*k*(n-k));
-      togglesign(a); a = gerepileuptoint(av, a);
-      gel(r--,0) = a;
-      gel(r--,0) = gen_0;
-    }
-  else
-    for (k=1,l=n; l>1; k++,l-=2)
-    {
-      av = avma;
-      a = diviiexact(mulii(a, muluu(l, l-1)), muluu(4*k, n-k));
-      togglesign(a); a = gerepileuptoint(av, a);
-      gel(r--,0) = a;
-      gel(r--,0) = gen_0;
-    }
+  for (k=1,l=n; l>1; k++,l-=2)
+  {
+    av = avma;
+    a = diviuuexact(muluui(l, l-1, a), 4*k, n-k);
+    togglesign(a); a = gerepileuptoint(av, a);
+    gel(r--,0) = a;
+    gel(r--,0) = gen_0;
+  }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
@@ -119,24 +109,14 @@ polchebyshev2(long n, long v)
   if (neg) togglesign(a);
   gel(r--,0) = a;
   gel(r--,0) = gen_0;
-  if (n < SQRTVERYBIGINT)
-    for (m=1; 2*m<= n; m++)
-    {
-      av = avma;
-      a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m*(n-m+1));
-      togglesign(a); a = gerepileuptoint(av, a);
-      gel(r--,0) = a;
-      gel(r--,0) = gen_0;
-    }
-  else
-    for (m=1; 2*m<= n; m++)
-    {
-      av = avma;
-      a = diviiexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), muluu(4*m, n-m+1));
-      togglesign(a); a = gerepileuptoint(av, a);
-      gel(r--,0) = a;
-      gel(r--,0) = gen_0;
-    }
+  for (m=1; 2*m<= n; m++)
+  {
+    av = avma;
+    a = diviuuexact(muluui(n-2*m+2, n-2*m+1, a), 4*m, n-m+1);
+    togglesign(a); a = gerepileuptoint(av, a);
+    gel(r--,0) = a;
+    gel(r--,0) = gen_0;
+  }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
@@ -216,24 +196,14 @@ polhermite(long n, long v)
   a = int2n(n);
   gel(r--,0) = a;
   gel(r--,0) = gen_0;
-  if (n < SQRTVERYBIGINT)
-    for (m=1; 2*m<= n; m++)
-    {
-      av = avma;
-      a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
-      togglesign(a);
-      gel(r--,0) = a = gerepileuptoint(av, a);
-      gel(r--,0) = gen_0;
-    }
-  else
-    for (m=1; 2*m<= n; m++)
-    {
-      av = avma;
-      a = diviuexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), 4*m);
-      togglesign(a);
-      gel(r--,0) = a = gerepileuptoint(av, a);
-      gel(r--,0) = gen_0;
-    }
+  for (m=1; 2*m<= n; m++)
+  {
+    av = avma;
+    a = diviuexact(muluui(n-2*m+2, n-2*m+1, a), 4*m);
+    togglesign(a);
+    gel(r--,0) = a = gerepileuptoint(av, a);
+    gel(r--,0) = gen_0;
+  }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
@@ -282,24 +252,14 @@ pollegendre(long n, long v)
   q = cgetg(n+3, t_POL); r = q + n+2;
   gel(r--,0) = a = binomialuu(n<<1,n);
   gel(r--,0) = gen_0;
-  if (n < SQRTVERYBIGINT)
-    for (k=1,l=n; l>1; k++,l-=2)
-    { /* l = n-2*k+2 */
-      av = avma;
-      a = diviuexact(muliu(a, l*(l-1)), 2*k*(n+l-1));
-      togglesign(a); a = gerepileuptoint(av, a);
-      gel(r--,0) = a;
-      gel(r--,0) = gen_0;
-    }
-  else
-    for (k=1,l=n; l>1; k++,l-=2)
-    { /* l = n-2*k+2 */
-      av = avma;
-      a = diviiexact(mulii(a, muluu(l, l-1)), muluu(2*k, n+l-1));
-      togglesign(a); a = gerepileuptoint(av, a);
-      gel(r--,0) = a;
-      gel(r--,0) = gen_0;
-    }
+  for (k=1,l=n; l>1; k++,l-=2)
+  { /* l = n-2*k+2 */
+    av = avma;
+    a = diviuuexact(muluui(l, l-1, a), 2*k, n+l-1);
+    togglesign(a); a = gerepileuptoint(av, a);
+    gel(r--,0) = a;
+    gel(r--,0) = gen_0;
+  }
   q[1] = evalsigne(1) | evalvarn(v);
   return gerepileupto(av, gmul2n(q,-n));
 }
@@ -926,7 +886,7 @@ stirling1(ulong n, ulong m)
   for (k = n-m-1; k > 0; --k)
   {
     GEN c;
-    t = diviiexact(mulii(t, muluu(n-m+k+1, n+k+1)), muluu(n+k, n-m-k));
+    t = diviuuexact(muluui(n-m+k+1, n+k+1, t), n+k, n-m-k);
     c = mulii(t, stirling2(n-m+k, k));
     s = odd(k)? subii(s, c): addii(s, c);
     if ((k & 0x1f) == 0) {

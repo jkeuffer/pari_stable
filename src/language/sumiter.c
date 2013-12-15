@@ -1432,7 +1432,7 @@ sumalt(void *E, GEN (*eval)(void *, GEN), GEN a, long prec)
   {
     c = addir(az,c); s = gadd(s, gmul(c, eval(E, a)));
     if (k==N-1) break;
-    az = diviiexact(mulii(muluu((N-k)<<1,N+k),az), muluu(k+1,k+k+1));
+    az = diviuuexact(muluui((N-k)<<1,N+k,az), k+1, (k<<1)+1);
     a = incloop(a); /* in place! */
     if (low_stack(lim, stack_lim(av,4)))
     {

@@ -1172,6 +1172,21 @@ diviiexact(GEN x, GEN y)
   avma = (pari_sp)z; return z;
 }
 
+/* assume yz != and yz | x */
+GEN
+diviuuexact(GEN x, ulong y, ulong z)
+{
+  long tmp[4];
+  ulong t;
+  LOCAL_HIREMAINDER;
+  t = mulll(y, z);
+  if (!hiremainder) return diviuexact(x, t);
+  tmp[0] = evaltyp(t_INT)|_evallg(4);
+  tmp[1] = evalsigne(1)|evallgefint(4);
+  tmp[2] = hiremainder;
+  tmp[3] = t;
+  return diviiexact(x, tmp);
+}
 
 /********************************************************************/
 /**                                                                **/
@@ -1640,6 +1655,26 @@ muliispec(GEN a, GEN b, long na, long nb)
     c0 = muliispec(a0,b,n0a,nb);
   }
   return gerepileuptoint(av, addshiftw(c,c0, n0));
+}
+GEN
+muluui(ulong x, ulong y, GEN z)
+{
+  long t, s = signe(z);
+  GEN r;
+  LOCAL_HIREMAINDER;
+
+  if (!x || !y || !signe(z)) return gen_0;
+  t = mulll(x,y);
+  if (!hiremainder)
+    r = muluispec(t, z+2, lgefint(z)-2);
+  else
+  {
+    long tmp[2];
+    tmp[0] = hiremainder;
+    tmp[1] = t;
+    r = muliispec(z+2,tmp,lgefint(z)-2,2);
+  }
+  setsigne(r,s); return r;
 }
 
 #define sqrispec_mirror sqrispec

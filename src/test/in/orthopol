@@ -19,8 +19,7 @@ polchebyshev(-1,2,2)
 polchebyshev(-2,2,2)
 polchebyshev(4,2,2)
 
-default(parisize,700*10^6);
-z=Mod(2,2^64+13); N=46342;
+z=Mod(2,2^64+13); N=1000;
 T=polchebyshev(N,1);subst(T,x,z) == polchebyshev(N,1,z)
 T=polchebyshev(N,2);subst(T,x,z) == polchebyshev(N,2,z)
 T=polhermite(N);subst(T,x,z) == polhermite(N,z)

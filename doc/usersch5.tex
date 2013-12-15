@@ -2515,6 +2515,8 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 
 \fun{GEN}{mului}{ulong x, GEN y} multiplies \kbd{x} by \kbd{y}.
 
+\fun{GEN}{muluui}{ulong x, ulong y, GEN z} return $xyz$.
+
 \fun{GEN}{muliu}{GEN x, ulong y} multiplies \kbd{x} by \kbd{y}.
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
@@ -2591,6 +2593,9 @@ implemented).
 \fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
 $\kbd{x} / \kbd{y}$, assuming $\kbd{y}$ divides
 $\kbd{x}$ and $\kbd{y}$ is non-zero.
+
+\fun{void}{diviuuexact}{GEN x, ulong y, ulong z} returns the Euclidean
+quotient $x/(yz)$, assuming $yz$ divides $x$ and $yz \neq 0$.
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
 0 otherwise. (Error if $y$ is $0$, even if $x$ is $0$.) All \kbd{GEN} are
