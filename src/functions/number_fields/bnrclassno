@@ -2,7 +2,7 @@ Function: bnrclassno
 Section: number_fields
 C-Name: bnrclassno0
 Prototype: GDGDG
-Help: bnrclassno(A,{B},{C}): relative degree the class field defined by
+Help: bnrclassno(A,{B},{C}): relative degree of the class field defined by
  A,B,C. [A,{B},{C}] is of type [bnr], [bnr,subgroup], [bnf,modulus],
  or [bnf,modulus,subgroup].
  Faster than bnrinit if only the ray class number is wanted.
