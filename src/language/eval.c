@@ -1682,34 +1682,6 @@ parforprime(GEN a, GEN b, GEN code, GEN code2)
 }
 
 GEN
-parapply_worker(GEN d, GEN C)
-{
-  return closure_callgen1(C, d);
-}
-
-GEN
-parapply(GEN C, GEN D)
-{
-  pari_sp av = avma;
-  long l = lg(D), i, pending = 0, workid;
-  GEN V, worker, done;
-  struct pari_mt pt;
-  if (typ(C) != t_CLOSURE || closure_arity(C) < 1) pari_err_TYPE("parapply",C);
-  if (!is_vec_t(typ(D))) pari_err_TYPE("parapply",D);
-  worker = strtoclosure("_parapply_worker", 1, C);
-  V = cgetg(l, typ(D));
-  mt_queue_start(&pt, worker);
-  for (i=1; i<l || pending; i++)
-  {
-    mt_queue_submit(&pt, i, i<l? mkvec(gel(D,i)): NULL);
-    done = mt_queue_get(&pt, &workid, &pending);
-    if (done) gel(V,workid) = done;
-  }
-  mt_queue_end(&pt);
-  return gerepilecopy(av, V);
-}
-
-GEN
 closure_callgen2(GEN C, GEN x, GEN y)
 {
   long i, ar = closure_arity(C);
