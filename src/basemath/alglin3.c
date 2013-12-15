@@ -537,7 +537,35 @@ select0(GEN f, GEN x, long flag)
   }
 }
 
-/* as genapply, but treat A [ t_VEC,t_COL, or t_MAT] as a t_VEC */
+GEN
+parselect(GEN C, GEN D, long flag)
+{
+  pari_sp av, av2;
+  long lv, l = lg(D), i, pending = 0, workid;
+  GEN V, worker, done;
+  struct pari_mt pt;
+  if (typ(C) != t_CLOSURE || closure_arity(C) < 1) pari_err_TYPE("parapply",C);
+  if (!is_vec_t(typ(D))) pari_err_TYPE("parapply",D);
+  V = cgetg(l, t_VECSMALL); av = avma;
+  worker = strtoclosure("_parapply_worker", 1, C);
+  av2 = avma;
+  mt_queue_start(&pt, worker);
+  for (i=1; i<l || pending; i++)
+  {
+    mt_queue_submit(&pt, i, i<l? mkvec(gel(D,i)): NULL);
+    done = mt_queue_get(&pt, &workid, &pending);
+    if (done) V[workid] = !gequal0(done);
+    avma = av2;
+  }
+  mt_queue_end(&pt);
+  avma = av;
+  for (lv=1, i=1; i<l; i++)
+    if (V[i]) V[lv++]=i;
+  fixlg(V, lv);
+  return flag? V: extract_copy(D, V);
+}
+
+  /* as genapply, but treat A [ t_VEC,t_COL, or t_MAT] as a t_VEC */
 GEN
 vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {

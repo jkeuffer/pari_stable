@@ -4,6 +4,9 @@ my(V=[2^256 + 1, 2^193 - 1]); parvector(#V,i,factor(V[i]))
 fun(V)=pareval(vector(#V,i,()->factor(V[i])));
 fun(V)
 parfirst(fun,V)=parfor(i=1,#V,fun(V[i]),j,if(j,return([i,j])));
+parfirst(isprime, [2^600..2^600+1000])
+parselect(isprime, [2^600..2^600+1000],1)
+parselect(isprime, [2^600..2^600+1000])
 
 /* Disable tests that depends on ellsea
 findp(E,n)=

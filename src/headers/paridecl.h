@@ -1041,6 +1041,7 @@ GEN     matmuldiagonal(GEN x, GEN d);
 GEN     matmultodiagonal(GEN x, GEN y);
 GEN     matslice0(GEN A, long x1, long x2, long y1, long y2);
 GEN     parapply(GEN V, GEN C);
+GEN     parselect(GEN C, GEN D, long flag);
 GEN     select0(GEN A, GEN f, long flag);
 GEN     shallowextract(GEN x, GEN L);
 GEN     shallowtrans(GEN x);
