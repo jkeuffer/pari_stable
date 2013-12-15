@@ -236,7 +236,9 @@ nftyp(GEN x)
     case t_VEC:
       switch(lg(x))
       {
-        case 10: return typ_NF;
+        case 10:
+          if (typ(gel(x,1))!=t_POL) break;
+          return typ_NF;
         case 11:
           x = bnf_get_nf(x); if (typ(x)!=t_VEC || lg(x)!=10) break;
           return typ_BNF;
@@ -795,7 +797,16 @@ pr_galoisapply(GEN nf, GEN pr, GEN aut)
   return mkvec5(p, u, gel(pr,3), gel(pr,4), b);
 }
 
-/* fa : famat or standard algebraic number, aut automorphism in ZC form
+static GEN
+vecgaloisapply(GEN nf, GEN aut, GEN v)
+{
+  long i, l;
+  GEN V = cgetg_copy(v, &l);
+  for (i = 1; i < l; i++) gel(V,i) = galoisapply(nf, aut, gel(v,i));
+  return V;
+}
+
+/* x: famat or standard algebraic number, aut automorphism in ZC form
  * simplified from general galoisapply */
 static GEN
 elt_galoisapply(GEN nf, GEN aut, GEN x)
@@ -805,7 +816,6 @@ elt_galoisapply(GEN nf, GEN aut, GEN x)
   {
     case t_INT:  return icopy(x);
     case t_FRAC: return gcopy(x);
-
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL: {
       GEN y = basistoalg(nf,ZC_galoisapply(nf, aut, x));
@@ -813,18 +823,11 @@ elt_galoisapply(GEN nf, GEN aut, GEN x)
     }
     case t_COL:
       return gerepileupto(av, ZC_galoisapply(nf, aut, x));
-    case t_MAT: {
-      GEN G, g;
-      long i, lx;
+    case t_MAT:
       switch(lg(x)) {
         case 1: return cgetg(1, t_MAT);
-        case 3: break;
-        default: pari_err_TYPE("galoisapply",x);
+        case 3: retmkmat2(vecgaloisapply(nf,aut,gel(x,1)), ZC_copy(gel(x,2)));
       }
-      g = gel(x,1); G = cgetg_copy(g, &lx);
-      for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));
-      return mkmat2(g, ZC_copy(gel(x,2)));
-    }
   }
   pari_err_TYPE("galoisapply",x);
   return NULL; /* not reached */

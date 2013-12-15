@@ -30,6 +30,8 @@ nf=nfinit(polcyclo(7)); s = nfgaloisconj(nf)[2]; pr = idealprimedec(nf,11)[1];
 nfgaloisapply(nf,s,idealhnf(nf,pr))
 nfgaloisapply(nf,s,pr)
 nfgaloisapply(nf,s,x^2+x)
+v=[1,1/2,Mod(x,nf.pol),x,vectorv(6),[;],[1,2;x,3]];
+for (i=1,#v, print(nfgaloisapply(nf,s,[1,v[i]])))
 
 galoistest(P)=
 {
