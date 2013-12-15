@@ -1426,7 +1426,9 @@ strlen_real(const char *s)
 /********************************************************************/
 #undef larg /* problems with SCO Unix headers (ioctl_arg) */
 #ifdef HAS_TIOCGWINSZ
-#  include <termios.h>
+#  ifdef __sun
+#    include <sys/termios.h>
+#  endif
 #  include <sys/ioctl.h>
 #endif
 
