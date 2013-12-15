@@ -259,38 +259,6 @@ polhermite_eval(long n, GEN x)
   }
   return gerepileupto(av, u);
 }
-GEN
-polhermite_eval2(long n, GEN x)
-{
-  pari_sp av, av2;
-  long m;
-  GEN a, x2, T;
-
-  if (!x) return polhermite(n, 0);
-  if (gcmpX(x)) return polhermite(n, varn(x));
-  if (n==0) return gen_1;
-
-  av = avma; x2 = gsqr(x); av2 = avma;
-  T = a = int2n(n);
-  if (n < SQRTVERYBIGINT)
-    for (m=1; 2*m<= n; m++)
-    {
-      T = gmul(T, x2);
-      a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
-      if ((m & 0xff)==0) gerepileall(av2,2,&T,&a);
-      togglesign(a); T = gadd(T, a);
-    }
-  else
-    for (m=1; 2*m<= n; m++)
-    {
-      T = gmul(T, x2);
-      a = diviuexact(mulii(a, muluu(n-2*m+2, n-2*m+1)), 4*m);
-      if ((m & 0xff)==0) gerepileall(av2,2,&T,&a);
-      togglesign(a); T = gadd(T, a);
-    }
-  if (odd(n)) T = gmul(T,x);
-  return gerepileupto(av, T);
-}
 
 /* Legendre polynomial
  * L0=1; L1=X; (n+1)*L(n+1)=(2*n+1)*X*L(n)-n*L(n-1)
