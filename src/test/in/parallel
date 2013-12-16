@@ -4,7 +4,7 @@ my(V=[2^256 + 1, 2^193 - 1]); parvector(#V,i,factor(V[i]))
 fun(V)=pareval(vector(#V,i,()->factor(V[i])));
 fun(V)
 parfirst(fun,V)=parfor(i=1,#V,fun(V[i]),j,if(j,return([i,j])));
-parfirst(isprime, [2^600..2^600+1000])
+parfirst(isprime, [2^600..2^600+1000])[1]
 parselect(isprime, [2^600..2^600+1000],1)
 parselect(isprime, [2^600..2^600+1000])
 
@@ -27,10 +27,7 @@ ell2(a,B,N)=iferr(ell(a,B,N),err,return(gcd(lift(component(err,2)),N)),errname(e
 ecm2(N,t,B)=my(z);parfirst(a->ell2(a,B,N),[1..t])[2];
 ecm2(2^101-1,500,600!)
 
-/*
 inline(chkell);
-chkell(p)=a->my(E=ellinit([1,a],p));isprime(ellcard(E));
-
-ellp(p)=parfirst(chkell(p),[1..10000]);
-ellp(2^127-1)
-*/
+chkell(n)=a->my(E=ellinit([1,0,0,0,ffgen(2^n)^a]),N=ellcard(E)/4);if(isprime(N),N);
+ellp(n)=parfirst(chkell(n),[1..10000]);
+ellp(128)
