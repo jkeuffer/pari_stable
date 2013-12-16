@@ -287,22 +287,24 @@ GEN
 shallowconcat1(GEN x)
 {
   pari_sp av = avma, lim = stack_lim(av, 3);
-  long tx = typ(x), lx, t, i;
+  long lx, t, i;
   GEN z;
-
-  if (tx == t_VEC) {
-    lx = lg(x);
-    if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
-  } else if (tx == t_LIST) {
-    if (!list_data(x)) pari_err_DOMAIN("concat","vector","=",x,x);
-    x = list_data(x); lx = lg(x); }
-  else
-  { pari_err_TYPE("concat",x); return NULL; /* not reached */ }
+  switch(typ(x))
+  {
+    case t_VEC:
+      lx = lg(x);
+      if (lx==1) pari_err_DOMAIN("concat","vector","=",x,x);
+      break;
+    case t_LIST:
+      if (!list_data(x)) pari_err_DOMAIN("concat","vector","=",x,x);
+      x = list_data(x); lx = lg(x);
+      break;
+    default:
+      pari_err_TYPE("concat",x);
+      return NULL; /* not reached */
+  }
   if (lx==2) return gel(x,1);
-
-  z = gel(x,1);
-  t = typ(z);
-  i = 2;
+  z = gel(x,1); t = typ(z); i = 2;
   if (is_matvec_t(t) || t == t_VECSMALL || t == t_STR)
   { /* detect a "homogeneous" object: catmany is faster */
     for (; i<lx; i++)
