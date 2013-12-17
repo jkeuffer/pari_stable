@@ -6769,12 +6769,20 @@ divisions are exact.
 
 \fun{GEN}{ZXX_to_Kronecker}{GEN P, long n} Assuming $P(X,Y)$ is a polynomial
 of degree in $X$ strictly less than $n$, returns $P(X,X^{2*n-1})$, the
-Kronecker form of $P$.
+Kronecker form of $P$. Shallow function.
 
 \fun{GEN}{ZXX_to_Kronecker_spec}{GEN Q, long lQ, long n} return
 \tet{ZXX_to_Kronecker}$(P, n)$, where $P$ is the polynomial
 $\sum_{i = 0}^{\kbd{lQ} - 1} Q[i] x^i$. To be used when splitting
-the coefficients of genuine polynomials into blocks.
+the coefficients of genuine polynomials into blocks. Shallow function.
+
+\fun{GEN}{Kronecker_to_ZXX}{GEN z, long n, long v} recover $P(X,Y)$
+from its Kronecker form $P(X,X^{2*n-1})$, $v$ is the variable number
+corresponding to $Y$. Shallow function.
+
+\fun{GEN}{ZXX_mul_Kronecker}{GEN P, GEN Q, long n} return \tet{ZX_mul}
+applied to the Kronecker forms $P(X,X^{2n-1})$ and $Q(X,X^{2n-1}$
+of $P$ and $Q$. Not memory clean.
 
 \subsec{\kbd{QX}}
 

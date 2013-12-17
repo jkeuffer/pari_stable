@@ -138,18 +138,20 @@ static void
 ZpXQ_HenselLift(GEN V, GEN W, long j, GEN f, GEN Td, GEN T1, GEN pd, GEN p0, GEN p1, int noinv)
 {
   pari_sp av = avma;
+  const long n = degpol(T1), vT = varn(T1);
   long space = lg(f) * lgefint(p1) * lg(T1);
   GEN a2, b2, g, z, s, t;
   GEN a = gel(V,j), b = gel(V,j+1);
   GEN u = gel(W,j), v = gel(W,j+1);
 
   (void)new_chunk(space); /* HACK */
-  g = RgX_sub(f, RgX_mul(a,b));
+  g = RgX_sub(f, Kronecker_to_ZXX(ZXX_mul_Kronecker(a,b,n), n, vT));
   g = FpXQX_red(g, T1, p1);
   g = RgX_Rg_divexact(g, p0);
   z = FpXQX_mul(v,g, Td,pd);
   t = FpXQX_divrem(z,a, Td,pd, &s);
-  t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
+  t = ZX_add(ZXX_mul_Kronecker(u,g,n), ZXX_mul_Kronecker(t,b,n));
+  t = Kronecker_to_ZXX(t, n, vT);
   t = FpXQX_red(t, Td, pd);
   t = RgX_Rg_mul(t,p0);
   s = RgX_Rg_mul(s,p0);
@@ -164,13 +166,15 @@ ZpXQ_HenselLift(GEN V, GEN W, long j, GEN f, GEN Td, GEN T1, GEN pd, GEN p0, GEN
 
   av = avma;
   (void)new_chunk(space); /* HACK */
-  g = RgX_add(RgX_mul(u,a2), RgX_mul(v,b2));
+  g = ZX_add(ZXX_mul_Kronecker(u,a2,n), ZXX_mul_Kronecker(v,b2,n));
+  g = Kronecker_to_ZXX(g, n, vT);
   g = Rg_RgX_sub(gen_1, g);
   g = FpXQX_red(g, T1, p1);
   g = RgX_Rg_divexact(g, p0);
   z = FpXQX_mul(v,g, Td,pd);
   t = FpXQX_divrem(z,a, Td,pd, &s);
-  t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
+  t = ZX_add(ZXX_mul_Kronecker(u,g,n), ZXX_mul_Kronecker(t,b,n));
+  t = Kronecker_to_ZXX(t, n, vT);
   t = FpXQX_red(t, Td, pd);
   t = RgX_Rg_mul(t,p0);
   s = RgX_Rg_mul(s,p0);

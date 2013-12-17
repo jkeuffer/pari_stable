@@ -110,6 +110,8 @@ JD 14- polcyclo(n, x) now works for all roots of 1
        all modular xxx_gauss functions
    22- O(1/x^2) --> error [ now equivalent to O(x^-2) ]
    23- faster evaluated polhermite/pollegendre
+   24- polhensellift / ZpX_liftfact: use quasi-linear ZXX_mul_Kronecker instead
+       of RgX_mul (~ Karatsuba)
 
   Added
 EP  1- Configure option for gcov/lcov support
@@ -141,6 +143,7 @@ BA 15- Parallel GP support (parapply, pareval, parfor, parforprime, parselect,
    16- [libpari] residual_characteristic
    17- GP function characteristic()
    18- [libpari] muluui, diviuuexact
+   19- [libpari] Kronecker_to_ZXX, ZXX_mul_Kronecker
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

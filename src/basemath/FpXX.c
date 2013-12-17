@@ -179,6 +179,33 @@ Kronecker_to_FpXQX(GEN Z, GEN T, GEN p)
   return FpXQX_renormalize(x, i+1);
 }
 
+/* shallow, n = deg(T) */
+GEN
+Kronecker_to_ZXX(GEN z, long n, long v)
+{
+  long i,j,lx,l, N = (n<<1)+1;
+  GEN x, t;
+  l = lg(z); lx = (l-2) / (N-2);
+  x = cgetg(lx+3,t_POL);
+  x[1] = z[1];
+  for (i=2; i<lx+2; i++)
+  {
+    t = cgetg(N,t_POL); t[1] = evalvarn(v);
+    for (j=2; j<N; j++) gel(t,j) = gel(z,j);
+    z += (N-2);
+    gel(x,i) = ZXX_renormalize(t,N);
+  }
+  N = (l-2) % (N-2) + 2;
+  t = cgetg(N,t_POL); t[1] = evalvarn(v);
+  for (j=2; j<N; j++) gel(t,j) = gel(z,j);
+  gel(x,i) = ZXX_renormalize(t,N);
+  return ZXX_renormalize(x, i+1);
+}
+/* shallow */
+GEN
+ZXX_mul_Kronecker(GEN x, GEN y, long n)
+{ return ZX_mul(ZXX_to_Kronecker(x,n), ZXX_to_Kronecker(y,n)); }
+
 GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
