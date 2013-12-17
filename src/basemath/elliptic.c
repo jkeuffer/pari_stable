@@ -381,72 +381,83 @@ base_ring(GEN x, GEN *pp, long *prec)
   if (*pp) switch(t = typ(*pp))
   {
     case t_INT:
-      if (cmpis(*pp,2) < 0) { t = t_FRAC; break; }
-      e = 0;
+      if (cmpis(*pp,2) < 0) { t = t_FRAC; p = NULL; break; }
       p = *pp;
       t = t_INTMOD;
       break;
     case t_INTMOD:
-      e = 0;
       p = gel(*pp, 1);
       break;
     case t_REAL:
       e = real_prec(*pp);
+      p = NULL;
       break;
     case t_PADIC:
       e = padic_prec(*pp);
       p = gel(*pp, 2);
       break;
     case t_FFELT:
-      e = 0;
       p = *pp;
       break;
     default:
       pari_err_TYPE("elliptic curve base_ring", *pp);
       return 0;
   }
+  /* Possible cases:
+   * t = t_FFELT (p t_FFELT)
+   * t = t_INTMOD (p a prime)
+   * t = t_PADIC (p a prime, e = padic prec)
+   * t = t_REAL (p = NULL, e = real prec)
+   * t = t_FRAC (p = NULL) */
   for (i = 1; i < imax; i++)
   {
-    GEN q = gel(x,i);
+    GEN p2, q = gel(x,i);
     switch(typ(q)) {
-      case t_PADIC: {
-        GEN p2 = gel(q,2);
-        t = t_PADIC;
+      case t_PADIC:
+        if (t == t_REAL) pari_err_TYPE("elliptic curve base_ring", x);
+        p2 = gel(q,2);
         e = minss(e, padic_prec(q));
         if (!p)
+        {
+          t = t_PADIC;
           p = p2;
-        else if (typ(p) != t_INT || !equalii(p, p2))
+        }
+        else if (t != t_PADIC || !equalii(p, p2))
           pari_err_MODULUS("ellinit", p,p2);
         break;
-      }
-      case t_INTMOD: {
-        GEN p2 = gel(q,1);
+      case t_INTMOD:
+        if (t == t_REAL) pari_err_TYPE("elliptic curve base_ring", x);
+        p2 = gel(q,1);
         if (!p)
         {
           t = t_INTMOD;
           p = p2;
         }
-        else
+        else switch(t)
         {
-          GEN p3;
-          switch(typ(p))
-          {
-            case t_FFELT: p3 = FF_p_i(p); break;
-            case t_INT: t = t_INTMOD; p3 = p; break;
-            default: pari_err_MODULUS("ellinit", p,p2); p3 = p;
+          case t_FFELT: {
+            GEN p3 = FF_p_i(p); break;
+            if (!equalii(p3, p2)) pari_err_MODULUS("ellinit", p3,p2);
           }
-          if (!equalii(p3, p2)) pari_err_MODULUS("ellinit", p3,p2);
+          case t_INTMOD:
+            if (!equalii(p, p2)) pari_err_MODULUS("ellinit", p,p2);
+            break;
+          default: pari_err_MODULUS("ellinit", p,p2);
         }
         break;
-      }
       case t_FFELT:
-        t = t_FFELT;
+        if (t == t_REAL) pari_err_TYPE("elliptic curve base_ring", x);
         if (!p)
-          p = q;
-        else switch(typ(p))
         {
-          case t_INT:
-            if (!equalii(p, FF_p_i(q))) pari_err_MODULUS("ellinit", p,q);
+          t = t_FFELT;
+          p = q;
+        }
+        else switch(t)
+        {
+          case t_INTMOD:
+            p2 = FF_p_i(q);
+            if (!equalii(p, p2)) pari_err_MODULUS("ellinit", p,p2);
+            t = t_FFELT;
             p = q;
             break;
           case t_FFELT:
@@ -458,16 +469,19 @@ base_ring(GEN x, GEN *pp, long *prec)
 
       case t_INT: case t_FRAC:
         break;
-      case t_REAL: {
-        t = t_REAL;
-        e = minss(e, padic_prec(q));
+      case t_REAL:
         switch(t)
         {
-          case t_INTMOD:
-          case t_PADIC: pari_err_TYPE("elliptic curve base_ring", x);
+          case t_INTMOD: case t_PADIC:
+            pari_err_TYPE("elliptic curve base_ring", x);
+          case t_REAL:
+            e = minss(e, real_prec(q));
+            break;
+          default:
+            e = real_prec(q);
+            t = t_REAL;
         }
         break;
-      }
       default: /* base ring too general */
         return t_COMPLEX;
     }
@@ -887,7 +901,7 @@ static GEN
 ch_Qp(GEN E, GEN e, GEN w)
 {
   GEN S, p = ellQp_get_zero(E), u2 = NULL, u = gel(w,1), r = gel(w,2);
-  long prec;
+  long prec = valp(p);
   if (base_ring(E, &p, &prec) != t_PADIC) return ellinit(E, p, prec);
   if ((S = obj_check(e, Qp_ROOT)))
   {

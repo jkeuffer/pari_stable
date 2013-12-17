@@ -338,4 +338,25 @@ small([1]), [Vecsmall([128, -1])], [0, 0, 0, 0, 0, 0, 0, [[2, 3]~, [1/2, 0,
   *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
 [0, 1, [5, 0, 0, 0], 1]
 1
-Total time spent: 628
+  ***   at top-level: ellinit([1])
+  ***                 ^------------
+  *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
+[0, 0, 0, x^2, x, 0, 2*x^2, 4*x, -x^4, -48*x^2, -864*x, -64*x^6 - 432*x^2, -
+6912*x^4/(-4*x^4 - 27), Vecsmall([0]), [Vecsmall([128, 0])], [0, 0, 0, 0]]
+[0, 0, 0, 1, 2, 0, 2, 8, -1, -48, -1728, -1792, 432/7, Vecsmall([0]), [Vecsm
+all([-192, -1])], [0, 0, 0, 0]]
+[0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 1, 3, 0, Vecsmall([4]), [0, [Vecsmall([0]), V
+ecsmall([0, 1]), [Vecsmall([0, 1]), Vecsmall([0]), Vecsmall([0]), Vecsmall([
+0])]]], [0, 0, 0, 0]]
+  ***   at top-level: ellinit([ffgen(5),1]
+  ***                 ^--------------------
+  *** ellinit: inconsistent moduli in ellinit: 3 != 5
+[0, 0, 0, 1.0000000000000000000000000000000000000, 1, 0, 2.00000000000000000
+00000000000000000000, 4, -1.0000000000000000000000000000000000000, -48.00000
+0000000000000000000000000000000, -864, -496.00000000000000000000000000000000
+000, 222.96774193548387096774193548387096774, Vecsmall([0]), [Vecsmall([-192
+, -1])], [0, 0, 0, 0]]
+  ***   at top-level: ellinit([1.,Mod(1,3)
+  ***                 ^--------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+Total time spent: 616

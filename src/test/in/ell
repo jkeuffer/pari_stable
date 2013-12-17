@@ -227,3 +227,11 @@ ellinit([1])
 E=ellinit([625,15625]);
 elllocalred(E,5)
 ellisoncurve(E,[0.,125.])
+ellinit([1])
+x='x;
+ellinit([x^2,x])
+ellinit([1,2],1.)
+ellinit([ffgen(5),1],5)
+ellinit([ffgen(5),1],3)
+ellinit([1.,1],precision(1.,60))
+ellinit([1.,Mod(1,3)])
