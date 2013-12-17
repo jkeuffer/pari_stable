@@ -1609,7 +1609,7 @@ ffrandom(GEN ff)
 }
 
 int
-is_FF(GEN c, GEN *ff)
+Rg_is_FF(GEN c, GEN *ff)
 {
   switch(typ(c))
   {
@@ -1624,20 +1624,20 @@ is_FF(GEN c, GEN *ff)
 }
 
 int
-is_FFC(GEN x, GEN *ff)
+RgC_is_FFC(GEN x, GEN *ff)
 {
   long i, lx = lg(x);
   for (i=lx-1; i>0; i--)
-    if (!is_FF(gel(x,i), ff)) return 0;
+    if (!Rg_is_FF(gel(x,i), ff)) return 0;
   return (*ff != NULL);
 }
 
 int
-is_FFM(GEN x, GEN *ff)
+RgM_is_FFM(GEN x, GEN *ff)
 {
   long j, lx = lg(x);
   for (j=lx-1; j>0; j--)
-    if (!is_FFC(gel(x,j), ff)) return 0;
+    if (!RgC_is_FFC(gel(x,j), ff)) return 0;
   return (*ff != NULL);
 }
 

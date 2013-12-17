@@ -145,6 +145,8 @@ BA 15- Parallel GP support (parapply, pareval, parfor, parforprime, parselect,
    17- GP function characteristic()
    18- [libpari] muluui, diviuuexact
    19- [libpari] Kronecker_to_ZXX, ZXX_mul_Kronecker
+BA 20- conversion from matrices of FFELTs to low level (Fq/Flxq/F2xq) kernels
+       for faster treatment.
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

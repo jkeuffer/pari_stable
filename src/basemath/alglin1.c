@@ -2625,8 +2625,7 @@ ker(GEN x)
     }
     return gerepileupto(av, x);
   }
-  if (is_FFM(x, &ff))
-    return gerepileupto(av, FFM_ker(x, ff));
+  if (RgM_is_FFM(x, &ff)) return FFM_ker(x, ff);
   return ker_aux(x,x);
 }
 GEN

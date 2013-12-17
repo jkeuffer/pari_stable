@@ -8889,6 +8889,18 @@ to $0$ (resp. $1$, resp. $-1$) else $0$.
 \fun{int}{FF_samefield}{GEN a, GEN b} return $1$ if the \typ{FFELT} \kbd{a} and
 \kbd{b} have the same definition field, else $0$.
 
+\fun{int}{Rg_is_FF}{GEN c, GEN *ff} to be called successively on many objects,
+setting \kbd{*ff = NULL} (unset) initially. Returns $1$ as long as $c$ is a
+\typ{FFELT} defined over the same field as \kbd{*ff} (setting \kbd{*ff = c}
+if unset), and $0$ otherwise.
+
+\fun{int}{RgC_is_FFC}{GEN x, GEN *ff} apply \tet{Rg_is_FF} successively to all
+components of the \typ{VEC} or \typ{COL} $x$. Return $0$ if one call fails,
+and $1$ otherwise.
+
+\fun{int}{RgM_is_FFM}{GEN x, GEN *ff} apply \tet{Rg_is_FF} to all components
+of the \typ{MAT}. Return $0$ if one call fails, and $1$ otherwise.
+
 \fun{GEN}{FF_add}{GEN a, GEN b} returns $a+b$ where \kbd{a} and \kbd{b} are
 \typ{FFELT} having the same definition field.
 
@@ -8995,6 +9007,10 @@ and compatible with \kbd{a}.
 of the univariate polynomial \kbd{f} over the definition field of the
 \typ{FFELT} \kbd{a}. The coefficients of \kbd{f} must be of type \typ{INT},
 \typ{INTMOD} or \typ{FFELT} and compatible with \kbd{a}.
+
+\fun{GEN}{FFM_ker}{GEN M, GEN ff} return the kernel of the \typ{MAT} \kbd{M}
+defined over the finite field given by the \typ{FFELT} \kbd{ff} (obtained
+by \tet{RgM_is_FFM(M,\&ff)}.
 
 \section{Transcendental functions}
 

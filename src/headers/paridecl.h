@@ -2120,9 +2120,9 @@ GEN     fflog(GEN x, GEN g, GEN o);
 GEN     fforder(GEN x, GEN o);
 GEN     ffprimroot(GEN x, GEN *o);
 GEN     ffrandom(GEN ff);
-int     is_FF(GEN c, GEN *ff);
-int     is_FFC(GEN x, GEN *ff);
-int     is_FFM(GEN x, GEN *ff);
+int     Rg_is_FF(GEN c, GEN *ff);
+int     RgC_is_FFC(GEN x, GEN *ff);
+int     RgM_is_FFM(GEN x, GEN *ff);
 int     is_Z_factor(GEN f);
 GEN     p_to_FF(GEN p, long v);
 
