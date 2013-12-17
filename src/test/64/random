@@ -24,4 +24,7 @@ Mod(5, 7)*x^3 + Mod(2, 7)*x^2 + Mod(1, 7)*x + Mod(6, 7)
 1051006573
 5
 1267650600228229401496703924683
+  ***   at top-level: random("")
+  ***                 ^----------
+  *** random: incorrect type in genrand (t_STR).
 Total time spent: 4
