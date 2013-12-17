@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define NOARG(x) newnode(Fnoarg,-1,-1,&(x))
 %}
 %error-verbose
-%name-prefix="pari_"
+%name-prefix "pari_"
 %pure-parser
 %parse-param {char **lex}
 %lex-param {char **lex}
