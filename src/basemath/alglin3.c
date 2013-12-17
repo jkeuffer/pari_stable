@@ -528,6 +528,7 @@ genselect(void *E, long (*f)(void* E, GEN x), GEN A)
       break;
     default:
       pari_err_TYPE("select",A);
+      return NULL;/*not reached*/
   }
   clone_unlock(A); return y;
 }
