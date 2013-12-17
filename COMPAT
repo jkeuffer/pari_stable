@@ -107,6 +107,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - removed useless wrappers map_proto_GG, map_proto_GL, map_proto_lGG
   - renamed ZM_hnfremdiv -> ZM_hnfdivrem
   - removed useless functions gand, gor
+  - removed useless function ratlift [ use Fp_ratlift ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

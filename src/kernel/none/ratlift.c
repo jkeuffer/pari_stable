@@ -13,7 +13,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /*==========================================================
- * ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
+ * Fp_ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
  *==========================================================
  * Reconstruct rational number from its residue x mod m
  *    Given t_INT x, m, amax>=0, bmax>0 such that
@@ -42,28 +42,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
       PAGES = {287--297},
  }
  * Preprint available from:
- * ftp://ftp.risc.uni-linz.ac.at/pub/techreports/1994/94-64.ps.gz
- */
+ * ftp://ftp.risc.uni-linz.ac.at/pub/techreports/1994/94-64.ps.gz */
 
 /* #define DEBUG_RATLIFT */
-
-int
-ratlift(GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b)
-{
-  pari_sp av = avma;
-  if (signe(bmax) <= 0) pari_err_DOMAIN("ratlift", "bmax", "<=", gen_0, bmax);
-  if (signe(amax) < 0) pari_err_DOMAIN("ratlift", "amax", "<", gen_0, amax);
-  /* check 2*amax*bmax < m */
-  if (cmpii(shifti(mulii(amax, bmax), 1), m) >= 0)
-    pari_err_DOMAIN("ratlift", "2*amax*bmax", ">=", m, mkvec3(amax,bmax,m));
-  /* we _could_ silently replace x with modii(x,m) instead of the following,
-   * but let's leave this up to the caller */
-  if (signe(x) < 0) pari_err_DOMAIN("ratlift", "x", "<", gen_0, x);
-  if (cmpii(x,m) >= 0) pari_err_DOMAIN("ratlift", "x", ">=", m, x);
-  if (cmpii(x,m) >= 0)
-  avma = av; return Fp_ratlift(x, m, amax, bmax, a, b);
-}
-
 static ulong
 get_vmax(GEN r, long lb, long lbb)
 {

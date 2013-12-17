@@ -5526,9 +5526,6 @@ prime $p$ chosen coprime to $B$ hence to $b$. Under the single assumption
 $\gcd(m,b) = 1$, if a solution $a,b$ exists satisfying the three conditions
 above, then it is unique.
 
-\fun{int}{ratlift}{GEN x, GEN m, GEN amax, GEN bmax, GEN *a, GEN *b}.
-Calls \tet{Fp_ratlift} after explicitly checking all preconditions.
-
 \fun{GEN}{FpM_ratlift}{GEN M, GEN m, GEN amax, GEN bmax, GEN denom}
 given an \kbd{FpM} modulo $m$ with reduced or \kbd{Fp\_center}-ed entries,
 reconstructs a matrix with rational coefficients by applying \kbd{Fp\_ratlift}
