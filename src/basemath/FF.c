@@ -1661,6 +1661,26 @@ FFM_to_raw(GEN x)
   return y;
 }
 
+static GEN
+FqC_to_FpXQC(GEN x, GEN T)
+{
+  long i, lx;
+  GEN y = cgetg_copy(x,&lx);
+  for(i=1; i<lx; i++)
+    gel(y, i) = Fq_to_FpXQ(gel(x, i), T);
+  return y;
+}
+
+static GEN
+FqM_to_FpXQM(GEN x, GEN T)
+{
+  long i, lx;
+  GEN y = cgetg_copy(x,&lx);
+  for(i=1; i<lx; i++)
+    gel(y, i) = FqC_to_FpXQC(gel(x, i), T);
+  return y;
+}
+
 GEN
 FFM_ker(GEN M, GEN ff)
 {
@@ -1671,7 +1691,7 @@ FFM_ker(GEN M, GEN ff)
   switch(ff[1])
   {
   case t_FF_FpXQ:
-    M = FqM_ker(FFM_to_raw(M), T, p);
+    M = FqM_to_FpXQM(FqM_ker(FFM_to_raw(M), T, p), T);
     break;
   case t_FF_F2xq:
     M = F2xqM_ker(FFM_to_raw(M), T);
