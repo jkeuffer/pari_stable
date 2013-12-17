@@ -372,6 +372,11 @@ static long
 padic_prec(GEN q)
 { return signe(gel(q,4))? precp(q)+valp(q): valp(q); }
 
+/* check whether moduli are consistent */
+static void
+chk_p(GEN p, GEN p2)
+{ if (!equalii(p, p2)) pari_err_MODULUS("ellinit", p,p2); }
+
 static long
 base_ring(GEN x, GEN *pp, long *prec)
 {
@@ -414,72 +419,44 @@ base_ring(GEN x, GEN *pp, long *prec)
     GEN p2, q = gel(x,i);
     switch(typ(q)) {
       case t_PADIC:
-        if (t == t_REAL) pari_err_TYPE("elliptic curve base_ring", x);
         p2 = gel(q,2);
-        e = minss(e, padic_prec(q));
-        if (!p)
+        switch(t)
         {
-          t = t_PADIC;
-          p = p2;
+          case t_FRAC:  t = t_PADIC; p = p2; break;
+          case t_PADIC: chk_p(p,p2); break;
+          default: pari_err_TYPE("elliptic curve base_ring", x);
         }
-        else if (t != t_PADIC || !equalii(p, p2))
-          pari_err_MODULUS("ellinit", p,p2);
+        e = minss(e, padic_prec(q));
         break;
       case t_INTMOD:
-        if (t == t_REAL) pari_err_TYPE("elliptic curve base_ring", x);
         p2 = gel(q,1);
-        if (!p)
+        switch(t)
         {
-          t = t_INTMOD;
-          p = p2;
-        }
-        else switch(t)
-        {
-          case t_FFELT: {
-            GEN p3 = FF_p_i(p); break;
-            if (!equalii(p3, p2)) pari_err_MODULUS("ellinit", p3,p2);
-          }
-          case t_INTMOD:
-            if (!equalii(p, p2)) pari_err_MODULUS("ellinit", p,p2);
-            break;
-          default: pari_err_MODULUS("ellinit", p,p2);
+          case t_FRAC:  t = t_INTMOD; p = p2; break;
+          case t_FFELT: chk_p(FF_p_i(p),p2); break;
+          case t_INTMOD:chk_p(p,p2); break;
+          default: pari_err_TYPE("elliptic curve base_ring", x);
         }
         break;
       case t_FFELT:
-        if (t == t_REAL) pari_err_TYPE("elliptic curve base_ring", x);
-        if (!p)
+        switch(t)
         {
-          t = t_FFELT;
-          p = q;
-        }
-        else switch(t)
-        {
-          case t_INTMOD:
-            p2 = FF_p_i(q);
-            if (!equalii(p, p2)) pari_err_MODULUS("ellinit", p,p2);
-            t = t_FFELT;
-            p = q;
-            break;
+          case t_INTMOD: chk_p(p, FF_p_i(q)); /* fall through */
+          case t_FRAC:   t = t_FFELT; p = q; break;
           case t_FFELT:
-            if (FF_samefield(p,q)) break;
-            /*fall through*/
-          default: pari_err_MODULUS("ellinit", p,q);
+            if (!FF_samefield(p,q)) pari_err_MODULUS("ellinit", p,q);
+            break;
+          default: pari_err_TYPE("elliptic curve base_ring", x);
         }
         break;
 
-      case t_INT: case t_FRAC:
-        break;
+      case t_INT: case t_FRAC: break;
       case t_REAL:
         switch(t)
         {
-          case t_INTMOD: case t_PADIC:
-            pari_err_TYPE("elliptic curve base_ring", x);
-          case t_REAL:
-            e = minss(e, real_prec(q));
-            break;
-          default:
-            e = real_prec(q);
-            t = t_REAL;
+          case t_REAL: e = minss(e, real_prec(q)); break;
+          case t_FRAC: e = real_prec(q); t = t_REAL; break;
+          default: pari_err_TYPE("elliptic curve base_ring", x);
         }
         break;
       default: /* base ring too general */
