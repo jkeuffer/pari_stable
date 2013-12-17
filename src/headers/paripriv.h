@@ -23,6 +23,18 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define umael(a,i,j)   (((ulong**)(a))[i][j])
 #define uel(a,i)       (((ulong*)(a))[i])
 
+/* to manipulate 'blocs' */
+#define BL_HEAD 4
+#define bl_base(x) (void*)((x) - BL_HEAD)
+#define bl_refc(x) (((GEN)x)[-4])
+#define bl_next(x) (((GEN*)x)[-3])
+#define bl_prev(x) (((GEN*)x)[-2])
+#define bl_num(x)  (((GEN)x)[-1])
+INLINE void
+clone_lock(GEN C) { if (isclone(C)) ++bl_refc(C); }
+INLINE void
+clone_unlock(GEN C) { if (isclone(C)) gunclone(C); }
+
 /* swap */
 #define lswap(x,y) {long _z=x; x=y; y=_z;}
 #define pswap(x,y) {GEN *_z=x; x=y; y=_z;}

@@ -732,18 +732,6 @@ st_alloc(long n)
 }
 
 INLINE void
-clone_lock(GEN C)
-{
-  if (isclone(C)) ++bl_refc(C);
-}
-
-INLINE void
-clone_unlock(GEN C)
-{
-  if (isclone(C)) gunclone(C);
-}
-
-INLINE void
 ptr_proplock(gp_pointer *g, GEN C)
 {
   g->x = C;

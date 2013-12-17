@@ -25,14 +25,6 @@ BEGINEXTERN
 #define EXPR_ARGUPTO __E, &gp_evalupto
 #define EXPR_ARGBOOL __E, &gp_evalbool
 
-/* to manipulate 'blocs' */
-#define BL_HEAD 4
-#define bl_base(x) (void*)((x) - BL_HEAD)
-#define bl_refc(x) (((GEN)x)[-4])
-#define bl_next(x) (((GEN*)x)[-3])
-#define bl_prev(x) (((GEN*)x)[-2])
-#define bl_num(x)  (((GEN)x)[-1])
-
 /* functions */
 void   changevalue(entree *ep, GEN val);
 void    freeep(entree *ep);

@@ -468,6 +468,7 @@ genindexselect(void *E, long (*f)(void* E, GEN x), GEN A)
   long l, i, lv;
   GEN v;
   pari_sp av;
+  clone_lock(A);
   if (typ(A) == t_LIST)
   {
     A = list_data(A);
@@ -481,7 +482,7 @@ genindexselect(void *E, long (*f)(void* E, GEN x), GEN A)
     if (f(E, gel(A,i))) v[lv++] = i;
     avma = av;
   }
-  fixlg(v, lv); return v;
+  clone_unlock(A); fixlg(v, lv); return v;
 }
 static GEN
 extract_copy(GEN A, GEN v)
@@ -495,33 +496,40 @@ extract_copy(GEN A, GEN v)
 GEN
 vecselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
-  GEN v = genindexselect(E, f, A);
+  GEN v;
+  clone_lock(A);
+  v = genindexselect(E, f, A);
   A = extract_copy(A, v); settyp(A, t_VEC);
-  return A;
+  clone_unlock(A); return A;
 }
 GEN
 genselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
-  GEN v;/* v left on stack for efficiency */
+  GEN y, v;/* v left on stack for efficiency */
+  clone_lock(A);
   switch(typ(A))
   {
     case t_LIST:
-    {
-      GEN L, B;
       A = list_data(A);
-      if (!A) return listcreate();
-      L = cgetg(3, t_LIST);
-      v = genindexselect(E, f, A);
-      B = extract_copy(A, v);
-      list_nmax(L) = lg(B)-1;
-      list_data(L) = B; return L;
-    }
+      if (!A) y = listcreate();
+      else
+      {
+        GEN B;
+        y = cgetg(3, t_LIST);
+        v = genindexselect(E, f, A);
+        B = extract_copy(A, v);
+        list_nmax(y) = lg(B)-1;
+        list_data(y) = B;
+      }
+      break;
     case t_VEC: case t_COL: case t_MAT:
       v = genindexselect(E, f, A);
-      return extract_copy(A, v);
+      y = extract_copy(A, v);
+      break;
+    default:
+      pari_err_TYPE("select",A);
   }
-  pari_err_TYPE("select",A);
-  return NULL; /*not reached*/
+  clone_unlock(A); return y;
 }
 
 GEN
@@ -565,16 +573,6 @@ parselect(GEN C, GEN D, long flag)
   return flag? V: extract_copy(D, V);
 }
 
-  /* as genapply, but treat A [ t_VEC,t_COL, or t_MAT] as a t_VEC */
-GEN
-vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
-{
-  long i, lx;
-  GEN y = cgetg_copy(x, &lx);
-  for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
-  settyp(y, t_VEC); return y;
-}
-
 GEN
 veccatapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {
@@ -583,43 +581,61 @@ veccatapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
   return gerepilecopy(av, z);
 }
 
+static GEN
+vecapply2(void *E, GEN (*f)(void* E, GEN x), GEN x)
+{
+  long i, lx;
+  GEN y = cgetg_copy(x, &lx); y[1] = x[1];
+  for (i=2; i<lx; i++) gel(y,i) = f(E, gel(x,i));
+  return y;
+}
+static GEN
+vecapply1(void *E, GEN (*f)(void* E, GEN x), GEN x)
+{
+  long i, lx;
+  GEN y = cgetg_copy(x, &lx);
+  for (i=1; i<lx; i++) gel(y,i) = f(E, gel(x,i));
+  return y;
+}
+/* as genapply, but treat A [ t_VEC,t_COL, or t_MAT] as a t_VEC */
+GEN
+vecapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
+{
+  GEN y;
+  clone_lock(x); y = vecapply1(E,f,x);
+  clone_unlock(x); settyp(y, t_VEC); return y;
+}
 GEN
 genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {
   long i, lx, tx = typ(x);
   GEN y;
   if (is_scalar_t(tx)) return f(E, x);
+  clone_lock(x);
   switch(tx) {
-    case t_POL:
-      y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = f(E, gel(x,i));
-      return normalizepol_lg(y, lx);
-    case t_SER:
-      y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = f(E, gel(x,i));
-      return normalize(y);
-    case t_LIST: {
-      GEN L;
+    case t_POL: y = normalizepol(vecapply2(E,f,x)); break;
+    case t_SER: y = normalize(vecapply2(E,f,x)); break;
+    case t_LIST:
       x = list_data(x);
-      if (!x) return listcreate();
-      L = cgetg(3, t_LIST);
-      y = cgetg_copy(x, &lx);
-      for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
-      list_nmax(L) = lx-1;
-      list_data(L) = y; return L;
-    }
+      if (!x)
+        y = listcreate();
+      else
+      {
+        y = cgetg(3, t_LIST);
+        list_nmax(y) = lg(x)-1;
+        list_data(y) = vecapply1(E,f,x);
+      }
+      break;
     case t_MAT:
       y = cgetg_copy(x, &lx);
-      for (i = 1; i < lx; i++) gel(y,i) = genapply(E, f, gel(x,i));
-      return y;
+      for (i = 1; i < lx; i++) gel(y,i) = vecapply1(E,f,gel(x,i));
+      break;
 
-    case t_VEC: case t_COL:
-      y = cgetg_copy(x, &lx);
-      for (i = 1; i < lx; i++) gel(y,i) = f(E, gel(x,i));
-      return y;
+    case t_VEC: case t_COL: y = vecapply1(E,f,x); break;
+    default:
+      pari_err_TYPE("apply",x); return NULL;/*not reached*/
   }
-  pari_err_TYPE("apply",x);
-  return NULL; /* not reached */
+  clone_unlock(x); return y;
 }
 
 GEN
@@ -635,12 +651,10 @@ vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun,
 {
   GEN y;
   long i, l = lg(A), nb=1;
-  y = cgetg(l, t_VEC);
+  clone_lock(A); y = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
-    if (pred(Epred, gel(A,i)))
-      gel(y,nb++) = fun(Efun, gel(A,i));
-  fixlg(y,nb);
-  return y;
+    if (pred(Epred, gel(A,i))) gel(y,nb++) = fun(Efun, gel(A,i));
+  fixlg(y,nb); clone_unlock(A); return y;
 }
 
 GEN
