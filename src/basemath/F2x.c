@@ -1428,6 +1428,36 @@ ZXX_to_F2xX(GEN B, long v)
   return FlxX_renormalize(b, lb);
 }
 
+static GEN
+_F2xq_neg(void *E, GEN x)
+{ (void) E; return vecsmall_copy(x); }
+
+static GEN
+_F2xq_rmul(void *E, GEN x, GEN y)
+{ (void) E; return F2x_mul(x,y); }
+
+static GEN
+_F2xq_inv(void *E, GEN x)
+{ return F2xq_inv(x, (GEN) E); }
+
+static int
+_F2xq_equal0(GEN x) { return lgpol(x)==0; }
+
+static GEN
+_F2xq_s(void *E, long x)
+{ GEN T = (GEN) E;
+  return odd(x)? pol1_F2x(T[1]): pol0_F2x(T[0]);
+}
+
+static const struct bb_field F2xq_field={_F2xq_red,_F2xq_add,_F2xq_rmul,_F2xq_neg,
+                                         _F2xq_inv,_F2xq_equal0,_F2xq_s};
+
+const struct bb_field *get_F2xq_field(void **E, GEN T)
+{
+  *E = (void *) T;
+  return &F2xq_field;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                             F2v                                   **/

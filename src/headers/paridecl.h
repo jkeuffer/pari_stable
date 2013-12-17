@@ -109,6 +109,7 @@ GEN     ZX_to_F2x(GEN x);
 GEN     ZXT_to_FlxT(GEN z, ulong p);
 GEN     ZXX_to_F2xX(GEN B, long v);
 GEN     gener_F2xq(GEN T, GEN *po);
+const struct bb_field *get_F2xq_field(void **E, GEN T);
 GEN     random_F2x(long d, long vs);
 
 /* F2xqE.c */

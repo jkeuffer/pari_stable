@@ -1044,8 +1044,8 @@ F2xqM_ker_i(GEN x, GEN T, long deplin)
   void *E;
 
   if (lg(x)==1) return cgetg(1,t_MAT);
-  //ff = get_F2xq_field(&E,T);
-  //return gen_ker(x,deplin, E, ff);
+  ff = get_F2xq_field(&E,T);
+  return gen_ker(x,deplin, E, ff);
 }
 
 GEN
