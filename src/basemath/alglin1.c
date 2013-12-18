@@ -910,6 +910,20 @@ FlxqM_rank(GEN x, GEN T, ulong p)
   (void)FlxqM_gauss_pivot(x,T,p,&r);
   avma = av; return lg(x)-1 - r;
 }
+GEN
+FlxqM_det(GEN a, GEN T, ulong p)
+{
+  void *E;
+  const struct bb_field *S = get_Flxq_field(&E, T, p);
+  return gen_det(a, E, S);
+}
+GEN
+F2xqM_det(GEN a, GEN T)
+{
+  void *E;
+  const struct bb_field *S = get_F2xq_field(&E, T);
+  return gen_det(a, E, S);
+}
 
 static GEN
 FqM_gauss_pivot_gen(GEN x, GEN T, GEN p, long *rr)
@@ -949,6 +963,14 @@ FqM_rank(GEN x, GEN T, GEN p)
   long r;
   (void)FqM_gauss_pivot(x,T,p,&r);
   avma = av; return lg(x)-1 - r;
+}
+
+GEN
+FqM_det(GEN x, GEN T, GEN p)
+{
+  void *E;
+  const struct bb_field *S = get_Fq_field(&E,T,p);
+  return gen_det(x, E, S);
 }
 
 static GEN
@@ -1053,7 +1075,28 @@ F2xqM_ker(GEN x, GEN T)
 {
   return F2xqM_ker_i(x, T, 0);
 }
-
+static GEN
+F2xqM_gauss_pivot(GEN x, GEN T, long *rr)
+{
+  void *E;
+  const struct bb_field *S = get_F2xq_field(&E,T);
+  return gen_Gauss_pivot(x, rr, E, S);
+}
+GEN
+F2xqM_image(GEN x, GEN T)
+{
+  long r;
+  GEN d = F2xqM_gauss_pivot(x,T,&r); /* d left on stack for efficiency */
+  return image_from_pivot(x,d,r);
+}
+long
+F2xqM_rank(GEN x, GEN T)
+{
+  pari_sp av = avma;
+  long r;
+  (void)F2xqM_gauss_pivot(x,T,&r);
+  avma = av; return lg(x)-1 - r;
+}
 /*******************************************************************/
 /*                                                                 */
 /*                       Solve A*X=B (Gauss pivot)                 */
@@ -2641,7 +2684,7 @@ GEN
 image(GEN x)
 {
   pari_sp av = avma;
-  GEN d, p = NULL;
+  GEN d, ff = NULL, p = NULL;
   long r;
 
   if (typ(x)!=t_MAT) pari_err_TYPE("matimage",x);
@@ -2657,6 +2700,7 @@ image(GEN x)
     }
     return gerepileupto(av, x);
   }
+  if (RgM_is_FFM(x, &ff)) return FFM_image(x, ff);
   d = gauss_pivot(x,&r); /* d left on stack for efficiency */
   return image_from_pivot(x,d,r);
 }
@@ -3142,7 +3186,7 @@ rank(GEN x)
 {
   pari_sp av = avma;
   long r;
-  GEN p = NULL;
+  GEN ff = NULL, p = NULL;
 
   if (typ(x)!=t_MAT) pari_err_TYPE("rank",x);
   if (RgM_is_FpM(x, &p) && p)
@@ -3157,6 +3201,7 @@ rank(GEN x)
     }
     avma = av; return r;
   }
+  if (RgM_is_FFM(x, &ff)) return FFM_rank(x, ff);
   (void)gauss_pivot(x, &r);
   avma = av; return lg(x)-1 - r;
 }
@@ -3880,7 +3925,7 @@ det(GEN a)
 {
   long n = lg(a)-1;
   double B;
-  GEN data, p=NULL;
+  GEN data, ff = NULL, p = NULL;
   pivot_fun pivot;
 
   if (typ(a)!=t_MAT) pari_err_TYPE("det",a);
@@ -3903,6 +3948,7 @@ det(GEN a)
     }
     avma = av; return mkintmodu(d, pp);
   }
+  if (RgM_is_FFM(a, &ff)) return FFM_det(a, ff);
   pivot = get_pivot_fun(a, a, &data);
   if (pivot != gauss_get_pivot_NZ) return det_simple_gauss(a, data, pivot);
   B = (double)n;

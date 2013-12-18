@@ -86,7 +86,14 @@ factorff(Pol(0),t.p,t.mod)
 factorff(Pol(1),t.p,t.mod)
 factorff(x^4-t,t.p,t.mod)
 
-test(q)= my(t = ffgen(q,'t), m=[t,t^2,1+t^3; 1+t,1+t^2,1+t^3]); matker(m);
+test(q)=
+{
+  my(t = ffgen(q,'t), m=[t,t^2,1+t^3; 1+t,1+t^2,1+t^3]);
+  print(matker(m));
+  print(M = matimage(m));
+  print(matrank(m));
+  print(matdet(M));
+}
 test(2^5)
 test(7^5)
 test((2^64+13)^5)

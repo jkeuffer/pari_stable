@@ -3752,6 +3752,9 @@ as \kbd{gauss}, where $b$ is a \kbd{FqC}.
 
 \fun{GEN}{FqM_suppl}{GEN x, GEN T, GEN p} as \kbd{suppl}
 
+\fun{GEN}{FqM_det}{GEN x, GEN T, GEN p} as \kbd{det}
+
+
 \subsec{\kbd{Flc} / \kbd{Flv}, \kbd{Flm}} See \kbd{FpV}, \kbd{FpM}
 operations.
 
@@ -4016,6 +4019,8 @@ and \kbd{y}
 \fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
 
 \fun{GEN}{FlxqM_image}{GEN x, GEN T, ulong p}
+
+\fun{GEN}{FlxqM_det}{GEN a, GEN T, ulong p}
 
 \fun{GEN}{FlxqM_inv}{GEN x, GEN T, ulong p}
 
@@ -5365,6 +5370,12 @@ $a=\sigma(X)$ where $\sigma$ is an automorphism of the algebra $\F_2[X]/T(X)$.
 \subsec{\kbd{F2xqV}, \kbd{F2xqM}}. See \kbd{FqV}, \kbd{FqM} operations.
 
 \fun{GEN}{F2xqM_ker}{GEN x, GEN T}
+
+\fun{GEN}{F2xqM_det}{GEN a, GEN T}
+
+\fun{GEN}{F2xqM_image}{GEN x, GEN T}
+
+\fun{long}{F2xqM_rank}{GEN x, GEN T}
 
 \subsec{Functions returning objects with \typ{INTMOD} coefficients}
 
@@ -9011,6 +9022,12 @@ of the univariate polynomial \kbd{f} over the definition field of the
 \fun{GEN}{FFM_ker}{GEN M, GEN ff} return the kernel of the \typ{MAT} \kbd{M}
 defined over the finite field given by the \typ{FFELT} \kbd{ff} (obtained
 by \tet{RgM_is_FFM(M,\&ff)}.
+
+\fun{GEN}{FFM_det}{GEN M, GEN ff}
+
+\fun{GEN}{FFM_image}{GEN M, GEN ff}
+
+\fun{long}{FFM_rank}{GEN M, GEN ff}
 
 \section{Transcendental functions}
 

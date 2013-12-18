@@ -1681,24 +1681,57 @@ FqM_to_FpXQM(GEN x, GEN T)
   return y;
 }
 
-GEN
-FFM_ker(GEN M, GEN ff)
+static GEN
+FFM_wrap(GEN M, GEN ff, GEN (*Fq)(GEN,GEN,GEN),
+                       GEN (*Flxq)(GEN,GEN,ulong),
+                       GEN (*F2xq)(GEN,GEN))
 {
-  pari_sp av=avma;
+  pari_sp av = avma;
   ulong pp;
   GEN T, p;
-  _getFF(ff,&T,&p,&pp);
+  _getFF(ff,&T,&p,&pp); M = FFM_to_raw(M);
   switch(ff[1])
   {
-  case t_FF_FpXQ:
-    M = FqM_to_FpXQM(FqM_ker(FFM_to_raw(M), T, p), T);
-    break;
-  case t_FF_F2xq:
-    M = F2xqM_ker(FFM_to_raw(M), T);
-    break;
-  default:
-    M = FlxqM_ker(FFM_to_raw(M), T, pp);
-    break;
+  case t_FF_FpXQ: M = FqM_to_FpXQM(Fq(M,T,p), T); break;
+  case t_FF_F2xq: M = F2xq(M,T); break;
+  default: M = Flxq(M,T,pp); break;
   }
   return gerepilecopy(av, raw_to_FFM(M, ff));
+}
+GEN
+FFM_ker(GEN M, GEN ff)
+{ return FFM_wrap(M,ff, &FqM_ker,&FlxqM_ker,&F2xqM_ker); }
+GEN
+FFM_image(GEN M, GEN ff)
+{ return FFM_wrap(M,ff, &FqM_image,&FlxqM_image,&F2xqM_image); }
+long
+FFM_rank(GEN M, GEN ff)
+{
+  pari_sp av = avma;
+  long r;
+  ulong pp;
+  GEN T, p;
+  _getFF(ff,&T,&p,&pp); M = FFM_to_raw(M);
+  switch(ff[1])
+  {
+  case t_FF_FpXQ: r = FqM_rank(M,T,p); break;
+  case t_FF_F2xq: r = F2xqM_rank(M,T); break;
+  default: r = FlxqM_rank(M,T,pp); break;
+  }
+  avma = av; return r;
+}
+GEN
+FFM_det(GEN M, GEN ff)
+{
+  pari_sp av = avma;
+  ulong pp;
+  GEN d, T, p;
+  _getFF(ff,&T,&p,&pp); M = FFM_to_raw(M);
+  switch(ff[1])
+  {
+  case t_FF_FpXQ: d = FqM_det(M,T,p); break;
+  case t_FF_F2xq: d = F2xqM_det(M,T); break;
+  default: d = FlxqM_det(M,T,pp); break;
+  }
+  return gerepilecopy(av, mkFF_i(ff, d));
 }

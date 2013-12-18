@@ -150,6 +150,8 @@ BA 15- Parallel GP support (parapply, pareval, parfor, parforprime, parselect,
    19- [libpari] Kronecker_to_ZXX, ZXX_mul_Kronecker
 BA 20- conversion from matrices of FFELTs to low level (Fq/Flxq/F2xq) kernels
        for faster treatment.
+   21- FqM_det, FlxqM_det, F2xqM_det, F2xqM_image, F2xqM_rank, FFM_det,
+       FFM_image, FFM_ker, FFM_rank
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
