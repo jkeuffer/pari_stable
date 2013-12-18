@@ -237,7 +237,9 @@ gred_rfrac_simple(GEN n, GEN d)
   if (dd <= 0)
   {
     if (dd < 0) pari_err_INV("gred_rfrac_simple", d);
-    return scalarpol(gdiv(n, gel(d,2)), varn(d));
+    n = gdiv(n, gel(d,2));
+    if (typ(n) != t_POL || varn(n) != varn(d)) n = scalarpol(n, varn(d));
+    return n;
   }
 
   cd = content(d);

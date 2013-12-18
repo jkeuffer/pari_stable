@@ -71,6 +71,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    53- oo loop in ispower for huge arguments / oo loop in prime iterator
        in congruence classes [#1498, 2.6.0]
    54- L=[1,2,3]; apply(x->L=x,L) -> SEGV  ( idem select and [|x<-] operators )
+   55- (k+1.)/k - (2*k+1.)/k -> incorrect object
 
   Changed
     1- default help text for a user function is now as in \u:
