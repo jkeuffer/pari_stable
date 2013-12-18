@@ -92,7 +92,7 @@ test(q)=
   print(matker(m));
   print(matimage(m));
   print(matrank(m));
-  my(M = [t,2,3; t,t^2,1+t^3; 1+t,1+t^2,1+t^3]);
+  my(M = [t,2*t^0,3*t^0; t,t^2,1+t^3; 1+t,1+t^2,1+t^3]);
   print(matdet(M));
 }
 test(2^5)
