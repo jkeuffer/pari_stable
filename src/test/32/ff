@@ -240,22 +240,22 @@ t^2 + Mod(1, 5)*t + Mod(3, 5))*x^3 + Mod(Mod(0, 5), Mod(1, 5)*t^4 + Mod(1, 5
 od(4, 5)*t, Mod(1, 5)*t^4 + Mod(1, 5)*t^3 + Mod(2, 5)*t^2 + Mod(1, 5)*t + Mo
 d(3, 5)) 1]
 
-? test(q)=my(t=ffgen(q,'t),m=[t,t^2,1+t^3;1+t,1+t^2,1+t^3]);print(matker(m));print(M=matimage(m));print(matrank(m));print(matdet(M));
+? test(q)=my(t=ffgen(q,'t),m=[t,t^2,1+t^3;1+t,1+t^2,1+t^3]);print(matker(m));print(matimage(m));print(matrank(m));my(M=[t,2,3;t,t^2,1+t^3;1+t,1+t^2,1+t^3]);print(matdet(M));
 ? test(2^5)
 [t^4 + t^3; t^4 + t^3; 1]
 [t, t^2; t + 1, t^2 + 1]
 2
-t^2 + t
+t^4 + t^2
 ? test(7^5)
 [3*t^4 + 5*t^3 + 6*t^2 + 2*t; 4*t^4 + 2*t^3 + t^2 + 5*t; 1]
 [t, t^2; t + 1, t^2 + 1]
 2
-6*t^2 + t
+6*t^4 + 2*t^3 + 4*t^2 + 2*t + 2
 ? test((2^64+13)^5)
 [3*t^4 + 5*t^3 + 18446744073709551621*t^2 + 18446744073709551617*t; 18446744
 073709551626*t^4 + 18446744073709551624*t^3 + 8*t^2 + 12*t; 1]
 [t, t^2; t + 1, t^2 + 1]
 2
-18446744073709551628*t^2 + t
+18446744073709551628*t^4 + 2*t^3 + 18446744073709551626*t^2 + 2*t + 2
 ? print("Total time spent: ",gettime);
-Total time spent: 2036
+Total time spent: 1940
