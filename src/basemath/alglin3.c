@@ -466,20 +466,23 @@ GEN
 genindexselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
   long l, i, lv;
-  GEN v;
+  GEN v, z;
   pari_sp av;
   clone_lock(A);
   if (typ(A) == t_LIST)
   {
-    A = list_data(A);
-    l = A? lg(A): 1;
+    z = list_data(A);
+    l = z? lg(z): 1;
   }
   else
+  {
     l = lg(A);
+    z = A;
+  }
   v = cgetg(l, t_VECSMALL);
   av = avma;
   for (i = lv = 1; i < l; i++) {
-    if (f(E, gel(A,i))) v[lv++] = i;
+    if (f(E, gel(z,i))) v[lv++] = i;
     avma = av;
   }
   clone_unlock(A); fixlg(v, lv); return v;
@@ -505,19 +508,19 @@ vecselect(void *E, long (*f)(void* E, GEN x), GEN A)
 GEN
 genselect(void *E, long (*f)(void* E, GEN x), GEN A)
 {
-  GEN y, v;/* v left on stack for efficiency */
+  GEN y, z, v;/* v left on stack for efficiency */
   clone_lock(A);
   switch(typ(A))
   {
     case t_LIST:
-      A = list_data(A);
-      if (!A) y = listcreate();
+      z = list_data(A);
+      if (!z) y = listcreate();
       else
       {
         GEN B;
         y = cgetg(3, t_LIST);
-        v = genindexselect(E, f, A);
-        B = extract_copy(A, v);
+        v = genindexselect(E, f, z);
+        B = extract_copy(z, v);
         list_nmax(y) = lg(B)-1;
         list_data(y) = B;
       }
@@ -610,21 +613,21 @@ GEN
 genapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {
   long i, lx, tx = typ(x);
-  GEN y;
+  GEN y, z;
   if (is_scalar_t(tx)) return f(E, x);
   clone_lock(x);
   switch(tx) {
     case t_POL: y = normalizepol(vecapply2(E,f,x)); break;
     case t_SER: y = normalize(vecapply2(E,f,x)); break;
     case t_LIST:
-      x = list_data(x);
-      if (!x)
+      z = list_data(x);
+      if (!z)
         y = listcreate();
       else
       {
         y = cgetg(3, t_LIST);
-        list_nmax(y) = lg(x)-1;
-        list_data(y) = vecapply1(E,f,x);
+        list_nmax(y) = lg(z)-1;
+        list_data(y) = vecapply1(E,f,z);
       }
       break;
     case t_MAT:
