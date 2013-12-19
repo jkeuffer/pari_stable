@@ -38,7 +38,7 @@ brent_kung_optpow(long d, long n, long m)
 }
 
 static GEN
-gen_RgXQ_eval_powers(GEN P, GEN V, long a, long n, void *E, struct bb_algebra *ff,
+gen_RgXQ_eval_powers(GEN P, GEN V, long a, long n, void *E, const struct bb_algebra *ff,
                                            GEN cmul(void *E, GEN P, long a, GEN x))
 {
   pari_sp av = avma, lim=stack_lim(av,2);
