@@ -475,7 +475,7 @@ auxiliary data typecast to \kbd{void*}. The following functions operate on
 black box algebra:
 
 \fun{GEN}{gen_bkeval}{GEN P, long d, GEN x, int use_sqr, void *E,
-          const struct bb_field *ff, GEN cmul(void *E, GEN P, long a, GEN x)}
+          const struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x)}
 $x$ being an element of the black box algebra, and $P$ some black box
 polynomial of degree $d$ over the base field,  returns $P(x)$. The function
 \kbd{cmul(E,P,a,y)} must return the coefficient of degree $a$ of $P$
@@ -485,7 +485,7 @@ The flag \kbd{use\_sqr} has the same meaning as for \kbd{gen\_powers}. This
 implements an algorithm of Brent and Kung (1978).
 
 \fun{GEN}{gen_bkeval_powers}{GEN P, long d, GEN V, void *E,
- const struct bb_field *ff, GEN cmul(void *E, GEN P, long a, GEN x)}
+ const struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x)}
 as \tet{gen_RgX_bkeval} assuming $V$ was output by
 \tet{gen_powers}$(x, l, E, \var{ff})$ for some $l\geq 1$. For optimal
 performance, $l$ should be computed by \tet{brent_kung_optpow}.

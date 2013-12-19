@@ -59,7 +59,7 @@ gen_RgXQ_eval_powers(GEN P, GEN V, long a, long n, void *E, struct bb_algebra *f
  * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
  * by brent_kung_optpow */
 GEN
-gen_bkeval_powers(GEN P, long d, GEN V, void *E, struct bb_algebra *ff,
+gen_bkeval_powers(GEN P, long d, GEN V, void *E, const struct bb_algebra *ff,
                                      GEN cmul(void *E, GEN P, long a, GEN x))
 {
   pari_sp av = avma, lim;
@@ -91,7 +91,7 @@ gen_bkeval_powers(GEN P, long d, GEN V, void *E, struct bb_algebra *ff,
 }
 
 GEN
-gen_bkeval(GEN Q, long d, GEN x, int use_sqr, void *E, struct bb_algebra *ff,
+gen_bkeval(GEN Q, long d, GEN x, int use_sqr, void *E, const struct bb_algebra *ff,
                                       GEN cmul(void *E, GEN P, long a, GEN x))
 {
   pari_sp av = avma;

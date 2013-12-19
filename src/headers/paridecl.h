@@ -758,9 +758,9 @@ GEN     ZX_unscale_div(GEN P, GEN h);
 int     ZXQX_dvd(GEN x, GEN y, GEN T);
 long    brent_kung_optpow(long d, long n, long m);
 GEN     gen_bkeval(GEN Q, long d, GEN x, int use_sqr, void *E,
-          struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
+          const struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
 GEN     gen_bkeval_powers(GEN P, long d, GEN V, void *E,
-          struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
+          const struct bb_algebra *ff, GEN cmul(void *E, GEN P, long a, GEN x));
 
 /* ZV.c */
 
