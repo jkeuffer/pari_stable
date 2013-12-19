@@ -1,0 +1,10 @@
+norml2(-1/2)
+norml1(-1)
+norml1(-1/2)
+norml1(I)
+norml1([1,-2,3])
+norml1([1,-2;-3,4])
+norml1([[1,2],[3,4],5,6])
+default(realprecision,38);
+norml1( (1+I) + I*x^2 )
+
