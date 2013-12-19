@@ -41,3 +41,6 @@ test(incgam, 76)
 default(realprecision, 38);
 incgam(1/2,10^8)
 eint1(-0.3-95*I)
+eint1(100)
+\p1000
+eint1(100)

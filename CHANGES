@@ -74,6 +74,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    55- (k+1.)/k - (2*k+1.)/k -> incorrect object
    56- gcd(x,0.) -> 1 but gcd(x,Pol(0.)) -> x [ the former is correct, since 0.
        is inexact and may represent an arbitrary small non-zero real number ]
+   57- eint1 misbehaved at large precision [#1499]
 
   Changed
     1- default help text for a user function is now as in \u:

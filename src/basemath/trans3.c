@@ -638,16 +638,22 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 static GEN
 incgamcf_0(GEN x, GEN expx)
 {
+  pari_sp av;
   long l = realprec(x), n, i;
+  double mx = rtodbl(x), L = prec2nbits_mul(l,LOG2);
   GEN z;
 
-  if (expo(x) >= 4)
+  if (mx > L)
   {
-    double mx = rtodbl(x), m = (prec2nbits_mul(l,LOG2) + mx)/4;
+    double m = (L + mx)/4;
     n = (long)(1+m*m/mx);
+    av = avma;
     z = divsr(-n, addsr(n<<1,x));
     for (i=n-1; i >= 1; i--)
+    {
       z = divsr(-i, addrr(addsr(i<<1,x), mulur(i,z))); /* -1 / (2 + z + x/i) */
+      if ((i & 0x1ff) == 0) z = gerepileuptoleaf(av, z);
+    }
     return divrr(addrr(real_1(l),z), mulrr(expx? expx: mpexp(x), x));
   }
   else
@@ -656,12 +662,14 @@ incgamcf_0(GEN x, GEN expx)
     GEN S, t, H, run = real_1(prec);
     n = -prec2nbits(prec);
     x = rtor(x, prec);
+    av = avma;
     S = z = t = H = run;
     for (i = 2; expo(t) - expo(S) >= n; i++)
     {
       H = addrr(H, divru(run,i)); /* H = sum_{k<=i} 1/k */
       z = divru(mulrr(x,z), i);   /* z = x^(i-1)/i! */
       t = mulrr(z, H); S = addrr(S, t);
+      if ((i & 0x1ff) == 0) gerepileall(av, 4, &z,&t,&S,&H);
     }
     return subrr(mulrr(x, divrr(S,expx? expx: mpexp(x))),
                  addrr(mplog(x), mpeuler(prec)));
