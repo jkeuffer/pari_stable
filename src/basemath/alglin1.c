@@ -4029,12 +4029,14 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     {
       case t_INT: break;
       case t_COL: if (lg(Y) != 1) pari_err_DIM("gaussmodulo");
+                  break;
       default: pari_err_TYPE("gaussmodulo",Y);
     }
     switch(typ(D))
     {
       case t_INT: break;
       case t_COL: if (lg(D) != 1) pari_err_DIM("gaussmodulo");
+                  break;
       default: pari_err_TYPE("gaussmodulo",D);
     }
     if (ptu1) *ptu1 = cgetg(1, t_MAT);
