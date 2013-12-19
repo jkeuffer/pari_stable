@@ -1704,6 +1704,9 @@ FFM_ker(GEN M, GEN ff)
 GEN
 FFM_image(GEN M, GEN ff)
 { return FFM_wrap(M,ff, &FqM_image,&FlxqM_image,&F2xqM_image); }
+GEN
+FFM_inv(GEN M, GEN ff)
+{ return FFM_wrap(M,ff, &FqM_inv,&FlxqM_inv,&F2xqM_inv); }
 long
 FFM_rank(GEN M, GEN ff)
 {

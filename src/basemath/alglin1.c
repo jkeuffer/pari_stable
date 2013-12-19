@@ -926,6 +926,25 @@ F2xqM_det(GEN a, GEN T)
 }
 
 static GEN
+F2xqM_gauss_gen(GEN a, GEN b, GEN T)
+{
+  void *E;
+  const struct bb_field *S = get_F2xq_field(&E, T);
+  return gen_Gauss(a, b, E, S);
+}
+GEN
+F2xqM_inv(GEN a, GEN T)
+{
+  pari_sp av = avma;
+  long n = lg(a)-1;
+  GEN u;
+  if (!n) { avma = av; return cgetg(1, t_MAT); }
+  u = F2xqM_gauss_gen(a, matid_F2xqM(n,T), T);
+  if (!u) { avma = av; return NULL; }
+  return gerepilecopy(av, u);
+}
+
+static GEN
 FqM_gauss_pivot_gen(GEN x, GEN T, GEN p, long *rr)
 {
   void *E;
@@ -1950,7 +1969,7 @@ FlxqM_inv(GEN a, GEN T, ulong p)
   long n = lg(a)-1;
   GEN u;
   if (!n) { avma = av; return cgetg(1, t_MAT); }
-  u = FlxqM_gauss_gen(a, matid(n), T, p);
+  u = FlxqM_gauss_gen(a, matid_FlxqM(n,T,p), T,p);
   if (!u) { avma = av; return NULL; }
   return gerepilecopy(av, u);
 }

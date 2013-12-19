@@ -18,6 +18,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*******************************************************************/
 #include "parinf.h"
 
+/* black box groups */
+struct bb_group
+{
+  GEN   (*mul)(void *E, GEN, GEN);
+  GEN   (*pow)(void *E, GEN, GEN);
+  GEN   (*rand)(void *E);
+  ulong (*hash)(GEN);
+  int   (*equal)(GEN,GEN);
+  int   (*equal1)(GEN);
+  GEN   (*easylog)(void *E, GEN, GEN, GEN);
+};
+
+/* black box fields */
+struct bb_field
+{
+  GEN (*red)(void *E ,GEN);
+  GEN (*add)(void *E ,GEN, GEN);
+  GEN (*mul)(void *E ,GEN, GEN);
+  GEN (*neg)(void *E ,GEN);
+  GEN (*inv)(void *E ,GEN);
+  int (*equal0)(GEN);
+  GEN (*s)(void *E, long);
+};
+
+/* black box algebra */
+struct bb_algebra
+{
+  GEN (*red)(void *E, GEN x);
+  GEN (*add)(void *E, GEN x, GEN y);
+  GEN (*mul)(void *E, GEN x, GEN y);
+  GEN (*sqr)(void *E, GEN x);
+  GEN (*one)(void *E);
+  GEN (*zero)(void *E);
+};
+
 /* OBSOLETE */
 GEN     bernvec(long nomb);
 GEN     buchimag(GEN D, GEN c1, GEN c2, GEN gCO);
@@ -576,8 +611,11 @@ GEN     ZV_zMs_mul(GEN B, GEN M);
 GEN     ZpMs_ZpCs_solve(GEN M, GEN B, long nbrow, GEN p, long e);
 GEN     gen_FpM_Wiedemann(void *E, GEN (*f)(void*, GEN), GEN B, GEN p);
 GEN     gen_ZpM_Dixon(void *E, GEN (*f)(void*, GEN), GEN B, GEN p, long e);
+GEN     gen_matid(long n, void *E, const struct bb_field *S);
 GEN     matid_F2m(long n);
 GEN     matid_Flm(long n);
+GEN     matid_F2xqM(long n, GEN T);
+GEN     matid_FlxqM(long n, GEN T, ulong p);
 GEN     scalar_Flm(long s, long n);
 GEN     zCs_to_ZC(GEN C, long nbrow);
 GEN     zMs_to_ZM(GEN M, long nbrow);
@@ -907,6 +945,7 @@ GEN     F2m_suppl(GEN x);
 GEN     F2xqM_det(GEN a, GEN T);
 GEN     F2xqM_ker(GEN x, GEN T);
 GEN     F2xqM_image(GEN x, GEN T);
+GEN     F2xqM_inv(GEN a, GEN T);
 long    F2xqM_rank(GEN x, GEN T);
 GEN     Flm_Flc_gauss(GEN a, GEN b, ulong p);
 GEN     Flm_Flc_invimage(GEN mat, GEN y, ulong p);
@@ -2118,6 +2157,7 @@ GEN     FF_trace(GEN x);
 GEN     FF_zero(GEN a);
 GEN     FFM_det(GEN M, GEN ff);
 GEN     FFM_image(GEN M, GEN ff);
+GEN     FFM_inv(GEN M, GEN ff);
 GEN     FFM_ker(GEN M, GEN ff);
 long    FFM_rank(GEN M, GEN ff);
 GEN     FFX_factor(GEN f, GEN x);

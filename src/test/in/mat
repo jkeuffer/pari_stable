@@ -66,6 +66,8 @@ matdet(A*Mod(1,3037000507))
 matdet(A*Mod(1,2^64+13))
 matsolve(A*Mod(1,2^64+13),[1,2,3]~)
 
+matker([1.,I;I,-1.])
+
 trace(matid(3))
 trace([;])
 iferr(trace(Mat([1,2])),E,E)

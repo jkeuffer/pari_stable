@@ -632,6 +632,22 @@ Flm_transpose(GEN x)
 /********************************************************************/
 
 GEN
+gen_matid(long n, void *E, const struct bb_field *S)
+{
+  GEN y = cgetg(n+1,t_MAT), _0, _1;
+  long i;
+  if (n < 0) pari_err_DOMAIN("gen_matid", "dimension","<",gen_0,stoi(n));
+  _0 = S->s(E,0);
+  _1 = S->s(E,1);
+  for (i=1; i<=n; i++)
+  {
+    GEN z = const_col(n, _0); gel(z,i) = _1;
+    gel(y, i) = z;
+  }
+  return y;
+}
+
+GEN
 matid_F2m(long n)
 {
   GEN y = cgetg(n+1,t_MAT);
@@ -639,6 +655,21 @@ matid_F2m(long n)
   if (n < 0) pari_err_DOMAIN("matid_F2m", "dimension","<",gen_0,stoi(n));
   for (i=1; i<=n; i++) { gel(y,i) = zero_F2v(n); F2v_set(gel(y,i),i); }
   return y;
+}
+
+GEN
+matid_F2xqM(long n, GEN T)
+{
+  void *E;
+  const struct bb_field *S = get_F2xq_field(&E, T);
+  return gen_matid(n, E, S);
+}
+GEN
+matid_FlxqM(long n, GEN T, ulong p)
+{
+  void *E;
+  const struct bb_field *S = get_Flxq_field(&E, T, p);
+  return gen_matid(n, E, S);
 }
 
 GEN

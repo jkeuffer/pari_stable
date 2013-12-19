@@ -73,41 +73,6 @@ typedef struct {
   GEN G;
 } nffp_t;
 
-/* black box groups */
-struct bb_group
-{
-  GEN   (*mul)(void *E, GEN, GEN);
-  GEN   (*pow)(void *E, GEN, GEN);
-  GEN   (*rand)(void *E);
-  ulong (*hash)(GEN);
-  int   (*equal)(GEN,GEN);
-  int   (*equal1)(GEN);
-  GEN   (*easylog)(void *E, GEN, GEN, GEN);
-};
-
-/* black box fields */
-struct bb_field
-{
-  GEN (*red)(void *E ,GEN);
-  GEN (*add)(void *E ,GEN, GEN);
-  GEN (*mul)(void *E ,GEN, GEN);
-  GEN (*neg)(void *E ,GEN);
-  GEN (*inv)(void *E ,GEN);
-  int (*equal0)(GEN);
-  GEN (*s)(void *E, long);
-};
-
-/* black box algebra */
-struct bb_algebra
-{
-  GEN (*red)(void *E, GEN x);
-  GEN (*add)(void *E, GEN x, GEN y);
-  GEN (*mul)(void *E, GEN x, GEN y);
-  GEN (*sqr)(void *E, GEN x);
-  GEN (*one)(void *E);
-  GEN (*zero)(void *E);
-};
-
 /* qfr3 / qfr5 */
 struct qfr_data { GEN D, sqrtD, isqrtD; };
 

@@ -4026,6 +4026,8 @@ and \kbd{y}
 
 \fun{long}{FlxqM_rank}{GEN x, GEN T, ulong p}
 
+\fun{GEN}{matid_FlxqM}{long n, GEN T, ulong p}
+
 \subsec{\kbd{Zlm}}
 \fun{GEN}{ZlM_gauss}{GEN a, GEN b, ulong p, long e, GEN C} as \kbd{gauss}
 with the following peculiarities: $a$ and $b$ are \kbd{ZM}, such that $a$ is
@@ -5375,7 +5377,11 @@ $a=\sigma(X)$ where $\sigma$ is an automorphism of the algebra $\F_2[X]/T(X)$.
 
 \fun{GEN}{F2xqM_image}{GEN x, GEN T}
 
+\fun{GEN}{F2xqM_inv}{GEN a, GEN T}
+
 \fun{long}{F2xqM_rank}{GEN x, GEN T}
+
+\fun{GEN}{matid_F2xqM}{long n, GEN T}
 
 \subsec{Functions returning objects with \typ{INTMOD} coefficients}
 
@@ -9026,6 +9032,8 @@ by \tet{RgM_is_FFM(M,\&ff)}.
 \fun{GEN}{FFM_det}{GEN M, GEN ff}
 
 \fun{GEN}{FFM_image}{GEN M, GEN ff}
+
+\fun{GEN}{FFM_inv}{GEN M, GEN ff}
 
 \fun{long}{FFM_rank}{GEN M, GEN ff}
 

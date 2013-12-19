@@ -3319,9 +3319,15 @@ ginv(GEN x)
         togglesign(gel(y,2));
       return y;
     case t_MAT:
-      y = RgM_inv(x);
+    {
+      GEN ff = NULL;
+      if (RgM_is_FFM(x,&ff))
+        y = FFM_inv(x, ff);
+      else
+        y = RgM_inv(x);
       if (!y) pari_err_INV("ginv",x);
       return y;
+    }
     case t_VECSMALL:
     {
       long i, lx = lg(x)-1;
