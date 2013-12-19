@@ -3594,7 +3594,7 @@ compute_vecG(GEN nf, FB_t *F, long n)
   for (e = 32;;)
   {
     G = gmul2n(G, e);
-    G0 = ground(G); if (rank(G0) == r) break; /* maximal rank ? */
+    G0 = ground(G); if (ZM_rank(G0) == r) break; /* maximal rank ? */
   }
   Gtw0 = ground(gmul2n(G, 10));
   vecG = cgetg(1 + n*(n+1)/2,t_VEC);

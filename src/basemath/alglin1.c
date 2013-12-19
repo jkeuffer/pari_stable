@@ -3258,6 +3258,19 @@ indexrank0(long n, long r, GEN d)
   }
   return res;
 }
+/* n = dim x, r = dim Ker(x), d from gauss_pivot */
+static GEN
+indeximage0(long n, long r, GEN d)
+{
+  long i, j;
+  GEN v;
+
+  r = n - r; /* now r = dim Im(x) */
+  v = cgetg(r+1,t_VECSMALL);
+  if (d) for (i=j=1; j<=n; j++)
+    if (d[j]) v[i++] = j;
+  return v;
+}
 /* x an m x n t_MAT, n > 0, r = dim Ker(x), d from gauss_pivot */
 static void
 indexrank_all(long m, long n, long r, GEN d, GEN *prow, GEN *pcol)
@@ -3320,6 +3333,23 @@ F2m_indexrank(GEN x) {
   init_indexrank(x);
   d = F2m_gauss_pivot(F2m_copy(x),&r);
   avma = av; return indexrank0(lg(x)-1, r, d);
+}
+
+GEN
+ZM_indeximage(GEN x) {
+  pari_sp av = avma;
+  long r;
+  GEN d;
+  init_indexrank(x);
+  d = ZM_pivots(x,&r);
+  avma = av; return indeximage0(lg(x)-1, r, d);
+}
+long
+ZM_rank(GEN x) {
+  pari_sp av = avma;
+  long r;
+  (void)ZM_pivots(x,&r);
+  avma = av; return lg(x)-1-r;
 }
 
 /*******************************************************************/

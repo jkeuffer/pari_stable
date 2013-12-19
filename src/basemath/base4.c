@@ -1990,7 +1990,7 @@ RM_round_maxrank(GEN G0)
   for (e = 4; ; e <<= 1)
   {
     GEN H = ground(G);
-    if (rank(H) == r) return H; /* maximal rank ? */
+    if (ZM_rank(H) == r) return H; /* maximal rank ? */
     avma = av;
     G = gmul2n(G0, e);
   }

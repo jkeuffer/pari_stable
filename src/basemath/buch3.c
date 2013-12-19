@@ -1076,7 +1076,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
         err_printf("       column #%ld of the matrix log(b_j/Q): %Ps\n",
                    nbcol, newcol);
       }
-      mat1 = shallowconcat(mat,newcol); ra = rank(mat1);
+      mat1 = shallowconcat(mat,newcol); ra = ZM_rank(mat1);
       if (ra==nbcol) continue;
 
       if (DEBUGLEVEL>2) err_printf("       new rank: %ld\n",ra);

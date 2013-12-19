@@ -6136,6 +6136,12 @@ variable $0$) of the \kbd{ZM} $M$.
 
 \fun{GEN}{ZM_imagecompl}{GEN x} returns \kbd{matimagecompl(x)}.
 
+\fun{long}{ZM_rank}{GEN x} returns \kbd{matrank(x)}.
+
+\fun{GEN}{ZM_indexrank}{GEN x} returns \kbd{matindexrank(x)}.
+
+\fun{GEN}{ZM_indeximage}{GEN x} returns \kbd{gel(ZM\_indexrank(x), 2)}.
+
 \fun{long}{ZM_max_lg}{GEN x} returns the effective length of the longest
 entry in $x$.
 
