@@ -1105,6 +1105,7 @@ GEN     vecselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun,
                             GEN (*fun)(void* E, GEN x), GEN A);
 GEN     vecselect(void *E, long (*f)(void* E, GEN x), GEN A);
 GEN     vecslice0(GEN A, long y1, long y2);
+GEN     vecsum(GEN v);
 
 /* anal.c */
 

@@ -22,6 +22,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /*******************************************************************/
 /*                                                                 */
+/*                               SUM                               */
+/*                                                                 */
+/*******************************************************************/
+
+GEN
+vecsum(GEN v)
+{
+  pari_sp av = avma, lim;
+  long i, l;
+  GEN p;
+  if (!is_vec_t(typ(v)))
+    pari_err_TYPE("vecsum", v);
+  l = lg(v);
+  if (l == 1) return gen_0;
+  p = gel(v,1);
+  if (l == 2) return gcopy(p);
+  lim = stack_lim(av, 2);
+  for (i=2; i<l; i++)
+  {
+    p = gadd(p, gel(v,i));
+    if (low_stack(lim, stack_lim(av, 2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"sum");
+      p = gerepileupto(av, p);
+    }
+  }
+  return gerepileupto(av, p);
+}
+
+/*******************************************************************/
+/*                                                                 */
 /*                         TRANSPOSE                               */
 /*                                                                 */
 /*******************************************************************/

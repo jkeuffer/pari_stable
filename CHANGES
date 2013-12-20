@@ -155,6 +155,7 @@ BA 20- conversion from matrices of FFELTs to low level (Fq/Flxq/F2xq) kernels
        F2xqM_image, F2xqM_rank, FFM_det, FFM_image, FFM_ker, FFM_rank, FFM_inv
    22- ZM_rank, ZM_indexrank, ZM_indeximage
    23- GP function norml1
+BA 24- GP function vecsum
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
