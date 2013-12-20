@@ -1788,8 +1788,8 @@ get_nfindex(GEN bas)
     bas = Q_remove_denom(bas, &d);
     if (!d) { avma = av; return D; }
     mat = RgXV_to_RgM(bas, n);
-    d = diviiexact(powiu(d, n), det(mat));
-    D = mulii(D,d);
+    d = diviiexact(powiu(d, n), ZM_det(mat));
+    D = mulii(D,absi(d));
   }
   return gerepileuptoint(av, D);
 }
