@@ -704,8 +704,18 @@ gnorm(GEN x)
   return NULL; /* not reached */
 }
 
-GEN
-gnorml2(GEN x)
+/* return |q|^2, complex modulus */
+static GEN
+cxquadnorm(GEN q, long prec)
+{
+  GEN X = gel(q,1), c = gel(X,2); /* (1-D)/4, -D/4 */
+  if (signe(c) > 0) return quadnorm(q); /* imaginary */
+  if (!prec) pari_err_TYPE("gnorml2", q);
+  return sqrr(quadtofp(q, prec));
+}
+
+static GEN
+gnorml2_i(GEN x, long prec)
 {
   pari_sp av, lim;
   long i, lx;
@@ -717,7 +727,7 @@ gnorml2(GEN x)
     case t_REAL: return sqrr(x);
     case t_FRAC: return sqrfrac(x);
     case t_COMPLEX: av = avma; return gerepileupto(av, cxnorm(x));
-    case t_QUAD:    av = avma; return gerepileupto(av, quadnorm(x));
+    case t_QUAD:    av = avma; return gerepileupto(av, cxquadnorm(x,prec));
 
     case t_POL: lx = lg(x)-1; x++; break;
 
@@ -741,6 +751,68 @@ gnorml2(GEN x)
     }
   }
   return gerepileupto(av,s);
+}
+GEN
+gnorml2(GEN x) { return gnorml2_i(x, 0); }
+
+static GEN pnormlp(GEN,GEN,long);
+static GEN
+pnormlpvec(long i0, GEN x, GEN p, long prec)
+{
+  pari_sp av = avma, lim = stack_lim(av,1);
+  long i, lx = lg(x);
+  GEN s = gen_0;
+  for (i=i0; i<lx; i++)
+  {
+    s = gadd(s, pnormlp(gel(x,i),p,prec));
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"gnormlp, i = %ld", i);
+      s = gerepileupto(av, s);
+    }
+  }
+  return s;
+}
+/* (||x||_p)^p */
+static GEN
+pnormlp(GEN x, GEN p, long prec)
+{
+  switch(typ(x))
+  {
+    case t_INT: case t_REAL: x = mpabs(x); break;
+    case t_FRAC: x = absfrac(x); break;
+    case t_COMPLEX: case t_QUAD: x = gabs(x,prec); break;
+    case t_POL: return pnormlpvec(2, x, p, prec);
+    case t_VEC: case t_COL: case t_MAT: return pnormlpvec(1, x, p, prec);
+    default: pari_err_TYPE("gnormlp",x);
+  }
+  return gpow(x, p, prec);
+}
+
+GEN
+gnormlp(GEN x, GEN p, long prec)
+{
+  pari_sp av = avma;
+  if (!p) return gsupnorm(x, prec);
+  if (gsigne(p) <= 0) pari_err_DOMAIN("normlp", "p", "<=", gen_0, p);
+  if (is_scalar_t(typ(x))) return gabs(x, prec);
+  if (typ(p) == t_INT)
+  {
+    ulong pp = itou_or_0(p);
+    switch(pp)
+    {
+      case 1: return gnorml1(x, prec);
+      case 2: x = gnorml2_i(x, prec); break;
+      default: x = pnormlp(x, p, prec); break;
+    }
+    if (pp && typ(x) == t_INT && Z_ispowerall(x, pp, &x))
+      return gerepileuptoleaf(av, x);
+    if (pp == 2) return gerepileupto(av, gsqrt(x, prec));
+  }
+  else
+    x = pnormlp(x, p, prec);
+  x = gpow(x, ginv(p), prec);
+  return gerepileupto(av, x);
 }
 
 GEN
@@ -814,14 +886,14 @@ store(GEN z, GEN *m) { if (!*m || gcmp(z, *m) > 0) *m = z; }
 /* compare |x| to *m or |x|^2 to *msq, whichever is easiest, and update
  * the pointed value if x is larger */
 void
-gsupnorm_aux(GEN x, GEN *m, GEN *msq)
+gsupnorm_aux(GEN x, GEN *m, GEN *msq, long prec)
 {
   long i, lx;
   GEN z;
   switch(typ(x))
   {
     case t_COMPLEX: z = cxnorm(x); store(z, msq); return;
-    case t_QUAD:  z = quadnorm(x); store(z, msq); return;
+    case t_QUAD:  z = cxquadnorm(x,prec); store(z, msq); return;
     case t_INT: case t_REAL: z = mpabs(x); store(z,m); return;
     case t_FRAC: z = absfrac(x); store(z,m); return;
 
@@ -834,14 +906,14 @@ gsupnorm_aux(GEN x, GEN *m, GEN *msq)
     default: pari_err_TYPE("gsupnorm",x);
       return; /* not reached */
   }
-  for (i=1; i<lx; i++) gsupnorm_aux(gel(x,i), m, msq);
+  for (i=1; i<lx; i++) gsupnorm_aux(gel(x,i), m, msq, prec);
 }
 GEN
 gsupnorm(GEN x, long prec)
 {
   GEN m = NULL, msq = NULL;
   pari_sp av = avma;
-  gsupnorm_aux(x, &m, &msq);
+  gsupnorm_aux(x, &m, &msq, prec);
   /* now set m = max (m, sqrt(msq)) */
   if (msq) {
     msq = gsqrt(msq, prec);

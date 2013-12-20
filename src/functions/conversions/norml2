@@ -5,7 +5,8 @@ Prototype: G
 Help: norml2(x): square of the L2-norm of x.
 Doc:
  square of the $L^2$-norm of $x$. More precisely,
- if $x$ is a scalar, $\kbd{norml2}(x)$ is defined to be \kbd{$x$ * conj($x$)}.
+ if $x$ is a scalar, $\kbd{norml2}(x)$ is defined to be the square
+ of the complex modulus of $x$ (real \typ{QUAD}s are not supported).
  If $x$ is a polynomial, a (row or column) vector or a matrix, \kbd{norml2($x$)} is
  defined recursively as $\sum_i \kbd{norml2}(x_i)$, where $(x_i)$ run through
  the components of $x$. In particular, this yields the usual $\sum |x_i|^2$

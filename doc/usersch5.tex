@@ -8694,7 +8694,8 @@ modulus, the norm of a recursive type is the max of the norms of its
 components. A precision \kbd{prec} must be included for the same reason as in
 \kbd{gnorml1}.
 
-\fun{void}{gsupnorm_aux}{GEN x, GEN *m, GEN *m2} Low-level function underlying
+\fun{void}{gsupnorm_aux}{GEN x, GEN *m, GEN *m2, long prec}
+Low-level function underlying
 \kbd{gsupnorm}, used as follows:
 \bprog
   GEN m = NULL, m2 = NULL;
