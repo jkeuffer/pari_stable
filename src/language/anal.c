@@ -718,12 +718,8 @@ static entree *
 findentry(const char *name, long len, entree *ep1)
 {
   entree *ep;
-
   for (ep = ep1; ep; ep = ep->next)
     if (!strncmp(ep->name, name, len) && !(ep->name)[len]) return ep;
-
-  if (foreignAutoload) /* Try to autoload. */
-    return foreignAutoload(name,len);
   return NULL; /* not found */
 }
 

@@ -33,12 +33,6 @@ void   pari_fill_hashtable(entree **table, entree *ep);
 void compile_err(const char *msg, const char *str);
 void compile_varerr(const char *str);
 
-extern void *foreignHandler;
-extern GEN  (*foreignExprHandler)(char*);
-extern char foreignExprSwitch;
-extern entree * (*foreignAutoload)(const char*, long len);
-extern void (*foreignFuncFree)(entree *);
-
 #ifdef STACK_CHECK
 extern THREAD void *PARI_stack_limit;
 #endif

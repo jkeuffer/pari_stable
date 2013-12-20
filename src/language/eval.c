@@ -136,9 +136,6 @@ pop_val(entree *ep)
 void
 freeep(entree *ep)
 {
-  if (foreignFuncFree && ep->code && (*ep->code == 'x'))
-    (*foreignFuncFree)(ep); /* function created by foreign interpreter */
-
   if (EpSTATIC(ep)) return; /* gp function loaded at init time */
   if (ep->help) {pari_free((void*)ep->help); ep->help=NULL;}
   if (ep->code) {pari_free((void*)ep->code); ep->code=NULL;}

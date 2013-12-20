@@ -85,12 +85,6 @@ static pari_stack s_MODULES, s_OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
 entree **functions_hash, **defaults_hash;
 
-void *foreignHandler;                       /* Handler for foreign commands.   */
-char foreignExprSwitch = 3;               /* Just some unprobable char.      */
-GEN  (*foreignExprHandler)(char*);    /* Handler for foreign expressions.*/
-entree* (*foreignAutoload)(const char*, long len); /* Autoloader         */
-void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
-
 void (*cb_pari_ask_confirm)(const char *);
 int  (*cb_pari_handle_exception)(long);
 int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
@@ -2338,13 +2332,6 @@ pari_version(void)
  *
  * Syntax requirements:
  *  = Separator '=' required.
- *
- * Origin:
- *  x Installed foreign function. Put the ep of the function as the
- *       first argument, fill the rest with PARI arguments,
- *       then call installedHandler with these arguments.
- *       Should be the first char in the code.
- *
  ****************************************************************************
  */
 #include "init.h"
