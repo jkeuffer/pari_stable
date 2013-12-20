@@ -112,7 +112,7 @@ __extension__ ({ ulong __valuelo, __arg1 = (a), __arg2 = (b), __temp; \
 #define divll(a,b) \
 __extension__ ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("divq %4" \
-        : "=a" /* %eax */ (__value), "=&d" /* %edx */ (hiremainder) \
+        : "=a" /* %eax */ (__value), "=d" /* %edx */ (hiremainder) \
         : "0" /* %eax */ (__arg1), "1" /* %edx */ (hiremainder), "mr" (__arg2)); \
    __value; \
 })
