@@ -1588,7 +1588,7 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
 GEN
 FqX_rand(long d1, long v, GEN T, GEN p)
 {
-  long i, d = d1+2, k = degpol(T), w = varn(T);
+  long i, d = d1+2, k = get_FpX_degree(T), w = get_FpX_var(T);
   GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
   for (i=2; i<d; i++) gel(y,i) = random_FpX(k, w, p);
   (void)normalizepol_lg(y,d); return y;
@@ -2276,7 +2276,7 @@ FpXQX_nbroots(GEN f, GEN T, GEN p)
   if(lgefint(p)==3)
   {
     ulong pp=p[2];
-    z = FlxqX_split_part(ZXX_to_FlxX(f,pp,varn(T)),ZX_to_Flx(T,pp),pp);
+    z = FlxqX_split_part(ZXX_to_FlxX(f,pp,varn(T)),ZXT_to_FlxT(T,pp),pp);
   }
   else
     z = FpXQX_split_part(f, T, p);
@@ -2637,8 +2637,8 @@ FqX_quad_roots(GEN x, GEN T, GEN p)
   GEN s, u, D, nb, b = gel(x,3), c = gel(x,2);
   if (equaliu(p, 2))
   {
-    GEN f2 = ZXX_to_F2xX(x,T[1]);
-    s = F2xqX_quad_roots(f2, ZX_to_F2x(T));
+    GEN f2 = ZXX_to_F2xX(x, get_FpX_var(T));
+    s = F2xqX_quad_roots(f2, ZX_to_F2x(get_FpX_mod(T)));
     return F2xC_to_ZXC(s);
   }
   D = Fq_sub(Fq_sqr(b,T,p), Fq_Fp_mul(c,utoi(4),T,p), T,p);
