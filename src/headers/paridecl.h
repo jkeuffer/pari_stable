@@ -136,7 +136,7 @@ GEN     Rg_to_F2xq(GEN x, GEN T);
 GEN     RgM_to_F2m(GEN x);
 GEN     RgV_to_F2v(GEN x);
 GEN     RgX_to_F2x(GEN x);
-GEN     Z_to_F2x(GEN x, long sv);
+GEN     Z_to_F2x(GEN x, long v);
 GEN     ZM_to_F2m(GEN x);
 GEN     ZV_to_F2v(GEN x);
 GEN     ZX_to_F2x(GEN x);

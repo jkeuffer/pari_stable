@@ -82,8 +82,9 @@ F2x_to_Flx(GEN x)
 }
 
 GEN
-Z_to_F2x(GEN x, long sv)
+Z_to_F2x(GEN x, long v)
 {
+  long sv = evalvarn(v);
   return mpodd(x) ? pol1_F2x(sv): pol0_F2x(sv);
 }
 
