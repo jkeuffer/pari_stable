@@ -215,40 +215,41 @@ idealaddtoone0(GEN nf, GEN arg1, GEN arg2)
   return idealaddtoone(nf,arg1,arg2);
 }
 
+/* b not a scalar */
+static GEN
+hnf_Z_ZC(GEN nf, GEN a, GEN b) { return hnfmodid(zk_multable(nf,b), a); }
+/* b not a scalar */
 static GEN
 hnf_Z_QC(GEN nf, GEN a, GEN b)
 {
   GEN db;
   b = Q_remove_denom(b, &db);
   if (db) a = mulii(a, db);
-  b = zk_scalar_or_multable(nf, b);
-  if (typ(b) == t_INT) {
-    b = gcdii(b,a);
-    return db? mkfraccopy(b, db): a;
-  } else {
-    b = hnfmodid(b, a);
-    return db? RgM_Rg_div(b, db): b;
-  }
+  b = hnf_Z_ZC(nf,a,b);
+  return db? RgM_Rg_div(b, db): b;
 }
+/* b not a scalar (not point in trying to optimize for this case) */
 static GEN
 hnf_Q_QC(GEN nf, GEN a, GEN b)
 {
-  GEN db, da;
-
+  GEN da, db;
   if (typ(a) == t_INT) return hnf_Z_QC(nf, a, b);
   da = gel(a,2);
   a = gel(a,1);
   b = Q_remove_denom(b, &db);
-  b = ZC_Z_mul(b, da);
-  if (db) {
+  /* write da = d*A, db = d*B, gcd(A,B) = 1
+   * gcd(a/(d A), b/(d B)) = gcd(a B, A b) / A B d = gcd(a B, b) / A B d */
+  if (db)
+  {
     GEN d = gcdii(da,db);
-    db = diviiexact(db,d);
-    a = mulii(a, db);
-    da = mulii(da, db); /* lcm(denom(a),denom(b)) */
+    if (!is_pm1(d)) db = diviiexact(db,d); /* B */
+    if (!is_pm1(db))
+    {
+      a = mulii(a, db); /* a B */
+      da = mulii(da, db); /* A B d = lcm(denom(a),denom(b)) */
+    }
   }
-  b = zk_scalar_or_multable(nf, b);
-  if (typ(b) == t_INT) return gdiv(gcdii(b, a), da);
-  return RgM_Rg_div(hnfmodid(b, a), da);
+  return RgM_Rg_div(hnf_Z_ZC(nf,a,b), da);
 }
 static GEN
 hnf_QC_QC(GEN nf, GEN a, GEN b)
@@ -264,7 +265,7 @@ hnf_QC_QC(GEN nf, GEN a, GEN b)
   return d? RgM_Rg_div(x, d): x;
 }
 static GEN
-hnf_Q_Q(GEN nf, GEN a, GEN b) {return scalarmat(ggcd(a,b), nf_get_degree(nf));}
+hnf_Q_Q(GEN nf, GEN a, GEN b) {return scalarmat(Q_gcd(a,b), nf_get_degree(nf));}
 GEN
 idealhnf0(GEN nf, GEN a, GEN b)
 {
