@@ -21,7 +21,7 @@
   *** galoisidentify: incorrect type in checkgal (t_INT).
 [x]~
 [-x, x]~
-[-x, x, -x^3, x^3]
+[-x, x, -x^3, x^3]~
 
 [11  0  0 10 7 1]
 
@@ -97,4 +97,4 @@ d(-2*x^6 + 2*x^4 + 2, x^8 - x^6 + x^4 - x^2 + 1)], [x^2 + 5, Mod(2*x^7 - x^5
 ^8 - x^6 + x^4 - x^2 + 1)], [x^4 - 5*x^2 + 5, Mod(-x^7 + x^5 - x^3 + 2*x, x^
 8 - x^6 + x^4 - x^2 + 1)], [x^8 - x^6 + x^4 - x^2 + 1, Mod(x, x^8 - x^6 + x^
 4 - x^2 + 1)]]
-Total time spent: 6236
+Total time spent: 2396
