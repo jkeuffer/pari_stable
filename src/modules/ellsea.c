@@ -189,7 +189,8 @@ find_numerator_isogeny(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, GEN h, GEN T, GEN
                        long precS)
 {
   pari_sp ltop = avma;
-  GEN mod = T ? gmodulo(gmodulsg(1,p),gmul(T,gmodulsg(1,p))): gmodulsg(1,p);
+  GEN mod1p = gmodulsg(1,p);
+  GEN mod = T ? gmodulo(mod1p, gmul(get_FpX_mod(T), mod1p)): mod1p;
   GEN WEb = gmul(compute_W(Eba4, Eba6, T, p, varn(h), precS), mod);
   GEN WEc = gmul(compute_W(Eca4, Eca6, T, p, varn(h), precS), mod);
   GEN den = poleval(h, WEb);
@@ -252,13 +253,14 @@ static void
 init_eigenu(struct eigen_ellinit *Edat, GEN a4, GEN a6, GEN h, GEN T, ulong p)
 {
   pari_sp ltop = avma;
-  GEN g1 = pol1_Flx(T[1]), g0 = pol0_Flx(T[1]);
+  long vT = get_Flx_var(T);
+  GEN g1 = pol1_Flx(vT), g0 = pol0_Flx(vT);
   GEN RHS  = FlxqX_rem(mkpoln(4, g1, g0, a4, a6), h, T, p);
   GEN DRHS = FlxqX_rem(mkpoln(3, Fl_to_Flx(3, T[1]), g0, a4), h, T, p);
   GEN lambda = FlxqXQ_div(DRHS, FlxX_Fl_mul(RHS, 4, p), h, T, p);
-  GEN C = FlxX_sub(FlxqXQ_mul(lambda, DRHS, h, T, p), monomial(Fl_to_Flx(2,T[1]),1,0), p);
+  GEN C = FlxX_sub(FlxqXQ_mul(lambda, DRHS, h, T, p), monomial(Fl_to_Flx(2,vT),1,0), p);
   GEN D = FlxqXQ_mul(FlxX_double(lambda, p),FlxX_sub(pol_x(0), C, p), h, T, p);
-  GEN X12 = mkvec2(C, FlxX_Flx_add(D, Fl_to_Flx(p-1,T[1]), p));
+  GEN X12 = mkvec2(C, FlxX_Flx_add(D, Fl_to_Flx(p-1,vT), p));
   GEN Gr = FlxqXQ_halfFrobenius(RHS,h,T,p);
   GEN nGr = FlxX_neg(Gr, p);
   GEN O = mkvec2(monomial(g1,1,0), monomial(g1,0,0));
@@ -332,10 +334,11 @@ eigenu_elldbl(void *E, GEN P)
   pari_sp ltop = avma;
   struct eigen_ellinit *Edat=(struct eigen_ellinit *)E;
   GEN T = Edat->T, h = Edat->h, x, y;
+  long vT = get_Flx_var(T);
   ulong p = Edat->pp;
   if (ell_is_inf(P)) return gcopy(P);
   x = gel(P,1), y = gel(P,2);
-  if (FlxX_equal(x, monomial(pol1_Flx(T[1]),1,0)) && FlxX_equal(y, monomial(pol1_Flx(T[1]),0,0)))
+  if (FlxX_equal(x, monomial(pol1_Flx(vT),1,0)) && FlxX_equal(y, monomial(pol1_Flx(vT),0,0)))
     return Edat->X12;
   else
   {
@@ -404,7 +407,7 @@ find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN T, GEN p, GEN tr)
   ulong pp = T ?itou_or_0(p): 0;
   if (pp)
     init_eigenu(&Edat, ZX_to_Flx(a4,pp), ZX_to_Flx(a6,pp),
-                       ZXX_to_FlxX(h,pp,varn(T)), ZX_to_Flx(T,pp), pp);
+                       ZXX_to_FlxX(h,pp, get_FpX_var(T)), ZXT_to_FlxT(T,pp), pp);
   else
     init_eigen(&Edat, a4, a6, h, T, p);
   Dr = BP = Edat.O;
@@ -448,7 +451,7 @@ find_eigen_value_power(GEN a4, GEN a6, ulong ell, long k, GEN h, ulong lambda, G
   ulong pp = T ?itou_or_0(p): 0;
   if (pp)
     init_eigenu(&Edat, ZX_to_Flx(a4,pp), ZX_to_Flx(a6,pp),
-        ZXX_to_FlxX(h,pp,varn(T)), ZX_to_Flx(T,pp), pp);
+        ZXX_to_FlxX(h, pp, get_FpX_var(T)), ZXT_to_FlxT(T,pp), pp);
   else
     init_eigen(&Edat, a4, a6, h, T, p);
   BP = eigen_ellmulu(&Edat, Edat.O, ellk1);
@@ -738,7 +741,8 @@ Flxq_study_eqn(long ell, GEN mpoly, GEN T, ulong p, long *pt_dG, long *pt_r)
   if (!*pt_dG)
   {
     GEN L = FlxqXQ_matrix_pow(Xq, ell+1, ell+1, mpoly, T, p);
-    long s = ell + 1 - FlxqM_rank(FlxM_Flx_add_shallow(L, Fl_to_Flx(p-1, T[1]), p), T, p);
+    long vT = get_Flx_var(T);
+    long s = ell + 1 - FlxqM_rank(FlxM_Flx_add_shallow(L, Fl_to_Flx(p-1, vT), p), T, p);
     *pt_r = (ell + 1)/s;
     return NULL;
   }
@@ -768,8 +772,8 @@ FpXQ_study_eqn(long ell, GEN mpoly, GEN T, GEN p, long *pt_dG, long *pt_r)
   if (lgefint(p)==3)
   {
     ulong pp = p[2];
-    GEN Tp = ZX_to_Flx(T,pp);
-    GEN mpolyp = ZXX_to_FlxX(mpoly,pp,varn(Tp));
+    GEN Tp = ZXT_to_FlxT(T,pp);
+    GEN mpolyp = ZXX_to_FlxX(mpoly,pp,get_FpX_var(T));
     G = Flxq_study_eqn(ell, mpolyp, Tp, pp, pt_dG, pt_r);
     if (!G) return NULL;
     G = FlxX_to_ZXX(G);
@@ -1389,7 +1393,7 @@ get_FqE_group(void ** pt_E, GEN a4, GEN a6, GEN T, GEN p)
   else if (lgefint(p)==3)
   {
     ulong pp=(ulong) p[2];
-    return get_FlxqE_group(pt_E, ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZX_to_Flx(T,pp),pp);
+    return get_FlxqE_group(pt_E, ZX_to_Flx(a4,pp),ZX_to_Flx(a6,pp),ZXT_to_FlxT(T,pp),pp);
   }
   return get_FpXQE_group(pt_E,a4,a6,T,p);
 }
@@ -1414,9 +1418,10 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
   void *E;
 
   if (!modular_eqn && !get_seadata(0)) return NULL;
-  if (T && varn(T)==0) /* 0 is used by the modular polynomial */
+  if (T && get_FpX_var(T)==0) /* 0 is used by the modular polynomial */
   {
-    T  = shallowcopy(T);  setvarn(T,1);
+    if (typ(T)==t_POL) { T  = shallowcopy(T); setvarn(T,1); }
+    else T = gsubst(T,0,pol_x(1));
     a4 = shallowcopy(a4); setvarn(a4,1);
     a6 = shallowcopy(a6); setvarn(a6,1);
   }
