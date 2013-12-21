@@ -6,20 +6,21 @@ Help: idealtwoelt(nf,x,{a}): two-element representation of an ideal x in the
  number field nf. If (optional) a is non-zero, first element will be equal to a.
 Doc: computes a two-element
  representation of the ideal $x$ in the number field $\var{nf}$, combining a
- random search and an explicit approximation theorem. $x$ is an ideal
+ random search and an approximation theorem; $x$ is an ideal
  in any form (possibly an extended ideal, whose principal part is ignored)
- and the
- result is a row vector $[a,\alpha]$ with two components such that
- $x=a\Z_K+\alpha\Z_K$ and $a\in\Z$, where $a$ is the one passed as argument if
- any. Unless $x$ was given as a principal ideal, $a$ is chosen to be the
- positive generator of $x\cap\Z$.
 
- Note that when an explicit $a$ is given, we must factor it and this may
- be costly. When $a$ is omitted, we use a fast lazy factorization of $x\cap
- \Z$, yielding an algorithm in randomized polynomial time (and generally
- much faster in practice).
+ \item When called as \kbd{idealtwoelt(nf,x)}, the result is a row vector
+ $[a,\alpha]$ with two components such that $x=a\Z_K+\alpha\Z_K$ and $a$ is
+ chosen to be the positive generator of $x\cap\Z$, unless $x$ was given as a
+ principal ideal (in which case we may choose $a = 0$). The algorithm
+ uses a fast lazy factorization of $x\cap \Z$ and runs in randomized
+ polynomial time.
+
+ \item When called as \kbd{idealtwoelt(nf,x,a)} with an explicit non-zero $a$
+ supplied as third argument, the function assumes that $a \in x$ and returns
+ $\alpha\in x$ such that $x = a\Z_K + \alpha\Z_K$. Note that we must factor
+ $a$ in this case, and the algorithm is generally much slower than the
+ default variant.
 Variant: Also available are
  \fun{GEN}{idealtwoelt}{GEN nf, GEN x} and
  \fun{GEN}{idealtwoelt2}{GEN nf, GEN x, GEN a}.
-
-

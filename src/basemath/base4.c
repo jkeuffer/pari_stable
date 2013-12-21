@@ -452,20 +452,12 @@ idealtwoelt(GEN nf, GEN x)
   pari_sp av;
   GEN z;
   long tx = idealtyp(&x,&z);
-
   nf = checknf(nf);
   if (tx == id_MAT) return mat_ideal_two_elt(nf,x);
   if (tx == id_PRIME) return mkvec2copy(gel(x,1), gel(x,2));
   /* id_PRINCIPAL */
-  z = cgetg(3,t_VEC); av = avma;
-  x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) {
-    gel(z,1) = gerepilecopy(av, x);
-    gel(z,2) = gen_0; return z;
-  }
-  gel(z,1) = gen_0;
-  gel(z,2) = x = (avma == av)? gcopy(x): gerepileupto(av, x);
-  return z;
+  av = avma; x = nf_to_scalar_or_basis(nf, x);
+  return gerepilecopy(av, typ(x)==t_COL? mkvec2(gen_0,x): mkvec2(Q_abs(x),gen_0));
 }
 
 /*******************************************************************/
