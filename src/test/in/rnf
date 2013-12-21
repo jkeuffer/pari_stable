@@ -60,7 +60,7 @@ bnfisnorm(K,2)
 bnfisnorm(K,6)
 
 L=rnfinit(K,x^2-y);
-v = [2,1/2,x+y,Mod(y,K.pol),Mod(x,L.pol),Mod(x+y/2,x^2-y),y,z,Mod(y+1/2,y^2+1),[1]~,[1,2]~,[1,y]~,[1,I]~, y+I,x^2];
+v = [2,1/2,x+y,Mod(1,K.pol),Mod(1/2,K.pol),Mod(y,K.pol),Mod(1,L.pol),Mod(1/2,L.pol),Mod(x,L.pol),Mod(x+y/2,x^2-y),y,z,Mod(y+1/2,y^2+1),[1]~,[1,2]~,[1,y]~,[1,I]~, y+I,x^2];
 f=[rnfalgtobasis,rnfbasistoalg,rnfeltabstorel,rnfeltreltoabs,rnfeltup,rnfeltdown,rnfelttrace,rnfeltnorm];
 {
 for (i=1,#v,
