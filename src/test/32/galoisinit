@@ -21,6 +21,7 @@
   *** galoisidentify: incorrect type in checkgal (t_INT).
 [x]~
 [-x, x]~
+[-x, x, -x^3, x^3]
 
 [11  0  0 10 7 1]
 

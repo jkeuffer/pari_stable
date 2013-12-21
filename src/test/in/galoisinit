@@ -24,6 +24,7 @@ do(x^48+688253440*x^36+64889579202*x^24+688253440*x^12+1);
 
 nfgaloisconj(x^3-x-1)
 nfgaloisconj(x^24+2814)
+nfgaloisconj(x^4+1)
 
 
 nf=nfinit(polcyclo(7)); s = nfgaloisconj(nf)[2]; pr = idealprimedec(nf,11)[1];
