@@ -2218,7 +2218,7 @@ conjcyclo(GEN T, long N)
 {
   pari_sp av = avma;
   long i, k = 1, d = eulerphiu(N), v = varn(T);
-  GEN L = cgetg(d+1,t_VEC);
+  GEN L = cgetg(d+1,t_COL);
   for (i=1; i<=N; i++)
     if (ugcd(i, N)==1)
     {
