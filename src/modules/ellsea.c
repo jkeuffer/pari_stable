@@ -1489,7 +1489,7 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
       bound_gr *= growth_factor;
       if (signe(max_traces))
       {
-        max_traces = divis(muliu(max_traces,2*nbtrace), ellkt);
+        max_traces = divis(muliu(max_traces,nbtrace), ellkt);
         if (DEBUGLEVEL>=3)
           err_printf("At least %Ps remaining possibilities.\n",max_traces);
       }
