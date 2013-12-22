@@ -752,7 +752,7 @@ divide_p_elt(GEN LP, long ip, long k, GEN nf, GEN m, FACT *fact)
   for (j=1; j<l; j++)
   {
     GEN P = gel(LP,j);
-    long v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
+    long v = ZC_nfval(nf, m, P);
     if (!v) continue;
     store(ip + j, v, fact); /* v = v_P(m) > 0 */
     k -= v * pr_get_f(P);
@@ -782,7 +782,7 @@ divide_p_quo(GEN LP, long ip, long k, GEN nf, GEN I, GEN m, FACT *fact)
   for (j=1; j<l; j++)
   {
     GEN P = gel(LP,j);
-    long v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
+    long v = ZC_nfval(nf, m, P);
     if (!v) continue;
     v -= idealval(nf,I, P);
     if (!v) continue;

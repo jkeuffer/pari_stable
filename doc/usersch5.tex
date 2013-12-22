@@ -2242,6 +2242,9 @@ This function is not stack clean.
 \fun{long}{ZV_pval}{GEN x, GEN p} as \kbd{ZV\_pvalrem} but only returns the
 ``valuation''.
 
+\fun{int}{ZV_Z_dvd}{GEN x, GEN p} returns $1$ if $p$ divides all components
+of $x$ and $0$ otherwise. Faster than testing \kbd{ZV\_pval(x,p) >= 1}.
+
 \fun{long}{ZV_lvalrem}{GEN x, ulong p, GEN *px} as \kbd{ZV\_pvalrem},
 except that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 This function is not stack-clean.

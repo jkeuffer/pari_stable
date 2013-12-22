@@ -631,36 +631,56 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   return gerepileupto(av,y);
 }
 
-/* valuation of integer x, with resp. to prime ideal P above p.
+/* valuation of integral x (ZV), with resp. to prime ideal P above p.
  * p.P^(-1) Z_{K,P} = b Z_{K,P}, where b is integral; it may be given as an
  * element of Z_K (t_INT or ZV), or via the 'multiplication by b' ZM matrix */
 long
-int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
+ZC_nfvalrem(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 {
-  long i, k, w, N;
-  GEN r, a, y, mul = zk_scalar_or_multable(nf, b);
+  long i, v, l;
+  GEN r, y, mul = zk_scalar_or_multable(nf, b);
 
   if (typ(mul) == t_INT) return newx? ZV_pvalrem(x, p, newx):ZV_pval(x, p);
-
-  N = nf_get_degree(nf);
-  y = cgetg(N+1, t_COL); /* will hold the new x */
+  y = cgetg_copy(x, &l); /* will hold the new x */
   x = leafcopy(x);
-  for(w=0;; w++)
+  for(v=0;; v++)
   {
-    for (i=1; i<=N; i++)
-    { /* compute (x.b)_i */
-      a = mulii(gel(x,1), gcoeff(mul,i,1));
-      for (k=2; k<=N; k++) a = addii(a, mulii(gel(x,k), gcoeff(mul,i,k)));
-      /* is it divisible by p ? */
-      gel(y,i) = dvmdii(a,p,&r);
-      if (r != gen_0)
-      {
-        if (newx) *newx = x;
-        return w;
-      }
+    for (i=1; i<l; i++)
+    { /* is (x.b)[i] divisible by p ? */
+      gel(y,i) = dvmdii(ZMrow_ZC_mul(mul,x,i),p,&r);
+      if (r != gen_0) { if (newx) *newx = x; return v; }
     }
     swap(x, y);
   }
+}
+long
+ZC_nfval(GEN nf, GEN x, GEN P)
+{ return ZC_nfvalrem(nf, x, pr_get_p(P), pr_get_tau(P), NULL); }
+
+/* v_P(x) != 0, x a ZV. Simpler version of ZC_nfvalrem */
+int
+ZC_prdvd(GEN nf, GEN x, GEN P)
+{
+  pari_sp av = avma;
+  long i, l;
+  GEN p = pr_get_p(P), mul = zk_scalar_or_multable(nf, pr_get_tau(P));
+  if (typ(mul) == t_INT) return ZV_Z_dvd(x, p);
+  l = lg(x);
+  for (i=1; i<l; i++)
+    if (remii(ZMrow_ZC_mul(mul,x,i), p) != gen_0) { avma = av; return 0; }
+  avma = av; return 1;
+}
+
+int
+pr_equal(GEN nf, GEN P, GEN Q)
+{
+  GEN gQ, p = pr_get_p(P);
+  long e = pr_get_e(P), f = pr_get_f(P), n;
+  if (!equalii(p, pr_get_p(Q)) || e != pr_get_e(Q) || f != pr_get_f(Q))
+    return 0;
+  gQ = pr_get_gen(Q); n = lg(gQ)-1;
+  if (2*e*f > n) return 1; /* room for only one such pr */
+  return ZV_equal(pr_get_gen(P), gQ) || ZC_prdvd(nf, gQ, P);
 }
 
 long
@@ -668,7 +688,7 @@ nfval(GEN nf, GEN x, GEN pr)
 {
   pari_sp av = avma;
   long w, e;
-  GEN cx,p;
+  GEN cx, p;
 
   if (gequal0(x)) return LONG_MAX;
   nf = checknf(nf);
@@ -676,9 +696,9 @@ nfval(GEN nf, GEN x, GEN pr)
   p = pr_get_p(pr);
   e = pr_get_e(pr);
   x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) return e * Q_pval(x,p);
+  if (typ(x) != t_COL) return e*Q_pval(x,p);
   x = Q_primitive_part(x, &cx);
-  w = int_elt_val(nf,x,p, pr_get_tau(pr), NULL);
+  w = ZC_nfval(nf,x,pr);
   if (cx) w += e*Q_pval(cx,p);
   avma = av; return w;
 }

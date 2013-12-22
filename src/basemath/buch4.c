@@ -151,7 +151,7 @@ psquarenf(GEN nf,GEN x,GEN pr,GEN modpr)
     if (v&1) return 0;
     v = (Z_quad_char(x, pr) == 1);
   } else {
-    v = int_elt_val(nf, x, p, pr_get_tau(pr), &x);
+    v = ZC_nfvalrem(nf, x, p, pr_get_tau(pr), &x);
     if (v&1) return 0;
     v = (quad_char(nf, x, modpr) == 1);
   }
@@ -182,7 +182,7 @@ psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
     if (!signe(x)) return 1;
     v = Z_lvalrem(x, 2, &x) * pr_get_e(pr);
   } else
-    v = int_elt_val(nf, x, pr_get_p(pr), pr_get_tau(pr), &x);
+    v = ZC_nfvalrem(nf, x, pr_get_p(pr), pr_get_tau(pr), &x);
   if (v&1) return 0;
   /* now (x,pr) = 1 */
   v = check2(nf,x,zinit); avma = av; return v;
@@ -217,7 +217,7 @@ lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
 
   gpx = nfpoleval(nf, RgX_deriv(T), x);
   /* gx /= pi^la, pi a pr-uniformizer */
-  la = int_elt_val(nf, gx, pr_get_p(pr), pr_get_tau(pr), &gx);
+  la = ZC_nfvalrem(nf, gx, pr_get_p(pr), pr_get_tau(pr), &gx);
   mu = gequal0(gpx)? la+nu+1: nfval(nf,gpx,pr);
 
   if (la > (mu<<1)) return 1;

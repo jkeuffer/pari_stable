@@ -306,21 +306,19 @@ tauofideal(GEN id, tau_s *tau)
 }
 
 static int
-isprimeidealconj(GEN nfz, GEN pr1, GEN pr2, tau_s *tau)
+isprimeidealconj(GEN nfz, GEN P, GEN Q, tau_s *tau)
 {
-  GEN p = gel(pr1,1);
-  GEN x = gel(pr1,2);
-  GEN b1= gel(pr1,5);
-  GEN b2= gel(pr2,5);
-  if (!equalii(p, gel(pr2,1))
-   || pr_get_e(pr1) != pr_get_e(pr2)
-   || pr_get_f(pr1) != pr_get_f(pr2)) return 0;
-  if (ZV_equal(x,gel(pr2,2))) return 1;
+  GEN p = pr_get_p(P);
+  GEN x = pr_get_gen(P);
+  if (!equalii(p, pr_get_p(Q))
+   || pr_get_e(P) != pr_get_e(Q)
+   || pr_get_f(P) != pr_get_f(Q)) return 0;
+  if (ZV_equal(x, pr_get_gen(Q))) return 1;
   for(;;)
   {
-    if (int_elt_val(nfz,x,p,b2,NULL)) return 1;
+    if (ZC_prdvd(nfz,x,Q)) return 1;
     x = FpC_red(tauofelt(x, tau), p);
-    if (int_elt_val(nfz,x,p,b1,NULL)) return 0;
+    if (ZC_prdvd(nfz,x,P)) return 0;
   }
 }
 

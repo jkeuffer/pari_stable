@@ -627,16 +627,12 @@ idealval(GEN nf, GEN ix, GEN P)
   tx = idealtyp(&ix,&a);
   if (tx == id_PRINCIPAL) return nfval(nf,ix,P);
   checkprid(P);
-  p = pr_get_p(P);
-  if (tx == id_PRIME) {
-    if (!equalii(p, pr_get_p(ix))) return 0;
-    return (ZV_equal(pr_get_gen(P), pr_get_gen(ix))
-         || nfval(nf, pr_get_gen(ix), P))? 1: 0;
-  }
+  if (tx == id_PRIME) return pr_equal(nf, P, ix)? 1: 0;
   /* id_MAT */
   nf = checknf(nf);
   N = nf_get_degree(nf);
   ix = Q_primitive_part(ix, &cx);
+  p = pr_get_p(P);
   f = pr_get_f(P);
   if (f == N) { v = cx? Q_pval(cx,p): 0; avma = av; return v; }
   i = val_norm(ix,p, &k);
@@ -1259,7 +1255,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     if (typ(x) == t_INT) {
       if (!vdx) vden = subii(vden, mului(Z_pvalrem(x, p, &x), gel(e,i)));
     } else {
-      (void)int_elt_val(nf, x, p, mul, &x);
+      (void)ZC_nfvalrem(nf, x, p, mul, &x);
       x =  ZC_hnfrem(x, prk);
     }
     gel(newg,i) = x;

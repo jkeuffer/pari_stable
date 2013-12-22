@@ -2368,7 +2368,7 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
   u = uniformizer(nf, S, P, V, p, ramif);
   /* P = (p,u) prime. t is an anti-uniformizer: Z_K + t/p Z_K = P^(-1) */
   t = FpM_deplin(zk_multable(nf, u), p);
-  e = ramif? 1 + int_elt_val(nf,t,p,t,NULL): 1;
+  e = ramif? 1 + ZC_nfvalrem(nf,t,p,t,NULL): 1;
   return mk_pr(p,u,e,f,t);
 }
 

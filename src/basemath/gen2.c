@@ -1555,6 +1555,16 @@ long
 ZX_pval(GEN x, GEN p) { return gen_pval(x, p, 2); }
 long
 ZV_pval(GEN x, GEN p) { return gen_pval(x, p, 1); }
+/* v = 0 (mod p) */
+int
+ZV_Z_dvd(GEN v, GEN p)
+{
+  pari_sp av = avma;
+  long i, l = lg(v);
+  for (i=1; i<l; i++)
+    if (remii(gel(v,i), p) != gen_0) { avma = av; return 0; }
+  avma = av; return 1;
+}
 
 static long
 gen_2valrem(GEN x, GEN *px, long imin)

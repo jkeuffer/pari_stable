@@ -860,6 +860,25 @@ with \kbd{nf} coefficients to the residue field; returns an \kbd{FqX}.
 \fun{GEN}{FqX_to_nfX}{GEN Q, GEN modpr} lifts an \kbd{FqX} to a polynomial
 with coefficients in \kbd{nf}.
 
+\subsec{Valuations}
+
+\fun{long}{nfval}{GEN nf, GEN x, GEN P} return $v_P(x)$
+
+\misctitle{Unsafe functions} assume \var{nf} is a genuine \kbd{nf}
+structure, that $P$, $Q$ are \kbd{prid}.
+
+\fun{long}{ZC_nfval}{GEN nf, GEN x, GEN P} returns $v_P(x)$,
+assuming $x$ is a \kbd{ZC}, representing an algebraic integer.
+
+\fun{int}{ZC_prdvd}{GEN nf, GEN x, GEN P} returns $1$ is $P$ divides $x$ and
+$0$ otherwise. Assumes that $x$ is a \kbd{ZC}, representing an algebraic
+integer. Faster than computing $v_P(x)$.
+
+\fun{int}{pr_equal}{GEN nf, GEN P, GEN Q} returns 1 is $P$ and $Q$ represent
+the same maximal ideal: they must lie above the same $p$ and share the same
+$e,f$ invariants, but the $p$-uniformizer and $\tau$ element may differ.
+Returns $0$ otherwise.
+
 \subsec{Signatures}
 
 ``Signs'' of the real embeddings of number field element are represented in

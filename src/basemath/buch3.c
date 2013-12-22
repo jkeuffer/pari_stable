@@ -166,7 +166,7 @@ fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
 {
   pari_sp av = avma;
   GEN p = pr_get_p(pr);
-  long v = typ(L0) == t_INT? 0: int_elt_val(nf,L0,p,tau,NULL);
+  long v = typ(L0) == t_INT? 0: ZC_nfvalrem(nf,L0,p,tau,NULL);
   if (cx)
   {
     long w = Q_pval(cx, p);

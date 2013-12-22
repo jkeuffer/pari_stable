@@ -1481,6 +1481,7 @@ GEN     nftrace(GEN nf, GEN x);
 long    nfval(GEN nf, GEN x, GEN vp);
 GEN     polmod_nffix(const char *f, GEN rnf, GEN x,int lift);
 GEN     polmod_nffix2(const char *f, GEN T, GEN relpol, GEN x, int lift);
+int     pr_equal(GEN nf, GEN P, GEN Q);
 GEN     rnfalgtobasis(GEN rnf, GEN x);
 GEN     rnfbasistoalg(GEN rnf, GEN x);
 GEN     rnfeltnorm(GEN rnf, GEN x);
@@ -1496,9 +1497,11 @@ GEN     tablemul_ei(GEN M, GEN x, long i);
 GEN     tablemul_ei_ej(GEN M, long i, long j);
 GEN     tablemulvec(GEN M, GEN x, GEN v);
 GEN     tablesqr(GEN tab, GEN x);
-GEN     zk_multable(GEN nf, GEN x);
 GEN     ei_multable(GEN nf, long i);
+long    ZC_nfval(GEN nf, GEN x, GEN P);
+GEN     zk_multable(GEN nf, GEN x);
 GEN     zk_scalar_or_multable(GEN, GEN x);
+int     ZC_prdvd(GEN nf, GEN x, GEN P);
 
 /* base4.c */
 
@@ -2234,6 +2237,7 @@ long    Q_pvalrem(GEN x, GEN p, GEN *y);
 long    RgX_val(GEN x);
 long    RgX_valrem(GEN x, GEN *z);
 long    RgX_valrem_inexact(GEN x, GEN *Z);
+int     ZV_Z_dvd(GEN v, GEN p);
 long    ZV_pval(GEN x, GEN p);
 long    ZV_pvalrem(GEN x, GEN p, GEN *px);
 long    ZV_lval(GEN x, ulong p);

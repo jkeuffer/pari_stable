@@ -177,7 +177,7 @@ GEN    get_theta_abstorel(GEN T, GEN pol, GEN k);
 GEN    idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
 GEN    init_unif_mod_fZ(GEN L);
 GEN    init_units(GEN BNF);
-long   int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
+long   ZC_nfvalrem(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 GEN    make_integral(GEN nf, GEN L0, GEN f, GEN listpr);
 GEN    maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 GEN    nf_deg1_prime(GEN nf);
