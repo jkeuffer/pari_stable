@@ -136,13 +136,10 @@ void mt_err_recover(long er);
 void mt_init_stack(size_t s);
 int  mt_is_thread(void);
 GEN  parapply_worker(GEN d, GEN code);
-GEN  pareval(GEN C);
 GEN  pareval_worker(GEN code);
 void parfor(GEN a, GEN b, GEN code, GEN code2);
 GEN  parfor_worker(GEN i, GEN C);
 void parforprime(GEN a, GEN b, GEN code, GEN code2);
-GEN  parsum(GEN a, GEN b, GEN code, GEN x);
-GEN  parvector(long n, GEN code);
 GEN  parvector_worker(GEN i, GEN C);
 
 /* multiprecision */
