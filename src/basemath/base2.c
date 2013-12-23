@@ -1303,7 +1303,7 @@ get_partial_order_as_pols(GEN p, GEN f)
   return O == gen_1? pol_x_powers(degpol(f), v): RgM_to_RgXV(O, v);
 }
 
-typedef struct __decomp {
+typedef struct {
   /* constants */
   long pisprime; /* -1: unknown, 1: prime,  0: composite */
   GEN p, f; /* goal: factor f p-adically */
@@ -1649,22 +1649,26 @@ static GEN
 get_nu(GEN chi, GEN p, long *ptl)
 {
   GEN P = gel(FpX_factor(chi, p),1);
-  *ptl = lg(P) - 1;
-  return gel(P,*ptl);
+  *ptl = lg(P) - 1; return gel(P,*ptl);
 }
 
-/* Factor characteristic polynomial of S->phi mod (p, S->chi) */
-static long
-factcp(decomp_t *S)
+/* Factor characteristic polynomial chi of phi mod p. If it splits, update
+ * S->{phi, chi, nu} and return 1. In any case, set *nu to an irreducible
+ * factor mod p of chi */
+static int
+split_char(decomp_t *S, GEN chi, GEN phi, GEN phi0, GEN *nu)
 {
-  GEN chi = mycaract(S, S->chi, S->phi, S->psf, S->prc);
   long l;
+  *nu  = get_nu(chi, S->p, &l);
+  if (l == 1) return 0; /* single irreducible factor: doesn't split */
+  /* phi o phi0 mod (p, f) */
+  S->phi = compmod(S->p, phi, phi0, S->f, S->p, 0);
   S->chi = chi;
-  S->nu  = get_nu(chi, S->p, &l); return l;
+  S->nu = *nu; return 1;
 }
 
 /* Return the prime element in Zp[phi], a t_INT (iff *Ep = 1) or QX;
- * nup, chip are ZX.
+ * nup, chip are ZX. phi = NULL codes X
  * If *Ep < oE or Ep divides Ediv (!=0) return NULL (uninteresting) */
 static GEN
 getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
@@ -1673,6 +1677,12 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
   GEN chin, q, qp;
   long r, s;
 
+  if (phi && dvdii(constant_term(chip), S->psc))
+  {
+    chip = mycaract(S, S->chi, phi, S->pmf, S->prc);
+    if (dvdii(constant_term(chip), S->pmf))
+      chip = ZXQ_charpoly(phi, S->chi, varn(chip));
+  }
   if (degpol(nup) == 1)
   {
     GEN c = gel(nup,2); /* nup = X + c */
@@ -1703,12 +1713,6 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
 
 static void
 kill_cache(decomp_t *S) { S->precns = NULL; }
-
-/* S->phi := T o T0 mod (p, f) */
-static void
-composemod(decomp_t *S, GEN T, GEN T0) {
-  S->phi = compmod(S->p, T, T0, S->f, S->p, 0);
-}
 
 static int
 update_phi(decomp_t *S, long *ptl, long flag)
@@ -1758,24 +1762,27 @@ update_phi(decomp_t *S, long *ptl, long flag)
   S->prc = mulii(prc, S->p); return 1;
 }
 
-/* return 1 if at least 2 factors mod p ==> chi can be split
+/* return 1 if at least 2 factors mod p ==> chi splits
  * Replace S->phi such that F increases (to D) */
 static int
 testb2(decomp_t *S, long D, GEN theta)
 {
   long v = varn(S->chi), dlim = degpol(S->chi)-1;
-  GEN T0 = S->phi, chi0 = S->chi;
-
+  GEN T0 = S->phi, chi, phi, nu;
   if (DEBUGLEVEL>4) err_printf("  Increasing Fa\n");
   for (;;)
   {
-    S->phi = gadd(theta, random_FpX(dlim, v, S->p));
+    phi = gadd(theta, random_FpX(dlim, v, S->p));
+    chi = mycaract(S, S->chi, phi, S->psf, S->prc);
     /* phi non-primary ? */
-    if (factcp(S) > 1) { composemod(S, S->phi, T0); return 1; }
-    if (degpol(S->nu) == D) break;
-    S->chi = chi0;
+    if (split_char(S, chi, phi, T0, &nu)) return 1;
+    if (degpol(nu) == D) break;
   }
-  S->phi0 = T0; return 0; /* F_phi=lcm(F_alpha, F_theta)=D and E_phi=E_alpha */
+  /* F_phi=lcm(F_alpha, F_theta)=D and E_phi=E_alpha */
+  S->phi0 = T0;
+  S->chi = chi;
+  S->phi = phi;
+  S->nu = nu; return 0;
 }
 
 /* return 1 if at least 2 factors mod p ==> chi can be split.
@@ -1784,7 +1791,7 @@ testb2(decomp_t *S, long D, GEN theta)
 static int
 testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
 {
-  GEN c, T0 = S->phi;
+  GEN c, chi, phi, nu, T0 = S->phi;
 
   if (DEBUGLEVEL>4) err_printf("  Increasing Ea\n");
   if (Et == 1) /* same as other branch, split for efficiency */
@@ -1801,9 +1808,14 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
     c = RgX_Rg_div(c, powiu(S->p, t));
     c = redelt(c, S->psc, S->p);
   }
-  S->phi = RgX_add(c,  pol_x(varn(S->chi)));
-  if (factcp(S) > 1) { composemod(S, S->phi, T0); return 1; }
-  S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
+  phi = RgX_add(c,  pol_x(varn(S->chi)));
+  chi = mycaract(S, S->chi, phi, S->psf, S->prc);
+  if (split_char(S, chi, phi, T0, &nu)) return 1;
+  /* E_phi = lcm(E_alpha,E_theta) */
+  S->phi0 = T0;
+  S->chi = chi;
+  S->phi = phi;
+  S->nu = nu; return 0;
 }
 
 /* Return h^(-degpol(P)) P(x * h) if result is integral, NULL otherwise */
@@ -1851,9 +1863,9 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
   if (!is_pm1(Dg)) g = RgX_Rg_div(g, Dg);
   return g;
 }
-static void
-get_g(decomp_t *S, long Ea, long L, long E, GEN beta,
-      GEN *pg, GEN *pchig, long *peq, long *per)
+static GEN
+get_g(decomp_t *S, long Ea, long L, long E, GEN beta, GEN *pchig,
+      long *peq, long *per)
 {
   long eq, er;
   GEN g, chig, chib = NULL;
@@ -1883,20 +1895,9 @@ get_g(decomp_t *S, long Ea, long L, long E, GEN beta,
     /* if g fails the v*-test, v(beta) was wrong. Retry once */
     L = -1;
   }
-  *pg = g; *pchig = chig; *peq = eq; *per = er;
+  *pchig = chig; *peq = eq; *per = er; return g;
 }
 
-static GEN
-fix_charpoly(decomp_t *S, GEN e, GEN chie)
-{
-  if (dvdii(constant_term(chie), S->psc))
-  {
-    chie = mycaract(S, S->chi, e, S->pmf, S->prc);
-    if (dvdii(constant_term(chie), S->pmf))
-      chie = ZXQ_charpoly(e, S->chi, varn(chie));
-  }
-  return chie;
-}
 /* return 1 if at least 2 factors mod p ==> chi can be split */
 static int
 loop(decomp_t *S, long Ea)
@@ -1907,32 +1908,26 @@ loop(decomp_t *S, long Ea)
   S->invnu = NULL;
   for (;;)
   { /* beta tends to a factor of chi */
-    long L, i, l, Fg, eq, er;
+    long L, i, Fg, eq, er;
     GEN chig = NULL, d, g, nug;
 
     if (DEBUGLEVEL>4) err_printf("  beta = %Ps\n", beta);
     L = ZpX_resultant_val(S->chi, beta, S->p, S->mf+1);
     if (L > S->mf) L = -1; /* from scratch */
-    get_g(S, Ea, L, N, beta, &g, &chig, &eq, &er);
+    g = get_g(S, Ea, L, N, beta, &chig, &eq, &er);
     if (DEBUGLEVEL>4) err_printf("  (eq,er) = (%ld,%ld)\n", eq,er);
     /* g = beta p^-eq  nu^-er (a unit), chig = charpoly(g) */
-    nug = get_nu(chig, S->p, &l);
-    if (l > 1)
-    {
-      S->chi = chig;
-      S->nu  = nug; composemod(S, g, S->phi); return 1;
-    }
+    if (split_char(S, chig, g,S->phi, &nug)) return 1;
 
     Fg = degpol(nug);
     if (Fg == 1)
-    { /* frequent special case */
+    { /* frequent special case nug = x - d */
       long Le, Ee;
       GEN chie, nue, e, pie;
       d = negi(gel(nug,2));
       chie = RgX_translate(chig, d);
       nue = pol_x(v);
       e = RgX_Rg_sub(g, d);
-      chie = fix_charpoly(S, e, chie);
       pie = getprime(S, e, chie, nue, &Le, &Ee,  0,Ea);
       if (pie) return testc2(S, S->nu, Ea, pie, Ee);
     }
@@ -1962,16 +1957,11 @@ loop(decomp_t *S, long Ea)
           continue;
         e = RgX_Rg_div(nume, deng);
         chie = mycaract(S, S->chi, e, S->psc, S->prc);
-        nue = get_nu(chie, S->p, &l);
-        if (l > 1) {
-          S->nu = nue;
-          S->chi= chie; composemod(S, e, S->phi); return 1;
-        }
+        if (split_char(S, chie, e,S->phi, &nue)) return 1;
         if (RgX_is_monomial(nue))
         { /* v_p(e) = v_p(g - d) > 0 */
           long Le, Ee;
           GEN pie;
-          chie = fix_charpoly(S, e, chie);
           pie = getprime(S, e, chie, nue, &Le, &Ee,  0,Ea);
           if (pie) return testc2(S, S->nu, Ea, pie, Ee);
           break;
@@ -2034,8 +2024,7 @@ nilord(decomp_t *S, GEN dred, long flag)
     Fa = degpol(S->nu);
     for(;;)
     {
-      long La, Ea;
-      /* N.B If oE = 0, getprime cannot return NULL */
+      long La, Ea; /* N.B If oE = 0, getprime cannot return NULL */
       GEN pia  = getprime(S, NULL, S->chi, S->nu, &La, &Ea, oE,0);
       if (pia) { /* success, we break out in THIS loop */
         opa = (Ea > 1)? RgX_RgXQ_eval(pia, S->phi, S->f): pia;
@@ -2061,8 +2050,8 @@ nilord(decomp_t *S, GEN dred, long flag)
     if (!update_phi(S, &l, flag)) goto DONE;
   }
 DONE:
-  if (l == 1) return flag? NULL: dbasis(p, S->f, S->mf, S->phi, S->chi);
-  return Decomp(S, flag);
+  if (l != 1) return Decomp(S, flag);
+  return flag? NULL: dbasis(p, S->f, S->mf, S->phi, S->chi);
 }
 
 GEN
