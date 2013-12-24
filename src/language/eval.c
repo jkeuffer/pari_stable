@@ -1529,20 +1529,22 @@ parfor_worker(GEN i, GEN C)
 GEN
 parvector(long n, GEN code)
 {
-  pari_sp av = avma;
   long i, pending = 0, workid;
   GEN worker = snm_closure(is_entry("_parvector_worker"), mkvec(code));
-  GEN V = cgetg(n+1, t_VEC), done;
+  GEN a, V, done;
   struct pari_mt pt;
   mt_queue_start(&pt, worker);
+  a = mkvec(cgetipos(3)); /* left on the stack */
+  V = cgetg(n+1, t_VEC);
   for (i=1; i<=n || pending; i++)
   {
-    mt_queue_submit(&pt, i, i<=n? mkvec(stoi(i)): NULL);
+    mael(a,1,2) = i;
+    mt_queue_submit(&pt, i, i<=n? a: NULL);
     done = mt_queue_get(&pt, &workid, &pending);
     if (done) gel(V,workid) = done;
   }
   mt_queue_end(&pt);
-  return gerepilecopy(av, V);
+  return V;
 }
 
 GEN
