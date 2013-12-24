@@ -1307,7 +1307,8 @@ typedef struct {
   /* constants */
   long pisprime; /* -1: unknown, 1: prime,  0: composite */
   GEN p, f; /* goal: factor f p-adically */
-  long df; /* p^df = reduced discriminant of f */
+  long df;
+  GEN pdf; /* p^df = reduced discriminant of f */
   long mf; /* */
   GEN psf, pmf; /* stability precision for f, wanted precision for f */
   long vpsf; /* v_p(p_f) */
@@ -1715,20 +1716,10 @@ static void
 kill_cache(decomp_t *S) { S->precns = NULL; }
 
 static int
-update_phi(decomp_t *S, long *ptl, long flag)
+update_phi(decomp_t *S)
 {
-  GEN PHI = NULL, prc, psc = S->psc, X = pol_x(varn(S->f));
-  GEN pdf = powiu(S->p, S->df);
+  GEN PHI = NULL, prc, psc, X = pol_x(varn(S->f));
   long k;
-
-  if (!S->chi)
-  {
-    kill_cache(S);
-    S->chi = mycaract(S, S->f, S->phi, S->psf, pdf);
-    S->nu = get_nu(S->chi, S->p, ptl);
-    if (*ptl > 1) return 0; /* we can get a decomposition */
-  }
-
   for (k = 1;; k++)
   {
     kill_cache(S);
@@ -1742,7 +1733,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
     PHI = S->phi0? compmod(S->p, S->phi, S->phi0, S->f, S->psc, 0)
                  : S->phi;
     PHI = gadd(PHI, ZX_Z_mul(X, mului(k, S->p)));
-    S->chi = mycaract(S, S->f, PHI, S->psc, pdf);
+    S->chi = mycaract(S, S->f, PHI, S->psc, S->pdf);
   }
   psc = mulii(sqri(prc), S->p);
   S->chi = FpX_red(S->chi, psc);
@@ -1751,12 +1742,8 @@ update_phi(decomp_t *S, long *ptl, long flag)
                  : S->phi;
   S->phi = PHI;
 
-  if (is_pm1(prc))
-  { /* may happen if p is unramified */
-    if (!flag) { *ptl = 1; return 0; }
-    S->nu = get_nu(S->chi, S->p, ptl);
-    return 0;
-  }
+  /* may happen if p is unramified */
+  if (is_pm1(prc)) return 0;
   S->psc = psc;
   S->vpsc = 2*Z_pval(prc, S->p) + 1;
   S->prc = mulii(prc, S->p); return 1;
@@ -1985,13 +1972,40 @@ loop(decomp_t *S, long Ea)
   }
 }
 
+static long
+loop_init(decomp_t *S, GEN *popa, long *poE)
+{
+  long oE = *poE;
+  GEN opa = *popa;
+  for(;;)
+  {
+    long l, La, Ea; /* N.B If oE = 0, getprime cannot return NULL */
+    GEN pia  = getprime(S, NULL, S->chi, S->nu, &La, &Ea, oE,0);
+    if (pia) { /* success, we break out in THIS loop */
+      opa = (typ(pia) == t_POL)? RgX_RgXQ_eval(pia, S->phi, S->f): pia;
+      oE = Ea;
+      if (La == 1) break; /* no need to change phi so that nu = pia */
+    }
+    /* phi += prime elt */
+    S->phi = typ(opa) == t_INT? RgX_Rg_add_shallow(S->phi, opa)
+                              : RgX_add(S->phi, opa);
+    /* recompute char. poly. chi from scratch */
+    kill_cache(S);
+    S->chi = mycaract(S, S->f, S->phi, S->psf, S->pdf);
+    S->nu = get_nu(S->chi, S->p, &l);
+    if (l > 1) return l; /* we can get a decomposition */
+    if (!update_phi(S)) return 1; /* unramified / irreducible */
+    if (pia) break;
+  }
+  *poE = oE; *popa = opa; return 0;
+}
 /* flag != 0 iff we're looking for the p-adic factorization,
    in which case it is the p-adic precision we want */
 static GEN
 nilord(decomp_t *S, GEN dred, long flag)
 {
   GEN p = S->p;
-  long Fa, oE, l, N  = degpol(S->f), v = varn(S->f);
+  long oE, l, N  = degpol(S->f), v = varn(S->f);
   GEN opa; /* t_INT or QX */
 
   if (DEBUGLEVEL>2)
@@ -2016,42 +2030,25 @@ nilord(decomp_t *S, GEN dred, long flag)
   S->precns = NULL;
   oE = 0;
   opa = NULL; /* -Wall */
-  l = 2; /* Decomp by default */
-
   for(;;)
   {
+    long Fa = degpol(S->nu);
     S->phi0 = NULL; /* no delayed composition */
-    Fa = degpol(S->nu);
-    for(;;)
-    {
-      long La, Ea; /* N.B If oE = 0, getprime cannot return NULL */
-      GEN pia  = getprime(S, NULL, S->chi, S->nu, &La, &Ea, oE,0);
-      if (pia) { /* success, we break out in THIS loop */
-        opa = (Ea > 1)? RgX_RgXQ_eval(pia, S->phi, S->f): pia;
-        oE = Ea;
-        if (La == 1) break; /* no need to change phi so that nu = pia */
-      }
-      /* phi += prime elt */
-      S->phi = typ(opa) == t_INT? RgX_Rg_add_shallow(S->phi, opa)
-                                : RgX_add(S->phi, opa);
-      S->chi = NULL;
-      if (!update_phi(S, &l, flag)) goto DONE;
-      if (pia) break;
-    }
-
+    l = loop_init(S, &opa, &oE);
+    if (l > 1) return Decomp(S,flag);
+    if (l == 1) break;
     if (DEBUGLEVEL>4) err_printf("  (Fa, oE) = (%ld,%ld)\n", Fa, oE);
     if (oE*Fa == N)
     { /* O = Zp[phi] */
-      if (!flag) S->phi = redelt(S->phi, sqri(p), p);
-      S->chi = NULL; l = 1; goto DONE;
+      if (flag) return NULL;
+      return dbasis(p, S->f, S->mf, redelt(S->phi,sqri(p),p), NULL);
     }
-    l = 2;
-    if (loop(S, oE)) goto DONE;
-    if (!update_phi(S, &l, flag)) goto DONE;
+    if (loop(S, oE)) return Decomp(S,flag);
+    if (!update_phi(S)) break; /* unramified / irreducible */
   }
-DONE:
-  if (l != 1) return Decomp(S, flag);
-  return flag? NULL: dbasis(p, S->f, S->mf, S->phi, S->chi);
+  if (flag) return NULL;
+  S->nu = get_nu(S->chi, S->p, &l);
+  return l != 1? Decomp(S,flag): dbasis(p, S->f, S->mf, S->phi, S->chi);
 }
 
 GEN
@@ -2068,6 +2065,7 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
   S.mf = mf;
   S.nu = h;
   S.df = Z_pval(D, p);
+  S.pdf = powiu(p, S.df);
   if (l == 1) return nilord(&S, D, flag);
   if (flag && flag <= mf) flag = mf + 1;
   S.phi = pol_x(varn(f));
