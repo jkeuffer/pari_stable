@@ -1561,11 +1561,11 @@ parsum(GEN a, GEN b, GEN code, GEN x)
 
   mt_queue_start(&pt, worker);
   b = gfloor(b);
-  a = setloop(a);
+  a = mkvec(setloop(a));
   av2=avma; lim = stack_lim(av2,1);
-  for (; cmpii(a,b) <= 0 || pending; a = incloop(a))
+  for (; cmpii(gel(a,1),b) <= 0 || pending; gel(a,1) = incloop(gel(a,1)))
   {
-    mt_queue_submit(&pt, 0, cmpii(a,b) <= 0? mkvec(a): NULL);
+    mt_queue_submit(&pt, 0, cmpii(gel(a,1),b) <= 0? a: NULL);
     done = mt_queue_get(&pt, NULL, &pending);
     if (done)
     {
