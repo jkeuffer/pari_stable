@@ -2,14 +2,14 @@ Function: parforprime
 Section: programming/parallel
 C-Name: parforprime
 Prototype: vV=GDGJDVDI
-Help: parforprime(p=a,{b},expr1,{j},{expr2}): the sequence expr2 (dependent on p
- and j) is evaluated for p prime between a and b, in random order, with j being
- substitued for the value of expr1 (dependent on i), computed in parallel. If b
- is omitted, the loop will not stop.
-Doc: the sequence \kbd{expr2} (dependent on $p$ and $j$) is evaluated for $p$
- prime between $a$ and $b$, in random order, with $j$ being substitued for the
- value of \kbd{expr1} (dependent on $p$), computed in parallel. If $b$ is
- omitted, the loop will not stop.
+Help: parforprime(p=a,{b},expr1,{j},{expr2}): evaluates the sequence expr2
+ (dependent on p and j) for p prime between a and b, in random order,
+ computed in parallel. Substitute for j the value of expr1 (dependent on i).
+ If b is omitted, the loop will not stop.
+Doc: evaluates the sequence \kbd{expr2} (dependent on $p$ and $j$) for $p$
+ prime between $a$ and $b$, in random order, computed in parallel. Substitute
+ for $j$ the value of \kbd{expr1} (dependent on $p$).
+ If $b$ is omitted, the loop will not stop.
 
  It is allowed fo \kbd{expr2} to exit the loop using
  \kbd{break}/\kbd{next}/\kbd{return}, however in that case, \kbd{expr2} will

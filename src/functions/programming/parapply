@@ -4,8 +4,8 @@ C-Name: parapply
 Prototype: GG
 Help: parapply(f, x): parallel evaluation of f on the elements of x.
 Doc: parallel evaluation of \kbd{f} on the elements of \kbd{x}.
- The function \kbd{f} must not access global variables and local variables
- declared with local(), and must be free of side effect.
+ The function \kbd{f} must not access global variables or variables
+ declared with local(), and must be free of side effects.
  \bprog
  parapply(factor,[2^256 + 1, 2^193 - 1])
  @eprog
@@ -16,7 +16,7 @@ Doc: parallel evaluation of \kbd{f} on the elements of \kbd{x}.
    parapply(p->ellcard(E,p),V)
  }
  @eprog
- compute the order of $E(\F_p)$ for $12$ random primes of $200$ bits.
+ computes the order of $E(\F_p)$ for $12$ random primes of $200$ bits.
 
 Function: _parapply_worker
 Section: programming/internals
