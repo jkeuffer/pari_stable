@@ -93,6 +93,8 @@ mt_is_thread(void)
   return mt_thread_no>=0;
 }
 
+void mt_broadcast(GEN code) {(void) code;}
+
 void pari_mt_init(void)
 {
   pari_mt = NULL;

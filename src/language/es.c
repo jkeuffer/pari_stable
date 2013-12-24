@@ -4927,8 +4927,7 @@ gpinstall(const char *s, const char *code, const char *gpname, const char *lib)
   { /* help is the default AND prototype changes: delete help */
     pari_free((void*)ep->help); ep->help = NULL;
   }
-  if (!*lib) lib = pari_library_path;
-  f = install0(s, lib);
+  f = install0(s, *lib ?lib :pari_library_path);
   if (!f)
   {
     if (*lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",s,lib);
@@ -4936,5 +4935,7 @@ gpinstall(const char *s, const char *code, const char *gpname, const char *lib)
   }
   ep = install(f,gp,code);
   if (ep && !ep->help) addhelp(gp, dft_help(gp,s,code));
+  mt_broadcast(strtoclosure("install",4,strtoGENstr(s),strtoGENstr(code),
+                                       strtoGENstr(gp),strtoGENstr(lib)));
   avma = av;
 }

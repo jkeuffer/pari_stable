@@ -19,7 +19,7 @@ static THREAD int pari_MPI_size, pari_MPI_rank;
 static THREAD long nbreq = 0;
 
 enum PMPI_cmd { PMPI_close, PMPI_worker, PMPI_work, PMPI_parisize,
-                PMPI_precreal };
+                PMPI_precreal, PMPI_eval };
 
 struct mt_mstate
 {
@@ -177,6 +177,10 @@ pari_MPI_child(void)
     case PMPI_precreal:
       precreal = recvfrom_long(0);
       break;
+    case PMPI_eval:
+      (void) closure_evalgen(recvfrom_GEN(0));
+      avma = av;
+      break;
     case PMPI_close:
       MPI_Barrier(MPI_COMM_WORLD);
       MPI_Finalize();
@@ -204,6 +208,15 @@ int
 mt_is_thread(void)
 {
   return pari_MPI_rank;
+}
+
+void
+mt_broadcast(GEN code)
+{
+  long i;
+  if (!pari_MPI_rank && !pari_mt)
+    for (i=1;i<pari_MPI_size;i++)
+      send_request_GEN(PMPI_eval, code, i);
 }
 
 void

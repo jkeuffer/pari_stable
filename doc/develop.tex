@@ -807,6 +807,13 @@ task but is not available to \kbd{worker}.  It provides an efficient way to
 match a tasks and results. It is ignored when the parameter \kbd{task} is
 \kbd{NULL}.
 
+\subsec{Miscellaneous}
+
+\fun{void}{mt_broadcast}{GEN code}: do nothing unless the MPI threading engine
+is in use. In that case, it evaluates the closure  \kbd{code} on all secondary
+nodes. This can be sued to change the states of the MPI child nodes.
+This is used by \tet{install}.
+
 \section{Initialization}
 
 This section is technical.
