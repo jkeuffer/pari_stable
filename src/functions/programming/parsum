@@ -2,6 +2,8 @@ Function: parsum
 Section: programming/parallel
 C-Name: parsum
 Prototype: V=GGJDG
+Description:
+ (gen,gen,closure,?gen):gen parsum($1, $2, $3, $4)
 Help: parsum(i=a,b,expr,{x}): x plus the sum (X goes from a to b) of
  expression expr, evaluated in parallel (in random order)
 Doc: sum of expression \var{expr}, initialized at $x$, the formal parameter

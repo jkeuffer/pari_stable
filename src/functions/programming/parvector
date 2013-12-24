@@ -2,6 +2,8 @@ Function: parvector
 Section: programming/parallel
 C-Name: parvector
 Prototype: LVJ
+Description:
+  (small,,closure):vec    parvector($1, $3)
 Help: parvector(N,i,expr): as vector(N,i,expr) but the evaluation of expr are
  done in parallel.
 Doc: As \kbd{vector(N,i,expr)} but the evaluation of \kbd{expr} are done in
