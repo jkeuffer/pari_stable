@@ -5,7 +5,12 @@
     pr = idealprimedec(K,p)[1];
     print(pr.p,":", apply(galoisidentify,idealramgroups(K,G,pr))))
 }
-K=bnfinit(x^6 + 12*x^5 + 60*x^4 + 376*x^3 + 80268*x^2 + 4569240*x + 66227068);
+K=nfinit(x^6 + 12*x^5 + 60*x^4 + 376*x^3 + 80268*x^2 + 4569240*x + 66227068);
 G=galoisinit(K);
 D=idealprimedec(K,29)[1];
 [idealfrobenius(K,G,D),idealramgroups(K,G,D)]
+
+K=nfinit(polcyclo(24));
+G=galoisinit(K);
+P=idealprimedec(K,2)[1];
+idealramgroups(K,G,P)
