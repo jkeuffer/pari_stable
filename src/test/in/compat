@@ -615,5 +615,7 @@ deplin(A)
 deplin(Mod(A,2))
 deplin(Mod(A,7))
 deplin(Mod(A,2^64+13))
+
+p=2^64+13; T=char(Mod(4*p*y+1,y^4+1), x); discf2(T)
 getstack()
 getheap()

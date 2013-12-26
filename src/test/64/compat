@@ -2575,9 +2575,11 @@ mod(391, 3120), mod(2081, 3120)]]
 [-2, 1, 0]~
 ? deplin(mod(a,2^64+13))
 [-2, 1, 0]~
+? p=2^64+13;t=char(mod(4*p*y+1,y^4+1),x);discf2(t)
+256
 ? getstack()
 200
 ? getheap()
-[719, 97807]
+[721, 97699]
 ? print("Total time spent: ",gettime);
-Total time spent: 172
+Total time spent: 144
