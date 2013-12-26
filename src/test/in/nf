@@ -86,6 +86,9 @@ nfinit([y^3+2,[1,y^5,y]])
 K=nfinit([x^5-x^4+x^3+100*x+20,[1,x,x^2-x,1/2*x^4-1/2*x^3+1/2*x^2+40,x^3-x^2+x]]);
 K.index
 
+K=nfinit([x^5+9*x^4+851*x^3+18890*x^2+252376*x+529348, 39820]);
+nfcertify(K)
+
 nfnewprec(x)
 nfnewprec(quadgen(5))
 nfnewprec(vector(5))

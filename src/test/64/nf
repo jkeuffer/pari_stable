@@ -216,6 +216,7 @@ ecsmall([1])]]], Mat([-2, -3])], Mat([-3, -1, -3])]]]
   ***                 ^--------------------
   *** nfinit: incorrect type in nfbasic_init (t_VEC).
 2
+[6416795761]
   ***   at top-level: nfnewprec(x)
   ***                 ^------------
   *** nfnewprec: incorrect type in nfnewprec (t_POL).
