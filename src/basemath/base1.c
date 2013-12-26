@@ -2301,8 +2301,13 @@ polred_aux(nfbasic_t *T, GEN *pro, long flag)
 
   if (n == 1)
   {
-    GEN ch = deg1pol_shallow(gen_1, gen_m1, v);
-    return orig? mkmat2(mkcol(ch),mkcol(gen_1)): mkvec(ch);
+    if (!best)
+    {
+      GEN ch = deg1pol_shallow(gen_1, gen_m1, v);
+      return orig? mkmat2(mkcol(ch),mkcol(gen_1)): mkvec(ch);
+    }
+    else
+      return orig? trivial_fact(): cgetg(1,t_VEC);
   }
 
   (void)polred_init(T, &F, &d);
@@ -2401,10 +2406,10 @@ polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
   *px = x;
 }
 GEN
-polredbest(GEN x, long flag)
+polredbest(GEN x0, long flag)
 {
   pari_sp av = avma;
-  GEN dx, ro, b;
+  GEN x, dx, ro, b;
   long fl;
   nfbasic_t T;
   switch(flag)
@@ -2413,16 +2418,20 @@ polredbest(GEN x, long flag)
     case 0: fl = nf_PARTIALFACT; break;
     case 1: fl = nf_PARTIALFACT|nf_ORIG; break;
   }
-  nfbasic_init(x, fl, &T);
+  x = x0; nfbasic_init(x, fl, &T);
   if (!flag) polredbest_aux(&T, &ro, &x, &dx, NULL);
   else
   {
     polredbest_aux(&T, &ro, &x, &dx, &b);
-    if (x == T.x)
-      b = pol_x(varn(x)); /* no improvement */
+    b = QXQ_reverse(b, x0);
+    if (degpol(x) == 1)
+      b = gmodulo(b, x);
     else
-      b = QXQ_reverse(b, T.x);
-    x = mkvec2(x, mkpolmod(b,x));
+    {
+      if (!isint1(T.unscale)) b = RgX_Rg_div(b, T.unscale);
+      b = mkpolmod(b,x);
+    }
+    x = mkvec2(x, b);
   }
   return gerepilecopy(av, x);
 }

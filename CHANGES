@@ -75,6 +75,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    56- gcd(x,0.) -> 1 but gcd(x,Pol(0.)) -> x [ the former is correct, since 0.
        is inexact and may represent an arbitrary small non-zero real number ]
    57- eint1 misbehaved at large precision [#1499]
+   58- polredbest(T,1) incorrect if T non-monic or degree 1
 
   Changed
     1- default help text for a user function is now as in \u:
