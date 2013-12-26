@@ -1155,6 +1155,7 @@ QXQ_reverse(GEN a, GEN T)
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
   }
   if (typ(a) != t_POL || !signe(a)) err_reverse(a,T);
+  if (gcmpX(a)) return gcopy(a);
   y = RgXV_to_RgM(QXQ_powers(a,n-1,T), n);
   y = RgM_solve(y, col_ei(n, 2));
   if (!y) err_reverse(a,T);
