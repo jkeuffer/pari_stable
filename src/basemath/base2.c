@@ -2764,28 +2764,6 @@ zk_to_Fq(GEN x, GEN modpr)
 
 /* REDUCTION Modulo a prime ideal */
 
-/* x integral, reduce mod prh in HNF */
-GEN
-nfreducemodpr_i(GEN x, GEN prh)
-{
-  GEN p = gcoeff(prh,1,1);
-  long i,j;
-
-  x = leafcopy(x);
-  for (i=lg(x)-1; i>=2; i--)
-  {
-    GEN t = gel(prh,i), p1 = remii(gel(x,i), p);
-    gel(x,i) = p1;
-    if (signe(p1) && is_pm1(gel(t,i)))
-    {
-      for (j=1; j<i; j++)
-        gel(x,j) = subii(gel(x,j), mulii(p1, gel(t,j)));
-      gel(x,i) = gen_0;
-    }
-  }
-  gel(x,1) = remii(gel(x,1), p); return x;
-}
-
 /* nf a true nf */
 static GEN
 Rg_to_ff(GEN nf, GEN x0, GEN modpr)

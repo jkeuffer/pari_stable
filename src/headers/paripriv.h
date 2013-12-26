@@ -503,7 +503,6 @@ GEN     nftohnfbasis(GEN nf, GEN x);
 
 GEN     gen_if_principal(GEN bnf, GEN x);
 int     nfissquarefree(GEN nf, GEN x);
-GEN     nfreducemodpr_i(GEN x, GEN prh);
 GEN     polsymmodp(GEN g, GEN p);
 GEN     nfbasis_gp(GEN T, GEN P, GEN junk);
 GEN     nfdisc_gp(GEN T, GEN P, GEN junk);
