@@ -35,3 +35,7 @@ m=[y,y^2;y^2,y^3]
 nfkermodpr(K, m, P)
 nfsolvemodpr(K, m, v, P)
 nfsolvemodpr(K, m, m, P)
+
+K=nfinit(charpoly(Mod(2*x+1,polcyclo(51))));
+P=idealprimedec(K,2)[1];
+nfeltreducemodpr(K,P.gen[2],nfmodprinit(K,P))
