@@ -2341,22 +2341,38 @@ pol_min(GEN mul, GEN p)
 }
 
 static GEN
-get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
+get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif, long N)
 {
   GEN u, t;
-  long e, f, N;
+  long e, f;
 
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
-  N = nf_get_degree(nf);
   f = N - (lg(P)-1);
-  if (f == N)
-    return mk_pr(p,scalarcol_shallow(p,N),1,f,gen_1);
-
-  u = uniformizer(nf, S, P, V, p, ramif);
-  /* P = (p,u) prime. t is an anti-uniformizer: Z_K + t/p Z_K = P^(-1) */
-  t = FpM_deplin(zk_multable(nf, u), p);
-  e = ramif? 1 + ZC_nfvalrem(nf,t,p,t,NULL): 1;
+  /* P = (p,u) prime. t is an anti-uniformizer: Z_K + t/p Z_K = P^(-1),
+   * so that v_P(t) = e(P/p)-1 */
+  if (f == N) {
+    u = scalarcol_shallow(p,N);
+    t = gen_1;
+    e = 1;
+  } else {
+    u = uniformizer(nf, S, P, V, p, ramif);
+    t = FpM_deplin(zk_multable(nf,u), p);
+    e = ramif? 1 + ZC_nfvalrem(nf,t,p,t,NULL): 1;
+  }
   return mk_pr(p,u,e,f,t);
+}
+
+static GEN
+primedec_end(GEN nf, GEN L, GEN p)
+{
+  long i, l = lg(L), N = nf_get_degree(nf);
+  GEN Lpr = cgetg(l, t_VEC);
+  GEN LV = get_LV(nf, L,p,N);
+  int ramif = dvdii(nf_get_disc(nf), p);
+  norm_S S; init_norm(&S, nf, p);
+  for (i=1; i<l; i++)
+    gel(Lpr,i) = get_pr(nf, &S, p, gel(L,i), gel(LV,i), ramif, N);
+  return Lpr;
 }
 
 /* prime ideal decomposition of p */
@@ -2452,15 +2468,7 @@ primedec_aux(GEN nf, GEN p)
       gel(L,iL++) = H;
   }
   setlg(L, iL);
-{
-  GEN Lpr = cgetg(iL, t_VEC);
-  GEN LV = get_LV(nf, L,p,N);
-  int ramif = dvdii(nf_get_disc(nf), p);
-  norm_S S; init_norm(&S, nf, p);
-  for (i=1; i<iL; i++)
-    gel(Lpr,i) = get_pr(nf, &S, p, gel(L,i), gel(LV,i), ramif);
-  return Lpr;
-}
+  return primedec_end(nf, L, p);
 }
 
 GEN
