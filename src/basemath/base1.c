@@ -2423,7 +2423,10 @@ polredbest(GEN x0, long flag)
   else
   {
     polredbest_aux(&T, &ro, &x, &dx, &b);
-    b = QXQ_reverse(b, x0);
+    if (x0 == T.x)
+      b = pol_x(varn(x)); /* no improvement */
+    else
+      b = QXQ_reverse(b, x0);
     if (degpol(x) == 1)
       b = gmodulo(b, x);
     else
