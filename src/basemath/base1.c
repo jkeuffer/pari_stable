@@ -977,7 +977,7 @@ idealinertiagroup(GEN nf, GEN gal, GEN pr)
     {
       GEN S = poltobasis(nf, galoispermtopol(gal, iso));
       if (ZC_prdvd(nf, ZC_galoisapply(nf, S, pi), pr)
-          && (coprime || gcmpX(nf_to_Fq(nf, galoisapply(nf,S,b), modpr))))
+          && (coprime || gequalX(nf_to_Fq(nf, galoisapply(nf,S,b), modpr))))
           return iso;
       avma = ltop;
     }
@@ -1054,7 +1054,7 @@ idealramgroupindex(GEN nf, GEN gal, GEN pr)
         if (f>1)
         {
           GEN b = nf_to_Fq(nf, QX_galoisapplymod(nf, g, S, p), modpr);
-          if (!gcmpX(b)) idx[i] = 0;
+          if (!gequalX(b)) idx[i] = 0;
         }
       }
       else idx[i] = -1;

@@ -1284,7 +1284,7 @@ pari_err_display(GEN err)
     if (numerr==e_NOTFUNC)
     {
       GEN fun = gel(err,2);
-      if (gcmpX(fun))
+      if (gequalX(fun))
       {
         entree *ep = varentries[varn(fun)];
         const char *s = ep->name;

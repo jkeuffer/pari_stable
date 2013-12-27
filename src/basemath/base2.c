@@ -1246,7 +1246,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   GEN b, h;
 
   if (n == 1) return matid(1);
-  if (a && gcmpX(a)) a = NULL;
+  if (a && gequalX(a)) a = NULL;
   if (DEBUGLEVEL>5)
   {
     err_printf("  entering Dedekind Basis with parameters p=%Ps\n",p);

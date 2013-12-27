@@ -2264,7 +2264,7 @@ void    gaffsg(long s, GEN x);
 int     gcmp(GEN x, GEN y);
 int     gequal0(GEN x);
 int     gequal1(GEN x);
-int     gcmpX(GEN x);
+int     gequalX(GEN x);
 int     gequalm1(GEN x);
 int     gcmpsg(long x, GEN y);
 GEN     gcvtop(GEN x, GEN p, long r);

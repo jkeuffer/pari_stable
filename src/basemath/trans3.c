@@ -2836,7 +2836,7 @@ jell(GEN x, long prec)
 
   if (!is_scalar_t(tx))
   {
-    if (gcmpX(x)) { h = ser_j(precdl); setvarn(h, varn(x)); return h; }
+    if (gequalX(x)) { h = ser_j(precdl); setvarn(h, varn(x)); return h; }
     q = toser_i(x);
     if (!q) pari_err_TYPE("ellj",x);
     h = ser_j(lg(q) - 2);

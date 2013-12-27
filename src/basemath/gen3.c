@@ -1565,7 +1565,7 @@ gsubstvec(GEN e, GEN v, GEN r)
   for(i=j=1;i<l;i++)
   {
     GEN T = gel(v,i), ri = gel(r,i);
-    if (!gcmpX(T)) pari_err_TYPE("substvec [not a variable]", T);
+    if (!gequalX(T)) pari_err_TYPE("substvec [not a variable]", T);
     if (gvar(ri) == NO_VARIABLE) /* no need to take precautions */
       e = gsubst(e, varn(T), ri);
     else

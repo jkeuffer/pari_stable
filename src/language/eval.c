@@ -571,7 +571,7 @@ INLINE long
 closure_varn(GEN x)
 {
   if (!x) return -1;
-  if (!gcmpX(x)) err_var(x);
+  if (!gequalX(x)) err_var(x);
   return varn(x);
 }
 

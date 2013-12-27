@@ -466,7 +466,7 @@ gequalm1(GEN x)
 }
 
 int
-gcmpX(GEN x) { return typ(x) == t_POL && lg(x) == 4
+gequalX(GEN x) { return typ(x) == t_POL && lg(x) == 4
                       && isintzero(gel(x,2)) && isint1(gel(x,3)); }
 
 static int

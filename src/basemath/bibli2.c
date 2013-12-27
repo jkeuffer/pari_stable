@@ -168,7 +168,7 @@ GEN
 polchebyshev_eval(long n, long kind, GEN x)
 {
   if (!x) return polchebyshev(n, kind, 0);
-  if (gcmpX(x)) return polchebyshev(n, kind, varn(x));
+  if (gequalX(x)) return polchebyshev(n, kind, varn(x));
   switch (kind)
   {
     case 1: return polchebyshev1_eval(n, x);
@@ -215,7 +215,7 @@ polhermite_eval(long n, GEN x)
   GEN x2, u, v;
 
   if (!x) return polhermite(n, 0);
-  if (gcmpX(x)) return polhermite(n, varn(x));
+  if (gequalX(x)) return polhermite(n, varn(x));
   if (n==0) return gen_1;
   if (n==1) return gmul2n(x,1);
   av = avma; x2 = gmul2n(x,1); v = gen_1; u = x2;
@@ -272,7 +272,7 @@ pollegendre_eval(long n, GEN x)
   GEN u, v;
 
   if (!x) return pollegendre(n, 0);
-  if (gcmpX(x)) return pollegendre(n, varn(x));
+  if (gequalX(x)) return pollegendre(n, varn(x));
   /* pollegendre(-n) = pollegendre(n-1) */
   if (n < 0) n = -n-1;
   if (n==0) return gen_1;
@@ -339,7 +339,7 @@ polcyclo_eval(long n, GEN x)
 
   if (!x) return polcyclo(n, 0);
   tx = typ(x);
-  if (gcmpX(x)) return polcyclo(n, varn(x));
+  if (gequalX(x)) return polcyclo(n, varn(x));
   if (n <= 0) pari_err_DOMAIN("polcyclo", "index", "<=", gen_0, stoi(n));
   if (n == 1) return gsubgs(x, 1);
   if (tx == t_INT && !signe(x)) return gen_1;
@@ -1109,7 +1109,7 @@ polint(GEN X, GEN Y, GEN x, GEN *ptdy)
     return scalarpol(Y, 0);
   }
   if (!x) return RgV_polint(X, Y, 0);
-  if (gcmpX(x)) return RgV_polint(X, Y, varn(x));
+  if (gequalX(x)) return RgV_polint(X, Y, varn(x));
   return polint_i(X? X+1: NULL,Y+1,x,lx-1,ptdy);
 }
 
@@ -1155,7 +1155,7 @@ QXQ_reverse(GEN a, GEN T)
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
   }
   if (typ(a) != t_POL || !signe(a)) err_reverse(a,T);
-  if (gcmpX(a)) return gcopy(a);
+  if (gequalX(a)) return gcopy(a);
   y = RgXV_to_RgM(QXQ_powers(a,n-1,T), n);
   y = RgM_solve(y, col_ei(n, 2));
   if (!y) err_reverse(a,T);
