@@ -1,6 +1,6 @@
 Function: polredord
 Section: number_fields
-C-Name: ordred
+C-Name: polredord
 Prototype: G
 Help: polredord(x): reduction of the polynomial x, staying in the same order.
 Doc: finds polynomials with reasonably small

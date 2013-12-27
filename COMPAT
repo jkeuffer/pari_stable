@@ -109,6 +109,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - removed useless functions gand, gor
   - removed useless function ratlift [ use Fp_ratlift ]
   - renamed gcmpX -> gequalX
+  - renamed ordred -> polredord: useless function, use polredbest!
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -118,7 +118,8 @@ JD 14- polcyclo(n, x) now works for all roots of 1
    23- faster evaluated polhermite/pollegendre
    24- polhensellift / ZpX_liftfact: use quasi-linear ZXX_mul_Kronecker instead
        of RgX_mul (~ Karatsuba)
-   25- renamed gcmpX -> gequalX
+   25- [libpari] renamed gcmpX -> gequalX
+   26- [libpari] renamed ordred -> polredord
 
   Added
 EP  1- Configure option for gcov/lcov support

@@ -18,11 +18,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* allow p = -1 from factorizations */
+/* allow p = -1 from factorizations, avoid oo loop on p = 1 */
 static long
 safe_Z_pvalrem(GEN x, GEN p, GEN *z)
 {
-  if (signe(p) < 0) { *z = absi(x); return 1; }
+  if (is_pm1(p))
+  {
+    if (signe(p) > 0) return gvaluation(x,p); /*error*/
+    *z = absi(x); return 1;
+  }
   return Z_pvalrem(x, p, z);
 }
 /* D an integer, P a ZV, return a factorization matrix for D over P, removing

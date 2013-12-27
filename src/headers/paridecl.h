@@ -1368,7 +1368,7 @@ GEN     nfnewprec(GEN nf, long prec);
 GEN     nfnewprec_shallow(GEN nf, long prec);
 GEN     nfpoleval(GEN nf, GEN pol, GEN a);
 long    nftyp(GEN x);
-GEN     ordred(GEN x);
+GEN     polredord(GEN x);
 GEN     polgalois(GEN x, long prec);
 GEN     polred(GEN x);
 GEN     polred0(GEN x, long flag, GEN p);

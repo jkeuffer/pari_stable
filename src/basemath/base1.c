@@ -2433,7 +2433,7 @@ polred0(GEN x, long flag, GEN fa)
 }
 
 GEN
-ordred(GEN x)
+polredord(GEN x)
 {
   pari_sp av = avma;
   GEN v, lt;
@@ -2442,6 +2442,7 @@ ordred(GEN x)
   if (typ(x) != t_POL) pari_err_TYPE("polredord",x);
   x = Q_primpart(x); RgX_check_ZX(x,"polredord");
   n = degpol(x); if (n <= 0) pari_err_CONSTPOL("polredord");
+  if (n == 1) return gerepilecopy(av, mkvec(x));
   lt = leading_term(x); vx = varn(x);
   if (is_pm1(lt))
   {
