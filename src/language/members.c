@@ -19,9 +19,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                          MEMBER FUNCTIONS                      **/
 /**                                                                **/
 /********************************************************************/
-INLINE int is_ell5(GEN x) {
-  long lx = lg(x);
-  return (typ(x) == t_VEC && (lx == 6 || lx==17));
+INLINE int
+is_ell5(GEN x) {
+  long lx;
+  if (typ(x) != t_VEC) return 0;
+  lx = lg(x);
+  return lx == 17 || (lx == 6 && typ(gel(x,2)) != t_COL);
 }
 INLINE int is_ell(GEN x) {
   long lx = lg(x);
@@ -55,24 +58,22 @@ GEN
 member_p(GEN x)
 {
   long t; (void)get_nf(x,&t);
-  if (t == typ_GAL) return gal_get_p(x);
-  if (t == typ_ELL) switch(ell_get_type(x))
+  switch(t)
   {
-    case t_ELL_Fp:
-    case t_ELL_Fq: return ellff_get_p(x);
-    case t_ELL_Qp: return ellQp_get_p(x);
-    default: member_err("p",x);
+    case typ_GAL: return gal_get_p(x);
+    case typ_ELL: switch(ell_get_type(x))
+    {
+      case t_ELL_Fp:
+      case t_ELL_Fq: return ellff_get_p(x);
+      case t_ELL_Qp: return ellQp_get_p(x);
+      default: member_err("p",x);
+    }
+    case typ_MODPR: x = get_prid(x);
+    case typ_PRID: return pr_get_p(x);
   }
   switch(typ(x)) {
-    case t_VEC:
-    {
-      GEN y = get_prid(x); if (!y) break;
-      return pr_get_p(y);
-    }
-    case t_PADIC:
-      return gel(x,2);
-    case t_FFELT:
-      return FF_p_i(x);
+    case t_PADIC: return gel(x,2);
+    case t_FFELT: return FF_p_i(x);
   }
   member_err("p",x);
   return NULL;
@@ -427,9 +428,13 @@ member_gen(GEN x)
 {
   pari_sp av;
   long t; GEN y = get_bnf(x,&t);
-  if (t == typ_PRID) return mkvec2(gel(x,1), gel(x,2));
-  if (t == typ_GAL) return gal_get_gen(x);
-  if (t == typ_ELL) return ellgenerators(x);
+  switch(t)
+  {
+    case typ_MODPR: x = get_prid(x);
+    case typ_PRID: return mkvec2(gel(x,1), gel(x,2));
+    case typ_GAL: return gal_get_gen(x);
+    case typ_ELL: return ellgenerators(x);
+  }
   av = avma;
   x = _check_clgp(x,y,t);
   if (lg(x)!=4) member_err("gen",x);

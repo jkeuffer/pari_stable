@@ -120,23 +120,6 @@ checkabelian_group(GEN v)
   pari_err_TYPE("checkabelian_group",v);
 }
 
-void
-checkprid(GEN id)
-{
-  if (typ(id) != t_VEC || lg(id) != 6 || typ(gel(id,2)) != t_COL)
-    pari_err_TYPE("checkprid",id);
-}
-GEN
-get_prid(GEN x)
-{
-  long lx;
-  if (typ(x) != t_VEC) return NULL;
-  lx = lg(x);
-  if (lx == 3) { x = gel(x,1); lx = lg(x); }
-  if (lx != 6 || typ(gel(x,3)) != t_INT) return NULL;
-  return x;
-}
-
 GEN
 checknfelt_mod(GEN nf, GEN x, const char *s)
 {
@@ -183,6 +166,10 @@ get_bnf(GEN x, long *t)
         case 13: *t = typ_RNF; return NULL;
         case 17: *t = typ_ELL; return NULL;
       }
+      break;
+    case t_COL:
+      if (get_prid(x)) { *t = typ_MODPR; return NULL; }
+      break;
   }
   *t = typ_NULL; return NULL;
 }
@@ -222,6 +209,10 @@ get_nf(GEN x, long *t)
         case 13: *t = typ_RNF; return NULL;
         case 17: *t = typ_ELL; return NULL;
       }
+      break;
+    case t_COL:
+      if (get_prid(x)) { *t = typ_MODPR; return NULL; }
+      break;
   }
   *t = typ_NULL; return NULL;
 }

@@ -24,6 +24,7 @@ enum {
   typ_GAL, /* galoisinit     */
   typ_BID,
   typ_PRID,
+  typ_MODPR,
   typ_RNF
 };
 

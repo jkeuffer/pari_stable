@@ -2704,14 +2704,37 @@ nfmodprinit(GEN nf, GEN pr) { return modprinit(nf, pr, 0); }
 GEN
 zkmodprinit(GEN nf, GEN pr) { return modprinit(nf, pr, 1); }
 
+/* x may be a modpr */
+static int
+ok_modpr(GEN x)
+{ return typ(x) == t_COL && (lg(x) == SMALLMODPR || lg(x) == LARGEMODPR); }
 void
-checkmodpr(GEN modpr)
+checkmodpr(GEN x)
 {
-  if (typ(modpr) != t_COL || lg(modpr) < SMALLMODPR)
-    pari_err_TYPE("checkmodpr [use nfmodprinit]", modpr);
-  checkprid(gel(modpr,mpr_PR));
+  if (!ok_modpr(x)) pari_err_TYPE("checkmodpr [use nfmodprinit]", x);
+  checkprid(gel(x,mpr_PR));
 }
-
+static int
+is_prid(GEN x)
+{
+  return (typ(x) == t_VEC && lg(x) == 6
+          && typ(gel(x,2)) == t_COL && typ(gel(x,3)) == t_INT);
+}
+void
+checkprid(GEN x)
+{ if (!is_prid(x)) pari_err_TYPE("checkprid",x); }
+GEN
+get_prid(GEN x)
+{
+  long lx = lg(x);
+  if (lx == 3 && typ(x) == t_VEC) x = gel(x,1);
+  if (is_prid(x)) return x;
+  if (ok_modpr(x)) {
+    x = gel(x,mpr_PR);
+    if (is_prid(x)) return x;
+  }
+  return NULL;
+}
 
 static GEN
 to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p, int zk)
