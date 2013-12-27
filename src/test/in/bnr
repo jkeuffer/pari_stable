@@ -2,6 +2,9 @@ default(realprecision,38);
 K=bnfinit(x^3-x-1);
 subgrouplist(bnrinit(K,10))
 K=bnrinit(K,20);
+default(realprecision,77);
+nfnewprec(K);
+default(realprecision,38);
 subgrouplist(K)
 subgrouplist(K, 2)
 subgrouplist(K, 2, 1)
