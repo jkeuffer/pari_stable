@@ -17,11 +17,12 @@ area,
 bid,
 bnf,
 clgp,
+codiff,
 cyc,
 diff,
-codiff,
 disc,
 e,
+eta,
 f,
 fu,
 gen,
@@ -33,19 +34,20 @@ nf,
 no,
 omega,
 orders,
-eta,
 p,
 pol,
+r1,
+r2,
 reg,
 roots,
 sign,
-r1,
-r2,
 t2,
 tate,
 tu,
-zk
+zk,
+zkst
 ];}
+\\ tufu, futu omitted
 
 test(s)=
 {
