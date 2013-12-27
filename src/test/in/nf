@@ -13,7 +13,7 @@ bnfcertify(bnfinit(x^2-40!));
 zetakinit(2*x-1);
 
 nf=nfinit(y^5-4*y^3+2*y+11);
-v = [4/3, -1, y^2+y+1, Mod(y,nf.pol),[1,2,3,4,5]~];
+v = [4/3, -1, y^2+y+1, Mod(y,nf.pol),Mod(1/2,nf.pol),[1,2,3,4,5]~];
 for (i=1, #v, print( nfelttrace(nf,v[i]) ))
 for (i=1, #v, print( nfeltnorm(nf,v[i]) ))
 nfeltnorm(nf,[3,3;y,2])
