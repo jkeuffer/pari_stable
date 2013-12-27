@@ -120,6 +120,8 @@ JD 14- polcyclo(n, x) now works for all roots of 1
        of RgX_mul (~ Karatsuba)
    25- [libpari] renamed gcmpX -> gequalX
    26- [libpari] renamed ordred -> polredord
+   27- the prid structure: the anti-uniformizer tau (pr_get_tau) is now stored
+       via its multiplication table
 
   Added
 EP  1- Configure option for gcov/lcov support

@@ -287,6 +287,13 @@ ZM_pow(GEN x, GEN n)
   if (!signe(n)) return matid(lg(x)-1);
   return gerepileupto(av, gen_pow(x, n, NULL, &_ZM_sqr, &_ZM_mul));
 }
+GEN
+ZM_powu(GEN x, ulong n)
+{
+  pari_sp av = avma;
+  if (!n) return matid(lg(x)-1);
+  return gerepileupto(av, gen_powu(x, n, NULL, &_ZM_sqr, &_ZM_mul));
+}
 /********************************************************************/
 /**                                                                **/
 /**                           ADD, SUB                             **/

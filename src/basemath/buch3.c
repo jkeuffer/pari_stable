@@ -160,16 +160,15 @@ idealmoddivisor(GEN bnr, GEN x)
   return idealmoddivisor_aux(checknf(bnr), x, bid_get_mod(bid), sarch);
 }
 
-/* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
+/* v_pr(L0 * cx) */
 static long
-fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
+fast_val(GEN nf,GEN L0,GEN cx,GEN pr)
 {
   pari_sp av = avma;
-  GEN p = pr_get_p(pr);
-  long v = typ(L0) == t_INT? 0: ZC_nfvalrem(nf,L0,p,tau,NULL);
+  long v = typ(L0) == t_INT? 0: ZC_nfval(nf,L0,pr);
   if (cx)
   {
-    long w = Q_pval(cx, p);
+    long w = Q_pval(cx, pr_get_p(pr));
     if (w) v += w * pr_get_e(pr);
   }
   avma = av; return v;
@@ -206,7 +205,7 @@ static GEN
 compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 {
   GEN f, fZ, basecl, module, fa, fa2, pr, t, EX, sarch, cyc, F;
-  GEN listpr, vecpi, vecpinvpi, vectau;
+  GEN listpr, vecpi, vecpinvpi;
   long i,j,l,lp;
 
   if (lg(u1) == 1) return cgetg(1, t_VEC);
@@ -224,13 +223,11 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   lp = lg(listpr);
   vecpinvpi = cgetg(lp, t_VEC);
   vecpi  = cgetg(lp, t_VEC);
-  vectau = cgetg(lp, t_VEC);
   for (i=1; i<lp; i++)
   {
     pr = gel(listpr,i);
     gel(vecpi,i)    = NULL; /* to be computed if needed */
     gel(vecpinvpi,i) = NULL; /* to be computed if needed */
-    gel(vectau,i) = zk_scalar_or_multable(nf, pr_get_tau(pr));
   }
 
   l = lg(basecl);
@@ -285,7 +282,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       for (j=1; j<lp; j++)
       {
         pr = gel(listpr,j);
-        v  = fast_val(nf, L0,cx, pr,gel(vectau,j)); /* = val_pr(LL) */
+        v  = fast_val(nf, L0,cx, pr); /* = val_pr(LL) */
         if (!v) continue;
         p  = pr_get_p(pr);
         pi = get_pi(F, pr, &gel(vecpi,j));

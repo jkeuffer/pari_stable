@@ -2293,6 +2293,7 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
       if (!is_uniformizer(u, powiu(p,f+1), &S)) gel(u,2) = addii(gel(u,2), p);
     }
     u = poltobasis(nf,u);
+    t = zk_scalar_or_multable(nf, t);
   }
   return mk_pr(p,u,e,f,t);
 }
@@ -2361,7 +2362,8 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif, long N)
   } else {
     u = uniformizer(nf, S, P, V, p, ramif);
     t = FpM_deplin(zk_multable(nf,u), p);
-    e = ramif? 1 + ZC_nfvalrem(nf,t,p,t,NULL): 1;
+    e = ramif? 1 + ZC_nfval(nf,t,mk_pr(p,u,0,0,t)): 1;
+    t = zk_scalar_or_multable(nf, t);
   }
   return mk_pr(p,u,e,f,t);
 }
@@ -2514,10 +2516,14 @@ lift_to_zk(GEN v, GEN c, long N)
 GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
-  GEN b = pr_get_tau(pr);
+  GEN q, b = pr_get_tau(pr);
   long e = pr_get_e(pr);
   if (e == 1) return b;
-  return ZC_Z_divexact(nfpow_u(nf, b, e), powiu(pr_get_p(pr), e-1));
+  q = powiu(pr_get_p(pr), e-1);
+  if (typ(b) == t_MAT)
+    return ZM_Z_divexact(ZM_powu(b,e), q);
+  else
+    return ZC_Z_divexact(nfpow_u(nf,b,e), q);
 }
 
 /* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */
@@ -2525,11 +2531,17 @@ static GEN
 anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = pr_get_p(pr), z;
-  long N = nf_get_degree(nf), e = pr_get_e(pr), f = pr_get_f(pr);
-  if (e*f == N) return col_ei(N, 1);
+  long N = nf_get_degree(nf);
+  if (pr_get_e(pr)*pr_get_f(pr) == N) return col_ei(N, 1);
 
-  z = FpC_red(special_anti_uniformizer(nf, pr), p);
-  z = zk_scalar_or_multable(nf, z); /* not a scalar */
+  z = special_anti_uniformizer(nf,pr);
+  if (typ(z) == t_MAT)
+    z = FpM_red(z,p);
+  else
+  {
+    z = FpC_red(z,p);
+    z = zk_scalar_or_multable(nf, z); /* not a scalar */
+  }
   z = ZM_hnfmodid(z, p);
   z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
@@ -3094,12 +3106,17 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc, long only_maximal)
 
   k = gsub(P, RgXQX_mul(gzk,hzk, nfT));
   tau = pr_get_tau(pr);
-  if (typ(tau) == t_INT)
-    k = gdiv(k, p);
-  else
+  switch(typ(tau))
   {
-    tau = coltoliftalg(nf, tau);
-    k = gdiv(RgXQX_RgXQ_mul(k, tau, nfT), p);
+    case t_INT: k = gdiv(k, p); break;
+    case t_MAT:
+      k = RgX_to_nfX(nf, k);
+      k = RgX_Rg_div(tablemulvec(NULL,tau, k), p);
+      break;
+    case t_COL:
+      tau = coltoliftalg(nf, tau);
+      k = RgX_Rg_div(RgXQX_RgXQ_mul(k, tau, nfT), p);
+      break;
   }
   k = nfX_to_FqX(k, nf, modpr);
   k  = FqX_normalize(FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p), T,p);

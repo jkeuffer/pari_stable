@@ -124,6 +124,7 @@ multable(GEN M, GEN x)
 {
   long i, N;
   GEN mul;
+  if (typ(x) == t_MAT) return x;
   M = get_tab(M, &N);
   if (typ(x) != t_COL) return scalarmat(x, N);
   mul = cgetg(N+1,t_MAT);
@@ -321,22 +322,33 @@ nfC_nf_mul(GEN nf, GEN v, GEN x)
   }
   return dx? RgC_Rg_div(y, dx): y;
 }
+static GEN
+mulbytab(GEN M, GEN c)
+{ return typ(c) == t_COL? RgM_RgC_mul(M,c): RgC_Rg_mul(gel(M,1), c); }
 GEN
 tablemulvec(GEN M, GEN x, GEN v)
 {
   long l, i;
-  GEN y, dx = NULL;
+  GEN y;
 
-  if (RgV_isscalar(x)) return RgV_Rg_mul(v, gel(x,1));
-  x = multable(M, x);
-  l = lg(v); y = cgetg(l, t_VEC);
-  for (i=1; i < l; i++)
+  if (typ(x) == t_COL && RgV_isscalar(x))
   {
-    GEN c = gel(v,i);
-    if (typ(c)!=t_COL) c = RgC_Rg_mul(gel(x,1), c); else c = RgM_RgC_mul(x,c);
-    gel(y,i) = c;
+    x = gel(x,1);
+    return typ(v) == t_POL? RgX_Rg_mul(v,x): RgV_Rg_mul(v,x);
   }
-  return dx? gdiv(y, dx): y;
+  x = multable(M, x); /* multiplication table by x */
+  y = cgetg_copy(v, &l);
+  if (typ(v) == t_POL)
+  {
+    y[1] = v[1];
+    for (i=2; i < l; i++) gel(y,i) = mulbytab(x, gel(v,i));
+    y = normalizepol(y);
+  }
+  else
+  {
+    for (i=1; i < l; i++) gel(y,i) = mulbytab(x, gel(v,i));
+  }
+  return y;
 }
 
 /* inverse of x in nf */
@@ -631,14 +643,12 @@ pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
   return gerepileupto(av,y);
 }
 
-/* valuation of integral x (ZV), with resp. to prime ideal P above p.
- * p.P^(-1) Z_{K,P} = b Z_{K,P}, where b is integral; it may be given as an
- * element of Z_K (t_INT or ZV), or via the 'multiplication by b' ZM matrix */
+/* valuation of integral x (ZV), with resp. to prime ideal pr */
 long
-ZC_nfvalrem(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
+ZC_nfvalrem(GEN nf, GEN x, GEN pr, GEN *newx)
 {
   long i, v, l;
-  GEN r, y, mul = zk_scalar_or_multable(nf, b);
+  GEN r, y, p = pr_get_p(pr), mul = zk_scalar_or_multable(nf, pr_get_tau(pr));
 
   if (typ(mul) == t_INT) return newx? ZV_pvalrem(x, p, newx):ZV_pval(x, p);
   y = cgetg_copy(x, &l); /* will hold the new x */
@@ -655,7 +665,7 @@ ZC_nfvalrem(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 }
 long
 ZC_nfval(GEN nf, GEN x, GEN P)
-{ return ZC_nfvalrem(nf, x, pr_get_p(P), pr_get_tau(P), NULL); }
+{ return ZC_nfvalrem(nf, x, P, NULL); }
 
 /* v_P(x) != 0, x a ZV. Simpler version of ZC_nfvalrem */
 int

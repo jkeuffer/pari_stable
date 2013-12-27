@@ -1231,8 +1231,7 @@ GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
   long i, l = lg(g);
-  GEN prkZ, u, vden = gen_0, p = pr_get_p(pr);
-  GEN mul = zk_scalar_or_multable(nf, pr_get_tau(pr));
+  GEN prkZ, u, vden = gen_0, p = pr_get_p(pr), tau = pr_get_tau(pr);
   pari_sp av = avma, lim = stack_lim(av, 2);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
@@ -1255,7 +1254,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     if (typ(x) == t_INT) {
       if (!vdx) vden = subii(vden, mului(Z_pvalrem(x, p, &x), gel(e,i)));
     } else {
-      (void)ZC_nfvalrem(nf, x, p, mul, &x);
+      (void)ZC_nfvalrem(nf, x, pr, &x);
       x =  ZC_hnfrem(x, prk);
     }
     gel(newg,i) = x;
@@ -1274,6 +1273,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     GEN t = special_anti_uniformizer(nf, pr);
     if (typ(t) == t_INT) setlg(newg, l); /* = 1 */
     else {
+      if (typ(t) == t_MAT) t = gel(t,1); /* multiplication table */
       gel(newg,i) = FpC_red(t, prkZ);
       e = shallowconcat(e, negi(vden));
     }
@@ -1616,6 +1616,7 @@ idealpowprime(GEN nf, GEN pr, GEN n, GEN *d)
     q = pr_get_p(pr);
     if (s < 0) {
       gen = pr_get_tau(pr);
+      if (typ(gen) == t_MAT) gen = gel(gen,1);
       *d = q;
     } else {
       gen = pr_get_gen(pr);
@@ -1631,8 +1632,10 @@ idealpowprime(GEN nf, GEN pr, GEN n, GEN *d)
     q = powii(p,m);
     if (s < 0)
     {
+      gen = pr_get_tau(pr);
+      if (typ(gen) == t_MAT) gen = gel(gen,1);
       n = negi(n);
-      gen = ZC_Z_divexact(nfpow(nf, pr_get_tau(pr), n), powii(p, subii(n,m)));
+      gen = ZC_Z_divexact(nfpow(nf, gen, n), powii(p, subii(n,m)));
       *d = q;
     }
     else

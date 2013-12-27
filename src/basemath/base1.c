@@ -805,11 +805,7 @@ pr_galoisapply(GEN nf, GEN pr, GEN aut)
   if (typ(pr_get_tau(pr)) == t_INT) return pr; /* inert */
   p = pr_get_p(pr);
   u = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_gen(pr)), aut, p);
-#if 1
   b = FpM_deplin(zk_multable(nf, u), p);
-#else /* Slower */
-  b = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_tau(pr)), aut, p);
-#endif
   return mkvec5(p, u, gel(pr,3), gel(pr,4), b);
 }
 
