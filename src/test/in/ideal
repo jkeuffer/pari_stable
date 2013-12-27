@@ -29,3 +29,5 @@ idealval(K,P[2],P[1])
 idealval(K,P[2],P[2])
 P[1][2] += 5;
 idealval(K,P[1],P[1])
+idealmul(K,P[1],P[1].gen[2])
+idealnorm(K,P[1])
