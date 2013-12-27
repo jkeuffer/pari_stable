@@ -16,7 +16,7 @@ nf=nfinit(y^5-4*y^3+2*y+11);
 v = [4/3, -1, y^2+y+1, [1,2,3,4,5]~];
 for (i=1, #v, print( nfelttrace(nf,v[i]) ))
 for (i=1, #v, print( nfeltnorm(nf,v[i]) ))
-
+nfeltnorm(nf,[3,3;y,2])
 funs = [nfeltadd, nfeltdiv, nfeltdiveuc, nfeltdivrem, nfeltmod, nfeltmul];
 
 try(f) = for (i=1, #v, for (j=1,#v, print( f(nf, v[i],v[j])) ))
