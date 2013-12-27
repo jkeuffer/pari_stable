@@ -620,8 +620,7 @@ idealval(GEN nf, GEN ix, GEN P)
 {
   pari_sp av = avma, av1, lim;
   long N, vmax, vd, v, e, f, i, j, k, tx = typ(ix);
-  GEN mul, B, a, x, y, r, t0, p, pk, cx, vals;
-  int do_mul;
+  GEN mul, B, a, x, y, r, p, pk, cx, vals;
 
   if (is_extscalar_t(tx) || tx==t_COL) return nfval(nf,ix,P);
   tx = idealtyp(&ix,&a);
@@ -646,25 +645,15 @@ idealval(GEN nf, GEN ix, GEN P)
   i = i / f;
   vmax = minss(i,j); /* v_P(ix) <= vmax */
 
-  t0 = pr_get_tau(P);
-  if (typ(t0) == t_MAT)
-  { /* t0 given by a multiplication table */
-    mul = t0;
-    do_mul = 0;
-  }
-  else /* always a t_COL since f < N, never a t_INT */
-  {
-    mul = cgetg(N+1,t_MAT);
-    gel(mul,1) = t0;
-    do_mul = 1;
-  }
+  mul = pr_get_tau(P);
+  /* occurs when reading from file a prid in old format */
+  if (typ(mul) != t_MAT) mul = zk_scalar_or_multable(nf,mul);
   B = cgetg(N+1,t_MAT);
   pk = powiu(p, (ulong)ceil((double)vmax / e));
   /* B[1] not needed: v_pr(ix[1]) = v_pr(ix \cap Z) is known already */
   gel(B,1) = gen_0; /* dummy */
   for (j=2; j<=N; j++)
   {
-    if (do_mul) gel(mul,j) = zk_ei_mul(nf,t0,j);
     x = gel(ix,j);
     y = cgetg(N+1, t_COL); gel(B,j) = y;
     for (i=1; i<=N; i++)
@@ -1231,7 +1220,7 @@ GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
   long i, l = lg(g);
-  GEN prkZ, u, vden = gen_0, p = pr_get_p(pr), tau = pr_get_tau(pr);
+  GEN prkZ, u, vden = gen_0, p = pr_get_p(pr);
   pari_sp av = avma, lim = stack_lim(av, 2);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
