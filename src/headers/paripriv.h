@@ -494,11 +494,6 @@ int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 int     divisors_init(GEN n, GEN *pP, GEN *pE);
 long    set_optimize(long what, GEN g);
 
-/* base1.c */
-
-GEN     nffromhnfbasis(GEN nf, GEN x);
-GEN     nftohnfbasis(GEN nf, GEN x);
-
 /* base2.c */
 
 GEN     gen_if_principal(GEN bnf, GEN x);

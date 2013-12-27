@@ -1582,6 +1582,7 @@ nfcertify(GEN nf)
   return primes_certify(gmael(nf, 5, 8));
 }
 
+#if 0 /* used to check benches between HNF nf.zk and LLL-reduced nf.zk */
 static GEN
 hnffromLLL(GEN nf)
 {
@@ -1640,6 +1641,7 @@ nftohnfbasis(GEN nf, GEN x)
   u = ZM_inv(hnffromLLL(nf), gen_1);
   return gerepilecopy(av, nfbasechange(u, x));
 }
+#endif
 
 /* set *pro to roots of T->x */
 static GEN
