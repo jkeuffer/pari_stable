@@ -6,6 +6,7 @@ idealaddtoone(Q,[1,[;],Mat(1/2)])
 ideallog(Q,2,idealstar(Q,4,1))
 idealstar(Qi,matdiagonal([6,12]))
 idealintersect(Qi, 1/2,1/2)
+ideallog(Q,1/2,idealstar(Q,3,1))
 
 K=nfinit(x^2-236*x+13384);\\ Q(sqrt(60)), in disguise
 idealhnf(K, qfbprimeform(60,2))
