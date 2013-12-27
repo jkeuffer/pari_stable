@@ -59,7 +59,11 @@ test(s)=
 }
 
 test(x)
+test(vector(5))
+test(vector(20))
+test([]~)
 print("NF"); test( NF = nfinit(y^2-1105) )
+print("NF chvar"); test( nfinit(2*y^2+1) )
 print("BNF");test( BNF = bnfinit(NF) )
 print("BNR");test( bnrinit(BNF, 4) )
 print("RNF");test( rnfinit(NF, x^2-y) )

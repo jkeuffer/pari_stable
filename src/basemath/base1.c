@@ -151,7 +151,7 @@ get_bnf(GEN x, long *t)
         case 6:
           if (typ(gel(x,1)) == t_VEC && typ(gel(x,3)) == t_MAT)
           { *t = typ_BID; return NULL; }
-          if (typ(gel(x,1)) == t_INT && typ(gel(x,3)) == t_INT)
+          if (typ(gel(x,2)) == t_COL && typ(gel(x,3)) == t_INT)
           { *t = typ_PRID; return NULL; }
           break;
         case 7:  *t = typ_BNR;
@@ -191,7 +191,7 @@ get_nf(GEN x, long *t)
         case 6:
           if (typ(gel(x,1)) == t_VEC && typ(gel(x,3)) == t_MAT)
           { *t = typ_BID; return NULL; }
-          if (typ(gel(x,1)) == t_INT && typ(gel(x,3)) == t_INT)
+          if (typ(gel(x,2)) == t_COL && typ(gel(x,3)) == t_INT)
           { *t = typ_PRID; return NULL; }
           break;
         case 7: *t = typ_BNR;
