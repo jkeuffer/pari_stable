@@ -1,6 +1,10 @@
 Qi = nfinit(x^2+1);
 idealintersect(Qi,0,1)
 Q = nfinit(y);
+idealaddtoone(Q,1,[;])
+idealaddtoone(Q,2,[;])
+idealaddtoone(Q,[;],[;])
+idealaddtoone(Q,[;],1)
 idealaddtoone(Q,[1,[;]])
 idealaddtoone(Q,[1,[;],Mat(1/2)])
 ideallog(Q,2,idealstar(Q,4,1))
