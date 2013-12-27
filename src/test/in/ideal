@@ -31,3 +31,7 @@ P[1][2] += 5;
 idealval(K,P[1],P[1])
 idealmul(K,P[1],P[1].gen[2])
 idealnorm(K,P[1])
+idealinv(K,Mod(x,K.pol))
+idealpow(K,idealhnf(K,x),-2)
+v=[1,1/2,x,Mod(x,K.pol),P[1],[;],Mat(1),vector(5),[1,2,3;4,5,6;7,8,9],[1,2,3;0,4,5;0,0,6]];
+for(i=1,#v, if(!nfisideal(K,v[i]),print(i)))

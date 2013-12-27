@@ -1792,7 +1792,7 @@ isideal(GEN nf,GEN x)
     case t_INT: case t_FRAC: return 1;
     case t_POL: return varn(x) == varn(T);
     case t_POLMOD: return RgX_equal_var(T, gel(x,1));
-    case t_VEC: return (lx==6);
+    case t_VEC: return get_prid(x)? 1 : 0;
     case t_MAT: break;
     default: return 0;
   }
@@ -1802,12 +1802,9 @@ isideal(GEN nf,GEN x)
 
   av = avma; x = Q_primpart(x);
   if (!ZM_ishnf(x)) return 0;
-  for (i=1; i<=N; i++)
+  for (i=2; i<=N; i++)
     for (j=2; j<=N; j++)
-      if (! hnf_invimage(x, zk_ei_mul(nf,gel(x,i),j)))
-      {
-        avma = av; return 0;
-      }
+      if (! hnf_invimage(x, zk_ei_mul(nf,gel(x,i),j))) { avma = av; return 0; }
   avma=av; return 1;
 }
 
