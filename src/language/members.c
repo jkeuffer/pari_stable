@@ -24,7 +24,7 @@ is_ell5(GEN x) {
   long lx;
   if (typ(x) != t_VEC) return 0;
   lx = lg(x);
-  return lx == 17 || (lx == 6 && typ(gel(x,2)) != t_COL);
+  return lx == 17 || (lx == 6 && !is_vec_t(typ(gel(x,2))));
 }
 INLINE int is_ell(GEN x) {
   long lx = lg(x);

@@ -58,6 +58,7 @@ test(s)=
               if (n != "e_IMPL" && n != "e_TYPE" && n != "e_MISC", error(E))));
 }
 
+test(x)
 print("NF"); test( NF = nfinit(y^2-1105) )
 print("BNF");test( BNF = bnfinit(NF) )
 print("BNR");test( bnrinit(BNF, 4) )
@@ -79,3 +80,6 @@ print("QUAD"); test( quadgen(-4) )
 P=idealprimedec(NF,2)[1];
 print("PRID"); test(P)
 print("MODPR"); test(nfmodprinit(NF,P))
+A=idealpow(NF,P,2);
+print("BID"); test(idealstar(NF,A,2))
+print("BID (nogen)"); test(idealstar(NF,idealpow(NF,A,1)))
