@@ -161,7 +161,7 @@ BA 20- conversion from matrices of FFELTs to low level (Fq/Flxq/F2xq) kernels
    22- ZM_rank, ZM_indexrank, ZM_indeximage
    23- GP function normlp
 BA 24- GP function vecsum
-   25- [libpari] pr_equal, ZC_nfval, ZC_prdvd, ZV_Z_dvd
+   25- [libpari] pr_equal, ZC_nfval, ZC_nfvalrem, ZC_prdvd, ZV_Z_dvd
    26- allow .p / .e / .f / .gen for modpr structures
 
   Removed
