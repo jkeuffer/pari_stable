@@ -96,3 +96,6 @@ nfnewprec(vector(6))
 nfnewprec(vector(8))
 nfnewprec(vector(9))
 nfnewprec(vector(16))
+
+K=nfinit(2*x^2+1);
+idealprimedec(K,2)
