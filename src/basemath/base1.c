@@ -2649,7 +2649,7 @@ store(GEN x, GEN z, GEN a, nfbasic_t *T, long flag, GEN u)
   if (flag & (nf_ORIG|nf_ADDZK))
   {
     b = QXQ_reverse(a, x);
-    if (!isint1(T->unscale)) b = RgX_Rg_div(b, T->unscale);
+    if (!isint1(T->unscale)) b = gdiv(b, T->unscale); /* not RgX_Rg_div */
   }
   else
     b = NULL;
