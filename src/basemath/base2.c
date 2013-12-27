@@ -2707,7 +2707,7 @@ zkmodprinit(GEN nf, GEN pr) { return modprinit(nf, pr, 1); }
 /* x may be a modpr */
 static int
 ok_modpr(GEN x)
-{ return typ(x) == t_COL && (lg(x) == SMALLMODPR || lg(x) == LARGEMODPR); }
+{ return typ(x) == t_COL && lg(x) >= SMALLMODPR && lg(x) <= LARGEMODPR; }
 void
 checkmodpr(GEN x)
 {
