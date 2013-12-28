@@ -33,25 +33,6 @@ k=bnfinit(z^2+19*z+6,1); bnfisunit(k,k.fu[1]^2)
 \\#1158
 nf=nfinit(x^2+x+1);
 nfinit(nf)
-p = 67452192952521724999; pi = idealprimedec(nf,p)[1];
-q = 762234946175168528650011228121; qi = idealprimedec(nf,q)[1];
-f=idealfactor(nf, idealdiv(nf,pi,qi))
-id=idealfactorback(nf,f)
-idealnumden(nf,id)
-idealnumden(nf,pi)
-idealnumden(nf,1)
-idealnumden(nf,1/2)
-idealnumden(nf,x/2)
-nffactorback(nf, [3, x+1, [1,2]~], [1, 2, 3])
-v = [x,0,[0,1/7^4]~,Mod(x,nf.pol)];
-F = idealfactor(nf, 2*3*7);
-P = F[,1];
-F[,2] *= 3;
-Y=idealchinese(nf, F, v)
-vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-Y),P[i]))
-F[,2] = [0,1,-2,3]~;
-Y=idealchinese(nf, F, v)
-vector(#P, i, nfeltval(nf, nfeltadd(nf, v[i],-Y),P[i]))
 
 \\#1180
 setrand(1);quadclassunit(572).no
@@ -98,6 +79,3 @@ nfnewprec(vector(6))
 nfnewprec(vector(8))
 nfnewprec(vector(9))
 nfnewprec(vector(16))
-
-K=nfinit(2*x^2+1);
-idealprimedec(K,2)
