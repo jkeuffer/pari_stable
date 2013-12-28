@@ -18,3 +18,5 @@ setrand(1); quadclassunit(-13163208).cyc
 \\ #1195 with non-fundamental discriminants [oo loop]
 setrand(38);quadclassunit(-29920).cyc
 
+quadclassunit(-13163208,,[0.1]).cyc
+setrand(1); quadclassunit((2^70+25)).cyc
