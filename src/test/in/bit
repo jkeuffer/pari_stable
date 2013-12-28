@@ -6,7 +6,7 @@ hammingweight(matid(100))
 N = 2^128+2^64+1;
 [bittest(N, i) | i<-[60..70]]
 {
-  args = [0, 3, -3, 2^65-1, N, -N];
+  args = [0, 3, -3, 2^65-1, N, -N, I];
   funs = [bitand, bitnegimply, bitor, bitxor];
   for (a=1,#funs,
     my (f = funs[a]);
@@ -14,14 +14,14 @@ N = 2^128+2^64+1;
     for (i=1,#args,
       for (j=i,#args,
         my(u=args[i], v=args[j]);
-        print([u,v,f(u,v)])
+        print([u,v,iferr(f(u,v),E,E)])
       )
     )
   );
   print("#bitneg");
   for (i=1, #args,
     my (u=args[i]);
-    print([u, bitneg(u,65),bitneg(u)])
+    print(iferr([u, bitneg(u,65),bitneg(u)],E,E))
   )
 }
 

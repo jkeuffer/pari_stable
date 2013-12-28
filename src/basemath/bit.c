@@ -323,6 +323,9 @@ ibitnegimply(GEN x, GEN y)
 
 static int
 signs(GEN x, GEN y) { return (((signe(x) >= 0) << 1) | (signe(y) >= 0)); }
+static void
+checkint2(const char *f,GEN x, GEN y)
+{ if (typ(x)!=t_INT || typ(y)!=t_INT) pari_err_TYPE2(f,x,y); }
 
 GEN
 gbitor(GEN x, GEN y)
@@ -330,7 +333,7 @@ gbitor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err_TYPE2( "bitwise or",x,y);
+  checkint2("bitwise or",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -354,7 +357,7 @@ gbitand(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err_TYPE2( "bitwise and",x,y);
+  checkint2("bitwise and",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -378,7 +381,7 @@ gbitxor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) pari_err_TYPE2( "bitwise xor",x,y);
+  checkint2("bitwise xor",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -403,8 +406,7 @@ gbitnegimply(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT)
-    pari_err_TYPE2( "bitwise negated imply",x,y);
+  checkint2("bitwise negated imply",x,y);
   switch (signs(x, y))
   {
     case 3: /*1,1*/
