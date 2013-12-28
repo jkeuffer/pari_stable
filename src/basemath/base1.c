@@ -2389,24 +2389,18 @@ GEN
 polredbest(GEN x0, long flag)
 {
   pari_sp av = avma;
-  GEN x, dx, ro, b;
-  long fl;
+  GEN x, dx, ro, a;
   nfbasic_t T;
-  switch(flag)
+  if (flag < 0 || flag > 1) pari_err_FLAG("polredbest");
+  x = x0; nfbasic_init(x, nf_PARTIALFACT, &T);
+  polredbest_aux(&T, &ro, &x, &dx, flag? &a: NULL);
+  if (flag)
   {
-    default: pari_err_FLAG("polredbest");
-    case 0: fl = nf_PARTIALFACT; break;
-    case 1: fl = nf_PARTIALFACT|nf_ORIG; break;
-  }
-  x = x0; nfbasic_init(x, fl, &T);
-  if (!flag) polredbest_aux(&T, &ro, &x, &dx, NULL);
-  else
-  {
-    polredbest_aux(&T, &ro, &x, &dx, &b);
+    GEN b;
     if (x0 == T.x)
       b = pol_x(varn(x)); /* no improvement */
     else
-      b = QXQ_reverse(b, x0);
+      b = QXQ_reverse(a, x0);
     if (degpol(x) == 1)
       b = gmodulo(b, x);
     else
@@ -2742,3 +2736,71 @@ GEN
 polredabs(GEN x) { return polredabs0(x,0); }
 GEN
 polredabs2(GEN x) { return polredabs0(x,nf_ORIG); }
+
+/* relative polredabs/best. Returns relative polynomial by default (flag = 0)
+ * flag & nf_ORIG: + element (base change)
+ * flag & nf_ABSOLUTE: absolute polynomial */
+static GEN
+rnfpolred_i(GEN nf, GEN relpol, long flag, long best)
+{
+  const char *f = best? "rnfpolredbest": "rnfpolredabs";
+  pari_timer ti;
+  GEN listP = NULL, red, bas, elt, pol, T, rnfeq;
+  long ty = typ(relpol);
+  pari_sp av = avma;
+
+  if (ty == t_VEC) {
+    if (lg(relpol) != 3) pari_err_TYPE(f,relpol);
+    listP = gel(relpol,2);
+    relpol = gel(relpol,1);
+  }
+  if (typ(relpol) != t_POL) pari_err_TYPE(f,relpol);
+  nf = checknf(nf);
+  if (DEBUGLEVEL>1) timer_start(&ti);
+  T = nf_get_pol(nf);
+  relpol = RgX_nffix(f, T, relpol, 0);
+  if (best || (flag & nf_PARTIALFACT))
+  {
+    long sa;
+    bas = rnfequationall(nf, relpol, &sa, NULL);
+    if (listP) bas = mkvec2(bas, listP);
+    rnfeq = mkvec5(gen_0,gen_0,stoi(sa),T,relpol);
+    if (best)
+    {
+      GEN ro, x, dx, a;
+      nfbasic_t T;
+      nfbasic_init(bas, nf_PARTIALFACT, &T);
+      polredbest_aux(&T, &ro, &x, &dx, flag & nf_ABSOLUTE? NULL: &a);
+      red = mkvec2(x, flag & nf_ABSOLUTE? gen_0: a);
+    }
+    else
+      red = polredabs0(bas, nf_RAW|nf_PARTIALFACT);
+  }
+  else
+  {
+    GEN rnf = rnfinit(nf, relpol), M = rnf_basM(rnf);
+    rnfeq = rnf_get_map(rnf);
+    pol = gel(rnfeq,1);
+    bas = mkvec2(pol, RgM_to_RgXV(M, varn(pol)));
+    if (DEBUGLEVEL>1) timer_printf(&ti, "absolute basis");
+    red = polredabs0(bas, nf_RAW);
+  }
+  pol = gel(red,1);
+  if (DEBUGLEVEL>1) err_printf("reduced absolute generator: %Ps\n",pol);
+  if (flag & nf_ABSOLUTE) return gerepilecopy(av, pol);
+
+  elt = eltabstorel_lift(rnfeq, gel(red,2));
+  pol = RgXQ_charpoly(elt, relpol, varn(relpol));
+  pol = lift_if_rational(pol);
+  if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(RgXQ_reverse(elt,relpol),pol));
+  return gerepilecopy(av, pol);
+}
+GEN
+rnfpolredabs(GEN nf, GEN relpol, long flag)
+{ return rnfpolred_i(nf,relpol,flag, 0); }
+GEN
+rnfpolredbest(GEN nf, GEN relpol, long flag)
+{
+  if (flag < 0 || flag > 3) pari_err_FLAG("rnfpolredbest");
+  return rnfpolred_i(nf,relpol,flag, 1);
+}

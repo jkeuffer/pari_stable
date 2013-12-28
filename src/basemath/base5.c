@@ -69,7 +69,7 @@ rnfeltreltoabs(GEN rnf,GEN x)
   pari_err_TYPE(f,x); return NULL;
 }
 
-static GEN
+GEN
 eltabstorel_lift(GEN rnfeq, GEN P)
 {
   GEN k, T = gel(rnfeq,4), relpol = gel(rnfeq,5);
@@ -183,7 +183,7 @@ modulereltoabs(GEN rnf, GEN x)
 }
 
 /* Z-basis for absolute maximal order, as a t_MAT */
-static GEN
+GEN
 rnf_basM(GEN rnf)
 {
   GEN M, d, pol = rnf_get_polabs(rnf);
@@ -958,53 +958,4 @@ rnfpolred(GEN nf, GEN pol, long prec)
                                 : RgX_Rg_div(newpol, L);
   }
   return gerepilecopy(av,w);
-}
-
-/* relative polredabs. Returns relative polynomial by default (flag = 0)
- * flag & nf_ORIG: + element (base change)
- * flag & nf_ABSOLUTE: absolute polynomial */
-GEN
-rnfpolredabs(GEN nf, GEN relpol, long flag)
-{
-  pari_timer ti;
-  GEN listP = NULL, red, bas, elt, pol, T, rnfeq;
-  long ty = typ(relpol), fl = nf_RAW;
-  pari_sp av = avma;
-
-  if (ty == t_VEC) {
-    if (lg(relpol) != 3) pari_err_TYPE("rnfpolredabs",relpol);
-    listP = gel(relpol,2);
-    relpol = gel(relpol,1);
-  }
-  if (typ(relpol) != t_POL) pari_err_TYPE("rnfpolredabs",relpol);
-  nf = checknf(nf);
-  if (DEBUGLEVEL>1) timer_start(&ti);
-  T = nf_get_pol(nf);
-  relpol = RgX_nffix("rnfpolredabs", T, relpol, 0);
-  if (flag & nf_PARTIALFACT)
-  {
-    long sa;
-    fl |= nf_PARTIALFACT;
-    bas = rnfequationall(nf, relpol, &sa, NULL);
-    if (listP) bas = mkvec2(bas, listP);
-    rnfeq = mkvec5(gen_0,gen_0,stoi(sa),T,relpol);
-  }
-  else
-  {
-    GEN rnf = rnfinit(nf, relpol), M = rnf_basM(rnf);
-    rnfeq = rnf_get_map(rnf);
-    pol = gel(rnfeq,1);
-    bas = mkvec2(pol, RgM_to_RgXV(M, varn(pol)));
-    if (DEBUGLEVEL>1) timer_printf(&ti, "absolute basis");
-  }
-  red = polredabs0(bas, fl);
-  pol = gel(red,1);
-  if (DEBUGLEVEL>1) err_printf("reduced absolute generator: %Ps\n",pol);
-  if (flag & nf_ABSOLUTE) return gerepilecopy(av, pol);
-
-  elt = eltabstorel_lift(rnfeq, gel(red,2));
-  pol = RgXQ_charpoly(elt, relpol, varn(relpol));
-  pol = lift_if_rational(pol);
-  if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(RgXQ_reverse(elt,relpol),pol));
-  return gerepilecopy(av, pol);
 }

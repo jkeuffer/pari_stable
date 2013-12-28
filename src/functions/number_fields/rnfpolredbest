@@ -1,0 +1,29 @@
+Function: rnfpolredbest
+Section: number_fields
+C-Name: rnfpolredbest
+Prototype: GGD0,L,
+Help: rnfpolredbest(nf,pol,{flag=0}): given a pol with coefficients in nf,
+ finds a relative simpler polynomial defining the same field. Binary digits
+ of flag mean: 1: return also the element whose characteristic polynomial is
+ the given polynomial, 2: return an absolute polynomial.
+Doc: relative version of \kbd{polredbest}. Given a monic polynomial \var{pol}
+ with coefficients in $\var{nf}$, finds a simpler relative polynomial defining
+ the same field. The binary digits of $\fl$ mean
+
+ 1: returns $[P,a]$ where $P$ is the default output and $a$ is an
+ element expressed on a root of $P$ whose characteristic polynomial is
+ \var{pol}
+
+ 2: returns an absolute polynomial (same as
+ {\tt rnfequation(\var{nf},rnfpolredbest(\var{nf},\var{pol}))}
+ but faster).
+
+ As opposed to \tet{rnfpolredabs} this function does not return a
+ \emph{smallest} (canonical) polynomial with respect to some criterion,
+ but it does run in polynomial time.
+
+ \misctitle{Remark} In the present implementation, \kbd{rnfpolredbest}
+ produces smaller polynomials than \kbd{rnfpolred} and is usually much
+ faster. The \kbd{rnfpolred} implementation is based on (a partial
+ implementation of) an incomplete reduction theory of lattices over number
+ fields, the function \kbd{rnflllgram}, which deserves to be improved.
