@@ -28,3 +28,6 @@ Mod(x,y)
 Mod(1/x,y)
 Mod(1+O(y),y)
 Mod(1+O(y),y+1)
+
+modreverse(Mod(0,Pol(1)))
+modreverse(Mod(1,x+1))

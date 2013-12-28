@@ -56,4 +56,6 @@ Mod(1, y)
   ***   at top-level: Mod(1+O(y),y+1)
   ***                 ^---------------
   *** Mod: forbidden division t_SER % t_POL.
+0
+Mod(-1, x - 1)
 Total time spent: 4
