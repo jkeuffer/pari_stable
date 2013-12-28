@@ -39,3 +39,7 @@ for (i = 1,10^4,
 Mod(1,2)-Mod(2,4)
 
 p=2^80+13; znlog(Mod(3,p),Mod(2,p))
+
+g=Mod(3,11);
+v=[I,-1,Mat(1),matid(2)/2,Mat([5,1])];
+a=Mod(-1,11); for(i=1,#v, print(iferr(znlog(a,g,v[i]),E,E)));
