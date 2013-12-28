@@ -24,3 +24,8 @@ N = 2^128+2^64+1;
     print([u, bitneg(u,65),bitneg(u)])
   )
 }
+
+bittest(-1,10)
+bitneg(-2,64)
+bitneg(1,-2)
+bitneg(1,128)

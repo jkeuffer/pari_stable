@@ -321,7 +321,8 @@ ibitnegimply(GEN x, GEN y)
   return out;
 }
 
-#define signs(x,y) (((signe(x) >= 0) << 1) | (signe(y) >= 0))
+static int
+signs(GEN x, GEN y) { return (((signe(x) >= 0) << 1) | (signe(y) >= 0)); }
 
 GEN
 gbitor(GEN x, GEN y)
@@ -340,10 +341,9 @@ gbitor(GEN x, GEN y)
     case 1: /*-1,1*/
       z = ibitnegimply(inegate(x),y);
       break;
-    case 0: /*-1,-1*/
+    default: /*-1,-1*/
       z = ibitand(inegate(x),inegate(y));
       break;
-    default: return NULL;
   }
   return gerepileuptoint(ltop, inegate(z));
 }
@@ -365,10 +365,9 @@ gbitand(GEN x, GEN y)
     case 1: /*-1,1*/
       z = ibitnegimply(y,inegate(x));
       break;
-    case 0: /*-1,-1*/
+    default: /*-1,-1*/
       z = inegate(ibitor(inegate(x),inegate(y)));
       break;
-    default: return NULL;
   }
   return gerepileuptoint(ltop, z);
 }
@@ -390,10 +389,9 @@ gbitxor(GEN x, GEN y)
     case 1: /*-1,1*/
       z = inegate(ibitxor(inegate(x),y));
       break;
-    case 0: /*-1,-1*/
+    default: /*-1,-1*/
       z = ibitxor(inegate(x),inegate(y));
       break;
-    default: return NULL;
   }
   return gerepileuptoint(ltop,z);
 }
@@ -417,10 +415,9 @@ gbitnegimply(GEN x, GEN y)
     case 1: /*-1,1*/
       z = inegate(ibitor(y,inegate(x)));
       break;
-    case 0: /*-1,-1*/
+    default: /*-1,-1*/
       z = ibitnegimply(inegate(y),inegate(x));
       break;
-    default: return NULL;
   }
   return gerepileuptoint(ltop,z);
 }

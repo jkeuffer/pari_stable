@@ -14,3 +14,5 @@ default(realprecision,38);
 binary(0.)
 binary(0.005)
 binary(1.1)
+binary([0,1])
+binary(I)
