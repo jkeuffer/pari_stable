@@ -20,3 +20,4 @@ setunion(a,b)
 X = [1,2,3]; Y = [2,3,4];
 setbinop((x,y)->x+y, X,Y)
 setbinop((x,y)->x+y, X)
+setbinop(x->x, X)
