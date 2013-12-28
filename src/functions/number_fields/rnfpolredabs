@@ -7,7 +7,8 @@ Help: rnfpolredabs(nf,pol,{flag=0}): given a pol with coefficients in nf,
  of flag mean: 1: return also the element whose characteristic polynomial is
  the given polynomial, 2: return an absolute polynomial, 16: partial
  reduction.
-Doc: relative version of \kbd{polredabs}. Given a monic polynomial \var{pol}
+Doc: THIS FUNCTION IS OBSOLETE: use \tet{rnfpolredbest} instead.
+ Relative version of \kbd{polredabs}. Given a monic polynomial \var{pol}
  with coefficients in $\var{nf}$, finds a simpler relative polynomial defining
  the same field. The binary digits of $\fl$ mean
 
@@ -23,8 +24,8 @@ Doc: relative version of \kbd{polredabs}. Given a monic polynomial \var{pol}
  default when the relative discriminant is smooth, and much faster otherwise.
  See \secref{se:polredabs}.
 
- \misctitle{Remark} In the present implementation, \kbd{rnfpolredabs}
+ \misctitle{Warning} In the present implementation, \kbd{rnfpolredabs}
  produces smaller polynomials than \kbd{rnfpolred} and is usually much
- faster. The \kbd{rnfpolred} implementation is based on (a partial
- implementation of) an incomplete reduction theory of lattices over number
- fields, the function \kbd{rnflllgram}, which deserves to be improved.
+ faster, but its complexity is still exponential in the absolute degree.
+ The function \tet{rnfpolredbest} runs in polynomial time, and  tends  to
+ return polynomials with smaller discriminants.
