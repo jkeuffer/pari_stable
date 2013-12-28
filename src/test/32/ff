@@ -260,5 +260,15 @@ t^4 + t^2
 2
 18446744073709551628*t^4 + 2*t^3 + 18446744073709551626*t^2 + 2*t + 2
 [1, 0, 0; 0, 1, 0; 0, 0, 1]
+? p=2^64+13;g=ffprimroot(ffgen(p^2),&o);a=2*g^0;
+? v=[I,-1,Mat(1),matid(2)/2,o];
+? for(i=1,#v,print(iferr(fflog(a,g,v[i]),E,E)));
+error("incorrect type in generic discrete logarithm (order factorization) (t
+_COMPLEX).")
+error("incorrect type in generic discrete logarithm (order factorization) (t
+_INT).")
+error("incorrect type in factorback [not a factorization] (t_MAT).")
+error("incorrect type in factorback [not an exponent vector] (t_COL).")
+78109549624233025797131340958849736130
 ? print("Total time spent: ",gettime);
-Total time spent: 1956
+Total time spent: 2416
