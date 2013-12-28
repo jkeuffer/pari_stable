@@ -10,6 +10,7 @@ setrand(3);bnfinit(x^2-(1130481^2+4)).clgp
 setrand(2);bnfinit(x^4 - x^3 + 63*x^2 - 22*x + 1004).clgp
 setrand(1);bnfinit(x^8 - 8*x^6 + 38*x^4 - 143*x^2 + 121).clgp
 bnfcertify(bnfinit(x^2-40!));
+bnfcertify(bnfinit(x^8-2));
 zetakinit(2*x-1);
 
 nf=nfinit(y^5-4*y^3+2*y+11);
