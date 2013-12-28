@@ -28,6 +28,7 @@ K = nfinit(x^2-x+2); M = [1, 0, x; 0, x, 0; 0,0,2+x]; N = [1, 1, 1];
 nfsnf(K, [M, N, N])
 rnfisabelian(y,x)
 rnfisabelian(y^2+23,x^3+x^2-1)
+rnfisabelian(y^2+23, polcyclo(7, x+Mod(y,y^2+23)))
 
 pol = y^3+y^2-2*y-1;
 bnf = bnfinit(pol);
