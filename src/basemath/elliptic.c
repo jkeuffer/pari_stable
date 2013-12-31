@@ -366,7 +366,7 @@ do_padic_agm(GEN *ptx, GEN *pty, GEN a1, GEN b1)
 /* q a t_REAL*/
 static long
 real_prec(GEN q)
-{ return signe(q)? LONG_MAX: realprec(q); }
+{ return signe(q)? realprec(q): LONG_MAX; }
 /* q a t_PADIC */
 static long
 padic_prec(GEN q)

@@ -117,3 +117,17 @@ checkt(18446744073709551629,3,2,10);
 
 E=ellinit([a1,a2,a3,a4,a6]*Mod(1,2));
 elldivpol(E,2)
+
+check(q)=
+{ my(g,E,x = 1,y);
+  g = ffprimroot(ffgen(q,'t));
+  E = ellinit(ellfromj(g));
+  for(i=1,10,
+    x *= g;
+    y = ellordinate(E,x);
+    for(i=1,#y, if (!ellisoncurve(E,[x,y[i]]), error([x,y])))
+  );
+}
+check(2^4)
+check(3^4)
+check((2^64+13)^4)

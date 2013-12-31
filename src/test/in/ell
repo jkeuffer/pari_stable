@@ -71,6 +71,10 @@ a=ffgen(3^5,'a);ellinit(ellfromj(a)).j
 elldivpol(ellinit([1,2,3,5,7]),4)
 elldivpol(ellinit([0,0,0,0,1]),8)
 
+e = ellinit([1.,2,3,4,5]);
+e.eta
+E = ellchangecurve(e, [2,3,4,5]);
+E.eta
 e = ellinit([1,2,3,4,5]); e.eta; e.roots;
 E = ellchangecurve(e, [2,3,4,5]);
 E.omega
@@ -227,6 +231,8 @@ ellinit([1])
 E=ellinit([625,15625]);
 elllocalred(E,5)
 ellisoncurve(E,[0.,125.])
+ellisoncurve(E,[0.,125+1e-50])
+elladd(E,[0.,125.],[0.,125+1e-38])
 ellinit([1])
 x='x;
 ellinit([x^2,x])
