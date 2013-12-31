@@ -1,5 +1,5 @@
 Function: norml2
-Section: conversions
+Section: linear_algebra
 C-Name: gnorml2
 Prototype: G
 Help: norml2(x): square of the L2-norm of x.
