@@ -122,6 +122,8 @@ JD 14- polcyclo(n, x) now works for all roots of 1
    26- [libpari] renamed ordred -> polredord
    27- the prid structure: the anti-uniformizer tau (pr_get_tau) is now stored
        via its multiplication table
+   28- rnfpolredabs(x,3) did not conform to the documentation (which did not
+       make sense). Fix documentation and function, for rnfpolredbest as well.
 
   Added
 EP  1- Configure option for gcov/lcov support

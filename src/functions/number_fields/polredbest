@@ -39,8 +39,16 @@ Doc: finds a polynomial with reasonably
  If $\fl = 1$: outputs a two-component row vector $[P,a]$,  where $P$ is the
  default output and \kbd{Mod(a, P)} is a root of the original $T$.
  \bprog
- ? polredbest(x^4 + 8, 1)
+ ? [P,a] = polredbest(x^4 + 8, 1)
  %1 = [x^4 + 2, Mod(x^3, x^4 + 2)]
- ? charpoly(%[2])
+ ? charpoly(a)
  %2 = x^4 + 8
- @eprog
+ @eprog\noindent In particular, the map $\Q[x]/(T) \to \Q[x]/(P)$,
+ $x\mapsto \kbd{Mod(a,P)} defines an isomorphism of number fields, which can
+ be computed as
+ \bprog
+   subst(lift(Q), 'x, a)
+ @eprog\noindent if $Q$ is a \typ{POLMOD} modulo $T$; \kbd{b = modreverse(a)}
+ returns a \typ{POLMOD} giving the inverse of the above map (which should be
+ useless since $\Q[x]/(P)$ is a priori a better representation for the number
+ field and its elements).

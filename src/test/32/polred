@@ -29,6 +29,10 @@ d(-385*y - 251, y^2 - y - 7)*x^5 + Mod(695*y + 2955, y^2 - y - 7)*x^4 + Mod(
 (-2050*y - 3861, y^2 - y - 7)*x + Mod(565*y + 1331, y^2 - y - 7)
 x^3 + Mod(y^2 - 2, y^3 - y - 1)*x^2 + Mod(-y + 1, y^3 - y - 1)*x + Mod(y - 1
 , y^3 - y - 1)
+x^9 - 4*x^8 + 8*x^7 - 9*x^6 + 7*x^5 - 3*x^4 - x^3 + 4*x^2 - 3*x + 1
+0
+0
+0
   *** nfinit: Warning: non-monic polynomial. Result of the form [nf,c].
 x^2 - 3646554366
 304

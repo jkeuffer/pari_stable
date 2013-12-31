@@ -12,20 +12,31 @@ Doc: THIS FUNCTION IS OBSOLETE: use \tet{rnfpolredbest} instead.
  with coefficients in $\var{nf}$, finds a simpler relative polynomial defining
  the same field. The binary digits of $\fl$ mean
 
- 1: returns $[P,a]$ where $P$ is the default output and $a$ is an
- element expressed on a root of $P$ whose characteristic polynomial is
- \var{pol}
+ The binary digits of $\fl$ correspond to $1$: add information to convert
+ elements to the new representation, $2$: absolute polynomial, instead of
+ relative, $16$: possibly use a suborder of the maximal order. More precisely:
 
- 2: returns an absolute polynomial (same as
- {\tt rnfequation(\var{nf},rnfpolredabs(\var{nf},\var{pol}))}
- but faster).
+ 0: default, return $P$
+
+ 1: returns $[P,a]$ where $P$ is the default output and $a$,
+ a \typ{POLMOD} modulo $P$, is a root of \var{pol}.
+
+ 2: returns \var{Pabs}, an absolute, instead of a relative, polynomial.
+ Same as but faster than
+ \bprog
+   rnfequation(nf, rnfpolredabs(nf,pol))
+ @eprog
+
+ 3: returns $[\var{Pabs},a,b]$, where \var{Pabs} is an absolute polynomial
+ as above, $a$, $b$ are \typ{POLMOD} modulo \var{Pabs}, roots of \kbd{nf.pol}
+ and \var{pol} respectively.
 
  16: possibly use a suborder of the maximal order. This is slower than the
  default when the relative discriminant is smooth, and much faster otherwise.
  See \secref{se:polredabs}.
 
  \misctitle{Warning} In the present implementation, \kbd{rnfpolredabs}
- produces smaller polynomials than \kbd{rnfpolred} and is usually much
+ produces smaller polynomials than \kbd{rnfpolred} and is usually
  faster, but its complexity is still exponential in the absolute degree.
  The function \tet{rnfpolredbest} runs in polynomial time, and  tends  to
  return polynomials with smaller discriminants.

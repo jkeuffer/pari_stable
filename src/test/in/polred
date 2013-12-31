@@ -6,8 +6,14 @@ rnfpolredabs(K,T)
 rnfpolredbest(K,T)
 rnfpolredabs(K,[T,100],16)
 rnfpolredbest(K,[T,100])
-K=nfinit(y^3-y-1);
-rnfpolredabs(K,x^3-x-1)
+K=nfinit(y^3-y-1); T=x^3-x-1;
+rnfpolredabs(K,T)
+rnfpolredabs(K,T,2)
+[P,a]=rnfpolredbest(K,T,1);
+subst(K.pol,y,a)
+[P,a,b]=rnfpolredbest(K,T,3);
+subst(K.pol,y,a)
+substvec(T,[x,y],[a,b])
 rnfpolred(nfinit(quadpoly(1129,y)),quadray(1129,1));
 
 nfinit(Pol([256,-2560,5120,6400,-60320,6976,116320,72560,-456615,270630,-129362]));
