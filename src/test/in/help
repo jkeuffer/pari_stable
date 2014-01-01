@@ -18,3 +18,9 @@ addhelp(new,"test5")
 ?echo
 ?new
 ?does_not_exist
+?
+?.
+?\
+?1
+?12
+\t
