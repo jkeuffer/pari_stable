@@ -3,8 +3,7 @@ Section: linear_algebra
 C-Name: gnorml2
 Prototype: G
 Help: norml2(x): square of the L2-norm of x.
-Doc:
- square of the $L^2$-norm of $x$. More precisely,
+Doc: square of the $L^2$-norm of $x$. More precisely,
  if $x$ is a scalar, $\kbd{norml2}(x)$ is defined to be the square
  of the complex modulus of $x$ (real \typ{QUAD}s are not supported).
  If $x$ is a polynomial, a (row or column) vector or a matrix, \kbd{norml2($x$)} is

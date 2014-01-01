@@ -24,4 +24,38 @@ Vecsmall([0, 0, 0, 133, 165, 638, 396, 4268])
 [1, 0]~
 [-1, 1]~
 [-1, 1]~
+14
+23
+2
+-13
+285
+
+[35  67  99]
+
+[67 110 153]
+
+[99 153 207]
+
+1
+  ***   at top-level: qfnorm(1,1)
+  ***                 ^-----------
+  *** qfnorm: incorrect type in qfnorm (t_INT).
+  ***   at top-level: qfnorm(x,Mat(1))
+  ***                 ^----------------
+  *** qfnorm: inconsistent dimensions in qfeval.
+  ***   at top-level: qfnorm(x,Mat(x~))
+  ***                 ^-----------------
+  *** qfnorm: inconsistent dimensions in qfeval.
+  ***   at top-level: qfbil(1,1)
+  ***                 ^----------
+  *** qfbil: incorrect type in qfbil (t_INT).
+  ***   at top-level: qfbil([1],[1,2])
+  ***                 ^----------------
+  *** qfbil: inconsistent dimensions in qfbil.
+  ***   at top-level: qfbil([1,2],[1,2],q)
+  ***                 ^--------------------
+  *** qfbil: inconsistent dimensions in qfevalb.
+  ***   at top-level: qfbil([1,2],[1,2],Ma
+  ***                 ^--------------------
+  *** qfbil: inconsistent dimensions in qfevalb.
 Total time spent: 12

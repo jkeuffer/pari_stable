@@ -3863,8 +3863,34 @@ qfeval(GEN q, GEN x)
 {
   long l = lg(q);
   if (lg(x) != l) pari_err_DIM("qfeval");
-  if (l == 1) return gen_0;
+  if (l==1) return gen_0;
+  if (lgcols(q) != l) pari_err_DIM("qfeval");
   return qfeval0(q,x,l);
+}
+GEN
+qfnorm(GEN x, GEN q)
+{
+  if (!q) return gnorml2(x);
+  if (typ(q) != t_MAT) pari_err_TYPE("qfnorm",q);
+  switch(typ(x))
+  {
+    case t_VEC: case t_COL: break;
+    case t_MAT: return qf_apply_RgM(q, x);
+    default: pari_err_TYPE("qfnorm",x);
+  }
+  return qfeval(q,x);
+}
+GEN
+qfbil(GEN x, GEN y, GEN q)
+{
+  if (!is_vec_t(typ(x))) pari_err_TYPE("qfbil",x);
+  if (!is_vec_t(typ(y))) pari_err_TYPE("qfbil",y);
+  if (!q) {
+    if (lg(x) != lg(y)) pari_err_DIM("qfbil");
+    return RgV_dotproduct(x,y);
+  }
+  if (typ(q) != t_MAT) pari_err_TYPE("qfbil",q);
+  return qfevalb(q,x,y);
 }
 
 /* l = lg(x) = lg(q) > 1. x a RgV */
@@ -3960,6 +3986,7 @@ qfevalb(GEN q, GEN x, GEN y)
   long l = lg(q);
   if (lg(x) != l || lg(y) != l) pari_err_DIM("qfevalb");
   if (l==1) return gen_0;
+  if (lgcols(q) != l) pari_err_DIM("qfevalb");
   return qfevalb0(q,x,y,l);
 }
 

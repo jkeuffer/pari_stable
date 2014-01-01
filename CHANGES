@@ -166,6 +166,7 @@ BA 24- GP function vecsum
    25- [libpari] pr_equal, ZC_nfval, ZC_nfvalrem, ZC_prdvd, ZV_Z_dvd
    26- allow .p / .e / .f / .gen for modpr structures
    27- function rnfpolredbest
+   28- functions qfnorm, qfbil
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
