@@ -350,6 +350,27 @@ small([1]), [Vecsmall([128, -1])], [0, 0, 0, 0, 0, 0, 0, [[2, 3]~, [1/2, 0,
   *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
 [0, 0, 0, x^2, x, 0, 2*x^2, 4*x, -x^4, -48*x^2, -864*x, -64*x^6 - 432*x^2, -
 6912*x^4/(-4*x^4 - 27), Vecsmall([0]), [Vecsmall([128, 0])], [0, 0, 0, 0]]
+  ***   at top-level: ellminimalmodel(E)
+  ***                 ^------------------
+  *** ellminimalmodel: incorrect type in checkell over Q (t_VEC).
+  ***   at top-level: ellweilpairing(E,[0]
+  ***                 ^--------------------
+  *** ellweilpairing: incorrect type in checkell over Fq (t_VEC).
+  ***   at top-level: ellinit([1])
+  ***                 ^------------
+  *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
+  ***   at top-level: ellinit([1,1],quadge
+  ***                 ^--------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_QUAD).
+  ***   at top-level: ellinit([Mod(1,2),1]
+  ***                 ^--------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+  ***   at top-level: ellinit([O(2),1],ffg
+  ***                 ^--------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
+  ***   at top-level: ellinit([O(2),1],1.)
+  ***                 ^--------------------
+  *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
 [0, 0, 0, 1, 2, 0, 2, 8, -1, -48, -1728, -1792, 432/7, Vecsmall([0]), [Vecsm
 all([128, -1])], [0, 0, 0, 0]]
 [0, 0, 0, 0, 1, 0, 0, 4, 0, 0, 1, 3, 0, Vecsmall([4]), [0, [Vecsmall([0]), V
@@ -366,4 +387,4 @@ ecsmall([0, 1]), [Vecsmall([0, 1]), Vecsmall([0]), Vecsmall([0]), Vecsmall([
   ***   at top-level: ellinit([1.,Mod(1,3)
   ***                 ^--------------------
   *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
-Total time spent: 552
+Total time spent: 556
