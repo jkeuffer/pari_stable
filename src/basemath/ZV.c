@@ -167,9 +167,7 @@ ZMrow_ZC_mul_i(GEN x, GEN y, long i, long lx)
 }
 GEN
 ZMrow_ZC_mul(GEN x, GEN y, long i)
-{
-  return ZMrow_ZC_mul_i(x, y, i, lg(x));
-}
+{ return ZMrow_ZC_mul_i(x, y, i, lg(x)); }
 
 /* return x * y, 1 < lx = lg(x), l = lgcols(x) */
 static GEN
@@ -177,7 +175,7 @@ ZM_ZC_mul_i(GEN x, GEN y, long lx, long l)
 {
   GEN z = cgetg(l,t_COL);
   long i;
-  for (i = 1; i < l; i++) gel(z,i) = ZMrow_ZC_mul_i(x, y, i, lx);
+  for (i=1; i<l; i++) gel(z,i) = ZMrow_ZC_mul_i(x,y,i,lx);
   return z;
 }
 GEN
@@ -190,6 +188,28 @@ ZM_mul(GEN x, GEN y)
   l = lgcols(x); z = cgetg(ly,t_MAT);
   for (j=1; j<ly; j++) gel(z,j) = ZM_ZC_mul_i(x, gel(y,j), lx, l);
   return z;
+}
+/* assume result is symmetric */
+GEN
+ZM_multosym(GEN x, GEN y)
+{
+  long j, lx, ly = lg(y);
+  GEN M;
+  if (ly == 1) return cgetg(1,t_MAT);
+  lx = lg(x);
+  if (lx != lgcols(y)) pari_err_OP("operation 'ZM_multosym'", x,y);
+  if (lx == 1) return cgetg(1,t_MAT);
+  if (ly != lgcols(x)) pari_err_OP("operation 'ZM_multosym'", x,y);
+  M = cgetg(ly, t_MAT);
+  for (j=1; j<ly; j++)
+  {
+    GEN z = cgetg(ly,t_COL), yj = gel(y,j);
+    long i;
+    for (i=1; i<j; i++) gel(z,i) = gcoeff(M,j,i);
+    for (i=j; i<ly; i++)gel(z,i) = ZMrow_ZC_mul_i(x,yj,i,lx);
+    gel(M,j) = z;
+  }
+  return M;
 }
 GEN
 ZM_ZC_mul(GEN x, GEN y)

@@ -996,7 +996,7 @@ forqfvec_init_dolll(struct qfvec *qv, GEN a, long dolll)
   {
     u = lllgramint(a);
     if (lg(u) != lg(a)) err_minim(a);
-    a = qf_apply_ZM(a, u);
+    a = qf_apply_ZM(a,u);
   } else u = NULL;
   qv->a = RgM_gtofp(a, DEFAULTPREC);
   r = qfgaussred_positive(qv->a);
@@ -1745,7 +1745,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
     u = lllfp(a, 0.75, LLL_GRAM);
     if (lg(u) != lg(a)) return NULL;
-    r = qf_apply_ZM(a,u);
+    r = qf_apply_RgM(a,u);
     i = gprecision(r);
     if (i)
       prec = i;

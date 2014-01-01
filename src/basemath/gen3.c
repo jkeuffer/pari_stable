@@ -3824,23 +3824,6 @@ simplify(GEN x)
 /*                EVALUATION OF SOME SIMPLE OBJECTS                */
 /*                                                                 */
 /*******************************************************************/
-/* l = lg(x) = lg(q) > 1. x a ZV, don't use Horner */
-static GEN
-qfeval0_Z(GEN q, GEN x, long l)
-{
-  long i, j;
-  pari_sp av = avma;
-  GEN res;
-  if (l == 2) return gerepileupto(av, gmul(gcoeff(q,1,1), sqri(gel(x,1))));
-
-  res = gmul(gcoeff(q,2,1), mulii(gel(x,2),gel(x,1))); /* i = 2 */
-  for (i=3;i<l;i++)
-    for (j=1;j<i;j++)
-      res = gadd(res, gmul(gcoeff(q,i,j), mulii(gel(x,i),gel(x,j))) );
-  res = gshift(res,1);
-  for (i=1;i<l;i++) res = gadd(res, gmul(gcoeff(q,i,i), sqri(gel(x,i))) );
-  return gerepileupto(av,res);
-}
 /* l = lg(x) = lg(q) > 1. x a RgV, Horner-type evaluation */
 static GEN
 qfeval0(GEN q, GEN x, long l)
@@ -3928,40 +3911,6 @@ hqfeval(GEN q, GEN x)
   return hqfeval0(q,x,l);
 }
 
-/* Horner-type evaluation (mul x 2/3) would force us to use gmul and not
- * mulii (more than 4 x slower for small entries). Not worth it. */
-static GEN
-qfevalb0_Z(GEN q, GEN x, GEN y, long l)
-{
-  long i, j;
-  pari_sp av=avma;
-  GEN res = gmul(gcoeff(q,1,1), mulii(gel(x,1),gel(y,1)));
-  for (i=2;i<l;i++)
-  {
-    if (!signe(gel(x,i)))
-    {
-      if (!signe(gel(y,i))) continue;
-      for (j=1;j<i;j++)
-        res = gadd(res, gmul(gcoeff(q,i,j), mulii(gel(x,j),gel(y,i))));
-    }
-    else if (!signe(gel(y,i)))
-    {
-      for (j=1;j<i;j++)
-        res = gadd(res, gmul(gcoeff(q,i,j), mulii(gel(x,i),gel(y,j))));
-    }
-    else
-    {
-      for (j=1;j<i;j++)
-      {
-        GEN p1 = addii(mulii(gel(x,i),gel(y,j)), mulii(gel(x,j),gel(y,i)));
-        res = gadd(res, gmul(gcoeff(q,i,j),p1));
-      }
-      res = gadd(res, gmul(gcoeff(q,i,i), mulii(gel(x,i),gel(y,i))));
-    }
-  }
-  return gerepileupto(av,res);
-}
-
 static GEN
 qfevalb0(GEN q, GEN x, GEN y, long l)
 {
@@ -3998,19 +3947,10 @@ qf_apply_RgM(GEN q, GEN M)
 GEN
 qf_apply_ZM(GEN q, GEN M)
 {
-  long i, j, k, l;
-  GEN res;
-
+  pari_sp av = avma;
+  long k, l;
   init_qf_apply(q, M, &k, &l); if (l == 1) return cgetg(1, t_MAT);
-  res = cgetg(k,t_MAT);
-  for (i=1; i<k; i++) {
-    gel(res,i) = cgetg(k,t_COL);
-    gcoeff(res,i,i) = qfeval0_Z(q,gel(M,i),l);
-  }
-  for (i=2;i<k;i++)
-    for (j=1;j<i;j++)
-      gcoeff(res,i,j) = gcoeff(res,j,i) = qfevalb0_Z(q,gel(M,i),gel(M,j),l);
-  return res;
+  return gerepileupto(av, ZM_multosym(shallowtrans(M), ZM_mul(q, M)));
 }
 
 GEN

@@ -6298,6 +6298,11 @@ scalar).
 the result is a symmetric matrix (about twice faster than a generic matrix
 multiplication).
 
+\fun{GEN}{RgMrow_RgC_mul}{GEN x, GEN y, long i} multiplies the $i$-th row of
+\kbd{RgM}~\kbd{x} by the \kbd{RgC}~\kbd{y} (seen as a column vector, assumed
+to have compatible dimensions). Assumes that $x$ is non-empty and $0 < i <
+\kbd{lg(x[1])}$.
+
 \fun{GEN}{RgM_mulreal}{GEN x, GEN y} returns the real part of $x\times y$
 (whose entries are \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}).
 
@@ -8751,8 +8756,8 @@ vectors of compatible dimensions).
 \fun{GEN}{qf_apply_RgM}{GEN q, GEN M} $q$ is a symmetric $n\times n$ matrix,
 $M$ an $n\times k$ matrix, return $M' q M$.
 
-\fun{GEN}{qf_apply_ZM}{GEN q, GEN M} as above assuming that $M$ has integer
-entries.
+\fun{GEN}{qf_apply_ZM}{GEN q, GEN M} as above assuming that both
+$q$ and $M$ have integer entries.
 
 \newpage
 \chapter{Miscellaneous mathematical functions}
