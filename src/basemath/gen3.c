@@ -3960,24 +3960,8 @@ qfevalb0_Z(GEN q, GEN x, GEN y, long l)
 static GEN
 qfevalb0(GEN q, GEN x, GEN y, long l)
 {
-  long i, j;
   pari_sp av=avma;
-  GEN res = gmul(gcoeff(q,1,1), gmul(gel(x,1), gel(y,1)));
-
-  for (i=2; i<l; i++)
-  {
-    GEN c = gel(q,i);
-    GEN sx = gmul(gel(c,1), gel(y,1));
-    GEN sy = gmul(gel(c,1), gel(x,1));
-    for (j=2; j<i; j++)
-    {
-      sx = gadd(sx, gmul(gel(c,j),gel(y,j)));
-      sy = gadd(sy, gmul(gel(c,j),gel(x,j)));
-    }
-    sx = gadd(sx, gmul(gel(c,i),gel(y,i)));
-    res = gadd(res, gadd(gmul(gel(x,i), sx), gmul(gel(y,i), sy)));
-  }
-  return gerepileupto(av,res);
+  return gerepileupto(av, RgV_dotproduct(RgV_RgM_mul(x,q), y));
 }
 /* assume q is a real symetric matrix */
 GEN
@@ -3985,8 +3969,6 @@ qfevalb(GEN q, GEN x, GEN y)
 {
   long l = lg(q);
   if (lg(x) != l || lg(y) != l) pari_err_DIM("qfevalb");
-  if (l==1) return gen_0;
-  if (lgcols(q) != l) pari_err_DIM("qfevalb");
   return qfevalb0(q,x,y,l);
 }
 
