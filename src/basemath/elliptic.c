@@ -537,25 +537,17 @@ ellinit_Fq(GEN x, GEN fg)
   return y ? gerepilecopy(av, y): NULL;
 }
 
-static GEN
-get_ell(GEN x)
-{
-  switch(typ(x))
-  {
-    case t_STR: return gel(ellsearchcurve(x),2);
-    case t_VEC: switch(lg(x)) { case 3: case 6: case 17: return x; }
-    /*fall through*/
-  }
-  pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
-  return NULL;/*not reached*/
-}
-
 GEN
 ellinit(GEN x, GEN p, long prec)
 {
   pari_sp av = avma;
   GEN y;
-  x = get_ell(x);
+  switch(typ(x))
+  {
+    case t_STR: x = gel(ellsearchcurve(x),2); break;
+    case t_VEC: break;
+    default: pari_err_TYPE("ellxxx [not an elliptic curve (ell5)]",x);
+  }
   switch (base_ring(x, &p, &prec))
   {
   case t_PADIC:
