@@ -5,11 +5,9 @@ Prototype: GDG
 Help: qfnorm(x,{q}): evaluate the binary quadratic form q (symmetric matrix)
  at x; if q omitted, use the standard Euclidean form.
 Doc: evaluate the binary quadratic form $q$ (symmetric matrix)
- at the vector $x$. If $q$ omitted, use the standard Euclidean form
- and return the square of the $L^2$-norm of $x$; in this special case
- the function is as permissive as \tet{normlp} (allow \typ{POL}s and scalars).
+ at the vector $x$. If $q$ omitted, use the standard Euclidean form.
 
- Roughly equivalent to \kbd{x\til * q * x}, but about twice faster and
+ Equivalent to \kbd{x\til * q * x}, but about twice faster and
  more convenient (does not distinguish between column and row vectors):
  \bprog
  ? x = [1,2,3]~; qfnorm(x)
@@ -24,9 +22,15 @@ Doc: evaluate the binary quadratic form $q$ (symmetric matrix)
  and return \kbd{x\til * q * x} in this case as well:
  \bprog
  ? M = [1,2,3;4,5,6;7,8,9]; qfnorm(M)
- %5 = 285
+ %5 =
+ [66  78  90]
+
+ [78  93 108]
+
+ [90 108 126]
+
  ? for(i=1,10^6, qfnorm(M,q))
- time = 2,884 ms.
+ time = 2,144 ms.
  ? for(i=1,10^6, M~*q*M)
  time = 2,793 ms.
  @eprog

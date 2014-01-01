@@ -26,6 +26,6 @@ Doc: evaluate the bilinear form $q$ (symmetric matrix)
  time = 444ms
  ? for(i=1,10^6, qfnorm(x))
  time = 176 ms.
- ? for(i=1,10^6, qfbil(x,x))
- time = 188 ms.
+ ? for(i=1,10^6, qfbil(x,y))
+ time = 208 ms.
  @eprog

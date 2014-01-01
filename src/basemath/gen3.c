@@ -3870,7 +3870,12 @@ qfeval(GEN q, GEN x)
 GEN
 qfnorm(GEN x, GEN q)
 {
-  if (!q) return gnorml2(x);
+  if (!q) switch(typ(x))
+  {
+    case t_VEC: case t_COL: return RgV_dotsquare(x);
+    case t_MAT: return gram_matrix(x);
+    default: pari_err_TYPE("qfnorm",x);
+  }
   if (typ(q) != t_MAT) pari_err_TYPE("qfnorm",q);
   switch(typ(x))
   {
@@ -3985,19 +3990,10 @@ init_qf_apply(GEN q, GEN M, long *k, long *l)
 GEN
 qf_apply_RgM(GEN q, GEN M)
 {
-  long i, j, k, l;
-  GEN res;
-
+  pari_sp av = avma;
+  long k, l;
   init_qf_apply(q, M, &k, &l); if (l == 1) return cgetg(1, t_MAT);
-  res = cgetg(k,t_MAT);
-  for (i=1; i<k; i++) {
-    gel(res,i) = cgetg(k,t_COL);
-    gcoeff(res,i,i) = qfeval0(q,gel(M,i),l);
-  }
-  for (i=2;i<k;i++)
-    for (j=1;j<i;j++)
-      gcoeff(res,i,j) = gcoeff(res,j,i) = qfevalb0(q,gel(M,i),gel(M,j),l);
-  return res;
+  return gerepileupto(av, RgM_multosym(shallowtrans(M), RgM_mul(q, M)));
 }
 GEN
 qf_apply_ZM(GEN q, GEN M)

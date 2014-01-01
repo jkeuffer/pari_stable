@@ -371,19 +371,24 @@ RgM_RgV_mul(GEN x, GEN y)
   return RgC_RgV_mul(gel(x,1), y);
 }
 
-/* compatible t_MAT * t_COL, l = lg(x) = lg(y), lz = l>1? lgcols(x): 1 */
+/* x[i,]*y, l = lg(y) > 1 */
+static GEN
+RgMrow_RgC_mul(GEN x, long i, GEN y, long l)
+{
+  pari_sp av = avma;
+  GEN t = gmul(gcoeff(x,i,1), gel(y,1)); /* l > 1 ! */
+  long j;
+  for (j=2; j<l; j++) t = gadd(t, gmul(gcoeff(x,i,j), gel(y,j)));
+  return gerepileupto(av,t);
+}
+
+/* compatible t_MAT * t_COL, l = lg(x) = lg(y) > 1, lz = lgcols(x) */
 static GEN
 RgM_RgC_mul_i(GEN x, GEN y, long l, long lz)
 {
   GEN z = cgetg(lz,t_COL);
-  long i, j;
-  for (i=1; i<lz; i++)
-  {
-    pari_sp av = avma;
-    GEN t = gmul(gcoeff(x,i,1), gel(y,1)); /* l > 1 ! */
-    for (j=2; j<l; j++) t = gadd(t, gmul(gcoeff(x,i,j), gel(y,j)));
-    gel(z,i) = gerepileupto(av,t);
-  }
+  long i;
+  for (i=1; i<lz; i++) gel(z,i) = RgMrow_RgC_mul(x,i,y,l);
   return z;
 }
 GEN
@@ -391,7 +396,8 @@ RgM_RgC_mul(GEN x, GEN y)
 {
   long lx = lg(x);
   if (lx != lg(y)) pari_err_OP("operation 'RgM_RgC_mul'", x,y);
-  return RgM_RgC_mul_i(x, y, lx, (lx == 1)? 1: lgcols(x));
+  if (lx == 1) return cgetg(1,t_COL);
+  return RgM_RgC_mul_i(x, y, lx, lgcols(x));
 }
 GEN
 RgV_RgM_mul(GEN x, GEN y)
@@ -459,11 +465,34 @@ RgM_mul(GEN x, GEN y)
   if (ly == 1) return cgetg(1,t_MAT);
   lx = lg(x);
   if (lx != lgcols(y)) pari_err_OP("operation 'RgM_mul'", x,y);
+  if (lx == 1) return zeromat(0,lx-1);
   if (is_modular_mul(x,y,&z)) return gerepileupto(av, z);
   z = cgetg(ly, t_MAT);
-  l = (lx == 1)? 1: lgcols(x);
+  l = lgcols(x);
   for (j=1; j<ly; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(y,j), lx, l);
   return z;
+}
+/* assume result is symmetric */
+GEN
+RgM_multosym(GEN x, GEN y)
+{
+  long j, lx, ly = lg(y);
+  GEN M;
+  if (ly == 1) return cgetg(1,t_MAT);
+  lx = lg(x);
+  if (lx != lgcols(y)) pari_err_OP("operation 'RgM_mulsym'", x,y);
+  if (lx == 1) return cgetg(1,t_MAT);
+  if (ly != lgcols(x)) pari_err_OP("operation 'RgM_mulsym'", x,y);
+  M = cgetg(ly, t_MAT);
+  for (j=1; j<ly; j++)
+  {
+    GEN z = cgetg(ly,t_COL), yj = gel(y,j);
+    long i;
+    for (i=1; i<j; i++) gel(z,i) = gcoeff(M,j,i);
+    for (i=j; i<ly; i++)gel(z,i) = RgMrow_RgC_mul(x,i,yj,ly);
+    gel(M,j) = z;
+  }
+  return M;
 }
 GEN
 RgM_sqr(GEN x)

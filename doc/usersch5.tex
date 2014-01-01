@@ -6294,6 +6294,10 @@ scalar).
 
 \fun{GEN}{RgM_mul}{GEN x, GEN y} returns $x\times y$.
 
+\fun{GEN}{RgM_multosym}{GEN x, GEN y} returns $x\times y$, assuming
+the result is a symmetric matrix (about twice faster than a generic matrix
+multiplication).
+
 \fun{GEN}{RgM_mulreal}{GEN x, GEN y} returns the real part of $x\times y$
 (whose entries are \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}).
 
