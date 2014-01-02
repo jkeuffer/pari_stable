@@ -26,4 +26,5 @@ O(x^-2)
 2 + O(x^2)
 1 + O(x^2)
 1
+O(x^0)
 Total time spent: 0
