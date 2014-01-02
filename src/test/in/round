@@ -7,4 +7,5 @@ test(ceil)
 test(floor)
 test(frac)
 test(round)
-test(x->[round(x,&e),e])
+round(0,&E);
+test(x->[round(x,&e), if(e==E,-'oo,e)])
