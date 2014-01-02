@@ -203,15 +203,6 @@ mt_is_thread(void)
 }
 
 void
-mt_init_stack(size_t s)
-{
-  long i;
-  if (!pari_MPI_rank)
-    for (i=1;i<pari_MPI_size;i++)
-      send_request_long(PMPI_parisize,s,i);
-}
-
-void
 pari_mt_init(void)
 {
   int res = MPI_Init(0, NULL);
@@ -287,8 +278,11 @@ mt_queue_start(struct pari_mt *pt, GEN worker)
   {
     struct mt_mstate *mt = &pari_mt_data;
     long i, n = minss(pari_mt_nbthreads, pari_MPI_size-1);
+    long mtparisize = GP_DATA->threadsize? GP_DATA->threadsize: top-bot;
     pari_mt = mt;
     mt->workid = (long*) pari_malloc(sizeof(long)*(n+1));
+    for (i=1; i <= n; i++)
+      send_request_long(PMPI_parisize, mtparisize, i);
     for (i=1; i <= n; i++)
       send_request_GEN(PMPI_worker, worker, i);
     mt->n = n;

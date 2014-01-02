@@ -40,7 +40,6 @@ struct mt_pstate
 
 static THREAD long mt_thread_no = -1;
 static struct mt_pstate *pari_mt;
-void mt_init_stack(size_t s) { }
 
 #define LOCK(x) pthread_mutex_lock(x); do
 #define UNLOCK(x) while(0); pthread_mutex_unlock(x)

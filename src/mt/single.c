@@ -14,7 +14,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "paripriv.h"
 #include "mt.h"
 
-void mt_init_stack(size_t s) { (void)s; }
 void mt_sigint_block(void) { }
 void mt_sigint_unblock(void) { }
 void mt_err_recover(long er) { (void)er; }

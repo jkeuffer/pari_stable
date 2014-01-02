@@ -541,10 +541,7 @@ sd_threadsize(const char *v, long flag)
   ulong size = GP_DATA->threadsize, n = size;
   GEN r = sd_ulong(v,flag,"threadsize",&n, 0,LONG_MAX,NULL);
   if (n != size)
-  {
     GP_DATA->threadsize = n;
-    mt_init_stack(n? n: top-bot);
-  }
   return r;
 }
 

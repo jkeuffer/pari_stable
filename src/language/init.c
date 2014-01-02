@@ -493,7 +493,6 @@ pari_init_stack(size_t size, size_t old)
     BLOCK_SIGINT_END;
   }
   avma = top = bot+s;
-  if (GP_DATA->threadsize==0) mt_init_stack(s);
   memused = 0;
 }
 
