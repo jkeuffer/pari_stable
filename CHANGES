@@ -167,7 +167,8 @@ BA 24- GP function vecsum
    26- allow .p / .e / .f / .gen for modpr structures
    27- function rnfpolredbest
    28- functions qfnorm, qfbil
-   29- [libpari] ZM_multosym, RgM_multosym, RgMrow_RgC_mul
+   29- [libpari] ZM_multosym, RgM_multosym, RgMrow_RgC_mul, RgM_transmul,
+       RgM_transmultosym, ZM_transmultosym
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

@@ -3824,31 +3824,29 @@ simplify(GEN x)
 /*                EVALUATION OF SOME SIMPLE OBJECTS                */
 /*                                                                 */
 /*******************************************************************/
-/* l = lg(x) = lg(q) > 1. x a RgV, Horner-type evaluation */
-static GEN
-qfeval0(GEN q, GEN x, long l)
-{
-  long i, j;
-  pari_sp av = avma;
-  GEN res = gmul(gcoeff(q,1,1), gsqr(gel(x,1)));
-  for (i=2; i<l; i++)
-  {
-    GEN c = gel(q,i), sx = gmul(gel(c,1), gel(x,1));
-    for (j=2; j<i; j++) sx = gadd(sx, gmul(gel(c,j),gel(x,j)));
-    sx = gadd(gshift(sx,1), gmul(gel(c,i),gel(x,i)));
-    res = gadd(res, gmul(gel(x,i), sx));
-  }
-  return gerepileupto(av,res);
-}
-/* assume q is a real symetric matrix */
+/* q is a real symetric matrix, x a RgV. Horner-type evaluation of q(x)
+ * using (n^2+3n-2)/2 mul */
 GEN
 qfeval(GEN q, GEN x)
 {
-  long l = lg(q);
+  pari_sp av = avma;
+  long i, j, l = lg(q);
+  GEN z;
   if (lg(x) != l) pari_err_DIM("qfeval");
   if (l==1) return gen_0;
   if (lgcols(q) != l) pari_err_DIM("qfeval");
-  return qfeval0(q,x,l);
+  /* l = lg(x) = lg(q) > 1 */
+  z = gmul(gcoeff(q,1,1), gsqr(gel(x,1)));
+  for (i=2; i<l; i++)
+  {
+    GEN c = gel(q,i), s;
+    if (isintzero(gel(x,i))) continue;
+    s = gmul(gel(c,1), gel(x,1));
+    for (j=2; j<i; j++) s = gadd(s, gmul(gel(c,j),gel(x,j)));
+    s = gadd(gshift(s,1), gmul(gel(c,i),gel(x,i)));
+    z = gadd(z, gmul(gel(x,i), s));
+  }
+  return gerepileupto(av,z);
 }
 GEN
 qfnorm(GEN x, GEN q)
@@ -3868,6 +3866,15 @@ qfnorm(GEN x, GEN q)
   }
   return qfeval(q,x);
 }
+/* assume q is a real symetric matrix, q(x,y) using n^2+n mul */
+GEN
+qfevalb(GEN q, GEN x, GEN y)
+{
+  pari_sp av = avma;
+  long l = lg(q);
+  if (lg(x) != l || lg(y) != l) pari_err_DIM("qfevalb");
+  return gerepileupto(av, RgV_dotproduct(RgV_RgM_mul(x,q), y));
+}
 GEN
 qfbil(GEN x, GEN y, GEN q)
 {
@@ -3881,57 +3888,36 @@ qfbil(GEN x, GEN y, GEN q)
   return qfevalb(q,x,y);
 }
 
-/* l = lg(x) = lg(q) > 1. x a RgV */
-static GEN
-hqfeval0(GEN q, GEN x, long l)
-{
-  long i, j;
-  pari_sp av = avma;
-  GEN res, xc;
-  if (l == 2) return gerepileupto(av, gmul(gcoeff(q,1,1), gnorm(gel(x,1))));
-
-  xc = gconj(x);
-  res = mulreal(gcoeff(q,2,1), gmul(gel(x,2),gel(xc,1)));
-  for (i=3;i<l;i++)
-    for (j=1;j<i;j++)
-      res = gadd(res, mulreal(gcoeff(q,i,j), gmul(gel(x,i),gel(xc,j))));
-  res = gshift(res,1);
-  for (i=1;i<l;i++) res = gadd(res, gmul(gcoeff(q,i,i), gnorm(gel(x,i))));
-  return gerepileupto(av,res);
-}
-/* We assume q is a hermitian complex matrix */
+/* q a hermitian complex matrix, x a RgV */
 GEN
 hqfeval(GEN q, GEN x)
 {
-  long l = lg(q);
+  pari_sp av = avma;
+  long i, j, l = lg(q);
+  GEN z, xc;
 
   if (lg(x) != l) pari_err_DIM("hqfeval");
   if (l==1) return gen_0;
   if (lgcols(q) != l) pari_err_DIM("hqfeval");
-  return hqfeval0(q,x,l);
-}
-
-static GEN
-qfevalb0(GEN q, GEN x, GEN y, long l)
-{
-  pari_sp av=avma;
-  return gerepileupto(av, RgV_dotproduct(RgV_RgM_mul(x,q), y));
-}
-/* assume q is a real symetric matrix */
-GEN
-qfevalb(GEN q, GEN x, GEN y)
-{
-  long l = lg(q);
-  if (lg(x) != l || lg(y) != l) pari_err_DIM("qfevalb");
-  return qfevalb0(q,x,y,l);
+  if (l == 2) return gerepileupto(av, gmul(gcoeff(q,1,1), gnorm(gel(x,1))));
+  /* l = lg(x) = lg(q) > 2 */
+  xc = gconj(x);
+  z = mulreal(gcoeff(q,2,1), gmul(gel(x,2),gel(xc,1)));
+  for (i=3;i<l;i++)
+    for (j=1;j<i;j++)
+      z = gadd(z, mulreal(gcoeff(q,i,j), gmul(gel(x,i),gel(xc,j))));
+  z = gshift(z,1);
+  for (i=1;i<l;i++) z = gadd(z, gmul(gcoeff(q,i,i), gnorm(gel(x,i))));
+  return gerepileupto(av,z);
 }
 
 static void
-init_qf_apply(GEN q, GEN M, long *k, long *l)
+init_qf_apply(GEN q, GEN M, long *l)
 {
-  *l = lg(q); *k = lg(M);
-  if (*l == 1) { if (*k == 1) return; }
-  else         { if (*k != 1 && lgcols(M) == *l) return; }
+  long k = lg(M);
+  *l = lg(q);
+  if (*l == 1) { if (k == 1) return; }
+  else         { if (k != 1 && lgcols(M) == *l) return; }
   pari_err_DIM("qf_apply_RgM");
 }
 /* Return X = M'.q.M, assuming q is a symetric matrix and M is a
@@ -3940,17 +3926,15 @@ GEN
 qf_apply_RgM(GEN q, GEN M)
 {
   pari_sp av = avma;
-  long k, l;
-  init_qf_apply(q, M, &k, &l); if (l == 1) return cgetg(1, t_MAT);
-  return gerepileupto(av, RgM_multosym(shallowtrans(M), RgM_mul(q, M)));
+  long l; init_qf_apply(q, M, &l); if (l == 1) return cgetg(1, t_MAT);
+  return gerepileupto(av, RgM_transmultosym(M, RgM_mul(q, M)));
 }
 GEN
 qf_apply_ZM(GEN q, GEN M)
 {
   pari_sp av = avma;
-  long k, l;
-  init_qf_apply(q, M, &k, &l); if (l == 1) return cgetg(1, t_MAT);
-  return gerepileupto(av, ZM_multosym(shallowtrans(M), ZM_mul(q, M)));
+  long l; init_qf_apply(q, M, &l); if (l == 1) return cgetg(1, t_MAT);
+  return gerepileupto(av, ZM_transmultosym(M, ZM_mul(q, M)));
 }
 
 GEN

@@ -497,6 +497,67 @@ RgM_multosym(GEN x, GEN y)
   }
   return M;
 }
+/* x~ * y, assuming result is symmetric */
+GEN
+RgM_transmultosym(GEN x, GEN y)
+{
+  long i, j, l, ly = lg(y);
+  GEN M;
+  if (ly == 1) return cgetg(1,t_MAT);
+  if (lg(x) != ly) pari_err_OP("operation 'RgM_transmultosym'", x,y);
+  l = lgcols(y);
+  if (lgcols(x) != l) pari_err_OP("operation 'RgM_transmultosym'", x,y);
+  M = cgetg(ly, t_MAT);
+  for (i=1; i<ly; i++)
+  {
+    GEN xi = gel(x,i), c = cgetg(ly,t_COL);
+    gel(M,i) = c;
+    for (j=1; j<i; j++)
+      gcoeff(M,i,j) = gel(c,j) = RgV_dotproduct_i(xi,gel(y,j),l);
+    gel(c,i) = RgV_dotproduct_i(xi,gel(y,i),l);
+  }
+  return M;
+}
+/* x~ * y */
+GEN
+RgM_transmul(GEN x, GEN y)
+{
+  long i, j, l, lx, ly = lg(y);
+  GEN M;
+  if (ly == 1) return cgetg(1,t_MAT);
+  lx = lg(x);
+  l = lgcols(y);
+  if (lgcols(x) != l) pari_err_OP("operation 'RgM_transmul'", x,y);
+  M = cgetg(ly, t_MAT);
+  for (i=1; i<ly; i++)
+  {
+    GEN xi = gel(x,i), c = cgetg(lx,t_COL);
+    gel(M,i) = c;
+    for (j=1; j<lx; j++) gel(c,j) = RgV_dotproduct_i(xi,gel(y,j),l);
+  }
+  return M;
+}
+
+GEN
+gram_matrix(GEN x)
+{
+  long i,j, l, lx = lg(x);
+  GEN M;
+  if (!is_matvec_t(typ(x))) pari_err_TYPE("gram",x);
+  if (lx == 1) return cgetg(1,t_MAT);
+  l = lgcols(x);
+  M = cgetg(lx,t_MAT);
+  for (i=1; i<lx; i++)
+  {
+    GEN xi = gel(x,i), c = cgetg(lx,t_COL);
+    gel(M,i) = c;
+    for (j=1; j<i; j++)
+      gcoeff(M,i,j) = gel(c,j) = RgV_dotproduct_i(xi,gel(x,j),l);
+    gel(c,i) = RgV_dotsquare(xi);
+  }
+  return M;
+}
+
 GEN
 RgM_sqr(GEN x)
 {

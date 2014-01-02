@@ -196,10 +196,9 @@ ZM_multosym(GEN x, GEN y)
   long j, lx, ly = lg(y);
   GEN M;
   if (ly == 1) return cgetg(1,t_MAT);
-  lx = lg(x);
-  if (lx != lgcols(y)) pari_err_OP("operation 'ZM_multosym'", x,y);
+  lx = lg(x); /* = lgcols(y) */
   if (lx == 1) return cgetg(1,t_MAT);
-  if (ly != lgcols(x)) pari_err_OP("operation 'ZM_multosym'", x,y);
+  /* ly = lgcols(x) */
   M = cgetg(ly, t_MAT);
   for (j=1; j<ly; j++)
   {
@@ -208,6 +207,42 @@ ZM_multosym(GEN x, GEN y)
     for (i=1; i<j; i++) gel(z,i) = gcoeff(M,j,i);
     for (i=j; i<ly; i++)gel(z,i) = ZMrow_ZC_mul_i(x,yj,i,lx);
     gel(M,j) = z;
+  }
+  return M;
+}
+
+/* assume lx > 1 is lg(x) = lg(y) */
+static GEN
+ZV_dotproduct_i(GEN x, GEN y, long lx)
+{
+  pari_sp av = avma;
+  GEN c = mulii(gel(x,1), gel(y,1));
+  long i;
+  for (i = 2; i < lx; i++)
+  {
+    GEN t = mulii(gel(x,i), gel(y,i));
+    if (t != gen_0) c = addii(c, t);
+  }
+  return gerepileuptoint(av, c);
+}
+
+/* x~ * y, assuming result is symmetric */
+GEN
+ZM_transmultosym(GEN x, GEN y)
+{
+  long i, j, l, ly = lg(y);
+  GEN M;
+  if (ly == 1) return cgetg(1,t_MAT);
+  /* lg(x) = ly */
+  l = lgcols(y); /* = lgcols(x) */
+  M = cgetg(ly, t_MAT);
+  for (i=1; i<ly; i++)
+  {
+    GEN xi = gel(x,i), c = cgetg(ly,t_COL);
+    gel(M,i) = c;
+    for (j=1; j<i; j++)
+      gcoeff(M,i,j) = gel(c,j) = ZV_dotproduct_i(xi,gel(y,j),l);
+    gel(c,i) = ZV_dotproduct_i(xi,gel(y,i),l);
   }
   return M;
 }
@@ -228,21 +263,6 @@ zv_dotproduct(GEN x, GEN y)
   for (i = 2; i < lx; i++)
     c += uel(x,i)*uel(y,i);
   return c;
-}
-
-/* assume lx > 1 is lg(x) = lg(y) */
-static GEN
-ZV_dotproduct_i(GEN x, GEN y, long lx)
-{
-  pari_sp av = avma;
-  GEN c = mulii(gel(x,1), gel(y,1));
-  long i;
-  for (i = 2; i < lx; i++)
-  {
-    GEN t = mulii(gel(x,i), gel(y,i));
-    if (t != gen_0) c = addii(c, t);
-  }
-  return gerepileuptoint(av, c);
 }
 
 GEN

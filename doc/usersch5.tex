@@ -6111,6 +6111,10 @@ by the \typ{INT}~\kbd{y}.
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions).
 
+\fun{GEN}{ZM_multosym}{GEN x, GEN y}
+
+\fun{GEN}{ZM_transmultosym}{GEN x, GEN y}
+
 \fun{GEN}{ZMrow_ZC_mul}{GEN x, GEN y, long i} multiplies the $i$-th row
 of \kbd{ZM}~\kbd{x} by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed
 to have compatible dimensions). Assumes that $x$ is non-empty and
@@ -6123,6 +6127,9 @@ by the \kbd{ZM}~\kbd{y}. Returns a \typ{VEC}.
 are exact.
 
 \fun{GEN}{ZM_pow}{GEN x, GEN n} returns $\kbd{x}^\kbd{n}$, assuming \kbd{x}
+is a square \kbd{ZM} and $\kbd{n}\geq 0$.
+
+\fun{GEN}{ZM_powu}{GEN x, ulong n} returns $\kbd{x}^\kbd{n}$, assuming \kbd{x}
 is a square \kbd{ZM} and $\kbd{n}\geq 0$.
 
 \fun{GEN}{ZM_det}{GEN M} if \kbd{M} is a \kbd{ZM}, returns the determinant of
@@ -6294,7 +6301,13 @@ scalar).
 
 \fun{GEN}{RgM_mul}{GEN x, GEN y} returns $x\times y$.
 
+\fun{GEN}{RgM_transmul}{GEN x, GEN y} returns $x\til \times y$.
+
 \fun{GEN}{RgM_multosym}{GEN x, GEN y} returns $x\times y$, assuming
+the result is a symmetric matrix (about twice faster than a generic matrix
+multiplication).
+
+\fun{GEN}{RgM_transmultosym}{GEN x, GEN y} returns $x\til \times y$, assuming
 the result is a symmetric matrix (about twice faster than a generic matrix
 multiplication).
 
@@ -6338,7 +6351,7 @@ when $m > n$.
 \fun{GEN}{RgV_dotsquare}{GEN x} returns the scalar product of $x$ with itself.
 
 \fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} $(v_i\cdot v_j)$
-associated to the entries of $v$ (matrix or vector).
+associated to the entries of $v$ (matrix, or vector of vectors).
 
 \fun{GEN}{RgV_polint}{GEN X, GEN Y, long v} $X$ and $Y$ being two vectors of
 the same length, returns the polynomial $T$ in variable $v$ such that

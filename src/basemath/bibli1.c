@@ -244,22 +244,6 @@ gram_schmidt(GEN e, GEN *ptB)
 /**                          LLL ALGORITHM                         **/
 /**                                                                **/
 /********************************************************************/
-GEN
-gram_matrix(GEN x)
-{
-  long i,j, lx = lg(x), tx = typ(x);
-  GEN g;
-  if (!is_matvec_t(tx)) pari_err_TYPE("gram",x);
-  g = cgetg(lx,t_MAT);
-  for (i=1; i<lx; i++)
-  {
-    gel(g,i) = cgetg(lx,t_COL);
-    for (j=1; j<=i; j++)
-      gcoeff(g,i,j) = gcoeff(g,j,i) = RgV_dotproduct(gel(x,i),gel(x,j));
-  }
-  return g;
-}
-
 /* Def: a matrix M is said to be -partially reduced- if | m1 +- m2 | >= |m1|
  * for any two columns m1 != m2, in M.
  *
