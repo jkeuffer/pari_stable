@@ -119,29 +119,6 @@ zkst : structure of (Z_K/m)*         bid,                           bnr
 cmp      divrem   lex      max      min      shift    shiftmul sign
 vecmax   vecmin   
 
-The standard distribution of GP/PARI includes a reference manual, a tutorial
-, a 
-reference card and quite a few examples. They should have been installed in 
-the 
-directory '/home/kb/PARI/pari/../GP/share/pari'. If not, ask the person who 
-installed PARI on your system where they can be found. You can also download
- 
-them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'.
-
-Three mailing lists are devoted to PARI:
-  - pari-announce (moderated) to announce major version changes.
-  - pari-dev for everything related to the development of PARI, including
-    suggestions, technical questions, bug reports and patch submissions.
-  - pari-users for everything else!
-To subscribe, send an empty message to 
-<listname>-request@pari.math.u-bordeaux.fr, with a Subject: field containing
- 
-the word "subscribe". An archive is kept at the WWW site mentioned above. Yo
-u 
-can also reach the authors directly by email: pari@math.u-bordeaux.fr (answe
-r 
-not guaranteed).
-
 List of the PARI types:
   t_INT    : long integers     [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]
   t_REAL   : long real numbers [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]

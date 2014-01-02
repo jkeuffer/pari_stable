@@ -380,27 +380,22 @@ usage(char *s)
 static void
 community(void)
 {
-  pari_sp av = avma;
-  char *s = stack_malloc(strlen(pari_datadir) + 1024);
-
-  (void)sprintf(s, "The standard distribution of GP/PARI includes a \
-reference manual, a tutorial, a reference card and quite a few examples. They \
-should have been installed in the directory '%s'. If not, ask the person \
-who installed PARI on your system where they can be found. You can also \
-download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'."
-                 , pari_datadir);
-  print_text(s); avma = av;
-
-  pari_puts("\nThree mailing lists are devoted to PARI:\n\
+  print_text("The PARI/GP distribution includes a reference manual, a \
+tutorial, a reference card and quite a few examples. They have been installed \
+in the directory ");
+  pari_puts("  ");
+  pari_puts(pari_datadir);
+  pari_puts("\nYou can also download them from http://pari.math.u-bordeaux.fr/.\
+\n\nThree mailing lists are devoted to PARI:\n\
   - pari-announce (moderated) to announce major version changes.\n\
   - pari-dev for everything related to the development of PARI, including\n\
     suggestions, technical questions, bug reports and patch submissions.\n\
-  - pari-users for everything else!\n");
-  print_text("\
-To subscribe, send an empty message to <listname>-request@pari.math.u-bordeaux.fr, \
-with a Subject: field containing the word \"subscribe\".  \
-An archive is kept at the WWW site mentioned above. You can also reach the \
-authors directly by email: pari@math.u-bordeaux.fr (answer not guaranteed)."); }
+  - pari-users for everything else!\n\
+To subscribe, send an empty message to\n\
+  <pari_list_name>-request@pari.math.u-bordeaux.fr\n\
+with a Subject: field containing the word 'subscribe'.\n\n");
+  print_text("An archive is kept at the WWW site mentioned above. You can also \
+reach the authors at pari@math.u-bordeaux.fr (answer not guaranteed)."); }
 
 static void
 gentypes(void)
