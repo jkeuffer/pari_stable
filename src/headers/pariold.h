@@ -13,6 +13,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define recip serreverse
 #define gcmpX gequalX
 #define ZM_hnfremdiv ZM_hnfdivrem
 #define rnfidealhermite rnfidealhnf

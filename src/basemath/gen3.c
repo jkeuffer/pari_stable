@@ -1589,65 +1589,59 @@ gsubstvec(GEN e, GEN v, GEN r)
 /*******************************************************************/
 
 GEN
-recip(GEN x)
+serreverse(GEN x)
 {
-  long v=varn(x), lx = lg(x);
-  pari_sp tetpil, av=avma;
-  GEN p1, a, y, u;
+  long v=varn(x), lx = lg(x), i, mi;
+  pari_sp av = avma, lim = stack_lim(av, 2);
+  GEN a, y, u;
 
   if (typ(x)!=t_SER) pari_err_TYPE("serreverse",x);
   if (valp(x)!=1) pari_err_DOMAIN("serreverse", "valuation", "!=", gen_1,x);
   if (lx < 3) pari_err_DOMAIN("serreverse", "x", "=", gen_0,x);
-
-  a=gel(x,2);
-  if (gequal1(a))
+  a = gel(x,2);
+  if (gequal1(a)) a = NULL; else { x = gdiv(x,a); gel(x,2) = gen_1; }
+  mi = lx-1; while (mi>=3 && gequal0(gel(x,mi))) mi--;
+  u = cgetg(lx,t_SER);
+  y = cgetg(lx,t_SER);
+  u[1] = y[1] = evalsigne(1) | _evalvalp(1) | evalvarn(v);
+  gel(u,2) = gel(y,2) = gen_1;
+  if (lx > 3)
   {
-    long i, j, k, mi;
-    pari_sp lim=stack_lim(av, 2);
-
-    mi = lx-1; while (mi>=3 && gequal0(gel(x,mi))) mi--;
-    u = cgetg(lx,t_SER);
-    y = cgetg(lx,t_SER);
-    u[1] = y[1] = evalsigne(1) | _evalvalp(1) | evalvarn(v);
-    gel(u,2) = gel(y,2) = gen_1;
-    if (lx > 3)
-    {
-      gel(u,3) = gmulsg(-2,gel(x,3));
-      gel(y,3) = gneg(gel(x,3));
-    }
-    for (i=3; i<lx-1; )
-    {
-      pari_sp av2;
-      for (j=3; j<i+1; j++)
-      {
-        av2 = avma; p1 = gel(x,j);
-        for (k = maxss(3,j+2-mi); k < j; k++)
-          p1 = gadd(p1, gmul(gel(u,k),gel(x,j-k+2)));
-        p1 = gneg(p1);
-        gel(u,j) = gerepileupto(av2, gadd(gel(u,j), p1));
-      }
-      av2 = avma;
-      p1 = gmulsg(i,gel(x,i+1));
-      for (k = 2; k < minss(i,mi); k++)
-      {
-        GEN p2 = gmul(gel(x,k+1),gel(u,i-k+2));
-        p1 = gadd(p1, gmulsg(k,p2));
-      }
-      i++;
-      gel(u,i) = gerepileupto(av2, gneg(p1));
-      gel(y,i) = gdivgs(gel(u,i), i-1);
-      if (low_stack(lim, stack_lim(av,2)))
-      {
-        if(DEBUGMEM>1) pari_warn(warnmem,"recip");
-        for(k=i+1; k<lx; k++) gel(u,k) = gel(y,k) = gen_0; /* dummy */
-        gerepileall(av,2, &u,&y);
-      }
-    }
-    return gerepilecopy(av,y);
+    gel(u,3) = gmulsg(-2,gel(x,3));
+    gel(y,3) = gneg(gel(x,3));
   }
-  y = gdiv(x,a); gel(y,2) = gen_1; y = recip(y);
-  a = gdiv(pol_x(v),a); tetpil = avma;
-  return gerepile(av,tetpil, gsubst(y,v,a));
+  for (i=3; i<lx-1; )
+  {
+    pari_sp av2;
+    GEN p1;
+    long j, k, K = minss(i,mi);
+    for (j=3; j<i+1; j++)
+    {
+      av2 = avma; p1 = gel(x,j);
+      for (k = maxss(3,j+2-mi); k < j; k++)
+        p1 = gadd(p1, gmul(gel(u,k),gel(x,j-k+2)));
+      p1 = gneg(p1);
+      gel(u,j) = gerepileupto(av2, gadd(gel(u,j), p1));
+    }
+    av2 = avma;
+    p1 = gmulsg(i,gel(x,i+1));
+    for (k = 2; k < K; k++)
+    {
+      GEN p2 = gmul(gel(x,k+1),gel(u,i-k+2));
+      p1 = gadd(p1, gmulsg(k,p2));
+    }
+    i++;
+    gel(u,i) = gerepileupto(av2, gneg(p1));
+    gel(y,i) = gdivgs(gel(u,i), i-1);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"serreverse");
+      for(k=i+1; k<lx; k++) gel(u,k) = gel(y,k) = gen_0; /* dummy */
+      gerepileall(av,2, &u,&y);
+    }
+  }
+  if (a) y = ser_unscale(y, ginv(a));
+  return gerepilecopy(av,y);
 }
 
 /*******************************************************************/

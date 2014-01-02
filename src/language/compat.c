@@ -607,7 +607,7 @@ entree oldfonctions[]={
 {"reorder",0,(void*)suppressed,11,"G","reorder(x)=THIS FUNCTION HAS BEEN SUPPRESSED."},
 {"resultant",2,(void*)resultant_all,7,"GGD&","resultant(x,y)=resultant of the polynomials x and y with exact entries."},
 {"resultant2",2,(void*)resultant2,7,"GG","resultant2(x,y)=resultant of the polynomials x and y."},
-{"reverse",1,(void*)recip,7,"G","reverse(x)=reversion of the power series x."},
+{"reverse",1,(void*)serreverse,7,"G","reverse(x)=reversion of the power series x."},
 {"rhoreal",1,(void*)rhoreal,4,"G","rhoreal(x)=single reduction step of the binary quadratic form x of positive discriminant."},
 {"rhorealnod",2,(void*)rhorealnod,4,"GG","rhorealnod(x,sq)=single reduction step of the binary quadratic form x with D>0 without distance function where sq=[sqrt D]."},
 {"rndtoi",13,(void*)grndtoi,2,"Gf","rndtoi(x)=take the nearest integer to all the coefficients of x, without taking into account loss of integer part precision."},
