@@ -5,7 +5,8 @@ Prototype: GDG
 Help: qfnorm(x,{q}): evaluate the binary quadratic form q (symmetric matrix)
  at x; if q omitted, use the standard Euclidean form.
 Doc: evaluate the binary quadratic form $q$ (symmetric matrix)
- at the vector $x$. If $q$ omitted, use the standard Euclidean form.
+ at the vector $x$. If $q$ omitted, use the standard Euclidean form,
+ corresponding to the identity matrix.
 
  Equivalent to \kbd{x\til * q * x}, but about twice faster and
  more convenient (does not distinguish between column and row vectors):
@@ -21,7 +22,7 @@ Doc: evaluate the binary quadratic form $q$ (symmetric matrix)
  @eprog\noindent We also allow \typ{MAT}s of compatible dimensions for $x$,
  and return \kbd{x\til * q * x} in this case as well:
  \bprog
- ? M = [1,2,3;4,5,6;7,8,9]; qfnorm(M)
+ ? M = [1,2,3;4,5,6;7,8,9]; qfnorm(M) \\ Gram matrix
  %5 =
  [66  78  90]
 

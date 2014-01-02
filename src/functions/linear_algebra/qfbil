@@ -6,7 +6,7 @@ Help: qfbil(x,y,{q}): evaluate the bilinear form q (symmetric matrix)
  at (x,y); if q omitted, use the standard Euclidean scalar product.
 Doc: evaluate the bilinear form $q$ (symmetric matrix)
  at the vectors $(x,y)$; if $q$ omitted, use the standard Euclidean scalar
- product.
+ product, corresponding to the identity matrix.
 
  Roughly equivalent to \kbd{x\til * q * y}, but a little faster and
  more convenient (does not distinguish between column and row vectors):
