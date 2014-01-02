@@ -59,4 +59,28 @@ error("incorrect type in ground (t_STR).")
 [[1, 2], -oo]
 [[0, 0; 0, 0], -oo]
 error("incorrect type in grndtoi (t_STR).")
-Total time spent: 0
+1
+1
+-1
+error("incorrect type in gtrunc (t_INTMOD).")
+error("incorrect type in gtrunc (t_QUAD).")
+error("incorrect type in gtrunc (t_POLMOD).")
+x
+1/3*x + 4/3
+0
+[1, 2]
+[0, 0; 0, 0]
+error("incorrect type in gtrunc (t_STR).")
+[1, -oo]
+[1, -1]
+[-1, -oo]
+error("incorrect type in gtrunc (t_INTMOD).")
+error("incorrect type in gtrunc (t_QUAD).")
+error("incorrect type in gtrunc (t_POLMOD).")
+[x, -oo]
+[1/3*x + 4/3, -oo]
+[0, -oo]
+[[1, 2], -oo]
+[[0, 0; 0, 0], -oo]
+error("incorrect type in gtrunc (t_STR).")
+Total time spent: 4

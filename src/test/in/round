@@ -9,3 +9,5 @@ test(frac)
 test(round)
 round(0,&E);
 test(x->[round(x,&e), if(e==E,-'oo,e)])
+test(truncate)
+test(x->[truncate(x,&e), if(e==E,-'oo,e)])
