@@ -2065,9 +2065,8 @@ gfloor(GEN x)
 GEN
 gfrac(GEN x)
 {
-  pari_sp av = avma, tetpil;
-  GEN p1 = gneg_i(gfloor(x));
-  tetpil = avma; return gerepile(av,tetpil,gadd(x,p1));
+  pari_sp av = avma;
+  return gerepileupto(av, gsub(x,gfloor(x)));
 }
 
 /* assume x t_REAL */
@@ -2075,14 +2074,14 @@ GEN
 ceilr(GEN x) {
   pari_sp av = avma;
   GEN y = floorr(x);
-  if (cmpri(x, y)) return gerepileuptoint(av, addsi(1,y));
+  if (cmpri(x, y)) return gerepileuptoint(av, addui(1,y));
   return y;
 }
 
 GEN
 gceil(GEN x)
 {
-  GEN y, p1;
+  GEN y;
   long i, lx;
   pari_sp av;
 
@@ -2092,12 +2091,8 @@ gceil(GEN x)
     case t_POL: return RgX_copy(x);
     case t_REAL: return ceilr(x);
     case t_FRAC:
-      av = avma; y = dvmdii(gel(x,1),gel(x,2),&p1);
-      if (p1 != gen_0 && signe(gel(x,1)) > 0)
-      {
-        cgiv(p1);
-        return gerepileuptoint(av, addsi(1,y));
-      }
+      av = avma; y = divii(gel(x,1),gel(x,2));
+      if (signe(gel(x,1)) > 0) y = gerepileuptoint(av, addui(1,y));
       return y;
 
     case t_RFRAC:

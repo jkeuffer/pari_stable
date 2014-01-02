@@ -1,6 +1,7 @@
 1
 1
 2
+-1
 error("incorrect type in gceil (t_INTMOD).")
 error("incorrect type in gceil (t_QUAD).")
 error("incorrect type in gceil (t_POLMOD).")
@@ -12,6 +13,7 @@ error("incorrect type in gceil (t_SER).")
 error("incorrect type in gceil (t_STR).")
 1
 1
+-2
 error("incorrect type in gfloor (t_INTMOD).")
 error("incorrect type in gfloor (t_QUAD).")
 error("incorrect type in gfloor (t_POLMOD).")
@@ -23,6 +25,7 @@ error("incorrect type in gfloor (t_SER).")
 error("incorrect type in gfloor (t_STR).")
 0
 0.60000000000000000000000000000000000000
+2/3
 error("incorrect type in gfloor (t_INTMOD).")
 error("incorrect type in gfloor (t_QUAD).")
 error("incorrect type in gfloor (t_POLMOD).")
@@ -34,6 +37,7 @@ error("incorrect type in gfloor (t_SER).")
 error("incorrect type in gfloor (t_STR).")
 1
 2
+-1
 Mod(1, 3)
 w
 Mod(x + 1, x^2 + 1/2)
@@ -45,6 +49,7 @@ x
 error("incorrect type in ground (t_STR).")
 [1, -2305843009213693952]
 [2, -2]
+[-1, -2305843009213693952]
 [Mod(1, 3), -2305843009213693952]
 [w, -2305843009213693952]
 [Mod(x + 1, x^2 + 1/2), -2305843009213693952]
@@ -54,4 +59,4 @@ error("incorrect type in ground (t_STR).")
 [[1, 2], -2305843009213693952]
 [[0, 0; 0, 0], -2305843009213693952]
 error("incorrect type in grndtoi (t_STR).")
-Total time spent: 4
+Total time spent: 0
