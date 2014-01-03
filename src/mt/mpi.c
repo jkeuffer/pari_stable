@@ -18,7 +18,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 static THREAD int pari_MPI_size, pari_MPI_rank;
 static THREAD long nbreq = 0;
 
-enum PMPI_cmd { PMPI_close, PMPI_worker, PMPI_work, PMPI_parisize };
+enum PMPI_cmd { PMPI_close, PMPI_worker, PMPI_work, PMPI_parisize,
+                PMPI_precreal };
 
 struct mt_mstate
 {
@@ -173,6 +174,9 @@ pari_MPI_child(void)
       pari_init_stack(size,top-bot);
       gp_context_save(&rec);
       break;
+    case PMPI_precreal:
+      precreal = recvfrom_long(0);
+      break;
     case PMPI_close:
       MPI_Barrier(MPI_COMM_WORLD);
       MPI_Finalize();
@@ -282,9 +286,11 @@ mt_queue_start(struct pari_mt *pt, GEN worker)
     pari_mt = mt;
     mt->workid = (long*) pari_malloc(sizeof(long)*(n+1));
     for (i=1; i <= n; i++)
+    {
       send_request_long(PMPI_parisize, mtparisize, i);
-    for (i=1; i <= n; i++)
+      send_request_long(PMPI_precreal, precreal, i);
       send_request_GEN(PMPI_worker, worker, i);
+    }
     mt->n = n;
     mt->nbint = 1;
     mt->source = 1;
