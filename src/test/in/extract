@@ -25,4 +25,8 @@ test(f)= [ print(iferr(f(p),E,E)) | p<-obj ];
 test(x->component(x,2));
 test(x->component(x,10));
 
+test(x->polcoeff(x,-1));
+test(x->polcoeff(x,2));
+test(x->polcoeff(x,10));
+
 vecextract(Vecsmall([3,4,5]),[2,3,1])

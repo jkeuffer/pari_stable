@@ -263,5 +263,41 @@ error("non-existent component: index > 5")
 error("incorrect type in component [leaf] (t_STR).")
 error("non-existent component: index > 3")
 error("non-existent component: index > 3")
+0
+0
+1
+0
+0
+error("non-existent component in polcoeff: index < 1")
+error("incorrect type in polcoeff (t_VECSMALL).")
+error("incorrect type in polcoeff (t_LIST).")
+error("incorrect type in polcoeff (t_LIST).")
+error("incorrect type in polcoeff (t_STR).")
+error("non-existent component in polcoeff: index < 1")
+error("incorrect type in polcoeff (t_ERROR).")
+0
+0
+0
+3
+2
+2
+error("incorrect type in polcoeff (t_VECSMALL).")
+error("incorrect type in polcoeff (t_LIST).")
+error("incorrect type in polcoeff (t_LIST).")
+error("incorrect type in polcoeff (t_STR).")
+[2, 4]~
+error("incorrect type in polcoeff (t_ERROR).")
+0
+0
+0
+0
+error("domain error in polcoeff: degree > 2")
+error("non-existent component in polcoeff: index > 2")
+error("incorrect type in polcoeff (t_VECSMALL).")
+error("incorrect type in polcoeff (t_LIST).")
+error("incorrect type in polcoeff (t_LIST).")
+error("incorrect type in polcoeff (t_STR).")
+error("non-existent component in polcoeff: index > 3")
+error("incorrect type in polcoeff (t_ERROR).")
 Vecsmall([4, 5, 3])
-Total time spent: 0
+Total time spent: 4
