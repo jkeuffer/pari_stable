@@ -19,7 +19,7 @@ matsize(vecextract(A, Vecsmall([1,2]), []))
 matsize(vecextract(matid(6), 3, 0))
 
 fun = [Vec,Vecrev,Col,Colrev,Vecsmall];
-obj = [1, 'x, Pol([5,4,3,2,1]), List([1,2,3]), List([1,2,3,4,5])];
+obj = [1, 'x, Pol([5,4,3,2,1]), x+2*x^2+O(x^3),[1,2], Vecsmall([1,2]), List([1,2,3]), List([1,2,3,4,5])];
 {
   for(i=1, #fun,
     my (f = fun[i]);
