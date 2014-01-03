@@ -2672,6 +2672,7 @@ _gtopoly(GEN x, long v, int reverse)
       if (typ(a) != t_POL || varn(a) != vb) return zeropol(v);
       y = RgX_div(a,b); break;
     }
+    case t_VECSMALL: x = zv_to_ZV(x); /* fall through */
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
     {
       long j, k, lx = lg(x);
