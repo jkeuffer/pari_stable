@@ -59,190 +59,209 @@
 [0, 0]
 [0, 0]
 [0, 0]
-Vec:
 [1]
-[1, 0, 0, 0]
-[0, 0, 0, 1]
 [1, 0]
-[1, 0, 0, 0]
-[0, 0, 1, 0]
 [1/x]
-[1/x, 0, 0, 0]
-[0, 0, 0, 1/x]
 [5, 4, 3, 2, 1]
-[5, 4, 3, 2]
-[5, 4, 3, 2]
 [1, 2]
-[1, 2, 0, 0]
-[0, 0, 1, 2]
 [1, 2]
-[1, 2, 0, 0]
-[0, 0, 1, 2]
 [1, 2]
-[1, 2, 0, 0]
-[0, 0, 1, 2]
 [1, 2, 3]
-[1, 2, 3, 0]
-[0, 1, 2, 3]
 [1, 2, 3, 4, 5]
-[1, 2, 3, 4]
-[1, 2, 3, 4]
 ["a", "b"]
-error("incorrect type in gtovec (t_STR).")
-error("incorrect type in gtovec (t_STR).")
 [[1, 3]~, [2, 4]~, [3, 5]~]
-error("incorrect type in gtovec (t_MAT).")
-error("incorrect type in gtovec (t_MAT).")
 ["e_INV", "gdiv", 0]
-error("incorrect type in gtovec (t_ERROR).")
-error("incorrect type in gtovec (t_ERROR).")
-Vecrev:
-[1]
-[0, 0, 0, 1]
 [1, 0, 0, 0]
-[0, 1]
-[0, 0, 0, 1]
-[0, 1, 0, 0]
-[1/x]
-[0, 0, 0, 1/x]
+[1, 0, 0, 0]
 [1/x, 0, 0, 0]
+[5, 4, 3, 2]
+[1, 2, 0, 0]
+[1, 2, 0, 0]
+[1, 2, 0, 0]
+[1, 2, 3, 0]
+[1, 2, 3, 4]
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
+error("incorrect type in gtovec (t_ERROR).")
+[0, 0, 0, 1]
+[0, 0, 1, 0]
+[0, 0, 0, 1/x]
+[5, 4, 3, 2]
+[0, 0, 1, 2]
+[0, 0, 1, 2]
+[0, 0, 1, 2]
+[0, 1, 2, 3]
+[1, 2, 3, 4]
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
+error("incorrect type in gtovec (t_ERROR).")
+[1]
+[0, 1]
+[1/x]
 [1, 2, 3, 4, 5]
-[2, 3, 4, 5]
-[2, 3, 4, 5]
 [2, 1]
-[0, 0, 2, 1]
-[2, 1, 0, 0]
 [2, 1]
-[0, 0, 2, 1]
-[2, 1, 0, 0]
 [2, 1]
-[0, 0, 2, 1]
-[2, 1, 0, 0]
 [3, 2, 1]
-[0, 3, 2, 1]
-[3, 2, 1, 0]
 [5, 4, 3, 2, 1]
-[4, 3, 2, 1]
-[4, 3, 2, 1]
 ["b", "a"]
-error("incorrect type in gtovec (t_STR).")
-error("incorrect type in gtovec (t_STR).")
 [[3, 5]~, [2, 4]~, [1, 3]~]
-error("incorrect type in gtovec (t_MAT).")
-error("incorrect type in gtovec (t_MAT).")
 [0, "gdiv", "e_INV"]
+[0, 0, 0, 1]
+[0, 0, 0, 1]
+[0, 0, 0, 1/x]
+[2, 3, 4, 5]
+[0, 0, 2, 1]
+[0, 0, 2, 1]
+[0, 0, 2, 1]
+[0, 3, 2, 1]
+[4, 3, 2, 1]
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
 error("incorrect type in gtovec (t_ERROR).")
+[1, 0, 0, 0]
+[0, 1, 0, 0]
+[1/x, 0, 0, 0]
+[2, 3, 4, 5]
+[2, 1, 0, 0]
+[2, 1, 0, 0]
+[2, 1, 0, 0]
+[3, 2, 1, 0]
+[4, 3, 2, 1]
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
 error("incorrect type in gtovec (t_ERROR).")
-Col:
 [1]~
-[1, 0, 0, 0]~
-[0, 0, 0, 1]~
 [1, 0]~
-[1, 0, 0, 0]~
-[0, 0, 1, 0]~
 [1/x]~
-[1/x, 0, 0, 0]~
-[0, 0, 0, 1/x]~
 [5, 4, 3, 2, 1]~
-[5, 4, 3, 2]~
-[5, 4, 3, 2]~
 [1, 2]~
-[1, 2, 0, 0]~
-[0, 0, 1, 2]~
 [1, 2]~
-[1, 2, 0, 0]~
-[0, 0, 1, 2]~
 [1, 2]~
-[1, 2, 0, 0]~
-[0, 0, 1, 2]~
 [1, 2, 3]~
-[1, 2, 3, 0]~
-[0, 1, 2, 3]~
 [1, 2, 3, 4, 5]~
-[1, 2, 3, 4]~
-[1, 2, 3, 4]~
 ["a", "b"]~
-error("incorrect type in gtovec (t_STR).")
-error("incorrect type in gtovec (t_STR).")
 [[1, 2, 3], [3, 4, 5]]~
-error("incorrect type in gtovec (t_MAT).")
-error("incorrect type in gtovec (t_MAT).")
 ["e_INV", "gdiv", 0]~
-error("incorrect type in gtovec (t_ERROR).")
-error("incorrect type in gtovec (t_ERROR).")
-Colrev:
-[1]~
-[0, 0, 0, 1]~
 [1, 0, 0, 0]~
-[0, 1]~
-[0, 0, 0, 1]~
-[0, 1, 0, 0]~
-[1/x]~
-[0, 0, 0, 1/x]~
+[1, 0, 0, 0]~
 [1/x, 0, 0, 0]~
+[5, 4, 3, 2]~
+[1, 2, 0, 0]~
+[1, 2, 0, 0]~
+[1, 2, 0, 0]~
+[1, 2, 3, 0]~
+[1, 2, 3, 4]~
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
+error("incorrect type in gtovec (t_ERROR).")
+[0, 0, 0, 1]~
+[0, 0, 1, 0]~
+[0, 0, 0, 1/x]~
+[5, 4, 3, 2]~
+[0, 0, 1, 2]~
+[0, 0, 1, 2]~
+[0, 0, 1, 2]~
+[0, 1, 2, 3]~
+[1, 2, 3, 4]~
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
+error("incorrect type in gtovec (t_ERROR).")
+[1]~
+[0, 1]~
+[1/x]~
 [1, 2, 3, 4, 5]~
-[2, 3, 4, 5]~
-[2, 3, 4, 5]~
 [2, 1]~
-[0, 0, 2, 1]~
-[2, 1, 0, 0]~
 [2, 1]~
-[0, 0, 2, 1]~
-[2, 1, 0, 0]~
 [2, 1]~
-[0, 0, 2, 1]~
-[2, 1, 0, 0]~
 [3, 2, 1]~
-[0, 3, 2, 1]~
-[3, 2, 1, 0]~
 [5, 4, 3, 2, 1]~
-[4, 3, 2, 1]~
-[4, 3, 2, 1]~
 ["b", "a"]~
-error("incorrect type in gtovec (t_STR).")
-error("incorrect type in gtovec (t_STR).")
 [[3, 4, 5], [1, 2, 3]]~
-error("incorrect type in gtovec (t_MAT).")
-error("incorrect type in gtovec (t_MAT).")
 [0, "gdiv", "e_INV"]~
+[0, 0, 0, 1]~
+[0, 0, 0, 1]~
+[0, 0, 0, 1/x]~
+[2, 3, 4, 5]~
+[0, 0, 2, 1]~
+[0, 0, 2, 1]~
+[0, 0, 2, 1]~
+[0, 3, 2, 1]~
+[4, 3, 2, 1]~
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
 error("incorrect type in gtovec (t_ERROR).")
+[1, 0, 0, 0]~
+[0, 1, 0, 0]~
+[1/x, 0, 0, 0]~
+[2, 3, 4, 5]~
+[2, 1, 0, 0]~
+[2, 1, 0, 0]~
+[2, 1, 0, 0]~
+[3, 2, 1, 0]~
+[4, 3, 2, 1]~
+error("incorrect type in gtovec (t_STR).")
+error("incorrect type in gtovec (t_MAT).")
 error("incorrect type in gtovec (t_ERROR).")
-Vecsmall:
 Vecsmall([1])
-Vecsmall([1, 0, 0, 0])
-Vecsmall([0, 0, 0, 1])
 Vecsmall([1, 0])
-Vecsmall([1, 0, 0, 0])
-Vecsmall([0, 0, 1, 0])
 error("incorrect type in vectosmall (t_RFRAC).")
-error("incorrect type in gtovecsmall (t_RFRAC).")
-error("incorrect type in gtovecsmall (t_RFRAC).")
 Vecsmall([5, 4, 3, 2, 1])
-Vecsmall([5, 4, 3, 2])
-Vecsmall([5, 4, 3, 2])
 Vecsmall([1, 2])
-Vecsmall([1, 2, 0, 0])
-Vecsmall([0, 0, 1, 2])
 Vecsmall([1, 2])
-Vecsmall([1, 2, 0, 0])
-Vecsmall([0, 0, 1, 2])
 Vecsmall([1, 2])
-Vecsmall([1, 2, 0, 0])
-Vecsmall([0, 0, 1, 2])
 Vecsmall([1, 2, 3])
-Vecsmall([1, 2, 3, 0])
-Vecsmall([0, 1, 2, 3])
 Vecsmall([1, 2, 3, 4, 5])
-Vecsmall([1, 2, 3, 4])
-Vecsmall([1, 2, 3, 4])
 Vecsmall([97, 98])
-error("incorrect type in gtovecsmall (t_STR).")
-error("incorrect type in gtovecsmall (t_STR).")
 error("incorrect type in vectosmall (t_MAT).")
-error("incorrect type in gtovecsmall (t_MAT).")
-error("incorrect type in gtovecsmall (t_MAT).")
 error("incorrect type in vectosmall (t_ERROR).")
+Vecsmall([1, 0, 0, 0])
+Vecsmall([1, 0, 0, 0])
+error("incorrect type in gtovecsmall (t_RFRAC).")
+Vecsmall([5, 4, 3, 2])
+Vecsmall([1, 2, 0, 0])
+Vecsmall([1, 2, 0, 0])
+Vecsmall([1, 2, 0, 0])
+Vecsmall([1, 2, 3, 0])
+Vecsmall([1, 2, 3, 4])
+error("incorrect type in gtovecsmall (t_STR).")
+error("incorrect type in gtovecsmall (t_MAT).")
 error("incorrect type in gtovecsmall (t_ERROR).")
+Vecsmall([0, 0, 0, 1])
+Vecsmall([0, 0, 1, 0])
+error("incorrect type in gtovecsmall (t_RFRAC).")
+Vecsmall([5, 4, 3, 2])
+Vecsmall([0, 0, 1, 2])
+Vecsmall([0, 0, 1, 2])
+Vecsmall([0, 0, 1, 2])
+Vecsmall([0, 1, 2, 3])
+Vecsmall([1, 2, 3, 4])
+error("incorrect type in gtovecsmall (t_STR).")
+error("incorrect type in gtovecsmall (t_MAT).")
 error("incorrect type in gtovecsmall (t_ERROR).")
+error("incorrect type in component [leaf] (t_INT).")
+1
+x
+2
+2
+2
+2
+2
+2
+error("incorrect type in component [leaf] (t_STR).")
+[2, 4]~
+0
+error("incorrect type in component [leaf] (t_INT).")
+0
+error("non-existent component: index > 2")
+0
+error("non-existent component: index > 3")
+error("non-existent component: index > 2")
+error("non-existent component: index > 2")
+error("non-existent component: index > 3")
+error("non-existent component: index > 5")
+error("incorrect type in component [leaf] (t_STR).")
+error("non-existent component: index > 3")
+error("non-existent component: index > 3")
 Vecsmall([4, 5, 3])
 Total time spent: 0
