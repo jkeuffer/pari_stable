@@ -46,12 +46,13 @@ send_request(enum PMPI_cmd ecmd, long dest)
 static void
 send_GEN(GEN elt, int dest)
 {
+  pari_sp av = avma;
   int size;
   GEN reloc = copybin_unlink(elt);
   GENbin *buf = copy_bin(mkvec2(elt,reloc));
   size = sizeof(GENbin) + buf->len*sizeof(ulong);
   MPI_Send(buf, size, MPI_CHAR, dest, 0, MPI_COMM_WORLD);
-  pari_free(buf);
+  pari_free(buf); avma = av;
 }
 
 static void
