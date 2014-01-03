@@ -28,5 +28,12 @@ test(x->component(x,10));
 test(x->polcoeff(x,-1));
 test(x->polcoeff(x,2));
 test(x->polcoeff(x,10));
+polcoeff(O(x),0)
+s=x*(y+O(x))+y;
+polcoeff(s,0,y)
+polcoeff(s,1,y)
+s=y+O(y^2);
+polcoeff(s,0,x)
+polcoeff(s,1,x)
 
 vecextract(Vecsmall([3,4,5]),[2,3,1])

@@ -299,5 +299,10 @@ error("incorrect type in polcoeff (t_LIST).")
 error("incorrect type in polcoeff (t_STR).")
 error("non-existent component in polcoeff: index > 3")
 error("incorrect type in polcoeff (t_ERROR).")
+0
+0
+x + 1
+0
+y + O(y^2)
 Vecsmall([4, 5, 3])
-Total time spent: 4
+Total time spent: 0
