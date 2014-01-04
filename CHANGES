@@ -138,7 +138,7 @@ EP  1- Configure option for gcov/lcov support
        rnf_get_polabs, rnf_get_zk, rnf_get_nfzk, rnf_get_varn, rnf_get_disc,
        rnf_get_index, RgV_is_QV, RgX_equal_var
     5- allow rnf.disc, rnf.index
-    6- functions rnfelttrace, rnfelttrace
+    6- functions rnfelttrace, rnfeltnorm
     7- function ZV_gcdext, based on ZM_hnflll (simplified)
     8- allow ffgen(p^f) instead of ffgen(ffinit(p,f))
     9- [libpari] Fq_sqrtn
