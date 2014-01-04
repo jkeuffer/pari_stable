@@ -3267,48 +3267,39 @@ polcoeff0(GEN x, long n, long v)
   return gerepilecopy(av, x);
 }
 
+static GEN
+vecdenom(GEN v, long imin, long imax)
+{
+  pari_sp av = avma;
+  long i = imin;
+  GEN s;
+  if (imin > imax) return gen_1;
+  s = denom(gel(v,i));
+  for (i++; i<=imax; i++)
+  {
+    GEN t = denom(gel(v,i));
+    if (t != gen_1) s = glcm(s,t);
+  }
+  return gerepileupto(av, s);
+}
 GEN
 denom(GEN x)
 {
-  long lx, i;
-  pari_sp av, tetpil;
-  GEN s,t;
-
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_INTMOD: case t_FFELT:
-    case t_PADIC: case t_SER:
-      return gen_1;
-
-    case t_FRAC:
-      return icopy(gel(x,2));
-
-    case t_COMPLEX:
-      av=avma; t=denom(gel(x,1)); s=denom(gel(x,2)); tetpil=avma;
-      return gerepile(av,tetpil,glcm(s,t));
-
-    case t_QUAD:
-      av=avma; t=denom(gel(x,2)); s=denom(gel(x,3)); tetpil=avma;
-      return gerepile(av,tetpil,glcm(s,t));
-
-    case t_POLMOD:
-      return denom(gel(x,2));
-
-    case t_RFRAC:
-      return RgX_copy(gel(x,2));
-
-    case t_POL:
-      return pol_1(varn(x));
-
-    case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); if (lx==1) return gen_1;
-      av = tetpil = avma; s = denom(gel(x,1));
-      for (i=2; i<lx; i++)
-      {
-        t = denom(gel(x,i));
-        if (t != gen_1) { tetpil=avma; s=glcm(s,t); }
-      }
-      return gerepile(av,tetpil,s);
+    case t_INT:
+    case t_REAL:
+    case t_INTMOD:
+    case t_FFELT:
+    case t_PADIC:
+    case t_SER: return gen_1;
+    case t_FRAC: return icopy(gel(x,2));
+    case t_COMPLEX: return vecdenom(x,1,2);
+    case t_QUAD: return vecdenom(x,2,3);
+    case t_POLMOD: return denom(gel(x,2));
+    case t_RFRAC: return RgX_copy(gel(x,2));
+    case t_POL: return pol_1(varn(x));
+    case t_VEC: case t_COL: case t_MAT: return vecdenom(x, 1, lg(x)-1);
   }
   pari_err_TYPE("denom",x);
   return NULL; /* not reached */
@@ -3317,31 +3308,26 @@ denom(GEN x)
 GEN
 numer(GEN x)
 {
-  pari_sp av, tetpil;
-  GEN s;
-
+  pari_sp av;
   switch(typ(x))
   {
-    case t_INT: case t_REAL:
-      return mpcopy(x);
-    case t_POL:
-      return RgX_copy(x);
-    case t_INTMOD: case t_FFELT: case t_PADIC: case t_SER:
-      return gcopy(x);
-
-    case t_FRAC:
-      return (signe(gel(x,2))>0)? icopy(gel(x,1)): negi(gel(x,1));
-
+    case t_INT:
+    case t_REAL: return mpcopy(x);
+    case t_INTMOD:
+    case t_FFELT:
+    case t_PADIC:
+    case t_SER: return gcopy(x);
+    case t_POL: return RgX_copy(x);
+    case t_FRAC: return icopy(gel(x,1));
     case t_POLMOD:
-      av=avma; s=numer(gel(x,2)); tetpil=avma;
-      return gerepile(av,tetpil,gmodulo(s,gel(x,1)));
-
-    case t_RFRAC:
-      return gcopy(gel(x,1));
-
-    case t_COMPLEX: case t_QUAD: case t_VEC: case t_COL: case t_MAT:
-      av=avma; s=denom(x); tetpil=avma;
-      return gerepile(av,tetpil,gmul(s,x));
+      av = avma; return gerepileupto(av, gmodulo(numer(gel(x,2)), gel(x,1)));
+    case t_RFRAC: return gcopy(gel(x,1));
+    case t_COMPLEX:
+    case t_QUAD:
+    case t_VEC:
+    case t_COL:
+    case t_MAT:
+      av = avma; return gerepileupto(av, gmul(denom(x),x));
   }
   pari_err_TYPE("numer",x);
   return NULL; /* not reached */
