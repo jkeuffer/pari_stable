@@ -17,8 +17,6 @@ y^2 + 2*y - 4 x^2 + 2*x - 4 -4*x^2 + 2*x + 1
 2*y^2 + y 2*x^2 + x 2*x^2 + x
 y + 2*y^2 + O(y^4) (y + 2*y^2 + O(y^4)) + O(x^16) (y + 2*y^2 + O(y^4)) + O(x
 ^5)
-y + x + O(x^2)
-(y + O(y^17)) + (1 + O(y^16))*x + O(x^2)
 2 2 3
 y + 2 y + 2 (y + 2) + x + O(x^2)
 1 1 x + 2
@@ -32,4 +30,7 @@ x^2 + 1
 
 [1    0]
 
+  ***   at top-level: Pol("")
+  ***                 ^-------
+  *** Pol: incorrect type in gtopoly (t_STR).
 Total time spent: 0

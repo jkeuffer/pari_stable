@@ -16,3 +16,7 @@ a^2 == a*(a+1) - a \\ test RgX_mullow, RgX_sqrlow
 3+O(1)
 serreverse(x/2+O(x^2))
 serreverse(tan(x)/2)
+
+Ser(x+y+O(x^2),x)
+Ser(x+y+O(x^2),y)
+Ser("")
