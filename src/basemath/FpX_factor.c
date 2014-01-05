@@ -2454,14 +2454,16 @@ FqX_frob_deflate(GEN f, GEN T, GEN p)
 static GEN
 FqX_split_Trager(GEN A, GEN T, GEN p)
 {
-  GEN x0, P, u, fa, n;
+  GEN c, P, u, fa, n;
   long lx, i, k;
 
   u = A;
   n = NULL;
   for (k = 0; cmpui(k, p) < 0; k++)
   {
-    GEN U = poleval(u, deg1pol_shallow(gen_1, gmulsg(k, pol_x(varn(T))), varn(A)));
+    GEN U;
+    c = deg1pol_shallow(stoi(k) , gen_0, varn(T));
+    U = FqX_translate(u, c, T, p);
     n = FpX_FpXY_resultant(T, U, p);
     if (FpX_is_squarefree(n, p)) break;
     n = NULL;
@@ -2473,10 +2475,10 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   if (lx == 2) return mkcol(A); /* P^k, P irreducible */
 
   P = cgetg(lx,t_COL);
-  x0 = gadd(pol_x(varn(A)), gmulsg(-k, mkpolmod(pol_x(varn(T)), T)));
+  c = FpX_neg(c,p);
   for (i=lx-1; i>1; i--)
   {
-    GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
+    GEN F = FqX_translate(gel(fa,i), c, T, p);
     F = FqX_normalize(FqX_gcd(u, F, T, p), T, p);
     if (typ(F) != t_POL || degpol(F) == 0)
       pari_err_IRREDPOL("FqX_split_Trager [modulus]",T);
