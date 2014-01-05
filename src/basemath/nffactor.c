@@ -1866,7 +1866,7 @@ nfroots_split(GEN nf, GEN pol)
 {
   GEN T = get_nfpol(nf,&nf), den = get_den(&nf, T);
   pari_sp av = avma;
-  GEN z = gerepilecopy(av, nfsqff(nf, pol, 2, den));
+  GEN z = gerepilecopy(av, nfsqff(nf, pol, ROOTS_SPLIT, den));
   return (lg(z) == 1)? NULL: mkvec2(z, nf);
 }
 
