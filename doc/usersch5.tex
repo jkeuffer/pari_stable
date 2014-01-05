@@ -6893,6 +6893,22 @@ polynomial to which \kbd{Q\_remove\_denom} can be applied is fine.
 \fun{GEN}{QXQ_reverse}{GEN f, GEN T} as \kbd{RgXQ\_reverse}, assuming $f$
 is a \kbd{QX}.
 
+\fun{GEN}{QX_ZXQV_eval}{GEN f, GEN nV, GEN dV} as \kbd{RgX\_RgXQV\_eval},
+except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitly
+by a numerator \kbd{nV} (\kbd{ZV}) and denominator \kbd{dV} (a positive
+\typ{INT} or \kbd{NULL} for trivial denominator). Not memory clean, but
+suitable for \kbd{gerepileupto}.
+
+\fun{GEN}{QXV_QXQ_eval}{GEN v, GEN a, GEN T} $v$ is a vector of \kbd{QX}s
+(possibly scalars, i.e.~rational numbers, for convenience), $a$ and $T$ both
+\kbd{QX}. Return the vector of evaluations at $a$ modulo $T$.
+Not memory clean, nor suitable for \kbd{gerepileupto}.
+
+\fun{GEN}{QXX_QXQ_eval}{GEN P, GEN a, GEN T} $P(X,Y)$ is a \typ{POL} with
+\kbd{QX} coefficients (possibly scalars, i.e.~rational numbers, for
+convenience) , $a$ and $T$ both \kbd{QX}. Return the \kbd{QX} $P(X, a \mod
+T)$. Not memory clean, nor suitable for \kbd{gerepileupto}.
+
 \fun{GEN}{nfgcd}{GEN P, GEN Q, GEN T, GEN den} given $P$ and $Q$ in
 $\Z[X,Y]$, $T$ monic irreducible in $\Z[Y]$, returns the primitive $d$ in
 $\Z[X,Y]$ which is a gcd of $P$, $Q$ in $K[X]$, where $K$ is the number field
@@ -7283,12 +7299,6 @@ $T$.
 
 \fun{GEN}{RgX_RgXQV_eval}{GEN f, GEN V} as \kbd{RgX\_RgXQ\_eval(f, x, T)},
 assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)} for some $n\geq 1$.
-
-\fun{GEN}{QX_ZXQV_eval}{GEN f, GEN nV, GEN dV} as \kbd{RgX\_RgXQV\_eval},
-except that $f$ is assumed to be a \kbd{QX}, $V$ is given implicitly
-by a numerator \kbd{nV} (\kbd{ZV}) and denominator \kbd{dV} (a positive
-\typ{INT} or \kbd{NULL} for trivial denominator). Not memory clean, but
-suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{RgX_translate}{GEN P, GEN c} assume $c$ is a scalar or
 a polynomials whose main variable has lower priority than the main variable

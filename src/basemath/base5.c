@@ -231,34 +231,26 @@ check_and_build_norms(GEN rnf) {
   return obj_checkbuild(rnf, NORMS, &makenorms);
 }
 
+void
+nf_nfzk(GEN nf, GEN rnfeq, GEN *zknf, GEN *czknf)
+{
+  GEN pol = gel(rnfeq,1), a = gel(rnfeq,2);
+  GEN zk = QXV_QXQ_eval(nf_get_zk(nf), a, pol);
+  *zknf = Q_primitive_part(zk, czknf);
+  if (!*czknf) *czknf = gen_1;
+}
+
 GEN
 rnfinit(GEN nf, GEN polrel)
 {
   pari_sp av = avma;
-  GEN rnf, bas, D,d,f, B, pol, rnfeq,a, zk, basnf,cobasnf, V,dV;
-  long i, m;
-
+  GEN rnf, bas, D,d,f, B, rnfeq, basnf,cobasnf;
   nf = checknf(nf);
   bas = rnfallbase(nf,&polrel, &D,&d, &f);
   B = matbasistoalg(nf,gel(bas,1));
   gel(bas,1) = lift_if_rational( RgM_to_RgXV(B,varn(polrel)) );
   rnfeq = nf_rnfeq(nf,polrel);
-  pol = gel(rnfeq,1);
-  a = gel(rnfeq,2);
-  zk = nf_get_zk(nf);
-  m = nf_get_degree(nf);
-  basnf = cgetg(m+1, t_VEC);
-  V = QXQ_powers(a, m-1, pol);
-  V = Q_remove_denom(V, &dV);
-  for (i = 1; i <= m; i++)
-  {
-    GEN c = gel(zk,i);
-    if (typ(c) == t_POL) c = QX_ZXQV_eval(c, V, dV);
-    gel(basnf,i) = c;
-  }
-  basnf = Q_primitive_part(basnf, &cobasnf);
-  if (!cobasnf) cobasnf = gen_1;
-
+  nf_nfzk(nf, rnfeq, &basnf, &cobasnf);
   rnf = cgetg(13, t_VEC);
   gel(rnf,1) = polrel;
   gel(rnf,2) = mkvec2(basnf, cobasnf);
@@ -279,18 +271,27 @@ GEN
 rnfeltup(GEN rnf, GEN x)
 {
   pari_sp av = avma;
-  GEN zknf, czknf, c;
+  GEN zknf, czknf;
   checkrnf(rnf);
   if (typ(x) == t_POLMOD && RgX_equal_var(gel(x,1), rnf_get_polabs(rnf)))
     return gcopy(x);
-  x = nf_to_scalar_or_basis(rnf_get_nf(rnf), x);
-  if (typ(x) != t_COL) return gerepilecopy(av, x);
   rnf_get_nfzk(rnf, &zknf, &czknf);
+  x = nfeltup(rnf_get_nf(rnf), x, zknf, czknf);
+  if (typ(x) == t_POL) x = mkpolmod(x, rnf_get_polabs(rnf));
+  return gerepilecopy(av, x);
+}
+
+GEN
+nfeltup(GEN nf, GEN x, GEN zknf, GEN czknf)
+{
+  GEN c;
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL) return x;
   x = Q_primitive_part(x, &c);
-  if (!RgV_is_QV(x)) pari_err_TYPE("rnfeltup", x);
+  if (!RgV_is_ZV(x)) pari_err_TYPE("rnfeltup", x);
   c = mul_content(c, czknf);
   x = RgV_RgC_mul(zknf, x); if (c) x = RgX_Rg_mul(x, c);
-  return gerepilecopy(av, mkpolmod(x, rnf_get_polabs(rnf)));
+  return x;
 }
 
 static void

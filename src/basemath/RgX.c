@@ -2044,6 +2044,29 @@ QXQ_powers(GEN a, long n, GEN T)
   return v;
 }
 
+static GEN
+do_QXQ_eval(GEN v, long imin, GEN a, GEN T)
+{
+  long l, i, m = degpol(T);
+  GEN dz, z = Q_remove_denom(QXQ_powers(a, m-1, T), &dz);
+  GEN V = cgetg_copy(v, &l);
+  for (i = 1; i < imin; i++) V[i] = v[i];
+  for (i = imin; i < l; i++)
+  {
+    GEN c = gel(v,i);
+    if (typ(c) == t_POL) c = QX_ZXQV_eval(c, z, dz);
+    gel(V,i) = c;
+  }
+  return V;
+}
+/* [ s(a mod T) | s <- lift(v) ], a,T are QX, v a QXV */
+GEN
+QXV_QXQ_eval(GEN v, GEN a, GEN T)
+{ return do_QXQ_eval(v, 1, a, T); }
+GEN
+QXX_QXQ_eval(GEN v, GEN a, GEN T)
+{ return normalizepol(do_QXQ_eval(v, 2, a, T)); }
+
 GEN
 RgXQ_matrix_pow(GEN y, long n, long m, GEN P)
 {

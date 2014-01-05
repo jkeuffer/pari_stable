@@ -681,16 +681,22 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
 static GEN
 nfX_eltup(GEN nf, GEN rnfeq, GEN x)
 {
-  long i, l = lg(x), v = nf_get_varn(nf);
-  GEN a = gel(rnfeq,2), pol = gel(rnfeq,1), y = cgetg(l, t_POL);
-  y[1] = x[1];
+  long i, l;
+  GEN zknf, czknf, y = cgetg_copy(x, &l);
+  y[1] = x[1]; nf_nfzk(nf, rnfeq, &zknf, &czknf);
+  for (i=2; i<l; i++) gel(y,i) = nfeltup(nf, gel(x,i), zknf, czknf);
+  return y;
+}
+/* FIXME: remove this */
+static void
+nfX_fix_var(GEN P, long v)
+{
+  long i, l = lg(P);
   for (i=2; i<l; i++)
   {
-    GEN t = nf_to_scalar_or_alg(nf, gel(x,i));
-    if (typ(t) == t_POL) { t = RgX_RgXQ_eval(t, a, pol); setvarn(t, v); }
-    gel(y,i) = t;
+    GEN c = gel(P,i);
+    if (typ(c) == t_POL) setvarn(c, v);
   }
-  return y;
 }
 
 GEN
@@ -714,10 +720,10 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   relpol = RgX_nffix("rnfisnorminit", T, relpol, 1);
   if (nf_get_degree(nf) == 1) /* over Q */
     rnfeq = mkvec5(relpol,gen_0,gen_0,T,relpol);
-  else if (galois == 2) /* needs reltoabs */
-    rnfeq = nf_rnfeq(bnf, relpol);
-  else
-    rnfeq = nf_rnfeqsimple(bnf, relpol);
+  else if (galois == 2) /* needs eltup+abstorel */
+    rnfeq = nf_rnfeq(nf, relpol);
+  else /* needs abstorel */
+    rnfeq = nf_rnfeqsimple(nf, relpol);
   polabs = gel(rnfeq,1);
   k = gel(rnfeq,3);
   if (!bnfabs || !gequal0(k))
@@ -726,8 +732,17 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 
   if (galois == 2)
   {
-    GEN P = polabs == relpol? relpol: nfX_eltup(nf, rnfeq, relpol);
-    galois = nfissplit(gsubst(nfabs, nf_get_varn(nfabs), pol_x(varn(T))), P);
+    GEN P;
+    long v = varn(T);
+    if (polabs == relpol)
+      P = relpol;
+    else
+    { /* FIXME: don't mess with variables, use proper priorities in nfabs. */
+      P = nfX_eltup(nf, rnfeq, relpol);
+      nfX_fix_var(P, v);
+    }
+    /* FIXME */
+    galois = nfissplit(gsubst(nfabs, nf_get_varn(nfabs), pol_x(v)), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);

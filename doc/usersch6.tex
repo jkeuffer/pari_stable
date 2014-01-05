@@ -1358,6 +1358,20 @@ except that $x$ is returned in partially lifted form, i.e.~ as a
 \tet{rnf_get_map} (but in this case \tet{rnfeltreltoabs} is more robust)
 or \tet{nf_rnfeq}, return $x$ in absolute form.
 
+\fun{void}{nf_nfzk}{GEN nf, GEN rnfeq, GEN *zknf, GEN *czknf} \kbd{rnfeq} as
+given by \tet{nf_rnfeq}, \kbd{nf} a true \var{nf} structure, set \kbd{*zknf}
+and \kbd{*czknf} to a suitable representation of \kbd{nf.zk} allowing quick
+computation of the map $K\to L$ by the function \tet{nfeltup}, \emph{without}
+computing a full \var{rnf} structure, which is useful if the relative
+integral basis is not required. The computed values are the same as in
+\tet{rnf_get_nfzk}. Shallow function.
+
+\fun{GEN}{nfeltup}{GEN nf, GEN x, GEN zknf, GEN czknf} \kbd{zknf} and
+\kbd{czknf} are initialized by \tet{nf_nfzk} or \tet{rnf_get_nfzk} (but in
+this case \tet{rnfeltup} is more robust); \kbd{nf} is a true \var{nf}
+structure for $K$, returns $x \in K$ as a (lifted) element of $L$, in
+absolute form.
+
 \fun{GEN}{Rg_nffix}{const char *f, GEN T, GEN c, int lift} given
 a \kbd{ZX} $T$ and a ``coefficient'' $c$ supposedly belonging to $\Q[y]/(T)$,
 check whether this is a the case and return a cleaned up version of $c$.

@@ -1466,16 +1466,6 @@ rnfnormgroup(GEN bnr, GEN polrel)
   return NULL;
 }
 
-static GEN
-liftpol(GEN pol, GEN q)
-{
-  long i, l = lg(pol);
-  GEN y = cgetg(l, t_POL); y[1] = pol[1];
-  for (i = 2; i < l; i++)
-    gel(y,i) = lift_intern(poleval(lift_intern(gel(pol,i)), q));
-  return y;
-}
-
 GEN
 nf_deg1_prime(GEN nf)
 {
@@ -1515,10 +1505,11 @@ rnfisabelian(GEN nf, GEN pol)
     nf = checknf(nf);
     v = nf_get_varn(nf);
   }
+  pol = RgX_nffix("rnfisabelian",nf,pol,1);
   eq = nf_rnfeq(nf,pol); /* init L := K[x]/(pol), nf associated to K */
   C = gel(eq,1); setvarn(C, v); /* L = Q[t]/(C) */
   a = gel(eq,2); setvarn(a, v); /* root of K.pol in L */
-  z = nfroots_split(C, liftpol(pol, a));
+  z = nfroots_split(C, QXX_QXQ_eval(pol, a, C));
   if (!z) return 0;
   ro = gel(z,1); l = lg(ro)-1;
   /* small groups are abelian, as are groups of prime order */

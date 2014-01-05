@@ -1715,8 +1715,8 @@ static void polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pa);
 static GEN
 nfpolred(nfbasic_t *T, GEN *pro)
 {
-  GEN x = T->x, dx, b, rev, pow, dpow;
-  long i, n = degpol(x), v = varn(x);
+  GEN x = T->x, dx, b, rev;
+  long n = degpol(x), v = varn(x);
 
   if (n == 1) {
     T->x = deg1pol_shallow(gen_1, gen_m1, v);
@@ -1728,9 +1728,7 @@ nfpolred(nfbasic_t *T, GEN *pro)
 
   /* update T */
   rev = QXQ_reverse(b, T->x);
-  pow = QXQ_powers(rev, n-1, x);
-  pow = Q_remove_denom(pow, &dpow);
-  for (i=2; i<=n; i++) gel(T->bas,i) = QX_ZXQV_eval(gel(T->bas,i), pow, dpow);
+  T->bas = QXV_QXQ_eval(T->bas, rev, x);
   (void)Z_issquareall(diviiexact(dx,T->dK), &(T->index));
   T->basden = get_bas_den(T->bas);
   T->dx = dx;
