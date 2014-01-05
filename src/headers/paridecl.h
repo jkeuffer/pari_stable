@@ -1437,6 +1437,8 @@ GEN     rnfdiscf(GEN nf, GEN pol);
 GEN     rnfequation(GEN nf, GEN pol);
 GEN     rnfequation0(GEN nf, GEN pol, long flall);
 GEN     rnfequation2(GEN nf, GEN pol);
+GEN     nf_rnfeq(GEN nf, GEN relpol);
+GEN     nf_rnfeqsimple(GEN nf, GEN relpol);
 GEN     rnfequationall(GEN A, GEN B, long *pk, GEN *pLPRS);
 GEN     rnfhnfbasis(GEN bnf, GEN order);
 long    rnfisfree(GEN bnf, GEN order);
@@ -1594,6 +1596,9 @@ GEN     vecpow(GEN x, GEN n);
 
 /* base5.c */
 
+GEN     eltreltoabs(GEN rnfeq, GEN x);
+GEN     eltabstorel(GEN eq, GEN P);
+GEN     eltabstorel_lift(GEN rnfeq, GEN P);
 GEN     rnfeltabstorel(GEN rnf, GEN x);
 GEN     rnfeltdown(GEN rnf, GEN x);
 GEN     rnfeltreltoabs(GEN rnf, GEN x);

@@ -712,28 +712,21 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (drel <= 2) galois = 1;
 
   relpol = RgX_nffix("rnfisnorminit", T, relpol, 1);
-  rnfeq = NULL; /* no reltoabs needed */
-  if (nf_get_degree(nf) == 1) { /* over Q */
-    polabs = relpol;
-    k = gen_0;
-  } else if (galois == 2) { /* needs reltoabs */
-    rnfeq = rnfequation2(bnf, relpol);
-    polabs = gel(rnfeq,1);
-    gel(rnfeq,2) = lift_intern(gel(rnfeq,2));
-    k = gel(rnfeq,3);
-    rnfeq = shallowconcat(rnfeq, mkvec2(T,relpol));
-  } else {
-    long sk;
-    polabs = rnfequationall(bnf, relpol, &sk, NULL);
-    k = stoi(sk);
-  }
+  if (nf_get_degree(nf) == 1) /* over Q */
+    rnfeq = mkvec5(relpol,gen_0,gen_0,T,relpol);
+  else if (galois == 2) /* needs reltoabs */
+    rnfeq = nf_rnfeq(bnf, relpol);
+  else
+    rnfeq = nf_rnfeqsimple(bnf, relpol);
+  polabs = gel(rnfeq,1);
+  k = gel(rnfeq,3);
   if (!bnfabs || !gequal0(k))
     bnfabs = Buchall(polabs, nf_FORCE, nf_get_prec(nf));
   if (!nfabs) nfabs = bnf_get_nf(bnfabs);
 
   if (galois == 2)
   {
-    GEN P = rnfeq? nfX_eltup(nf, rnfeq, relpol): relpol;
+    GEN P = polabs == relpol? relpol: nfX_eltup(nf, rnfeq, relpol);
     galois = nfissplit(gsubst(nfabs, nf_get_varn(nfabs), pol_x(varn(T))), P);
   }
 
@@ -755,7 +748,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   gel(y,1) = bnf;
   gel(y,2) = bnfabs;
   gel(y,3) = relpol;
-  gel(y,4) = mkvec5(gen_0,gen_0,k,T,relpol);
+  gel(y,4) = rnfeq;
   gel(y,5) = prod;
   gel(y,6) = S1;
   gel(y,7) = S2;

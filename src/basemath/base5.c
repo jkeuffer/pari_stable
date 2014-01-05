@@ -235,21 +235,18 @@ GEN
 rnfinit(GEN nf, GEN polrel)
 {
   pari_sp av = avma;
-  GEN rnf, bas, D,d,f, B, pol, rnfeq,a,k, T, zk, basnf,cobasnf, V,dV;
+  GEN rnf, bas, D,d,f, B, pol, rnfeq,a, zk, basnf,cobasnf, V,dV;
   long i, m;
 
   nf = checknf(nf);
   bas = rnfallbase(nf,&polrel, &D,&d, &f);
   B = matbasistoalg(nf,gel(bas,1));
   gel(bas,1) = lift_if_rational( RgM_to_RgXV(B,varn(polrel)) );
-  rnfeq = rnfequation2(nf,polrel);
-  T = nf_get_pol(nf);
+  rnfeq = nf_rnfeq(nf,polrel);
   pol = gel(rnfeq,1);
-  a = lift_intern(gel(rnfeq,2));
-  k = gel(rnfeq,3);
-
+  a = gel(rnfeq,2);
   zk = nf_get_zk(nf);
-  m = degpol(T);
+  m = nf_get_degree(nf);
   basnf = cgetg(m+1, t_VEC);
   V = QXQ_powers(a, m-1, pol);
   V = Q_remove_denom(V, &dV);
@@ -273,7 +270,7 @@ rnfinit(GEN nf, GEN polrel)
   gel(rnf,8) = lift_if_rational( RgM_inv(B) );
   gel(rnf,9) = cgetg(1,t_VEC); /* dummy */
   gel(rnf,10)= nf;
-  gel(rnf,11)= mkvec5(pol, a, k, T, polrel);
+  gel(rnf,11)= rnfeq;
   gel(rnf,12)= zerovec(2);
   return gerepilecopy(av, rnf);
 }
@@ -592,6 +589,23 @@ GEN
 rnfequation(GEN nf, GEN pol) { return rnfequation0(nf,pol,0); }
 GEN
 rnfequation2(GEN nf, GEN pol) { return rnfequation0(nf,pol,1); }
+GEN
+nf_rnfeq(GEN nf, GEN relpol)
+{
+  GEN pol, a, k, junk, eq = rnfequation2(nf, relpol);
+  pol = gel(eq,1);
+  a = gel(eq,2); if (typ(a) == t_POLMOD) a = gel(a,2);
+  k = gel(eq,3);
+  return mkvec5(pol,a,k,get_nfpol(nf, &junk),relpol);
+}
+/* only allow abstorel */
+GEN
+nf_rnfeqsimple(GEN nf, GEN relpol)
+{
+  long sa;
+  GEN junk, pol = rnfequationall(nf, relpol, &sa, NULL);
+  return mkvec5(pol,gen_0/*dummy*/,stoi(sa),get_nfpol(nf, &junk),relpol);
+}
 
 static GEN
 nftau(long r1, GEN x)

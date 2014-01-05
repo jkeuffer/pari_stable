@@ -1332,6 +1332,32 @@ remainder sequence associated to $A(Y)$ and $B(X-kY)$, leading to $C =
 \text{Res}_Y(A(Y), B(Y-kX))$. In particular $a := -h_0/h_1$ is a root of $A$
 in $\Q[X]/(C)$, and $X - ka$ is a root of $B$.
 
+\fun{GEN}{nf_rnfeq}{GEN A, GEN B} wrapper around \tet{rnfequationall} to allow
+maping $K\to L$ (\kbd{eltup}) and converting elements of $L$
+between absolute and relative form (\kbd{reltoabs}, \kbd{abstorel}),
+\emph{without} computing a full \var{rnf} structure, which is useful if the
+relative integral basis is not required. In fact, since $A$ may be a \typ{POL}
+or an \var{nf}, the integral basis of the base field is not needed either. The
+return value is the same as \tet{rnf_get_map}. Shallow function.
+
+\fun{GEN}{nf_rnfeqsimple}{GEN nf, GEN relpol} as \tet{nf_rnfeq} except some
+fields are omitted, so that only the \tet{abstorel} operation is supported.
+Shallow function.
+
+\fun{GEN}{eltabstorel}{GEN rnfeq, GEN x} \kbd{rnfeq} is as
+given by \tet{rnf_get_map} (but in this case \tet{rnfeltabstorel} is more
+robust), \tet{nf_rnfeq} or \tet{nf_rnfeqsimple}, return $x$ as an element
+of $L/K$, i.e. as a \typ{POLMOD} with \typ{POLMOD} coefficients. Shallow
+function.
+
+\fun{GEN}{eltabstorel_lift}{GEN rnfeq, GEN x} same as \tet{eltabstorel},
+except that $x$ is returned in partially lifted form, i.e.~ as a
+\typ{POL} with \typ{POLMOD} coefficients.
+
+\fun{GEN}{eltreltoabs}{GEN rnfeq, GEN x} \kbd{rnfeq} is as given by
+\tet{rnf_get_map} (but in this case \tet{rnfeltreltoabs} is more robust)
+or \tet{nf_rnfeq}, return $x$ in absolute form.
+
 \fun{GEN}{Rg_nffix}{const char *f, GEN T, GEN c, int lift} given
 a \kbd{ZX} $T$ and a ``coefficient'' $c$ supposedly belonging to $\Q[y]/(T)$,
 check whether this is a the case and return a cleaned up version of $c$.

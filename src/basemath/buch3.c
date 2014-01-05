@@ -1515,9 +1515,9 @@ rnfisabelian(GEN nf, GEN pol)
     nf = checknf(nf);
     v = nf_get_varn(nf);
   }
-  eq = rnfequation2(nf,pol);
-  C = gel(eq,1); setvarn(C, v);
-  a = lift_intern(gel(eq,2)); setvarn(a, v); /* root of nf[1] */
+  eq = nf_rnfeq(nf,pol); /* init L := K[x]/(pol), nf associated to K */
+  C = gel(eq,1); setvarn(C, v); /* L = Q[t]/(C) */
+  a = gel(eq,2); setvarn(a, v); /* root of K.pol in L */
   z = nfroots_split(C, liftpol(pol, a));
   if (!z) return 0;
   ro = gel(z,1); l = lg(ro)-1;

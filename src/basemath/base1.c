@@ -2764,11 +2764,8 @@ rnfpolred_i(GEN nf, GEN relpol, long flag, long best)
   {
     if (abs)
     {
-      GEN a, k, eq = rnfequation2(nf, relpol);
-      pol = gel(eq,1);
-      a = lift_intern(gel(eq,2));
-      k = gel(eq,3);
-      rnfeq = mkvec5(pol,a,k,T,relpol);
+      rnfeq = nf_rnfeq(nf, relpol);
+      pol = gel(rnfeq,1);
     }
     else
     {
