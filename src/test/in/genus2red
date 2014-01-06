@@ -414,25 +414,30 @@ do(P0, Strprintf("[IV*-I*{%ld}-%ld], p. 174",n, m))
 n = 9;
 P0=t*((x-1)^2+t^n)*(x^3+t);
 do(P0, Strprintf("[IV*-I*{%ld}-(-1)], p. 175",n))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n >= 0
 n = 9;
 P0=x*(x^3+t)*((x-1)^2+t^n);
 do(P0, Strprintf("[IV-II{%ld}], p. 175",n))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n > 0
 n = 9;
 P0=x*(x^3+t^2)*((x-1)^2+t^(n-1));
 do(P0, Strprintf("[IV*-II{%ld}], p. 175",n))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n = 0
 P0=(x^2+t^3)*(x^3+t^4);
 do(P0, "[IV*-II{0}], p. 175")
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n >= 0
 n = 9;
 P0=(x^3+t)*(x^2+t^(n+1));
 do(P0, Strprintf("[II-II*{%ld}], p. 176",n))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n >= 0
 n = 9;
