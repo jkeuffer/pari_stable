@@ -261,11 +261,13 @@ do(P0, Strprintf("[II*-III*-%ld], p. 167",m))
 m = 10;
 P0=x*(x^2+t^(4*m+1))*((x-1)^3+t^2);
 do(P0, Strprintf("[IV-III-%ld], p. 167",m))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ m >= 0
 m = 10;
 P0=x*(x^2+t^(4*m+3))*((x-1)^3+t^2);
 do(P0, Strprintf("[IV-III*-%ld], p. 167",m))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ m = -1
 P0=x*(x^2+t)*(x^3+t);
@@ -319,11 +321,13 @@ do(subst(P0, 'a, 3), Strprintf("[I{%ld-0-0}], p. 170",n))
 n = 9; m = 10;
 P0=(x^3+a*t^(4*m)*x+t^(6*m))*((x-1)^2+t^n);
 do(subst(P0, 'a, 3), Strprintf("[I{%ld}-I{0}-%ld], p. 170",n, m))
+genus2red(0,substvec(P0,['a,'t],[-1,3]),3)
 
 \\ n, m >= 0
 n = 9; m = 10;
 P0=(x+t)*(x^2+t^(n+2))*((x-1)^3+a*t^(4*m)*(x-1)+t^(6*m));
 do(subst(P0, 'a, 3), Strprintf("[I{0}-I*{%ld}-%ld], p. 170",n, m))
+genus2red(0,substvec(P0,['a,'t],[-1,3]),3)
 
 \\ n, m >= 0
 n = 9; m = 10;
@@ -423,16 +427,19 @@ do(P0, Strprintf("[II-II*{%ld}], p. 176",n))
 n = 9;
 P0=t*x*(x^3+t)*((x-1)^2+t^n);
 do(P0, Strprintf("[II*-II*{%ld}], p. 176",n))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n > 0, m >= 0
 n = 9; m = 10;
 P0=x*(x^2+t^(4*m+1))*((x-1)^2+t^n);
 do(P0, Strprintf("[III-I{%ld}-%ld], p. 176",n,m))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n > 0, m >= 0
 n = 9; m = 10;
 P0=x*(x^2+t^(4*m+3))*((x-1)^2+t^n);
 do(P0, Strprintf("[III*-I{%ld}-%ld], p. 176",n,m))
+genus2red(0,subst(P0,'t,3),3)
 
 \\ n, m >= 0
 n = 9; m = 10;
