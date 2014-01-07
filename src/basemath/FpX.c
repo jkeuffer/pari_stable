@@ -1499,12 +1499,6 @@ FpXQ_pow_Frobenius(GEN x, GEN n, GEN aut, GEN T, GEN p)
   return gerepileupto(av,signe(n)>0 ? z : FpXQ_inv(z,T,p));
 }
 
-static GEN
-FpX_Frobenius(GEN T, GEN p)
-{
-  return FpXQ_pow(pol_x(get_FpX_var(T)), p, T, p);
-}
-
 /* assume T irreducible mod p */
 int
 FpXQ_issquare(GEN x, GEN T, GEN p)
@@ -1617,6 +1611,14 @@ _FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
 
 static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,hash_GEN,ZX_equal,ZX_equal1,_FpXQ_easylog};
 
+const struct bb_group *get_FpXQ_star(void **E, GEN T, GEN p)
+{
+  GEN z = new_chunk(sizeof(struct _FpXQ));
+  struct _FpXQ *e = (struct _FpXQ *) z;
+  e->T = T; e->p  = p; e->aut =  FpXQ_pow(pol_x(get_FpX_var(T)), p, T, p);
+  *E = (void*)e; return &FpXQ_star;
+}
+
 GEN
 FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
 {
@@ -1629,9 +1631,9 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   }
   else
   {
-    struct _FpXQ s;
-    s.T=T; s.p=p; s.aut = FpX_Frobenius(T, p);
-    return gen_order(a,ord, (void*)&s,&FpXQ_star);
+    void *E;
+    const struct bb_group *S = get_FpXQ_star(&E,T,p);
+    return gen_order(a,ord,E,S);
   }
 }
 
@@ -1647,10 +1649,9 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   }
   else
   {
-    struct _FpXQ s;
-    GEN z;
-    s.T=T; s.p=p; s.aut = FpX_Frobenius(T, p);
-    z = gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star);
+    void *E;
+    const struct bb_group *S = get_FpXQ_star(&E,T,p);
+    GEN z = gen_PH_log(a,g,ord,E,S);
     return z? z: cgetg(1,t_VEC);
   }
 }
@@ -1680,10 +1681,10 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   }
   else
   {
-    struct _FpXQ s;
+    void *E;
+    const struct bb_group *S = get_FpXQ_star(&E,T,p);
     GEN o = addis(powiu(p,get_FpX_degree(T)),-1);
-    s.T=T; s.p=p; s.aut = FpX_Frobenius(T, p);
-    return gen_Shanks_sqrtn(a,n,o,zeta, (void*)&s,&FpXQ_star);
+    return gen_Shanks_sqrtn(a,n,o,zeta,E,S);
   }
 }
 

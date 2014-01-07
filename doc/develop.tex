@@ -367,6 +367,9 @@ $Q$ is of order $m$. (Note: $Q$ needs not be of order $d_2$).
 
 \subsec{Functions returning black box groups}
 
+\fun{const struct bb_group *}{get_FpXQ_star}{void **E, GEN T, GEN p}
+returns a pointer to the black box group $(\F_p[x]/(T))^*$.
+
 \fun{const struct bb_group *}{get_FpE_group}{void **pt_E, GEN a4, GEN a6, GEN p}
 returns a pointer to a black box group and set \kbd{*pt\_E} to the necessary data for
 computing in the group $E(\F_p)$ where $E$ is the elliptic curve $E:y^2=x^3+a_4\*x+a_6$,

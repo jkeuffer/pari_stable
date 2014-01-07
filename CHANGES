@@ -175,8 +175,8 @@ BA 24- GP function vecsum
        RgM_transmultosym, ZM_transmultosym
    30- [libpari] nf_rnfeq, nf_rnfeqsimple, eltreltoabs, eltabstorel,
        eltabstorel_lift, nf_nfzk, nfeltup, QXV_QXQ_eval, QXX_QXQ_eval
-   31- factor_pn_1_limit
-
+   31- [libpari] factor_pn_1_limit
+   32- [libpari] get_FpXQ_star
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
        Use the default = round4

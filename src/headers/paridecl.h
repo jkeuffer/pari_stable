@@ -466,6 +466,7 @@ GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 long    get_FpX_degree(GEN T);
 GEN     get_FpX_mod(GEN T);
 long    get_FpX_var(GEN T);
+const struct bb_group *get_FpXQ_star(void **E, GEN T, GEN p);
 GEN     random_FpX(long d, long v, GEN p);
 
 /* FpX_factor.c */
