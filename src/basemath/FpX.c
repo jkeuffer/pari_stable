@@ -1510,14 +1510,11 @@ int
 FpXQ_issquare(GEN x, GEN T, GEN p)
 {
   pari_sp av;
-  GEN m, z;
   long res;
   if (lg(x) == 2 || equalui(2, p)) return 1;
   if (lg(x) == 3) return Fq_issquare(gel(x,2), T, p);
-  av = avma;
-  m = diviiexact(subis(powiu(p, get_FpX_degree(T)), 1), subis(p,1));
-  z = constant_term( FpXQ_pow(x, m, T, p) );
-  res = kronecker(z, p) == 1;
+  /* Ng = g^((q-1)/(p-1)) */
+  av = avma; res = kronecker(FpX_resultant(T,x,p), p) == 1;
   avma = av; return res;
 }
 int
@@ -1768,12 +1765,13 @@ GEN
 gener_FpXQ(GEN T, GEN p, GEN *po)
 {
   long i, j, vT = get_FpX_var(T), f = get_FpX_degree(T);
-  GEN g, L, L2, p_1, q, o;
+  GEN g, L, L2, p_1, q_1, N, o;
   pari_sp av0 = avma, av;
 
+  p_1 = subiu(p,1);
   if (f == 1) {
     GEN L, fa;
-    o = subis(p, 1);
+    o = p_1;
     fa = Z_factor(o);
     L = gel(fa,1);
     L = vecslice(L, 2, lg(L)-1); /* remove 2 for efficiency */
@@ -1794,8 +1792,8 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     gerepileall(av0, 2, &g, po);
     return g;
   }
-  p_1 = subis(p,1);
-  q = diviiexact(subis(powiu(p,f), 1), p_1);
+  q_1 = subiu(powiu(p,f), 1);
+  N = diviiexact(q_1, p_1);
 
   L = NULL;
   (void)Z_lvalrem(p_1, 2, &L);
@@ -1806,7 +1804,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   for (i = j = 1; i < lg(L2); i++)
   {
     if (remii(p_1, gel(L2,i)) == gen_0) continue;
-    gel(L2,j++) = diviiexact(q, gel(L2,i));
+    gel(L2,j++) = diviiexact(N, gel(L2,i));
   }
   setlg(L2, j);
   for (av = avma;; avma = av)
@@ -1814,7 +1812,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     GEN t;
     g = random_FpX(f, vT, p);
     if (degpol(g) < 1) continue;
-    t = FpX_resultant(T, g, p); /* Ng = g^q, assuming T is monic */
+    t = FpX_resultant(T, g, p); /* Ng = g^((q-1)/(p-1)), assuming T is monic */
     if (equali1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
     t = FpXQ_pow(g, shifti(p_1,-1), T, p);
     for (i = 1; i < j; i++)
@@ -1826,7 +1824,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   }
   if (!po) g = gerepilecopy(av0, g);
   else {
-    *po = mkvec2(subis(powiu(p,f), 1), o);
+    *po = mkvec2(q_1, o);
     gerepileall(av0, 2, &g, po);
   }
   return g;
