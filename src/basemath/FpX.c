@@ -50,21 +50,19 @@ get_FpX_degree(GEN T) { return typ(T)==t_VEC? degpol(gel(T,2)): degpol(T); }
  */
 
 static ulong
-to_Flx(GEN P, GEN Q, GEN p, GEN *pt_P, GEN *pt_Q)
+to_Flx(GEN *P, GEN *Q, GEN p)
 {
   ulong pp = (ulong)p[2];
-  *pt_P = ZX_to_Flx(P, pp);
-  *pt_Q = ZX_to_Flx(Q, pp);
-  return pp;
+  *P = ZX_to_Flx(*P, pp);
+  *Q = ZX_to_Flx(*Q, pp); return pp;
 }
 
 static ulong
-to_Flxq(GEN P, GEN T, GEN p, GEN *pt_P, GEN *pt_T)
+to_Flxq(GEN *P, GEN *T, GEN p)
 {
   ulong pp = (ulong)p[2];
-  if (pt_P) *pt_P = ZX_to_Flx(P, pp);
-  *pt_T = ZXT_to_FlxT(T, pp);
-  return pp;
+  if (P) *P = ZX_to_Flx(*P, pp);
+  *T = ZXT_to_FlxT(*T, pp); return pp;
 }
 
 GEN
@@ -361,7 +359,7 @@ FpX_divrem_basecase(GEN x, GEN y, GEN p, GEN *pr)
   av0 = avma; dz = dx-dy;
   if (lgefint(p) == 3)
   { /* assume ab != 0 mod p */
-    ulong pp = to_Flx(x, y, p, &x, &y);
+    ulong pp = to_Flx(&x, &y, p);
     z = Flx_divrem(x, y, pp, pr);
     avma = av0; /* HACK: assume pr last on stack, then z */
     if (!z) return NULL;
@@ -557,7 +555,7 @@ FpX_halfgcd(GEN x, GEN y, GEN p)
   GEN M,q,r;
   if (lgefint(p)==3)
   {
-    ulong pp = to_Flx(x, y, p, &x, &y);
+    ulong pp = to_Flx(&x, &y, p);
     M = FlxM_to_ZXM(Flx_halfgcd(x, y, pp));
   }
   else
@@ -602,7 +600,7 @@ FpX_gcd(GEN x, GEN y, GEN p)
   {
     ulong pp;
     (void)new_chunk((lg(x) + lg(y)) << 2); /* scratch space */
-    pp = to_Flx(x, y, p, &x, &y);
+    pp = to_Flx(&x, &y, p);
     x = Flx_gcd(x, y, pp);
     avma = av; return Flx_to_ZX(x);
   }
@@ -704,7 +702,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   pari_sp ltop=avma;
   if (lgefint(p)==3)
   {
-    ulong pp = to_Flx(x, y, p, &x, &y);
+    ulong pp = to_Flx(&x, &y, p);
     d = Flx_extgcd(x,y, pp, ptu,ptv);
     d = Flx_to_ZX(d);
     if (ptu) *ptu=Flx_to_ZX(*ptu);
@@ -1128,7 +1126,7 @@ FpX_divrem(GEN x, GEN T, GEN p, GEN *pr)
   else if (lgefint(p)==3)
   {
     pari_sp av = avma;
-    ulong pp = to_Flxq(x, T, p, &x, &T);
+    ulong pp = to_Flxq(&x, &T, p);
     GEN z = Flx_divrem(x, T, pp, pr);
     if (!z) return NULL;
     if (!pr || pr == ONLY_DIVIDES)
@@ -1160,7 +1158,7 @@ FpX_rem(GEN x, GEN T, GEN p)
   else if (lgefint(p)==3)
   {
     pari_sp av = avma;
-    ulong pp = to_Flxq(x, T, p, &x, &T);
+    ulong pp = to_Flxq(&x, &T, p);
     return Flx_to_ZX_inplace(gerepileuptoleaf(av, Flx_rem(x, T, pp)));
   } else
   {
@@ -1290,7 +1288,7 @@ FpXQ_pow(GEN x, GEN n, GEN T, GEN p)
   av = avma;
   if (!is_bigint(p))
   {
-    ulong pp = to_Flxq(x, T, p, &x, &T);
+    ulong pp = to_Flxq(&x, &T, p);
     y = Flxq_pow(x, n, T, pp);
     return Flx_to_ZX_inplace(gerepileuptoleaf(av, y));
   }
@@ -1311,7 +1309,7 @@ FpXQ_powu(GEN x, ulong n, GEN T, GEN p)
   av = avma;
   if (!is_bigint(p))
   {
-    ulong pp = to_Flxq(x, T, p, &x, &T);
+    ulong pp = to_Flxq(&x, &T, p);
     y = Flxq_powu(x, n, T, pp);
     return Flx_to_ZX_inplace(gerepileuptoleaf(av, y));
   }
@@ -1328,7 +1326,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   int use_sqr;
   if (l>2 && lgefint(p) == 3) {
     pari_sp av = avma;
-    ulong pp = to_Flxq(x, T, p, &x, &T);
+    ulong pp = to_Flxq(&x, &T, p);
     GEN z = FlxV_to_ZXV(Flxq_powers(x, l, T, pp));
     return gerepileupto(av, z);
   }
@@ -1359,7 +1357,7 @@ FpX_FpXQ_eval(GEN Q, GEN x, GEN T, GEN p)
   if (lgefint(p) == 3)
   {
     pari_sp av = avma;
-    ulong pp = to_Flxq(x, T, p, &x, &T);
+    ulong pp = to_Flxq(&x, &T, p);
     GEN z = Flx_Flxq_eval(ZX_to_Flx(Q, pp), x, T, pp);
     return Flx_to_ZX_inplace(gerepileuptoleaf(av, z));
   }
@@ -1625,7 +1623,7 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   if (lgefint(p)==3)
   {
     pari_sp av=avma;
-    ulong pp = to_Flxq(a, T, p, &a, &T);
+    ulong pp = to_Flxq(&a, &T, p);
     GEN z = Flxq_order(a, ord, T, pp);
     return gerepileuptoint(av,z);
   }
@@ -1643,7 +1641,7 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   if (lgefint(p)==3)
   {
     pari_sp av=avma;
-    ulong pp = to_Flxq(a, T, p, &a, &T);
+    ulong pp = to_Flxq(&a, &T, p);
     GEN z = Flxq_log(a, ZX_to_Flx(g, pp), ord, T, pp);
     return gerepileuptoint(av,z);
   }
@@ -1669,7 +1667,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   if (lgefint(p)==3)
   {
     pari_sp av=avma;
-    ulong pp = to_Flxq(a, T, p, &a, &T);
+    ulong pp = to_Flxq(&a, &T, p);
     GEN z = Flxq_sqrtn(a, n, T, pp, zeta);
     if (!z) return NULL;
     if (!zeta)
@@ -1785,7 +1783,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   }
   if (lgefint(p) == 3)
   {
-    ulong pp = to_Flxq(NULL, T, p, NULL, &T);
+    ulong pp = to_Flxq(NULL, &T, p);
     g = gener_Flxq(T, pp, po);
     if (!po) return Flx_to_ZX_inplace(gerepileuptoleaf(av0, g));
     g = Flx_to_ZX(g);
