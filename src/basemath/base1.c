@@ -1559,23 +1559,30 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
 }
 
 static GEN
-primes_certify(GEN dKP)
+primes_certify(GEN dK, GEN dKP)
 {
+  pari_sp av = avma;
   long i, l = lg(dKP);
-  GEN v;
+  GEN v, D = dK;
   v = vectrunc_init(l);
   for (i = 1; i < l; i++)
   {
     GEN p = gel(dKP,i);
-    if (!isprime(p)) vectrunc_append(v, icopy(p));
+    if (!isprime(p)) vectrunc_append(v, p);
+    (void)Z_pvalrem(D, p, &D);
   }
-  fixlg(v, lg(v)); return v;
+  if (!is_pm1(D))
+  {
+    if (signe(D) < 0) D = negi(D);
+    if (!isprime(D)) vectrunc_append(v, D);
+  }
+  fixlg(v, lg(v)); return gerepilecopy(av, v);
 }
 GEN
 nfcertify(GEN nf)
 {
   nf = checknf(nf);
-  return primes_certify(gmael(nf, 5, 8));
+  return primes_certify(nf_get_disc(nf),gmael(nf, 5, 8));
 }
 
 #if 0 /* used to check benches between HNF nf.zk and LLL-reduced nf.zk */
@@ -2707,7 +2714,7 @@ polredabs0(GEN x, long flag)
   {
     GEN v;
     if (!(flag & nf_PARTIALFACT)
-        && T.dKP && lg(primes_certify(T.dKP)) != 1) return gen_0;
+        && T.dKP && lg(primes_certify(T.dK, T.dKP)) != 1) return gen_0;
     v = polredabs_aux(&T, &u);
     y = gel(v,1);
     a = gel(v,2); l = lg(a);

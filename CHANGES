@@ -76,6 +76,9 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
        is inexact and may represent an arbitrary small non-zero real number ]
    57- eint1 misbehaved at large precision [#1499]
    58- polredbest(T,1) incorrect if T non-monic or degree 1
+   59- nfcertify might miss a factor to be certified, e.g.
+       P=polcompositum(x^4+437*x+19,x^5-571*x+27)[1];
+       nfcertify(nfinit(P, [2,3,5])) was empty
 
   Changed
     1- default help text for a user function is now as in \u:
