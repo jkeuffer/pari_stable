@@ -143,12 +143,18 @@ mathouseholder(GEN Q, GEN v)
 {
   long l = lg(Q);
   check_householder(Q);
-  if (typ(v) == t_MAT)
+  switch(typ(v))
   {
-    long lx, i;
-    GEN M = cgetg_copy(v, &lx);
-    for (i = 1; i < lx; i++) gel(M,i) = RgC_ApplyAllQ(Q, gel(v,i), l);
-    return M;
+    case t_MAT:
+    {
+      long lx, i;
+      GEN M = cgetg_copy(v, &lx);
+      for (i = 1; i < lx; i++) gel(M,i) = RgC_ApplyAllQ(Q, gel(v,i), l);
+      return M;
+    }
+    case t_COL: if (lg(v) == l) break;
+      /* fall through */
+    default: pari_err_TYPE("mathouseholder", v);
   }
   return RgC_ApplyAllQ(Q, v, l);
 }
