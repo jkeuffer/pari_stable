@@ -2489,7 +2489,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
   long i, j;
   long vT = get_Flx_var(T), f =get_Flx_degree(T);
   ulong p_1;
-  GEN g, L, L2, o, q;
+  GEN g, L, L2, o, q, F;
   pari_sp av0, av;
 
   if (f == 1) {
@@ -2522,6 +2522,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     gel(L2,j++) = diviiexact(q, gel(L2,i));
   }
   setlg(L2, j);
+  F = Flxq_powu(polx_Flx(evalvarn(vT)), p, T, p); /* Frobenius */
   for (av = avma;; avma = av)
   {
     ulong RES;
@@ -2538,7 +2539,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     RES = p_1;
     for (i = 1; i < j; i++)
     {
-      GEN a = Flxq_pow(tt, gel(L2,i), T, p);
+      GEN a = Flxq_pow_Frobenius(tt, gel(L2,i), F, T, p);
       if (!degpol(a) && (ulong)a[2] == RES) break;
     }
     if (i == j) break;

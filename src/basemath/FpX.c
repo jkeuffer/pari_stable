@@ -1766,7 +1766,7 @@ GEN
 gener_FpXQ(GEN T, GEN p, GEN *po)
 {
   long i, j, vT = get_FpX_var(T), f = get_FpX_degree(T);
-  GEN g, L, L2, p_1, q_1, N, o;
+  GEN g, L, L2, p_1, q_1, N, o, F;
   pari_sp av0 = avma, av;
 
   p_1 = subiu(p,1);
@@ -1808,6 +1808,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     gel(L2,j++) = diviiexact(N, gel(L2,i));
   }
   setlg(L2, j);
+  F = FpXQ_pow(pol_x(vT), p, T, p); /* Frobenius */
   for (av = avma;; avma = av)
   {
     GEN t;
@@ -1818,7 +1819,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     t = FpXQ_pow(g, shifti(p_1,-1), T, p);
     for (i = 1; i < j; i++)
     {
-      GEN a = FpXQ_pow(t, gel(L2,i), T, p);
+      GEN a = FpXQ_pow_Frobenius(t, gel(L2,i), F, T, p);
       if (!degpol(a) && equalii(gel(a,2), p_1)) break;
     }
     if (i == j) break;
@@ -1830,3 +1831,22 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   }
   return g;
 }
+
+#if 0 /* generic version: slower */
+GEN
+gener_FpXQ2(GEN T, GEN p, GEN *po)
+{
+  pari_sp av = avma;
+  void *E;
+  long f = get_FpX_degree(T);
+  GEN g, o = factor_pn_1(p,f);
+  const struct bb_group *S = get_FpXQ_star(&E,T,p);
+  g = gen_gener(o,E,S);
+  if (!po) g = gerepilecopy(av, g);
+  else {
+    *po = mkvec2(powiu(p,f), o);
+    gerepileall(av, 2, &g, po);
+  }
+  return g;
+}
+#endif
