@@ -2975,8 +2975,14 @@ necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
 \kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
 necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
 
-\fun{GEN}{factor_pn_1}{GEN p, long n} returns the factorization of $p^n-1$,
+\fun{GEN}{factor_pn_1}{GEN p, ulong n} returns the factorization of $p^n-1$,
 where $p$ is prime and $n$ is a positive integer.
+
+\fun{GEN}{factor_pn_1_limit}{GEN p, ulong n, ulong B} returns a partial
+factorization of $p^n-1$, where $p$ is prime and $n$ is a positive integer.
+Don't actively search for prime divisors $p > B$, but we may find still find
+some due to Aurifeuillian factorizations. Any entry $> B^2$ in the output
+factorization matrix is \emph{a priori} not a prime (but may well be).
 
 \fun{GEN}{factor_Aurifeuille_prime}{GEN p, long n} an Aurifeuillian factor
 of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists

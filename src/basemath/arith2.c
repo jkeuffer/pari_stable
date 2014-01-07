@@ -568,12 +568,16 @@ factoru_pow(ulong n)
   return f;
 }
 
-/* factor p^n - 1, assuming p prime */
+static GEN
+factorlim(GEN n, ulong lim)
+{ return lim? Z_factor_limit(n, lim): Z_factor(n); }
+/* factor p^n - 1, assuming p prime. If lim != 0, limit factorization to
+ * primes <= lim */
 GEN
-factor_pn_1(GEN p, long n)
+factor_pn_1_limit(GEN p, long n, ulong lim)
 {
   pari_sp av = avma;
-  GEN A = Z_factor(subis(p,1)), d = divisorsu(n);
+  GEN A = factorlim(subiu(p,1), lim), d = divisorsu(n);
   long i, pp = itos_or_0(p);
   for(i=2; i<lg(d); i++)
   {
@@ -584,16 +588,19 @@ factor_pn_1(GEN p, long n)
        (pp==2 && (d[i]&7)==4)))
     {
       GEN f=factor_Aurifeuille_prime(p,d[i]);
-      B = Z_factor(f);
+      B = factorlim(f, lim);
       A = merge_factor(A, B, (void*)&cmpii, cmp_nodata);
-      B = Z_factor(diviiexact(polcyclo_eval(d[i],p), f));
+      B = factorlim(diviiexact(polcyclo_eval(d[i],p), f), lim);
     }
     else
-      B = Z_factor(polcyclo_eval(d[i],p));
+      B = factorlim(polcyclo_eval(d[i],p), lim);
     A = merge_factor(A, B, (void*)&cmpii, cmp_nodata);
   }
   return gerepilecopy(av, A);
 }
+GEN
+factor_pn_1(GEN p, ulong n)
+{ return factor_pn_1_limit(p, n, 0); }
 
 #if 0
 static GEN
