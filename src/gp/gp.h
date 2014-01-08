@@ -82,6 +82,7 @@ extern entree  functions_gp[];
 extern entree functions_oldgp[];
 
 /* From highlvl.c */
-void gpinstall(char *s, char *code, char *gpname, char *lib);
+void gpinstall(const char *s, const char *code,
+               const char *gpname, const char *lib);
 
 ENDEXTERN

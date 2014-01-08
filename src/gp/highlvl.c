@@ -26,12 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* see try_name() */
 static void *
-try_dlopen(char *s, int flag)
+try_dlopen(const char *s, int flag)
 { void *h = dlopen(s, flag); pari_free((void*)s); return h; }
 
 /* like dlopen, but using default(sopath) */
 static void *
-gp_dlopen(char *name, int flag)
+gp_dlopen(const char *name, int flag)
 {
   void *handle;
   char *s;
@@ -57,7 +57,7 @@ gp_dlopen(char *name, int flag)
 }
 
 static void *
-install0(char *name, char *lib)
+install0(const char *name, const char *lib)
 {
   void *handle;
 
@@ -80,12 +80,12 @@ install0(char *name, char *lib)
 #  ifdef _WIN32
 #  include <windows.h>
 static HMODULE
-try_LoadLibrary(char *s)
+try_LoadLibrary(const char *s)
 { void *h = LoadLibrary(s); pari_free((void*)s); return h; }
 
 /* like LoadLibrary, but using default(sopath) */
 static HMODULE
-gp_LoadLibrary(char *name)
+gp_LoadLibrary(const char *name)
 {
   HMODULE handle;
   char *s = path_expand(name);
@@ -104,7 +104,7 @@ gp_LoadLibrary(char *name)
   return NULL;
 }
 static void *
-install0(char *name, char *lib)
+install0(const char *name, const char *lib)
 {
   FARPROC f;
   HMODULE handle;
@@ -131,7 +131,7 @@ install0(char *name, char *lib)
 }
 #  else
 static void *
-install0(char *name, char *lib)
+install0(const char *name, const char *lib)
 { pari_err(e_ARCH,"install"); return NULL; }
 #endif
 #endif
@@ -141,10 +141,10 @@ dft_help(const char *gp, const char *s, const char *code)
 { return stack_sprintf("%s: installed function\nlibrary name: %s\nprototype: %s" , gp, s, code); }
 
 void
-gpinstall(char *s, char *code, char *gpname, char *lib)
+gpinstall(const char *s, const char *code, const char *gpname, const char *lib)
 {
   pari_sp av = avma;
-  char *gp = *gpname? gpname: s;
+  const char *gp = *gpname? gpname: s;
   void *f;
   entree *ep;
   if (GP_DATA->secure)
