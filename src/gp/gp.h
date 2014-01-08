@@ -81,8 +81,4 @@ extern entree  functions_gp[];
 /* list of old GP-specific fonctions (up to 1.39.15) */
 extern entree functions_oldgp[];
 
-/* From highlvl.c */
-void gpinstall(const char *s, const char *code,
-               const char *gpname, const char *lib);
-
 ENDEXTERN

@@ -2198,6 +2198,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 #endif
   gp_is_interactive = pari_stdin_isatty();
   pari_init_defaults();
+  pari_library_path = DL_DFLT_NAME;
   pari_stack_init(&s_A,sizeof(*A),(void**)&A);
   pari_stack_init(&s_bufstack, sizeof(Buffer*), (void**)&bufstack);
   cb_pari_err_recover = gp_err_recover;

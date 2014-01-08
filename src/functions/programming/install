@@ -1,5 +1,4 @@
 Function: install
-Class: highlevel
 Section: programming/specific
 C-Name: gpinstall
 Prototype: vrrD"",r,D"",s,

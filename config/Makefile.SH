@@ -235,7 +235,7 @@ GMPLIBS      = $GMPLIBS
 MT_LIBS      = $MT_LIBS
 RT_LIBS      = $RT_LIBS
 DL_LIBS      = $DL_LIBS
-STA_LIBS     = \$(GMPLIBS) \$(RT_LIBS) \$(MT_LIBS) \$(LIBS)
+STA_LIBS     = \$(GMPLIBS) \$(DL_LIBS) \$(RT_LIBS) \$(MT_LIBS) \$(LIBS)
 
 RM = rm -f
 MV = mv -f
@@ -336,7 +336,7 @@ tune-sta: tune.o \$(LIBPARI_STA)
 
 gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	\$(RM) \$@
-	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(DL_LIBS) \$(STA_LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(STA_LIBS)
 	$postconfig gp-sta
 
 cleantest:
@@ -381,7 +381,7 @@ install-bin: install-bin-$dft
 install-bin-dyn: gp-dyn install-lib-dyn
 	-mkdir -p \$(BINDIR)
 	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
-	\$(LD) -o \$(BINDIR)/gp-$version$exe_suff -L\$(LIBDIR) \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(LDDYN) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
+	\$(LD) -o \$(BINDIR)/gp-$version$exe_suff -L\$(LIBDIR) \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(LDDYN) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version$exe_suff
 	-cd \$(BINDIR); $postconfig gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
@@ -490,7 +490,7 @@ install-lib-sta: \$(LIBPARI_STA)
 install-lib-dyn-base:
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME) \$(LIBDIR)/\$(LIBPARI_SO)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(MT_LIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(DL_LIBS) \$(RT_LIBS) \$(MT_LIBS) \$(EXPORT_FILE) \$(LD_INSTALL_NAME)
 	$install_implib
 
 install-lib-dyn-link: install-lib-dyn-base
@@ -595,12 +595,12 @@ EOT
 
 gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	\$(RM) \$@
-	\$(LD) -o \$@ -L\$(TOPLDDYN) \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
+	\$(LD) -o \$@ -L\$(TOPLDDYN) \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 	$postconfig gp-dyn
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(TOPLDDYN)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(RT_LIBS) \$(MT_LIBS) \$(EXPORT_FILE)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(TOPLDDYN)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(DL_LIBS) \$(RT_LIBS) \$(MT_LIBS) \$(EXPORT_FILE)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SO)"; then \
 	  \$(RM) \$(LIBPARI_SO);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO); fi
@@ -712,7 +712,7 @@ for dir in basemath modules language gp graph systems mt; do
   compile='$(CC)'
   case "$f" in
   gp)
-    cflags="$cflags -I$src/language"
+    cflags="$cflags -I$src/language -DDL_DFLT_NAME=\$(DL_DFLT_NAME)"
     depend="$src/gp/gp.h"
     ;;
   gp_rl)
@@ -735,7 +735,6 @@ for dir in basemath modules language gp graph systems mt; do
     depend="$RECT_H"
     ;;
   highlvl)
-    cflags="$cflags -DDL_DFLT_NAME=\$(DL_DFLT_NAME)"
     depend="$RECT_H $src/gp/highlvl.h"
     ;;
   plotQt)

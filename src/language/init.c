@@ -91,6 +91,7 @@ int  (*cb_pari_whatnow)(PariOUT *out, const char *, int);
 void (*cb_pari_sigint)(void);
 void (*cb_pari_pre_recover)(long);
 void (*cb_pari_err_recover)(long);
+const char * pari_library_path = NULL;
 
 static THREAD GEN global_err_data;
 THREAD jmp_buf *iferr_env;

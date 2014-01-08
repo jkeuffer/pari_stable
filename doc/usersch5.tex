@@ -228,6 +228,12 @@ available.
 \item $\fl = 1$: must return $0$ if the function did not change, and a
 non-$0$ result otherwise. May print a help message.
 
+\subsec{Configuration variables}
+
+\tet{pari_library_path}: If set, It should be a path to the libpari library.
+It is used by the function \tet{gpinstall} to locate the PARI library when
+searching for symbols.  This should only be useful on Windows.
+
 \misctitle{Utility function}
 
 \fun{void}{pari_ask_confirm}{const char *s} raise an error if the

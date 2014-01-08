@@ -2020,6 +2020,8 @@ GEN     gp_read_file(char *s);
 GEN     gp_read_stream(FILE *f);
 GEN     gp_readvec_file(char *s);
 GEN     gp_readvec_stream(FILE *f);
+void    gpinstall(const char *s, const char *code,
+                  const char *gpname, const char *lib);
 GEN     gsprintf(const char *fmt, ...);
 GEN     gvsprintf(const char *fmt, va_list ap);
 char*   itostr(GEN x);
