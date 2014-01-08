@@ -1657,6 +1657,8 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 GEN
 FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
 {
+  pari_sp av = avma;
+  GEN z;
   if (!signe(a))
   {
     long v=varn(a);
@@ -1666,24 +1668,24 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   }
   if (lgefint(p)==3)
   {
-    pari_sp av=avma;
     ulong pp = to_Flxq(&a, &T, p);
-    GEN z = Flxq_sqrtn(a, n, T, pp, zeta);
+    z = Flxq_sqrtn(a, n, T, pp, zeta);
     if (!z) return NULL;
-    if (!zeta)
-      return Flx_to_ZX_inplace(gerepileuptoleaf(av, z));
+    if (!zeta) return Flx_to_ZX_inplace(gerepileuptoleaf(av, z));
     z = Flx_to_ZX(z);
     *zeta=Flx_to_ZX(*zeta);
-    gerepileall(av,2,&z,zeta);
-    return z;
   }
   else
   {
     void *E;
     const struct bb_group *S = get_FpXQ_star(&E,T,p);
     GEN o = addis(powiu(p,get_FpX_degree(T)),-1);
-    return gen_Shanks_sqrtn(a,n,o,zeta,E,S);
+    z = gen_Shanks_sqrtn(a,n,o,zeta,E,S);
+    if (!z) return NULL;
+    if (!zeta) return gerepileupto(av, z);
   }
+  gerepileall(av, 2, &z,zeta);
+  return z;
 }
 
 GEN
