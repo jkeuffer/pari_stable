@@ -331,7 +331,7 @@ pari_daemon(void)
 /*                                                                   */
 /*********************************************************************/
 static int try_to_recover = 0;
-VOLATILE THREAD int PARI_SIGINT_block = 0, PARI_SIGINT_pending = 0;
+THREAD VOLATILE int PARI_SIGINT_block = 0, PARI_SIGINT_pending = 0;
 static void pari_sighandler(int sig);
 
 /*********************************************************************/

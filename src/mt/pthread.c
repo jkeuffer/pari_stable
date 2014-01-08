@@ -61,6 +61,7 @@ mt_sigint_unblock(void)
 void
 mt_err_recover(long er)
 {
+  (void) er;
   if (mt_thread_no>=0)
   {
     struct mt_pstate *mt = pari_mt;
@@ -162,6 +163,7 @@ mtpthread_queue_get(struct mt_state *junk, long *workid, long *pending)
   struct mt_queue *mq;
   GEN done = NULL;
   long last;
+  (void) junk;
   if (mt->nbint<mt->n) { mt->last = mt->nbint; *pending = mt->pending; return NULL; }
   BLOCK_SIGINT_START
   LOCK(&mt->pmut)
@@ -205,6 +207,7 @@ mtpthread_queue_submit(struct mt_state *junk, long workid, GEN work)
 {
   struct mt_pstate *mt = pari_mt;
   struct mt_queue *mq = mt->mq+mt->last;
+  (void) junk;
   if (!work) { mt->nbint=mt->n; return; }
   BLOCK_SIGINT_START
   if (mt->nbint<mt->n) mt->nbint++;
