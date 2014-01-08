@@ -302,7 +302,7 @@ installep(const char *name, long len, entree **table)
 }
 
 entree *
-install(void *f, char *name, char *code)
+install(void *f, const char *name, const char *code)
 {
   long hash, arity;
   entree *ep = is_entry_intern(name, functions_hash, &hash);
@@ -317,7 +317,7 @@ install(void *f, char *name, char *code)
   }
   else
   {
-    char *s = name;
+    const char *s = name;
     if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
     if (*s) pari_err(e_SYNTAX,"not a valid identifier", s, name);

@@ -1546,7 +1546,7 @@ library with new functions from your C source code. Functions such as
 \tet{gp_read_str} may then evaluate a GP expression sequence involving calls
 to these new function!
 
-\fun{entree *}{install}{void *f, char *gpname, char *code}
+\fun{entree *}{install}{void *f, const char *gpname, const char *code}
 
 \noindent where \kbd{f} is the (address of the) function (cast to
 \kbd{void*}), \kbd{gpname} is the name by which you want to access your

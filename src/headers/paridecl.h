@@ -1132,7 +1132,7 @@ long    fetch_user_var(const char *s);
 long    fetch_var(void);
 GEN     fetch_var_value(long vx, GEN t);
 GEN     gp_read_str(const char *t);
-entree* install(void *f, char *name, char *code);
+entree* install(void *f, const char *name, const char *code);
 entree* is_entry(const char *s);
 void    kill0(const char *e);
 long    manage_var(long n, entree *ep);
