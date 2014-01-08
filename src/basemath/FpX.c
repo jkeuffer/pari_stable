@@ -1783,11 +1783,9 @@ gener_FpXQ_i(GEN T, GEN p, GEN p_1, GEN Lp, GEN Lq)
       t = g;
     else
     {
-      if (lg(Lp) > 1)
-      {
-        t = FpX_resultant(T, g, p); /* Ng = g^((q-1)/(p-1)), assuming T monic */
-        if (equali1(t) || !is_gener_Fp(t, p, p_1, Lp)) continue;
-      }
+      t = FpX_resultant(T, g, p); /* Ng = g^((q-1)/(p-1)), assuming T monic */
+      if (kronecker(t, p) == 1) continue;
+      if (lg(Lp) > 1 && !is_gener_Fp(t, p, p_1, Lp)) continue;
       t = FpXQ_pow(g, shifti(p_1,-1), T, p);
     }
     for (i = 1; i < l; i++)
