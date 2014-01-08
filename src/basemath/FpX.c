@@ -1760,24 +1760,61 @@ FpXQ_conjvec(GEN x, GEN T, GEN p)
   return gerepilecopy(av,z);
 }
 
+/* p prime, p_1 = p-1, q = p^deg T, Lp = cofactors of some prime divisors
+ * l_p of p-1, Lq = cofactors of some prime divisors l_q of q-1, return a
+ * g in Fq such that
+ * - Ng generates all l_p-Sylows of Fp^*
+ * - g generates all l_q-Sylows of Fq^* */
+static GEN
+gener_FpXQ_i(GEN T, GEN p, GEN p_1, GEN Lp, GEN Lq)
+{
+  pari_sp av;
+  long vT = varn(T), f = degpol(T), l = lg(Lq);
+  GEN F = FpXQ_pow(pol_x(vT), p, T, p); /* Frobenius */
+  int p_is_2 = is_pm1(p_1);
+  for (av = avma;; avma = av)
+  {
+    GEN t, g = random_FpX(f, vT, p);
+    long i;
+    if (degpol(g) < 1) continue;
+    if (p_is_2)
+      t = g;
+    else
+    {
+      if (lg(Lp) > 1)
+      {
+        t = FpX_resultant(T, g, p); /* Ng = g^((q-1)/(p-1)), assuming T monic */
+        if (equali1(t) || !is_gener_Fp(t, p, p_1, Lp)) continue;
+      }
+      t = FpXQ_pow(g, shifti(p_1,-1), T, p);
+    }
+    for (i = 1; i < l; i++)
+    {
+      GEN a = FpXQ_pow_Frobenius(t, gel(Lq,i), F, T, p);
+      if (!degpol(a) && equalii(gel(a,2), p_1)) break;
+    }
+    if (i == l) return g;
+  }
+}
+
 GEN
 gener_FpXQ(GEN T, GEN p, GEN *po)
 {
-  long i, j, vT = get_FpX_var(T), f = get_FpX_degree(T);
-  GEN g, L, L2, p_1, q_1, N, o, F;
-  pari_sp av0 = avma, av;
+  long i, j, f = get_FpX_degree(T);
+  GEN g, Lp, Lq, p_1, q_1, N, o;
+  pari_sp av = avma;
 
   p_1 = subiu(p,1);
   if (f == 1) {
-    GEN L, fa;
+    GEN Lp, fa;
     o = p_1;
     fa = Z_factor(o);
-    L = gel(fa,1);
-    L = vecslice(L, 2, lg(L)-1); /* remove 2 for efficiency */
+    Lp = gel(fa,1);
+    Lp = vecslice(Lp, 2, lg(Lp)-1); /* remove 2 for efficiency */
 
     g = cgetg(3, t_POL);
-    g[1] = evalsigne(1) | evalvarn(vT);
-    gel(g,2) = pgener_Fp_local(p, L);
+    g[1] = evalsigne(1) | evalvarn(get_FpX_var(T));
+    gel(g,2) = pgener_Fp_local(p, Lp);
     if (po) *po = mkvec2(o, fa);
     return g;
   }
@@ -1785,47 +1822,30 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   {
     ulong pp = to_Flxq(NULL, &T, p);
     g = gener_Flxq(T, pp, po);
-    if (!po) return Flx_to_ZX_inplace(gerepileuptoleaf(av0, g));
+    if (!po) return Flx_to_ZX_inplace(gerepileuptoleaf(av, g));
     g = Flx_to_ZX(g);
     gel(*po,2) = Flx_to_ZX(gel(*po,2));
-    gerepileall(av0, 2, &g, po);
+    gerepileall(av, 2, &g, po);
     return g;
   }
+  /* p now odd */
   q_1 = subiu(powiu(p,f), 1);
   N = diviiexact(q_1, p_1);
-
-  L = NULL;
-  (void)Z_lvalrem(p_1, 2, &L);
-  L = gel(Z_factor(L),1);
-  for (i=lg(L)-1; i; i--) gel(L,i) = diviiexact(p_1, gel(L,i));
+  Lp = odd_prime_divisors(p_1);
+  for (i=lg(Lp)-1; i; i--) gel(Lp,i) = diviiexact(p_1, gel(Lp,i));
   o = factor_pn_1(p,f);
-  L2 = leafcopy( gel(o, 1) );
-  for (i = j = 1; i < lg(L2); i++)
+  Lq = leafcopy( gel(o, 1) );
+  for (i = j = 1; i < lg(Lq); i++)
   {
-    if (remii(p_1, gel(L2,i)) == gen_0) continue;
-    gel(L2,j++) = diviiexact(N, gel(L2,i));
+    if (remii(p_1, gel(Lq,i)) == gen_0) continue;
+    gel(Lq,j++) = diviiexact(N, gel(Lq,i));
   }
-  setlg(L2, j);
-  F = FpXQ_pow(pol_x(vT), p, T, p); /* Frobenius */
-  for (av = avma;; avma = av)
-  {
-    GEN t;
-    g = random_FpX(f, vT, p);
-    if (degpol(g) < 1) continue;
-    t = FpX_resultant(T, g, p); /* Ng = g^((q-1)/(p-1)), assuming T is monic */
-    if (equali1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
-    t = FpXQ_pow(g, shifti(p_1,-1), T, p);
-    for (i = 1; i < j; i++)
-    {
-      GEN a = FpXQ_pow_Frobenius(t, gel(L2,i), F, T, p);
-      if (!degpol(a) && equalii(gel(a,2), p_1)) break;
-    }
-    if (i == j) break;
-  }
-  if (!po) g = gerepilecopy(av0, g);
+  setlg(Lq, j);
+  g = gener_FpXQ_i(get_FpX_mod(T), p, p_1, Lp, Lq);
+  if (!po) g = gerepilecopy(av, g);
   else {
     *po = mkvec2(q_1, o);
-    gerepileall(av0, 2, &g, po);
+    gerepileall(av, 2, &g, po);
   }
   return g;
 }
@@ -1848,3 +1868,31 @@ gener_FpXQ2(GEN T, GEN p, GEN *po)
   return g;
 }
 #endif
+
+GEN
+gener_FpXQ_local(GEN T, GEN p, GEN L)
+{
+  GEN Lp, Lq, p_1 = subiu(p,1), q_1, N, z;
+  long f, i, ip, iq, l = lg(L);
+  T = get_FpX_mod(T);
+  f = degpol(T);
+  q_1 = subiu(powiu(p,f), 1);
+  N = diviiexact(q_1, p_1);
+
+  (void)Z_lvalrem(p_1, 2, &z);
+  Lp = cgetg(l, t_VEC); ip = 1;
+  Lq = cgetg(l, t_VEC); iq = 1;
+  for (i=1; i < l; i++)
+  {
+    GEN a, b, ell = gel(L,i);
+    if (equaliu(ell,2)) continue;
+    a = dvmdii(z, ell, &b);
+    if (b == gen_0)
+      gel(Lp,ip++) = a;
+    else
+      gel(Lq,iq++) = diviiexact(N,ell);
+  }
+  setlg(Lp, ip);
+  setlg(Lq, iq);
+  return gener_FpXQ_i(T, p, p_1, Lp, Lq);
+}

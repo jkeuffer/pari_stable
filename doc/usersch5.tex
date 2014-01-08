@@ -2992,10 +2992,12 @@ of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists
 $\phi_n(a)$, assuming $a$ is a non-zero integer and $n > 2$. Returns $1$
 if no Aurifeuillian factor exists.
 
+\fun{GEN}{odd_prime_divisors}{GEN a} \typ{VEC} of all prime divisors of the
+\typ{INT} $a$.
+
 \fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
 is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
 containing the prime divisors of $n$, and the $v_p(n)$.
-
 
 \fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
 is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
@@ -4460,6 +4462,13 @@ $(T,p)$. $T$ is an \kbd{FpX} assumed to be irreducible modulo the prime
 $p$. If \kbd{po} is not \kbd{NULL} it is set to $[o,\var{fa}]$, where $o$ is
 the order of the multiplicative group of the finite field, and \var{fa} is
 its factorization.
+
+\fun{GEN}{gener_FpXQ_local}{GEN T, GEN p, GEN L}, \kbd{L} being a vector of
+primes dividing $p^{\deg T} - 1$, returns an element of $G:=\F_p[x]/(T)$
+which is a generator of the $\ell$-Sylow of $G$ for every $\ell$ in
+\kbd{L}. It is not necessary, and in fact slightly inefficient, to include
+$\ell=2$, since 2 is treated separately in any case, i.e. the generator
+obtained is never a square if $p$ is odd.
 
 \fun{GEN}{FpXQ_powers}{GEN x, long n, GEN T, GEN p} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{FpXQ}s.

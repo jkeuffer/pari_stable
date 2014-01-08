@@ -29,7 +29,7 @@ static GEN
 remove2(GEN q) { long v = vali(q); return v? shifti(q, -v): q; }
 static ulong
 u_remove2(ulong q) { return q >> vals(q); }
-static GEN
+GEN
 odd_prime_divisors(GEN q) { return gel(Z_factor(remove2(q)), 1); }
 static GEN
 u_odd_prime_divisors(ulong q) { return gel(factoru(u_remove2(q)), 1); }
