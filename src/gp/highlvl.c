@@ -56,13 +56,12 @@ gp_dlopen(char *name, int flag)
   return NULL;
 }
 
-static entree *
-install0(char *name, char *code, char *gpname, char *lib)
+static void *
+install0(char *name, char *lib)
 {
-  void *f, *handle;
+  void *handle;
 
   if (! *lib) lib = DL_DFLT_NAME;
-  if (! *gpname) gpname = name;
 
 #ifndef RTLD_GLOBAL /* OSF1 has dlopen but not RTLD_GLOBAL*/
 #  define RTLD_GLOBAL 0
@@ -75,13 +74,7 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(e_MISC,"couldn't open dynamic library '%s'",lib);
     pari_err(e_MISC,"couldn't open dynamic symbol table of process");
   }
-  f = dlsym(handle, name);
-  if (!f)
-  {
-    if (lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",name,lib);
-    pari_err(e_MISC,"can't find symbol '%s' in dynamic symbol table of process",name);
-  }
-  return install(f, gpname, code);
+  return dlsym(handle, name);
 }
 #else
 #  ifdef _WIN32
@@ -110,8 +103,8 @@ gp_LoadLibrary(char *name)
   }
   return NULL;
 }
-static entree *
-install0(char *name, char *code, char *gpname, char *lib)
+static void *
+install0(char *name, char *lib)
 {
   FARPROC f;
   HMODULE handle;
@@ -127,7 +120,6 @@ install0(char *name, char *code, char *gpname, char *lib)
 #ifdef DL_DFLT_NAME
   if (! *lib) lib = DL_DFLT_NAME;
 #endif
-  if (! *gpname) gpname = name;
 
   handle = gp_LoadLibrary(lib);
   if (!handle)
@@ -135,17 +127,11 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(e_MISC,"couldn't open dynamic library '%s'",lib);
     pari_err(e_MISC,"couldn't open dynamic symbol table of process");
   }
-  f = GetProcAddress(handle,name);
-  if (!f)
-  {
-    if (lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",name,lib);
-    pari_err(e_MISC,"can't find symbol '%s' in dynamic symbol table of process",name);
-  }
-  return install((void*)f,gpname,code);
+  return GetProcAddress(handle,name);
 }
 #  else
-static entree *
-install0(char *name, char *code, char *gpname, char *lib)
+static void *
+install0(char *name, char *lib)
 { pari_err(e_ARCH,"install"); return NULL; }
 #endif
 #endif
@@ -159,6 +145,7 @@ gpinstall(char *s, char *code, char *gpname, char *lib)
 {
   pari_sp av = avma;
   char *gp = *gpname? gpname: s;
+  void *f;
   entree *ep;
   if (GP_DATA->secure)
   {
@@ -173,7 +160,13 @@ gpinstall(char *s, char *code, char *gpname, char *lib)
   { /* help is the default AND prototype changes: delete help */
     pari_free((void*)ep->help); ep->help = NULL;
   }
-  ep = install0(s, code, gpname, lib);
+  f = install0(s, lib);
+  if (!f)
+  {
+    if (*lib) pari_err(e_MISC,"can't find symbol '%s' in library '%s'",s,lib);
+    pari_err(e_MISC,"can't find symbol '%s' in dynamic symbol table of process",s);
+  }
+  ep = install(f,gp,code);
   if (ep && !ep->help) addhelp(gp, dft_help(gp,s,code));
   avma = av;
 }
