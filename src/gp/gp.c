@@ -2169,17 +2169,17 @@ cyg_environment(int argc, char ** argv)
 }
 #endif
 
-#ifdef WINCE
+#ifndef WINCE
+int
+main(int argc, char **argv)
+{
+#else
 int
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         LPWSTR lpCmdLine, int nShowCmd)
 {
   char **argv = NULL;
   int argc = 1;
-#else
-int
-main(int argc, char **argv)
-{
 #endif
   void **A;
   pari_stack s_A;
