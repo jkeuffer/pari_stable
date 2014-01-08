@@ -1872,21 +1872,21 @@ gener_FpXQ2(GEN T, GEN p, GEN *po)
 GEN
 gener_FpXQ_local(GEN T, GEN p, GEN L)
 {
-  GEN Lp, Lq, p_1 = subiu(p,1), q_1, N, z;
+  GEN Lp, Lq, p_1 = subiu(p,1), q_1, N, Q;
   long f, i, ip, iq, l = lg(L);
   T = get_FpX_mod(T);
   f = degpol(T);
   q_1 = subiu(powiu(p,f), 1);
   N = diviiexact(q_1, p_1);
 
-  (void)Z_lvalrem(p_1, 2, &z);
+  if (!is_pm1(p_1)) Q = shifti(p_1,-1);
   Lp = cgetg(l, t_VEC); ip = 1;
   Lq = cgetg(l, t_VEC); iq = 1;
   for (i=1; i < l; i++)
   {
     GEN a, b, ell = gel(L,i);
     if (equaliu(ell,2)) continue;
-    a = dvmdii(z, ell, &b);
+    a = dvmdii(Q, ell, &b);
     if (b == gen_0)
       gel(Lp,ip++) = a;
     else
