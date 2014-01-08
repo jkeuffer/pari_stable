@@ -342,7 +342,7 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 cleantest:
 	\$(RM) *.dif gp.out io-testfile pari.ps
 cleanobj:
-	-\$(RM) *\$(_O) mpker.c *.s mpinl.h parilvl0.h parilvl1.h libpari* $exec kerntest
+	-\$(RM) *\$(_O) mpker.c *.s parimt.h mpinl.h parilvl0.h parilvl1.h libpari* $exec kerntest
 	-\$(RM) gmon.out
 	-\$(RM) *.gcno *.gcda
 cleandesc:

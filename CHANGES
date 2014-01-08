@@ -79,6 +79,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    59- nfcertify might miss a factor to be certified, e.g.
        P=polcompositum(x^4+437*x+19,x^5-571*x+27)[1];
        nfcertify(nfinit(P, [2,3,5])) was empty
+   60- make clean did not remove Oxxx/parimt.h
 
   Changed
     1- default help text for a user function is now as in \u:
