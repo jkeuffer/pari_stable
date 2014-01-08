@@ -1596,11 +1596,6 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
   mt_queue_start(&pt, worker);
   b = b ? gfloor(b): NULL;
   a = mkvec(setloop(a));
-  if (code2)
-  {
-    push_lex(gen_0, code2);
-    push_lex(gen_0, NULL);
-  }
   av2 = avma;
   while ((running = (!stop && (!b || cmpii(gel(a,1),b) <= 0))) || pending)
   {
@@ -1608,8 +1603,10 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
     done = mt_queue_get(&pt, NULL, &pending);
     if (code2 && done && (!stop || cmpii(gel(done,1),stop) < 0))
     {
-      set_lex(-2,gel(done,1)); set_lex(-1,gel(done,2));
+      push_lex(gel(done,1), code2);
+      push_lex(gel(done,2), NULL);
       closure_evalvoid(code2);
+      pop_lex(2);
       if (loop_break())
       {
         status = br_status;
@@ -1622,7 +1619,6 @@ parfor(GEN a, GEN b, GEN code, GEN code2)
   }
   avma = av2;
   mt_queue_end(&pt);
-  if (code2) pop_lex(2);
   br_status = status;
   avma = av;
 }
@@ -1640,11 +1636,6 @@ parforprime(GEN a, GEN b, GEN code, GEN code2)
 
   if (!forprime_init(&T, a,b)) { avma = av; return; }
   mt_queue_start(&pt, worker);
-  if (code2)
-  {
-    push_lex(gen_0, code2);
-    push_lex(gen_0, NULL);
-  }
   av2 = avma;
   while ((running = (!stop && forprime_next(&T))) || pending)
   {
@@ -1652,8 +1643,10 @@ parforprime(GEN a, GEN b, GEN code, GEN code2)
     done = mt_queue_get(&pt, NULL, &pending);
     if (code2 && done && (!stop || cmpii(gel(done,1),stop) < 0))
     {
-      set_lex(-2,gel(done,1)); set_lex(-1,gel(done,2));
+      push_lex(gel(done,1), code2);
+      push_lex(gel(done,2), NULL);
       closure_evalvoid(code2);
+      pop_lex(2);
       if (loop_break())
       {
         status = br_status;
@@ -1665,7 +1658,6 @@ parforprime(GEN a, GEN b, GEN code, GEN code2)
   }
   avma = av2;
   mt_queue_end(&pt);
-  if (code2) pop_lex(2);
   br_status = status;
   avma = av;
 }
