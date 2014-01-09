@@ -3,7 +3,7 @@ Section: conversions
 C-Name: centerlift0
 Prototype: GDn
 Help: centerlift(x,{v}): centered lift of x. Same as lift except for
- integermods.
+ intmod and padic components.
 Description:
  (pol):pol        centerlift($1)
  (vec):vec        centerlift($1)
@@ -11,18 +11,18 @@ Description:
  (pol, var):pol        centerlift0($1, $2)
  (vec, var):vec        centerlift0($1, $2)
  (gen, var):gen        centerlift0($1, $2)
-Doc:
- lifts an element $x=a \bmod n$ of $\Z/n\Z$
- to $a$ in $\Z$, and similarly lifts a polmod to a polynomial. This is the
- same as \tet{lift} except that in the particular case of elements of
- $\Z/n\Z$, the lift $y$ is such that $-n/2<y\le n/2$.  A \typ{PADIC} is lifted
- as above if its valuation $v$ is non-negative; if not, returns the fraction
- $p^v$ \kbd{centerlift}$(x^{-v})$; in particular, note that rational
- reconstruction is not attempted.
+Doc: Same as \tet{lift}, except that \typ{INTMOD} and \typ{PADIC} components
+ are lifted using centered residues:
 
- If $x$ is of type fraction, complex, quadratic, polynomial, power series,
- rational function, vector or matrix, the lift is done for each coefficient.
- Reals are forbidden.
+ \item for a \typ{INTMOD} $x\in \Z/n\Z$, the lift $y$ is such that
+ $-n/2<y\le n/2$.
 
-Variant: Also available is \fun{GEN}{centerlift}{GEN x} corresponding to
- \kbd{centerlift0(x,-1)}.
+ \item  a \typ{PADIC} $x$ is lifted in the same way as above (modulo
+ $p^\kbd{padicprec(x)}$) if its valuation $v$ is non-negative; if not, returns
+ the fraction $p^v$ \kbd{centerlift}$(x p^{-v})$; in particular, rational
+ reconstruction is not attempted. Use \tet{bestappr} for this.
+
+ For backward compatibility, \kbd{centerlift(x,'v)} is allowed as an alias
+ for \kbd{lift(x,'v)}.
+
+ \synt{centerlift}{GEN x}.

@@ -228,8 +228,7 @@ GEN  ZX_disc_all(GEN,ulong);
 GEN  ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 GEN  ZX_ZXY_resultant_all(GEN A, GEN B, long *lambda, GEN *LPRS);
 GEN  RgXQ_minpoly_naive(GEN y, GEN P);
-GEN lift_intern0(GEN x,long v);
-#define lift_intern(x) (lift_intern0((x),-1))
+GEN lift_intern(GEN x);
 
 /* c) factorization */
 double cauchy_bound(GEN p);

@@ -3344,26 +3344,14 @@ lift0(GEN x, long v)
 
   switch(typ(x))
   {
-    case t_INT:
-      return icopy(x);
-    case t_REAL:
-      return leafcopy(x);
-
-    case t_INTMOD:
-      return icopy(gel(x,2));
-
+    case t_INT: return icopy(x);
+    case t_INTMOD: return v < 0? icopy(gel(x,2)): gcopy(x);
     case t_POLMOD:
       if (v < 0 || v == varn(gel(x,1))) return gcopy(gel(x,2));
       y = cgetg(3, t_POLMOD);
       gel(y,1) = lift0(gel(x,1),v);
       gel(y,2) = lift0(gel(x,2),v); return y;
-
-    case t_FRAC: case t_FFELT:
-      return gcopy(x);
-
-    case t_PADIC:
-      return gtrunc(x);
-
+    case t_PADIC: return v < 0? padic_to_Q(x): gcopy(x);
     case t_POL:
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
@@ -3372,62 +3360,38 @@ lift0(GEN x, long v)
       y = cgetg_copy(x, &lx); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
       return normalize(y);
-    case t_COMPLEX: case t_RFRAC:
+    case t_COMPLEX: case t_QUAD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
       for (i=1; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
       return y;
-
-    case t_QUAD:
-      y=cgetg(4,t_QUAD); gel(y,1) = ZX_copy(gel(x,1));
-      gel(y,2) = lift0(gel(x,2),v);
-      gel(y,3) = lift0(gel(x,3),v); return y;
+    default: return gcopy(x);
   }
-  pari_err_TYPE("lift",x);
-  return NULL; /* not reached */
 }
-
 GEN
-lift(GEN x)
-{
-  return lift0(x,-1);
-}
+lift(GEN x) { return lift0(x,-1); }
 
-/* same as lift, without copy. May DESTROY x. For internal use only.
-   Conventions on v as for lift. */
+/* same as lift, without copy. May DESTROY x. For internal use only */
 GEN
-lift_intern0(GEN x, long v)
+lift_intern(GEN x)
 {
   long i;
-
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_FFELT:
+    case t_INTMOD: case t_POLMOD: return gel(x,2);
+    case t_PADIC: return padic_to_Q(x);
+    case t_SER:
+      for (i = lg(x)-1; i>=2; i--) gel(x,i) = lift_intern(gel(x,i));
+      return normalize(x);
+    case t_POL:
+      for (i = lg(x)-1; i>=2; i--) gel(x,i) = lift_intern(gel(x,i));
+      return normalizepol(x);
+    case t_COMPLEX: case t_QUAD: case t_RFRAC:
+    case t_VEC: case t_COL: case t_MAT:
+      for (i = lg(x)-1; i>=1; i--) gel(x,i) = lift_intern(gel(x,i));
       return x;
-
-    case t_INTMOD:
-      return gel(x,2);
-    case t_PADIC:
-      return gtrunc(x);
-
-    case t_POLMOD:
-      if (v < 0 || v == varn(gel(x,1))) return gel(x,2);
-      gel(x,1) = lift_intern0(gel(x,1),v);
-      gel(x,2) = lift_intern0(gel(x,2),v);
-      return x;
-
-    case t_SER: case t_POL:
-      for (i = lg(x)-1; i>=2; i--)
-        gel(x,i) = lift_intern0(gel(x,i),v);
-      return x;
-    case t_COMPLEX: case t_QUAD:
-    case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
-      for (i = lg(x)-1; i>=1; i--)
-        gel(x,i) = lift_intern0(gel(x,i),v);
-      return x;
+    default: return x;
   }
-  pari_err_TYPE("lift_intern",x);
-  return NULL; /* not reached */
 }
 
 static GEN
@@ -3441,39 +3405,30 @@ centerliftii(GEN x, GEN y)
 /* see lift0 */
 GEN
 centerlift0(GEN x, long v)
+{ return v < 0? centerlift(x): lift0(x,v); }
+GEN
+centerlift(GEN x)
 {
-  long i, lx;
+  long i, v, lx;
   GEN y;
-
   switch(typ(x))
   {
-    case t_INT:
-      return icopy(x);
-    case t_INTMOD:
-      return centerliftii(gel(x,2), gel(x,1));
-
-    case t_POLMOD:
-      if (v < 0 || v == varn(gel(x,1))) return gcopy(gel(x,2));
-      y = cgetg(3, t_POLMOD);
-      gel(y,1) = centerlift0(gel(x,1),v);
-      gel(y,2) = centerlift0(gel(x,2),v); return y;
-    case t_FRAC:
-      return gcopy(x);
-   case t_POL: case t_SER:
+    case t_INT: return icopy(x);
+    case t_INTMOD: return centerliftii(gel(x,2), gel(x,1));
+    case t_POLMOD: return gcopy(gel(x,2));
+   case t_POL:
       y = cgetg_copy(x, &lx); y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = centerlift0(gel(x,i),v);
-      return y;
-   case t_COMPLEX: case t_RFRAC:
-    case t_VEC: case t_COL: case t_MAT:
+      for (i=2; i<lx; i++) gel(y,i) = centerlift(gel(x,i));
+      return normalizepol_lg(y,lx);
+   case t_SER:
+      y = cgetg_copy(x, &lx); y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = centerlift(gel(x,i));
+      return normalize(y);
+   case t_COMPLEX: case t_QUAD: case t_RFRAC:
+   case t_VEC: case t_COL: case t_MAT:
       y = cgetg_copy(x, &lx);
-      for (i=1; i<lx; i++) gel(y,i) = centerlift0(gel(x,i),v);
+      for (i=1; i<lx; i++) gel(y,i) = centerlift(gel(x,i));
       return y;
-
-    case t_QUAD:
-      y=cgetg(4,t_QUAD); gel(y,1) = ZX_copy(gel(x,1));
-      gel(y,2) = centerlift0(gel(x,2),v);
-      gel(y,3) = centerlift0(gel(x,3),v); return y;
-
     case t_PADIC:
       if (!signe(gel(x,4))) return gen_0;
       v = valp(x);
@@ -3489,15 +3444,8 @@ centerlift0(GEN x, long v)
       gel(y,1) = centerliftii(gel(x,4), gel(x,3));
       gel(y,2) = powiu(gel(x,2),-v);
       return y;
+    default: return gcopy(x);
   }
-  pari_err_TYPE("centerlift",x);
-  return NULL; /* not reached */
-}
-
-GEN
-centerlift(GEN x)
-{
-  return centerlift0(x,-1);
 }
 
 /*******************************************************************/

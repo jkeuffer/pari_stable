@@ -128,7 +128,12 @@ JD 14- polcyclo(n, x) now works for all roots of 1
        via its multiplication table
    28- rnfpolredabs(x,3) did not conform to the documentation (which did not
        make sense). Fix documentation and function, for rnfpolredbest as well.
-   29 [libpari] renamed recip -> serreverse
+   29- [libpari] renamed recip -> serreverse
+   30- lift(x,'v) / centerlift(x,'v) now only lift t_POLMODs in variable v,
+       no longer (most) t_INTMOD / t_PADICs met along the way
+   31- lift / centerlift no longer raise an exception when they encounter
+       a non-arithmetic type (e.g. a t_REAL or even a t_STR) in a structure.
+       They just copy the offending sub-object as-is.
 
   Added
 EP  1- Configure option for gcov/lcov support
