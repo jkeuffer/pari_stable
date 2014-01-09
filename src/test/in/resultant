@@ -66,3 +66,6 @@ polresultant(x,x,y)
 A = x*y; B = (x+y)^2;
 polresultant(A, B)
 polresultantext(A, B, y)
+
+\\ #1509
+polresultantext(y^3+y,3*y^2+1,y)

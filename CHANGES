@@ -80,6 +80,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
        P=polcompositum(x^4+437*x+19,x^5-571*x+27)[1];
        nfcertify(nfinit(P, [2,3,5])) was empty
    60- make clean did not remove Oxxx/parimt.h
+   61- polresultantext(t_POL in y, t_POL in y,y) -> U/V as t_POL in x [#1509]
 
   Changed
     1- default help text for a user function is now as in \u:

@@ -2475,6 +2475,11 @@ resultant2(GEN x, GEN y)
   av = avma; return gerepileupto(av,det(sylvestermatrix_i(x,y)));
 }
 
+/* Let vx = main variable of x. Return a polynomial in variable 0:
+ * if vx is 0 and v != 0, set *mx = 1 and replace vx by pol_x(MAXVARN)
+ * if vx = v, copy x, set its main variable to 0 and return
+ * if vx < v, return subst(x, v, pol_x(0))
+ * if vx > v, return scalarpol(x, 0) */
 static GEN
 fix_pol(GEN x, long v, long *mx)
 {
@@ -2541,8 +2546,12 @@ polresultantext0(GEN x, GEN y, long v)
   {
     U = gsubst(gsubst(U, 0, pol_x(v)), MAXVARN, pol_x(0));
     V = gsubst(gsubst(V, 0, pol_x(v)), MAXVARN, pol_x(0));
-
     R = gsubst(R,MAXVARN,pol_x(0));
+  }
+  else
+  {
+    if (typ(U) == t_POL && varn(U) != v) U = poleval(U, pol_x(v));
+    if (typ(V) == t_POL && varn(V) != v) V = poleval(V, pol_x(v));
   }
   return gerepilecopy(av, mkvec3(U,V,R));
 }
