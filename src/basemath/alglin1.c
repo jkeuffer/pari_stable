@@ -3626,7 +3626,7 @@ ZM_det3(GEN M)
 static GEN
 det_simple_gauss(GEN a, GEN data, pivot_fun pivot)
 {
-  pari_sp av = avma, lim = stack_lim(av,1);
+  pari_sp av = avma, lim = stack_lim(av,3);
   long i,j,k, s = 1, nbco = lg(a)-1;
   GEN p, x = gen_1;
 
@@ -3652,7 +3652,7 @@ det_simple_gauss(GEN a, GEN data, pivot_fun pivot)
       for (j=i+1; j<=nbco; j++)
       {
         gcoeff(a,j,k) = gsub(gcoeff(a,j,k), gmul(m,gcoeff(a,j,i)));
-        if (low_stack(lim, stack_lim(av,1)))
+        if (low_stack(lim, stack_lim(av,3)))
         {
           if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
           gerepileall(av,2, &a,&x);
