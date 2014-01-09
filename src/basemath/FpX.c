@@ -1879,7 +1879,7 @@ gener_FpXQ_local(GEN T, GEN p, GEN L)
   q_1 = subiu(powiu(p,f), 1);
   N = diviiexact(q_1, p_1);
 
-  if (!is_pm1(p_1)) Q = shifti(p_1,-1);
+  Q = is_pm1(p_1)? gen_1: shifti(p_1,-1);
   Lp = cgetg(l, t_VEC); ip = 1;
   Lq = cgetg(l, t_VEC); iq = 1;
   for (i=1; i < l; i++)
