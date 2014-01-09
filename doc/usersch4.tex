@@ -1043,7 +1043,10 @@ technical bit which indicates whether the object is a clone or not (see
 \secref{se:clone}). This last one is used by \kbd{gp} for internal garbage
 collecting, you will not have to worry about it.
 
-\noindent These data can be handled through the following \emph{macros}:
+Some types have a second codeword, different for each type, which we will
+soon describe as we will shortly consider each of them in turn.
+
+\noindent The first codeword is handled through the following \emph{macros}:
 
 \fun{long}{typ}{GEN z} returns the type number of \kbd{z}.
 
@@ -1062,6 +1065,13 @@ an advanced example in \secref{se:prog}).
 
 \fun{void}{unsetisclone}{GEN z} clears the \emph{clone} bit.
 
+\misctitle{Important remark} For the sake of efficiency, none of the
+codeword-handling macros check the types of their arguments even when there
+are stringent restrictions on their use. It is trivial to create invalid
+objects, or corrupt one of the ``universal constants'' (e.g. setting the sign
+of \kbd{gen\_0} to $1$), and they usually provide negligible savings.
+Use higher level functions whenever possible.
+
 \misctitle{Remark} The clone bit is there so that \kbd{gunclone} can check
 it is deleting an object which was allocated by \kbd{gclone}. Miscellaneous
 vector entries are often cloned by \kbd{gp} so that a GP statement like
@@ -1072,16 +1082,6 @@ doing: in particular \emph{never} set the clone bit of a vector component
 when the said vector is scheduled to be uncloned. Hackish code may abuse the
 clone bit to tag objects for reasons unrelated to the above instead of using
 proper data structures. Don't do that.
-
-These macros are written in such a way that you do not need to worry about
-type casts when using them: i.e.~if \kbd{z} is a \kbd{GEN}, \kbd{typ(z[2])}
-is accepted by your compiler, as well as the more proper \kbd{typ(gel(z,2))}.
-Note that for the sake of efficiency, none of the codeword-handling macros
-check the types of their arguments even when there are stringent restrictions
-on their use.
-
-Some types have a second codeword, used differently by each type, and
-we will describe it as we now consider each of them in turn.
 
 \subsec{Type \typ{INT} (integer)}
 \sidx{integer}\kbdsidx{t_INT}this type has a second codeword \kbd{z[1]} which
@@ -1292,7 +1292,8 @@ congruent to 3 mod 4 only), but one should rather use the more general
 significant $p$-adic digits, and the exponent of \kbd{z}. This information
 can be handled using the following functions:
 
-\fun{long}{precp}{GEN z} returns the $p$-adic precision of \kbd{z}.
+\fun{long}{precp}{GEN z} returns the $p$-adic precision of \kbd{z}. This is
+$0$ if $\kbd{z} = 0$.
 
 \fun{void}{setprecp}{GEN z, long l} sets the $p$-adic precision of \kbd{z}
 to \kbd{l}.
