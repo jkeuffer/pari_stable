@@ -79,11 +79,11 @@ Mod(4294967310, 4294967311), Mod(1, 4294967311)*x^3 + Mod(1, 4294967311)*x^2
 , 1; x^2 + (4294967310*a^2 + 2)*x + 1, 1], [0, 0, 0, a, 1, 0, 2*a, 4, 429496
 7310*a^2, 4294967263*a, 4294966447, 64*a^2 + 4294967183*a + 4294966815, 1484
 088443*a^2 + 1141114953*a + 4283364322, Vecsmall([4]), [a, [1296*a, 46656, [
-6, 0, 0, 0]]], [0, 0, 0, 0]], a/x, (x + a)/(x + 4294967310*a), 3186745513*a^
-2 + 3260840736*a + 45702063, 6148914735617846011, a, [x + (268392743*a^2 + 2
-459390605*a + 1304316255), 1; x + (4026574568*a^2 + 1835576706*a + 299065105
-7), 1], [268392743*a^2 + 2459390605*a + 1304316254, 4026574568*a^2 + 1835576
-706*a + 2990651056]~]
+6, 0, 0, 0]]], [0, 0, 0, 0]], a/x, (x + a)/(x + 4294967310*a), 2425092325*a^
+2 + 865514605*a + 1871360732, 6148914735617846011, a, [x + (268392743*a^2 + 
+2459390605*a + 1304316255), 1; x + (4026574568*a^2 + 1835576706*a + 29906510
+57), 1], [268392743*a^2 + 2459390605*a + 1304316254, 4026574568*a^2 + 183557
+6706*a + 2990651056]~]
 ? test2(p)=ffgen(x*Mod(1,p));g=ffprimroot(ffgen((x+1)*Mod(1,p)),&o);print([g,o]);fflog(g^17,g,o);
 ? test2(2)
 [1, [1, matrix(0,2)]]
@@ -261,7 +261,7 @@ t^4 + t^2
 18446744073709551628*t^4 + 2*t^3 + 18446744073709551626*t^2 + 2*t + 2
 [1, 0, 0; 0, 1, 0; 0, 0, 1]
 ? p=2^64+13;g=ffprimroot(ffgen(p^2),&o);a=2*g^0;
-? v=[I,-1,Mat(1),matid(2)/2,o];
+? v=[I,-1,Mat(1),matid(2)/2];
 ? for(i=1,#v,print(iferr(fflog(a,g,v[i]),E,E)));
 error("incorrect type in generic discrete logarithm (order factorization) (t
 _COMPLEX).")
@@ -269,6 +269,9 @@ error("incorrect type in generic discrete logarithm (order factorization) (t
 _INT).")
 error("incorrect type in factorback [not a factorization] (t_MAT).")
 error("incorrect type in factorback [not an exponent vector] (t_COL).")
-78109549624233025797131340958849736130
+? d=fflog(a,g,o)
+111436866868185526910467304990626977090
+? g^d==a
+1
 ? print("Total time spent: ",gettime);
-Total time spent: 2416
+Total time spent: 2432
