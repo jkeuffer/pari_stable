@@ -599,4 +599,5 @@ error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (2 elts).
 
 [0  1   [1/2, 1/2]~]
 
-Total time spent: 476
+1
+Total time spent: 456

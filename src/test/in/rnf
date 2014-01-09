@@ -109,3 +109,5 @@ rnfdet(L,[[;],[]])
 rnfdet(K,[[;],[]])
 rnfdet(K,id)
 rnfbasis(bnfinit(y^2-1105),x^2-y)
+\\ #1508
+K=nfinit(y); L=rnfinit(K,x^3-2); rnfeltdown(L,Mod(Mod(1,K.pol),L[1]))

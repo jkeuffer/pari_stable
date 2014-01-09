@@ -333,8 +333,11 @@ rnfeltdown(GEN rnf,GEN x)
   }
   /* typ(z) = t_POLMOD, varn of both components is rnf_get_varn(rnf) */
   z = gel(z,2);
-  if (lg(z) != 3) fail(f,x);
-  z = gel(z,2);
+  if (typ(z) == t_POL)
+  {
+    if (lg(z) != 3) fail(f,x);
+    z = gel(z,2);
+  }
   return gerepilecopy(av, z);
 }
 
