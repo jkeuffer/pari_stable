@@ -186,6 +186,9 @@ BA 24- GP function vecsum
    31- [libpari] factor_pn_1_limit
    32- [libpari] get_FpXQ_star, gener_FpXQ_local
 BA 33- move gpinstall to libpari
+   34- liftall() lifts recursively all t_INTMOD/t_PADIC/t_POLMOD components
+   35- liftint() lifts recursively all t_INTMOD/t_PADIC components
+   36- liftpol() lifts recursively all t_POLMOD components
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]
