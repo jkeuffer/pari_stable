@@ -1154,7 +1154,7 @@ refine_H(GEN F, GEN G, GEN HH, long bit, long Sbit)
   pari_sp ltop = avma, lim = stack_lim(ltop, 1);
   long error, i, bit1, bit2;
 
-  D = gsub(gen_1, grem(gmul(H,G),F)); error = gexpo(D);
+  D = Rg_RgX_sub(gen_1, RgX_rem(RgX_mul(H,G),F)); error = gexpo(D);
   bit2 = bit + Sbit;
   for (i=0; error>-bit && i<NEWTON_MAX && error<=0; i++)
   {
@@ -1164,12 +1164,12 @@ refine_H(GEN F, GEN G, GEN HH, long bit, long Sbit)
       gerepileall(ltop,2, &D,&H);
     }
     bit1 = -error + Sbit;
-    aux = gmul(mygprec(H,bit1), mygprec(D,bit1));
-    aux = grem(mygprec(aux,bit1), mygprec(F,bit1));
+    aux = RgX_mul(mygprec(H,bit1), mygprec(D,bit1));
+    aux = RgX_rem(mygprec(aux,bit1), mygprec(F,bit1));
 
     bit1 = -error*2 + Sbit; if (bit1 > bit2) bit1 = bit2;
-    H = gadd(mygprec(H,bit1), aux);
-    D = gsub(gen_1, grem(gmul(H,G),F));
+    H = RgX_add(mygprec(H,bit1), aux);
+    D = Rg_RgX_sub(gen_1, RgX_rem(RgX_mul(H,G),F));
     error = gexpo(D); if (error < -bit1) error = -bit1;
   }
   if (error > -bit/2) return NULL; /* FAIL */
@@ -1184,7 +1184,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bit, double gamma)
   long error, i, bit1 = 0, bit2, Sbit, Sbit2,  enh, normF, normG, n = degpol(p);
   pari_sp av = avma, lim = stack_lim(av, 1);
 
-  FF = *F; GG = poldivrem(p, FF, &r);
+  FF = *F; GG = RgX_divrem(p, FF, &r);
   error = gexpo(r); if (error <= -bit) error = 1-bit;
   normF = gexpo(FF);
   normG = gexpo(GG);
@@ -1207,14 +1207,14 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bit, double gamma)
     if (!HH) return 0; /* FAIL */
 
     bit1 = -error + Sbit;
-    r = gmul(mygprec(HH,bit1), mygprec(r,bit1));
-    f0 = grem(mygprec(r,bit1), mygprec(FF,bit1));
+    r = RgX_mul(mygprec(HH,bit1), mygprec(r,bit1));
+    f0 = RgX_rem(mygprec(r,bit1), mygprec(FF,bit1));
 
     bit1 = -2*error + Sbit; if (bit1 > bit2) bit1 = bit2;
     FF = gadd(mygprec(FF,bit1),f0);
 
     bit1 = -3*error + Sbit; if (bit1 > bit2) bit1 = bit2;
-    GG = poldivrem(mygprec(p,bit1), mygprec(FF,bit1), &r);
+    GG = RgX_divrem(mygprec(p,bit1), mygprec(FF,bit1), &r);
     error = gexpo(r); if (error < -bit1) error = -bit1;
   }
   if (error>-bit) return 0; /* FAIL */
