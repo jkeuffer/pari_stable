@@ -342,7 +342,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   if (!dn)
   {
     GEN dis, res = divide_conquer_prod(gabs(prep,prec), mpmul);
-    dis = ZX_disc_all(T, 1+logint(res,gen_2,NULL));
+    dis = ZX_disc_all(T, expi(ceil_safe(res)));
     den = indexpartial(T,dis);
     if (ptdis) *ptdis = dis;
   }
@@ -389,17 +389,17 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long d)
   if (DEBUGLEVEL>=4) timer_printf(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
   borneroots = gsupnorm(L, prec); /*t_REAL*/
-  borneabs = addsr(1, gmul(borne,gmulsg(d, powru(borneroots, d))));
-  borneroots = addsr(1, gmul(borne, borneroots));
+  borneabs = ceil_safe(gmul(borne,gmulsg(d, powru(borneroots, d))));
+  borneroots = ceil_safe(gmul(borne, borneroots));
   av2 = avma;
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
-  gb->valsol = logint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l,NULL);
-  gb->valabs = logint(gmul2n(borneabs,2), gb->l,NULL);
+  gb->valsol = logint(shifti(borneroots,2+BITS_IN_LONG), gb->l,NULL);
+  gb->valabs = logint(shifti(borneabs,2), gb->l, NULL);
   gb->valabs = maxss(gb->valsol, gb->valabs);
   if (DEBUGLEVEL >= 4)
     err_printf("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
   avma = av2;
-  gb->bornesol = gerepileuptoint(ltop, ceil_safe(shiftr(borneroots,1)));
+  gb->bornesol = gerepileuptoint(ltop, shifti(borneroots,1));
   if (DEBUGLEVEL >= 9)
     err_printf("GaloisConj: Bound %Ps\n",borneroots);
   gb->ladicsol = powiu(gb->l, gb->valsol);
@@ -424,7 +424,7 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
   gl->p = p;
   gl->L = L;
   gl->Lden = Lden;
-  e = logint(gmul2n(gb->bornesol, 2+BITS_IN_LONG),p,NULL);
+  e = logint(shifti(gb->bornesol, 2+BITS_IN_LONG),p,NULL);
   avma = av;
   if (e < 2) e = 2;
   gl->e = e;
