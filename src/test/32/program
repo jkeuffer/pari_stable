@@ -1,7 +1,7 @@
    echo = 1 (on)
 ? alias(ln,log)
 ? ln(2)
-0.69314718055994530941723212145817656808
+0.69314718055994530941723212145817656807
 ? for(x=1,5,print(x!))
 1
 2
@@ -133,4 +133,4 @@ give a value for s? printtex((x+y)^3/(x-y)^2)
 ? getheap
 [50, 3479]
 ? print("Total time spent: ",gettime);
-Total time spent: 16
+Total time spent: 20

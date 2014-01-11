@@ -676,12 +676,12 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 0)
     {
-      if (beta > 4e9) { lx++; x = rtor(x, lx); }
+      if (beta > 18) { lx++; x = rtor(x, lx); }
       z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
     }
     else
     {
-      if (beta < -4e9) { lx++; x = rtor(x, lx); }
+      if (beta < -18) { lx++; x = rtor(x, lx); }
       z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
     }
     setsigne(z, 1);
