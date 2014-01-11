@@ -8,6 +8,7 @@ for (i=1,#v,
     print(iferr(v[i]\v[j],E,E));
     print(iferr(v[i]%v[j],E,E));
     print(iferr(v[i]\/v[j],E,E));
+    print(iferr(divrem(v[i],v[j]),E,E));
   )
 )
 }
@@ -27,10 +28,6 @@ for (i=2,#w, print(w[i]%2))
 for (i=2,#w, print(w[i]\2))
 divrem(x+y^2,y+x,y)
 divrem([3,5],2)
-divrem(5/2,2)
-divrem(3.,2)
-divrem(x,2)
-divrem(4,3/2)
 divrem(1,x)
 divrem(1,Pol(1))
 divrem(1,"a")
