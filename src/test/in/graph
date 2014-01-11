@@ -1,3 +1,4 @@
+HEAP=[31, if(precision(1.)==38,283,297)];
 default(realprecision,38);
 \e
 plotinit(0,500,500)
@@ -26,4 +27,4 @@ plotinit(3,600,600);plotscale(3,-7,7,-2,2);plotcursor(3)
 plotmove(0,100,100);plotstring(0,Pi)
 plotmove(0,200,200);plotstring(0,"(0,0)")
 psdraw([0,10,10])
-getheap
+if (getheap()!=HEAP, getheap())

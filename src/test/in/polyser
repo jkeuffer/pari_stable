@@ -1,3 +1,4 @@
+HEAP=[62, if(precision(1.)==38,7191,7253)];
 default(realprecision,154); Pi; default(realprecision,38);
 \e
 apol=y^3+5*y+1
@@ -48,4 +49,4 @@ subst(sin(x),x,y)
 subst(sin(x),x,x+x^2)
 taylor(y/(x-y),y)
 variable(name^4-other)
-getheap
+if (getheap()!=HEAP, getheap())
