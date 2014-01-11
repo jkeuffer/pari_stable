@@ -82,6 +82,11 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
        nfcertify(nfinit(P, [2,3,5])) was empty
    60- make clean did not remove Oxxx/parimt.h
    61- polresultantext(t_POL in y, t_POL in y,y) -> U/V as t_POL in x [#1509]
+   62- inconsistent handling of t_POL "divided by" scalar among the variants
+       of Euclidean division (%, divrem, \, ...). E.g. x % 2 is OK, but
+       x % Mod(2,3) was not. We now follow the semantic of
+       grem/gdeuc/poldivrem: a scalar is understood as a t_POL of degree 0
+       in the proper variable [#1510]
 
   Changed
     1- default help text for a user function is now as in \u:
@@ -136,6 +141,8 @@ JD 14- polcyclo(n, x) now works for all roots of 1
    31- lift / centerlift no longer raise an exception when they encounter
        a non-arithmetic type (e.g. a t_REAL or even a t_STR) in a structure.
        They just copy the offending sub-object as-is.
+   32- generic polynomial Euclidean division (grem, gmod, poldivrem): when
+       result is the zero polynomial, use RgX_get_0, not gen_0 / pol_0
 
   Added
 EP  1- Configure option for gcov/lcov support

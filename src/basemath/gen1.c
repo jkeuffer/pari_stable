@@ -2923,7 +2923,8 @@ gmulsg(long s, GEN y)
       gel(z,2) = gmulsg(s,gel(y,2)); return z;
 
     case t_POL:
-      if (!s || !signe(y)) return zeropol(varn(y));
+      if (!signe(y)) return RgX_copy(y);
+      if (!s) return scalarpol(RgX_get_0(y), varn(y));
       z = cgetg_copy(y, &ly); z[1]=y[1];
       for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return normalizepol_lg(z, ly);

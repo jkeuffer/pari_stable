@@ -8411,15 +8411,17 @@ individually with a \kbd{cgiv(r)}.
 
 \fun{GEN}{poldivrem}{GEN x, GEN y, GEN *r} same as \key{gdivmod} but
 specifically for \typ{POL}s~\kbd{x} and~\kbd{y}, not necessarily in the same
-variable. Either of \kbd{x} and \kbd{y} may also be scalars (treated as
-polynomials of degree $0$)
+variable. Either of \kbd{x} and \kbd{y} may also be scalars, treated as
+polynomials of degree $0$.
 
 \fun{GEN}{gdeuc}{GEN x, GEN y} creates the Euclidean quotient of the
 \typ{POL}s~\kbd{x} and~\kbd{y}. Either of \kbd{x} and \kbd{y} may also be
-scalars (treated as polynomials of degree $0$)
+scalars, treated as polynomials of degree $0$.
 
 \fun{GEN}{grem}{GEN x, GEN y} creates the Euclidean remainder of the
-\typ{POL}~\kbd{x} divided by the \typ{POL}~\kbd{y}.
+\typ{POL}~\kbd{x} divided by the \typ{POL}~\kbd{y}. Either of \kbd{x} and
+\kbd{y} may also be scalars, treated as polynomials of degree $0$.
+
 
 \fun{GEN}{gdivround}{GEN x, GEN y} if \kbd{x} and \kbd{y} are \typ{INT},
 as \kbd{diviiround}. Operate componentwise if \kbd{x} is

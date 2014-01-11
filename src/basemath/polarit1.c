@@ -19,98 +19,151 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /***********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-
 /*******************************************************************/
 /*                                                                 */
 /*                  POLYNOMIAL EUCLIDEAN DIVISION                  */
 /*                                                                 */
 /*******************************************************************/
+/* x t_POLMOD, y t_POL in the same variable as x[1], return x % y */
+static GEN
+polmod_mod(GEN x, GEN y)
+{
+  GEN z, a, T = gel(x,1);
+  if (RgX_equal(T, y)) return gcopy(x);
+  z = cgetg(3,t_POLMOD); T = RgX_gcd(T,y); a = gel(x,2);
+  gel(z,1) = T;
+  gel(z,2) = (typ(a)==t_POL && varn(a)==varn(T))? RgX_rem(a, T): gcopy(a);
+  return z;
+}
+/* x,y two "scalars", return 0 with type info */
+static GEN
+rem_scal_scal(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  GEN z = gadd(gmul(gen_0,x), gmul(gen_0,y));
+  if (gequal0(y)) pari_err_INV("grem",y);
+  return gerepileupto(av, simplify(z));
+}
+/* x pol, y "scalar", return 0 with type info */
+static GEN
+rem_pol_scal(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  if (gequal0(y)) pari_err_INV("grem",y);
+  return gerepileupto(av, simplify(gmul(RgX_get_0(x),y)));
+}
+/* x "scalar", y pol, return x % y with type info */
+static GEN
+rem_scal_pol(GEN x, GEN y)
+{
+  if (degpol(y))
+  {
+    if (!signe(y)) pari_err_INV("grem",y);
+    return gmul(x, RgX_get_1(y));
+  }
+  y = gel(y,2); return rem_scal_scal(x,y);
+}
 GEN
 poldivrem(GEN x, GEN y, GEN *pr)
 {
-  long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
-  GEN p1;
+  const char *f = "euclidean division";
+  long tx = typ(x), ty = typ(y), vx = gvar(x), vy = gvar(y);
+  GEN z;
 
-  if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
+  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err_TYPE2(f,x,y);
+  if (vx == vy && ((tx==t_POLMOD) ^ (ty==t_POLMOD))) pari_err_TYPE2(f,x,y);
+  if (ty != t_POL || varncmp(vx, vy) < 0) /* y "scalar" */
   {
-    if (pr == ONLY_REM) {
-      if (gequal0(y)) pari_err_INV("poldivrem",y);
-      return gen_0;
-    }
-    if (pr && pr != ONLY_DIVIDES) *pr=gen_0;
-    return gdiv(x,y);
+    if (!pr || pr == ONLY_DIVIDES) return gdiv(x,y);
+    if (tx != t_POL || varncmp(vy, vx) < 0) /* x "scalar" */
+      z = rem_scal_scal(x,y);
+    else
+      z = rem_pol_scal(x,y);
+    if (pr == ONLY_REM) return z;
+    *pr = z; return gdiv(x,y);
   }
-  if (ty != t_POL) pari_err_TYPE2("euclidean division",x,y);
-  tx = typ(x);
-  if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
+  if (tx != t_POL || varncmp(vx, vy) > 0) /* x "scalar" */
   {
+    if (!degpol(y)) /* constant t_POL, treat as scalar */
+    {
+      y = gel(y,2);
+      if (!pr || pr == ONLY_DIVIDES) gdiv(x,y);
+      z = rem_scal_scal(x,y);
+      if (pr == ONLY_REM) return z;
+      *pr = z; return gdiv(x,y);
+    }
     if (!signe(y)) pari_err_INV("poldivrem",y);
-    if (!degpol(y)) /* constant */
-    {
-      if (pr == ONLY_REM) return pol_0(vy);
-      p1 = gdiv(x, gel(y,2));
-      if (pr == ONLY_DIVIDES) return p1;
-      if (pr) *pr = pol_0(vy);
-      return p1;
-    }
-    if (pr == ONLY_REM) return gcopy(x);
-    if (pr == ONLY_DIVIDES) return gequal0(x)? gen_0: NULL;
-    if (pr) *pr = gcopy(x);
-    return gen_0;
+    if (!pr || pr == ONLY_DIVIDES) return gequal0(x)? RgX_get_0(y): NULL;
+    z = gmul(x, RgX_get_1(y));
+    if (pr == ONLY_REM) return z;
+    *pr = z; return RgX_get_0(y);
   }
-  if (tx != t_POL) pari_err_TYPE2("euclidean division",x,y);
-
-  if (varncmp(vx, vy) < 0)
-  {
-    if (pr && pr != ONLY_DIVIDES)
-    {
-      p1 = pol_0(vx); if (pr == ONLY_REM) return p1;
-      *pr = p1;
-    }
-    return gdiv(x,y);
-  }
-  return RgX_divrem(x, y, pr);
+  return RgX_divrem(x,y,pr);
 }
 GEN
 gdeuc(GEN x, GEN y)
 {
-  long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
-
-  if (is_scalar_t(ty) || varncmp(vx, vy) < 0) return gdiv(x,y);
-  if (ty != t_POL) pari_err_TYPE2("euclidean division",x,y);
-  tx = typ(x);
-  if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
-  {
+  const char *f = "euclidean division";
+  long tx = typ(x), ty = typ(y), vx = gvar(x), vy = gvar(y);
+  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err_TYPE2(f,x,y);
+  if (vx == vy && ((tx==t_POLMOD) ^ (ty==t_POLMOD))) pari_err_TYPE2(f,x,y);
+  if (ty != t_POL || varncmp(vx, vy) < 0) return gdiv(x,y); /* y "scalar" */
+  if (tx != t_POL || varncmp(vx, vy) > 0)
+  { /* x "scalar" */
     if (!signe(y)) pari_err_INV("gdeuc",y);
     if (!degpol(y)) return gdiv(x, gel(y,2)); /* constant */
-    return gen_0;
+    return RgX_get_0(y);
   }
-  if (tx != t_POL) pari_err_TYPE2("euclidean division",x,y);
-  if (varncmp(vx, vy) < 0) return gdiv(x,y);
-  return RgX_div(x, y);
+  return RgX_div(x,y);
 }
 GEN
 grem(GEN x, GEN y)
 {
-  long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
+  const char *f = "euclidean division";
+  long tx = typ(x), ty = typ(y), vx = gvar(x), vy = gvar(y);
 
-  if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
+  if (ty == t_POL)
   {
-    if (gequal0(y)) pari_err_INV("grem",y);
-    return gen_0;
+    if (varncmp(vx,vy) >= 0)
+    {
+      pari_sp av;
+      GEN z;
+      if (!signe(y)) pari_err_INV("grem",y);
+      if (vx != vy) return rem_scal_pol(x,y);
+      switch(tx)
+      {
+        case t_POLMOD: return polmod_mod(x,y);
+        case t_POL: return RgX_rem(x,y);
+        case t_RFRAC:
+          av = avma; z = gmul(gel(x,1), RgXQ_inv(gel(x,2),y));
+          return gerepileupto(av, grem(z,y));
+        case t_SER:
+          if (RgX_is_monomial(y))
+          {
+            if (lg(x)-2 + valp(x) < degpol(y)) pari_err_OP("%",x,y);
+            av = avma;
+            return gerepileupto(av, gmod(ser2rfrac_i(x), y));
+          }
+        default: pari_err_TYPE2("%",x,y);
+      }
+    }
+    else switch(tx)
+    {
+      case t_POL:
+      case t_RFRAC: return rem_pol_scal(x,y);
+      default: pari_err_TYPE2("%",x,y);
+    }
   }
-  if (ty != t_POL) pari_err_TYPE2("euclidean division",x,y);
-  tx = typ(x);
-  if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
-  {
-    if (!signe(y)) pari_err_INV("grem",y);
-    if (!degpol(y)) return pol_0(vy); /* constant */
-    return gcopy(x);
+  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err_TYPE2(f,x,y);
+  if (vx == vy && ty==t_POLMOD) pari_err_TYPE2(f,x,y);
+  if (tx != t_POL || varncmp(vx,vy) > 0)
+  { /* x a "scalar" */
+    if (ty != t_POL || varncmp(vx, vy) < 0) return rem_scal_scal(x,y);
+    return rem_scal_pol(x,y);
   }
-  if (tx != t_POL) pari_err_TYPE2("euclidean division",x,y);
-
-  if (varncmp(vx, vy) < 0) return pol_0(vx);
-  return RgX_rem(x, y);
+  if (ty != t_POL || varncmp(vx, vy) < 0) /* y a "scalar" */
+    return rem_pol_scal(x,y);
+  return RgX_rem(x,y);
 }
 
 /*******************************************************************/

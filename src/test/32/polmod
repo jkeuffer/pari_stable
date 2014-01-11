@@ -47,15 +47,13 @@ Mod(1/4, t)*x^2 + Mod(1, t)*x + Mod(1, t)
 0
 Mod(y, x)
 Mod(1/y, x)
-  ***   at top-level: Mod(O(y),x)
-  ***                 ^-----------
-  *** Mod: forbidden division t_SER % t_POL.
-0
-0
+Mod(O(y), x)
+Mod(1, y)*x
+Mod(1, y)/(Mod(1, y)*x)
 Mod(1, y)
   ***   at top-level: Mod(1+O(y),y+1)
   ***                 ^---------------
   *** Mod: forbidden division t_SER % t_POL.
 0
 Mod(-1, x - 1)
-Total time spent: 4
+Total time spent: 0

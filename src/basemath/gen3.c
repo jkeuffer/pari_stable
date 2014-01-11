@@ -628,116 +628,54 @@ modr_safe(GEN x, GEN y)
   return signe(f)? gsub(x, mulir(f,y)): x;
 }
 
-/* x t_POLMOD, y t_POL in the same variable as x[1], return x % y */
-static GEN
-polmod_mod(GEN x, GEN y)
-{
-  GEN z, T = gel(x,1);
-  if (RgX_equal(T, y)) return gcopy(x);
-  z = cgetg(3,t_POLMOD); T = RgX_gcd(T,y);
-  gel(z,1) = T;
-  gel(z,2) = grem(gel(x,2), T);
-  return z;
-}
 GEN
 gmod(GEN x, GEN y)
 {
-  pari_sp av, tetpil;
-  long i,lx,ty, tx = typ(x);
-  GEN z,p1;
+  pari_sp av;
+  long i, lx, ty, tx;
+  GEN z;
 
-  if (tx == t_INT && !is_bigint(x)) return gmodsg(itos(x),y);
-  ty = typ(y);
-  if (ty == t_INT && !is_bigint(y)) return gmodgs(x,itos(y));
+  tx = typ(x); if (tx == t_INT && !is_bigint(x)) return gmodsg(itos(x),y);
+  ty = typ(y); if (ty == t_INT && !is_bigint(y)) return gmodgs(x,itos(y));
   if (is_matvec_t(tx))
   {
     z = cgetg_copy(x, &lx);
     for (i=1; i<lx; i++) gel(z,i) = gmod(gel(x,i),y);
     return z;
   }
+  if (tx == t_POL || ty == t_POL) return grem(x,y);
+  if (!is_scalar_t(tx) || !is_scalar_t(ty)) pari_err_TYPE2("%",x,y);
   switch(ty)
   {
     case t_INT:
       switch(tx)
       {
-        case t_INT:
-          return modii(x,y);
-
+        case t_INT: return modii(x,y);
         case t_INTMOD: z=cgetg(3, t_INTMOD);
           gel(z,1) = gcdii(gel(x,1),y);
           gel(z,2) = modii(gel(x,2),gel(z,1)); return z;
-
-        case t_FRAC:
-          av=avma;
-          p1=mulii(gel(x,1),Fp_inv(gel(x,2),y));
-          tetpil=avma; return gerepile(av,tetpil,modii(p1,y));
-
+        case t_FRAC: return Fp_div(gel(x,1),gel(x,2),y);
         case t_QUAD: z=cgetg(4,t_QUAD);
           gel(z,1) = ZX_copy(gel(x,1));
           gel(z,2) = gmod(gel(x,2),y);
           gel(z,3) = gmod(gel(x,3),y); return z;
-
         case t_PADIC: return padic_to_Fp(x, y);
-        case t_POLMOD: case t_POL:
-          return gen_0;
         case t_REAL: /* NB: conflicting semantic with lift(x * Mod(1,y)). */
           av = avma;
           return gerepileuptoleaf(av, mpsub(x, mpmul(_quot(x,y),y)));
-
         default: pari_err_TYPE2("%",x,y);
       }
-
     case t_REAL: case t_FRAC:
       switch(tx)
       {
         case t_INT: case t_REAL: case t_FRAC:
           av = avma;
           return gerepileupto(av, gadd(x, gneg(gmul(_quot(x,y),y))));
-
-        case t_POLMOD: case t_POL:
-          return gen_0;
-
-        default: pari_err_TYPE2("%",x,y);
-      }
-
-    case t_POL:
-      if (is_scalar_t(tx))
-      {
-        if (tx!=t_POLMOD || varncmp(varn(x[1]), varn(y)) > 0)
-          return degpol(y)? gcopy(x): gen_0;
-        if (varn(x[1])!=varn(y)) return gen_0;
-        return polmod_mod(x, y);
-      }
-      switch(tx)
-      {
-        case t_POL:
-          return grem(x,y);
-
-        case t_RFRAC:
-          av=avma;
-          p1=gmul(gel(x,1),ginvmod(gel(x,2),y)); tetpil=avma;
-          return gerepile(av,tetpil,grem(p1,y));
-
-        case t_SER:
-          if (RgX_is_monomial(y) && varn(x) == varn(y))
-          {
-            long d = degpol(y);
-            if (lg(x)-2 + valp(x) < d) pari_err_OP("%",x,y);
-            av = avma;
-            return gerepileupto(av, gmod(ser2rfrac_i(x), y));
-          }
         default: pari_err_TYPE2("%",x,y);
       }
   }
   pari_err_TYPE2("%",x,y);
   return NULL; /* not reached */
-}
-/* divisibility: return 1 if y | x, 0 otherwise */
-int
-gdvd(GEN x, GEN y)
-{
-  pari_sp av = avma;
-  x = gmod(x,y); avma = av; return gequal0(x);
 }
 
 GEN
@@ -752,6 +690,7 @@ gmodgs(GEN x, long y)
     for (i=1; i<lx; i++) gel(z,i) = gmodgs(gel(x,i),y);
     return z;
   }
+  if (!y) pari_err_INV("gmodgs",gen_0);
   switch(tx)
   {
     case t_INT: return modis(x,y);
@@ -774,8 +713,8 @@ gmodgs(GEN x, long y)
       gel(z,3) = gmodgs(gel(x,3),y); return z;
 
     case t_PADIC: return padic_to_Fp(x, stoi(y));
-    case t_POLMOD: case t_POL:
-      return gen_0;
+    case t_POL: return scalarpol(RgX_get_0(x), varn(x));
+    case t_POLMOD: retmkpolmod(RgX_get_0(x), RgX_copy(x));
   }
   pari_err_TYPE2("%",x,stoi(y));
   return NULL; /* not reached */
@@ -783,17 +722,33 @@ gmodgs(GEN x, long y)
 GEN
 gmodsg(long x, GEN y)
 {
+  long d;
   switch(typ(y))
   {
     case t_INT: return modsi(x,y);
     case t_REAL: return modsr(x,y);
     case t_FRAC: return modsf(x,y);
-    case t_POL: return degpol(y)? stoi(x): gen_0;
+    case t_POL: d = degpol(y);
+      if (!signe(y)) pari_err_INV("gmodsg",y);
+      return d? gmulsg(x, RgX_get_1(y)): RgX_get_0(y);
   }
   pari_err_TYPE2("%",stoi(x),y);
   return NULL; /* not reached */
 }
+/* divisibility: return 1 if y | x, 0 otherwise */
+int
+gdvd(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  int t = gequal0( gmod(x,y) ); avma = av; return t;
+}
 
+GEN
+gmodulss(long x, long y)
+{
+  if (!y) pari_err_INV("%",gen_0);
+  retmkintmod(modss(x, y), utoi(labs(y)));
+}
 GEN
 gmodulsg(long x, GEN y)
 {
@@ -808,57 +763,31 @@ gmodulsg(long x, GEN y)
   }
   pari_err_TYPE2("%",stoi(x),y); return NULL; /* not reached */
 }
-
-GEN
-gmodulss(long x, long y)
-{
-  if (!y) pari_err_INV("%",gen_0);
-  retmkintmod(modss(x, y), utoi(labs(y)));
-}
-
 GEN
 gmodulo(GEN x,GEN y)
 {
-  long tx = typ(x), l, i;
-  GEN z;
-
+  long tx = typ(x), vx, vy;
   if (tx == t_INT && !is_bigint(x)) return gmodulsg(itos(x), y);
   if (is_matvec_t(tx))
   {
-    z = cgetg_copy(x, &l);
+    long l, i;
+    GEN z = cgetg_copy(x, &l);
     for (i=1; i<l; i++) gel(z,i) = gmodulo(gel(x,i),y);
     return z;
   }
   switch(typ(y))
   {
-    case t_INT: retmkintmod(Rg_to_Fp(x,y), absi(y));
+    case t_INT:
+      if (!is_const_t(tx)) return gmul(x, gmodulsg(1,y));
+      if (tx == t_INTMOD) return gmod(x,y);
+      retmkintmod(Rg_to_Fp(x,y), absi(y));
     case t_POL:
-      if (!signe(y)) pari_err_INV("%", y);
-      if (tx == t_POLMOD)
-      {
-        long vx = varn(gel(x,1)), vy = varn(y);
-        if (vx == vy) return polmod_mod(x,y);
-        z = cgetg(3,t_POLMOD);
-        gel(z,1) = RgX_copy(y);
-        gel(z,2) =  (varncmp(vx, vy) > 0 && lg(y) > 3)? gcopy(x): gen_0;
-        return z;
-      }
-      z = cgetg(3,t_POLMOD);
-      gel(z,1) = RgX_copy(y);
-      if (is_const_t(tx))
-      {
-        gel(z,2) = (lg(y) > 3)? gcopy(x): gmod(x,y);
-        return z;
-      }
-      switch(tx)
-      {
-        case t_POL: case t_RFRAC: case t_SER:
-          gel(z,2) = (varncmp(gvar(x), varn(y)) >= 0)? gmod(x,y): gen_0;
-          return z;
-      }
+      vx = gvar(x); vy = varn(y);
+      if (varncmp(vy, vx) > 0) return gmul(x, gmodulsg(1,y));
+      if (vx == vy && tx == t_POLMOD) return grem(x,y);
+      retmkpolmod(grem(x,y), RgX_copy(y));
   }
-  pari_err_TYPE2("%",x,y);
-  return NULL; /* not reached */
+  pari_err_TYPE2("%",x,y); return NULL; /* not reached */
 }
 
 /*******************************************************************/
@@ -866,15 +795,12 @@ gmodulo(GEN x,GEN y)
 /*                 GENERIC EUCLIDEAN DIVISION                      */
 /*                                                                 */
 /*******************************************************************/
-
 GEN
 gdivent(GEN x, GEN y)
 {
-  long tx = typ(x), ty;
-
-  if (tx == t_INT && !is_bigint(x)) return gdiventsg(itos(x),y);
-  ty = typ(y);
-  if (ty == t_INT && !is_bigint(y)) return gdiventgs(x,itos(y));
+  long tx, ty;
+  tx = typ(x); if (tx == t_INT && !is_bigint(x)) return gdiventsg(itos(x),y);
+  ty = typ(y); if (ty == t_INT && !is_bigint(y)) return gdiventgs(x,itos(y));
   if (is_matvec_t(tx))
   {
     long i, lx;
@@ -882,6 +808,7 @@ gdivent(GEN x, GEN y)
     for (i=1; i<lx; i++) gel(z,i) = gdivent(gel(x,i),y);
     return z;
   }
+  if (tx == t_POL || ty == t_POL) return gdeuc(x,y);
   switch(ty)
   {
     case t_INT:
@@ -890,17 +817,9 @@ gdivent(GEN x, GEN y)
         case t_INT: return truedivii(x,y);
         case t_REAL: return quotri(x,y);
         case t_FRAC: return quotfi(x,y);
-        case t_POL: return gdiv(x,y);
       }
       break;
     case t_REAL: case t_FRAC: return quot(x,y);
-    case t_POL:
-      if (is_scalar_t(tx))
-      {
-        if (tx == t_POLMOD) break;
-        return degpol(y)? gen_0: gdiv(x,y);
-      }
-      if (tx == t_POL) return gdeuc(x,y);
   }
   pari_err_TYPE2("\\",x,y);
   return NULL; /* not reached */
@@ -933,7 +852,9 @@ gdiventsg(long x, GEN y)
     case t_INT:  return truedivsi(x,y);
     case t_REAL: return quotsr(x,y);
     case t_FRAC: return quotsf(x,y);
-    case t_POL:  return degpol(y)? gen_0: gdivsg(x,y);
+    case t_POL:
+      if (!signe(y)) pari_err_INV("gdiventsg",y);
+      return degpol(y)? RgX_get_0(y): gdivsg(x,gel(y,2));
   }
   pari_err_TYPE2("\\",stoi(x),y);
   return NULL; /* not reached */
@@ -952,7 +873,7 @@ quotrem(GEN x, GEN y, GEN *r)
 GEN
 gdiventres(GEN x, GEN y)
 {
-  long tx = typ(x);
+  long tx = typ(x), ty = typ(y);
   GEN z,q,r;
 
   if (is_matvec_t(tx))
@@ -963,7 +884,12 @@ gdiventres(GEN x, GEN y)
     return z;
   }
   z = cgetg(3,t_COL);
-  switch(typ(y))
+  if (tx == t_POL || ty == t_POL)
+  {
+    gel(z,1) = poldivrem(x,y,(GEN*)(z+2));
+    return z;
+  }
+  switch(ty)
   {
     case t_INT:
       switch(tx)
@@ -975,37 +901,12 @@ gdiventres(GEN x, GEN y)
           q = quotrem(x,y,&r);
           gel(z,1) = q;
           gel(z,2) = r; return z;
-        case t_POL:
-          gel(z,1) = gdiv(x,y);
-          gel(z,2) = gen_0; return z;
       }
       break;
     case t_REAL: case t_FRAC:
           q = quotrem(x,y,&r);
           gel(z,1) = q;
           gel(z,2) = r; return z;
-    case t_POL:
-      if (is_scalar_t(tx))
-      {
-        if (tx == t_POLMOD) break;
-        if (degpol(y))
-        {
-          q = gen_0;
-          r = gcopy(x);
-        }
-        else
-        {
-          q = gdiv(x,y);
-          r = gen_0;
-        }
-        gel(z,1) = q;
-        gel(z,2) = r; return z;
-      }
-      if (tx == t_POL)
-      {
-        gel(z,1) = poldivrem(x,y,(GEN *)(z+2));
-        return z;
-      }
   }
   pari_err_TYPE2("\\",x,y);
   return NULL; /* not reached */
@@ -1090,17 +991,19 @@ gdivround(GEN x, GEN y)
 GEN
 gdivmod(GEN x, GEN y, GEN *pr)
 {
-  long tx = typ(x);
-
-  if (tx==t_INT)
+  switch(typ(x))
   {
-    long ty = typ(y);
-    if (ty==t_INT) return dvmdii(x,y,pr);
-    if (ty==t_POL) { *pr=gcopy(x); return gen_0; }
-    pari_err_TYPE2("gdivmod",x,y);
+    case t_INT:
+      switch(typ(y))
+      {
+        case t_INT: return dvmdii(x,y,pr);
+        case t_POL: *pr=icopy(x); return gen_0;
+      }
+      break;
+    case t_POL: return poldivrem(x,y,pr);
   }
-  if (tx!=t_POL) pari_err_TYPE2("gdivmod",x,y);
-  return poldivrem(x,y,pr);
+  pari_err_TYPE2("gdivmod",x,y);
+  return NULL;
 }
 
 /*******************************************************************/

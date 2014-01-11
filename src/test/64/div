@@ -248,29 +248,29 @@ error("forbidden division t_FRAC \\ t_INTMOD.")
 1
 * [5, 6]
 0
-error("forbidden division t_POL \\ t_POLMOD.")
-error("forbidden division t_POL % t_POLMOD.")
-error("forbidden division t_POL \\ t_POLMOD.")
+error("forbidden euclidean division t_POL , t_POLMOD.")
+error("forbidden euclidean division t_POL , t_POLMOD.")
+error("forbidden euclidean division t_POL , t_POLMOD.")
 * [5, 7]
 (2*t^4 + 2*t^3 + t^2)*x^2 + (2*t^4 + 2*t^3 + t^2)
-error("forbidden division t_POL \\ t_FFELT.")
-error("forbidden division t_POL % t_FFELT.")
-error("forbidden division t_POL \\ t_FFELT.")
+(2*t^4 + 2*t^3 + t^2)*x^2 + (2*t^4 + 2*t^3 + t^2)
+0
+(2*t^4 + 2*t^3 + t^2)*x^2 + (2*t^4 + 2*t^3 + t^2)
 * [5, 8]
 (-1 + w)*x^2 + (-1 + w)
-error("forbidden division t_POL \\ t_QUAD.")
-error("forbidden division t_POL % t_QUAD.")
-error("forbidden division t_POL \\ t_QUAD.")
+(-1 + w)*x^2 + (-1 + w)
+0
+(-1 + w)*x^2 + (-1 + w)
 * [5, 9]
 (2 + 3 + 3^2 + O(3^3))*x^2 + (2 + 3 + 3^2 + O(3^3))
-error("forbidden division t_POL \\ t_PADIC.")
-error("forbidden division t_POL % t_PADIC.")
-error("forbidden division t_POL \\ t_PADIC.")
+(2 + 3 + 3^2 + O(3^3))*x^2 + (2 + 3 + 3^2 + O(3^3))
+0
+(2 + 3 + 3^2 + O(3^3))*x^2 + (2 + 3 + 3^2 + O(3^3))
 * [5, 10]
 Mod(2, 3)*x^2 + Mod(2, 3)
-error("forbidden division t_POL \\ t_INTMOD.")
-error("forbidden division t_POL % t_INTMOD.")
-error("forbidden division t_POL \\ t_INTMOD.")
+Mod(2, 3)*x^2 + Mod(2, 3)
+Mod(0, 3)
+Mod(2, 3)*x^2 + Mod(2, 3)
 * [5, 11]
 1/18446744073709551617*x^2 + 1/18446744073709551617
 1/18446744073709551617*x^2 + 1/18446744073709551617
@@ -289,18 +289,18 @@ error("forbidden division t_POLMOD \\ t_INT.")
 * [6, 3]
 Mod(0.32258064516129032258064516129032258065*x, x^2 + 1)
 error("incorrect type in gfloor (t_POLMOD).")
-0
+error("forbidden division t_POLMOD % t_REAL.")
 error("incorrect type in gfloor (t_POLMOD).")
 * [6, 4]
 Mod(2*x, x^2 + 1)
 error("incorrect type in gfloor (t_POLMOD).")
-0
+error("forbidden division t_POLMOD % t_FRAC.")
 error("incorrect type in gfloor (t_POLMOD).")
 * [6, 5]
 error("impossible inverse in RgXQ_inv: 0.")
-error("forbidden division t_POLMOD \\ t_POL.")
+error("forbidden euclidean division t_POLMOD , t_POL.")
 Mod(x, x^2 + 1)
-error("forbidden division t_POLMOD \\ t_POL.")
+error("forbidden euclidean division t_POLMOD , t_POL.")
 * [6, 6]
 Mod(1, x^2 + 1)
 error("forbidden division t_POLMOD \\ t_POLMOD.")
@@ -329,7 +329,7 @@ error("forbidden division t_POLMOD \\ t_INTMOD.")
 * [6, 11]
 Mod(1/18446744073709551617*x, x^2 + 1)
 error("forbidden division t_POLMOD \\ t_INT.")
-0
+error("forbidden division t_POLMOD % t_INT.")
 error("forbidden division t_POLMOD \\ t_INT.")
 * [7, 1]
 error("impossible inverse in Fl_inv: Mod(0, 3).")
@@ -628,9 +628,9 @@ error("forbidden division t_SER % t_FRAC.")
 error("incorrect type in gfloor (t_SER).")
 * [1, 5]
 x + O(x^2)
-error("forbidden division t_SER \\ t_POL.")
+error("forbidden euclidean division t_SER , t_POL.")
 error("forbidden division t_SER % t_POL.")
-error("forbidden division t_SER \\ t_POL.")
+error("forbidden euclidean division t_SER , t_POL.")
 * [1, 6]
 error("forbidden division t_SER % t_POL.")
 error("forbidden division t_SER \\ t_POLMOD.")
