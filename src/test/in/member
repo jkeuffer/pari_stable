@@ -1,5 +1,5 @@
 \\package:elldata
-\p38
+default(realprecision,38);
 {
 members=[
 a1,

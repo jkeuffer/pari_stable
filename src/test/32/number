@@ -267,7 +267,6 @@ x^2 - x + 3
 ? znstar(3120)
 [768, [12, 4, 4, 2, 2], [Mod(2641, 3120), Mod(2341, 3120), Mod(2497, 3120), 
 Mod(391, 3120), Mod(2081, 3120)]]
-? getheap
-[90, 2751]
+? if(getheap()!=HEAP,getheap())
 ? print("Total time spent: ",gettime);
-Total time spent: 32
+Total time spent: 24

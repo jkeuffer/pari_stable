@@ -1,3 +1,4 @@
+HEAP=[92, if(precision(1.)==38,2737,2777)];
 default(realprecision,154); Pi; default(realprecision,38);
 \e
 addprimes([nextprime(10^9),nextprime(10^10)])
@@ -82,4 +83,4 @@ sqrtint(10!^2+1)
 znorder(Mod(33,2^16+1))
 forprime(p=2,100,print(p," ",lift(znprimroot(p))))
 znstar(3120)
-getheap
+if (getheap()!=HEAP, getheap())
