@@ -87,6 +87,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
        x % Mod(2,3) was not. We now follow the semantic of
        grem/gdeuc/poldivrem: a scalar is understood as a t_POL of degree 0
        in the proper variable [#1510]
+   63- incorrect rounding in mulur
 
   Changed
     1- default help text for a user function is now as in \u:

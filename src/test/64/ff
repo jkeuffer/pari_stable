@@ -272,9 +272,7 @@ error("incorrect type in generic discrete logarithm (order factorization) (t
 _INT).")
 error("incorrect type in factorback [not a factorization] (t_MAT).")
 error("incorrect type in factorback [not an exponent vector] (t_COL).")
-? d=fflog(a,g,o)
-187544425041221558743961599178786893950
-? g^d==a
+? g^fflog(a,g,o)==a
 1
 ? print("Total time spent: ",gettime);
-Total time spent: 1500
+Total time spent: 1536

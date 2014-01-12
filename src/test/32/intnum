@@ -1,104 +1,100 @@
 ? allocatemem(20*10^6);
   ***   Warning: new stack size = 20000000 (19.073 Mbytes).
+? check(a,b)=my(t=abs((a-b)/b));if(t,ceil(log(t)/log(10)),"-oo");
 ? oo=[1];
 ? \p96
    realprecision = 96 significant digits
-? intcirc(s=1,0.5,zeta(s))-1
--1.001878740 E-94 + 0.E-99*I
-? intlaplaceinv(x=2,1,1/x)-1
-7.37240875280988848267836598625171458524623438979 E-55 + 1.71877297004949632
-7338218359953890598325318264879 E-54*I
+? check(intcirc(s=1,0.5,zeta(s)),1)
+-93
+? check(intlaplaceinv(x=2,1,1/x),1)
+-53
 ? m=intnumstep();
-? intlaplaceinv(x=2,1,1/x,m+1)-1
-1.591769961 E-95 + 8.31356756 E-95*I
-? intlaplaceinv(x=5,1,1/x)-1
--5.985125294423071146 E-85 + 8.085986448769581166 E-85*I
-? intlaplaceinv(x=100,1,1/x)-1
--1.107198878 E-55 - 3.351417365 E-53*I
+? check(intlaplaceinv(x=2,1,1/x,m+1),1)
+-94
+? check(intlaplaceinv(x=5,1,1/x),1)
+-83
+? check(intlaplaceinv(x=100,1,1/x),1)
+-52
 ? A=intmellininv(s=2,4,gamma(s)^3);
 ? tab=intfuncinit(t=[-oo,4.5],[oo,4.5],gamma(2+I*t)^3,1);
-? intmellininvshort(2,4,tab)-A
--3.218652494 E-97 + 0.E-101*I
+? check(intmellininvshort(2,4,tab),A)
+-94
 ? f(x)=1/(exp(x)-1)-exp(-x)/x;
 ? F=truncate(f(t+O(t^7)));
 ? g(x)=if(x>1e-18,f(x),subst(F,t,x));
-? intnum(x=0,[oo,1],f(x))-Euler
-0.E-96
-? intnum(x=0,[oo,1],g(x))-Euler
-0.E-96
-? intnum(x=0,1,1/sqrt(x))-2
--1.4009863823182375326 E-54
-? intnum(x=[0,-1/2],1,1/sqrt(x))-2
-0.E-95
-? intnum(x=0,[oo,1],sin(x)/x)-Pi/2
-0.00448267113448250456172244085159836765958193607953130895411895619311247452
-425300891424918944797443
-? intnum(x=0,[oo,-I],sin(x)/x)-Pi/2
-0.E-96
-? intnum(x=0,[oo,-2*I],sin(2*x)/x)-Pi/2
-0.E-96
-? intnum(x=0,1,(1-cos(x))/x^2)+intnum(x=1,oo,1/x^2)-intnum(x=1,[oo,I],cos(x)/x^2)-Pi/2
--9.36335271 E-97
-? intnum(x=0,[oo,1],sin(x)^3*exp(-x))-0.3
-0.E-96
-? intnum(x=0,[oo,-I],sin(x)^3*exp(-x))-0.3
--1.335284649 E-89
+? check(intnum(x=0,[oo,1],f(x)),Euler)
+"-oo"
+? check(intnum(x=0,[oo,1],g(x)),Euler)
+"-oo"
+? check(intnum(x=0,1,1/sqrt(x)),2)
+-54
+? check(intnum(x=[0,-1/2],1,1/sqrt(x)),2)
+"-oo"
+? check(intnum(x=0,[oo,1],sin(x)/x),Pi/2)
+-2
+? check(intnum(x=0,[oo,-I],sin(x)/x),Pi/2)
+"-oo"
+? check(intnum(x=0,[oo,-2*I],sin(2*x)/x),Pi/2)
+"-oo"
+? A=intnum(x=0,1,(1-cos(x))/x^2)+intnum(x=1,oo,1/x^2)-intnum(x=1,[oo,I],cos(x)/x^2);
+? check(A,Pi/2)
+-96
+? check(intnum(x=0,[oo,1],sin(x)^3*exp(-x)),3/10)
+-96
+? check(intnum(x=0,[oo,-I],sin(x)^3*exp(-x)),3/10)
+-88
 ? tab=intnuminit(0,[oo,-I],m+1);
-? intnum(x=0,oo,sin(x)^3*exp(-x),tab)-0.3
-0.E-96
-? intnum(x=0,[oo,-I],x^2*sin(x))+2
-5.618011626 E-96
+? check(intnum(x=0,oo,sin(x)^3*exp(-x),tab),3/10)
+-96
+? check(intnum(x=0,[oo,-I],x^2*sin(x)),-2)
+-95
 ? tab=intnuminit(-1,1);
-? intnum(x=-1,1,intnum(y=-sqrt(1-x^2),sqrt(1-x^2),x^2+y^2,tab),tab)-Pi/2
--1.779037015 E-94
+? check(intnum(x=-1,1,intnum(y=-sqrt(1-x^2),sqrt(1-x^2),x^2+y^2,tab),tab),Pi/2)
+-93
 ? \p308
    realprecision = 308 significant digits
 ? a=sumpos(n=1,1/(n^3+n+1));
 ? tab=sumnuminit(2);
 ? b=sumnum(n=1,2,1/(n^3+n+1),tab);
-? a-b
--1.004064579 E-306 + 0.E-331*I
-? sumnum(n=1,2,1/(n^3+n+1),tab,1)-a
-1.004064579 E-306
+? check(a,b)
+-305
+? check(sumnum(n=1,2,1/(n^3+n+1),tab,1),a)
+-305
 ? c=sumnum(n=1,2,1/(n^2+1),tab,1);
 ? d=sumpos(n=1,1/(n^2+1));
-? d-c
-1.969190365 E-306
-? sumnum(n=1,2,n^(-4/3),,1)-zeta(4/3)
--2.4216544207504506114899981581969759071445497499100570634176004383007422693
-6954882413244126542269381152110599476350651837206116316883640508880554373752
-13154920980196906076673594248661407504915027261660100 E-107
+? check(c,d)
+-305
+? check(sumnum(n=1,2,n^(-4/3),,1),zeta(4/3))
+-107
 ? tab=sumnuminit([2,-3/2]);
-? sumnum(n=1,[2,-3/2],1/(n*sqrt(n)),tab,1)-zeta(3/2)
--1.190414514 E-305
-? suminf(n=1,2^(-n))-1
--1.112536929 E-308
-? sumpos(n=1,2^(-n))-1
--2.781342323 E-308
-? sumnum(n=1,[2,log(2)],2^(-n),intnumstep()+1,1)-1
--1.950277237 E-305
+? check(sumnum(n=1,[2,-3/2],1/(n*sqrt(n)),tab,1),zeta(3/2))
+-305
+? check(suminf(n=1,2^(-n)),1)
+-307
+? check(sumpos(n=1,2^(-n)),1)
+-307
+? check(sumnum(n=1,[2,log(2)],2^(-n),intnumstep()+1,1),1)
+-304
 ? tab=sumnuminit(2,,-1);
 ? a=sumnumalt(n=1,2,1/(n^3+n+1),tab,1);
 ? b=sumalt(n=1,(-1)^n/(n^3+n+1));
-? a-b
--1.390671162 E-308
+? check(a,b)
+-307
 ? \p96
    realprecision = 96 significant digits
 ? T=intnuminitgen(t,0,[1],exp(2*sinh(t)));
-? intnum(x=0,[1],1/(1+x^2),T)
-1.57079632679489661923132169163975144209858469968755291048747229615390820314
-310449931401741267106
+? check(intnum(x=0,[1],1/(1+x^2),T),Pi/2)
+"-oo"
 ? T=intnuminitgen(t,0,[[1],1],exp(t-exp(-t)));
-? intnum(x=0,[[1],1],exp(-x),T)
-1.00000000000000000000000000000000000000000000000000000000000000000000000000
-000000000000000000000
+? check(intnum(x=0,[[1],1],exp(-x),T),1)
+"-oo"
 ? intfourierexp(t=0,[[1],1],1/2,exp(-t^2))
 0.07515645001618094506724269142337819200573257288846457257682421833136020654
-01315089580450881170415 - 0.408148557374490719018171389392074027664154880556
+01315089580450881170413 - 0.408148557374490719018171389392074027664154880556
 033855962874575972355801042051564345987971241498*I
 ? intfouriercos(t=0,[[1],1],1/2,exp(-t^2))
 0.07515645001618094506724269142337819200573257288846457257682421833136020654
-01315089580450881170415
+01315089580450881170413
 ? intfouriersin(t=0,[[1],1],1/2,exp(-t^2))
 0.40814855737449071901817138939207402766415488055603385596287457597235580104
 2051564345987971241498
@@ -115,4 +111,4 @@
 ? sumpos(n=1,-log(cos(1/n)))
 0.94536905472633293521954432593129672389
 ? print("Total time spent: ",gettime);
-Total time spent: 18624
+Total time spent: 17932

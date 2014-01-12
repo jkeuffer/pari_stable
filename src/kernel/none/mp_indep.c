@@ -143,10 +143,11 @@ mulur_2(ulong x, GEN y, long s)
   y--; garde = mulll(x,y[lx]);
   for (i=lx-1; i>=3; i--) z[i]=addmul(x,y[i]);
   z[2]=hiremainder; /* != 0 since y normalized and |x| > 1 */
-
   sh = bfffo(hiremainder); m = BITS_IN_LONG-sh;
   if (sh) shift_left(z,z, 2,lx-1, garde,sh);
-  z[1] = evalsigne(s) | evalexpo(m+e); return z;
+  z[1] = evalsigne(s) | evalexpo(m+e);
+  if ((garde << sh) & HIGHBIT) roundr_up_ip(z, lx);
+  return z;
 }
 
 INLINE GEN

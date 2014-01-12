@@ -103,5 +103,4 @@ test((2^64+13)^5)
 p=2^64+13; g=ffprimroot(ffgen(p^2), &o); a=2*g^0;
 v=[I,-1,Mat(1),matid(2)/2];
 for(i=1,#v, print(iferr(fflog(a,g,v[i]),E,E)));
-d=fflog(a,g,o)
-g^d == a
+g^fflog(a,g,o) == a
