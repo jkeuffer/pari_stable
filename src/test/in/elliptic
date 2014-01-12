@@ -1,3 +1,4 @@
+HEAP=[77, if(precision(1.)==38,5275,5450)];
 default(realprecision,154); Pi; default(realprecision,38);
 \e
 ellinit([-1,0])
@@ -33,7 +34,7 @@ elltaniyama(bcurve)
 \\
 ccurve=ellinit([0,0,-1,-1,0])
 l=elllseries(ccurve,2)
-elllseries(ccurve,2,1.2)-l
+abs(elllseries(ccurve,2,1.2)-l) < 1.4e-38
 \\
 tcurve=ellinit([1,0,1,-19,26]);
 ellorder(tcurve,[1,2])
@@ -47,6 +48,4 @@ matsolve(ma,mhbi)
 \\
 cmcurve=ellinit([0,-3/4,0,-2,-1])
 ellmul(cmcurve,[x,y],quadgen(-7))
-\p 96
-precision(cmcurve)
-getheap
+if (getheap()!=HEAP, getheap())

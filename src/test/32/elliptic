@@ -91,8 +91,8 @@ q^101)
 small([128, 1])], [0, 0, 0, 0, 0, 0, 0, 0]]
 ? l=elllseries(ccurve,2)
 0.38157540826071121129371040958008663665
-? elllseries(ccurve,2,1.2)-l
-1.322431145 E-38
+? abs(elllseries(ccurve,2,1.2)-l)<1.4e-38
+1
 ? tcurve=ellinit([1,0,1,-19,26]);
 ? ellorder(tcurve,[1,2])
 6
@@ -124,11 +124,6 @@ small([128, 1])], [0, 0, 0, 0, 0, 0, 0, 0]]
 [((-2 + 3*w)*x^2 + (6 - w))/((-2 - 5*w)*x + (-4 - 2*w)), ((34 - 11*w)*y*x^2 
 + (40 - 28*w)*y*x + (22 + 23*w)*y)/((-90 - w)*x^2 + (-136 + 44*w)*x + (-40 +
  28*w))]
-? \p96
-   realprecision = 96 significant digits
-? precision(cmcurve)
-28
-? getheap
-[76, 5431]
+? if(getheap()!=HEAP,getheap())
 ? print("Total time spent: ",gettime);
-Total time spent: 28
+Total time spent: 32
