@@ -1123,6 +1123,7 @@ minim0_dolll(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long dolll)
   {
     BORNE = gfloor(BORNE);
     if (typ(BORNE) != t_INT) pari_err_TYPE("minim0",BORNE);
+    if (is_bigint(BORNE)) pari_err_PREC( "qfminim");
     sBORNE = itos(BORNE); avma = av;
   }
   if (!STOCKMAX)
