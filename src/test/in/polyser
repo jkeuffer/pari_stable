@@ -1,4 +1,4 @@
-HEAP=[62, if(precision(1.)==38,7191,7253)];
+HEAP=[62, if(precision(1.)==38,7190,7252)];
 default(realprecision,154); Pi; default(realprecision,38);
 \e
 apol=y^3+5*y+1

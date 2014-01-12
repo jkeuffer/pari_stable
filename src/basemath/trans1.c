@@ -153,7 +153,7 @@ pi_ramanujan(long prec)
 {
   const ulong B = 545140134, A = 13591409, C = 640320;
   const double alpha2 = 47.11041314; /* 3log(C/12) / log(2) */
-  long n, nmax;
+  long n, nmax, prec2;
   struct abpq_res R;
   struct abpq S;
   GEN D, u;
@@ -174,9 +174,9 @@ pi_ramanujan(long prec)
     S.p[n] = mulis(muluu(6*n-5, 2*n-1), 1-6*n);
     S.q[n] = mulii(sqru(n), muliu(D,n));
   }
-  abpq_sum(&R, 0, nmax, &S);
-  u = rdivii(R.Q, R.T, prec); /* = 12 Pi / C^{3/2} */
-  return mulrr( mulru(u, C/12), sqrtr_abs(utor(C,prec)) );
+  abpq_sum(&R, 0, nmax, &S); prec2 = prec+EXTRAPRECWORD;
+  u = itor(muliu(R.Q,C/12), prec2);
+  return rtor(mulrr(divri(u, R.T), sqrtr_abs(utor(C,prec2))), prec);
 }
 
 #if 0 /* Much slower than binary splitting at least up to prec = 10^8 */
@@ -233,7 +233,7 @@ constpi(long prec)
   if (gpi && realprec(gpi) >= prec) return gpi;
 
   av = avma;
-  tmp = gclone(pi_ramanujan(prec+EXTRAPRECWORD));
+  tmp = gclone(pi_ramanujan(prec));
   swap_clone(&gpi,tmp);
   avma = av; return gpi;
 }

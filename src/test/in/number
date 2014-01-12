@@ -1,4 +1,4 @@
-HEAP=[92, if(precision(1.)==38,2737,2777)];
+HEAP=[92, if(precision(1.)==38,2736,2776)];
 default(realprecision,154); Pi; default(realprecision,38);
 \e
 addprimes([nextprime(10^9),nextprime(10^10)])

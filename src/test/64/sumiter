@@ -39,6 +39,6 @@
 ? 6/Pi^2*sumpos(n=1,n^-2)
 1.0000000000000000000000000000000000000
 ? getheap
-[21, 175]
+[21, 174]
 ? print("Total time spent: ",gettime);
 Total time spent: 20
