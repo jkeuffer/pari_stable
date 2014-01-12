@@ -34,7 +34,8 @@ for (j = 1,10,
   b = vectorv(8,i,random(7));
   c = vectorv(8,i,random(7));
   d = nfeltmul(K,b,c);
-  print([nfhilbert(K, a,b,p), nfhilbert(K, a,c,p), nfhilbert(K, a,d,p)])
+  if (nfhilbert(K, a,b,p) * nfhilbert(K, a,c,p) != nfhilbert(K, a,d,p),
+    error([a,b,c]))
 )
 }
 
