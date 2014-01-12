@@ -1,3 +1,4 @@
+HEAP=[23, if(precision(1.)==38,200,226)];
 \p 19
 \e
 intnum(x=0,Pi,sin(x))
@@ -19,4 +20,4 @@ sum(k=1,10,2.^-k)
 sumdiv(8!,x,x)
 suminf(n=1,2.^-n)
 6/Pi^2*sumpos(n=1,n^-2)
-getheap
+if (getheap()!=HEAP, getheap())
