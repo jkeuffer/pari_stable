@@ -2126,7 +2126,7 @@ Flxq_inv(GEN x,GEN T,ulong p)
 {
   pari_sp av=avma;
   GEN U = Flxq_invsafe(x, T, p);
-  if (!U) pari_err_INV("Flxq_inv",x);
+  if (!U) pari_err_INV("Flxq_inv",Flx_to_ZX(x));
   return gerepileuptoleaf(av, U);
 }
 

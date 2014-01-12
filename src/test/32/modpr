@@ -333,7 +333,7 @@ error("inconsistent variables in poltobasis, z != y.")
 error("incorrect type in Rg_to_ff (t_COL).")
 error("incorrect type in Rg_to_ff (t_COL).")
 *6:
-error("impossible inverse in Flxq_inv: Vecsmall([65536]).")
+error("impossible inverse in Flxq_inv: 0.")
 [0, 0, 0]~
 [1, 0]~
 
@@ -360,4 +360,4 @@ error("impossible inverse in Flxq_inv: Vecsmall([65536]).")
   *** nfsolvemodpr: impossible inverse in nfsolvemodpr: [1, 1; 1, 1].
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 0, 0, 0, 0, 0, 0, 0]~
-Total time spent: 272
+Total time spent: 244
