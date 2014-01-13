@@ -2,8 +2,9 @@ Function: logint
 Section: number_theoretical
 C-Name: logint0
 Prototype: lGGD&
-Help: logint(x,b,&z): b being an integer > 1, and x an integer > 0, return the
- largest integer e so that b^e <= x. If present, set z to b^e.
+Help: logint(x,b,&z): return the largest integer e so that b^e <= x, where the
+ parameters b > 1 and x > 0 are both integers. If the parameter z is present,
+ set it to b^e.
 Description:
  (gen,2):small        expi($1)
  (gen,gen,&int):small logint0($1, $2, &$3)
@@ -25,7 +26,7 @@ Doc: Return the largest integer $e$ so that $b^e \leq x$, where the
  ? #digits(1000!, 10)
  %5 = 2568
  ? logint(1000!, 10)
- %6 = 2568
+ %6 = 2567
  @eprog\noindent This function may conveniently replace
  \bprog
    floor( log(x) / log(b) )
