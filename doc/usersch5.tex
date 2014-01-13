@@ -3672,6 +3672,9 @@ an \kbd{FpM}.
 and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 \kbd{p} to obtain an \kbd{FpM}.
 
+\fun{GEN}{FpM_powu}{GEN x, ulong n, GEN p} computes $x^n$ where $x$ is a
+square \kbd{FpM}.
+
 \fun{GEN}{FpM_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZM}~\kbd{x}
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.
@@ -3857,6 +3860,9 @@ $0$.
 \fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
 (assumed to have compatible dimensions).
 
+\fun{GEN}{Flm_powu}{GEN x, ulong n, ulong p} computes $x^n$ where $x$ is a
+square \kbd{Flm}.
+
 \fun{GEN}{Flm_charpoly}{GEN x, ulong p} return the characteristic polynomial of
 the square \kbd{Flm} $x$, as a \kbd{Flx}.
 
@@ -3962,6 +3968,9 @@ invertible.
 
 \fun{GEN}{F2m_mul}{GEN x, GEN y} multiplies  \kbd{x} and \kbd{y} (assumed to
 have compatible dimensions).
+
+\fun{GEN}{F2m_powu}{GEN x, ulong n} computes $x^n$ where $x$ is a square
+\kbd{F2m}.
 
 \fun{long}{F2m_rank}{GEN x} as \kbd{rank}.
 
