@@ -308,6 +308,13 @@ intinit_end(intdata *D, long pnt, long mnt)
   TABwm(v) = D->tabwm; setlg(D->tabwm, mnt+1); return v;
 }
 
+static const long EXTRAPREC =
+#ifdef LONG_IS_64BIT
+  1;
+#else
+  2;
+#endif
+
 /* divide by 2 in place */
 static GEN
 divr2_ip(GEN x) { shiftr_inplace(x, -1); return x; }
@@ -329,8 +336,8 @@ inittanhsinh(long m, long prec)
   et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    gel(D.tabxp,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabwp,k) = cgetr(prec+EXTRAPRECWORD); av = avma;
+    gel(D.tabxp,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabwp,k) = cgetr(prec+EXTRAPREC); av = avma;
     ct = divr2_ip(addrr(et, invr(et)));
     st = subrr(et, ct);
     ext = invr( addrs(mpexp(mulur(3, st)), 1) );
@@ -361,8 +368,8 @@ initsinhsinh(long m, long prec)
   et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    gel(D.tabxp,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabwp,k) = cgetr(prec+EXTRAPRECWORD); av = avma;
+    gel(D.tabxp,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabwp,k) = cgetr(prec+EXTRAPREC); av = avma;
     ct = divr2_ip(addrr(et, invr(et)));
     st = subrr(et, ct);
     ext = mpexp(st);
@@ -393,8 +400,8 @@ initsinh(long m, long prec)
   et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    gel(D.tabxp,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabwp,k) = cgetr(prec+EXTRAPRECWORD); av = avma;
+    gel(D.tabxp,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabwp,k) = cgetr(prec+EXTRAPREC); av = avma;
     eti = invr(et);
     xp = subrr(et, eti);
     wp = addrr(et, eti);
@@ -452,10 +459,10 @@ initexpexp(long m, long prec)
   et = ex = mpexp(negr(h));
   for (k = 1; k <= lim; k++)
   {
-    gel(D.tabxp,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabwp,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabxm,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabwm,k) = cgetr(prec+EXTRAPRECWORD); av = avma;
+    gel(D.tabxp,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabwp,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabxm,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabwm,k) = cgetr(prec+EXTRAPREC); av = avma;
     eti = invr(et); kh = mulur(k,h);
     xp = mpexp(subrr(kh, et));
     xm = mpexp(negr(addrr(kh, eti)));
@@ -487,10 +494,10 @@ initnumsine(long m, long prec)
   et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
   {
-    gel(D.tabxp,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabwp,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabxm,k) = cgetr(prec+EXTRAPRECWORD);
-    gel(D.tabwm,k) = cgetr(prec+EXTRAPRECWORD); av = avma;
+    gel(D.tabxp,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabwp,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabxm,k) = cgetr(prec+EXTRAPREC);
+    gel(D.tabwm,k) = cgetr(prec+EXTRAPREC); av = avma;
     eti = invr(et); /* exp(-kh) */
     ct = divr2_ip(addrr(et, eti));
     st = divr2_ip(subrr(et, eti));
@@ -918,7 +925,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
   GEN T, U, km, kma, kmb, tmp;
 
   if (m > 30) pari_err_OVERFLOW("intnuminit [m]");
-  l = prec+EXTRAPRECWORD;
+  l = prec+EXTRAPREC;
   codea = transcode(a, "a");
   codeb = transcode(b, "b");
   if (is_fin_f(codea) && is_fin_f(codeb)) return inittanhsinh(m, l);
@@ -1095,7 +1102,7 @@ intnuminitgen(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long m,
   };
   pari_sp ltop = avma;
   GEN hnpr, eps, v;
-  long k, h, newprec, lim, precl = prec+EXTRAPRECWORD;
+  long k, h, newprec, lim, precl = prec+EXTRAPREC;
   long flag, codea = transcode(a, "a"), codeb = transcode(b, "b");
   int NOT_OSC, NOT_ODD;
   intdata D; intinit_start(&D, m, flext, precl);
@@ -1329,7 +1336,7 @@ GEN
 intnum(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, GEN tab, long prec)
 {
   pari_sp ltop = avma;
-  long l = prec+EXTRAPRECWORD;
+  long l = prec+EXTRAPREC;
   GEN S;
 
   tab = intnuminit0(a, b, tab, prec);

@@ -27,7 +27,7 @@
 ? check(intnum(x=0,[oo,1],g(x)),Euler)
 "-oo"
 ? check(intnum(x=0,1,1/sqrt(x)),2)
--54
+-59
 ? check(intnum(x=[0,-1/2],1,1/sqrt(x)),2)
 "-oo"
 ? check(intnum(x=0,[oo,1],sin(x)/x),Pi/2)
@@ -47,7 +47,7 @@
 ? check(intnum(x=0,oo,sin(x)^3*exp(-x),tab),3/10)
 -96
 ? check(intnum(x=0,[oo,-I],x^2*sin(x)),-2)
--95
+"-oo"
 ? tab=intnuminit(-1,1);
 ? check(intnum(x=-1,1,intnum(y=-sqrt(1-x^2),sqrt(1-x^2),x^2+y^2,tab),tab),Pi/2)
 -93
@@ -65,7 +65,7 @@
 ? check(c,d)
 -305
 ? check(sumnum(n=1,2,n^(-4/3),,1),zeta(4/3))
--107
+-110
 ? tab=sumnuminit([2,-3/2]);
 ? check(sumnum(n=1,[2,-3/2],1/(n*sqrt(n)),tab,1),zeta(3/2))
 -305
@@ -111,4 +111,4 @@
 ? sumpos(n=1,-log(cos(1/n)))
 0.94536905472633293521954432593129672389
 ? print("Total time spent: ",gettime);
-Total time spent: 17932
+Total time spent: 18856
