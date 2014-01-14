@@ -37,7 +37,7 @@ mingw) dflt=${dfltlibdir:-$prefix/bin};;
 esac; . ./myread; libdir=$ans
 
 echo $n ..."include files ? $c"
-dflt=${dlftincludedir:-$prefix/include}; . ./myread; includedir=$ans
+dflt=${dfltincludedir:-$prefix/include}; . ./myread; includedir=$ans
 
 echo $n ..."manual pages ? $c"
 dflt=${dfltmandir:-$dfltman}; . ./myread; mandir=$ans
