@@ -1,4 +1,4 @@
-HEAP=[23, if(precision(1.)==38,200,226)];
+HEAP=[23, if(precision(1.)==38,200,230)];
 \p 19
 \e
 intnum(x=0,Pi,sin(x))
