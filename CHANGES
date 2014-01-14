@@ -88,6 +88,7 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
        in the proper variable [#1510]
    62- incorrect rounding in mulur
 BA 63- Configure: --includedir was ignored
+   64- add GC in RgV_dotproduct / RgV_dotsquare
 
   Changed
     1- default help text for a user function is now as in \u:

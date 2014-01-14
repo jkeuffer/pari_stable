@@ -109,12 +109,19 @@ GEN
 RgV_dotsquare(GEN x)
 {
   long i, lx = lg(x);
-  pari_sp av;
+  pari_sp av = avma, lim = stack_lim(av,3);
   GEN z;
   if (lx == 1) return gen_0;
-  av = avma;
   z = gsqr(gel(x,1));
-  for (i=2; i<lx; i++) z = gadd(z, gsqr(gel(x,i)));
+  for (i=2; i<lx; i++)
+  {
+    z = gadd(z, gsqr(gel(x,i)));
+    if (low_stack(lim,stack_lim(av,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgV_dotsquare, i = %ld",i);
+      z = gerepileupto(av, z);
+    }
+  }
   return gerepileupto(av,z);
 }
 
@@ -122,13 +129,20 @@ RgV_dotsquare(GEN x)
 static GEN
 RgV_dotproduct_i(GEN x, GEN y, long lx)
 {
-  pari_sp av;
+  pari_sp av = avma, lim = stack_lim(av,3);
   long i;
   GEN z;
   if (lx == 1) return gen_0;
-  av = avma;
   z = gmul(gel(x,1),gel(y,1));
-  for (i=2; i<lx; i++) z = gadd(z, gmul(gel(x,i), gel(y,i)));
+  for (i=2; i<lx; i++)
+  {
+    z = gadd(z, gmul(gel(x,i), gel(y,i)));
+    if (low_stack(lim,stack_lim(av,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgV_dotproduct, i = %ld",i);
+      z = gerepileupto(av, z);
+    }
+  }
   return gerepileupto(av,z);
 }
 GEN
