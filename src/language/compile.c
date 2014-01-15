@@ -1012,6 +1012,18 @@ countvar(GEN arg)
 }
 
 static void
+compileuninline(GEN arg)
+{
+  long j;
+  if (lg(arg) > 1)
+    compile_err("too many arguments",tree[arg[1]].str);
+  for(j=0; j<s_lvar.n; j++)
+    if(!localvars[j].inl)
+      pari_err(e_MISC,"uninline is only valid at top level");
+  s_lvar.n = 0;
+}
+
+static void
 compilemy(GEN arg, const char *str, int inl)
 {
   long i, j, k, l = lg(arg);
@@ -1191,6 +1203,13 @@ compilefunc(entree *ep, long n, int mode, long flag)
   else if (is_func_named(ep,"inline"))
   {
     compilemy(arg, str, 1);
+    compilecast(n,Gvoid,mode);
+    avma=ltop;
+    return;
+  }
+  else if (is_func_named(ep,"uninline"))
+  {
+    compileuninline(arg);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;

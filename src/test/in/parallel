@@ -26,8 +26,9 @@ ecm(2^101-1,500,600!)
 ell2(a,B,N)=iferr(ell(a,B,N),err,return(gcd(lift(component(err,2)),N)),errname(err)=="e_INV");0;
 ecm2(N,t,B)=my(z);parfirst(a->ell2(a,B,N),[1..t])[2];
 ecm2(2^101-1,500,600!)
-
+uninline();
 inline(chkell);
 chkell(n)=a->my(E=ellinit([1,0,0,0,ffgen(2^n)^a]),N=ellcard(E)/4);if(isprime(N),N);
 ellp(n)=parfirst(chkell(n),[1..10000]);
 ellp(128)
+uninline();
