@@ -79,7 +79,7 @@ test(L,v) =
 test(L,v);
 KQ = nfinit(y+1);
 LQ = rnfinit(KQ, x^2-y);
-vQ = [2,1/2,x+y, Mod(1/2,KQ.pol), y, Mod(Mod(1/2,KQ.pol),LQ[1]), Mod(x,LQ[1]), Mod(x,LQ.pol), Mod(x+y/2,x^2-y), x, [1]~,[1,2]~,[y]~];
+vQ = [2,1/2,x+y, Mod(1/2,KQ.pol), y, Mod(Mod(x/2+1,KQ.pol),LQ[1]), Mod(x,LQ[1]), Mod(x,LQ.pol), Mod(x+y/2,x^2-y), x, [1]~,[1,2]~,[y]~];
 test(LQ, vQ);
 
 Labs = nfinit(L.pol);
