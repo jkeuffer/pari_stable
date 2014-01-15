@@ -269,6 +269,151 @@ error("incorrect type in rnfcharpoly (t_COL).")
 error("incorrect type in rnfcharpoly (t_POL).")
 19:
 x^2 + Mod(-2*y, y^3 - 21)*x + Mod(y^2, y^3 - 21)
+1:
+[2, 0]~
+Mod(2, x^2 + 1)
+2
+2
+2
+2
+4
+4
+2:
+[1/2, 0]~
+Mod(1/2, x^2 + 1)
+1/2
+1/2
+1/2
+1/2
+1
+1/4
+3:
+[-1, 1]~
+Mod(x - 1, x^2 + 1)
+error("incorrect type in rnfeltabstorel (t_POL).")
+Mod(x - 2, x^2 - 2*x + 2)
+error("inconsistent variables in nf_to_scalar_or_basis, x != y.")
+error("incorrect type in rnfeltabstorel (t_POL).")
+error("incorrect type in rnfeltabstorel (t_POL).")
+error("incorrect type in rnfeltabstorel (t_POL).")
+4:
+[1/2, 0]~
+Mod(1/2, x^2 + 1)
+Mod(1/2, x^2 + 1)
+Mod(1/2, x^2 - 2*x + 2)
+1/2
+1/2
+1
+1/4
+5:
+[Mod(y, y + 1), 0]~
+Mod(Mod(-1, y + 1), x^2 + 1)
+Mod(-1, x^2 + 1)
+-1
+-1
+-1
+-2
+1
+6:
+[1/2, 0]~
+Mod(1/2, x^2 + 1)
+Mod(1/2, x^2 + 1)
+Mod(1/2, x^2 - 2*x + 2)
+error("inconsistent moduli in nf_to_scalar_or_basis: x^2 + 1 != y + 1")
+1/2
+1
+1/4
+7:
+[0, 1]~
+Mod(x, x^2 + 1)
+Mod(x, x^2 + 1)
+Mod(x - 1, x^2 - 2*x + 2)
+error("inconsistent moduli in nf_to_scalar_or_basis: x^2 + 1 != y + 1")
+error("domain error in rnfeltdown: element not in the base field")
+0
+1
+8:
+error("inconsistent moduli in rnfalgtobasis: x^2 - 2*x + 2 != y + 1")
+error("inconsistent moduli in rnfbasistoalg: x^2 - 2*x + 2 != y + 1")
+Mod(x + 1, x^2 + 1)
+Mod(x, x^2 - 2*x + 2)
+Mod(x, x^2 - 2*x + 2)
+error("domain error in rnfeltdown: element not in the base field")
+2
+2
+9:
+error("inconsistent moduli in rnfalgtobasis: x^2 - y != y + 1")
+error("inconsistent moduli in rnfbasistoalg: x^2 - y != y + 1")
+error("inconsistent moduli in rnfeltabstorel: x^2 - y != x^2 - 2*x + 2")
+error("inconsistent moduli in rnfeltreltoabs: x^2 - y != y + 1")
+error("inconsistent moduli in nf_to_scalar_or_basis: x^2 - y != y + 1")
+error("inconsistent moduli in rnfeltdown: x^2 - y != y + 1")
+error("inconsistent moduli in rnfeltabstorel: x^2 - y != x^2 - 2*x + 2")
+error("inconsistent moduli in rnfeltabstorel: x^2 - y != x^2 - 2*x + 2")
+10:
+[0, 1]~
+Mod(x, x^2 + 1)
+Mod(x + 1, x^2 + 1)
+Mod(x - 1, x^2 - 2*x + 2)
+error("inconsistent variables in nf_to_scalar_or_basis, x != y.")
+error("domain error in rnfeltdown: element not in the base field")
+2
+2
+11:
+error("inconsistent dimensions in rnfalgtobasis.")
+error("inconsistent operation 'RgV_RgC_mul' t_VEC (2 elts) , t_COL (1 elts).
+")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltreltoabs (t_COL).")
+1
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+12:
+[1, 2]~
+Mod(2*x + 1, x^2 + 1)
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltreltoabs (t_COL).")
+error("incorrect type in nf_to_scalar_or_basis (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+13:
+error("inconsistent dimensions in rnfalgtobasis.")
+error("inconsistent operation 'RgV_RgC_mul' t_VEC (2 elts) , t_COL (1 elts).
+")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltreltoabs (t_COL).")
+Mod(y, x^2 - 2*x + 2)
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+error("incorrect type in rnfeltabstorel (t_COL).")
+1:
+x^2 - 4*x + 4
+2:
+x^2 - x + 1/4
+3:
+x^2 + 2*x + 2
+4:
+x^2 - x + 1/4
+5:
+x^2 + 2*x + 1
+6:
+x^2 - x + 1/4
+7:
+x^2 + 1
+8:
+error("inconsistent moduli in rnfcharpoly: x^2 - 2*x + 2 != y + 1")
+9:
+error("inconsistent moduli in rnfcharpoly: x^2 - y != y + 1")
+10:
+x^2 + 1
+11:
+error("incorrect type in rnfcharpoly (t_COL).")
+12:
+error("incorrect type in rnfcharpoly (t_COL).")
+13:
+error("incorrect type in rnfcharpoly (t_COL).")
 [[1, -66328; 0, 1], [[280970, 12259, 35869; 0, 1, 0; 0, 0, 1], [1, 1/2, 1/2;
  0, 1/2, 0; 0, 0, 1/2]]]
 [280970, x^2 + 12259, x^4 + 35869, -x^4 + x - 66328, -1/2*x^4 + 1/2*x^3 - 33
@@ -600,4 +745,4 @@ error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (2 elts).
 [0  1   [1/2, 1/2]~]
 
 1
-Total time spent: 456
+Total time spent: 320

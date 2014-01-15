@@ -58,7 +58,15 @@ rnfeltreltoabs(GEN rnf,GEN x)
     case t_INT: return icopy(x);
     case t_FRAC: return gcopy(x);
     case t_POLMOD:
-      if (RgX_equal_var(gel(x,1), rnf_get_polabs(rnf))) return gcopy(x);
+      if (RgX_equal_var(gel(x,1), pol))
+      { /* already in 'abs' form, unless possibly if nf = Q */
+        if (typ(gel(x,2)) == t_POLMOD)
+        {
+          x = gel(x,2);
+          retmkpolmod(gcopy(gel(x,2)), RgX_copy(pol));
+        }
+        return gcopy(x);
+      }
       x = polmod_nffix(f,rnf,x,0);
       if (typ(x) == t_POLMOD) return rnfeltup(rnf,x);
       retmkpolmod(eltreltoabs(rnf_get_map(rnf), x), RgX_copy(pol));

@@ -56,25 +56,31 @@ nfhnfmod(nf, A, nfdetint(nf,A))
 K=bnfinit(y^2-40);
 bnfisnorm(K,2, 0)
 bnfisnorm(K,6, 0)
+
 K=bnfinit(y^3-21);
 bnfisnorm(K,2)
 bnfisnorm(K,6)
-
 L=rnfinit(K,x^2-y);
-v = [2,1/2,x+y,Mod(1,K.pol),Mod(1/2,K.pol),Mod(y,K.pol),Mod(1,L.pol),Mod(1/2,L.pol),Mod(x,L.pol),Mod(x+y/2,x^2-y),y,z,Mod(y+1/2,y^2+1),[1]~,[1,2]~,[1,y]~,[1,I]~, y+I,x^2];
+v = [2,1/2,x+y,Mod(1,K.pol),Mod(1/2,K.pol),Mod(y,K.pol),Mod(1,L.pol),Mod(1/2,L.pol),Mod(x,L.pol),Mod(x+y/2,L[1]),y,z,Mod(y+1/2,y^2+1),[1]~,[1,2]~,[1,y]~,[1,I]~, y+I,x^2];
 f=[rnfalgtobasis,rnfbasistoalg,rnfeltabstorel,rnfeltreltoabs,rnfeltup,rnfeltdown,rnfelttrace,rnfeltnorm];
+
+test(L,v) =
 {
-for (i=1,#v,
-  print(i,":");
-  for (j=1,#f, print(iferr(f[j](L,v[i]), E,E)))
-)
+  for (i=1,#v,
+    print(i,":");
+    for (j=1,#f, print(iferr(f[j](L,v[i]), E,E)))
+  );
+  my (K = L.nf);
+  for (i=1,#v,
+    print(i,":");
+    print(iferr(rnfcharpoly(K,x^2-y,v[i]),E,E))
+  );
 }
-{
-for (i=1,#v,
-  print(i,":");
-  print(iferr(rnfcharpoly(K,x^2-y,v[i]),E,E))
-)
-}
+test(L,v);
+KQ = nfinit(y+1);
+LQ = rnfinit(KQ, x^2-y);
+vQ = [2,1/2,x+y, Mod(1/2,KQ.pol), y, Mod(Mod(1/2,KQ.pol),LQ[1]), Mod(x,LQ[1]), Mod(x,LQ.pol), Mod(x+y/2,x^2-y), x, [1]~,[1,2]~,[y]~];
+test(LQ, vQ);
 
 Labs = nfinit(L.pol);
 idL = idealhnf(Labs, x^3+x^2+10);
