@@ -1738,3 +1738,39 @@ FFM_det(GEN M, GEN ff)
   }
   return gerepilecopy(av, mkFF_i(ff, d));
 }
+
+GEN
+FFM_FFC_mul(GEN M, GEN C, GEN ff)
+{
+  pari_sp av = avma;
+  ulong pp;
+  GEN P, T, p;
+  _getFF(ff, &T, &p, &pp);
+  M = FFM_to_raw(M);
+  C = FFC_to_raw(C);
+  switch (ff[1])
+  {
+  case t_FF_FpXQ: P = FqM_FqC_mul(M, C, T, p); break;
+  case t_FF_F2xq: P = F2xqM_F2xqC_mul(M, C, T); break;
+  default: P = FlxqM_FlxqC_mul(M, C, T, pp); break;
+  }
+  return gerepilecopy(av, raw_to_FFM(P, ff));
+}
+
+GEN
+FFM_mul(GEN M, GEN N, GEN ff)
+{
+  pari_sp av = avma;
+  ulong pp;
+  GEN P, T, p;
+  _getFF(ff, &T, &p, &pp);
+  M = FFM_to_raw(M);
+  N = FFM_to_raw(N);
+  switch (ff[1])
+  {
+  case t_FF_FpXQ: P = FqM_mul(M, N, T, p); break;
+  case t_FF_F2xq: P = F2xqM_mul(M, N, T); break;
+  default: P = FlxqM_mul(M, N, T, pp); break;
+  }
+  return gerepilecopy(av, raw_to_FFM(P, ff));
+}

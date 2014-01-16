@@ -432,7 +432,11 @@ fields:
 
 \fun{GEN}{gen_ker}{GEN x, long deplin, void *E, const struct bb_field *ff}
 
-\fun{GEN}{gen_matid}{long n, void *E, const struct bb_field *S}
+\fun{GEN}{gen_matcolmul}{GEN a, GEN b, void *E, const struct bb_field *ff}
+
+\fun{GEN}{gen_matid}{long n, void *E, const struct bb_field *ff}
+
+\fun{GEN}{gen_matmul}{GEN a, GEN b, void *E, const struct bb_field *ff}
 
 \subsec{Functions returning black box fields}
 

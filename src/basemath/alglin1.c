@@ -360,6 +360,54 @@ gen_Gauss(GEN a, GEN b, void *E, const struct bb_field *ff)
   return u;
 }
 
+/* compatible t_MAT * t_COL, lgA = lg(A) = lg(B) > 1, l = lgcols(A) */
+static GEN
+gen_matcolmul_i(GEN A, GEN B, ulong lgA, ulong l,
+                void *E, const struct bb_field *ff)
+{
+  GEN C = cgetg(l, t_COL);
+  ulong i;
+  for (i = 1; i < l; i++) {
+    pari_sp av = avma;
+    GEN e = ff->mul(E, gcoeff(A, i, 1), gel(B, 1));
+    long k;
+    for(k = 2; k < lgA; k++)
+      e = ff->add(E, e, ff->mul(E, gcoeff(A, i, k), gel(B, k)));
+    gel(C, i) = gerepileupto(av, ff->red(E, e));
+  }
+  return C;
+}
+
+GEN
+gen_matcolmul(GEN A, GEN B, void *E, const struct bb_field *ff)
+{
+  ulong lgA = lg(A);
+  if (lgA != lg(B))
+    pari_err_OP("operation 'gen_matcolmul'", A, B);
+  if (lgA == 1)
+    return cgetg(1, t_COL);
+  return gen_matcolmul_i(A, B, lgA, lgcols(A), E, ff);
+}
+
+GEN
+gen_matmul(GEN A, GEN B, void *E, const struct bb_field *ff)
+{
+  ulong j, l, lgA, lgB = lg(B);
+  GEN C;
+  if (lgB == 1)
+    return cgetg(1, t_MAT);
+  lgA = lg(A);
+  if (lgA != lgcols(B))
+    pari_err_OP("operation 'gen_matmul'", A, B);
+  if (lgA == 1)
+    return zeromat(0, lgB - 1);
+  l = lgcols(A);
+  C = cgetg(lgB, t_MAT);
+  for(j = 1; j < lgB; j++)
+    gel(C, j) = gen_matcolmul_i(A, gel(B, j), lgA, l, E, ff);
+  return C;
+}
+
 static GEN
 image_from_pivot(GEN x, GEN d, long r)
 {
@@ -917,6 +965,21 @@ FlxqM_det(GEN a, GEN T, ulong p)
   const struct bb_field *S = get_Flxq_field(&E, T, p);
   return gen_det(a, E, S);
 }
+
+GEN
+FlxqM_FlxqC_mul(GEN A, GEN B, GEN T, unsigned long p) {
+  void *E;
+  const struct bb_field *ff = get_Flxq_field(&E, T, p);
+  return gen_matcolmul(A, B, E, ff);
+}
+
+GEN
+FlxqM_mul(GEN A, GEN B, GEN T, unsigned long p) {
+  void *E;
+  const struct bb_field *ff = get_Flxq_field(&E, T, p);
+  return gen_matmul(A, B, E, ff);
+}
+
 GEN
 F2xqM_det(GEN a, GEN T)
 {
@@ -942,6 +1005,20 @@ F2xqM_inv(GEN a, GEN T)
   u = F2xqM_gauss_gen(a, matid_F2xqM(n,T), T);
   if (!u) { avma = av; return NULL; }
   return gerepilecopy(av, u);
+}
+
+GEN
+F2xqM_F2xqC_mul(GEN A, GEN B, GEN T) {
+  void *E;
+  const struct bb_field *ff = get_F2xq_field(&E, T);
+  return gen_matcolmul(A, B, E, ff);
+}
+
+GEN
+F2xqM_mul(GEN A, GEN B, GEN T) {
+  void *E;
+  const struct bb_field *ff = get_F2xq_field(&E, T);
+  return gen_matmul(A, B, E, ff);
 }
 
 static GEN
@@ -990,6 +1067,20 @@ FqM_det(GEN x, GEN T, GEN p)
   void *E;
   const struct bb_field *S = get_Fq_field(&E,T,p);
   return gen_det(x, E, S);
+}
+
+GEN
+FqM_FqC_mul(GEN A, GEN B, GEN T, GEN p) {
+  void *E;
+  const struct bb_field *ff = get_Fq_field(&E, T, p);
+  return gen_matcolmul(A, B, E, ff);
+}
+
+GEN
+FqM_mul(GEN A, GEN B, GEN T, GEN p) {
+  void *E;
+  const struct bb_field *ff = get_Fq_field(&E, T, p);
+  return gen_matmul(A, B, E, ff);
 }
 
 static GEN

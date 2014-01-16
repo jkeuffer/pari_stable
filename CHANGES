@@ -199,6 +199,8 @@ BA 33- move gpinstall to libpari
    35- liftint() lifts recursively all t_INTMOD/t_PADIC components
    36- liftpol() lifts recursively all t_POLMOD components
 BA 37- GP function logint
+PB 28- C functions gen_matmul, gen_matcolmul, FFM_mul, FqM_FqC_mul, FqM_mul,
+       F2xqM_mul, F2xqM_F2xqC_mul, FlxqM_FlxqC_mul, FlxqM_mul.
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

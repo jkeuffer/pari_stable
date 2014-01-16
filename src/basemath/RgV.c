@@ -408,14 +408,22 @@ RgM_RgC_mul_i(GEN x, GEN y, long lx, long l)
   for (i=1; i<l; i++) gel(z,i) = RgMrow_RgC_mul_i(x,y,i,lx);
   return z;
 }
+
 GEN
 RgM_RgC_mul(GEN x, GEN y)
 {
   long lx = lg(x);
+  GEN ffx = NULL, ffy = NULL;
   if (lx != lg(y)) pari_err_OP("operation 'RgM_RgC_mul'", x,y);
   if (lx == 1) return cgetg(1,t_COL);
+  if (RgM_is_FFM(x, &ffx) && RgC_is_FFC(y, &ffy)) {
+    if (!FF_samefield(ffx, ffy))
+      pari_err_OP("*", ffx, ffy);
+    return FFM_FFC_mul(x, y, ffx);
+  }
   return RgM_RgC_mul_i(x, y, lx, lgcols(x));
 }
+
 GEN
 RgV_RgM_mul(GEN x, GEN y)
 {
@@ -478,12 +486,17 @@ RgM_mul(GEN x, GEN y)
 {
   pari_sp av = avma;
   long j, l, lx, ly = lg(y);
-  GEN z;
+  GEN z, ffx = NULL, ffy = NULL;
   if (ly == 1) return cgetg(1,t_MAT);
   lx = lg(x);
   if (lx != lgcols(y)) pari_err_OP("operation 'RgM_mul'", x,y);
   if (lx == 1) return zeromat(0,lx-1);
   if (is_modular_mul(x,y,&z)) return gerepileupto(av, z);
+  if (RgM_is_FFM(x, &ffx) && RgM_is_FFM(y, &ffy)) {
+    if (!FF_samefield(ffx, ffy))
+      pari_err_OP("*", ffx, ffy);
+    return FFM_mul(x, y, ffx);
+  }
   z = cgetg(ly, t_MAT);
   l = lgcols(x);
   for (j=1; j<ly; j++) gel(z,j) = RgM_RgC_mul_i(x, gel(y,j), lx, l);
