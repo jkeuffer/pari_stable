@@ -414,6 +414,8 @@ error("incorrect type in rnfcharpoly (t_COL).")
 error("incorrect type in rnfcharpoly (t_COL).")
 13:
 error("incorrect type in rnfcharpoly (t_COL).")
+Mod(1, x^2 - 2)
+0
 [[1, -66328; 0, 1], [[280970, 12259, 35869; 0, 1, 0; 0, 0, 1], [1, 1/2, 1/2;
  0, 1/2, 0; 0, 0, 1/2]]]
 [280970, x^2 + 12259, x^4 + 35869, -x^4 + x - 66328, -1/2*x^4 + 1/2*x^3 - 33
@@ -745,4 +747,4 @@ error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (2 elts).
 [0  1   [1/2, 1/2]~]
 
 1
-Total time spent: 424
+Total time spent: 328

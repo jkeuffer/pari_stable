@@ -60,9 +60,13 @@ rnfeltreltoabs(GEN rnf,GEN x)
     case t_POLMOD:
       if (RgX_equal_var(gel(x,1), pol))
       { /* already in 'abs' form, unless possibly if nf = Q */
-        GEN y = gel(x,2);
-        if (typ(y) == t_POLMOD || (typ(y) == t_POL && !RgX_is_QX(y)))
-          retmkpolmod(liftpol(y), RgX_copy(pol));
+        if (rnf_get_nfdegree(rnf) == 1)
+        {
+          GEN y = gel(x,2);
+          pari_sp av = avma;
+          y = simplify_shallow(liftpol_shallow(y));
+          return gerepilecopy(av, mkpolmod(y, pol));
+        }
         return gcopy(x);
       }
       x = polmod_nffix(f,rnf,x,0);

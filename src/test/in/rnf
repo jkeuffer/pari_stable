@@ -82,6 +82,12 @@ LQ = rnfinit(KQ, x^2-y);
 vQ = [2,1/2,x+y, Mod(1/2,KQ.pol), y, Mod(Mod(x/2+1,KQ.pol),LQ[1]), Mod(x,LQ[1]), Mod(x,LQ.pol), Mod(x+y/2,x^2-y), x, [1]~,[1,2]~,[y]~];
 test(LQ, vQ);
 
+nf = nfinit(y);
+rnf = rnfinit(nf,x^2-2);
+rel = Mod(Mod(1,y)+0*y,x^2-2);
+a = rnfeltreltoabs(rnf,rel)
+variable(lift(a))
+
 Labs = nfinit(L.pol);
 idL = idealhnf(Labs, x^3+x^2+10);
 idK = idealhnf(K, y^2+10*y+5);
