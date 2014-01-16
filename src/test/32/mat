@@ -1,6 +1,7 @@
 error("inconsistent addition t_MAT (1x1) + t_MAT (0x1).")
 error("impossible inverse in gdiv: [Mod(0, 2), Mod(0, 2); Mod(0, 2), Mod(0, 
 2)].")
+[0, 2]
 1
 1
   ***   at top-level: mathouseholder(1,1)
@@ -356,4 +357,4 @@ od(0, 18446744073709551629); Mod(7, 18446744073709551629), Mod(8, 1844674407
 0
 2
 17
-Total time spent: 60
+Total time spent: 44

@@ -8,6 +8,8 @@ test(n)=
 test(200)
 test(2)
 
+matsize(matrix(0, 0) * matrix(0, 2))
+
 default(realprecision,38);
 h=mathilbert(40);
 [Q,R] = matqr(h); vecmax(abs(h-Q*R)) < 1e-37

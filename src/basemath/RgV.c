@@ -490,7 +490,7 @@ RgM_mul(GEN x, GEN y)
   if (ly == 1) return cgetg(1,t_MAT);
   lx = lg(x);
   if (lx != lgcols(y)) pari_err_OP("operation 'RgM_mul'", x,y);
-  if (lx == 1) return zeromat(0,lx-1);
+  if (lx == 1) return zeromat(0,ly-1);
   if (is_modular_mul(x,y,&z)) return gerepileupto(av, z);
   if (RgM_is_FFM(x, &ffx) && RgM_is_FFM(y, &ffy)) {
     if (!FF_samefield(ffx, ffy))
