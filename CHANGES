@@ -145,6 +145,9 @@ JD 14- polcyclo(n, x) now works for all roots of 1
        They just copy the offending sub-object as-is.
    32- generic polynomial Euclidean division (grem, gmod, poldivrem): when
        result is the zero polynomial, use RgX_get_0, not gen_0 / pol_0
+   33- rnf.pol (absolute defining polynomial / Q) is now called rnf.polabs,
+       rnf.pol is now the relative polynomial, defining the relative extension
+       over the base.
 
   Added
 EP  1- Configure option for gcov/lcov support

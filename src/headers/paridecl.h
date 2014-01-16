@@ -2748,6 +2748,7 @@ GEN     member_omega(GEN x);
 GEN     member_orders(GEN x);
 GEN     member_p(GEN x);
 GEN     member_pol(GEN x);
+GEN     member_polabs(GEN x);
 GEN     member_reg(GEN x);
 GEN     member_r1(GEN x);
 GEN     member_r2(GEN x);

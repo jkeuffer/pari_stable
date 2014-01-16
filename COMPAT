@@ -73,6 +73,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rnf structure: added new components
   - lift(x,'v) / centerlift(x,'v) now only lift t_POLMODs in variable v,
     no longer (most) t_INTMOD / t_PADICs met along the way
+  - rnf.pol (absolute defining polynomial / Q) is now called rnf.polabs,
+    rnf.pol is now the relative polynomial, defining the relative extension
+    over the base.
 
 * Specific to the PARI library:
 ===============================

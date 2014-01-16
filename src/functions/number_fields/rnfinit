@@ -21,7 +21,7 @@ Doc: $\var{nf}$ being a number field in \kbd{nfinit}
  information via \emph{member functions} is preferred since the specific
  data organization specified below will change in the future.
 
- $\var{rnf}[1]$ contains the relative polynomial \var{pol}.
+ $\var{rnf}[1]$(\kbd{rnf.pol}) contains the relative polynomial \var{pol}.
 
  $\var{rnf}[2]$ contains the integer basis $[A,d]$ of $K$, as
  (integral) elements of $L/\Q$. More precisely, $A$ is a vector of
@@ -56,7 +56,7 @@ Doc: $\var{nf}$ being a number field in \kbd{nfinit}
  $\var{rnf}[11]$ is the output of \kbd{rnfequation(K, pol, 1)}. Namely, a
  vector $[P, a, k]$ describing the \emph{absolute} extension
  $L/\Q$: $P$ is an absolute equation, more conveniently obtained
- as \kbd{rnf.pol}; $a$ expresses the generator $\alpha = y \mod \kbd{K.pol}$
+ as \kbd{rnf.polabs}; $a$ expresses the generator $\alpha = y \mod \kbd{K.pol}$
  of the number field $K$ as an element of $L$, i.e.~a polynomial modulo the
  absolute equation $P$;
 

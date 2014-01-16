@@ -55,35 +55,36 @@ Extended help (if available):
   ??? keyword    (a propos: list of related functions).
 Member functions, followed by relevant objects
 
-a1-a6, b2-b8, c4-c6 : coeff. of the curve.            ell
-area : area                                           ell
-bid  : big ideal                     bid,                           bnr
-bnf  : big number field                                        bnf, bnr
-clgp : class group                   bid,                      bnf, bnr
-cyc  : cyclic decomposition (SNF)    bid,       clgp, ell,     bnf, bnr
-diff, codiff: different and codifferent                    nf, bnf, bnr
-disc : discriminant                                   ell, nf, bnf, bnr
-e, f : inertia/residue  degree            prid
-fu   : fundamental units                                       bnf, bnr
-gen  : generators                    bid, prid, clgp, ell,     bnf, bnr, gal
-group: group                                          ell,             , gal
-index: index                                               nf, bnf, bnr
-j    : j-invariant                                    ell
-mod  : modulus                       bid,                           bnr, gal
-nf   : number field                                        nf, bnf, bnr
-no   : number of elements            bid,       clgp, ell,     bnf, bnr
-omega, eta: [w1,w2] and [eta1, eta2]                  ell
-orders: relative orders of generators                                    gal
-p    : rational prime                     prid,       ell,             , gal
-pol  : defining polynomial                                 nf, bnf, bnr, gal
-reg  : regulator                                               bnf, bnr
-roots: roots                                          ell, nf, bnf, bnr, gal
-sign,r1,r2 : signature                                     nf, bnf, bnr
-t2   : t2 matrix                                           nf, bnf, bnr
-tate : Tate's [u^2, u, q, [a,b]]                      ell
-tu   : torsion unit and its order                              bnf, bnr
-zk   : integral basis                                      nf, bnf, bnr
-zkst : structure of (Z_K/m)*         bid,                           bnr
+a1-a6, b2-b8, c4-c6 : coeff. of the curve.         ell
+area : area                                        ell
+bid  : big ideal                     bid,                     bnr
+bnf  : big number field                                   bnf,bnr
+clgp : class group                   bid,                 bnf,bnr
+cyc  : cyclic decomposition (SNF)    bid,     clgp,ell,   bnf,bnr
+diff, codiff: different and codifferent                nf,bnf,bnr
+disc : discriminant                                ell,nf,bnf,bnr,rnf
+e, f : inertia/residue  degree           prid
+fu   : fundamental units                                  bnf,bnr
+gen  : generators                    bid,prid,clgp,ell,   bnf,bnr,    gal
+group: group                                       ell,          ,rnf,gal
+index: index                                           nf,bnf,bnr
+j    : j-invariant                                 ell
+mod  : modulus                       bid,                     bnr,    gal
+nf   : number field                                    nf,bnf,bnr,rnf
+no   : number of elements            bid,     clgp,ell,   bnf,bnr
+omega, eta: [w1,w2] and [eta1, eta2]               ell
+orders: relative orders of generators                                 gal
+p    : rational prime                    prid,     ell,           rnf,gal
+pol  : defining polynomial                             nf,bnf,bnr,    gal
+polabs: defining polynomial over Q                                rnf
+reg  : regulator                                          bnf,bnr
+roots: roots                                       ell,nf,bnf,bnr,    gal
+sign,r1,r2 : signature                                 nf,bnf,bnr
+t2   : t2 matrix                                       nf,bnf,bnr
+tate : Tate's [u^2, u, q, [a,b]]                   ell
+tu   : torsion unit and its order                         bnf,bnr
+zk   : integral basis                                  nf,bnf,bnr,rnf
+zkst : structure of (Z_K/m)*         bid,                     bnr
 
 #       : enable/disable timer
 ##      : print time for last result
