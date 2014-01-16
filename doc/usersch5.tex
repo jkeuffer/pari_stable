@@ -7507,7 +7507,7 @@ is often more useful than \kbd{gprec}.
 \emph{words}. Contrary to \kbd{gprec\_w}, this function may never increase
 the precision of~$x$.
 
-\subsec{Modular objects}
+\subsec{Modular objects / lifts}
 
 \fun{GEN}{gmodulo}{GEN x, GEN y} creates the object \kbd{\key{Mod}(x,y)} on
 the PARI stack, where \kbd{x} and \kbd{y} are either both \typ{INT}s, and the
@@ -7522,6 +7522,15 @@ result is a \typ{INTMOD}, or \kbd{x} is a scalar or a \typ{POL} and \kbd{y} a
 
 \fun{GEN}{gmodulss}{long x, long y} same as \key{gmodulo} except both
 \kbd{x} and \kbd{y} are \kbd{long}s.
+
+\fun{GEN}{liftall_shallow}{GEN x} shallow version of \tet{liftall}
+
+\fun{GEN}{liftint_shallow}{GEN x} shallow version of \tet{liftint}
+
+\fun{GEN}{liftpol_shallow}{GEN x} shallow version of \tet{liftpol}
+
+\fun{GEN}{centerlift0}{GEN x,long v} DEPRECATED, kept for backward
+compatibility only: use either \tet{lift0}$(x,v)$ or \tet{centerlift}$(x)$.
 
 \subsec{Between polynomials and coefficient arrays}
 
