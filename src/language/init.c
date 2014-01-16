@@ -480,14 +480,14 @@ pari_init_stack(size_t size, size_t old)
   if (old != s) {
     BLOCK_SIGINT_START;
     if (old) pari_free((void*)bot);
-    for (;; s>>=1)
+    for (;;)
     {
       char buf[128];
       if (s < MIN_STACK) pari_err(e_MEM); /* no way out. Die */
-      s = fix_size(s);
       bot = (pari_sp)malloc(s); /* NOT pari_malloc, e_MEM would be deadly */
       if (bot) break;
       /* must use sprintf: pari stack is currently dead */
+      s = fix_size(s>>1);
       sprintf(buf, "not enough memory, new stack %lu", (ulong)s);
       pari_warn(warner, buf, s);
     }
