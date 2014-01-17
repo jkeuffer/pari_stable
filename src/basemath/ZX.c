@@ -265,7 +265,7 @@ int
 ZX_equal(GEN V, GEN W)
 {
   long i, l = lg(V);
-  if (lg(W) != l || V[1] != W[1]) return 0;
+  if (lg(W) != l) return 0;
   for (i = 2; i < l; i++)
     if (!equalii(gel(V,i), gel(W,i))) return 0;
   return 1;

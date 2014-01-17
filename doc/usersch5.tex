@@ -6641,8 +6641,9 @@ variable $v$ equal to the \typ{INT} $x$. Shallow function not suitable for
 \fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{int}{ZX_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZX} are equal
-and $0$ otherwise.
+\fun{int}{ZX_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZX} have
+the same \kbd{degpol} and their coefficients are equal. Variable numbers are
+not checked.
 
 \fun{int}{ZX_equal1}{GEN x} returns $1$ if the \kbd{ZX} is equal to $1$
 and $0$ otherwise.
@@ -6818,7 +6819,8 @@ $R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
 \subsec{\kbd{ZXV}}
 
 \fun{GEN}{ZXV_equal}{GEN x,GEN y} returns $1$ if the two vectors of \kbd{ZX}
-are equal and $0$ otherwise.
+are equal, as per \tet{ZX_equal} (variables are not checked to be equal) and
+$0$ otherwise.
 
 \fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x}
 by the integer \kbd{y}.
