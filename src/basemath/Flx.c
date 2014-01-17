@@ -3709,26 +3709,26 @@ static GEN
 FlxYqq_redswap(GEN x, GEN S, GEN T, ulong p)
 {
   pari_sp ltop=avma;
-  long n=degpol(S);
-  long m=get_Flx_degree(T);
-  long w = S[1];
-  GEN V = FlxX_swap(x,n,w);
-  V = FlxqX_red(V,T,p);
-  V = FlxX_swap(V,m,w);
+  long n = get_Flx_degree(S);
+  long m = get_Flx_degree(T);
+  long w = get_Flx_var(T);
+  GEN V = FlxX_swap(x,m,w);
+  V = FlxqX_red(V,S,p);
+  V = FlxX_swap(V,n,w);
   return gerepilecopy(ltop,V);
 }
 static GEN
 FlxYqq_sqr(void *data, GEN x)
 {
   FlxYqq_muldata *D = (FlxYqq_muldata*)data;
-  return FlxYqq_redswap(FlxqX_sqr(x, D->S, D->p),D->S,D->T,D->p);
+  return FlxYqq_redswap(FlxqX_sqr(x, D->T, D->p),D->S,D->T,D->p);
 }
 
 static GEN
 FlxYqq_mul(void *data, GEN x, GEN y)
 {
   FlxYqq_muldata *D = (FlxYqq_muldata*)data;
-  return FlxYqq_redswap(FlxqX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
+  return FlxYqq_redswap(FlxqX_mul(x,y, D->T, D->p),D->S,D->T,D->p);
 }
 
 /* x in Z[X,Y], S in Z[X] over Fq = Z[Y]/(p,T); compute lift(x^n mod (S,T,p)) */

@@ -827,23 +827,23 @@ FpXYQQ_redswap(GEN x, GEN S, GEN T, GEN p)
   long n = get_FpX_degree(S);
   long m = get_FpX_degree(T);
   long v = get_FpX_var(T);
-  GEN V = RgXY_swap(x,n,v);
-  V = FpXQX_red(V,T,p);
-  V = RgXY_swap(V,m,v);
+  GEN V = RgXY_swap(x,m,v);
+  V = FpXQX_red(V,S,p);
+  V = RgXY_swap(V,n,v);
   return gerepilecopy(ltop,V);
 }
 static GEN
 FpXYQQ_sqr(void *data, GEN x)
 {
   FpXYQQ_muldata *D = (FpXYQQ_muldata*)data;
-  return FpXYQQ_redswap(FpXQX_sqr(x, D->S, D->p),D->S,D->T,D->p);
+  return FpXYQQ_redswap(FpXQX_sqr(x, D->T, D->p),D->S,D->T,D->p);
 
 }
 static GEN
 FpXYQQ_mul(void *data, GEN x, GEN y)
 {
   FpXYQQ_muldata *D = (FpXYQQ_muldata*)data;
-  return FpXYQQ_redswap(FpXQX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
+  return FpXYQQ_redswap(FpXQX_mul(x,y, D->T, D->p),D->S,D->T,D->p);
 }
 
 /* x in Z[X,Y], S in Z[X] over Fq = Z[Y]/(p,T); compute lift(x^n mod (S,T,p)) */
