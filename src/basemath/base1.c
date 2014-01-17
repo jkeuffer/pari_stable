@@ -801,12 +801,13 @@ QX_galoisapplymod(GEN nf, GEN pol, GEN S, GEN p)
 static GEN
 pr_galoisapply(GEN nf, GEN pr, GEN aut)
 {
-  GEN p, b, u;
+  GEN p, t, u;
   if (typ(pr_get_tau(pr)) == t_INT) return pr; /* inert */
   p = pr_get_p(pr);
   u = QX_galoisapplymod(nf, coltoliftalg(nf, pr_get_gen(pr)), aut, p);
-  b = FpM_deplin(zk_multable(nf, u), p);
-  return mkvec5(p, u, gel(pr,3), gel(pr,4), b);
+  t = FpM_deplin(zk_multable(nf, u), p);
+  t = zk_scalar_or_multable(nf, t);
+  return mkvec5(p, u, gel(pr,3), gel(pr,4), t);
 }
 
 static GEN
