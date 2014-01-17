@@ -247,7 +247,7 @@ GEN     FlxX_triple(GEN x, ulong p);
 GEN     FlxY_Flxq_evalx(GEN P, GEN x, GEN T, ulong p);
 GEN     FlxY_Flx_div(GEN x, GEN y, ulong p);
 GEN     FlxY_evalx(GEN Q, ulong x, ulong p);
-GEN     FlxYqQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
+GEN     FlxYqq_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
 GEN     Flxq_autpow(GEN x, ulong n, GEN T, ulong p);
 GEN     Flxq_autsum(GEN x, ulong n, GEN T, ulong p);
 GEN     Flxq_charpoly(GEN x, GEN T, ulong p);

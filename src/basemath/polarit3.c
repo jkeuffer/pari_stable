@@ -1175,8 +1175,8 @@ Flx_ffintersect(GEN P, GEN Q, long n, ulong l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       A = Flx_intersect_ker(P, MA, U, l);
       B = Flx_intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) timer_start(&T);
-      An = gel(FlxYqQ_pow(A,ipg,U,P,l),2);
-      Bn = gel(FlxYqQ_pow(B,ipg,U,Q,l),2);
+      An = gel(FlxYqq_pow(A,ipg,U,P,l),2);
+      Bn = gel(FlxYqq_pow(B,ipg,U,Q,l),2);
       if (DEBUGLEVEL>=4) timer_printf(&T,"pows [P,Q]");
       z = Flxq_div(An,Bn,U,l);
       L = Flxq_sqrtn(z,ipg,U,l,NULL);

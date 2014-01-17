@@ -857,7 +857,7 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   {
     ulong pp = to_FlxqX(x, NULL, T, p, &x, NULL, &T);
     S = ZX_to_Flx(S, pp);
-    y = FlxX_to_ZXX( FlxYqQ_pow(x, n, S, T, pp) );
+    y = FlxX_to_ZXX( FlxYqq_pow(x, n, S, T, pp) );
   }
   else
   {
