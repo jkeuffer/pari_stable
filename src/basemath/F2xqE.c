@@ -112,9 +112,9 @@ F2xqE_add_slope(GEN P, GEN Q, GEN a, GEN T, GEN *slope)
   if (ell_is_inf(Q)) return P;
   Px = gel(P,1); Py = gel(P,2);
   Qx = gel(Q,1); Qy = gel(Q,2);
-  if (zv_equal(Px, Qx))
+  if (F2x_equal(Px, Qx))
   {
-    if (zv_equal(Py, Qy))
+    if (F2x_equal(Py, Qy))
       return F2xqE_dbl_slope(P, a, T, slope);
     else
       return ellinf();
@@ -336,9 +336,9 @@ F2xqE_chord_update(GEN R, GEN P, GEN Q, GEN a2, GEN T, GEN *pt_R)
     *pt_R = gcopy(R);
     return F2xqE_vert(R, Q, T);
   }
-  else if (zv_equal(gel(P, 1), gel(R, 1)))
+  else if (F2x_equal(gel(P, 1), gel(R, 1)))
   {
-    if (zv_equal(gel(P, 2), gel(R, 2)))
+    if (F2x_equal(gel(P, 2), gel(R, 2)))
       return F2xqE_tangent_update(R, Q, a2, T, pt_R);
     else
     {
@@ -416,7 +416,7 @@ F2xqE_weilpairing(GEN P, GEN Q, GEN m, GEN a2, GEN T)
 {
   pari_sp ltop = avma;
   GEN num, denom, result;
-  if (ell_is_inf(P) || ell_is_inf(Q) || zv_equal(P,Q))
+  if (ell_is_inf(P) || ell_is_inf(Q) || F2x_equal(P,Q))
     return pol1_F2x(T[1]);
   num    = F2xqE_Miller(P, Q, m, a2, T);
   if (!num) return pol1_F2x(T[1]);

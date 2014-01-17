@@ -89,6 +89,9 @@ BA 32- doing allocatemem in the break loop would corrupt the new break loop
    62- incorrect rounding in mulur
 BA 63- Configure: --includedir was ignored
    64- add GC in RgV_dotproduct / RgV_dotsquare
+   65- ZX equal was checking variables, contrary to the spirit of the
+       specification (and contrary to RgX_equal). Specify behaviour properly:
+       none of the internal .*[xX]_equal function check variable numbers.
 
   Changed
     1- default help text for a user function is now as in \u:
@@ -202,8 +205,9 @@ BA 33- move gpinstall to libpari
    35- liftint() lifts recursively all t_INTMOD/t_PADIC components
    36- liftpol() lifts recursively all t_POLMOD components
 BA 37- GP function logint
-PB 28- C functions gen_matmul, gen_matcolmul, FFM_mul, FqM_FqC_mul, FqM_mul,
+PB 38- [libpari] gen_matmul, gen_matcolmul, FFM_mul, FqM_FqC_mul, FqM_mul,
        F2xqM_mul, F2xqM_F2xqC_mul, FlxqM_FlxqC_mul, FlxqM_mul.
+   39- [libpari] Flx_equal, F2x_equal
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

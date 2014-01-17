@@ -4859,8 +4859,11 @@ a \kbd{FpX} to an extended modulus of for the corresponding \kbd{Flx}.
 \fun{GEN}{Flx_red}{GEN z, ulong p} converts from \kbd{zx} with
 non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
-\fun{int}{Flx_equal1}{GEN x} returns 1 (true) if the \kbd{Flx x} is equal to~1,
-0~(false) otherwise.
+\fun{int}{Flx_equal1}{GEN x} returns 1 (true) if the \kbd{Flx} $x$ is equal
+to~1, 0~(false) otherwise.
+
+\fun{int}{Flx_equal}{GEN x, GEN y} returns 1 (true) if the \kbd{Flx} $x$
+and $y$ are equal, and 0~(false) otherwise.
 
 \fun{GEN}{Flx_copy}{GEN x} returns a copy of \kbd{x}.
 
@@ -5310,6 +5313,8 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 degree of $0$ is defined as $-1$.
 
 \fun{int}{F2x_equal1}{GEN x}
+
+\fun{int}{F2x_equal}{GEN x, GEN y}
 
 \fun{GEN}{F2x_1_add}{GEN y} returns \kbd{y+1} where \kbd{y} is a \kbd{Flx}.
 

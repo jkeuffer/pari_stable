@@ -175,7 +175,7 @@ Rg_to_F2xq(GEN x, GEN T)
       a = gel(x,2); ta = typ(a);
       if (is_const_t(ta)) return Rg_to_Fl(a, 2)? pol1_F2x(v): pol0_F2x(v);
       b = RgX_to_F2x(b); if (b[1] != v) break;
-      a = RgX_to_F2x(a); if (zv_equal(b,T)) return a;
+      a = RgX_to_F2x(a); if (F2x_equal(b,T)) return a;
       return F2x_rem(a, T);
     case t_POL:
       x = RgX_to_F2x(x);
@@ -941,7 +941,7 @@ _F2xq_rand(void *data)
 
 static GEN F2xq_easylog(void* E, GEN a, GEN g, GEN ord);
 
-static const struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,hash_GEN,zv_equal,F2x_equal1,F2xq_easylog};
+static const struct bb_group F2xq_star={_F2xq_mul,_F2xq_pow,_F2xq_rand,hash_GEN,F2x_equal,F2x_equal1,F2xq_easylog};
 
 GEN
 F2xq_order(GEN a, GEN ord, GEN T)
@@ -958,7 +958,7 @@ F2x_is_smooth_squarefree(GEN f, long r)
   for(i=1;  ;i++)
   {
     a = F2xq_sqr(F2x_rem(a,f),f);
-    if (zv_equal(a, F2x_rem(sx,f))) {avma = av; return 1;}
+    if (F2x_equal(a, F2x_rem(sx,f))) {avma = av; return 1;}
     if (i==r) {avma = av; return 0;}
     f = F2x_div(f, F2x_gcd(F2x_add(a,sx),f));
   }
@@ -1145,7 +1145,7 @@ F2xq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, long n, GEN T, GEN m)
       }
       else
       {
-        if (zv_equal(Fi,bad)) break;
+        if (F2x_equal(Fi,bad)) break;
         R = F2xq_log_Coppersmith_d(W,Fi,r,n,T,m);
         if (!R) bad = Fi;
       }
@@ -1247,8 +1247,8 @@ check_kernel(long N, GEN M, GEN T, GEN m)
   for(i=1; i<l; i++)
   {
     GEN k = gel(K,i);
-    if (signe(k)==0 || !zv_equal(F2xq_pow(g, mulii(k,idx), T),
-                                 F2xq_pow(mkF2(i,T[1]), idx, T)))
+    if (signe(k)==0 || !F2x_equal(F2xq_pow(g, mulii(k,idx), T),
+                                  F2xq_pow(mkF2(i,T[1]), idx, T)))
       gel(K,i) = cgetineg(lm);
     else
       f++;
@@ -1288,8 +1288,7 @@ F2xq_log_index(GEN a0, GEN b0, GEN m, GEN T0)
   Bo = F2xq_log_Coppersmith_rec(W, r2, b, r, d2, T, m);
   if (DEBUGLEVEL) timer_printf(&ti,"smooth generator");
   e = Fp_div(Ao, Bo, m);
-  if (!zv_equal(F2xq_pow(b0,e,T0),a0))
-    pari_err_BUG("F2xq_log");
+  if (!F2x_equal(F2xq_pow(b0,e,T0),a0)) pari_err_BUG("F2xq_log");
   return gerepileupto(av, e);
 }
 
@@ -1297,7 +1296,7 @@ static GEN
 F2xq_easylog(void* E, GEN a, GEN g, GEN ord)
 {
   if (F2x_equal1(a)) return gen_0;
-  if (zv_equal(a,g)) return gen_1;
+  if (F2x_equal(a,g)) return gen_1;
   if (typ(ord)!=t_INT) return NULL;
   if (expi(ord)<28) return NULL;
   return F2xq_log_index(a,g,ord,(GEN)E);

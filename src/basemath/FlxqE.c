@@ -105,9 +105,9 @@ FlxqE_add_slope(GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *slope)
   if (ell_is_inf(Q)) return P;
   Px = gel(P,1); Py = gel(P,2);
   Qx = gel(Q,1); Qy = gel(Q,2);
-  if (zv_equal(Px, Qx))
+  if (Flx_equal(Px, Qx))
   {
-    if (zv_equal(Py, Qy))
+    if (Flx_equal(Py, Qy))
       return FlxqE_dbl_slope(P, a4, T, p, slope);
     else
       return ellinf();
@@ -327,9 +327,9 @@ FlxqE_chord_update(GEN R, GEN P, GEN Q, GEN a4, GEN T, ulong p, GEN *pt_R)
     *pt_R = gcopy(R);
     return FlxqE_vert(R, Q, T, p);
   }
-  else if (zv_equal(gel(P, 1), gel(R, 1)))
+  else if (Flx_equal(gel(P, 1), gel(R, 1)))
   {
-    if (zv_equal(gel(P, 2), gel(R, 2)))
+    if (Flx_equal(gel(P, 2), gel(R, 2)))
       return FlxqE_tangent_update(R, Q, a4, T, p, pt_R);
     else
     {
@@ -410,7 +410,7 @@ FlxqE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, ulong p)
 {
   pari_sp ltop = avma;
   GEN num, denom, result;
-  if (ell_is_inf(P) || ell_is_inf(Q) || zv_equal(P,Q))
+  if (ell_is_inf(P) || ell_is_inf(Q) || Flx_equal(P,Q))
     return pol1_Flx(get_Flx_var(T));
   num    = FlxqE_Miller(P, Q, m, a4, T, p);
   if (!num) return pol1_Flx(get_Flx_var(T));
@@ -1094,9 +1094,9 @@ FlxqE_find_order(GEN f, GEN h, GEN bound, GEN B, GEN a4, GEN T, ulong p)
         long j = ti[r]-1;
         GEN Q = FlxqE_add(FlxqE_mul(F, stoi(j), a4, T, p), fh, a4, T, p);
         if (DEBUGLEVEL) timer_printf(&Ti, "[ellap3] giant steps, i = %ld",i);
-        if (zv_equal(gel(P,1), gel(Q,1)))
+        if (Flx_equal(gel(P,1), gel(Q,1)))
         {
-          if (zv_equal(gel(P,2), gel(Q,2))) i = -i;
+          if (Flx_equal(gel(P,2), gel(Q,2))) i = -i;
           return gerepileupto(av,addii(h, mulii(addis(mulss(s,i), j), B)));
         }
       }

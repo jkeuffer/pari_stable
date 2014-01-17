@@ -292,7 +292,7 @@ Rg_to_Flxq(GEN x, GEN T, ulong p)
       a = gel(x,2); ta = typ(a);
       if (is_const_t(ta)) return Fl_to_Flx(Rg_to_Fl(a, p), v);
       b = RgX_to_Flx(b, p); if (b[1] != v) break;
-      a = RgX_to_Flx(a, p); if (zv_equal(b,T)) return a;
+      a = RgX_to_Flx(a, p); if (Flx_equal(b,T)) return a;
       return Flx_rem(a, T, p);
     case t_POL:
       x = RgX_to_Flx(x,p);
@@ -1691,7 +1691,7 @@ Flx_is_smooth_squarefree(GEN f, long r, ulong p)
   {
     if (degpol(f)<=r) {avma = av; return 1;}
     a = Flxq_pow(Flx_rem(a,f,p),utoi(p),f,p);
-    if (zv_equal(a, sx)) {avma = av; return 1;}
+    if (Flx_equal(a, sx)) {avma = av; return 1;}
     if (i==r) {avma = av; return 0;}
     f = Flx_div(f, Flx_gcd(Flx_sub(a,sx,p),f,p),p);
   }
@@ -2315,15 +2315,24 @@ Flxq_easylog(void* E, GEN a, GEN g, GEN ord)
 {
   struct _Flxq *f = (struct _Flxq *)E;
   if (Flx_equal1(a)) return gen_0;
-  if (zv_equal(a,g)) return gen_1;
+  if (Flx_equal(a,g)) return gen_1;
   if (!degpol(a) && !degpol(g))
     return Fp_log(utoi(a[2]),utoi(g[2]),ord, utoi(f->p));
   if (typ(ord)!=t_INT || get_Flx_degree(f->T)<4 || cmpiu(ord,1UL<<27)<0)
     return NULL;
   return Flxq_log_index(a,g,ord,f->T,f->p);
 }
+int
+Flx_equal(GEN V, GEN W)
+{
+  long l = lg(V);
+  if (lg(W) != l) return 0;
+  while (--l > 1) /* do not compare variables, V[1] */
+    if (V[l] != W[l]) return 0;
+  return 1;
+}
 
-static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,hash_GEN,zv_equal,Flx_equal1,Flxq_easylog};
+static const struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,hash_GEN,Flx_equal,Flx_equal1,Flxq_easylog};
 
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)

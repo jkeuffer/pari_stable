@@ -1860,6 +1860,8 @@ INLINE GEN
 polx_F2x(long sv) { return mkvecsmall2(sv, 2); }
 INLINE int
 F2x_equal1(GEN x) { return Flx_equal1(x); }
+INLINE int
+F2x_equal(GEN V, GEN W) { return Flx_equal(V,W); }
 INLINE GEN
 F2v_copy(GEN x) { return leafcopy(x); }
 INLINE GEN

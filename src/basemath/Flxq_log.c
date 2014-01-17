@@ -348,8 +348,8 @@ check_kernel(long r, GEN M, long nbi, long nbrow, GEN T, ulong p, GEN m)
   {
     GEN k = gel(K,i);
     pari_sp av = avma;
-    long t = signe(k) && zv_equal(Flxq_pow(g, k, T, p),
-                                  Flxq_pow(cindex_Flx(i,r,p,T[1]), idx, T, p));
+    long t = signe(k) && Flx_equal(Flxq_pow(g, k, T, p),
+                                   Flxq_pow(cindex_Flx(i,r,p,T[1]), idx, T, p));
     avma = av;
     if (!t)
       gel(K,i) = cgetineg(lm);
@@ -442,8 +442,7 @@ Flxq_log_index_cubic(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
   Bo = Flxq_log_rec(W, b, r, T, p, m);
   if (DEBUGLEVEL) timer_printf(&ti,"smooth generator");
   e = Fp_div(Ao, Bo, m);
-  if (!zv_equal(Flxq_pow(b0, e, T0, p), a0))
-    pari_err_BUG("Flxq_log");
+  if (!Flx_equal(Flxq_pow(b0, e, T0, p), a0)) pari_err_BUG("Flxq_log");
   return gerepileupto(av, e);
 }
 
@@ -640,7 +639,7 @@ Flxq_log_Coppersmith_rec(GEN W, long r2, GEN a, long r, GEN T, ulong p, GEN m)
       }
       else
       {
-        if (zv_equal(Fi,bad)) break;
+        if (Flx_equal(Fi,bad)) break;
         R = Flxq_log_Coppersmith_d(W,Fi,r,T,p,m);
         if (!R) bad = Fi;
       }
@@ -683,8 +682,7 @@ Flxq_log_index_Coppersmith(GEN a0, GEN b0, GEN m, GEN T0, ulong p)
   Bo = Flxq_log_Coppersmith_rec(W, r2, b, r, T, p, m);
   if (DEBUGLEVEL) timer_printf(&ti,"smooth generator");
   e = Fp_div(Ao, Bo, m);
-  if (!zv_equal(Flxq_pow(b0,e,T0,p),a0))
-    pari_err_BUG("Flxq_log");
+  if (!Flx_equal(Flxq_pow(b0,e,T0,p),a0)) pari_err_BUG("Flxq_log");
   return gerepileupto(av, e);
 }
 
