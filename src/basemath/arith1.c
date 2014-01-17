@@ -2883,8 +2883,8 @@ check_kernel(long N, long prmax, GEN C, GEN M, GEN p, GEN m)
   {
     GEN k = gel(K,i);
     GEN j = i<=prmax ? utoi(i): addis(C,i-(prmax+1));
-    if (signe(k)==0 || !zv_equal(Fp_pow(g, mulii(k,idx), p),
-                                 Fp_pow(j, idx, p)))
+    if (signe(k)==0 || !equalii(Fp_pow(g, mulii(k,idx), p),
+                                Fp_pow(j, idx, p)))
       gel(K,i) = cgetineg(lm);
     else
       f++;
