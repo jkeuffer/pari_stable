@@ -3700,20 +3700,19 @@ FlxqXQV_autsum(GEN aut, long n, GEN S, GEN T, ulong p)
 
 /*Preliminary implementation to speed up FpX_ffisom*/
 typedef struct {
-  GEN S, T, mg;
+  GEN S, T;
   ulong p;
 } FlxYqQ_muldata;
 
 /* reduce x in Fl[X, Y] in the algebra Fl[X, Y]/ (P(X),Q(Y)) */
 static GEN
-FlxYqQ_redswap(GEN x, GEN S, GEN mg, GEN T, ulong p)
+FlxYqQ_redswap(GEN x, GEN S, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long n=degpol(S);
   long m=get_Flx_degree(T);
   long w = S[1];
   GEN V = FlxX_swap(x,n,w);
-  (void) mg; /*TODO really use mg*/
   V = FlxqX_red(V,T,p);
   V = FlxX_swap(V,m,w);
   return gerepilecopy(ltop,V);
@@ -3722,14 +3721,14 @@ static GEN
 FlxYqQ_sqr(void *data, GEN x)
 {
   FlxYqQ_muldata *D = (FlxYqQ_muldata*)data;
-  return FlxYqQ_redswap(FlxqX_sqr(x, D->S, D->p),D->S,D->mg,D->T,D->p);
+  return FlxYqQ_redswap(FlxqX_sqr(x, D->S, D->p),D->S,D->T,D->p);
 }
 
 static GEN
 FlxYqQ_mul(void *data, GEN x, GEN y)
 {
   FlxYqQ_muldata *D = (FlxYqQ_muldata*)data;
-  return FlxYqQ_redswap(FlxqX_mul(x,y, D->S, D->p),D->S,D->mg,D->T,D->p);
+  return FlxYqQ_redswap(FlxqX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
 }
 
 /* x in Z[X,Y], S in Z[X] over Fq = Z[Y]/(p,T); compute lift(x^n mod (S,T,p)) */
