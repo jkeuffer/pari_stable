@@ -3119,11 +3119,11 @@ F3_card(ulong b2, ulong b4, ulong b6)
 static long
 cardmod2(GEN e)
 { /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
-  ulong a1 = Rg_to_Fl(ell_get_a1(e), 2);
-  ulong a2 = Rg_to_Fl(ell_get_a2(e), 2);
-  ulong a3 = Rg_to_Fl(ell_get_a3(e), 2);
-  ulong a4 = Rg_to_Fl(ell_get_a4(e), 2);
-  ulong a6 = Rg_to_Fl(ell_get_a6(e), 2);
+  ulong a1 = Rg_to_F2(ell_get_a1(e));
+  ulong a2 = Rg_to_F2(ell_get_a2(e));
+  ulong a3 = Rg_to_F2(ell_get_a3(e));
+  ulong a4 = Rg_to_F2(ell_get_a4(e));
+  ulong a6 = Rg_to_F2(ell_get_a6(e));
   return F2_card(a1,a2,a3,a4,a6);
 }
 static long

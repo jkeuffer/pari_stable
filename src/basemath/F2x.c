@@ -151,7 +151,7 @@ RgX_to_F2x(GEN x)
     {
       j=0; k++; z[k]=0;
     }
-    if (Rg_to_Fl(gel(x,i),2))
+    if (Rg_to_F2(gel(x,i)))
       z[k]|=1UL<<j;
   }
   return F2x_renormalize(z,l);
@@ -166,14 +166,14 @@ Rg_to_F2xq(GEN x, GEN T)
   if (is_const_t(tx))
   {
     if (tx == t_FFELT) return FF_to_F2xq(x);
-    return Rg_to_Fl(x, 2)? pol1_F2x(v): pol0_F2x(v);
+    return Rg_to_F2(x)? pol1_F2x(v): pol0_F2x(v);
   }
   switch(tx)
   {
     case t_POLMOD:
       b = gel(x,1);
       a = gel(x,2); ta = typ(a);
-      if (is_const_t(ta)) return Rg_to_Fl(a, 2)? pol1_F2x(v): pol0_F2x(v);
+      if (is_const_t(ta)) return Rg_to_F2(a)? pol1_F2x(v): pol0_F2x(v);
       b = RgX_to_F2x(b); if (b[1] != v) break;
       a = RgX_to_F2x(a); if (F2x_equal(b,T)) return a;
       return F2x_rem(a, T);
