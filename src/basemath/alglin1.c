@@ -370,7 +370,7 @@ gen_matcolmul_i(GEN A, GEN B, ulong lgA, ulong l,
   for (i = 1; i < l; i++) {
     pari_sp av = avma;
     GEN e = ff->mul(E, gcoeff(A, i, 1), gel(B, 1));
-    long k;
+    ulong k;
     for(k = 2; k < lgA; k++)
       e = ff->add(E, e, ff->mul(E, gcoeff(A, i, k), gel(B, k)));
     gel(C, i) = gerepileupto(av, ff->red(E, e));
@@ -397,7 +397,7 @@ gen_matmul(GEN A, GEN B, void *E, const struct bb_field *ff)
   if (lgB == 1)
     return cgetg(1, t_MAT);
   lgA = lg(A);
-  if (lgA != lgcols(B))
+  if (lgA != (ulong)lgcols(B))
     pari_err_OP("operation 'gen_matmul'", A, B);
   if (lgA == 1)
     return zeromat(0, lgB - 1);
