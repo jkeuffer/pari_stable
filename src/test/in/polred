@@ -49,3 +49,5 @@ polredbest(2*x+1,1)
 polredbest(4*x^2+1,1)
 polredord(2*x+1)
 polredord(4*x^2+1)
+\\ #1519, test T->unscale != 1
+polredbest(x^8+24*x^6+80*x^5+1040*x^4-4288*x^3-12736*x^2-61952*x+311296,1)

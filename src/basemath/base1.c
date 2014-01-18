@@ -2355,9 +2355,8 @@ Polred(GEN x, long flag, GEN fa)
 }
 
 /* finds "best" polynomial in polred_aux list, defaulting to T->x if none of
- * them is primitive. *px is the ZX, characteristic polynomial of *pb, *pdx
- * its discriminant.
- * Set *pro = polroots(T->x) [ NOT *px ], in case caller needs it. */
+ * them is primitive. *px is the ZX, characteristic polynomial of Mod(*pb,T->x),
+ * *pdx its discriminant. Set *pro = polroots(T->x) [ NOT *px ]. */
 static void
 polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
 {
@@ -2367,7 +2366,7 @@ polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
   *pdx = T->dx;
   if (pb)
   {
-    GEN a, b = pol_x(varn(x));
+    GEN a, b = deg1pol_shallow(T->unscale, gen_0, varn(x));
     a = gel(y,1); l = lg(a);
     y = gel(y,2);
     for (i=1; i<l; i++)
@@ -2392,33 +2391,27 @@ polredbest_aux(nfbasic_t *T, GEN *pro, GEN *px, GEN *pdx, GEN *pb)
   *px = x;
 }
 GEN
-polredbest(GEN x0, long flag)
+polredbest(GEN T0, long flag)
 {
   pari_sp av = avma;
-  GEN x, dx, ro, a;
-  nfbasic_t T;
+  GEN T, dT, ro, a;
+  nfbasic_t S;
   if (flag < 0 || flag > 1) pari_err_FLAG("polredbest");
-  x = x0; nfbasic_init(x, nf_PARTIALFACT, &T);
-  polredbest_aux(&T, &ro, &x, &dx, flag? &a: NULL);
+  T = T0; nfbasic_init(T, nf_PARTIALFACT, &S);
+  polredbest_aux(&S, &ro, &T, &dT, flag? &a: NULL);
   if (flag)
-  {
+  { /* charpoly(Mod(a,T0)) = T */
     GEN b;
-    if (x0 == x)
-      b = pol_x(varn(x)); /* no improvement */
+    if (T0 == T)
+      b = pol_x(varn(T)); /* no improvement */
     else
-      b = QXQ_reverse(a, x0);
-    if (degpol(x) == 1)
-      b = gmodulo(b, x);
-    else
-    {
-      if (!isint1(T.unscale)) b = RgX_Rg_div(b, T.unscale);
-      b = mkpolmod(b,x);
-    }
-    x = mkvec2(x, b);
+      b = QXQ_reverse(a, T0); /* charpoly(Mod(b,T)) = S.x */
+    b = (degpol(T) == 1)? gmodulo(b, T): mkpolmod(b,T);
+    T = mkvec2(T, b);
   }
-  return gerepilecopy(av, x);
+  return gerepilecopy(av, T);
 }
-/* FIXME: backward compatibility */
+/* DEPRECATED: backward compatibility */
 GEN
 polred0(GEN x, long flag, GEN fa)
 {
