@@ -819,7 +819,7 @@ typedef struct {
   GEN S, T, p;
 } FpXYQQ_muldata;
 
-/* reduce x in Fp[X, Y] in the algebra Fp[X, Y]/ (P(X),Q(Y)) */
+/* reduce x in Fp[X, Y] in the algebra Fp[X, Y]/ (S(X),T(Y)) */
 static GEN
 FpXYQQ_redswap(GEN x, GEN S, GEN T, GEN p)
 {
