@@ -2238,11 +2238,11 @@ RgXQ_ratlift(GEN x, GEN T, long amax, long bmax, GEN *P, GEN *Q)
 static GEN
 Lazard(GEN x, GEN y, long n)
 {
-  long a, b;
+  long a;
   GEN c;
 
   if (n == 1) return x;
-  a=1; while (n >= (b=a+a)) a=b; /* a = 2^k <= n < 2^(k+1) */
+  a = 1 << expu(n); /* a = 2^k <= n < 2^(k+1) */
   c=x; n-=a;
   while (a>1)
   {
