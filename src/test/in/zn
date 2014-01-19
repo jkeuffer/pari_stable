@@ -10,6 +10,9 @@ znstar(1)
 znstar(10)
 znstar(14)
 znstar(247)
+znstar(-247)
+znstar(factor(-247))
+znstar(factor(0))
 Mod(10,148)^(2^64)
 do(n)= {
   g = Mod(3,n); phi = eulerphi(n); G = g^(phi-1);

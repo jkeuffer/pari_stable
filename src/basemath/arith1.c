@@ -252,28 +252,29 @@ rootsof1_Fl(ulong n, ulong p)
 GEN
 znstar(GEN N)
 {
-  GEN res = cgetg(4,t_VEC), z, P, E, cyc, gen, mod;
+  GEN F = NULL, P, E, cyc, gen, mod;
   long i, j, nbp, sizeh;
-  pari_sp av;
+  pari_sp av = avma;
 
-  if (typ(N) != t_INT) pari_err_TYPE("znstar",N);
+  if ((F = check_arith_all(N,"znstar")))
+  {
+    F = clean_Z_factor(F);
+    N = typ(N) == t_VEC? gel(N,1): factorback(F);
+  }
   if (!signe(N))
   {
-    gel(res,1) = gen_2;
-    gel(res,2) = mkvec(gen_2);
-    gel(res,3) = mkvec(gen_m1); return res;
+    avma = av;
+    retmkvec3(gen_2, mkvec(gen_2), mkvec(gen_m1));
   }
   if (cmpiu(N,2) <= 0)
   {
-    gel(res,1) = gen_1;
-    gel(res,2) = cgetg(1,t_VEC);
-    gel(res,3) = cgetg(1,t_VEC); return res;
+    avma = av;
+    retmkvec3(gen_1, cgetg(1,t_VEC), cgetg(1,t_VEC));
   }
-  N = absi(N); /* copy needed: will be part of res (mkintmod) */
-  av = avma;
-  z = Z_factor(N);
-  P = gel(z,1);
-  E = gel(z,2); nbp = lg(P)-1;
+  if (signe(N) < 0) N = absi(N);
+  if (!F) F = Z_factor(N);
+  P = gel(F,1);
+  E = gel(F,2); nbp = lg(P)-1;
   cyc = cgetg(nbp+2,t_VEC);
   gen = cgetg(nbp+2,t_VEC);
   mod = cgetg(nbp+2,t_VEC);
@@ -349,11 +350,7 @@ znstar(GEN N)
       ci = d; if (equaliu(ci, 2)) break;
     }
   }
-  gerepileall(av, 2, &cyc, &gen);
-  gel(res,1) = ZV_prod(cyc);
-  gel(res,2) = cyc;
-  for (i = 1; i <= sizeh; i++) gel(gen,i) = mkintmod(gel(gen,i), N);
-  gel(res,3) = gen; return res;
+  return gerepilecopy(av, mkvec3(ZV_prod(cyc), cyc, FpV_to_mod(gen,N)));
 }
 
 /*********************************************************************/

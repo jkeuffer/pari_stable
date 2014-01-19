@@ -11,6 +11,9 @@ Mod(5, 170141183460469232801598459991038101138)
 [4, [4], [Mod(7, 10)]]
 [6, [6], [Mod(3, 14)]]
 [216, [36, 6], [Mod(2, 247), Mod(160, 247)]]
+[216, [36, 6], [Mod(2, 247), Mod(160, 247)]]
+[216, [36, 6], [Mod(2, 247), Mod(160, 247)]]
+[2, [2], [-1]]
   *** _^_: Warning: Mod(a,b)^n with n >> b : wasteful.
 Mod(84, 148)
 [599, 599, 599, 599]
@@ -37,4 +40,4 @@ _MAT).")
 error("incorrect type in generic discrete logarithm (order factorization) (t
 _MAT).")
 []
-Total time spent: 1368
+Total time spent: 1392
