@@ -2827,346 +2827,6 @@ such that $\kbd{au} + \kbd{bv} = d$.
 U]$, where $d$ is the GCD of the $A[i]$ and $U$ is a matrix
 in $\text{GL}_n(\Z)$ such that $AU = [0,\dots,0,D]$.
 
-\subsec{Pure powers}
-
-\fun{long}{Z_issquare}{GEN n} returns $1$ if the \typ{INT} $n$ is
-a square, and $0$ otherwise. This is tested first modulo small prime
-powers, then \kbd{sqrtremi} is called.
-
-\fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
-$n$ is indeed a square, set \kbd{sqrtn} to its integer square root.
-Uses a fast congruence test mod $64\times 63\times 65\times 11$ before
-computing an integer square root.
-
-\fun{long}{Z_ispow2}{GEN x} returns $1$ if the \typ{INT} $x$ is a power of
-$2$, and $0$ otherwise.
-
-\fun{long}{uissquare}{ulong n} as \kbd{Z\_issquare},
-for an \kbd{ulong} operand \kbd{n}.
-
-\fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
-for an \kbd{ulong} operand \kbd{n}.
-
-\fun{ulong}{usqrt}{ulong a} returns the floor of the square root of $a$.
-
-\fun{ulong}{usqrtn}{ulong a, ulong n} returns the floor of the $n$-th root
-of $a$.
-
-\fun{long}{Z_ispower}{GEN x, ulong k} returns $1$ if the \typ{INT} $n$ is a
-$k$-th power, and $0$ otherwise; assume that $k > 1$.
-
-\fun{long}{Z_ispowerall}{GEN x, ulong k, GEN *pt} as \kbd{Z\_ispower}. If
-$n$ is indeed a $k$-th power, set \kbd{*pt} to its integer $k$-th root.
-
-\fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
-that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;
-in particular \kbd{ispower(1)}, \kbd{ispower(0)}, \kbd{ispower(-1)} all
-return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
-\kbd{ptn} is not \kbd{NULL}, set \kbd{*ptn} to $n$.
-
-The following low-level functions are called by \tet{Z_isanypower} but can
-be directly useful:
-
-\fun{int}{is_357_power}{GEN x, GEN *ptn, ulong *pmask} tests whether the
-integer $x > 0$ is a $3$-rd, $5$-th or $7$-th power. The bits of \kbd{*mask}
-initially indicate which test is to be performed;
-bit $0$: $3$-rd,
-bit $1$: $5$-th,
-bit $2$: $7$-th (e.g.~$\kbd{*pmask} = 7$ performs all tests). They are
-updated during the call: if the ``$i$-th power'' bit is set to $0$
-then $x$ is not a $k$-th power. The function returns $0$
-(not a
-$3$-rd,
-$5$-th or
-$7$-th power),
-$3$
-($3$-rd power,
-not a $5$-th or
-$7$-th power),
-$5$
-($5$-th power,
-not a $7$-th power),
-or $7$
-($7$-th power); if an $i$-th power bit is initially set to $0$, we take it
-at face value and assume $x$ is not an $i$-th power without performing any
-test. If the return value $k$ is non-zero, set \kbd{*ptn} to $n$ such that $x
-= n^k$.
-
-\fun{int}{is_pth_power}{GEN x, GEN *ptn, forprime_t *T, ulong cutoff}
-let $x > 0$ be an integer, $\kbd{cutoff} > 0$ and $T$ be an iterator over
-primes $\geq 11$, we look for the smallest prime $p$ such that $x = n^p$
-(advancing $T$ as we go along). The $11$ is due to the fact that
-\tet{is_357_power} and \kbd{issquare} are faster than the generic version for
-$p < 11$.
-
-Fail and return $0$ when the existence of $p$ would imply $2^{\kbd{cutoff}} >
-x^{1/p}$, meaning that a possible $n$ is so small that it should have been
-found by trial division; for maximal speed, you should start by a round of
-trial division, but the cut-off may also be set to $1$ for a rigorous result
-without any trial division.
-
-Otherwise returns the smallest suitable prime power $p^i$ and set \kbd{*ptn}
-to the $p^i$-th root of $x$ (which is now not a $p$-th power). We may
-immediately recall the function with the same parameters after setting $x =
-\kbd{*ptn}$: it will start at the next prime.
-
-\subsec{Factorization}
-
-\fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
-in the factorization are actually strong pseudoprimes.
-
-\fun{GEN}{absi_factor}{GEN n} returns \kbd{Z\_factor(absi(n))}.
-
-\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ looks like the factorization
-of a positive integer, and $0$ otherwise. Useful for sanity checks but not
-100\% foolproof. Specifically, this routine checks that $f$ is a two-column
-matrix all of whose entries are positive integers.
-
-\fun{int}{is_Z_factor0}{GEN f} returns $1$ if $f$ looks like the factorization
-of a non-negative integer, and $0$ otherwise. Useful for sanity checks but not
-100\% foolproof. Specifically, either \tet{is_Z_factor}$(f)$ is true
-or $f$ encodes the ``factorization'' $0^1$.
-
-\fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
-prime factors of the \typ{INT} $n$ are less or equal to $lim$.
-
-\fun{GEN}{Z_issmooth_fact}{GEN n, ulong lim} returns \kbd{NULL} if a prime
-factor of the \typ{INT} $n$ is $> lim$, and returns the factorization
-of $n$ otherwise, as a \typ{MAT} with \typ{VECSMALL} columns (word-size
-primes and exponents). Neither memory-clean nor suitable for
-\kbd{gerepileupto}.
-
-\fun{long}{Z_issquarefree}{GEN n} returns $1$ if the \typ{INT} \kbd{n}
-is square-free, and $0$ otherwise.
-
-\fun{long}{Z_isfundamental}{GEN x} returns $1$ if the \typ{INT} \kbd{x}
-is a fundamental discriminant, and $0$ otherwise.
-
-\fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
-factorization process as soon as the unfactored part is smaller than \kbd{lim}.
-The resulting factorization matrix only contains the factors found. No other
-assumptions can be made on the remaining factors.
-
-\fun{GEN}{Z_factor_limit}{GEN n, ulong lim} trial divide $n$ by all primes $p
-< \kbd{lim}$ in the precomputed list of prime numbers and return the
-corresponding factorization matrix. In this case, the last ``prime'' divisor
-in the first column of the factorization matrix may well be a proven
-composite.
-
-If $\kbd{lim} = 0$, the effect is the same as setting $\kbd{lim} =
-\kbd{maxprime()} + 1$: use all precomputed primes.
-
-\fun{GEN}{absi_factor_limit}{GEN n, ulong all}returns
-\kbd{Z\_factor\_limit(absi(n))}.
-
-\fun{GEN}{boundfact}{GEN x, ulong lim} as \tet{Z_factor_limit}, applying to
-\typ{INT} or \typ{FRAC} inputs.
-
-\fun{GEN}{Z_smoothen}{GEN n, GEN L, GEN *pP, GEN *pE} given a \typ{VECSMALL}
-$L$ containing a list of small primes and a \typ{INT} $n$, trial divide
-$n$ by the elements of $L$ and return the cofactor. Return \kbd{NULL} if the
-cofactor is $\pm 1$. \kbd{*P} and \kbd{*E} contain the list of prime divisors
-found and their exponents, as \typ{VECSMALL}s. Neither memory-clean, nor
-suitable for \tet{gerepileupto}.
-
-\fun{GEN}{Z_factor_listP}{GEN N, GEN L} given a \typ{INT} $N$, a vector or
-primes $L$ containing all prime divisors of $N$ (and possibly others). Return
-\kbd{factor(N)}. Neither memory-clean, nor suitable for \tet{gerepileupto}.
-
-\fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
-$n/d$ is a square. The core of $0$ is defined to be $0$.
-
-\fun{GEN}{core2}{GEN n} return $[d,f]$ with $d$ squarefree and $n = df^2$.
-
-\fun{GEN}{corepartial}{GEN n, long lim} as \kbd{core}, using
-\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The result is not
-necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
-
-\fun{GEN}{core2partial}{GEN n, long lim} as \kbd{core2}, using
-\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
-necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
-
-\fun{GEN}{factor_pn_1}{GEN p, ulong n} returns the factorization of $p^n-1$,
-where $p$ is prime and $n$ is a positive integer.
-
-\fun{GEN}{factor_pn_1_limit}{GEN p, ulong n, ulong B} returns a partial
-factorization of $p^n-1$, where $p$ is prime and $n$ is a positive integer.
-Don't actively search for prime divisors $p > B$, but we may find still find
-some due to Aurifeuillian factorizations. Any entry $> B^2$ in the output
-factorization matrix is \emph{a priori} not a prime (but may well be).
-
-\fun{GEN}{factor_Aurifeuille_prime}{GEN p, long n} an Aurifeuillian factor
-of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists
-($p \zeta_n$ is a square in $\Q(\zeta_n)$).
-
-\fun{GEN}{factor_Aurifeuille}{GEN a, long d} an Aurifeuillian factor of
-$\phi_n(a)$, assuming $a$ is a non-zero integer and $n > 2$. Returns $1$
-if no Aurifeuillian factor exists.
-
-\fun{GEN}{odd_prime_divisors}{GEN a} \typ{VEC} of all prime divisors of the
-\typ{INT} $a$.
-
-\fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
-is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
-containing the prime divisors of $n$, and the $v_p(n)$.
-
-\fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
-is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
-\typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
-and the $p^{v_p(n)}$.
-
-\fun{ulong}{tridiv_bound}{GEN n} returns the trial division bound used by
-\tet{Z_factor}$(n)$.
-
-\subsec{Incremental integer factorization}
-
-Routines associated to the dynamic factorization of an integer $n$, iterating
-over successive prime divisors. This is useful to implement high-level
-routines allowed to take shortcuts given enough partial information: e.g.
-\kbd{moebius}$(n)$ can be trivially computed if we hit $p$ such that $p^2
-\mid n$. For efficiency, trial division by small primes should have already
-taken place. In any case, the functions below assume that no prime $< 2^{14}$
-divides $n$.
-
-\fun{GEN}{ifac_start}{GEN n, int moebius} schedules a new factorization
-attempt for the integer $n$. If \kbd{moebius} is non-zero, the factorization
-will be aborted as soon as a repeated factor is detected (Moebius mode).
-The function assumes that $n > 1$ is a \emph{composite} \typ{INT} whose prime
-divisors satisfy $p > 2^{14}$ \emph{and} that one can write to $n$ in place.
-
-This function stores data on the stack, no \kbd{gerepile} call should
-delete this data until the factorization is complete. Returns \kbd{partial},
-a data structure recording the partial factorization state.
-
-\fun{int}{ifac_next}{GEN *partial, GEN *p, long *e} deletes a primary factor
-$p^e$ from \kbd{partial} and sets \kbd{p} (prime) and \kbd{e} (exponent), and
-normally returns $1$. Whatever remains in the \kbd{partial} structure is now
-coprime to $p$.
-
-Returns $0$ if all primary factors have been used already, so we are done
-with the factorization. In this case $p$ is set to \kbd{NULL}. If we ran in
-Moebius mode and the factorization was in fact aborted, we have $e = 1$,
-otherwise $e = 0$.
-
-\fun{int}{ifac_read}{GEN part, GEN *k, long *e} peeks at the next integer
-to be factored in the list $k^e$, where $k$ is not necessarily prime
-and can be a perfect power as well, but will be factored by the next call to
-\tet{ifac_next}. You can remove this factorization from the schedule by
-calling:
-
-\fun{void}{ifac_skip}{GEN part} removes the next scheduled factorization.
-
-\fun{int}{ifac_isprime}{GEN n} given $n$ whose prime divisors are $> 2^{14}$,
-returns the decision the factoring engine would take about the compositeness
-of $n$: $0$ if $n$ is a proven composite, and $1$ if we believe it to be
-prime; more precisely, $n$ is a proven prime if \tet{factor_proven} is
-set, and only a BPSW-pseudoprime otherwise.
-
-\subsec{Primes, primality and compositeness tests}
-
-\subsubsec{Chebyshev's $\pi$ function, bounds}
-
-\fun{ulong}{uprimepi}{ulong n}, returns the number of primes $p\leq n$
-(Chebyshev's $\pi$ function).
-
-\fun{double}{primepi_upper_bound}{double x} return a quick upper bound for
-$\pi(x)$, using Dusart bounds.
-
-\fun{GEN}{gprimepi_upper_bound}{GEN x} as \tet{primepi_upper_bound}, returns a
-\typ{REAL}.
-
-\fun{double}{primepi_lower_bound}{double x} return a quick lower bound for
-$\pi(x)$, using Dusart bounds.
-
-\fun{GEN}{gprimepi_lower_bound}{GEN x} as \tet{primepi_lower_bound}, returns
-a \typ{REAL} or \kbd{gen\_0}.
-
-\subsubsec{Primes, primes in intervals}
-
-\fun{ulong}{unextprime}{ulong n}, returns the smallest prime $\geq n$. Return
-$0$ if it cannot be represented as an \kbd{ulong} ($n$ bigger than $2^{64} -
-59$ or $2^{32} - 5$ depending on the word size).
-
-\fun{ulong}{uprecprime}{ulong n}, returns the largest prime $\leq n$. Return
-$0$ if $n\leq 1$.
-
-\fun{ulong}{uprime}{long n} returns the $n$-th prime, assuming it fits in an
-\kbd{ulong} (overflow error otherwise).
-
-\fun{GEN}{prime}{long n} same as \kbd{utoi(uprime(n))}.
-
-\fun{GEN}{primes_zv}{long m} returns the first $m$ primes, in a
-\typ{VECSMALL}.
-
-\fun{GEN}{primes}{long m} return the first $m$ primes, as a \typ{VEC} of
-\typ{INT}s.
-
-\fun{GEN}{primes_interval}{GEN a, GEN b} return the primes in the interval
-$[a,b]$, as a \typ{VEC} of \typ{INT}s.
-
-\fun{GEN}{primes_interval_zv}{ulong a, ulong b} return the primes in the
-interval $[a,b]$, as a \typ{VECSMALL} of \kbd{ulongs}s.
-
-\fun{GEN}{primes_upto_zv}{ulong b} return the primes in the interval $[2,b]$,
-as a \typ{VECSMALL} of \kbd{ulongs}s.
-
-\subsubsec{Tests}
-
-\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
-$0$ otherwise.
-
-\fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-(fully proven) prime number and $0$ otherwise.
-
-\fun{long}{isprimeAPRCL}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-prime number and $0$ otherwise, using only the APRCL test --- not even trial
-division or compositeness tests. The workhorse \kbd{isprime} should be
-faster on average, especially if non-primes are included!
-
-\fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise (proven
-composite).
-
-\fun{int}{BPSW_isprime}{GEN x} assuming $x$ is a BPSW-pseudoprime, rigorously
-prove its primality. The function \tet{isprime} is currently implemented
-as
-\bprog
- BPSW_psp(x) && BPSW_isprime(x)
-@eprog
-
-\fun{long}{millerrabin}{GEN n, long k} performs $k$ strong Rabin-Miller
-compositeness tests on the \typ{INT} $n$, using $k$ random bases. This
-function also caches square roots of $-1$ that are encountered during the
-successive tests and stops as soon as three distinct square roots have been
-produced; we have in principle factored $n$ at this point, but
-unfortunately, there is currently no way for the factoring machinery to
-become aware of it. (It is highly implausible that hard to find factors
-would be exhibited in this way, though.) This should be slower than
-\tet{BPSW_psp} for $k\geq 4$ and we would expect it to be less reliable.
-
-\subsec{Iterators over primes}
-
-\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b} initialize an
-iterator $T$ over primes in $[a,b]$; over primes $\geq a$ if $b =
-\kbd{NULL}$. Return $0$ if the range is known to be empty from the start
-(as if $b < a$ or $b < 0$), and return $1$ otherwise.
-
-\fun{GEN}{forprime_next}{forprime_t *T} returns the next prime in the range,
-assuming that $T$ was initialized by \tet{forprime_init}.
-
-\fun{int}{u_forprime_init}{forprime_t *T, ulong a, ulong b}
-
-\fun{ulong}{u_forprime_next}{forprime_t *T}
-
-\fun{void}{u_forprime_restrict}{forprime_t *T, ulong c} let $T$ an iterator
-over primes initialized via \kbd{u\_forprime\_init(\&T, a, b)}, possibly
-followed by a number of calls to \tet{u_forprime_next}, and $a \leq c \leq
-b$. Restrict the range of primes considered to $[a,c]$.
-
-\fun{int}{u_forprime_arith_init}{forprime_t *T, ulong a,ulong b, ulong c,ulong q} initialize an iterator over primes in $[a,b]$, congruent to $c$
-modulo $q$. Assume $0 \leq c < q$ and $(c,q) = 1$. Subsequent calls to
-\tet{u_forprime_next} will only return primes congruent to $c$ modulo $q$.
-
 \subsec{Pseudo-random integers}
 These routine return pseudo-random integers uniformly distributed in some
 interval. The all use the same underlying generator which can be seeded and
@@ -6015,6 +5675,357 @@ vector of polynomials with \typ{INT} coefficients (repeated calls to
 
 \fun{GEN}{F2xV_to_F2m}{GEN v, long n} \kbd{F2x\_to\_F2v} to each polynomials
 to get an \kbd{F2m} with \kbd{n} rows.
+
+\section{Higher arithmetic over $\Z$: primes, factorization}
+
+\subsec{Pure powers}
+
+\fun{long}{Z_issquare}{GEN n} returns $1$ if the \typ{INT} $n$ is
+a square, and $0$ otherwise. This is tested first modulo small prime
+powers, then \kbd{sqrtremi} is called.
+
+\fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
+$n$ is indeed a square, set \kbd{sqrtn} to its integer square root.
+Uses a fast congruence test mod $64\times 63\times 65\times 11$ before
+computing an integer square root.
+
+\fun{long}{Z_ispow2}{GEN x} returns $1$ if the \typ{INT} $x$ is a power of
+$2$, and $0$ otherwise.
+
+\fun{long}{uissquare}{ulong n} as \kbd{Z\_issquare},
+for an \kbd{ulong} operand \kbd{n}.
+
+\fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
+for an \kbd{ulong} operand \kbd{n}.
+
+\fun{ulong}{usqrt}{ulong a} returns the floor of the square root of $a$.
+
+\fun{ulong}{usqrtn}{ulong a, ulong n} returns the floor of the $n$-th root
+of $a$.
+
+\fun{long}{Z_ispower}{GEN x, ulong k} returns $1$ if the \typ{INT} $n$ is a
+$k$-th power, and $0$ otherwise; assume that $k > 1$.
+
+\fun{long}{Z_ispowerall}{GEN x, ulong k, GEN *pt} as \kbd{Z\_ispower}. If
+$n$ is indeed a $k$-th power, set \kbd{*pt} to its integer $k$-th root.
+
+\fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
+that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;
+in particular \kbd{ispower(1)}, \kbd{ispower(0)}, \kbd{ispower(-1)} all
+return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
+\kbd{ptn} is not \kbd{NULL}, set \kbd{*ptn} to $n$.
+
+The following low-level functions are called by \tet{Z_isanypower} but can
+be directly useful:
+
+\fun{int}{is_357_power}{GEN x, GEN *ptn, ulong *pmask} tests whether the
+integer $x > 0$ is a $3$-rd, $5$-th or $7$-th power. The bits of \kbd{*mask}
+initially indicate which test is to be performed;
+bit $0$: $3$-rd,
+bit $1$: $5$-th,
+bit $2$: $7$-th (e.g.~$\kbd{*pmask} = 7$ performs all tests). They are
+updated during the call: if the ``$i$-th power'' bit is set to $0$
+then $x$ is not a $k$-th power. The function returns $0$
+(not a
+$3$-rd,
+$5$-th or
+$7$-th power),
+$3$
+($3$-rd power,
+not a $5$-th or
+$7$-th power),
+$5$
+($5$-th power,
+not a $7$-th power),
+or $7$
+($7$-th power); if an $i$-th power bit is initially set to $0$, we take it
+at face value and assume $x$ is not an $i$-th power without performing any
+test. If the return value $k$ is non-zero, set \kbd{*ptn} to $n$ such that $x
+= n^k$.
+
+\fun{int}{is_pth_power}{GEN x, GEN *ptn, forprime_t *T, ulong cutoff}
+let $x > 0$ be an integer, $\kbd{cutoff} > 0$ and $T$ be an iterator over
+primes $\geq 11$, we look for the smallest prime $p$ such that $x = n^p$
+(advancing $T$ as we go along). The $11$ is due to the fact that
+\tet{is_357_power} and \kbd{issquare} are faster than the generic version for
+$p < 11$.
+
+Fail and return $0$ when the existence of $p$ would imply $2^{\kbd{cutoff}} >
+x^{1/p}$, meaning that a possible $n$ is so small that it should have been
+found by trial division; for maximal speed, you should start by a round of
+trial division, but the cut-off may also be set to $1$ for a rigorous result
+without any trial division.
+
+Otherwise returns the smallest suitable prime power $p^i$ and set \kbd{*ptn}
+to the $p^i$-th root of $x$ (which is now not a $p$-th power). We may
+immediately recall the function with the same parameters after setting $x =
+\kbd{*ptn}$: it will start at the next prime.
+
+\subsec{Factorization}
+
+\fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
+in the factorization are actually strong pseudoprimes.
+
+\fun{GEN}{absi_factor}{GEN n} returns \kbd{Z\_factor(absi(n))}.
+
+\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ looks like the factorization
+of a positive integer, and $0$ otherwise. Useful for sanity checks but not
+100\% foolproof. Specifically, this routine checks that $f$ is a two-column
+matrix all of whose entries are positive integers.
+
+\fun{int}{is_Z_factor0}{GEN f} returns $1$ if $f$ looks like the factorization
+of a non-negative integer, and $0$ otherwise. Useful for sanity checks but not
+100\% foolproof. Specifically, either \tet{is_Z_factor}$(f)$ is true
+or $f$ encodes the ``factorization'' $0^1$.
+
+\fun{GEN}{check_arith_arg}{GEN n, const char *f} check whether $n$ is suitable
+for arithmetic function $f$
+
+\fun{GEN}{check_arith_arg0}{GEN n, const char *f}
+
+\fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
+prime factors of the \typ{INT} $n$ are less or equal to $lim$.
+
+\fun{GEN}{Z_issmooth_fact}{GEN n, ulong lim} returns \kbd{NULL} if a prime
+factor of the \typ{INT} $n$ is $> lim$, and returns the factorization
+of $n$ otherwise, as a \typ{MAT} with \typ{VECSMALL} columns (word-size
+primes and exponents). Neither memory-clean nor suitable for
+\kbd{gerepileupto}.
+
+\fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
+factorization process as soon as the unfactored part is smaller than \kbd{lim}.
+The resulting factorization matrix only contains the factors found. No other
+assumptions can be made on the remaining factors.
+
+\fun{GEN}{Z_factor_limit}{GEN n, ulong lim} trial divide $n$ by all primes $p
+< \kbd{lim}$ in the precomputed list of prime numbers and return the
+corresponding factorization matrix. In this case, the last ``prime'' divisor
+in the first column of the factorization matrix may well be a proven
+composite.
+
+If $\kbd{lim} = 0$, the effect is the same as setting $\kbd{lim} =
+\kbd{maxprime()} + 1$: use all precomputed primes.
+
+\fun{GEN}{absi_factor_limit}{GEN n, ulong all}returns
+\kbd{Z\_factor\_limit(absi(n))}.
+
+\fun{GEN}{boundfact}{GEN x, ulong lim} as \tet{Z_factor_limit}, applying to
+\typ{INT} or \typ{FRAC} inputs.
+
+\fun{GEN}{Z_smoothen}{GEN n, GEN L, GEN *pP, GEN *pE} given a \typ{VECSMALL}
+$L$ containing a list of small primes and a \typ{INT} $n$, trial divide
+$n$ by the elements of $L$ and return the cofactor. Return \kbd{NULL} if the
+cofactor is $\pm 1$. \kbd{*P} and \kbd{*E} contain the list of prime divisors
+found and their exponents, as \typ{VECSMALL}s. Neither memory-clean, nor
+suitable for \tet{gerepileupto}.
+
+\fun{GEN}{Z_factor_listP}{GEN N, GEN L} given a \typ{INT} $N$, a vector or
+primes $L$ containing all prime divisors of $N$ (and possibly others). Return
+\kbd{factor(N)}. Neither memory-clean, nor suitable for \tet{gerepileupto}.
+
+\fun{GEN}{factor_pn_1}{GEN p, ulong n} returns the factorization of $p^n-1$,
+where $p$ is prime and $n$ is a positive integer.
+
+\fun{GEN}{factor_pn_1_limit}{GEN p, ulong n, ulong B} returns a partial
+factorization of $p^n-1$, where $p$ is prime and $n$ is a positive integer.
+Don't actively search for prime divisors $p > B$, but we may find still find
+some due to Aurifeuillian factorizations. Any entry $> B^2$ in the output
+factorization matrix is \emph{a priori} not a prime (but may well be).
+
+\fun{GEN}{factor_Aurifeuille_prime}{GEN p, long n} an Aurifeuillian factor
+of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists
+($p \zeta_n$ is a square in $\Q(\zeta_n)$).
+
+\fun{GEN}{factor_Aurifeuille}{GEN a, long d} an Aurifeuillian factor of
+$\phi_n(a)$, assuming $a$ is a non-zero integer and $n > 2$. Returns $1$
+if no Aurifeuillian factor exists.
+
+\fun{GEN}{odd_prime_divisors}{GEN a} \typ{VEC} of all prime divisors of the
+\typ{INT} $a$.
+
+\fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
+is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
+containing the prime divisors of $n$, and the $v_p(n)$.
+
+\fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
+is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
+\typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
+and the $p^{v_p(n)}$.
+
+\fun{ulong}{tridiv_bound}{GEN n} returns the trial division bound used by
+\tet{Z_factor}$(n)$.
+
+\subsec{Incremental integer factorization}
+
+Routines associated to the dynamic factorization of an integer $n$, iterating
+over successive prime divisors. This is useful to implement high-level
+routines allowed to take shortcuts given enough partial information: e.g.
+\kbd{moebius}$(n)$ can be trivially computed if we hit $p$ such that $p^2
+\mid n$. For efficiency, trial division by small primes should have already
+taken place. In any case, the functions below assume that no prime $< 2^{14}$
+divides $n$.
+
+\fun{GEN}{ifac_start}{GEN n, int moebius} schedules a new factorization
+attempt for the integer $n$. If \kbd{moebius} is non-zero, the factorization
+will be aborted as soon as a repeated factor is detected (Moebius mode).
+The function assumes that $n > 1$ is a \emph{composite} \typ{INT} whose prime
+divisors satisfy $p > 2^{14}$ \emph{and} that one can write to $n$ in place.
+
+This function stores data on the stack, no \kbd{gerepile} call should
+delete this data until the factorization is complete. Returns \kbd{partial},
+a data structure recording the partial factorization state.
+
+\fun{int}{ifac_next}{GEN *partial, GEN *p, long *e} deletes a primary factor
+$p^e$ from \kbd{partial} and sets \kbd{p} (prime) and \kbd{e} (exponent), and
+normally returns $1$. Whatever remains in the \kbd{partial} structure is now
+coprime to $p$.
+
+Returns $0$ if all primary factors have been used already, so we are done
+with the factorization. In this case $p$ is set to \kbd{NULL}. If we ran in
+Moebius mode and the factorization was in fact aborted, we have $e = 1$,
+otherwise $e = 0$.
+
+\fun{int}{ifac_read}{GEN part, GEN *k, long *e} peeks at the next integer
+to be factored in the list $k^e$, where $k$ is not necessarily prime
+and can be a perfect power as well, but will be factored by the next call to
+\tet{ifac_next}. You can remove this factorization from the schedule by
+calling:
+
+\fun{void}{ifac_skip}{GEN part} removes the next scheduled factorization.
+
+\fun{int}{ifac_isprime}{GEN n} given $n$ whose prime divisors are $> 2^{14}$,
+returns the decision the factoring engine would take about the compositeness
+of $n$: $0$ if $n$ is a proven composite, and $1$ if we believe it to be
+prime; more precisely, $n$ is a proven prime if \tet{factor_proven} is
+set, and only a BPSW-pseudoprime otherwise.
+
+\subsec{Integer core, squarefree factorization}
+
+\fun{long}{Z_issquarefree}{GEN n} returns $1$ if the \typ{INT} \kbd{n}
+is square-free, and $0$ otherwise.
+
+\fun{long}{Z_isfundamental}{GEN x} returns $1$ if the \typ{INT} \kbd{x}
+is a fundamental discriminant, and $0$ otherwise.
+
+\fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
+$n/d$ is a square. The core of $0$ is defined to be $0$.
+
+\fun{GEN}{core2}{GEN n} return $[d,f]$ with $d$ squarefree and $n = df^2$.
+
+\fun{GEN}{corepartial}{GEN n, long lim} as \kbd{core}, using
+\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The result is not
+necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
+
+\fun{GEN}{core2partial}{GEN n, long lim} as \kbd{core2}, using
+\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
+necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
+
+
+
+\subsec{Primes, primality and compositeness tests}
+
+\subsubsec{Chebyshev's $\pi$ function, bounds}
+
+\fun{ulong}{uprimepi}{ulong n}, returns the number of primes $p\leq n$
+(Chebyshev's $\pi$ function).
+
+\fun{double}{primepi_upper_bound}{double x} return a quick upper bound for
+$\pi(x)$, using Dusart bounds.
+
+\fun{GEN}{gprimepi_upper_bound}{GEN x} as \tet{primepi_upper_bound}, returns a
+\typ{REAL}.
+
+\fun{double}{primepi_lower_bound}{double x} return a quick lower bound for
+$\pi(x)$, using Dusart bounds.
+
+\fun{GEN}{gprimepi_lower_bound}{GEN x} as \tet{primepi_lower_bound}, returns
+a \typ{REAL} or \kbd{gen\_0}.
+
+\subsubsec{Primes, primes in intervals}
+
+\fun{ulong}{unextprime}{ulong n}, returns the smallest prime $\geq n$. Return
+$0$ if it cannot be represented as an \kbd{ulong} ($n$ bigger than $2^{64} -
+59$ or $2^{32} - 5$ depending on the word size).
+
+\fun{ulong}{uprecprime}{ulong n}, returns the largest prime $\leq n$. Return
+$0$ if $n\leq 1$.
+
+\fun{ulong}{uprime}{long n} returns the $n$-th prime, assuming it fits in an
+\kbd{ulong} (overflow error otherwise).
+
+\fun{GEN}{prime}{long n} same as \kbd{utoi(uprime(n))}.
+
+\fun{GEN}{primes_zv}{long m} returns the first $m$ primes, in a
+\typ{VECSMALL}.
+
+\fun{GEN}{primes}{long m} return the first $m$ primes, as a \typ{VEC} of
+\typ{INT}s.
+
+\fun{GEN}{primes_interval}{GEN a, GEN b} return the primes in the interval
+$[a,b]$, as a \typ{VEC} of \typ{INT}s.
+
+\fun{GEN}{primes_interval_zv}{ulong a, ulong b} return the primes in the
+interval $[a,b]$, as a \typ{VECSMALL} of \kbd{ulongs}s.
+
+\fun{GEN}{primes_upto_zv}{ulong b} return the primes in the interval $[2,b]$,
+as a \typ{VECSMALL} of \kbd{ulongs}s.
+
+\subsubsec{Tests}
+
+\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
+$0$ otherwise.
+
+\fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+(fully proven) prime number and $0$ otherwise.
+
+\fun{long}{isprimeAPRCL}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+prime number and $0$ otherwise, using only the APRCL test --- not even trial
+division or compositeness tests. The workhorse \kbd{isprime} should be
+faster on average, especially if non-primes are included!
+
+\fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise (proven
+composite).
+
+\fun{int}{BPSW_isprime}{GEN x} assuming $x$ is a BPSW-pseudoprime, rigorously
+prove its primality. The function \tet{isprime} is currently implemented
+as
+\bprog
+ BPSW_psp(x) && BPSW_isprime(x)
+@eprog
+
+\fun{long}{millerrabin}{GEN n, long k} performs $k$ strong Rabin-Miller
+compositeness tests on the \typ{INT} $n$, using $k$ random bases. This
+function also caches square roots of $-1$ that are encountered during the
+successive tests and stops as soon as three distinct square roots have been
+produced; we have in principle factored $n$ at this point, but
+unfortunately, there is currently no way for the factoring machinery to
+become aware of it. (It is highly implausible that hard to find factors
+would be exhibited in this way, though.) This should be slower than
+\tet{BPSW_psp} for $k\geq 4$ and we would expect it to be less reliable.
+
+\subsec{Iterators over primes}
+
+\fun{int}{forprime_init}{forprime_t *T, GEN a, GEN b} initialize an
+iterator $T$ over primes in $[a,b]$; over primes $\geq a$ if $b =
+\kbd{NULL}$. Return $0$ if the range is known to be empty from the start
+(as if $b < a$ or $b < 0$), and return $1$ otherwise.
+
+\fun{GEN}{forprime_next}{forprime_t *T} returns the next prime in the range,
+assuming that $T$ was initialized by \tet{forprime_init}.
+
+\fun{int}{u_forprime_init}{forprime_t *T, ulong a, ulong b}
+
+\fun{ulong}{u_forprime_next}{forprime_t *T}
+
+\fun{void}{u_forprime_restrict}{forprime_t *T, ulong c} let $T$ an iterator
+over primes initialized via \kbd{u\_forprime\_init(\&T, a, b)}, possibly
+followed by a number of calls to \tet{u_forprime_next}, and $a \leq c \leq
+b$. Restrict the range of primes considered to $[a,c]$.
+
+\fun{int}{u_forprime_arith_init}{forprime_t *T, ulong a,ulong b, ulong c,ulong q} initialize an iterator over primes in $[a,b]$, congruent to $c$
+modulo $q$. Assume $0 \leq c < q$ and $(c,q) = 1$. Subsequent calls to
+\tet{u_forprime_next} will only return primes congruent to $c$ modulo $q$.
 
 \section{Integral, rational and generic linear algebra}
 \subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}} A \kbd{ZV} (resp.~a~\kbd{ZM},
