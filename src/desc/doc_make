@@ -59,6 +59,7 @@ while (<FILE>)
 sub library_syntax { my ($fun, $args) = @_;
   return '' if ($fun->{Class} =~ /^(highlevel|gp|default|gp_default)$/);
   my ($Cname) = $fun->{'C-Name'};
+  return '' if (!$Cname);
   my ($Variant) = $fun->{Variant};
   my (@proto) = split(//, $fun->{Prototype});
   $args =~ s/[{}&]//g;
