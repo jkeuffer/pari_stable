@@ -2922,6 +2922,11 @@ of a positive integer, and $0$ otherwise. Useful for sanity checks but not
 100\% foolproof. Specifically, this routine checks that $f$ is a two-column
 matrix all of whose entries are positive integers.
 
+\fun{int}{is_Z_factor0}{GEN f} returns $1$ if $f$ looks like the factorization
+of a non-negative integer, and $0$ otherwise. Useful for sanity checks but not
+100\% foolproof. Specifically, either \tet{is_Z_factor}$(f)$ is true
+or $f$ encodes the ``factorization'' $0^1$.
+
 \fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
 prime factors of the \typ{INT} $n$ are less or equal to $lim$.
 

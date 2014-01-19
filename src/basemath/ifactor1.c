@@ -3296,14 +3296,12 @@ END:
   return f;
 }
 
-int
-is_Z_factor(GEN f)
+/* f a t_MAT, lg(f) = 3 */
+static int
+is_Z_factor_i(GEN f)
 {
-  long i, l;
-  GEN P, E;
-  if (typ(f) != t_MAT || lg(f) != 3) return 0;
-  P = gel(f,1);
-  E = gel(f,2); l = lg(P);
+  GEN P = gel(f,1), E = gel(f,2);
+  long i, l = lg(P);
   for (i = 1; i < l; i++)
   {
     GEN p = gel(P,i), e = gel(E,i);
@@ -3312,30 +3310,27 @@ is_Z_factor(GEN f)
   }
   return 1;
 }
+int
+is_Z_factor(GEN f)
+{ return typ(f) == t_MAT && lg(f) == 3 && is_Z_factor_i(f); }
+
 /* as is_Z_factor, also allow factor(0) */
-static int
+int
 is_Z_factor0(GEN f)
 {
-  long i, l;
-  GEN P, E;
+  long l;
+  GEN P;
   if (typ(f) != t_MAT || lg(f) != 3) return 0;
-  P = gel(f,1);
-  E = gel(f,2); l = lg(P);
+  P = gel(f,1); l = lg(P);
   if (l == 2)
   {
-    GEN p = gel(P,1), e = gel(E,1);
+    GEN p = gel(P,1), e = gcoeff(f,1,2);
     long s;
     if (typ(p) != t_INT || typ(e) != t_INT || signe(e) <= 0) return 0;
     s = signe(p);
     return (s > 0) || (!s && is_pm1(e));
   }
-  for (i = 1; i < l; i++)
-  {
-    GEN p = gel(P,i), e = gel(E,i);
-    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
-      return 0;
-  }
-  return 1;
+  return is_Z_factor_i(f);
 }
 
 INLINE GEN
