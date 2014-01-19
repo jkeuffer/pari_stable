@@ -92,6 +92,8 @@ BA 63- Configure: --includedir was ignored
    65- ZX equal was checking variables, contrary to the spirit of the
        specification (and contrary to RgX_equal). Specify behaviour properly:
        none of the internal .*[xX]_equal function check variable numbers.
+   66- arithmetic functions did not accept factorizations of negative integers
+       (whereas most of them are defined for negetive integers)
 
   Changed
     1- default help text for a user function is now as in \u:

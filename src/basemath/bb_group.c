@@ -427,10 +427,10 @@ dlog_get_ordfa(GEN o)
       if (signe(o) > 0) return mkvec2(o, Z_factor(o));
       break;
     case t_MAT:
-      if (is_Z_factor(o)) return mkvec2(factorback(o), o);
+      if (is_Z_factorpos(o)) return mkvec2(factorback(o), o);
       break;
     case t_VEC:
-      if (lg(o) == 3 && signe(gel(o,1)) > 0 && is_Z_factor(gel(o,2))) return o;
+      if (lg(o) == 3 && signe(gel(o,1)) > 0 && is_Z_factorpos(gel(o,2))) return o;
       break;
   }
   pari_err_TYPE("generic discrete logarithm (order factorization)",o);

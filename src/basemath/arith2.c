@@ -659,6 +659,127 @@ factor_eulerphi(GEN n)
 }
 #endif
 
+/***********************************************************************/
+/**                                                                   **/
+/**         CHECK FACTORIZATION FOR ARITHMETIC FUNCTIONS              **/
+/**                                                                   **/
+/***********************************************************************/
+static int
+RgV_is_ZVpos(GEN v)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+  {
+    GEN c = gel(v,i);
+    if (typ(c) != t_INT || signe(c) <= 0) return 0;
+  }
+  return 1;
+}
+/* check whether v is a ZV with non-0 entries */
+static int
+RgV_is_ZVnon0(GEN v)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+  {
+    GEN c = gel(v,i);
+    if (typ(c) != t_INT || !signe(c)) return 0;
+  }
+  return 1;
+}
+/* check whether v is a ZV with non-zero entries OR exactly [0] */
+static int
+RgV_is_ZV0(GEN v)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+  {
+    GEN c = gel(v,i);
+    long s;
+    if (typ(c) != t_INT) return 0;
+    s = signe(c);
+    if (!s) return (l == 2);
+  }
+  return 1;
+}
+
+static int
+is_Z_factor_i(GEN f)
+{ return typ(f) == t_MAT && lg(f) == 3 && RgV_is_ZVpos(gel(f,2)); }
+int
+is_Z_factorpos(GEN f)
+{ return is_Z_factor_i(f) && RgV_is_ZVpos(gel(f,1)); }
+int
+is_Z_factor(GEN f)
+{ return is_Z_factor_i(f) && RgV_is_ZV0(gel(f,1)); }
+/* as is_Z_factorpos, also allow factor(0) */
+int
+is_Z_factornon0(GEN f)
+{ return is_Z_factor_i(f) && RgV_is_ZVnon0(gel(f,1)); }
+GEN
+clean_Z_factor(GEN f)
+{
+  GEN P = gel(f,1);
+  long n = lg(P)-1;
+  if (n && equalim1(gel(P,1)))
+    return mkmat2(vecslice(P,2,n), vecslice(gel(f,2),2,n));
+  return f;
+}
+
+/* n associated to a factorization of a positive integer: either N (t_INT)
+ * a factorization matrix faN, or a t_VEC: [N, faN] */
+GEN
+check_arith_pos(GEN n, const char *f) {
+  switch(typ(n))
+  {
+    case t_INT:
+      if (signe(n) <= 0 ) pari_err_DOMAIN(f, "argument", "<=", gen_0, gen_0);
+      return NULL;
+    case t_VEC:
+      if (lg(n) != 3 || typ(gel(n,1)) != t_INT) break;
+      n = gel(n,2); /* fall through */
+    case t_MAT:
+      if (!is_Z_factorpos(n)) break;
+      return n;
+  }
+  pari_err_TYPE(f,n);
+  return NULL;
+}
+/* n associated to a factorization of a non-0 integer */
+GEN
+check_arith_non0(GEN n, const char *f) {
+  switch(typ(n))
+  {
+    case t_INT:
+      if (!signe(n)) pari_err_DOMAIN(f, "argument", "=", gen_0, gen_0);
+      return NULL;
+    case t_VEC:
+      if (lg(n) != 3 || typ(gel(n,1)) != t_INT) break;
+      n = gel(n,2); /* fall through */
+    case t_MAT:
+      if (!is_Z_factornon0(n)) break;
+      return n;
+  }
+  pari_err_TYPE(f,n);
+  return NULL;
+}
+/* n associated to a factorization of an integer */
+GEN
+check_arith_all(GEN n, const char *f) {
+  switch(typ(n))
+  {
+    case t_INT:
+      return NULL;
+    case t_VEC:
+      if (lg(n) != 3 || typ(gel(n,1)) != t_INT) break;
+      n = gel(n,2); /* fall through */
+    case t_MAT:
+      if (!is_Z_factor(n)) break;
+      return n;
+  }
+  pari_err_TYPE(f,n);
+  return NULL;
+}
 
 /***********************************************************************/
 /**                                                                   **/
@@ -862,6 +983,308 @@ coredisc2(GEN n)
 
 GEN
 coredisc0(GEN n,long flag) { return flag? coredisc2(n): coredisc(n); }
+
+long
+omega(GEN n)
+{
+  pari_sp av = avma;
+  GEN F, P;
+  if ((F = check_arith_non0(n,"omega"))) {
+    long n;
+    P = gel(F,1); n = lg(P)-1;
+    if (n && equalim1(gel(P,1))) n--;
+    return n;
+  }
+  else if (lgefint(n) == 3)
+  {
+    if (n[2] == 1) return 0;
+    F = factoru(n[2]);
+  }
+  else
+    F = absi_factor(n);
+  P = gel(F,1); avma = av; return lg(P)-1;
+}
+
+long
+bigomega(GEN n)
+{
+  pari_sp av = avma;
+  GEN F, E;
+  if ((F = check_arith_non0(n,"bigomega")))
+  {
+    GEN P = gel(F,1);
+    long n = lg(P)-1;
+    E = gel(F,2);
+    if (n && equalim1(gel(P,1))) E = vecslice(E,2,n);
+    E = ZV_to_zv(E);
+  }
+  else if (lgefint(n) == 3)
+  {
+    if (n[2] == 1) return 0;
+    F = factoru(n[2]);
+    E = gel(F,2);
+  }
+  else
+    E = ZV_to_zv(gel(absi_factor(n), 2));
+  avma = av; return zv_sum(E);
+}
+
+/* assume f = factoru(n), possibly with 0 exponents. Return phi(n) */
+ulong
+eulerphiu_fact(GEN f)
+{
+  GEN P = gel(f,1), E = gel(f,2);
+  long i, m = 1, l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    ulong p = P[i], e = E[i];
+    if (!e) continue;
+    if (p == 2)
+    { if (e > 1) m <<= e-1; }
+    else
+    {
+      m *= (p-1);
+      if (e > 1) m *= upowuu(p, e-1);
+    }
+  }
+  return m;
+}
+/* assume n != 0 */
+ulong
+eulerphiu(ulong n)
+{
+  pari_sp av = avma;
+  GEN F = factoru(n);
+  avma = av; return eulerphiu_fact(F);
+}
+GEN
+eulerphi(GEN n)
+{
+  pari_sp av = avma;
+  GEN Q, F, P, E;
+  long i, l;
+
+  if ((F = check_arith_non0(n,"eulerphi")))
+  {
+    F = clean_Z_factor(F);
+    if (typ(n) == t_VEC && lgefint(gel(n,1)) == 3)
+    {
+      ulong e;
+      F = mkmat2(ZV_to_nv(gel(F,1)), ZV_to_nv(gel(F,2)));
+      e = eulerphiu_fact(F);
+      avma = av; return utoipos(e);
+    }
+  }
+  else if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
+  else
+    F = absi_factor(n);
+  P = gel(F,1);
+  E = gel(F,2); l = lg(P);
+  Q = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), q;
+    ulong v = itou(gel(E,i));
+    q = subiu(p,1);
+    if (v != 1) q = mulii(q, v == 2? p: powiu(p, v-1));
+    gel(Q,i) = q;
+  }
+  return gerepileuptoint(av, ZV_prod(Q));
+}
+
+static GEN
+numdiv_aux(GEN F)
+{
+  GEN x, E = gel(F,2);
+  long i, l = lg(E);
+  x = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = itou(gel(E,i))+1;
+  return x;
+}
+GEN
+numdiv(GEN n)
+{
+  pari_sp av = avma;
+  GEN F, E;
+  long i, l;
+  if ((F = check_arith_non0(n,"numdiv")))
+  {
+    F = clean_Z_factor(F);
+    E = numdiv_aux(F);
+  }
+  else if (lgefint(n) == 3)
+  {
+    if (n[2] == 1) return gen_1;
+    F = factoru(n[2]);
+    E = gel(F,2); l = lg(E);
+    for (i=1; i<l; i++) E[i]++;
+  }
+  else
+    E = numdiv_aux(absi_factor(n));
+  return gerepileuptoint(av, zv_prod_Z(E));
+}
+
+/* 1 + p + ... + p^v, p != 2^BIL - 1 */
+static GEN
+u_euler_sumdiv(ulong p, long v)
+{
+  GEN u = utoipos(1 + p); /* can't overflow */
+  for (; v > 1; v--) u = addsi(1, mului(p, u));
+  return u;
+}
+/* 1 + q + ... + q^v */
+static GEN
+euler_sumdiv(GEN q, long v)
+{
+  GEN u = addui(1, q);
+  for (; v > 1; v--) u = addui(1, mulii(q, u));
+  return u;
+}
+static GEN
+u_euler_sumdivk(ulong p, long v, long k) { return euler_sumdiv(powuu(p,k), v); }
+static GEN
+euler_sumdivk(GEN p, long v, long k) { return euler_sumdiv(powiu(p,k), v); }
+
+static GEN
+sumdiv_aux(GEN F)
+{
+  GEN x, P = gel(F,1), E = gel(F,2);
+  long i, l = lg(P);
+  x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = euler_sumdiv(gel(P,i), itou(gel(E,i)));
+  return x;
+}
+GEN
+sumdiv(GEN n)
+{
+  pari_sp av = avma;
+  GEN F, P, E;
+  long i, l;
+
+  if ((F = check_arith_non0(n,"sumdiv")))
+  {
+    F = clean_Z_factor(F);
+    P = sumdiv_aux(F);
+  }
+  else if (lgefint(n) == 3)
+  {
+    if (n[2] == 1) return gen_1;
+    F = factoru(n[2]);
+    P = gel(F,1);
+    E = gel(F,2); l = lg(P);
+    for (i=1; i<l; i++) gel(P,i) = u_euler_sumdiv(P[i], E[i]);
+  }
+  else
+    P = sumdiv_aux(absi_factor(n));
+  return gerepileuptoint(av, ZV_prod(P));
+}
+
+static GEN
+sumdivk_aux(GEN F, long k)
+{
+  GEN x, P = gel(F,1), E = gel(F,2);
+  long i, l = lg(P);
+  x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = euler_sumdivk(gel(P,i), gel(E,i)[2], k);
+  return x;
+}
+GEN
+sumdivk(GEN n, long k)
+{
+  pari_sp av = avma;
+  GEN E, F, P;
+  long i, l, k1;
+
+  if (!k) return numdiv(n);
+  if (k == 1) return sumdiv(n);
+  if (k ==-1) return gerepileupto(av, gdiv(sumdiv(n), n));
+  k1 = k;
+  if (k < 0)  k = -k;
+  if ((F = check_arith_non0(n,"sumdivk")))
+  {
+    F = clean_Z_factor(F);
+    P = sumdivk_aux(F,k);
+  }
+  else if (lgefint(n) == 3)
+  {
+    if (n[2] == 1) return gen_1;
+    F = factoru(n[2]);
+    P = gel(F,1);
+    E = gel(F,2); l = lg(P);
+    for (i=1; i<l; i++) gel(P,i) = u_euler_sumdivk(P[i], E[i], k);
+  }
+  else
+    P = sumdivk_aux(absi_factor(n), k);
+  P = ZV_prod(P);
+  if (k1 > 0) return gerepileuptoint(av, P);
+  return gerepileupto(av, gdiv(P, powiu(n,k)));
+}
+
+/* K t_VECSMALL of k >= 0 */
+GEN
+usumdivkvec(ulong n, GEN K)
+{
+  pari_sp av = avma;
+  GEN F = factoru(n), P = gel(F,1), E = gel(F,2), Z, S;
+  long i,j, l = lg(P), lK = lg(K);
+  Z = cgetg(l, t_VEC);
+  S = cgetg(lK, t_VEC);
+  for (j=1; j<lK; j++)
+  {
+    long k = K[j];
+    for (i=1; i<l; i++) gel(Z,i) = u_euler_sumdivk(P[i], E[i], k);
+    gel(S,j) = ZV_prod(Z);
+  }
+  return gerepilecopy(av, S);
+}
+
+long
+uissquarefree_fact(GEN f)
+{
+  GEN E = gel(f,2);
+  long i, l = lg(E);
+  for (i = 1; i < l; i++)
+    if (E[i] > 1) return 0;
+  return 1;
+}
+long
+uissquarefree(ulong n)
+{
+  if (!n) return 0;
+  return moebiusu(n)? 1: 0;
+}
+long
+Z_issquarefree(GEN n)
+{
+  switch(lgefint(n))
+  {
+    case 2: return 0;
+    case 3: return uissquarefree(n[2]);
+  }
+  return moebius(n)? 1: 0;
+}
+long
+issquarefree(GEN x)
+{
+  pari_sp av;
+  GEN d;
+  switch(typ(x))
+  {
+    case t_INT: return Z_issquarefree(x);
+    case t_POL:
+      if (!signe(x)) return 0;
+      av = avma; d = RgX_gcd(x, RgX_deriv(x));
+      avma = av; return (lg(d) == 3);
+    default: pari_err_TYPE("issquarefree",x);
+      return 0; /* not reached */
+  }
+}
+
+/*********************************************************************/
+/**                                                                 **/
+/**                    DIGITS / SUM OF DIGITS                       **/
+/**                                                                 **/
+/*********************************************************************/
 
 static ulong DS[] ={
   0,1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,10,2,3,4,5,6,7,8,9,10,11,3,4,5,6,7,8,

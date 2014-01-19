@@ -14,6 +14,12 @@ core2(x) = core(x,1);
 fun = [ispowerful, moebius, core, core2, omega, bigomega, eulerphi, numdiv, sigma, sigma2, sigma3];
 for(i=1,#fun, print(fun[i](fa)))
 
+test(fa)= for(i=1,#fun, print(iferr(fun[i](fa),E,E)));
+test(0)
+test(factor(0))
+test(-2)
+test(factor(-2))
+
 fa = factor(1);
 for(i=1,#fun, print(fun[i](fa)))
 divisors(fa)

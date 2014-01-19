@@ -1260,7 +1260,7 @@ Zn_sqrt(GEN d, GEN fn)
   if (typ(d) != t_INT) pari_err_TYPE("Zn_sqrt",d);
   if (typ(fn) == t_INT)
     fn = absi_factor(fn);
-  else if (!is_Z_factor(fn))
+  else if (!is_Z_factorpos(fn))
     pari_err_TYPE("Zn_sqrt",fn);
   np = nbrows(fn);
   btop = avma; st_lim = stack_lim(btop, 1);

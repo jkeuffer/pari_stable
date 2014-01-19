@@ -5768,21 +5768,6 @@ in the factorization are actually strong pseudoprimes.
 
 \fun{GEN}{absi_factor}{GEN n} returns \kbd{Z\_factor(absi(n))}.
 
-\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ looks like the factorization
-of a positive integer, and $0$ otherwise. Useful for sanity checks but not
-100\% foolproof. Specifically, this routine checks that $f$ is a two-column
-matrix all of whose entries are positive integers.
-
-\fun{int}{is_Z_factor0}{GEN f} returns $1$ if $f$ looks like the factorization
-of a non-negative integer, and $0$ otherwise. Useful for sanity checks but not
-100\% foolproof. Specifically, either \tet{is_Z_factor}$(f)$ is true
-or $f$ encodes the ``factorization'' $0^1$.
-
-\fun{GEN}{check_arith_arg}{GEN n, const char *f} check whether $n$ is suitable
-for arithmetic function $f$
-
-\fun{GEN}{check_arith_arg0}{GEN n, const char *f}
-
 \fun{long}{Z_issmooth}{GEN n, ulong lim} returns $1$ if all the
 prime factors of the \typ{INT} $n$ are less or equal to $lim$.
 
@@ -5854,6 +5839,58 @@ and the $p^{v_p(n)}$.
 
 \fun{ulong}{tridiv_bound}{GEN n} returns the trial division bound used by
 \tet{Z_factor}$(n)$.
+
+\subsec{Checks associated to arithmetic functions}
+
+Arithmetic functions accept arguments of the following kind: a plain positive
+integer $N$ (\typ{INT}), the factorization \var{fa} of a positive integer (a
+\typ{MAT} with two columns containing respectively primes and exponents), or
+a vector $[N,\var{fa}]$. A few functions accept non-zero
+integers (e.g.~\tet{omega}), and some others arbitrary integers
+(e.g.~\tet{factorint}, \dots).
+
+\fun{int}{is_Z_factorpos}{GEN f} returns $1$ if $f$ looks like the
+factorization of a positive integer, and $0$ otherwise. Useful for sanity
+checks but not 100\% foolproof. Specifically, this routine checks that $f$ is
+a two-column matrix all of whose entries are positive integers. It does
+\emph{not} check that entries in the first column (``primes'') are prime,
+or even pairwise coprime, nor that they are stricly increasing.
+
+\fun{int}{is_Z_factornon0}{GEN f} returns $1$ if $f$ looks like the
+factorization of a non-zero integer, and $0$ otherwise. Useful for sanity
+checks but not 100\% foolproof, analogous to \tet{is_Z_factorpos}. (Entries
+in the first column need only be non-zero integers.)
+
+\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ looks like the
+factorization of an integer, and $0$ otherwise. Useful for sanity
+checks but not 100\% foolproof. Specifically, this routine checks that $f$ is
+a two-column matrix all of whose entries are integers. Entries in the second
+column (``exponents'') are all positive. Either it encodes the
+``factorization'' $0^e$, $e > 0$, or entries in the first column (``primes'')
+are all non-zero.
+
+\fun{GEN}{clean_Z_factor}{GEN f} assuming $f$ is the factorization of an
+integer $n$, return the factorization of $|n|$, i.e.~remove $-1$ from the
+factorization. Shallow function.
+
+In the following two routines, $f$ is the name of an arithmetic function,
+and $n$ a supplied argument. They all raise exceptions if $n$ does not
+correspond to an integer or an integer factorization of the expected shape.
+
+\fun{GEN}{check_arith_pos}{GEN n, const char *f} check whether $n$
+is associated to the factorization of a positive integer, and return
+\kbd{NULL} (plain \typ{INT}) or a factorization extracted from $n$ otherwise.
+May raise an \tet{e_DOMAIN} ($n \leq 0$) or an \tet{e_TYPE} exception (other
+failures).
+
+\fun{GEN}{check_arith_non0}{GEN n, const char *f} check whether $n$
+is associated to the factorization of a non-$0$ integer, and return
+\kbd{NULL} (plain \typ{INT}) or a factorization extracted from $n$ otherwise.
+May raise an \tet{e_TYPE} exception.
+
+\fun{GEN}{check_arith_all}{GEN n, const char *f}
+is associated to the factorization of an integer, and return \kbd{NULL}
+(plain \typ{INT}) or a factorization extracted from $n$ otherwise.
 
 \subsec{Incremental integer factorization}
 

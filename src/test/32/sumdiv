@@ -18,6 +18,50 @@
 20993420690550
 57335533287534038504
 1
+error("domain error in moebius: argument = 0")
+0
+[0, 1]
+error("domain error in omega: argument = 0")
+error("domain error in bigomega: argument = 0")
+error("domain error in eulerphi: argument = 0")
+error("domain error in numdiv: argument = 0")
+error("domain error in sumdiv: argument = 0")
+error("domain error in sumdivk: argument = 0")
+error("domain error in sumdivk: argument = 0")
+1
+error("incorrect type in moebius (t_MAT).")
+0
+[0, 1]
+error("incorrect type in omega (t_MAT).")
+error("incorrect type in bigomega (t_MAT).")
+error("incorrect type in eulerphi (t_MAT).")
+error("incorrect type in numdiv (t_MAT).")
+error("incorrect type in sumdiv (t_MAT).")
+error("incorrect type in sumdivk (t_MAT).")
+error("incorrect type in sumdivk (t_MAT).")
+0
+-1
+-2
+[-2, 1]
+1
+1
+1
+2
+3
+5
+9
+0
+-1
+-2
+[-2, 1]
+1
+1
+1
+2
+3
+5
+9
+1
 1
 1
 [1, 1]

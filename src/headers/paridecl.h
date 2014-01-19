@@ -1321,6 +1321,10 @@ GEN     znstar(GEN x);
 
 GEN     Z_smoothen(GEN N, GEN L, GEN *pP, GEN *pe);
 GEN     boundfact(GEN n, ulong lim);
+GEN     check_arith_pos(GEN n, const char *f);
+GEN     check_arith_non0(GEN n, const char *f);
+GEN     check_arith_all(GEN n, const char *f);
+GEN     clean_Z_factor(GEN f);
 GEN     corepartial(GEN n, long l);
 GEN     core0(GEN n,long flag);
 GEN     core2(GEN n);
@@ -1340,6 +1344,8 @@ ulong   init_primepointer_geq(ulong a, byteptr *pd);
 ulong   init_primepointer_gt(ulong a, byteptr *pd);
 ulong   init_primepointer_leq(ulong a, byteptr *pd);
 ulong   init_primepointer_lt(ulong a, byteptr *pd);
+int     is_Z_factor(GEN f);
+int     is_Z_factorpos(GEN f);
 ulong   maxprime(void);
 void    maxprime_check(ulong c);
 GEN     sumdigits(GEN n);
@@ -2220,8 +2226,6 @@ GEN     ffrandom(GEN ff);
 int     Rg_is_FF(GEN c, GEN *ff);
 int     RgC_is_FFC(GEN x, GEN *ff);
 int     RgM_is_FFM(GEN x, GEN *ff);
-int     is_Z_factor(GEN f);
-int     is_Z_factor0(GEN f);
 GEN     p_to_FF(GEN p, long v);
 
 /* galconj.c */
