@@ -15,7 +15,8 @@ Doc: outputs a \var{bid} structure,
  necessary for computing in the finite abelian group $G = (\Z_K/I)^*$. Here,
  \var{nf} is a number field and $I$ is a \var{modulus}: either an ideal in any
  form, or a row vector whose first component is an ideal and whose second
- component is a row vector of $r_1$ 0 or 1.
+ component is a row vector of $r_1$ 0 or 1. Ideals can also be given
+ by a factorization into prime ideals, as produced by \tet{idealfactor}.
 
  This \var{bid} is used in \tet{ideallog} to compute discrete logarithms. It
  also contains useful information which can be conveniently retrieved as

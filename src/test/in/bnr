@@ -24,7 +24,7 @@ test([[25,13;0,1],[1,0]])
 test([[5,3;0,1],[1,0]])
 test([5,3;0,1])
 
-m=[[5,3;0,1],[1,0]];
+m=[idealfactor(bnf,[5,3;0,1]),[1,0]];
 H=Mat(2);
 bnr=bnrinit(bnf, idealstar(bnf,m,2));
 f=[bnrclassno,bnrdisc,bnrconductor];

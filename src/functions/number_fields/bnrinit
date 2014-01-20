@@ -13,6 +13,8 @@ Doc: $\var{bnf}$ is as
  the ray class group structure corresponding to this module, a so-called
  \var{bnr} structure. One can input the associated \var{bid} with generators
  for $f$ instead of the module itself, saving some time.
+ (As in \tet{idealstar}, the finite part of the conductor may be given
+ by a factorization into prime ideals, as produced by \tet{idealfactor}.)
 
  The following member functions are available
  on the result: \kbd{.bnf} is the underlying \var{bnf},

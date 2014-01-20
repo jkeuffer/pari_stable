@@ -155,6 +155,8 @@ JD 14- polcyclo(n, x) now works for all roots of 1
        over the base.
 BA 34- FpXYQQ_pow: change order of moduli to be consstent with FpXQXQ_pow.
 BA 35- FlxYqQ_pow: renamed to FlxYqq_pow, and moduli order changed.
+   36- idealstar(K,id), allow to input 'id' as a factorization into prime
+       ideals, as produced by idealfactor
 
   Added
 EP  1- Configure option for gcov/lcov support

@@ -1808,6 +1808,22 @@ add_grp(GEN nf, GEN u1, GEN cyc, GEN gen, GEN bid)
     gel(bid,2) = mkvec2(h,cyc);
 }
 
+static int
+RgV_is_prV(GEN v)
+{
+  long l = lg(v), i;
+  for (i = 1; i < l; i++)
+    if (!get_prid(gel(v,i))) return 0;
+  return 1;
+}
+
+static int
+is_nf_factor(GEN F)
+{
+  return typ(F) == t_MAT && lg(F) == 3
+    && RgV_is_prV(gel(F,1)) && RgV_is_ZV(gel(F,2));
+}
+
 /* Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
    flag may include nf_GEN | nf_INIT */
 GEN
@@ -1844,12 +1860,21 @@ Idealstar(GEN nf, GEN ideal, long flag)
     arch = zerovec(R1);
     archp = cgetg(1, t_VECSMALL);
   }
-  x = idealhnf_shallow(nf, ideal);
+  if (is_nf_factor(ideal))
+  {
+    fa = ideal;
+    x = idealfactorback(nf, gel(fa,1), gel(fa,2), 0);
+  }
+  else
+  {
+    fa = NULL;
+    x = idealhnf_shallow(nf, ideal);
+  }
   if (lg(x) == 1) pari_err_DOMAIN("Idealstar", "ideal","=",gen_0,x);
   if (typ(gcoeff(x,1,1)) != t_INT)
     pari_err_DOMAIN("Idealstar","denominator(ideal)", "!=",gen_1,x);
   sarch = nfarchstar(nf, x, archp);
-  fa = idealfactor(nf, ideal);
+  if (!fa) fa = idealfactor(nf, ideal);
   P = gel(fa,1);
   E = gel(fa,2); nbp = lg(P)-1;
   if (nbp)
