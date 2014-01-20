@@ -1469,7 +1469,6 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     z = zidealij(pra, prb, &U);
     gen = leafcopy(gel(z,2));
     s = cgetg_copy(gen, &l);
-    if(DEBUGLEVEL>3) err_printf("zidealij done\n");
     for (i = 1; i < l; i++)
     {
       if (x) gel(gen,i) = makeprimetoideal(x,u,v,gel(gen,i));
