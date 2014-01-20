@@ -2,9 +2,11 @@ Mod(1, 2)
 Mod(3, 4)
   ***   at top-level: znprimroot(8)
   ***                 ^-------------
-  *** znprimroot: domain error in znprimroot: modulus = 8
+  *** znprimroot: domain error in znprimroot: argument = 8
 Mod(5, 9223372036854775837)
 Mod(5, 85070591730234616400799229995519050569)
+Mod(5, 170141183460469232801598459991038101138)
+Mod(5, 170141183460469232801598459991038101138)
 Mod(5, 170141183460469232801598459991038101138)
 [2, [2], [-1]]
 [1, [], []]
@@ -40,4 +42,4 @@ _MAT).")
 error("incorrect type in generic discrete logarithm (order factorization) (t
 _MAT).")
 []
-Total time spent: 1392
+Total time spent: 1380

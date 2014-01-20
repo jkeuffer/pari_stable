@@ -179,43 +179,55 @@ pgener_Zp(GEN p)
 }
 
 static GEN
-gener_Zp(GEN q)
+gener_Zp(GEN q, GEN F)
 {
-  GEN p;
-  long e = Z_isanypower(q, &p);
+  GEN p = NULL;
+  long e = 0;
+  if (F)
+  {
+    GEN P = gel(F,1), E = gel(F,2);
+    long i, l = lg(P);
+    for (i = 1; i < l; i++)
+    {
+      p = gel(P,i);
+      if (equaliu(p, 2)) continue;
+      if (i < l-1) pari_err_DOMAIN("znprimroot", "argument","=",F,F);
+      e = itos(gel(E,i));
+    }
+    if (!p) pari_err_DOMAIN("znprimroot", "argument","=",F,F);
+  }
+  else
+    e = Z_isanypower(q, &p);
   return e > 1? pgener_Zp(p): pgener_Fp(q);
 }
 
 GEN
-znprimroot(GEN m)
+znprimroot(GEN N)
 {
-  pari_sp av;
-  GEN x, z;
+  pari_sp av = avma;
+  GEN x, n, F;
 
-  if (typ(m) != t_INT) pari_err_TYPE("znprimroot",m);
-  if (!signe(m)) pari_err_DOMAIN("znprimroot","modulus","=",gen_0,gen_0);
-  if (is_pm1(m)) return mkintmodu(0,1);
-  z = cgetg(3, t_INTMOD);
-  m = absi(m);
-  gel(z,1) = m; av = avma;
-
-  switch(mod4(m))
+  if ((F = check_arith_non0(N,"znprimroot")))
   {
-    case 0: /* m = 0 mod 4 */
-      /* m != 4, non cyclic */
-      if (!equaliu(m,4)) pari_err_DOMAIN("znprimroot", "modulus","=",m,m);
-      x = utoipos(3);
+    F = clean_Z_factor(F);
+    N = typ(N) == t_VEC? gel(N,1): factorback(F);
+  }
+  if (signe(N) < 0) N = absi(N);
+  if (cmpiu(N, 4) <= 0) { avma = av; return mkintmodu(N[2]-1,N[2]); }
+  switch(mod4(N))
+  {
+    case 0: /* N = 0 mod 4 */
+      pari_err_DOMAIN("znprimroot", "argument","=",N,N);
+      x = NULL; break;
+    case 2: /* N = 2 mod 4 */
+      n = shifti(N,-1); /* becomes odd */
+      x = gener_Zp(n,F); if (!mod2(x)) x = addii(x,n);
       break;
-    case 2: /* m = 2 mod 4 */
-      m = shifti(m,-1); /* becomes odd */
-      if (equali1(m)) { x = gen_1; break; }
-      x = gener_Zp(m); if (!mod2(x)) x = addii(x,m);
-      break;
-    default: /* m odd */
-      x = gener_Zp(m);
+    default: /* N odd */
+      x = gener_Zp(N,F);
       break;
   }
-  gel(z,2) = gerepileuptoint(av, x); return z;
+  return gerepilecopy(av, mkintmod(x, N));
 }
 
 /* n | (p-1), returns a primitive n-th root of 1 in F_p^* */
@@ -266,12 +278,12 @@ znstar(GEN N)
     avma = av;
     retmkvec3(gen_2, mkvec(gen_2), mkvec(gen_m1));
   }
+  if (signe(N) < 0) N = absi(N);
   if (cmpiu(N,2) <= 0)
   {
     avma = av;
     retmkvec3(gen_1, cgetg(1,t_VEC), cgetg(1,t_VEC));
   }
-  if (signe(N) < 0) N = absi(N);
   if (!F) F = Z_factor(N);
   P = gel(F,1);
   E = gel(F,2); nbp = lg(P)-1;

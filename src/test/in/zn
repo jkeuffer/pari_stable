@@ -5,6 +5,8 @@ p=9223372036854775837;
 znprimroot(p)
 znprimroot(p^2)
 znprimroot(2*p^2)
+znprimroot([2,1;p,2])
+znprimroot([2*p^2,[2,1;p,2]])
 znstar(0)
 znstar(1)
 znstar(10)

@@ -328,7 +328,7 @@
   *** random: domain error in random: N <= 0
   ***   at top-level: znprimroot(0)
   ***                 ^-------------
-  *** znprimroot: domain error in znprimroot: modulus = 0
+  *** znprimroot: domain error in znprimroot: argument = 0
   ***   at top-level: sqrtint(-1)
   ***                 ^-----------
   *** sqrtint: domain error in sqrtint: argument < 0
@@ -340,7 +340,7 @@
   *** sqrtnint: domain error in sqrtnint: n <= 0
   ***   at top-level: znprimroot(8)
   ***                 ^-------------
-  *** znprimroot: domain error in znprimroot: modulus = 8
+  *** znprimroot: domain error in znprimroot: argument = 8
   ***   at top-level: polroots(x^2+Mod(1,2
   ***                 ^--------------------
   *** polroots: incorrect type in roots (t_INTMOD).
@@ -587,4 +587,4 @@ INFINITY
   ***   at top-level: trap(e_INV,INFINITY,log(0))
   ***                                     ^-------
   *** log: domain error in log: argument = 0
-Total time spent: 20
+Total time spent: 24
