@@ -3159,16 +3159,14 @@ RgM_invimage(GEN A, GEN B)
   return gerepileupto(av, RgM_mul(X, RgM_inv_upper(Y)));
 }
 
-/* r = dim Ker x */
+/* r = dim Ker x, n = nbrows(x) */
 static GEN
-get_suppl(GEN x, GEN d, long r, GEN(*ei)(long,long))
+get_suppl(GEN x, GEN d, long n, long r, GEN(*ei)(long,long))
 {
   pari_sp av;
   GEN y, c;
-  long j, k, n, rx = lg(x)-1;
+  long j, k, rx = lg(x)-1; /* != 0 due to init_suppl() */
 
-  if (!rx) pari_err_IMPL("suppl [empty matrix]");
-  n = nbrows(x);
   if (rx == n && r == 0) return gcopy(x);
   y = cgetg(n+1, t_MAT);
   av = avma; c = zero_zv(n);
@@ -3218,7 +3216,7 @@ suppl(GEN x)
   }
   avma = av; init_suppl(x);
   d = gauss_pivot(X,&r);
-  avma = av; return get_suppl(X,d,r,&col_ei);
+  avma = av; return get_suppl(X,d,nbrows(X),r,&col_ei);
 }
 GEN
 FpM_suppl(GEN x, GEN p)
@@ -3227,7 +3225,7 @@ FpM_suppl(GEN x, GEN p)
   GEN d;
   long r;
   init_suppl(x); d = FpM_gauss_pivot(x,p, &r);
-  avma = av; return get_suppl(x,d,r,&col_ei);
+  avma = av; return get_suppl(x,d,nbrows(x),r,&col_ei);
 }
 GEN
 Flm_suppl(GEN x, ulong p)
@@ -3236,7 +3234,7 @@ Flm_suppl(GEN x, ulong p)
   GEN d;
   long r;
   init_suppl(x); d = Flm_gauss_pivot(Flm_copy(x),p, &r);
-  avma = av; return get_suppl(x,d,r,&vecsmall_ei);
+  avma = av; return get_suppl(x,d,nbrows(x),r,&vecsmall_ei);
 
 }
 GEN
@@ -3246,7 +3244,7 @@ F2m_suppl(GEN x)
   GEN d;
   long r;
   init_suppl(x); d = F2m_gauss_pivot(F2m_copy(x), &r);
-  avma = av; return get_suppl(x,d,r,&F2v_ei);
+  avma = av; return get_suppl(x,d,mael(x,1,1),r,&F2v_ei);
 }
 
 GEN
@@ -3259,7 +3257,7 @@ FqM_suppl(GEN x, GEN T, GEN p)
   if (!T) return FpM_suppl(x,p);
   init_suppl(x);
   d = FqM_gauss_pivot(x,T,p,&r);
-  avma = av; return get_suppl(x,d,r,&col_ei);
+  avma = av; return get_suppl(x,d,nbrows(x),r,&col_ei);
 }
 
 GEN
