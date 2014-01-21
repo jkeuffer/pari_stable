@@ -44,6 +44,7 @@
 1
 1
 1
+1
 [x, 1]
 [(-78/43*y^2 - 14/43*y + 173/43)*x^2 + (60/43*y^2 + 24/43*y - 143/43)*x + (-
 23/43*y^2 - 35/43*y + 110/43), 1]
@@ -747,4 +748,4 @@ error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (2 elts).
 [0  1   [1/2, 1/2]~]
 
 1
-Total time spent: 328
+Total time spent: 428

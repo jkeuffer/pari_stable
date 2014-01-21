@@ -1495,17 +1495,18 @@ nf_deg1_prime(GEN nf)
 long
 rnfisabelian(GEN nf, GEN pol)
 {
-  GEN modpr, pr, T, pp, ro, nfL, C, z, a, sig, eq;
+  GEN modpr, pr, T, Tnf, pp, ro, nfL, C, z, a, sig, eq;
   long i, j, l, v;
   ulong p, k, ka;
 
   if (typ(nf) == t_POL)
-    v = varn(nf);
+    Tnf = nf;
   else {
     nf = checknf(nf);
-    v = nf_get_varn(nf);
+    Tnf = nf_get_pol(nf);
   }
-  pol = RgX_nffix("rnfisabelian",nf,pol,1);
+  v = varn(Tnf);
+  pol = RgX_nffix("rnfisabelian",Tnf,pol,1);
   eq = nf_rnfeq(nf,pol); /* init L := K[x]/(pol), nf associated to K */
   C = gel(eq,1); setvarn(C, v); /* L = Q[t]/(C) */
   a = gel(eq,2); setvarn(a, v); /* root of K.pol in L */
