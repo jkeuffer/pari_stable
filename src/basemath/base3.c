@@ -1420,7 +1420,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 {
   pari_sp av = avma;
   long a, e = itos(ep), f = pr_get_f(pr);
-  GEN p = pr_get_p(pr), list, g, g0, y, u,v, prh, prb, pre;
+  GEN p = pr_get_p(pr), list, g, g0, y, u,v, prb, pre;
   ulong mask;
 
   if(DEBUGLEVEL>3) err_printf("treating pr^%ld, pr = %Ps\n",e,pr);
@@ -1433,16 +1433,19 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     g = poltobasis(nf, g);
   }
   /* g generates  (Z_K / pr)^* */
-  prh = idealhnf_two(nf,pr);
-  pre = (e==1)? prh: idealpow(nf,pr,ep);
-  g0 = g;
-  u = v = NULL; /* gcc -Wall */
+  prb = idealhnf_two(nf,pr);
+  pre = (e==1)? prb: idealpow(nf,pr,ep);
   if (x)
   {
     GEN uv = idealaddtoone(nf,pre, idealdivpowprime(nf,x,pr,ep));
     u = gel(uv,1);
     v = zk_scalar_or_multable(nf, gel(uv,2));
     g0 = makeprimetoideal(x,u,v,g);
+  }
+  else
+  {
+    u = v = NULL; /* gcc -Wall */
+    g0 = g;
   }
 
   y = mkvec5(mkvec(addis(powiu(p,f), -1)),
@@ -1454,7 +1457,6 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   list = vectrunc_init(e+1);
   vectrunc_append(list, y);
   mask = quadratic_prec_mask(e);
-  prb = prh;
   a = 1;
   while (mask > 1)
   {
@@ -1574,32 +1576,35 @@ nfarchstar(GEN nf, GEN x, GEN archp)
   return mkvec3(cyc,gen,mat);
 }
 
+static GEN
+apply_U(GEN U, GEN a)
+{
+  GEN e;
+  if (typ(a) == t_INT)
+    e = RgC_Rg_mul(gel(U,1), subis(a, 1));
+  else
+  { /* t_COL */
+    GEN t = gel(a,1);
+    gel(a,1) = addsi(-1, gel(a,1)); /* a -= 1 */
+    e = RgM_RgC_mul(U, a);
+    gel(a,1) = t; /* restore */
+  }
+  return e;
+}
 /* a in Z_K (t_COL or t_INT), pr prime ideal, prk = pr^k,
  * list = zprimestar(nf, pr, k, ...)  */
 static GEN
 zlog_pk(GEN nf, GEN a, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
 {
-  GEN L, e, cyc, gen, s, U;
   long i,j, llist = lg(list)-1;
-
   for (j = 1; j <= llist; j++)
   {
-    L = gel(list,j);
-    cyc = gel(L,1);
-    gen = gel(L,2);
-    s   = gel(L,4);
-    U   = gel(L,5);
+    GEN L = gel(list,j), e;
+    GEN cyc = gel(L,1), gen = gel(L,2), s = gel(L,4), U = gel(L,5);
     if (j == 1)
       e = mkcol( nf_log(nf, a, gel(gen,1), gel(cyc,1), pr) );
     else if (typ(a) == t_INT)
-      e = RgC_Rg_mul(gel(U,1), subis(a, 1));
-    else
-    { /* t_COL */
-      GEN t = gel(a,1);
-      gel(a,1) = addsi(-1, gel(a,1)); /* a -= 1 */
-      e = RgM_RgC_mul(U, a);
-      gel(a,1) = t; /* restore */
-    }
+      e = apply_U(U, a);
     /* here lg(e) == lg(cyc) */
     for (i = 1; i < lg(cyc); i++)
     {
@@ -1942,6 +1947,98 @@ Idealstar(GEN nf, GEN ideal, long flag)
   add_grp(nf, u1, cyc, gen, y);
   if (!(flag & nf_INIT)) y = gel(y,2);
   return gerepilecopy(av, y);
+}
+
+/* vectors of [[cyc],[g],U.X^-1] */
+static GEN
+principal_units_i(GEN nf, GEN pr, long e)
+{
+  pari_sp av = avma;
+  long a;
+  GEN list, y, prb, pre;
+  ulong mask;
+
+  if(DEBUGLEVEL>3) err_printf("treating pr^%ld, pr = %Ps\n",e,pr);
+  if (e == 1) return cgetg(1, t_VEC);
+  prb = idealhnf_two(nf,pr);
+  pre = idealpows(nf,pr,e);
+  list = vectrunc_init(e);
+  mask = quadratic_prec_mask(e);
+  a = 1;
+  while (mask > 1)
+  {
+    GEN pra = prb, z, U;
+    long b = a << 1;
+
+    if (mask & 1) b--;
+    mask >>= 1;
+    /* compute 1 + pr^a / 1 + pr^b, 2a <= b */
+    if(DEBUGLEVEL>3) err_printf("  treating a = %ld, b = %ld\n",a,b);
+    prb = (b >= e)? pre: idealpows(nf,pr,b);
+    z = zidealij(pra, prb, &U);
+    y = mkvec3(gel(z,1), gel(z,2), U);
+    vectrunc_append(list, y);
+    a = b;
+  }
+  return gerepilecopy(av, list);
+}
+
+static GEN
+log_prk(GEN nf, GEN a, long nbgen, GEN list, GEN prk)
+{
+  GEN y = zerocol(nbgen);
+  long i,j, iy = 1, llist = lg(list)-1;
+
+  for (j = 1; j <= llist; j++)
+  {
+    GEN L = gel(list,j);
+    GEN cyc = gel(L,1), gen = gel(L,2), U = gel(L,3);
+    GEN e = apply_U(U, a);
+    /* here lg(e) == lg(cyc) */
+    for (i = 1; i < lg(cyc); i++)
+    {
+      GEN t = modii(negi(gel(e,i)), gel(cyc,i));
+      gel(y, iy++) = negi(t); if (!signe(t)) continue;
+      if (j != llist) a = elt_mulpow_modideal(nf, a, gel(gen,i), t, prk);
+    }
+  }
+  return y;
+}
+
+/* multiplicative group (1 + pr) / (1 + pr^e) */
+GEN
+principal_units(GEN nf, GEN pr, long e)
+{
+  pari_sp av = avma;
+  long c, i, j, k, nbgen;
+  GEN cyc, u1 = NULL, pre, gen;
+  GEN g, EX, h, L2;
+  long cp = 0;
+
+  nf = checknf(nf); pre = idealpows(nf, pr, e);
+  L2 = principal_units_i(nf, pr, e);
+  c = lg(L2); gen = cgetg(c, t_VEC);
+  for (j = 1; j < c; j++) gel(gen, j) = gmael(L2,j,2);
+  gen = shallowconcat1(gen); nbgen = lg(gen)-1;
+
+  h = cgetg(nbgen+1,t_MAT);
+  for (j=1; j < lg(L2); j++)
+  {
+    GEN L = gel(L2,j), F = gel(L,1), G = gel(L,2);
+    for (k=1; k<lg(G); k++)
+    { /* log(g^f) mod pr^e */
+      GEN g = gel(G,k), f = gel(F,k), a = nfpowmodideal(nf,g,f,pre);
+      gel(h,++cp) = ZC_neg(log_prk(nf, a, nbgen, L2, pre));
+      gcoeff(h,cp,cp) = f;
+    }
+  }
+  /* assert(cp == nbgen) */
+  h = ZM_hnfall(h,NULL,0);
+  cyc = ZM_snf_group(h, NULL, &u1);
+  c = lg(u1); g = cgetg(c, t_VEC); EX = gel(cyc,1);
+  for (i=1; i<c; i++)
+    gel(g,i) = famat_to_nf_modideal_coprime(nf, gen, gel(u1,i), pre, EX);
+  return gerepilecopy(av, mkvec3(powiu(pr_norm(pr), e-1), cyc, g));
 }
 
 /* FIXME: obsolete */

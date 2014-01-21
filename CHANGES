@@ -214,7 +214,8 @@ BA 37- GP function logint
 PB 38- [libpari] gen_matmul, gen_matcolmul, FFM_mul, FqM_FqC_mul, FqM_mul,
        F2xqM_mul, F2xqM_F2xqC_mul, FlxqM_FlxqC_mul, FlxqM_mul.
    39- [libpari] Flx_equal, F2x_equal
-BA 40- libpari functions FpM_powu/Flm_powu/F2m_powu
+BA 40- [libpari] FpM_powu/Flm_powu/F2m_powu
+   41- [libpari] principal_units
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

@@ -959,6 +959,11 @@ generators, which are furthermore congruent to $1$ mod $f_0$ (no condition if
 $f_0 = \Z_K$), and $M$ is the matrix of signs of the $g[i]$ at $f_\infty$,
 which is square and invertible over $\F_2$.
 
+\fun{GEN}{principal_units}{GEN nf, GEN pr, long e} returns the multiplicative
+group $(1 + \var{pr}) / (1 + \var{pr}^e)$ as an abelian group. Much faster
+than \tet{idealstar} when the norm of \var{pr} is large, since it avoids the
+need to compute discrete logarithms in the residue field.
+
 \subsec{Maximal order and discriminant}
 
 A number field $K = \Q[X]/(T)$ is defined by a monic $T\in\Z[X]$. The
