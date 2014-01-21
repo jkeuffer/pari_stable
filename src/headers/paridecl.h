@@ -1346,6 +1346,7 @@ ulong   init_primepointer_leq(ulong a, byteptr *pd);
 ulong   init_primepointer_lt(ulong a, byteptr *pd);
 int     is_Z_factor(GEN f);
 int     is_Z_factornon0(GEN f);
+int     is_Z_factorpos(GEN f);
 ulong   maxprime(void);
 void    maxprime_check(ulong c);
 GEN     sumdigits(GEN n);
