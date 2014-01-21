@@ -1603,7 +1603,7 @@ zlog_pk(GEN nf, GEN a, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     GEN cyc = gel(L,1), gen = gel(L,2), s = gel(L,4), U = gel(L,5);
     if (j == 1)
       e = mkcol( nf_log(nf, a, gel(gen,1), gel(cyc,1), pr) );
-    else if (typ(a) == t_INT)
+    else
       e = apply_U(U, a);
     /* here lg(e) == lg(cyc) */
     for (i = 1; i < lg(cyc); i++)
