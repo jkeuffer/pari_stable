@@ -1049,12 +1049,13 @@ eulerphiu_fact(GEN f)
   }
   return m;
 }
-/* assume n != 0 */
 ulong
 eulerphiu(ulong n)
 {
   pari_sp av = avma;
-  GEN F = factoru(n);
+  GEN F;
+  if (!n) return 2;
+  F = factoru(n);
   avma = av; return eulerphiu_fact(F);
 }
 GEN
@@ -1064,7 +1065,7 @@ eulerphi(GEN n)
   GEN Q, F, P, E;
   long i, l;
 
-  if ((F = check_arith_non0(n,"eulerphi")))
+  if ((F = check_arith_all(n,"eulerphi")))
   {
     F = clean_Z_factor(F);
     if (typ(n) == t_VEC && lgefint(gel(n,1)) == 3)
@@ -1078,6 +1079,7 @@ eulerphi(GEN n)
   else if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
   else
     F = absi_factor(n);
+  if (!signe(n)) return gen_2;
   P = gel(F,1);
   E = gel(F,2); l = lg(P);
   Q = cgetg(l, t_VEC);
