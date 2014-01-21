@@ -23,7 +23,7 @@ error("domain error in moebius: argument = 0")
 [0, 1]
 error("domain error in omega: argument = 0")
 error("domain error in bigomega: argument = 0")
-error("domain error in eulerphi: argument = 0")
+2
 error("domain error in numdiv: argument = 0")
 error("domain error in sumdiv: argument = 0")
 error("domain error in sumdivk: argument = 0")
@@ -34,7 +34,7 @@ error("incorrect type in moebius (t_MAT).")
 [0, 1]
 error("incorrect type in omega (t_MAT).")
 error("incorrect type in bigomega (t_MAT).")
-error("incorrect type in eulerphi (t_MAT).")
+2
 error("incorrect type in numdiv (t_MAT).")
 error("incorrect type in sumdiv (t_MAT).")
 error("incorrect type in sumdivk (t_MAT).")
@@ -89,4 +89,4 @@ x^10 + 16*x^9 + 115*x^8 + 491*x^7 + 1387*x^6 + 2729*x^5 + 3822*x^4 + 3805*x^
 3 + 2616*x^2 + 1146*x + 252
 x^10 + 16*x^9 + 115*x^8 + 491*x^7 + 1387*x^6 + 2729*x^5 + 3822*x^4 + 3805*x^
 3 + 2616*x^2 + 1146*x + 252
-Total time spent: 4
+Total time spent: 0

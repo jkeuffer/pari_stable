@@ -1068,7 +1068,8 @@ eulerphi(GEN n)
   if ((F = check_arith_all(n,"eulerphi")))
   {
     F = clean_Z_factor(F);
-    if (typ(n) == t_VEC && lgefint(gel(n,1)) == 3)
+    n = (typ(n) == t_VEC)? gel(n,1): factorback(F);
+    if (lgefint(n) == 3)
     {
       ulong e;
       F = mkmat2(ZV_to_nv(gel(F,1)), ZV_to_nv(gel(F,2)));
