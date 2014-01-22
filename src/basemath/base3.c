@@ -2158,16 +2158,17 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
 {
   pari_sp av = avma;
   long i, nbgen, lx, lx1,lx2, l1,l2;
-  GEN I1,I2, f1,f2, G1,G2, fa1,fa2, lists1,lists2, cyc1,cyc2;
+  GEN I1,I2, G1,G2, fa1,fa2, lists1,lists2, cyc1,cyc2;
   GEN lists, fa, U, cyc, y, u1 = NULL, x, gen;
 
-  f1 = gel(bid1,1); I1 = gel(f1,1);
-  f2 = gel(bid2,1); I2 = gel(f2,1);
+  I1 = bid_get_ideal(bid1);
+  I2 = bid_get_ideal(bid2);
   if (gequal1(gcoeff(I1,1,1))) return bid2; /* frequent trivial case */
-  G1 = gel(bid1,2); G2 = gel(bid2,2);
-  fa1= gel(bid1,3); fa2= gel(bid2,3); x = idealmul(nf, I1,I2);
+  G1 = bid_get_group(bid1);
+  G2 = bid_get_group(bid2);
+  fa1= gel(bid1,3);
+  fa2= gel(bid2,3); x = idealmul(nf, I1,I2);
   fa = famat_mul_shallow(fa1, fa2);
-
   lists1 = gel(bid1,4); lx1 = lg(lists1);
   lists2 = gel(bid2,4); lx2 = lg(lists2);
   /* concat (lists1 - last elt [nfarchstar]) + lists2 */
@@ -2175,12 +2176,12 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   for (i=1; i<lx1-1; i++) gel(lists,i) = gel(lists1,i);
   for (   ; i<lx; i++)    gel(lists,i) = gel(lists2,i-lx1+2);
 
-  cyc1 = gel(G1,2); l1 = lg(cyc1);
-  cyc2 = gel(G2,2); l2 = lg(cyc2);
+  cyc1 = abgrp_get_cyc(G1); l1 = lg(cyc1);
+  cyc2 = abgrp_get_cyc(G2); l2 = lg(cyc2);
   gen = (lg(G1)>3 && lg(G2)>3)? gen_1: NULL;
   nbgen = l1+l2-2;
   cyc = ZM_snf_group(diagonal_shallow(shallowconcat(cyc1,cyc2)),
-                 &U, gen? &u1: NULL);
+                     &U, gen? &u1: NULL);
   if (nbgen) {
     GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
     U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): ZM_mul(vecslice(U, 1, l1-1),   U1);
@@ -2192,7 +2193,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
 
   if (gen)
   {
-    GEN mu,mv, u,v, uv = idealaddtoone(nf,gel(f1,1),gel(f2,1));
+    GEN mu,mv, u,v, uv = idealaddtoone(nf,I1,I2);
     u = gel(uv,1);
     v = gel(uv,2);
     mv = zk_scalar_or_multable(nf, v);
@@ -2204,7 +2205,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
                         makeprimetoidealvec(x,v,mu, gel(G2,3)));
   }
   y = cgetg(6,t_VEC);
-  gel(y,1) = mkvec2(x, gel(f1,2));
+  gel(y,1) = mkvec2(x, bid_get_arch(bid1));
   gel(y,3) = fa;
   gel(y,4) = lists;
   gel(y,5) = U;
