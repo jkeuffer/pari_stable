@@ -74,10 +74,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-#ifdef ENABLE_TLS
-static THREAD char *saveptr;
-#define strtok(x,y) strtok_r(x,y,&saveptr)
-#endif
+static char *
+paristrtok_r(char *str, const char *delim, char **saveptr)
+{
+  char *res;
+  if (!str) str = *saveptr;
+  str += strspn(str, delim);
+  if (!*str) return NULL;
+  res = str;
+  str += strcspn(str, delim);
+  if (*str) *str++ = 0;
+  *saveptr = str;
+  return res;
+}
 
 /** DEBUG **/
 /* #define MPQS_DEBUG_VERBOSE 1 */
@@ -1847,22 +1856,22 @@ mpqs_add_0(char **last) {
 static GEN
 mpqs_factorback(mpqs_handle_t *h, char *relations)
 {
-  char *s, *t = stack_strdup(relations);
+  char *s, *t = stack_strdup(relations), *tok;
   GEN p_e, N = h->N, prod = gen_1;
   long i;
   mpqs_FB_entry_t *FB = h->FB;
 
-  s = strtok(t, " \n");
+  s = paristrtok_r(t, " \n", &tok);
   while (s != NULL)
   {
     e = atol(s); if (!e) break;
-    s = strtok(NULL, " \n");
+    s = paristrtok_r(NULL, " \n", &tok);
     i = atol(s);
     /* special case -1 */
-    if (i == 1) { prod = subii(N, prod); s = strtok(NULL, " \n"); continue; }
+    if (i == 1) { prod = subii(N, prod); s = paristrtok_r(NULL, " \n", &tok); continue; }
     p_e = Fp_powu(utoipos(FB[i].fbe_p), (ulong)e, N);
     prod = remii(mulii(prod, p_e), N);
-    s = strtok(NULL, " \n");
+    s = paristrtok_r(NULL, " \n", &tok);
   }
   return prod;
 }
@@ -2142,17 +2151,17 @@ typedef struct {
 static void
 mpqs_set_exponents(long *ei, char *r)
 {
-  char *s, b[MPQS_STRING_LENGTH];
+  char *s, b[MPQS_STRING_LENGTH], *tok;
   long e;
 
   strcpy(b, r);
-  s = strtok(b, " \n");
+  s = paristrtok_r(b, " \n", &tok);
   while (s != NULL)
   {
     e = atol(s); if (!e) break;
-    s = strtok(NULL, " \n");
+    s = paristrtok_r(NULL, " \n", &tok);
     ei[ atol(s) ] += e;
-    s = strtok(NULL, " \n");
+    s = paristrtok_r(NULL, " \n", &tok);
   }
 }
 
@@ -2321,18 +2330,20 @@ stream_read_F2m(pariFILE *pFREL, long rows, long cols, long *fpos)
     m = zero_F2m_copy(rows, cols);
   for (i = 0;; i++)
   {
+    char *tok=NULL;
     if (i < cols && (fpos[i] = ftell(FREL)) < 0)
       pari_err_FILE("full relations file [ftell]", pFREL->name);
     if (!fgets(buf, MPQS_STRING_LENGTH, FREL)) break;
-    s = strchr(buf, ':') + 2;
-    s = strtok(s, " \n");
+    s = strchr(buf, ':');
+    if (!s) pari_err_FILE("full relations file [strchr]", pFREL->name);
+    s = paristrtok_r(s+2, " \n", &tok);
     while (s != NULL)
     {
       e = atol(s); if (!e) break;
-      s = strtok(NULL, " \n");
+      s = paristrtok_r(NULL, " \n", &tok);
       p = atol(s);
       if (e & 1) F2m_set(m, p, i+1);
-      s = strtok(NULL, " \n");
+      s = paristrtok_r(NULL, " \n", &tok);
     }
   }
   if (i != cols)
@@ -2350,22 +2361,22 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 {
   pari_sp av = avma;
   GEN res;
-  char *s;
+  char *s, *tok;
 
   s = strchr(rel, ':') - 1;
   *s = '\0';
 
   res = remii(mulii(Y_prod, strtoi(rel)), N);
 
-  s = strtok(s + 3, " \n");
+  s = paristrtok_r(s + 3, " \n", &tok);
   while (s != NULL)
   {
     long e = atol(s), i;
     if (!e) break;
-    s = strtok(NULL, " \n");
+    s = paristrtok_r(NULL, " \n", &tok);
     i = atol(s); /* bug in g++-3.4.1: miscompiles ei[ atol(s) ] */
     ei[i] += e;
-    s = strtok(NULL, " \n");
+    s = paristrtok_r(NULL, " \n", &tok);
   }
   return gerepileuptoint(av, res);
 }
