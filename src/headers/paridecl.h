@@ -1371,7 +1371,7 @@ void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);
 void    checkbnr(GEN bnr);
 void    checkbnrgen(GEN bnr);
-void    checkabelian_group(GEN v);
+void    checkabgrp(GEN v);
 void    checksqmat(GEN x, long N);
 GEN     checknf(GEN nf);
 GEN     checknfelt_mod(GEN nf, GEN x, const char *s);
@@ -3610,12 +3610,17 @@ INLINE GEN    uutoineg(ulong x, ulong y);
 INLINE long   vali(GEN x);
 
 /* pariinl.h */
+INLINE GEN    abgrp_get_cyc(GEN x);
+INLINE GEN    abgrp_get_gen(GEN x);
+INLINE GEN    abgrp_get_no(GEN x);
 INLINE GEN    bid_get_arch(GEN bid);
 INLINE GEN    bid_get_cyc(GEN bid);
 INLINE GEN    bid_get_gen(GEN bid);
 INLINE GEN    bid_get_gen_nocheck(GEN bid);
+INLINE GEN    bid_get_grp(GEN bid);
 INLINE GEN    bid_get_ideal(GEN bid);
 INLINE GEN    bid_get_mod(GEN bid);
+INLINE GEN    bid_get_no(GEN bid);
 INLINE GEN    bnf_get_clgp(GEN bnf);
 INLINE GEN    bnf_get_cyc(GEN bnf);
 INLINE GEN    bnf_get_fu(GEN bnf);

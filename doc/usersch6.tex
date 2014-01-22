@@ -79,9 +79,18 @@ prime ideal structure.
 if one can be extracted from \kbd{ideal} (ideal or extended ideal), and
 return \kbd{NULL} otherwise.
 
-\fun{void}{checkabelian_group}{GEN v} Raise an exception if the argument
+\fun{void}{checkabgrp}{GEN v} Raise an exception if the argument
 is not an abelian group structure, i.e. a \typ{VEC} with either $2$ or $3$
 entries: $[N,\var{cyc}]$ or $[N,\var{cyc}, \var{gen}]$.
+
+\fun{GEN}{abgrp_get_no}{GEN x}
+ extract the cardinality $N$ from an abelian group structure.
+
+\fun{GEN}{abgrp_get_cyc}{GEN x}
+ extract the elementary divisors \var{cyc} from an abelian group structure.
+
+\fun{GEN}{abgrp_get_gen}{GEN x}
+ extract the generators \var{gen} from an abelian group structure.
 
 \fun{void}{checkmodpr}{GEN modpr} Raise an exception if the argument is not a
  prime ideal structure.
@@ -310,11 +319,17 @@ in a number field $K$.
 
 \fun{GEN}{bid_get_mod}{GEN bid} returns the modulus associated to the \var{bid}.
 
+\fun{GEN}{bid_get_grp}{GEN bid} returns the Abelian group associated
+to $(\Z_K/I)^*$modulus associated to the \var{bid}.
+
 \fun{GEN}{bid_get_ideal}{GEN bid} return the finite part of the \var{bid}
 modulus (an integer ideal).
 
 \fun{GEN}{bid_get_arch}{GEN bid} return the Archimedean part of the \var{bid}
 modulus (a vector of real places).
+
+\fun{GEN}{bid_get_no}{GEN bid} returns the cardinality of the
+group $(\Z_K/I)^*$.
 
 \fun{GEN}{bid_get_cyc}{GEN bid} returns the elementary divisors
 of the group $(\Z_K/I)^*$ (cyclic components) $[d_1,\ldots, d_k]$, where $d_k

@@ -309,7 +309,7 @@ _member_clgp(GEN x, GEN y, long t) /* class group (3-component row vector) */
 }
 static GEN
 _check_clgp(GEN x, GEN y, long t)
-{ GEN c = _member_clgp(x,y,t); checkabelian_group(c); return c; }
+{ GEN c = _member_clgp(x,y,t); checkabgrp(c); return c; }
 GEN
 member_clgp(GEN x)
 { long t; GEN y = get_bnf(x,&t); return _check_clgp(x,y,t); }

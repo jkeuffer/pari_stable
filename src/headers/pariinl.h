@@ -2365,15 +2365,21 @@ nf_get_sign(GEN nf, long *r1, long *r2)
 }
 
 INLINE GEN
+abgrp_get_no(GEN x) { return gel(x,1); }
+INLINE GEN
+abgrp_get_cyc(GEN x) { return gel(x,2); }
+INLINE GEN
+abgrp_get_gen(GEN x) { return gel(x,3); }
+INLINE GEN
 bnf_get_nf(GEN bnf) { return gel(bnf,7); }
 INLINE GEN
 bnf_get_clgp(GEN bnf) { return gmael(bnf,8,1); }
 INLINE GEN
-bnf_get_no(GEN bnf) { return gmael3(bnf,8,1,1); }
+bnf_get_no(GEN bnf) { return abgrp_get_no(bnf_get_clgp(bnf)); }
 INLINE GEN
-bnf_get_cyc(GEN bnf) { return gmael3(bnf,8,1,2); }
+bnf_get_cyc(GEN bnf) { return abgrp_get_cyc(bnf_get_clgp(bnf)); }
 INLINE GEN
-bnf_get_gen(GEN bnf) { return gmael3(bnf,8,1,3); }
+bnf_get_gen(GEN bnf)  { return abgrp_get_gen(bnf_get_clgp(bnf)); }
 INLINE GEN
 bnf_get_reg(GEN bnf) { return gmael(bnf,8,2); }
 INLINE GEN
@@ -2402,11 +2408,11 @@ bnr_get_nf(GEN bnr) { return gmael(bnr,1,7); }
 INLINE GEN
 bnr_get_clgp(GEN bnr) { return gel(bnr,5); }
 INLINE GEN
-bnr_get_no(GEN bnr) { return gmael(bnr,5,1); }
+bnr_get_no(GEN bnr) { return abgrp_get_no(bnr_get_clgp(bnr)); }
 INLINE GEN
-bnr_get_cyc(GEN bnr) { return gmael(bnr,5,2); }
+bnr_get_cyc(GEN bnr) { return abgrp_get_cyc(bnr_get_clgp(bnr)); }
 INLINE GEN
-bnr_get_gen_nocheck(GEN bnr) { return gmael(bnr,5,3); }
+bnr_get_gen_nocheck(GEN bnr) { return abgrp_get_gen(bnr_get_clgp(bnr)); }
 INLINE GEN
 bnr_get_gen(GEN bnr) {
   GEN G = bnr_get_clgp(bnr);
@@ -2422,14 +2428,18 @@ bid_get_ideal(GEN bid) { return gmael(bid,1,1); }
 INLINE GEN
 bid_get_arch(GEN bid) { return gmael(bid,1,2); }
 INLINE GEN
-bid_get_cyc(GEN bid) { return gmael(bid,2,2); }
+bid_get_grp(GEN bid) { return gel(bid,2); }
 INLINE GEN
-bid_get_gen_nocheck(GEN bid) { return gmael(bid,2,3); }
+bid_get_no(GEN bid) { return abgrp_get_no(bid_get_grp(bid)); }
+INLINE GEN
+bid_get_cyc(GEN bid) { return abgrp_get_cyc(bid_get_grp(bid)); }
+INLINE GEN
+bid_get_gen_nocheck(GEN bid)  { return abgrp_get_gen(bid_get_grp(bid)); }
 INLINE GEN
 bid_get_gen(GEN bid) {
-  GEN G = gel(bid, 2);
+  GEN G = bid_get_grp(bid);
   if (lg(G) != 4) pari_err(e_MISC,"missing bid generators. Use idealstar(,,2)");
-  return gel(G,3);
+  return abgrp_get_gen(G);
 }
 INLINE GEN
 gal_get_pol(GEN gal) { return gel(gal,1); }

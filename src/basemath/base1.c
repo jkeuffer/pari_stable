@@ -107,7 +107,7 @@ checkbid(GEN bid)
   if (!checkbid_i(bid)) pari_err_TYPE("checkbid",bid);
 }
 void
-checkabelian_group(GEN v)
+checkabgrp(GEN v)
 {
   if (typ(v) == t_VEC) switch(lg(v))
   {
@@ -117,7 +117,7 @@ checkabelian_group(GEN v)
             return;/*OK*/
     default: break;
   }
-  pari_err_TYPE("checkabelian_group",v);
+  pari_err_TYPE("checkabgrp",v);
 }
 
 GEN

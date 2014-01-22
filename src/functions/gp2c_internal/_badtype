@@ -12,6 +12,6 @@ Description:
  (*bnf):void:parens             $1 = checkbnf($1)
  (bnr):void                     checkbnr($1)
  (prid):void                    checkprid($1)
- (clgp):void                    checkabelian_group($1)
+ (clgp):void                    checkabgrp($1)
  (ell):void                     checkell($1)
  (*gal):gal:parens              $1 = checkgal($1)
