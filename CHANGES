@@ -158,6 +158,7 @@ BA 35- FlxYqQ_pow: renamed to FlxYqq_pow, and moduli order changed.
    36- idealstar(K,id), allow to input 'id' as a factorization into prime
        ideals, as produced by idealfactor
    37- define eulerphi(0) = 2 [ now eulerphi(n) = znstar(n).no for all n ]
+   38- allow subst(t_SER,x,exact 0): subst(2+O(x),x,Mod(0,3))->Mod(2,3) [#1513]
 
   Added
 EP  1- Configure option for gcov/lcov support

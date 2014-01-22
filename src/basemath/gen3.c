@@ -1416,7 +1416,14 @@ gsubst(GEN x, long v, GEN y)
           return gerepileupto(av, z);
         }
 
-        default: pari_err_TYPE2("substitution",x,y);
+        default:
+          if (isexactzero(y))
+          {
+            if (ex < 0) pari_err_INV("gsubst",y);
+            if (ex > 0) return gcopy(y);
+            if (lx > 2) return gadd(gel(x,2), y); /*add maps to correct ring*/
+          }
+          pari_err_TYPE2("substitution",x,y);
       }
       break;
 

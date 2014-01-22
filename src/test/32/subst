@@ -2,6 +2,14 @@ Y/x
 x + 1
 0
 O(x^2)
+  ***   at top-level: subst(x+O(x^2),x,Mod
+  ***                 ^--------------------
+  *** subst: forbidden substitution t_SER , t_INTMOD.
+Mod(0, 3)
+  ***   at top-level: subst(1/x+O(x^2),x,M
+  ***                 ^--------------------
+  *** subst: impossible inverse in gsubst: Mod(0, 3).
+Mod(2, 3)
 -1/-y
 Mod(y*x, y^2*x^2 + 1)
 y*x/(y^2*x^2 + 1)
@@ -13,4 +21,4 @@ x^2 + y^2*x^3 + O(x^4)
   ***                 ^--------------------
   *** subst: forbidden substitution t_INT , t_MAT (1x2).
 4*y^2 + O(y^3)
-Total time spent: 4
+Total time spent: 0
