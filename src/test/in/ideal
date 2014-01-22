@@ -9,6 +9,8 @@ idealaddtoone(Q,[1,[;]])
 idealaddtoone(Q,[1,[;],Mat(1/2)])
 ideallog(Q,2,idealstar(Q,4,1))
 idealstar(Qi,matdiagonal([6,12]))
+P = idealprimedec(Qi,2)[1];
+idealprincipalunits(Qi,P,10)
 idealintersect(Qi, 1/2,1/2)
 ideallog(Q,1/2,idealstar(Q,3,1))
 

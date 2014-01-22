@@ -1951,7 +1951,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
 
 /* vectors of [[cyc],[g],U.X^-1] */
 static GEN
-principal_units_i(GEN nf, GEN pr, long e)
+principal_units(GEN nf, GEN pr, long e)
 {
   pari_sp av = avma;
   long a;
@@ -2007,7 +2007,7 @@ log_prk(GEN nf, GEN a, long nbgen, GEN list, GEN prk)
 
 /* multiplicative group (1 + pr) / (1 + pr^e) */
 GEN
-principal_units(GEN nf, GEN pr, long e)
+idealprincipalunits(GEN nf, GEN pr, long e)
 {
   pari_sp av = avma;
   long c, i, j, k, nbgen;
@@ -2016,7 +2016,7 @@ principal_units(GEN nf, GEN pr, long e)
   long cp = 0;
 
   nf = checknf(nf); pre = idealpows(nf, pr, e);
-  L2 = principal_units_i(nf, pr, e);
+  L2 = principal_units(nf, pr, e);
   c = lg(L2); gen = cgetg(c, t_VEC);
   for (j = 1; j < c; j++) gel(gen, j) = gmael(L2,j,2);
   gen = shallowconcat1(gen); nbgen = lg(gen)-1;
