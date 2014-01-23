@@ -937,7 +937,7 @@ step6(GEN N, ulong t, GEN et)
 static GEN
 aprcl(GEN N)
 {
-  GEN et, fat, flaglp, faet;
+  GEN et, fat, flaglp, faet = NULL; /*-Wall*/
   long i, j, l, ltab, lfat, lpC;
   ulong t;
   Red R;
