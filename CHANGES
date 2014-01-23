@@ -97,6 +97,7 @@ BA 63- Configure: --includedir was ignored
 BA 67- Configure --time=ftime actually tested times, not ftime. Remove ftime
        from the default list of timer functions (reports wallclock time, not
        CPU time) [#1523]
+   68- polredabs() could (find then) forget some polynomials [#1511]
 
   Changed
     1- default help text for a user function is now as in \u:

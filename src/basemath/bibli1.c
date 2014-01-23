@@ -1395,11 +1395,15 @@ clonefill(GEN S, long s, long t)
   return S;
 }
 
+/* increment ZV x, by incrementing cell of index k. Initial value x0[k] was
+ * chosen to minimize qf(x) for given x0[1..k-1] and x0[k+1,..] = 0
+ * The last non-zero entry must be positive and goes through x0[k]+1,2,3,...
+ * Others entries go through: x0[k]+1,-1,2,-2,...*/
 INLINE void
 step(GEN x, GEN y, GEN inc, long k)
 {
-  if (!signe(gel(y,k)))
-    gel(x,k) = addis(gel(x,k), 1); /* leading coeff > 0 */
+  if (!signe(gel(y,k))) /* x[k+1..] = 0 */
+    gel(x,k) = addiu(gel(x,k), 1); /* leading coeff > 0 */
   else
   {
     long i = inc[k];
@@ -1513,7 +1517,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 
   av = avma; lim = stack_lim(av,2);
   stockmax = stockall? 2000: maxnum;
-  if (check) norms = cgetg(stockmax+1,t_VEC);
+  norms = cgetg(check?(stockmax+1): 1,t_VEC); /* unused if (!check) */
   S = cgetg(stockmax+1,t_VEC);
   x = cgetg(N,t_COL);
   y = cgetg(N,t_COL);
@@ -1542,10 +1546,11 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   { /* x (supposedly) small vector, ZV.
      * For all t >= k, we have
      *   z[t] = sum_{j > t} q[t,j] * x[j]
-     *   y[t] = sum_{i > t} q[i,i] * (x[i] + z[i])^2 */
+     *   y[t] = sum_{i > t} q[i,i] * (x[i] + z[i])^2
+     *        = 0 <=> x[i]=0 for all i>t */
     do
     {
-      int fl = 0;
+      int skip = 0;
       if (k > 1)
       {
         long l = k-1;
@@ -1559,20 +1564,21 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         gel(y,l) = gerepileuptoleaf(av1, p1);
         /* skip the [x_1,...,x_skipfirst,0,...,0] */
         if ((l <= skipfirst && !signe(gel(y,skipfirst)))
-         || mplessthan(borne1, gel(y,l))) fl = 1;
-        else
+         || mplessthan(borne1, gel(y,l))) skip = 1;
+        else /* initial value, minimizing (x[l] + z[l])^2, hence qf(x) for
+                the given x[1..l-1] */
           gel(x,l) = mpround( mpneg(gel(z,l)) );
         k = l;
       }
       for(;; step(x,y,inc,k))
-      {
-        if (!fl)
+      { /* at most 2n loops */
+        if (!skip)
         {
           if (check_bound(borne1, gel(x,k),gel(y,k),gel(z,k),gel(v,k))) break;
           step(x,y,inc,k);
           if (check_bound(borne1, gel(x,k),gel(y,k),gel(z,k),gel(v,k))) break;
         }
-        fl = 0; inc[k] = 1;
+        skip = 0; inc[k] = 1;
         if (++k > n) goto END;
       }
 
@@ -1584,7 +1590,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
           GEN dummy = cgetg(1, t_STR);
           for (i=s+1; i<=stockmax; i++) gel(norms,i) = dummy;
         }
-        gerepileall(av,check?7:6,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
+        gerepileall(av,7,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
       }
     }
     while (k > 1);
@@ -1619,57 +1625,54 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       else
         if (mpcmp(norme1,normax1) > 0) normax1 = norme1;
     }
+    if (++s > stockmax) continue; /* too many vectors: no longer remember */
+    if (check) gel(norms,s) = norme1;
+    gel(S,s) = leafcopy(x);
+    if (s != stockmax) continue; /* still room, get next vector */
 
-    if (++s <= stockmax)
+    /* overflow, eliminate vectors failing "check" */
+    if (check)
     {
-      if (check) gel(norms,s) = norme1;
-      gel(S,s) = leafcopy(x);
-      if (s != stockmax) continue;
-      /* overflow */
-      if (check)
+      pari_sp av2 = avma;
+      long imin, imax;
+      GEN per = indexsort(norms);
+      if (DEBUGLEVEL>2) err_printf("sorting... [%ld elts]\n",s);
+      /* let N be the minimal norm so far for x satisfying 'check'. Keep
+       * all elements of norm N */
+      for (i = 1; i <= s; i++)
       {
-        pari_sp av2 = avma;
-        long imin, imax;
-        GEN per = indexsort(norms);
-        if (DEBUGLEVEL>2) err_printf("sorting... [%ld elts]\n",s);
-        /* let N be the minimal norm so far for x satisfying 'check'. Keep
-         * all elements of norm N */
-        for (i = 1; i <= s; i++)
-        {
-          long k = per[i];
-          if (check(data,gel(S,k))) { borne1 = gel(norms,k); break; }
-        }
-        imin = i;
-        for (; i <= s; i++)
-          if (mpgreaterthan(gel(norms,per[i]), borne1)) break;
-        imax = i;
-        for (i=imin, s=0; i < imax; i++) gel(S,++s) = gel(S,per[i]);
-        avma = av2;
-        if (s)
-        {
-          borne2 = mulrr(borne1, alpha);
-          checkcnt = 0;
-        }
-        if (!stockall) continue;
-        if (s > stockmax/2) stockmax <<= 1;
+        long k = per[i];
+        if (check(data,gel(S,k))) { borne1 = gel(norms,k); break; }
       }
-      else
+      imin = i;
+      for (; i <= s; i++)
+        if (mpgreaterthan(gel(norms,per[i]), borne1)) break;
+      imax = i;
+      for (i=imin, s=0; i < imax; i++) gel(S,++s) = gel(S,per[i]);
+      avma = av2;
+      if (s)
       {
-        if (!stockall && BORNE) goto END;
-        if (!stockall) continue;
-
-        stockmax <<= 1;
+        borne2 = mulrr(borne1, alpha);
+        checkcnt = 0;
       }
-
-      {
-        GEN Snew = cgetg(stockmax + 1, t_VEC);
-        for (i = 1; i <= s; i++) gel(Snew,i) = gel(S,i);
-        Snew = clonefill(Snew, s, stockmax);
-        if (isclone(S)) gunclone(S);
-        S = Snew;
-      }
+      if (!stockall) continue;
+      if (s > stockmax/2) stockmax <<= 1;
       norms = cgetg(stockmax+1, t_VEC);
-      for (i = 1; i <= s; i++) gel(norms,i) = norme1;
+      for (i = 1; i <= s; i++) gel(norms,i) = borne1;
+    }
+    else
+    {
+      if (!stockall && BORNE) goto END;
+      if (!stockall) continue;
+      stockmax <<= 1;
+    }
+
+    {
+      GEN Snew = cgetg(stockmax + 1, t_VEC);
+      for (i = 1; i <= s; i++) gel(Snew,i) = gel(S,i);
+      Snew = clonefill(Snew, s, stockmax);
+      if (isclone(S)) gunclone(S);
+      S = Snew;
     }
   }
 END:
