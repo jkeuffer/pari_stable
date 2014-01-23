@@ -19,8 +19,8 @@ else
     list=$timing_fun
   else
     case "$osname" in
-      *cygwin*) list='times ftime';; # getrusage based timer always returns 0
-      *) list='getrusage times ftime';;
+      *cygwin*) list='times';; # getrusage based timer always returns 0
+      *) list='getrusage times';;
     esac;
   fi; . ./look
 fi

@@ -94,6 +94,9 @@ BA 63- Configure: --includedir was ignored
        none of the internal .*[xX]_equal function check variable numbers.
    66- arithmetic functions did not accept factorizations of negative integers
        (whereas most of them are defined for negetive integers)
+BA 67- Configure --time=ftime actually tested times, not ftime. Remove ftime
+       from the default list of timer functions (reports wallclock time, not
+       CPU time) [#1523]
 
   Changed
     1- default help text for a user function is now as in \u:

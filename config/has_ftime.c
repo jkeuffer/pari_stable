@@ -1,7 +1,5 @@
-# include <sys/times.h>
-# include <sys/time.h>
-# include <time.h>
+# include <sys/timeb.h>
 int main() {
-  struct tms t; times(&t);
-  return (int)t.tms_utime;
+  struct timeb t; ftime(&t);
+  return t.time*1000+t.millitm;
 }
