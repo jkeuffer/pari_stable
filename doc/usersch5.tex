@@ -7700,8 +7700,21 @@ remainder is $O(T^{d+l})$.
 creates a \typ{SER} of length~\kbd{l} congruent to $x$. Not memory-clean
 but suitable for \kbd{gerepileupto}.
 
-\fun{GEN}{gtoser}{GEN x, long v} converts the object~\kbd{x} into a \typ{SER}
-with main variable number~\kbd{v}.
+\fun{GEN}{gtoser}{GEN s, long v, long d} converts the object~$s$ into
+a \typ{SER} with main variable number~\kbd{v} and $d > 0$ significant terms.
+More precisely
+
+\item if $s$ is a scalar,  we return a constant power series with $d$
+significant terms.
+
+\item if $s$ is a \typ{POL}, it is truncated to $d$ terms if needed.
+
+\item If $s$ is a vector, the coefficients of the vector  are understood to
+be the coefficients of the power series starting from the constant term (as
+in \tet{Polrev}), and the precision $d$ is \emph{ignored}.
+
+\item If $s$ is already a power series in $v$, we retur a copy, and
+the precision $d$ is again \emph{ignored}.
 
 \fun{GEN}{gtocol}{GEN x} converts the object~\kbd{x} into a \typ{COL}
 
