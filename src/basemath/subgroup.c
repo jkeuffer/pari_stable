@@ -593,7 +593,7 @@ subgrouplist_i(GEN CYC, GEN bound, GEN expoI, GEN gen)
   subgp_iter T;
   sublist_t S;
   slist *list, *sublist;
-  long ii,i,j,nbsub,n,N;
+  long ii,i,j,nbsub,n,N = 0; /* -Wall */
   GEN z, H, cyc;
 
   cyc = get_snf(CYC, &N);
