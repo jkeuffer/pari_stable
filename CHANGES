@@ -98,6 +98,7 @@ BA 67- Configure --time=ftime actually tested times, not ftime. Remove ftime
        from the default list of timer functions (reports wallclock time, not
        CPU time) [#1523]
    68- polredabs() could (find then) forget some polynomials [#1511]
+   69- poldisc(x^3 + Mod(2,3)*x^2) --> e_INV
 
   Changed
     1- default help text for a user function is now as in \u:
@@ -224,6 +225,7 @@ BA 40- [libpari] FpM_powu/Flm_powu/F2m_powu
    41- new GP function idealprincipalunits
    42- [libpari] checkabgrp, abgrp_get_no, abgrp_get_cyc, abgrp_get_gen,
        bid_get_grp, bid_get_no
+   43- [libpari] FpX_disc
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

@@ -279,12 +279,12 @@ Flm_neg(GEN y, ulong p)
 static GEN
 ZMrow_ZC_mul_i(GEN x, GEN y, long lx, long i)
 {
-  GEN c = mulii(gcoeff(x,i,1), gel(y,1)), ZERO = gen_0;
+  GEN c = mulii(gcoeff(x,i,1), gel(y,1));
   long k;
   for (k = 2; k < lx; k++)
   {
     GEN t = mulii(gcoeff(x,i,k), gel(y,k));
-    if (t != ZERO) c = addii(c, t);
+    if (signe(t)) c = addii(c, t);
   }
   return c;
 }

@@ -850,6 +850,17 @@ FpX_resultant(GEN a, GEN b, GEN p)
   return gerepileuptoint(av, res);
 }
 
+GEN
+FpX_disc(GEN x, GEN p)
+{
+  pari_sp av = avma;
+  GEN L, D = FpX_resultant(x, FpX_deriv(x,p), p);
+  if (!D || !signe(D)) return gen_0;
+  L = leading_term(x); if (!equali1(L)) D = Fp_div(D,L,p);
+  if (degpol(x) & 2) D = Fp_neg(D,p);
+  return gerepileuptoint(av, D);
+}
+
 static GEN _FpX_mul(void *p,GEN a,GEN b){return FpX_mul(a,b,(GEN)p);}
 GEN
 FpXV_prod(GEN V, GEN p)

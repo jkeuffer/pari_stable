@@ -2784,7 +2784,7 @@ static GEN
 RgX_disc_aux(GEN x)
 {
   long dx = degpol(x), Tx;
-  GEN D, L, y;
+  GEN D, L, y, p;
   if (!signe(x) || !dx) return RgX_get_0(x);
   if (dx == 1) return RgX_get_1(x);
   if (dx == 2) {
@@ -2794,13 +2794,19 @@ RgX_disc_aux(GEN x)
   Tx = RgX_simpletype(x);
   if (Tx == t_INT) return ZX_disc(x);
   if (Tx == t_FRAC) return QX_disc(x);
+  p = NULL;
+  if (RgX_is_FpX(x, &p) && p)
+    return Fp_to_mod(FpX_disc(RgX_to_FpX(x,p), p), p);
 
   y = RgX_deriv(x);
   if (!signe(y)) return RgX_get_0(y);
   if (Tx == t_REAL)
     D = resultant2(x,y);
   else
+  {
     D = RgX_resultant_all(x, y, NULL);
+    if (D == gen_0) return RgX_get_0(y);
+  }
   L = leading_term(x); if (!gequal1(L)) D = gdiv(D,L);
   if (dx & 2) D = gneg(D);
   return D;
