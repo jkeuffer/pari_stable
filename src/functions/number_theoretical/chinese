@@ -23,7 +23,7 @@ Doc: if $x$ and $y$ are both intmods or both polmods, creates (with the same
  %3 = [Mod(1, 10), Mod(16, 21)]
  @eprog\noindent
  For polynomial arguments in the same variable, the function is applied to each
- coefficient; if the polynomials have diferrent degrees, the high degree terms
+ coefficient; if the polynomials have different degrees, the high degree terms
  are copied verbatim in the result, as if the missing high degree terms in the
  polynomial of lowest degree had been \kbd{Mod(0,1)}. Since the latter
  behavior is usually \emph{not} the desired one, we propose to convert the
