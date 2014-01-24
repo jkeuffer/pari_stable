@@ -107,7 +107,7 @@ Doc:
  ? B = 10^5;
  ? nf = nfinit([T, B]);
  ? nfcertify(nf)
- %3 = []      \\ nf is unconditionnally correct
+ %3 = []      \\ nf is unconditionally correct
  ? basis = nf.zk;
  ? disc = nf.disc;
  @eprog

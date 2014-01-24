@@ -31,7 +31,7 @@ Doc: extracts the $n^{\text{th}}$-component of $x$. This is to be understood
  \bprog
      ? x = 3 + O(3^5);
      ? component(x, 2)
-     %2 = 81   \\ p^(p-adic acurracy)
+     %2 = 81   \\ p^(p-adic accuracy)
      ? component(x, 1)
      %3 = 3    \\ p
      ? q = Qfb(1,2,3);
