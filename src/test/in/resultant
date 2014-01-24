@@ -69,3 +69,5 @@ polresultantext(A, B, y)
 
 \\ #1509
 polresultantext(y^3+y,3*y^2+1,y)
+poldisc(x^3 + Mod(2,3)*x^2)
+poldisc(x^3 + Mod(2,3)*x^2+1)
