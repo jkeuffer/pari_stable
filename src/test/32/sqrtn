@@ -36,4 +36,9 @@
   *** sqrtn: impossible inverse in Fl_inv: Mod(2, 4).
 1.0000000000000000000000000000000000000
 0
+error("not an n-th power residue in Qp_sqrt: 1 + 2 + O(2^2).")
+error("not an n-th power residue in Qp_sqrt: 1 + 2 + O(2^3).")
+error("not an n-th power residue in gsqrt: Mod(2, 11).")
+error("not a prime number in Fl_sqrt [modulus]: 33.")
+0.E-5 + 0.E-5*I
 Total time spent: 4

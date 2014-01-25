@@ -1,3 +1,4 @@
+  ***   Warning: new stack size = 20000000 (19.073 Mbytes).
 5.0431656433600286513118821892854247103
 [0.54030230586813971740093660744297660373 - 0.841470984807896506652502321630
 29899962*I, 0.54030230586813971740093660744297660373 + 0.8414709848078965066
@@ -11,5 +12,13 @@ error("impossible inverse in powp: O(2^0).")
 2.8284271247461900976033774484193961571 + O(x^2)
 Mod(1, y) + Mod(1/2, y)*x + O(x^2)
 2 + 1/4*x + O(x^2)
+error("domain error in gpow [irrational exponent]: valuation != 0")
+O(x^0)
+1 + 0.50000000000000000000000000000000000000*x + O(x^2)
 error("overflow in sqrtn [valuation].")
-Total time spent: 0
+error("incorrect type in gpow (t_STR).")
+error("incorrect type in gpow(0,n) (t_INTMOD).")
+x^196608
+error("overflow in pow_monome [degree].")
+error("overflow in gpow.")
+Total time spent: 8
