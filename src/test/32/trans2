@@ -21,4 +21,38 @@ error("incorrect type in gpow(0,n) (t_INTMOD).")
 x^196608
 error("overflow in pow_monome [degree].")
 error("overflow in gpow.")
+1.0000000000000000000000000000000000000
+0.E-38
+1 + 1/2*x - 1/16*x^2 + 1/32*x^3 - 21/1024*x^4 + 31/2048*x^5 - 195/16384*x^6 
++ 319/32768*x^7 - 34325/4194304*x^8 + 58899/8388608*x^9 + O(x^10)
+3 + 2*3^2 + 3^3 + O(3^4)
+error("incorrect type in gexp (t_INTMOD).")
+1 + O(3^5)
+1 + 3 + 3^2 + 2*3^3 + 2*3^4 + O(3^5)
+0.54030230586813971740093660744297660373 + 0.8414709848078965066525023216302
+9899962*I
+error("incorrect type in glog (t_INTMOD).")
+error("domain error in Qp_log: argument = 0")
+O(3^4)
+0.E-38 + 1.5707963267948966192313216916397514421*I
+error("incorrect type in gcos (t_INTMOD).")
+1 + O(3^5)
+1 + 3^2 + 2*3^4 + O(3^6)
+1.5430806348152437784779056207570616826
+error("incorrect type in gsin (t_INTMOD).")
+O(3^5)
+3 + 3^2 + 3^3 + 2*3^4 + O(3^5)
+1.1752011936438014568823818505956008152*I
+error("incorrect type in gtan (t_INTMOD).")
+O(3^5)
+3 + 3^2 + 3^4 + O(3^5)
+0.76159415595576488811945828260479359041*I
+error("incorrect type in gcotan (t_INTMOD).")
+error("impossible inverse in divpp: O(3^5).")
+3^-1 + 2 + 3^2 + O(3^3)
+-1.3130352854993313036361612469308478329*I
+0.27175258531951171652884372249858892071 + 1.0839233273386945434757520612119
+717214*I
+-0.45765755436028576375027741043204727643
+0.E-2003
 Total time spent: 8

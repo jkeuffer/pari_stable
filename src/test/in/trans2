@@ -23,3 +23,15 @@ N=2^16; y=x^N;
 y^3
 iferr(y^OVERFLOW_EXPONENT,E,E)
 iferr(0.^(2.^64),E,E)
+agm(1,1)
+agm(-1,1)
+agm(1+x+O(x^10),1)
+log(4+O(3^4))
+
+obj=[Mod(1,3), O(3^5), 3 + O(3^5),I];
+test(f)=[ print(iferr(f(p),E,E)) | p<-obj];
+[test(f) | f<-[exp,log,cos,sin,tan,cotan]];
+tan(1+I)
+cotan(2)
+default(realprecision,2003);
+log(exp(1.5)) - 1.5
