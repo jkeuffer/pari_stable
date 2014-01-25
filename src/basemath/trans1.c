@@ -1991,7 +1991,7 @@ sin_p(GEN x)
   pari_sp av;
   GEN x2, y;
 
-  if (gequal0(x)) return gaddgs(x,1);
+  if (gequal0(x)) return gcopy(x);
   k = Qp_exp_prec(x);
   if (k < 0) return NULL;
   av = avma; x2 = gsqr(x);

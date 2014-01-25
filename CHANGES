@@ -101,6 +101,7 @@ BA 67- Configure --time=ftime actually tested times, not ftime. Remove ftime
    69- poldisc(x^3 + Mod(2,3)*x^2) --> e_INV
    70- (Mod(4.,y^2+1)*(1 + O(x)))^(1/2) -> junk (= [2.0+O(x)),2.0+O(x)]~).
        Worse if other t_POLMOD coefficients. Now exception.
+   71- sin(O(p)) returned 1+O(p) instead of O(p)
 
   Changed
     1- default help text for a user function is now as in \u:
