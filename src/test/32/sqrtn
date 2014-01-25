@@ -41,4 +41,15 @@ error("not an n-th power residue in Qp_sqrt: 1 + 2 + O(2^3).")
 error("not an n-th power residue in gsqrt: Mod(2, 11).")
 error("not a prime number in Fl_sqrt [modulus]: 33.")
 0.E-5 + 0.E-5*I
-Total time spent: 4
+[1 + O(3), 1]
+[1 + O(2), -1]
+[2 + O(2^3), 1 + 2 + O(2^2)]
+[2.0000000000000000000000000000000000000, 3.00000000000000000000000000000000
+00000]
+error("not an n-th power residue in gsqrtn: Mod(2, 7).")
+[0, 0]
+Mod(2, 21)
+error("not a prime number in sqrtn [modulus]: 35.")
+[Mod(99, 101), Mod(100, 101)]
+0.E-38
+Total time spent: 0
