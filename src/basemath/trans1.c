@@ -1362,14 +1362,14 @@ gsqrt(GEN x, long prec)
         p1 = sqrtr( gmul2n(gsub(p1,a), -1) );
         if (gsigne(b) < 0) togglesign(p1);
         v = gerepileuptoleaf(av, p1); av = avma;
-        if (!signe(p1)) /* possible if a = 0 */
+        if (!signe(v)) /* possible if a = 0 */
           u = v;
         else
           u = gerepileuptoleaf(av, gdiv(b, shiftr(v,1)));
       } else {
         p1 = sqrtr( gmul2n(gadd(p1,a), -1) );
         u = gerepileuptoleaf(av, p1); av = avma;
-        if (!signe(p1)) /* possible if a = 0 */
+        if (!signe(u)) /* possible if a = 0 */
           v = u;
         else
           v = gerepileuptoleaf(av, gdiv(b, shiftr(u,1)));
