@@ -1002,48 +1002,46 @@ powgi(GEN x, GEN n)
   }
 }
 
+/* Assume x = 1 + O(t), n a scalar. Return x^n */
+static GEN
+ser_pow_1(GEN x, GEN n)
+{
+  long lx, mi, i, j, d;
+  GEN y = cgetg_copy(x, &lx), X = x+2, Y = y + 2;
+  y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
+  d = mi = lx-3; while (mi>=1 && isrationalzero(gel(X,mi))) mi--;
+  gel(Y,0) = gen_1;
+  for (i=1; i<=d; i++)
+  {
+    pari_sp av = avma;
+    GEN s = gen_0;
+    for (j=1; j<=minss(i,mi); j++)
+    {
+      GEN t = gsubgs(gmulgs(n,j),i-j);
+      s = gadd(s, gmul(gmul(t, gel(X,j)), gel(Y,i-j)));
+    }
+    gel(Y,i) = gerepileupto(av, gdivgs(s,i));
+  }
+  return y;
+}
+
 /* we suppose n != 0, valp(x) = 0 and leading-term(x) != 0. Not stack clean */
 static GEN
 ser_pow(GEN x, GEN n, long prec)
 {
-  pari_sp av, tetpil;
-  GEN y, p1, p2, lead;
-
+  GEN y, c, lead;
   if (varncmp(gvar(n), varn(x)) <= 0) return gexp(gmul(n, glog(x,prec)), prec);
   lead = gel(x,2);
-  if (gequal1(lead))
-  {
-    GEN X, Y, alp = gadd(n,gen_1); /* will be left on the stack */
-    long lx, mi, i, j, d;
-
-    lx = lg(x);
-    y = cgetg(lx,t_SER);
-    y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
-    X = x+2;
-    Y = y+2;
-
-    d = mi = lx-3; while (mi>=1 && isrationalzero(gel(X,mi))) mi--;
-    gel(Y,0) = gen_1;
-    for (i=1; i<=d; i++)
-    {
-      av = avma; p1 = gen_0;
-      for (j=1; j<=minss(i,mi); j++)
-      {
-        p2 = gsubgs(gmulgs(alp,j),i);
-        p1 = gadd(p1, gmul(gmul(p2,gel(X,j)),gel(Y,i-j)));
-      }
-      tetpil = avma; gel(Y,i) = gerepile(av,tetpil, gdivgs(p1,i));
-    }
-    return y;
-  }
-  p1 = gdiv(x,lead);
-  if (typ(p1) != t_SER) pari_err_TYPE("ser_pow",x);
-  gel(p1,2) = gen_1; /* in case it's inexact */
-  if (typ(n) == t_FRAC && !isinexact(lead) && ispower(lead, gel(n,2), &p2))
-    p2 = powgi(p2, gel(n,1));
+  if (gequal1(lead)) return ser_pow_1(x, n);
+  x = ser_normalize(x);
+  if (typ(n) == t_FRAC && !isinexact(lead) && ispower(lead, gel(n,2), &c))
+    c = powgi(c, gel(n,1));
   else
-    p2 = gpow(lead,n, prec);
-  return gmul(p2, gpow(p1,  n, prec));
+    c = gpow(lead,n, prec);
+  y = gmul(c, ser_pow_1(x, n));
+  /* gpow(t_POLMOD,n) can be a t_COL [conjvec] */
+  if (typ(y) != t_SER) pari_err_TYPE("gpow", y);
+  return y;
 }
 
 static long
@@ -1057,8 +1055,8 @@ val_from_i(GEN E)
 static GEN
 ser_powfrac(GEN x, GEN q, long prec)
 {
-  long e = valp(x);
-  GEN y, E = gmulsg(e, q);
+  GEN y, E = gmulsg(valp(x), q);
+  long e;
 
   if (!signe(x))
   {
@@ -1070,11 +1068,7 @@ ser_powfrac(GEN x, GEN q, long prec)
   e = val_from_i(E);
   y = leafcopy(x); setvalp(y, 0);
   y = ser_pow(y, q, prec);
-  if (typ(y) == t_SER) /* generic case */
-    y[1] = evalsigne(1) | evalvalp(e) | evalvarn(varn(x));
-  else /* e.g coeffs are POLMODs */
-    y = gmul(y, monomial(gen_1, e, varn(x)));
-  return y;
+  setvalp(y, e); return y;
 }
 
 GEN
@@ -1293,7 +1287,7 @@ sqrt_ser(GEN b, long prec)
 {
   long e = valp(b), vx = varn(b), lx, lold, j;
   ulong mask;
-  GEN a, x;
+  GEN a, x, lta, ltx;
 
   if (!signe(b)) return zeroser(vx, e>>1);
   a = leafcopy(b);
@@ -1301,7 +1295,10 @@ sqrt_ser(GEN b, long prec)
   if (e & 1)
     pari_err_DOMAIN("sqrtn", "valuation", "!=", mkintmod(gen_0, gen_2), x);
   a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
-  if (!issquareall(gel(a,2), &gel(x,2))) gel(x,2) = gsqrt(gel(a,2), prec);
+  lta = gel(a,2);
+  if (gequal1(lta)) ltx = lta;
+  else if (!issquareall(lta,&ltx)) ltx = gsqrt(lta,prec);
+  gel(x,2) = ltx;
   for (j = 3; j < lx; j++) gel(x,j) = gen_0;
   setlg(x,3);
   mask = quadratic_prec_mask(lx - 2);
@@ -2249,7 +2246,7 @@ agm1(GEN x, long prec)
       {
         a = a1;
         a1 = gmul2n(gadd(a,b1),-1);
-        b1 = ser_powfrac(gmul(a,b1), ghalf, prec);
+        b1 = gsqrt(gmul(a,b1), prec);
         p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
       }
       while (ep<l && !gequal0(p1)

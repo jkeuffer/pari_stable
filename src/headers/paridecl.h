@@ -2269,6 +2269,7 @@ GEN     gsubsg(long x, GEN y);
 GEN     inv_ser(GEN b);
 GEN     mulcxI(GEN x);
 GEN     mulcxmI(GEN x);
+GEN     ser_normalize(GEN x);
 
 /* galpol.c */
 

@@ -9017,6 +9017,10 @@ the coefficient of the term of degree \kbd{n} in the main variable.
 
 \fun{GEN}{ser_unscale}{GEN P, GEN h} return $P(h x)$, not memory clean.
 
+\fun{GEN}{ser_normalize}{GEN x} divide $x$ by its ``leading term'' so that
+the series is either $0$ or equal to $t^v(1+O(t))$. Shallow function if the
+``leading term'' is $1$.
+
 \section{Functions to handle \typ{FFELT}}
 These functions define the public interface of the \typ{FFELT} type to use in
 generic functions.  However, in specific functions, it is better to use the
