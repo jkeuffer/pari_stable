@@ -1540,9 +1540,6 @@ mpqs_self_init(mpqs_handle_t *h)
   GEN p1, p2;
   GEN A = h->A;
   GEN B = h->B;
-#ifdef MPQS_DEBUG
-  GEN C = h->C;
-#endif
   mpqs_per_A_prime_t *per_A_pr = h->per_A_pr;
   long i, j;
   long inv_A2;
@@ -1857,20 +1854,19 @@ static GEN
 mpqs_factorback(mpqs_handle_t *h, char *relations)
 {
   char *s, *t = stack_strdup(relations), *tok;
-  GEN p_e, N = h->N, prod = gen_1;
+  GEN N = h->N, prod = gen_1;
   long i;
   mpqs_FB_entry_t *FB = h->FB;
 
   s = paristrtok_r(t, " \n", &tok);
   while (s != NULL)
   {
-    e = atol(s); if (!e) break;
+    long e = atol(s); if (!e) break;
     s = paristrtok_r(NULL, " \n", &tok);
     i = atol(s);
     /* special case -1 */
-    if (i == 1) { prod = subii(N, prod); s = paristrtok_r(NULL, " \n", &tok); continue; }
-    p_e = Fp_powu(utoipos(FB[i].fbe_p), (ulong)e, N);
-    prod = remii(mulii(prod, p_e), N);
+    if (i == 1) { prod = Fp_neg(prod,N); s = paristrtok_r(NULL, " \n", &tok); continue; }
+    prod = Fp_mul(prod, Fp_powu(utoipos(FB[i].fbe_p), e, N), N);
     s = paristrtok_r(NULL, " \n", &tok);
   }
   return prod;
