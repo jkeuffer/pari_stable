@@ -1327,7 +1327,7 @@ GEN
 gsqrt(GEN x, long prec)
 {
   pari_sp av;
-  GEN y, p1;
+  GEN y;
 
   switch(typ(x))
   {
@@ -1335,41 +1335,41 @@ gsqrt(GEN x, long prec)
 
     case t_INTMOD:
     {
-      GEN p = gel(x,1);
+      GEN p = gel(x,1), a;
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(p);
-      p1 = Fp_sqrt(gel(x,2),p);
-      if (!p1)
+      a = Fp_sqrt(gel(x,2),p);
+      if (!a)
       {
         if (!BPSW_psp(p)) pari_err_PRIME("sqrt [modulus]",p);
         pari_err_SQRTN("gsqrt",x);
       }
-      gel(y,2) = p1; return y;
+      gel(y,2) = a; return y;
     }
 
     case t_COMPLEX:
     { /* (u+iv)^2 = a+ib <=> u^2+v^2 = sqrt(a^2+b^2), u^2-v^2=a, 2uv=b */
-      GEN a = gel(x,1), b = gel(x,2), u, v;
+      GEN a = gel(x,1), b = gel(x,2), r, u, v;
       if (isrationalzero(b)) return gsqrt(a, prec);
       y = cgetg(3,t_COMPLEX); av = avma;
 
-      p1 = cxnorm(x);
-      if (typ(p1) == t_INTMOD) pari_err_IMPL("sqrt(complex of t_INTMODs)");
-      p1 = gsqrt(p1, prec); /* t_REAL */
-      if (!signe(p1))
-        u = v = gerepileuptoleaf(av, sqrtr(p1));
+      r = cxnorm(x);
+      if (typ(r) == t_INTMOD) pari_err_IMPL("sqrt(complex of t_INTMODs)");
+      r = gsqrt(r, prec); /* t_REAL, |a+Ib| */
+      if (!signe(r))
+        u = v = gerepileuptoleaf(av, sqrtr(r));
       else if (gsigne(a) < 0)
       {
-        p1 = sqrtr( gmul2n(gsub(p1,a), -1) );
-        if (gsigne(b) < 0) togglesign(p1);
-        v = gerepileuptoleaf(av, p1); av = avma;
-        if (!signe(v)) /* possible if a = 0 */
-          u = v;
-        else
-          u = gerepileuptoleaf(av, gdiv(b, shiftr(v,1)));
+        /* v > 0 since r > 0, a < 0, rounding errors can't make the sum of two
+         * positive numbers = 0 */
+        v = sqrtr( gmul2n(gsub(r,a), -1) );
+        if (gsigne(b) < 0) togglesign(v);
+        v = gerepileuptoleaf(av, v); av = avma;
+        /* v = 0 is impossible */
+        u = gerepileuptoleaf(av, gdiv(b, shiftr(v,1)));
       } else {
-        p1 = sqrtr( gmul2n(gadd(p1,a), -1) );
-        u = gerepileuptoleaf(av, p1); av = avma;
-        if (!signe(u)) /* possible if a = 0 */
+        u = sqrtr( gmul2n(gadd(r,a), -1) );
+        u = gerepileuptoleaf(av, u); av = avma;
+        if (!signe(u)) /* possible if a = 0.0, e.g. sqrt(0.e-10+1e-10*I) */
           v = u;
         else
           v = gerepileuptoleaf(av, gdiv(b, shiftr(u,1)));
