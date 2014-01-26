@@ -119,6 +119,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - renamed FlxYqQ_pow -> FlxYqq_pow
   - FpXYQQ_pow/FlxYqq_pow: the order of the moduli S,T have been swapped to
     match FpXQXQ_pow
+  - renamed gsh -> gsinh, gch -> gcosh, gth -> gtanh,
+    gash -> gasinh, gach -> gacosh, gath -> gatanh, ggamd -> ggammah
+    (follow GP names)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.4 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -1,6 +1,6 @@
 Function: acosh
 Section: transcendental
-C-Name: gach
+C-Name: gacosh
 Prototype: Gp
 Help: acosh(x): inverse hyperbolic cosine of x.
 Doc: principal branch of $\text{cosh}^{-1}(x) = 2

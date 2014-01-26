@@ -13,6 +13,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define ggamd ggammah
+#define gach gacosh
+#define gash gasinh
+#define gath gatanh
+#define gch gcosh
+#define gsh gsinh
+#define gth gtanh
 #define recip serreverse
 #define gcmpX gequalX
 #define ZM_hnfremdiv ZM_hnfdivrem
@@ -236,7 +243,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*casts*/
 #define labsi   (long)absi
 #define labsr   (long)absr
-#define lach    (long)gach
+#define lach    (long)gacosh
 #define lacos   (long)gacos
 #define ladd    (long)gadd
 #define laddgs  (long)gaddgs
@@ -250,17 +257,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define laddsr  (long)addsr
 #define ladj    (long)adj
 #define larg    (long)garg
-#define lash    (long)gash
+#define lash    (long)gasinh
 #define lasin   (long)gasin
 #define lassmat (long)matcompanion
 #define latan   (long)gatan
-#define lath    (long)gath
+#define lath    (long)gatanh
 #define lbezout (long)bezout
 #define lbinome (long)binomial
 #define lcaract (long)caract
 #define lcaradj (long)caradj
 #define lceil   (long)gceil
-#define lch     (long)gch
+#define lch     (long)gcosh
 #define lchangevar (long)changevar
 #define lclone  (long)gclone
 #define lconcat (long)concat
@@ -294,7 +301,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define lfibo   (long)fibo
 #define lfloor  (long)gfloor
 #define lfrac   (long)gfrac
-#define lgamd   (long)ggamd
+#define lgamd   (long)ggammah
 #define lgamma  (long)ggamma
 #define lgauss  (long)gauss
 #define lgcd    (long)ggcd
@@ -386,7 +393,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define lroots  (long)roots
 #define lscalmat (long)scalarmat
 #define lscalsmat (long)scalarmat_s
-#define lsh     (long)gsh
+#define lsh     (long)gsinh
 #define lshifti (long)shifti
 #define lshift  (long)gshift
 #define lshiftr (long)shiftr
@@ -410,7 +417,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define lsubsr  (long)subsr
 #define ltan    (long)gtan
 #define ltchebi (long)polchebyshev
-#define lth     (long)gth
+#define lth     (long)gtanh
 #define ltrace  (long)gtrace
 #define ltrans  (long)gtrans
 #define ltrunc  (long)gtrunc

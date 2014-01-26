@@ -1,6 +1,6 @@
 Function: asinh
 Section: transcendental
-C-Name: gash
+C-Name: gasinh
 Prototype: Gp
 Help: asinh(x): inverse hyperbolic sine of x.
 Doc: principal branch of $\text{sinh}^{-1}(x) = \log(x + \sqrt{1+x^2})$. In

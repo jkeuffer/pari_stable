@@ -167,6 +167,9 @@ BA 35- FlxYqQ_pow: renamed to FlxYqq_pow, and moduli order changed.
        ideals, as produced by idealfactor
    37- define eulerphi(0) = 2 [ now eulerphi(n) = znstar(n).no for all n ]
    38- allow subst(t_SER,x,exact 0): subst(2+O(x),x,Mod(0,3))->Mod(2,3) [#1513]
+   39- [libpari] rename gsh -> gsinh, gch -> gcosh, gth -> gtanh,
+       gash -> gasinh, gach -> gacosh, gath -> gatanh, ggamd -> ggammah
+       (follow GP names)
 
   Added
 EP  1- Configure option for gcov/lcov support

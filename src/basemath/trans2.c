@@ -139,7 +139,7 @@ gatan(GEN x, long prec)
     case t_REAL: return mpatan(x);
     case t_COMPLEX: /* atan(x) = -i atanh(ix) */
       if (ismpzero(gel(x,2))) return gatan(gel(x,1), prec);
-      av = avma; return gerepilecopy(av, mulcxmI(gath(mulcxI(x),prec)));
+      av = avma; return gerepilecopy(av, mulcxmI(gatanh(mulcxI(x),prec)));
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err_DOMAIN("atan","valuation", "<", gen_0, x);
@@ -171,7 +171,7 @@ mpasin(GEN x) {
   return gerepileuptoleaf(av, z);
 }
 
-static GEN mpach(GEN x);
+static GEN mpacosh(GEN x);
 GEN
 gasin(GEN x, long prec)
 {
@@ -190,14 +190,14 @@ gasin(GEN x, long prec)
       if (expo(x) < 0) return mpasin(x);
       y = cgetg(3,t_COMPLEX);
       gel(y,1) = Pi2n(-1, realprec(x));
-      gel(y,2) = mpach(x);
+      gel(y,2) = mpacosh(x);
       if (sx < 0) togglesign(gel(y,1)); else togglesign(gel(y,2));
       return y;
 
     case t_COMPLEX: /* asin(z) = -i asinh(iz) */
       if (ismpzero(gel(x,2))) return gasin(gel(x,1), prec);
       av = avma;
-      return gerepilecopy(av, mulcxmI(gash(mulcxI(x), prec)));
+      return gerepilecopy(av, mulcxmI(gasinh(mulcxI(x), prec)));
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
@@ -258,7 +258,7 @@ gacos(GEN x, long prec)
         return sx > 0? real_0_bit( -(bit_prec(x)>>1) ) : mppi(realprec(x));
       if (expo(x) < 0) return mpacos(x);
 
-      y = cgetg(3,t_COMPLEX); p1 = mpach(x);
+      y = cgetg(3,t_COMPLEX); p1 = mpacosh(x);
       if (sx < 0) { gel(y,1) = mppi(realprec(x)); togglesign(p1); }
       else gel(y,1) = gen_0;
       gel(y,2) = p1; return y;
@@ -361,7 +361,7 @@ garg(GEN x, long prec)
 /********************************************************************/
 
 static GEN
-mpch(GEN x)
+mpcosh(GEN x)
 {
   pari_sp av;
   GEN z;
@@ -376,14 +376,14 @@ mpch(GEN x)
 }
 
 GEN
-gch(GEN x, long prec)
+gcosh(GEN x, long prec)
 {
   pari_sp av;
   GEN y, p1;
 
   switch(typ(x))
   {
-    case t_REAL: return mpch(x);
+    case t_REAL: return mpcosh(x);
     case t_COMPLEX:
       if (isintzero(gel(x,1))) return gcos(gel(x,2),prec);
       /* fall through */
@@ -396,7 +396,7 @@ gch(GEN x, long prec)
       p1 = gexp(y,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
-  return trans_eval("cosh",gch,x,prec);
+  return trans_eval("cosh",gcosh,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -405,7 +405,7 @@ gch(GEN x, long prec)
 /********************************************************************/
 
 static GEN
-mpsh(GEN x)
+mpsinh(GEN x)
 {
   pari_sp av;
   long ex = expo(x), lx;
@@ -419,14 +419,14 @@ mpsh(GEN x)
 }
 
 GEN
-gsh(GEN x, long prec)
+gsinh(GEN x, long prec)
 {
   pari_sp av;
   GEN y, p1;
 
   switch(typ(x))
   {
-    case t_REAL: return mpsh(x);
+    case t_REAL: return mpsinh(x);
     case t_COMPLEX:
       if (isintzero(gel(x,1))) retmkcomplex(gen_0, gsin(gel(x,2),prec));
       /* fall through */
@@ -439,7 +439,7 @@ gsh(GEN x, long prec)
       p1 = gexp(y, prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
-  return trans_eval("sinh",gsh,x,prec);
+  return trans_eval("sinh",gsinh,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -448,7 +448,7 @@ gsh(GEN x, long prec)
 /********************************************************************/
 
 static GEN
-mpth(GEN x)
+mptanh(GEN x)
 {
   long lx, s = signe(x);
   GEN y;
@@ -470,14 +470,14 @@ mpth(GEN x)
 }
 
 GEN
-gth(GEN x, long prec)
+gtanh(GEN x, long prec)
 {
   pari_sp av;
   GEN y, t;
 
   switch(typ(x))
   {
-    case t_REAL: return mpth(x);
+    case t_REAL: return mptanh(x);
     case t_COMPLEX:
       if (isintzero(gel(x,1))) retmkcomplex(gen_0, gtan(gel(x,2),prec));
       /* fall through */
@@ -493,7 +493,7 @@ gth(GEN x, long prec)
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
   }
-  return trans_eval("tanh",gth,x,prec);
+  return trans_eval("tanh",gtanh,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -503,7 +503,7 @@ gth(GEN x, long prec)
 
 /* x != 0 */
 static GEN
-mpash(GEN x)
+mpasinh(GEN x)
 {
   GEN z, res;
   pari_sp av;
@@ -517,7 +517,7 @@ mpash(GEN x)
 }
 
 GEN
-gash(GEN x, long prec)
+gasinh(GEN x, long prec)
 {
   pari_sp av;
   GEN a, y, p1;
@@ -526,10 +526,10 @@ gash(GEN x, long prec)
   {
     case t_REAL:
       if (!signe(x)) return rcopy(x);
-      return mpash(x);
+      return mpasinh(x);
 
     case t_COMPLEX:
-      if (ismpzero(gel(x,2))) return gash(gel(x,1), prec);
+      if (ismpzero(gel(x,2))) return gasinh(gel(x,1), prec);
       av = avma;
       if (ismpzero(gel(x,1))) /* avoid cancellation */
         return gerepilecopy(av, mulcxI(gasin(gel(x,2), prec)));
@@ -549,10 +549,10 @@ gash(GEN x, long prec)
       }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integser(p1);
-      if (!valp(y)) a = gadd(a, gash(gel(y,2),prec));
+      if (!valp(y)) a = gadd(a, gasinh(gel(y,2),prec));
       return gerepileupto(av, a);
   }
-  return trans_eval("asinh",gash,x,prec);
+  return trans_eval("asinh",gasinh,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -562,7 +562,7 @@ gash(GEN x, long prec)
 
 /* |x| >= 1, return ach(|x|) */
 static GEN
-mpach(GEN x)
+mpacosh(GEN x)
 {
   pari_sp av = avma;
   GEN z;
@@ -572,7 +572,7 @@ mpach(GEN x)
 }
 
 GEN
-gach(GEN x, long prec)
+gacosh(GEN x, long prec)
 {
   pari_sp av;
   GEN y, p1;
@@ -582,20 +582,20 @@ gach(GEN x, long prec)
     case t_REAL: {
       long s = signe(x), e = expo(x);
       GEN a, b;
-      if (s > 0 && e >= 0) return mpach(x);
+      if (s > 0 && e >= 0) return mpacosh(x);
       /* x < 1 */
       y = cgetg(3,t_COMPLEX); a = gen_0;
       if (s == 0) b = acos0(e);
       else if (e < 0) b = mpacos(x); /* -1 < x < 1 */
       else {
-        if (!absrnz_equal1(x)) a = mpach(x);
+        if (!absrnz_equal1(x)) a = mpacosh(x);
         b = mppi(realprec(x));
       }
       gel(y,1) = a;
       gel(y,2) = b; return y;
     }
     case t_COMPLEX:
-      if (ismpzero(gel(x,2))) return gach(gel(x,1), prec);
+      if (ismpzero(gel(x,2))) return gacosh(gel(x,1), prec);
       av = avma;
       p1 = gadd(x, gsqrt(gaddsg(-1,gsqr(x)), prec));
       y = glog(p1,prec); /* log(x + sqrt(x^2-1)) */
@@ -621,12 +621,12 @@ gach(GEN x, long prec)
       else
       {
         p1 = gel(y,2); if (gequal1(p1)) return gerepileupto(av,a);
-        p1 = gach(p1, prec);
+        p1 = gacosh(p1, prec);
       }
       return gerepileupto(av, gadd(p1,a));
     }
   }
-  return trans_eval("acosh",gach,x,prec);
+  return trans_eval("acosh",gacosh,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -636,7 +636,7 @@ gach(GEN x, long prec)
 
 /* |x| < 1, x != 0 */
 static GEN
-mpath(GEN x)
+mpatanh(GEN x)
 {
   pari_sp av = avma;
   long ex = expo(x);
@@ -648,7 +648,7 @@ mpath(GEN x)
 }
 
 GEN
-gath(GEN x, long prec)
+gatanh(GEN x, long prec)
 {
   long sx;
   pari_sp av;
@@ -659,7 +659,7 @@ gath(GEN x, long prec)
     case t_REAL:
       sx = signe(x);
       if (!sx) return real_0_bit(expo(x));
-      if (expo(x) < 0) return mpath(x);
+      if (expo(x) < 0) return mpatanh(x);
 
       y = cgetg(3,t_COMPLEX);
       av = avma;
@@ -676,7 +676,7 @@ gath(GEN x, long prec)
       return y;
 
     case t_COMPLEX: /* 2/(1-z) - 1 = (1+z) / (1-z) */
-      if (ismpzero(gel(x,2))) return gath(gel(x,1), prec);
+      if (ismpzero(gel(x,2))) return gatanh(gel(x,1), prec);
       av = avma; z = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
       return gerepileupto(av, gmul2n(z,-1));
 
@@ -685,10 +685,10 @@ gath(GEN x, long prec)
       if (valp(y) < 0) pari_err_DOMAIN("atanh","valuation", "<", gen_0, x);
       z = gdiv(derivser(y), gsubsg(1,gsqr(y)));
       a = integser(z);
-      if (!valp(y)) a = gadd(a, gath(gel(y,2),prec));
+      if (!valp(y)) a = gadd(a, gatanh(gel(y,2),prec));
       return gerepileupto(av, a);
   }
-  return trans_eval("atanh",gath,x,prec);
+  return trans_eval("atanh",gatanh,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -1255,7 +1255,7 @@ gammahs(long m, long prec)
   affrr(z, y); avma = av; return y;
 }
 GEN
-ggamd(GEN x, long prec)
+ggammah(GEN x, long prec)
 {
   switch(typ(x))
   {
@@ -1271,7 +1271,7 @@ ggamd(GEN x, long prec)
       return gerepileupto(av, ggamma(gadd(x,ghalf), prec));
     }
   }
-  return trans_eval("gammah",ggamd,x,prec);
+  return trans_eval("gammah",ggammah,x,prec);
 }
 
 /* find n such that n+v_p(n!)>=k p^2/(p-1)^2 */

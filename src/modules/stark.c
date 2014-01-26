@@ -2522,7 +2522,7 @@ LABDOUB:
     gel(veczeta,i) = gdivgs(z, den);
   }
   for (j = 1; j <= h; j++)
-    gel(veczeta,j) = gmul2n(gch(gel(veczeta,j), newprec), 1);
+    gel(veczeta,j) = gmul2n(gcosh(gel(veczeta,j), newprec), 1);
   polrelnum = roots_to_pol(veczeta, 0);
   if (DEBUGLEVEL)
   {

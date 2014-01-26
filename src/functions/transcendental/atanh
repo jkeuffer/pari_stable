@@ -1,6 +1,6 @@
 Function: atanh
 Section: transcendental
-C-Name: gath
+C-Name: gatanh
 Prototype: Gp
 Help: atanh(x): inverse hyperbolic tangent of x.
 Doc: principal branch of $\text{tanh}^{-1}(x) = log ((1+x)/(1-x)) / 2$. In

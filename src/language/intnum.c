@@ -557,8 +557,8 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
     tab = intnuminit(gen_0, b, m, prec);
   eps = prec2nbits(prec);
   t = gmul(pi, TABx0(tab));
-  if (sgn < 0) TABw0(tab) = gdiv(TABw0(tab), gch(t, prec));
-  else         TABw0(tab) = gmul(TABw0(tab), gth(t, prec));
+  if (sgn < 0) TABw0(tab) = gdiv(TABw0(tab), gcosh(t, prec));
+  else         TABw0(tab) = gmul(TABw0(tab), gtanh(t, prec));
   tabxp = TABxp(tab); L = lg(tabxp);
   tabwp = TABwp(tab);
   tabxm = TABxm(tab);
@@ -568,16 +568,16 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
     if (cmprs(gel(tabxp,k), eps) < 0)
     {
       t = mulrr(pi, gel(tabxp,k));
-      gel(tabwp,k) = (sgn < 0)? divrr(gel(tabwp,k), gch(t, prec))
-                              : mulrr(gel(tabwp,k), gth(t, prec));
+      gel(tabwp,k) = (sgn < 0)? divrr(gel(tabwp,k), gcosh(t, prec))
+                              : mulrr(gel(tabwp,k), gtanh(t, prec));
     }
     else
       if (sgn < 0) gel(tabwp,k) = real_0_bit(-eps);
     if (!flii)
     {
       t = mulrr(pi, gel(tabxm,k));
-      gel(tabwm,k) = (sgn < 0)? divrr(gel(tabwm,k), gch(t, prec))
-                              : mulrr(gel(tabwm,k), gth(t, prec));
+      gel(tabwm,k) = (sgn < 0)? divrr(gel(tabwm,k), gcosh(t, prec))
+                              : mulrr(gel(tabwm,k), gtanh(t, prec));
     }
   }
   return gerepilecopy(ltop, tab);

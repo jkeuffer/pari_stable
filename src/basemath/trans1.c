@@ -2768,7 +2768,7 @@ gcos(GEN x, long prec)
   {
     case t_REAL: return mpcos(x);
     case t_COMPLEX:
-      if (isintzero(gel(x,1))) return gch(gel(x,2), prec);
+      if (isintzero(gel(x,1))) return gcosh(gel(x,2), prec);
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
       r = gexp(gel(x,2),prec);
@@ -2831,7 +2831,7 @@ gsin(GEN x, long prec)
   {
     case t_REAL: return mpsin(x);
     case t_COMPLEX:
-      if (isintzero(gel(x,1))) retmkcomplex(gen_0,gsh(gel(x,2),prec));
+      if (isintzero(gel(x,1))) retmkcomplex(gen_0,gsinh(gel(x,2),prec));
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
       r = gexp(gel(x,2),prec);
@@ -3083,8 +3083,8 @@ gtan(GEN x, long prec)
     case t_REAL: return mptan(x);
 
     case t_COMPLEX: {
-      if (isintzero(gel(x,1))) retmkcomplex(gen_0,gth(gel(x,2),prec));
-      av = avma; y = mulcxmI(gth(mulcxI(x), prec)); /* tan x = -I th(I x) */
+      if (isintzero(gel(x,1))) retmkcomplex(gen_0,gtanh(gel(x,2),prec));
+      av = avma; y = mulcxmI(gtanh(mulcxI(x), prec)); /* tan x = -I th(I x) */
       gel(y,1) = gcopy(gel(y,1));
       return gerepileupto(av, y);
     }
@@ -3133,7 +3133,7 @@ gcotan(GEN x, long prec)
         GEN z = cgetg(3, t_COMPLEX);
         gel(z,1) = gen_0;
         av = avma;
-        gel(z,2) = gerepileupto(av, gneg(ginv(gth(gel(x,2),prec))));
+        gel(z,2) = gerepileupto(av, gneg(ginv(gtanh(gel(x,2),prec))));
         return z;
       }
       av = avma;

@@ -850,7 +850,7 @@ compute_M0(GEN M_star,long N)
   GEN f1,f2,f3,g1,g2,g3,pg1,pg2,pg3,pf1,pf2,pf3,X,Y,Z;
   long bitprec = 24;
 
-  if (N == 2) return gmul2n(sqrr(gach(gmul2n(M_star,-1),0)), -1);
+  if (N == 2) return gmul2n(sqrr(gacosh(gmul2n(M_star,-1),0)), -1);
   vM = fetch_var(); M = pol_x(vM);
   vz = fetch_var(); Z = pol_x(vz);
   vy = fetch_var(); Y = pol_x(vy);
