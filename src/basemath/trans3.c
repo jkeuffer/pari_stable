@@ -1338,6 +1338,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   }
   *pp = p;
   *pn = (long)ceil(n);
+  if (*pp < 0 || *pn < 0) pari_err_OVERFLOW("zeta");
   if (DEBUGLEVEL) err_printf("lim, nn: [%ld, %ld]\n", *pp, *pn);
 }
 
