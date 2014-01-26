@@ -39,6 +39,8 @@ asin(-1+O(x^3))
 asinh(I+O(x^3))
 asinh(-I+O(x^3))
 acosh(1+O(x^3))
+acosh(1+x^2+O(x^3))
+acosh(2+x+O(x^3))
 acos(1+O(x^3))
 sinh(I)
 default(realprecision,2003);

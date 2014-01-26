@@ -21,6 +21,7 @@ binomial(1001.,1000)
 
 lngamma(2^301)
 lngamma(2^301 + 2*I)
+lngamma(2^64 + 2*I)
 lngamma(-200.5)
 gammah(400)
 gammah(400+I)
