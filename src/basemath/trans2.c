@@ -1265,8 +1265,7 @@ ggammah(GEN x, long prec)
       if (labs(k) > 962353) pari_err_OVERFLOW("gammah");
       return gammahs(k<<1, prec);
     }
-    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
-    case t_PADIC: case t_SER: {
+    case t_REAL: case t_COMPLEX: case t_PADIC: case t_SER: {
       pari_sp av = avma;
       return gerepileupto(av, ggamma(gadd(x,ghalf), prec));
     }
