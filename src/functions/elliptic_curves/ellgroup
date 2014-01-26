@@ -41,6 +41,7 @@ Doc: Let $E$ be an \var{ell} structure as output by \kbd{ellinit}, defined over
       11
       13
  ? ellgroup(E, 7, 1)
+ %6 = [12, [6, 2], [[Mod(2, 7), Mod(4, 7)], [Mod(4, 7), Mod(4, 7)]]]
  @eprog\noindent
  If $E$ is defined over $\Q$, we allow singular reduction and in this case we
  return the structure of the group of non-singular points, satisfying
