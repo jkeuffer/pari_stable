@@ -217,7 +217,7 @@ jbesselh(GEN n, GEN z, long prec)
       gz = gexpo(z);
       if ( (pr = precision(z)) ) prec = pr;
       y = cgetc(prec);
-      bits = -2*k*gz - BITS_IN_LONG;
+      bits = -2*k*gz + BITS_IN_LONG;
       av = avma;
       if (bits <= 0)
         precnew = prec;
