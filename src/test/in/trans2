@@ -36,6 +36,10 @@ tan(1+I)
 cotan(2)
 asin(1+O(x^3))
 asin(-1+O(x^3))
+asinh(1+O(x^3))
+asinh(-1+O(x^3))
+acosh(1+O(x^3))
+acos(1+O(x^3))
 sinh(I)
 default(realprecision,2003);
 log(exp(1.5)) - 1.5

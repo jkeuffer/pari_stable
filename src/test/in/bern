@@ -5,3 +5,4 @@ for(k = 0, 5, print(bernpol(k)));
 bernfrac(-1)
 bernreal(-1)
 bernpol(-1)
+bernvec(30)
