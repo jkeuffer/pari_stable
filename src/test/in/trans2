@@ -26,6 +26,7 @@ iferr(0.^(2.^64),E,E)
 agm(1,1)
 agm(-1,1)
 agm(1+x+O(x^10),1)
+agm(1,[1,2])
 log(4+O(3^4))
 
 obj=[Mod(1,3), O(3^5), 3 + O(3^5),I];
@@ -33,5 +34,8 @@ test(f,p)=print(iferr(f(p),E,E));
 [test(f,p) | f<-[exp,log,cos,sin,tan,cotan];p<-obj];
 tan(1+I)
 cotan(2)
+asin(1+O(x^3))
+asin(-1+O(x^3))
+sinh(I)
 default(realprecision,2003);
 log(exp(1.5)) - 1.5
