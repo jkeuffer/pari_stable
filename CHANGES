@@ -229,6 +229,7 @@ BA 40- [libpari] FpM_powu/Flm_powu/F2m_powu
    42- [libpari] checkabgrp, abgrp_get_no, abgrp_get_cyc, abgrp_get_gen,
        bid_get_grp, bid_get_no
    43- [libpari] FpX_disc
+   44- [libpari] retmkcomplex
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

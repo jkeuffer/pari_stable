@@ -251,12 +251,7 @@ Pi2n(long n, long prec)
 
 /* I * Pi * 2^n */
 GEN
-PiI2n(long n, long prec)
-{
-  GEN z = cgetg(3,t_COMPLEX);
-  gel(z,1) = gen_0;
-  gel(z,2) = Pi2n(n, prec); return z;
-}
+PiI2n(long n, long prec) { retmkcomplex(gen_0, Pi2n(n, prec)); }
 
 /* 2I * Pi */
 GEN
@@ -2568,9 +2563,7 @@ glog(GEN x, long prec)
         if (!signe(x)) pari_err_DOMAIN("log", "argument", "=", gen_0, x);
         return logr_abs(x);
       }
-      y = cgetg(3,t_COMPLEX);
-      gel(y,1) = logr_abs(x);
-      gel(y,2) = mppi(realprec(x)); return y;
+      retmkcomplex(logr_abs(x), mppi(realprec(x)));
 
     case t_FRAC:
     {
@@ -2838,11 +2831,7 @@ gsin(GEN x, long prec)
   {
     case t_REAL: return mpsin(x);
     case t_COMPLEX:
-      if (isintzero(gel(x,1))) {
-        GEN z = cgetg(3, t_COMPLEX);
-        gel(z,1) = gen_0;
-        gel(z,2) = gsh(gel(x,2),prec); return z;
-      }
+      if (isintzero(gel(x,1))) retmkcomplex(gen_0,gsh(gel(x,2),prec));
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
       r = gexp(gel(x,2),prec);
@@ -3094,11 +3083,7 @@ gtan(GEN x, long prec)
     case t_REAL: return mptan(x);
 
     case t_COMPLEX: {
-      if (isintzero(gel(x,1))) {
-        GEN z = cgetg(3, t_COMPLEX);
-        gel(z,1) = gen_0;
-        gel(z,2) = gth(gel(x,2),prec); return z;
-      }
+      if (isintzero(gel(x,1))) retmkcomplex(gen_0,gth(gel(x,2),prec));
       av = avma; y = mulcxmI(gth(mulcxI(x), prec)); /* tan x = -I th(I x) */
       gel(y,1) = gcopy(gel(y,1));
       return gerepileupto(av, y);

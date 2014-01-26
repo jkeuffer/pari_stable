@@ -428,11 +428,7 @@ gsh(GEN x, long prec)
   {
     case t_REAL: return mpsh(x);
     case t_COMPLEX:
-      if (isintzero(gel(x,1))) {
-        GEN z = cgetg(3, t_COMPLEX);
-        gel(z,1) = gen_0;
-        gel(z,2) = gsin(gel(x,2),prec); return z;
-      }
+      if (isintzero(gel(x,1))) retmkcomplex(gen_0, gsin(gel(x,2),prec));
       /* fall through */
     case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gsub(p1, ginv(p1));
@@ -483,11 +479,7 @@ gth(GEN x, long prec)
   {
     case t_REAL: return mpth(x);
     case t_COMPLEX:
-      if (isintzero(gel(x,1))) {
-        GEN z = cgetg(3, t_COMPLEX);
-        gel(z,1) = gen_0;
-        gel(z,2) = gtan(gel(x,2),prec); return z;
-      }
+      if (isintzero(gel(x,1))) retmkcomplex(gen_0, gtan(gel(x,2),prec));
       /* fall through */
     case t_PADIC:
       av = avma;

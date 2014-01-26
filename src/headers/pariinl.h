@@ -24,6 +24,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
   do { GEN _v = cgetg(3, t_INTMOD);\
        gel(_v,1) = (y);\
        gel(_v,2) = (x); return _v; } while(0)
+#define retmkcomplex(x,y)\
+  do { GEN _v = cgetg(3, t_COMPLEX);\
+       gel(_v,1) = (x);\
+       gel(_v,2) = (y); return _v; } while(0)
 #define retmkpolmod(x,y)\
   do { GEN _v = cgetg(3, t_POLMOD);\
        gel(_v,1) = (y);\
@@ -141,16 +145,11 @@ INLINE GEN
 mkrfraccopy(GEN x, GEN y) { GEN v = cgetg(3, t_RFRAC);
   gel(v,1) = gcopy(x); gel(v,2) = gcopy(y); return v; }
 INLINE GEN
-mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
-  gel(v,1) = x; gel(v,2) = y; return v; }
+mkcomplex(GEN x, GEN y) { retmkcomplex(x,y); }
 INLINE GEN
 gen_I(void) { return mkcomplex(gen_0, gen_1); }
 INLINE GEN
-cgetc(long l)
-{
-  GEN u = cgetg(3,t_COMPLEX);
-  gel(u,1) = cgetr(l); gel(u,2) = cgetr(l); return u;
-}
+cgetc(long l) { retmkcomplex(cgetr(l), cgetr(l)); }
 INLINE GEN
 mkquad(GEN n, GEN x, GEN y) { GEN v = cgetg(4, t_QUAD);
   gel(v,1) = n; gel(v,2) = x; gel(v,3) = y; return v; }
@@ -1198,10 +1197,8 @@ cxcompotor(GEN z, long prec)
   }
 }
 INLINE GEN
-cxtofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
-  gel(z,1) = cxcompotor(gel(x,1),prec);
-  gel(z,2) = cxcompotor(gel(x,2),prec); return z;
-}
+cxtofp(GEN x, long prec)
+{ retmkcomplex(cxcompotor(gel(x,1),prec), cxcompotor(gel(x,2),prec)); }
 
 INLINE double
 gtodouble(GEN x)
@@ -1724,12 +1721,9 @@ is_vec_t(long t) { return (t == t_VEC || t == t_COL); }
 INLINE GEN
 sqrtr(GEN x) {
   long s = signe(x);
-  GEN y;
   if (s == 0) return real_0_bit(expo(x) >> 1);
   if (s >= 0) return sqrtr_abs(x);
-  y = cgetg(3,t_COMPLEX);
-  gel(y,2) = sqrtr_abs(x);
-  gel(y,1) = gen_0; return y;
+  retmkcomplex(gen_0, sqrtr_abs(x));
 }
 /* x^(1/n) */
 INLINE GEN

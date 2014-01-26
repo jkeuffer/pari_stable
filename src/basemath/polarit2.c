@@ -386,11 +386,9 @@ gauss_factor_p(GEN p)
 static GEN
 gauss_primpart(GEN x, GEN *c)
 {
-  GEN y, a = gel(x,1), b = gel(x,2), n = gcdii(a, b);
+  GEN a = gel(x,1), b = gel(x,2), n = gcdii(a, b);
   *c = n; if (n == gen_1) return x;
-  y = cgetg(3, t_COMPLEX);
-  gel(y,1) = diviiexact(a, n);
-  gel(y,2) = diviiexact(b, n); return y;
+  retmkcomplex(diviiexact(a,n), diviiexact(b,n));
 }
 
 static GEN
