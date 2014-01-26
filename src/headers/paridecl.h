@@ -3187,6 +3187,7 @@ GEN     ZX_graeffe(GEN p);
 GEN     cleanroots(GEN x,long l);
 int     isrealappr(GEN x, long l);
 GEN     polgraeffe(GEN p);
+GEN     polmod_to_embed(GEN x, long prec);
 GEN     roots(GEN x,long l);
 
 /* subcyclo.c */
@@ -3300,6 +3301,7 @@ GEN     powgi(GEN x, GEN n);
 GEN     serchop0(GEN s);
 GEN     sqrtnint(GEN a, long n);
 GEN     teich(GEN x);
+GEN     trans_eval(const char *fun, GEN (*f) (GEN, long), GEN x, long prec);
 ulong   upowuu(ulong p, ulong k);
 ulong   usqrtn(ulong a, ulong n);
 ulong   usqrt(ulong a);

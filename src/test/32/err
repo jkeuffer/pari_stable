@@ -164,13 +164,13 @@
   *** acos: domain error in acos: valuation < 0
   ***   at top-level: asinh(1/x)
   ***                 ^----------
-  *** asinh: domain error in ash: valuation < 0
+  *** asinh: domain error in asinh: valuation < 0
   ***   at top-level: acosh(1/x)
   ***                 ^----------
-  *** acosh: domain error in ach: valuation < 0
+  *** acosh: domain error in acosh: valuation < 0
   ***   at top-level: atanh(1/x)
   ***                 ^----------
-  *** atanh: domain error in ath: valuation < 0
+  *** atanh: domain error in atanh: valuation < 0
   ***   at top-level: lngamma(x)
   ***                 ^----------
   *** lngamma: domain error in lngamma: valuation != 0
@@ -587,4 +587,4 @@ INFINITY
   ***   at top-level: trap(e_INV,INFINITY,log(0))
   ***                                     ^-------
   *** log: domain error in log: argument = 0
-Total time spent: 24
+Total time spent: 20

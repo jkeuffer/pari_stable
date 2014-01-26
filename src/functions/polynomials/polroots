@@ -14,6 +14,3 @@ Doc: complex roots of the polynomial
  root-finding algorithm, due to and originally implemented by X.~Gourdon.
  Barring bugs, it is guaranteed to converge and to give the roots to the
  required accuracy.
-Variant: Also available is \fun{GEN}{cleanroots}{GEN x, long prec} which
- ensures that real roots of real polynomials are returned as \typ{REAL}
- (instead of \typ{COMPLEX}s with 0 imaginary part).

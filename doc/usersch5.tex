@@ -6956,7 +6956,8 @@ caller).
 
 \fun{GEN}{QX_complex_roots}{GEN p, long l} returns the complex roots of the
 \kbd{QX} $p$ at accuracy $l$, where real roots are returned as \typ{REAL}s.
-More efficient when $p$ is irreducible and primitive.
+More efficient when $p$ is irreducible and primitive. Special case
+of \tet{cleanroots}.
 
 \subsec{\kbd{QXQ}}
 
@@ -9003,6 +9004,15 @@ non-zero remainder in the polynomial remainder sequence if such a sequence
 was computed, and to \kbd{gen\_0} otherwise (e.g. polynomials of degree 0,
 $u,v$ in $\Q[X]$).
 
+\fun{GEN}{cleanroots}{GEN x, long prec} returns the complex roots of
+the complex polynomial $x$ (with coefficients \typ{INT}, \typ{FRAC},
+\typ{REAL} or \typ{COMPLEX} of the above). The roots are returned
+as \typ{REAL} or \typ{COMPLEX} of \typ{REAL}s of precision \kbd{prec}
+(guaranteeing a non-$0$ imaginary part). See \tet{QX_complex_roots}.
+
+\fun{GEN}{polmod_to_embed}{GEN x, long prec} return the vector of complex
+embeddings of the \typ{POLMOD} $x$ (with complex coefficients). Shallow
+function, simple complex variant of \tet{conjvec}.
 
 \section{Power series}
 
@@ -9307,6 +9317,21 @@ when $x$ is real and $y$ pure imaginary.
 with \typ{REAL} components. Assign $x$ to \kbd{res}, first shortening
 the components of \kbd{res} if needed (in a \kbd{gerepile}-safe way). Further
 convert \kbd{res} to a \typ{REAL} if $x$ is a \typ{REAL}.
+
+\fun{GEN}{trans_eval}{const char *fun, GEN (*f) (GEN, long), GEN x, long prec}
+evaluate transcendantal function $f$ (named \kbd{"fun"} at the argument
+$x$ and precision \kbd{prec}. This is a quick way to implement a transcendental
+function to be made available under GP, starting from a $C$ function
+handling only \typ{REAL} and \typ{COMPLEX} arguments. This routine first
+converts $x$ to a suitable type:
+
+\item \typ{INT}/\typ{FRAC} to \typ{REAL} of precision \kbd{prec}, \typ{QUAD} to
+\typ{REAL} or \typ{COMPLEX} of precision \kbd{prec}.
+
+\item \typ{POLMOD} to a \typ{COL} of complex embeddings (as in \tet{conjvec})
+
+Then evaluates the function at \typ{VEC}, \typ{COL}, \typ{MAT} arguments
+coefficientwise.
 
 \subsec{Transcendental functions with \typ{PADIC} arguments}
 

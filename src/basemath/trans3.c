@@ -2056,18 +2056,11 @@ gzeta(GEN x, long prec)
         pari_err_OVERFLOW("zeta [large negative argument]");
       }
       return szeta(itos(x),prec);
-
-    case t_REAL: case t_COMPLEX:
-      return czeta(x,prec);
-
-    case t_INTMOD: pari_err_TYPE("gzeta",x);
-
-    case t_PADIC:
-      return zetap(x);
-
-    case t_SER: pari_err_IMPL("zeta of power series");
+    case t_REAL: case t_COMPLEX: return czeta(x,prec);
+    case t_PADIC: return zetap(x);
+    case t_SER: pari_err_IMPL("zeta(t_SER)");
   }
-  return transc(gzeta,x,prec);
+  return trans_eval("zeta",gzeta,x,prec);
 }
 
 /***********************************************************************/
@@ -3331,9 +3324,9 @@ glambertW(GEN y, long prec)
   switch(typ(y))
   {
     case t_REAL: return mplambertW(y);
-    case t_COMPLEX: pari_err_IMPL("complex lambertW");
-    default: return transc(glambertW,y,prec);
+    case t_COMPLEX: pari_err_IMPL("lambert(t_COMPLEX)");
   }
+  return trans_eval("lambert",glambertW,y,prec);
 }
 
 #if 0

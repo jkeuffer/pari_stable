@@ -55,7 +55,6 @@ void abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A);
 
 /* generic */
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
-GEN transc(GEN (*f) (GEN, long), GEN x, long prec);
 GEN sort_factor_pol(GEN y, int (*cmp)(GEN,GEN));
 
 /* loops */
@@ -683,7 +682,6 @@ void    pari_init_rand(void);
 
 GEN     FFT(GEN x, GEN Omega);
 GEN     FFTinit(long k, long prec);
-GEN     polmod_to_embed(GEN x, long prec);
 
 /* subcyclo.c */
 

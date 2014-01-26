@@ -136,15 +136,10 @@ gatan(GEN x, long prec)
 
   switch(typ(x))
   {
-    case t_REAL:
-      return mpatan(x);
-
+    case t_REAL: return mpatan(x);
     case t_COMPLEX: /* atan(x) = -i atanh(ix) */
       if (ismpzero(gel(x,2))) return gatan(gel(x,1), prec);
       av = avma; return gerepilecopy(av, mulcxmI(gath(mulcxI(x),prec)));
-
-    case t_INTMOD: case t_PADIC: pari_err_TYPE("gatan",x);
-
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err_DOMAIN("atan","valuation", "<", gen_0, x);
@@ -154,7 +149,7 @@ gatan(GEN x, long prec)
       if (!valp(y)) a = gadd(a, gatan(gel(y,2),prec));
       return gerepileupto(av, a);
   }
-  return transc(gatan,x,prec);
+  return trans_eval("atan",gatan,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -203,8 +198,6 @@ gasin(GEN x, long prec)
       if (ismpzero(gel(x,2))) return gasin(gel(x,1), prec);
       av = avma;
       return gerepilecopy(av, mulcxmI(gash(mulcxI(x), prec)));
-
-    case t_INTMOD: case t_PADIC: pari_err_TYPE("gasin",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
@@ -222,7 +215,7 @@ gasin(GEN x, long prec)
       if (!valp(y)) a = gadd(a, gasin(gel(y,2),prec));
       return gerepileupto(av, a);
   }
-  return transc(gasin,x,prec);
+  return trans_eval("asin",gasin,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -276,9 +269,7 @@ gacos(GEN x, long prec)
       p1 = gadd(x, mulcxI(gsqrt(gsubsg(1,gsqr(x)), prec)));
       y = glog(p1,prec); /* log(x + I*sqrt(1-x^2)) */
       return gerepilecopy(av, mulcxmI(y));
-
-    case t_INTMOD: case t_PADIC: pari_err_TYPE("gacos",x);
-    case t_SER:
+    default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err_DOMAIN("acos","valuation", "<", gen_0, x);
       if (lg(y) > 2)
@@ -293,7 +284,7 @@ gacos(GEN x, long prec)
       a = (lg(y)==2 || valp(y))? Pi2n(-1, prec): gacos(gel(y,2),prec);
       return gerepileupto(av, gadd(a,p1));
   }
-  return transc(gacos,x,prec);
+  return trans_eval("acos",gacos,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -353,28 +344,14 @@ cxarg(GEN x, GEN y, long prec)
 GEN
 garg(GEN x, long prec)
 {
-  long tx = typ(x);
-  pari_sp av;
-
   if (gequal0(x)) pari_err_DOMAIN("arg", "argument", "=", gen_0, x);
-  switch(tx)
+  switch(typ(x))
   {
     case t_REAL: prec = realprec(x); /* fall through */
-    case t_INT: case t_FRAC:
-      return (gsigne(x)>0)? real_0(prec): mppi(prec);
-
-    case t_QUAD:
-      av = avma;
-      return gerepileuptoleaf(av, garg(quadtofp(x, prec), prec));
-
-    case t_COMPLEX:
-      return cxarg(gel(x,1),gel(x,2),prec);
-
-    case t_VEC: case t_COL: case t_MAT:
-      return transc(garg,x,prec);
+    case t_INT: case t_FRAC: return (gsigne(x)>0)? real_0(prec): mppi(prec);
+    case t_COMPLEX: return cxarg(gel(x,1),gel(x,2),prec);
   }
-  pari_err_TYPE("garg",x);
-  return NULL; /* not reached */
+  return trans_eval("arg",garg,x,prec);
 }
 
 /********************************************************************/
@@ -413,14 +390,13 @@ gch(GEN x, long prec)
     case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
-    case t_INTMOD: pari_err_TYPE("gch",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
       p1 = gexp(y,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
-  return transc(gch,x,prec);
+  return trans_eval("cosh",gch,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -461,14 +437,13 @@ gsh(GEN x, long prec)
     case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
-    case t_INTMOD:
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y) && valp(y) == 0) return gerepilecopy(av, y);
       p1 = gexp(y, prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
-  return transc(gsh,x,prec);
+  return trans_eval("sinh",gsh,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -519,7 +494,6 @@ gth(GEN x, long prec)
       t = gexp(gmul2n(x,1),prec);
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
-    case t_INTMOD: pari_err_TYPE("gth",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
@@ -527,7 +501,7 @@ gth(GEN x, long prec)
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
   }
-  return transc(gth,x,prec);
+  return trans_eval("tanh",gth,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -570,11 +544,10 @@ gash(GEN x, long prec)
       p1 = gadd(x, gsqrt(gaddsg(1,gsqr(x)), prec));
       y = glog(p1,prec); /* log (x + sqrt(1+x^2)) */
       return gerepileupto(av, y);
-    case t_INTMOD: case t_PADIC: pari_err_TYPE("gash",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gequal0(y)) return gerepilecopy(av, y);
-      if (valp(y) < 0) pari_err_DOMAIN("ash","valuation", "<", gen_0, x);
+      if (valp(y) < 0) pari_err_DOMAIN("asinh","valuation", "<", gen_0, x);
       p1 = gaddsg(1,gsqr(y));
       if (gequal0(p1))
       {
@@ -587,7 +560,7 @@ gash(GEN x, long prec)
       if (!valp(y)) a = gadd(a, gash(gel(y,2),prec));
       return gerepileupto(av, a);
   }
-  return transc(gash,x,prec);
+  return trans_eval("asinh",gash,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -636,15 +609,12 @@ gach(GEN x, long prec)
       y = glog(p1,prec); /* log(x + sqrt(x^2-1)) */
       if (signe(real_i(y)) < 0) y = gneg(y);
       return gerepileupto(av, y);
-
-    case t_INTMOD: case t_PADIC: pari_err_TYPE("gach",x);
-
     default: {
       GEN a;
       long v;
       av = avma; if (!(y = toser_i(x))) break;
       v = valp(y);
-      if (v < 0) pari_err_DOMAIN("ach","valuation", "<", gen_0, x);
+      if (v < 0) pari_err_DOMAIN("acosh","valuation", "<", gen_0, x);
       if (gequal0(y))
       {
         if (!v) return gerepilecopy(av, y);
@@ -664,7 +634,7 @@ gach(GEN x, long prec)
       return gerepileupto(av, gadd(p1,a));
     }
   }
-  return transc(gach,x,prec);
+  return trans_eval("acosh",gach,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -718,16 +688,15 @@ gath(GEN x, long prec)
       av = avma; z = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
       return gerepileupto(av, gmul2n(z,-1));
 
-    case t_INTMOD: case t_PADIC: pari_err_TYPE("gath",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) pari_err_DOMAIN("ath","valuation", "<", gen_0, x);
+      if (valp(y) < 0) pari_err_DOMAIN("atanh","valuation", "<", gen_0, x);
       z = gdiv(derivser(y), gsubsg(1,gsqr(y)));
       a = integser(z);
       if (!valp(y)) a = gadd(a, gath(gel(y,2),prec));
       return gerepileupto(av, a);
   }
-  return transc(gath,x,prec);
+  return trans_eval("atanh",gath,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -1298,9 +1267,10 @@ ggamd(GEN x, long prec)
 {
   switch(typ(x))
   {
-    case t_INT: {
+    case t_INT:
+    {
       long k = itos(x);
-      if (labs(k) > 962353) pari_err_OVERFLOW("ggamd");
+      if (labs(k) > 962353) pari_err_OVERFLOW("gammah");
       return gammahs(k<<1, prec);
     }
     case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
@@ -1308,9 +1278,8 @@ ggamd(GEN x, long prec)
       pari_sp av = avma;
       return gerepileupto(av, ggamma(gadd(x,ghalf), prec));
     }
-    case t_INTMOD: pari_err_TYPE("ggamd",x);
   }
-  return transc(ggamd,x,prec);
+  return trans_eval("gammah",ggamd,x,prec);
 }
 
 /* find n such that n+v_p(n!)>=k p^2/(p-1)^2 */
@@ -1440,7 +1409,7 @@ ggamma(GEN x, long prec)
       if (signe(x) <= 0)
         pari_err_DOMAIN("gamma","argument", "=",
                          strtoGENstr("non-positive integer"), x);
-      if (cmpiu(x,481177) > 0) pari_err_OVERFLOW("ggamma");
+      if (cmpiu(x,481177) > 0) pari_err_OVERFLOW("gamma");
       return mpfactr(itos(x) - 1, prec);
 
     case t_REAL: case t_COMPLEX:
@@ -1451,13 +1420,12 @@ ggamma(GEN x, long prec)
       z = gel(x,1); /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
-        pari_err_OVERFLOW("ggamma");
+        pari_err_OVERFLOW("gamma");
         return NULL; /* not reached */
       }
       return gammahs(m-1, prec);
 
     case t_PADIC: return Qp_gamma(x);
-    case t_INTMOD: pari_err_TYPE("ggamma",x);
     default:
       av = avma; if (!(y = toser_i(x))) break;
       /* exp(lngamma) */
@@ -1478,7 +1446,7 @@ ggamma(GEN x, long prec)
       }
       return gerepileupto(av, z);
   }
-  return transc(ggamma,x,prec);
+  return trans_eval("gamma",ggamma,x,prec);
 }
 
 GEN
@@ -1535,9 +1503,8 @@ glngamma(GEN x, long prec)
       return gerepileupto(av, p1);
 
     case t_PADIC: av = avma; return gerepileupto(av, Qp_log(Qp_gamma(x)));
-    case t_INTMOD: pari_err_TYPE("glngamma",x);
   }
-  return transc(glngamma,x,prec);
+  return trans_eval("lngamma",glngamma,x,prec);
 }
 /********************************************************************/
 /**                                                                **/
@@ -1721,7 +1688,6 @@ serpsiz0(GEN z0, long L, long v, long prec)
 static GEN
 serpsi(GEN y, long prec)
 {
-  pari_sp av = avma;
   GEN Q, z0, Y;
   long L = lg(y)-2, v  = varn(y), vy = valp(y);
   int reflect;
@@ -1748,17 +1714,20 @@ serpsi(GEN y, long prec)
     else
       Q = gadd(Q, gmul(pi, gcotan(gmul(pi,Y), prec)));
   }
-  return gerepileupto(av, Q);
+  return Q;
 }
 
 GEN
 gpsi(GEN x, long prec)
 {
+  pari_sp av;
+  GEN y;
   switch(typ(x))
   {
     case t_REAL: case t_COMPLEX: return cxpsi(x,prec);
-    case t_INTMOD: case t_PADIC: pari_err_TYPE("gpsi",x);
-    case t_SER: return serpsi(x,prec);
+    default:
+      av = avma; if (!(y = toser_i(x))) break;
+      return gerepileupto(av, serpsi(y,prec));
   }
-  return transc(gpsi,x,prec);
+  return trans_eval("psi",gpsi,x,prec);
 }
