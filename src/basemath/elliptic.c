@@ -68,7 +68,16 @@ ell_to_a4a6_bc(GEN E, GEN p)
 
 void
 checkellpt(GEN z)
-{ if (typ(z)!=t_VEC || lg(z) > 3) pari_err_TYPE("checkellpt", z); }
+{
+  if (typ(z)!=t_VEC) pari_err_TYPE("checkellpt", z);
+  switch(lg(z))
+  {
+    case 3: break;
+    case 2: if (isintzero(gel(z,1))) break;
+    /* fall through */
+    default: pari_err_TYPE("checkellpt", z);
+  }
+}
 void
 checkell5(GEN E)
 {
