@@ -2300,7 +2300,7 @@ INLINE GEN ellQp_get_p(GEN E) { GEN z = ellQp_get_zero(E); return gel(z,2); }
 INLINE long ellR_get_prec(GEN x) { return nbits2prec(mael3(x, 15, 1, 1)); }
 INLINE long ellR_get_sign(GEN x) { return mael3(x, 15, 1, 2); }
 
-INLINE int ell_is_inf(GEN z) { return lg(z) < 3; }
+INLINE int ell_is_inf(GEN z) { return lg(z) == 2 && isintzero(gel(z,1)); }
 INLINE GEN ellinf(void) { return mkvec(gen_0); }
 
 /*******************************************************************/
