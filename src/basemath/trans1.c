@@ -21,10 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 #ifdef LONG_IS_64BIT
 static const long SQRTVERYBIGINT = 3037000500L; /* ceil(sqrt(LONG_MAX)) */
-static const long CBRTVERYBIGINT = 2097152L;    /* ceil(cbrt(LONG_MAX)) */
 #else
 static const long SQRTVERYBIGINT = 46341L;
-static const long CBRTVERYBIGINT =  1291L;
 #endif
 
 static THREAD GEN gcatalan, geuler, glog2, gpi;
