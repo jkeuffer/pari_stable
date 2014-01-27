@@ -1017,7 +1017,7 @@ veceint1(GEN C, GEN nmax, long prec)
 }
 
 /* j > 0, a t_REAL. Return sum_{m >= 0} a^m / j(j+1)...(j+m)).
- * Stop when expo(summand) < E */
+ * Stop when expo(summand) < E; note that s(j-1) = (a s(j) + 1) / (j-1). */
 static GEN
 mp_sum_j(GEN a, long j, long E, long prec)
 {
@@ -1032,42 +1032,15 @@ mp_sum_j(GEN a, long j, long E, long prec)
   }
   return gerepileuptoleaf(av, s);
 }
-/* j > 0, a complex. Return s_a(j) = sum_{m >= 0} a^m / j(j+1)...(j+m)).
- * Stop when expo(summand) < E
- * Note that s(j-1) = (a s(j) + 1) / (j-1). */
-static GEN
-sum_j(GEN a, long j, long E, long prec)
-{
-  pari_sp av = avma;
-  GEN q = divru(real_1(prec), j), s = q;
-  long m;
-  for (m = 0;; m++)
-  {
-    if (gexpo(q) < E) break;
-    q = gmul(q, gdivgs(a, m+j));
-    s = gadd(s, q);
-  }
-  return gerepileupto(av, s);
-}
-
 /* Return the s_a(j), j <= J */
 static GEN
 sum_jall(GEN a, long J, long prec)
 {
   GEN s = cgetg(J+1, t_VEC);
   long j, E = -bit_accuracy(prec) - 5;
-  if (typ(a) == t_REAL)
-  {
-    gel(s, J) = mp_sum_j(a, J, E, prec);
-    for (j = J-1; j; j--)
-      gel(s,j) = divru(addrs(mulrr(a, gel(s,j+1)), 1), j);
-  }
-  else
-  {
-    gel(s, J) = sum_j(a, J, E, prec);
-    for (j = J-1; j; j--)
-      gel(s, j) = gdivgs(gaddgs(gmul(a, gel(s,j+1)), 1), j);
-  }
+  gel(s, J) = mp_sum_j(a, J, E, prec);
+  for (j = J-1; j; j--)
+    gel(s,j) = divru(addrs(mulrr(a, gel(s,j+1)), 1), j);
   return s;
 }
 
