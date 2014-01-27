@@ -170,6 +170,13 @@ BA 35- FlxYqQ_pow: renamed to FlxYqq_pow, and moduli order changed.
    39- [libpari] rename gsh -> gsinh, gch -> gcosh, gth -> gtanh,
        gash -> gasinh, gach -> gacosh, gath -> gatanh, ggamd -> ggammah
        (follow GP names)
+   40- no longer naively use the Karatsuba/3M formula to multiply t_COMPLEX
+       of t_REALs: loss of accuracy is too important and unpredictable from the
+       user's point of view [ e.g. (1+ 1e-90*I)*(1e90+I) -> 1. E90 + 0.E52*I,
+       when the definition directly yields 1. E90 + 2*I ]. Could use it when
+       the exponents of real/imaginary parts are close, increasing the
+       precision by the exponent difference (increasing overhead...): not done
+       yet.
 
   Added
 EP  1- Configure option for gcov/lcov support

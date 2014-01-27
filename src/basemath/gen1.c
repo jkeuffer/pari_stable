@@ -1579,6 +1579,7 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
   gel(z,2) = gmul(x, y); return z;
 }
 
+#if 0 /* used by 3M only */
 /* set z = x+y and return 1 if x,y have the same sign
  * set z = x-y and return 0 otherwise */
 static int
@@ -1623,6 +1624,7 @@ did_add(GEN x, GEN y, GEN *z)
   }
   *z = gadd(x,y); return 1;
 }
+#endif
 /* x * I * y, x t_COMPLEX with non-intzero real part, y non-intzero "scalar" */
 static GEN
 mulcIR(GEN x, GEN y)
@@ -1654,7 +1656,9 @@ mulcc(GEN x, GEN y)
   if (isintzero(yr)) return mulcIR(x, yi);
 
   z = cgetg(3,t_COMPLEX); av = avma;
-  /* 3M method avoiding catastrophic cancellation */
+#if 0
+  /* 3M method avoiding catastrophic cancellation, BUT loses accuracy due to
+   * e.g. xr + xi if exponents differ */
   if (did_add(xr, xi, &p3))
   {
     if (did_add(yr, yi, &p4)) {
@@ -1694,12 +1698,38 @@ mulcc(GEN x, GEN y)
   tetpil = avma;
   gel(z,1) = gadd(p1,p2);
   gel(z,2) = gadd(p3,p4);
-
-  if (isintzero(gel(z,2)))
-  {
-    cgiv(gel(z,2));
-    return gerepileupto((pari_sp)(z+3), gel(z,1));
+#else
+  if (typ(xr)==t_INT && typ(yr)==t_INT && typ(xi)==t_INT && typ(yr)==t_INT)
+  { /* 3M formula */
+    p3 = addii(xr,xi);
+    p4 = addii(yr,yi);
+    p1 = mulii(xr,yr);
+    p2 = mulii(xi,yi);
+    p3 = mulii(p3,p4);
+    p4 = addii(p2,p1);
+    tetpil = avma;
+    gel(z,1) = subii(p1,p2);
+    gel(z,2) = subii(p3,p4);
+    if (!signe(gel(z,2)))
+      return gerepileuptoint((pari_sp)(z+3), gel(z,1));
   }
+  else
+  { /* naive 4M formula: avoid all loss of accuracy */
+    p1 = gmul(xr,yr);
+    p2 = gmul(xi,yi);
+    p3 = gmul(xr,yi);
+    p4 = gmul(xi,yr);
+    tetpil = avma;
+    gel(z,1) = gsub(p1,p2);
+    gel(z,2) = gadd(p3,p4);
+    if (isintzero(gel(z,2)))
+    {
+      cgiv(gel(z,2));
+      return gerepileupto((pari_sp)(z+3), gel(z,1));
+    }
+  }
+#endif
+
   gerepilecoeffssp(av,tetpil, z+1,2); return z;
 }
 /* x,y PADIC */
