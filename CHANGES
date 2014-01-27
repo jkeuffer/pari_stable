@@ -133,7 +133,7 @@ JD 14- polcyclo(n, x) now works for all roots of 1
    17- x t_REAL * y t_INT: either convert y to t_REAL (as before) or use
        integer multiplication (if lg(x) >> lg(y))
    18- GP: all results are now stored in GP history, together with the time
-       to obtain them [ used to only store non-gnil results, and no timings ]
+       to obtain them [ we used to only store non-gnil results, and no timings ]
    19- chinese(t_POL,t_POL): allow polynomials of different degrees
    20- deplin(): use FpM/Flm/F2m routines if possible (like all other generic
        linear algebra routines)
