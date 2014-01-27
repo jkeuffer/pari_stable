@@ -160,12 +160,12 @@ Hello           \\@com \kbd{void} return value
 \noindent In the third example, \kbd{Hello} is printed as a side effect, but
 is not the return value. The \kbd{print} command is a \emph{procedure},
 which conceptually returns nothing. But in fact procedures return a special
-\kbd{void} object, meant to be ignored; in particular, it does not clutter
-the history (but evaluates to $0$ in a numeric context). The final example
-assigns to the variable \kbd{f} the function $x\mapsto x^2$, the alternative
-form \kbd{f = x->x\pow2} achieving the same effect; the return value of a
-function definition is, unsurprisingly, a function object (of type
-\typ{CLOSURE}).
+\kbd{void} object, meant to be ignored (but which evaluates
+to $0$ in a numeric context, and stored as $0$ in the history or results).
+The final example assigns to the variable \kbd{f} the function $x\mapsto
+x^2$, the alternative form \kbd{f = x->x\pow2} achieving the same effect; the
+return value of a function definition is, unsurprisingly, a function object
+(of type \typ{CLOSURE}).
 
 Several expressions are combined on a single line by separating them with
 semicolons ('\kbd{;}'). Such an expression sequence will be called a
