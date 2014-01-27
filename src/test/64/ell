@@ -337,17 +337,11 @@ small([1]), [Vecsmall([128, -1])], [0, 0, 0, 0, 0, 0, 0, [[2, 3]~, [1/2, 0,
 -262537412640768000
 0 19 0 0 0 -21 0 0 4 -23 8 0 0 0 -25 -12 
 4294985035
-  ***   at top-level: ellinit([1])
-  ***                 ^------------
-  *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
 [0, 1, [5, 0, 0, 0], 1]
 1
 0
 [6.2500000000000000000000000000000000000, -140.62500000000000000000000000000
 000000]
-  ***   at top-level: ellinit([1])
-  ***                 ^------------
-  *** ellinit: incorrect type in ellxxx [not an elliptic curve (ell5)] (t_VEC).
 [0, 0, 0, x^2, x, 0, 2*x^2, 4*x, -x^4, -48*x^2, -864*x, -64*x^6 - 432*x^2, -
 6912*x^4/(-4*x^4 - 27), Vecsmall([0]), [Vecsmall([128, 0])], [0, 0, 0, 0]]
   ***   at top-level: ellminimalmodel(E)
@@ -387,4 +381,4 @@ ecsmall([0, 1]), [Vecsmall([0, 1]), Vecsmall([0]), Vecsmall([0]), Vecsmall([
   ***   at top-level: ellinit([1.,Mod(1,3)
   ***                 ^--------------------
   *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
-Total time spent: 620
+Total time spent: 628
