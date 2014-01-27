@@ -1754,7 +1754,7 @@ FFM_FFC_mul(GEN M, GEN C, GEN ff)
   case t_FF_F2xq: P = F2xqM_F2xqC_mul(M, C, T); break;
   default: P = FlxqM_FlxqC_mul(M, C, T, pp); break;
   }
-  return gerepilecopy(av, raw_to_FFM(P, ff));
+  return gerepilecopy(av, raw_to_FFC(P, ff));
 }
 
 GEN

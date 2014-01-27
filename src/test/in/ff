@@ -95,6 +95,8 @@ test(q)=
   my(M = [t,2*t^0,3*t^0; t,t^2,1+t^3; 1+t,1+t^2,1+t^3]);
   print(matdet(M));
   print(M^(-1)*M);
+  my(v = [t^0, t^1, t^2]~);
+  print(M*v);
 }
 test(2^5)
 test(7^5)
