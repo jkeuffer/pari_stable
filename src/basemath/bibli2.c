@@ -19,12 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                      SPECIAL POLYNOMIALS                      **/
 /**                                                               **/
 /*******************************************************************/
-#ifdef LONG_IS_64BIT
-static const long SQRTVERYBIGINT = 3037000500L;   /* ceil(sqrt(LONG_MAX)) */
-#else
-static const long SQRTVERYBIGINT = 46341L;
-#endif
-
 /* Tchebichev polynomial: T0=1; T1=X; T(n)=2*X*T(n-1)-T(n-2)
  * T(n) = (n/2) sum_{k=0}^{n/2} a_k x^(n-2k)
  *   where a_k = (-1)^k 2^(n-2k) (n-k-1)! / k!(n-2k)! is an integer
