@@ -516,7 +516,7 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
 
 static int
 sol_OK(GEN x, GEN N, GEN B)
-{ return B? (cmpii(gcdii(x,N),B) >= 0): !signe(resii(x,N)); }
+{ return B? (cmpii(gcdii(x,N),B) >= 0): !signe(remii(x,N)); }
 /* deg(P) > 0, x >= 0. Find all j such that gcd(P(j), N) >= B, |j| <= x */
 static GEN
 do_exhaustive(GEN P, GEN N, long x, GEN B)

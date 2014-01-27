@@ -610,14 +610,14 @@ stable_reduction(struct igusa *I, struct igusa_p *Ip)
 
   /* s = max(v_p(X) / deg(X)) */
   J = cgetg(1, t_VEC);
-  if (gegal(s,gel(v,6)))
+  if (gequal(s,gel(v,6)))
     Ip->tt = 1;
-  else if (gegal(s,gel(v,7)))
+  else if (gequal(s,gel(v,7)))
   {
     J = mkvec( Fp_to_mod(gmod(gdiv(gpowgs(i4,3),i12), p), p) );
     Ip->tt = 2;
   }
-  else if (gegal(s,gel(v,3)))
+  else if (gequal(s,gel(v,3)))
     Ip->tt = (val[2] == val[3] || 2*val[4] == 3*val[3])? 3: 4;
   else if (r3 == r4)
   {
@@ -1744,7 +1744,7 @@ litredtp(long alpha, long alpha1, GEN theta, GEN theta1, GEN polh, GEN polh1,
     { /* Ip->tt == 7 */
       long d1;
       d = val[6] - 3*val[3] + (val[Ip->eps2]/Ip->eps);
-      if (gcmp1(theta1)) /* H(px) / p^3 */
+      if (gequal1(theta1)) /* H(px) / p^3 */
         polh1 = RgX_Rg_div(RgX_unscale(polh1,p), powiu(p,3));
       d1 = minss(val[7]-3*val[3],d/2);
       if (d == 2*d1) indice = d1;
@@ -1913,7 +1913,7 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
       case 3: Ip->type = "[I{2-1-0}] page 179"; Ip->neron = cyclic(2); return 2;
       case 4: Ip->type = "[I{1-1-1}] page 182"; Ip->neron = cyclic(3); return 2;
       case 5:
-        if (equalis(p,3) && !gegal(theta,ghalf))
+        if (equalis(p,3) && !gequal(theta,ghalf))
           return labelm3(polh,theta,alpha,dismin,I,Ip);
         Ip->type = "[I{0}-III-0] page 161"; Ip->neron = cyclic(2); return 2;
       case 6:

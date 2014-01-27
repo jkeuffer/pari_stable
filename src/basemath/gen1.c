@@ -2334,7 +2334,7 @@ ser_normalize(GEN x)
 {
   long i, lx;
   GEN c, z = cgetg_copy(x, &lx);
-  z[1] = x[1]; if (lx == 2 || gcmp1(c = gel(x,2))) return z;
+  z[1] = x[1]; if (lx == 2 || gequal1(c = gel(x,2))) return z;
   gel(z,2) = gen_1; for (i=3; i<lx; i++) gel(z,i) = gdiv(gel(x,i),c);
   return z;
 }

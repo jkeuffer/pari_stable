@@ -3619,7 +3619,7 @@ mateigen(GEN x, long flag, long prec)
       if (r1)
       {
         r = gsub(r1,r2);
-        if (gcmp0(r) || gexpo(r) < ex) continue;
+        if (gequal0(r) || gexpo(r) < ex) continue;
       }
       vectrunc_append(v, r2);
       r1 = r2;
