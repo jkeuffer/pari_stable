@@ -1342,7 +1342,7 @@ inv_szeta_euler(long n, double lba, long prec)
     if (low_stack(avlim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"inv_szeta_euler, p = %lu/%lu", p,lim);
-      affrr(z, res); avma = av2;
+      z = gerepileuptoleaf(av2, z);
     }
   }
   affrr(z, res); avma = av; return res;
