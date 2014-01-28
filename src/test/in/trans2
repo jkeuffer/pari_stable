@@ -47,5 +47,7 @@ w=Pi/4;
 test(z)= my(a=expm1(z),b=exp(z)-1); printf("%.1e\n", abs(a-b)/abs(a));
 for (i=0,7, z=1e-20+i*w; test(z))
 for (i=0,7, z=1e-20+i*w+I; test(z))
+erfc(1/2+I)
+erfc(-1/2+I)
 default(realprecision,2003);
 log(exp(1.5)) - 1.5

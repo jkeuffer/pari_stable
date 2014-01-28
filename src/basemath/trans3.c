@@ -1167,11 +1167,7 @@ cxerfc_r1(GEN x, long prec)
   if (rtodbl(real_i(x)) < sqrt(D))
   {
     GEN t = gmul(divrr(Pi2n(1,prec),h), x);
-    if (typ(x) == t_REAL)
-      t = mpexpm1(t); /* stabler */
-    else
-      t = gsubgs(gexp(t, prec), 1);
-    res = gsub(res, gdivsg(2, t));
+    res = gsub(res, gdivsg(2, cxexpm1(t, prec)));
   }
   return gerepileupto(av,res);
 }
