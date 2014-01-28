@@ -312,12 +312,11 @@ _gen_get_col(GEN a, GEN b, long li, void *E, const struct bb_field *ff)
 GEN
 gen_Gauss(GEN a, GEN b, void *E, const struct bb_field *ff)
 {
-  pari_sp av = avma, lim;
   long i, j, k, li, bco, aco;
   GEN u, g0 = ff->s(E,0);
-
-  lim = stack_lim(av,1);
+  pari_sp av = avma, lim = stack_lim(av,1);
   a = RgM_shallowcopy(a);
+  b = RgM_shallowcopy(b);
   aco = lg(a)-1; bco = lg(b)-1; li = nbrows(a);
   for (i=1; i<=aco; i++)
   {

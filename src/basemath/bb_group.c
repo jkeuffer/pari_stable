@@ -374,7 +374,7 @@ gen_Shanks_log(GEN x, GEN g0,GEN q, void *E, const struct bb_group *grp)
   p1 = giant = gerepileupto(av1, grp->mul(E,x,grp->pow(E, p1, gen_m1)));
   perm = vecsmall_indexsort(table);
   table = perm_mul(table,perm);
-
+  av1 = avma; lim=stack_lim(av1,2);
   for (k=1; k<= lbaby; k++)
   {
     long h = grp->hash(p1);
