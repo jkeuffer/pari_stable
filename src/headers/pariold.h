@@ -13,6 +13,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define mpexp1 mpexpm1
 #define ggamd ggammah
 #define gach gacosh
 #define gash gasinh
@@ -338,7 +339,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #define lmpdiv  (long)mpdiv
 #define lmpent  (long)mpent
 #define lmpeuler (long)mpeuler
-#define lmpexp1 (long)mpexp1
+#define lmpexp1 (long)mpexpm1
 #define lmpexp  (long)mpexp
 #define lmpfact (long)mpfact
 #define lmplog  (long)mplog

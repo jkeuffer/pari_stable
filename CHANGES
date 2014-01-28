@@ -177,6 +177,8 @@ BA 35- FlxYqQ_pow: renamed to FlxYqq_pow, and moduli order changed.
        the exponents of real/imaginary parts are close, increasing the
        precision by the exponent difference (increasing overhead...): not done
        yet.
+   41- renamed mpexp1 -> mpexpm1, cxexp1 -> cxexpm1
+   42- change prototye of mpsincos1 and rename -> mpsincosm1
 
   Added
 EP  1- Configure option for gcov/lcov support
@@ -240,6 +242,7 @@ BA 40- [libpari] FpM_powu/Flm_powu/F2m_powu
        bid_get_grp, bid_get_no
    43- [libpari] FpX_disc
    44- [libpari] retmkcomplex
+   45- GP function expm1 (= exp - 1, avoiding cancellation)
 
   Removed
     1- optional flag to factorpadic() [ enabling Buchman-Lenstra + round2 ]

@@ -784,7 +784,7 @@ static GEN
 gexp1(GEN x, long prec)
 {
   if (typ(x) != t_REAL) x = gtofp(x, prec);
-  return mpexp1(x);
+  return mpexpm1(x);
 }
 
 /* assume s != 0 */
@@ -1168,7 +1168,7 @@ cxerfc_r1(GEN x, long prec)
   {
     GEN t = gmul(divrr(Pi2n(1,prec),h), x);
     if (typ(x) == t_REAL)
-      t = mpexp1(t); /* stabler */
+      t = mpexpm1(t); /* stabler */
     else
       t = gsubgs(gexp(t, prec), 1);
     res = gsub(res, gdivsg(2, t));

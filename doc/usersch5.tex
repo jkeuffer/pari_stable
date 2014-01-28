@@ -8949,7 +8949,7 @@ $x,y$ have type \typ{INT}, \typ{FRAC}, \typ{REAL} or \typ{COMPLEX}. See also
 
 \fun{GEN}{cxnorm}{GEN x} norm of the \typ{COMPLEX} $x$ (modulus squared).
 
-\fun{GEN}{cxexp1}{GEN x} returns $\exp(x)-1$, for a \typ{COMPLEX} $x$.
+\fun{GEN}{cxexpm1}{GEN x} returns $\exp(x)-1$, for a \typ{COMPLEX} $x$.
 
 \section{Quadratic numbers and binary quadratic forms}
 
@@ -9269,15 +9269,14 @@ where you want such computations as $\log(-1) = I$.
 
 \fun{GEN}{mpexp[z]}{GEN x[, GEN z]} returns $\exp(x)$.
 
-\fun{GEN}{mpexp1}{GEN x} returns $\exp(x)-1$, but is more accurate than
+\fun{GEN}{mpexpm1}{GEN x} returns $\exp(x)-1$, but is more accurate than
 \kbd{subrs(mpexp(x), 1)}, which suffers from catastrophic cancellation if
 $|x|$ is very small.
 
-\fun{GEN}{mpsincos1}{GEN x, long *qmod8} compute $y\in[-\pi/4,\pi/4]$
-such that $y = x + q \pi/2$, $q\in \Z$ and return $\cos(y) - 1$; this is
-more accurate than \kbd{subrs(mpcos(y), 1)}, which suffers from catastrophic
-cancellation if $|x|$ is very small. Set \kbd{*qmod8} to the integer in
-$[0,7]$ congruent to $q$ modulo 8.
+\fun{void}{mpsincosm1}{GEN x, GEN *s, GEN *c} sets $s$ and $c$ to
+$\sin(x)$ and $\cos(x)-1$ respectively, where $x$ is a \typ{REAL}; the latter
+is more accurate than \kbd{subrs(mpcos(y), 1)}, which suffers from
+catastrophic cancellation if $|x|$ is very small.
 
 \fun{GEN}{mpveceint1}{GEN C, GEN eC, long n} as \kbd{veceint1}; assumes
 that $C > 0$ is a \typ{REAL} and that \kbd{eC} is \kbd{NULL} or \kbd{mpexp(C)}.
