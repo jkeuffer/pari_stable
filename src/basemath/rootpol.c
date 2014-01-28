@@ -1723,8 +1723,8 @@ mygprec_absolute(GEN x, long bit)
 static long
 a_posteriori_errors(GEN p, GEN roots_pol, long err)
 {
-  long i, e, n = degpol(p), e_max = -(long)EXPOBITS;
-  GEN sigma, shatzle, x;
+  long i, n = degpol(p), e_max = -(long)EXPOBITS;
+  GEN sigma, shatzle;
 
   err += (long)log2((double)n) + 1;
   if (err > -2) return 0;
@@ -1733,8 +1733,10 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   shatzle = divur(2, subrs(sqrtnr(subrs(sigma,1),n), 1));
   for (i=1; i<=n; i++)
   {
-    x = root_error(n,i,roots_pol,err,shatzle);
-    e = gexpo(x); if (e > e_max) e_max = e;
+    pari_sp av = avma;
+    GEN x = root_error(n,i,roots_pol,err,shatzle);
+    long e = gexpo(x);
+    avma = av; if (e > e_max) e_max = e;
     gel(roots_pol,i) = mygprec_absolute(gel(roots_pol,i), -e);
   }
   return e_max;
