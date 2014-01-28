@@ -1225,7 +1225,8 @@ get_xinf(double beta)
     x0 = x1;
   }
 }
-/* optimize for zeta( s + it, prec ) */
+/* optimize for zeta( s + it, prec ), assume |s-1| > 0.1 (guaranteed since
+ * if gexpo(u = s-1) < -5, we use the functional equation s->1-s) */
 static void
 optim_zeta(GEN S, long prec, long *pp, long *pn)
 {
@@ -1243,13 +1244,8 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   if (s <= 0) /* may occur if S ~ 0, and we don't use the func. eq. */
   { /* TODO: the crude bounds below are generally valid. Optimize ? */
     double l,l2, la = 1.; /* heuristic */
-    if (dnorm(s-1,t) < 0.1) /* |S - 1|^2 < 0.1 */
-      l2 = -(s - 0.5);
-    else
-    {
-      double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
-      l2 = (s - 0.5)*rlog - t*ilog; /* = Re( (S - 1/2) log (S-1) ) */
-    }
+    double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
+    l2 = (s - 0.5)*rlog - t*ilog; /* = Re( (S - 1/2) log (S-1) ) */
     l = (B - l2 + s*log2PI) / (2. * (1.+ log((double)la)));
     l2 = dabs(s, t)/2;
     if (l < l2) l = l2;
