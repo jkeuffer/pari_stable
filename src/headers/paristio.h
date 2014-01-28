@@ -226,10 +226,14 @@ extern char *current_psfile, *pari_datadir;
 
 /* Define this to (1) locally (in a given file, NOT here) to check
  * "random" garbage collecting */
+#ifdef DEBUG_LOWSTACK
+#  define low_stack(x,l) 1
+#else
 #ifdef DYNAMIC_STACK
 #  define low_stack(x,l) (avma < (pari_sp)(l))
 #else
 #  define low_stack(x,l) (avma < (pari_sp)(x))
+#endif
 #endif
 
 #define stack_lim(av,n) (bot + (((av)-bot)>>(n)))
