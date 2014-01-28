@@ -2357,7 +2357,7 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 {
   pari_sp av = avma;
   GEN res;
-  char *s, *tok;
+  char *s, *tok=NULL;
 
   s = strchr(rel, ':') - 1;
   *s = '\0';
