@@ -4642,11 +4642,6 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
 }
 
 static GEN
-_pow(void *E, GEN x, GEN n) { return ellmul_Z((GEN)E,x,n); }
-
-static const struct bb_group ell_group={_mul,_pow,NULL,hash_GEN,gequal,ell_is_inf};
-
-static GEN
 doellff_get_o(GEN E)
 {
   GEN G = ellgroup(E, NULL), d1 = gel(G,1);
