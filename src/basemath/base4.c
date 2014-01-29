@@ -3101,7 +3101,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
     if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"[2]: nfhnfmod, i = %ld", i);
-      gerepileall(av,3, &A,&I,&J);
+      gerepileall(av,dA? 4: 3, &A,&I,&J,&dA);
     }
   }
   idV_simplify(I);
