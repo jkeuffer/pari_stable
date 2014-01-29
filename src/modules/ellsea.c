@@ -714,11 +714,11 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, struct meqn
 
     /*check that the kernel kpoly is the good one */
     kpoly2 = FqX_sqr(kpoly, T, p);
-    h = lift(lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2)))));
+    h = liftall_shallow(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2))));
     if (signe(Fq_elldivpolmod(Eba4, Eba6, ell, h, T, p)))
     {
       GEN Ic = gdiv(gsubst(num_iso, vx, Ib), gsqr(gsubst(kpoly, vx, Ib)));
-      GEN kpoly_new = lift(lift(numer(gsubst(gtmp, vx, Ic))));
+      GEN kpoly_new = liftall_shallow(numer(gsubst(gtmp, vx, Ic)));
       return gerepilecopy(ltop, mkvecn(5, a4t, a6t, kpoly_new, gtmp, Ic));
     }
     avma = btop;
