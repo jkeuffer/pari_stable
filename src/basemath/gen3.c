@@ -1508,8 +1508,8 @@ serreverse(GEN x)
   if (typ(x)!=t_SER) pari_err_TYPE("serreverse",x);
   if (valp(x)!=1) pari_err_DOMAIN("serreverse", "valuation", "!=", gen_1,x);
   if (lx < 3) pari_err_DOMAIN("serreverse", "x", "=", gen_0,x);
-  a = gel(x,2);
-  if (gequal1(a)) a = NULL; else { x = gdiv(x,a); gel(x,2) = gen_1; }
+  y = ser_normalize(x);
+  if (y == x) a = NULL; else { a = gel(x,2); x = y; }
   av = avma; lim = stack_lim(av, 2);
   mi = lx-1; while (mi>=3 && gequal0(gel(x,mi))) mi--;
   u = cgetg(lx,t_SER);

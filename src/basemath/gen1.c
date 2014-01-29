@@ -2332,10 +2332,12 @@ div_ser_scal(GEN x, GEN y) {
 GEN
 ser_normalize(GEN x)
 {
-  long i, lx;
-  GEN c, z = cgetg_copy(x, &lx);
-  z[1] = x[1]; if (lx == 2 || gequal1(c = gel(x,2))) return z;
-  gel(z,2) = gen_1; for (i=3; i<lx; i++) gel(z,i) = gdiv(gel(x,i),c);
+  long i, lx = lg(x);
+  GEN c, z;
+  if (lx == 2) return x;
+  c = gel(x,2); if (gequal1(c)) return x;
+  z = cgetg(lx, t_SER); z[1] = x[1]; gel(z,2) = gen_1;
+  for (i=3; i<lx; i++) gel(z,i) = gdiv(gel(x,i),c);
   return z;
 }
 
