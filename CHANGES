@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.6.2 (released ??/??/2014):
+Done for version 2.6.2 (released 30/01/2014):
 
   Fixed
     1- eulerphi(t_INT factorization) corrupted the input
