@@ -19,6 +19,6 @@ Doc: given a prime $p$, an integral polynomial $A$ whose leading coefficient
      B = [x + (3*t^2 + t + 1), x + (4*t^2 + 6*t + 6)];
      r = polhensellift(A, B, [p, T], 6) }
  %1 = [x + (20191*t^2 + 50604*t + 75783), x + (97458*t^2 + 67045*t + 41866)]
- ? lift(lift( r[1] * r[2] * Mod(Mod(1,p^6),T) ))
+ ? liftall( r[1] * r[2] * Mod(Mod(1,p^6),T) )
  %2 = x^2 + (t + 1)
  @eprog
