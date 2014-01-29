@@ -384,11 +384,10 @@ rowred_long(GEN a, long rmod)
 }
 
 static void
-rowred(GEN a, GEN rmod)
+rowred(GEN a, GEN rmod, GEN rmodo2)
 {
   long j,k, c = lg(a), r = lgcols(a);
   pari_sp av=avma, lim=stack_lim(av,1);
-  GEN rmodo2 = shifti(rmod,-1);
 
   for (j=1; j<r; j++)
   {
@@ -572,7 +571,7 @@ maxord2(GEN cf, GEN p, long epsilon)
           gcoeff(T2,j,i)=(i==j)? p: gen_0;
           gcoeff(T2,j,n+i) = modii(gcoeff(t,i,j),p);
         }
-      rowred(T2,pp);
+      rowred(T2,pp,ppo2);
     }
     setlg(T2, n+1);
     jp=matinv(T2,p);
@@ -600,7 +599,7 @@ maxord2(GEN cf, GEN p, long epsilon)
           for (j=1; j<=n; j++,h++)
             gcoeff(Tn,k,h) = diviiexact(gcoeff(t,i,j), p);
       }
-      rowred(Tn,pp);
+      rowred(Tn,pp,ppo2);
     }
     setlg(Tn, n+1);
     index = ZM_det_triangular(Tn);
