@@ -2364,7 +2364,7 @@ ifac_defrag(GEN *partial, GEN *where)
  * 'where' pointer is carried along; if it is 1, we make an educated guess.
  * Exception:  If new_lg is 0, the vector is full to the brim, and the first
  * entry is composite, we make it longer to avoid being called again a
- * microsecond later. It is safe to call this with NULL for the where argument;
+ * microsecond later. It is safe to call this with *where = NULL:
  * if it doesn't point anywhere within the old structure, it is left alone */
 static void
 ifac_realloc(GEN *partial, GEN *where, long new_lg)
@@ -3057,25 +3057,12 @@ ifac_decomp(GEN n, long hint)
 /***********************************************************************/
 /* memory management */
 static void
-ifac_memcheck(pari_sp av,pari_sp lim, GEN *part)
+ifac_GC(pari_sp av, GEN *part)
 {
-  if (low_stack(lim, stack_lim(av,1)))
-  {
-    if(DEBUGMEM>1) pari_warn(warnmem,"ifac_xxx");
-    ifac_realloc(part, NULL, 0);
-    *part = gerepileupto(av, *part);
-  }
-}
-static void
-ifac_memcheck_extra(pari_sp av,pari_sp lim, GEN *part, GEN *extra, GEN res)
-{
-  if (low_stack(lim, stack_lim(av,1)))
-  {
-    affii(*extra,res); *extra = res;
-    if(DEBUGMEM>1) pari_warn(warnmem,"ifac_xxx");
-    ifac_realloc(part, NULL, 0);
-    *part = gerepileupto(av, *part);
-  }
+  GEN here = NULL;
+  if(DEBUGMEM>1) pari_warn(warnmem,"ifac_xxx");
+  ifac_realloc(part, &here, 0);
+  *part = gerepileupto(av, *part);
 }
 
 static long
@@ -3090,7 +3077,7 @@ ifac_moebius(GEN n)
     GEN p;
     if (!ifac_next(&part,&p,&v)) return v? 0: mu;
     mu = -mu;
-    ifac_memcheck(av, lim, &part);
+    if (low_stack(lim, stack_lim(av,1))) ifac_GC(av,&part);
   }
 }
 
@@ -3124,7 +3111,7 @@ ifac_ispowerful(GEN n)
     if (e != 1 || Z_isanypower(p,NULL)) { ifac_skip(part); continue; }
     if (!ifac_next(&part,&p,&e)) return 1;
     if (e == 1) return 0;
-    ifac_memcheck(av, lim, &part);
+    if (low_stack(lim, stack_lim(av,1))) ifac_GC(av,&part);
   }
 }
 static GEN
@@ -3142,7 +3129,7 @@ ifac_core(GEN n)
     if (!odd(e) || Z_issquare(p)) { ifac_skip(part); continue; }
     if (!ifac_next(&part,&p,&e)) return m;
     if (odd(e)) m = mulii(m, p);
-    ifac_memcheck_extra(av, lim, &part, &m,c);
+    if (low_stack(lim, stack_lim(av,1))) { affii(m,c); m=c; ifac_GC(av,&part); }
   }
 }
 
