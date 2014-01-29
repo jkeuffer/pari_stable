@@ -1502,7 +1502,7 @@ GEN
 serreverse(GEN x)
 {
   long v=varn(x), lx = lg(x), i, mi;
-  pari_sp av = avma, lim = stack_lim(av, 2);
+  pari_sp av0 = avma, av, lim;
   GEN a, y, u;
 
   if (typ(x)!=t_SER) pari_err_TYPE("serreverse",x);
@@ -1510,6 +1510,7 @@ serreverse(GEN x)
   if (lx < 3) pari_err_DOMAIN("serreverse", "x", "=", gen_0,x);
   a = gel(x,2);
   if (gequal1(a)) a = NULL; else { x = gdiv(x,a); gel(x,2) = gen_1; }
+  av = avma; lim = stack_lim(av, 2);
   mi = lx-1; while (mi>=3 && gequal0(gel(x,mi))) mi--;
   u = cgetg(lx,t_SER);
   y = cgetg(lx,t_SER);
@@ -1545,13 +1546,14 @@ serreverse(GEN x)
     gel(y,i) = gdivgs(gel(u,i), i-1);
     if (low_stack(lim, stack_lim(av,2)))
     {
+      GEN dummy = cgetg(1,t_VEC);
       if(DEBUGMEM>1) pari_warn(warnmem,"serreverse");
-      for(k=i+1; k<lx; k++) gel(u,k) = gel(y,k) = gen_0; /* dummy */
+      for(k=i+1; k<lx; k++) gel(u,k) = gel(y,k) = dummy;
       gerepileall(av,2, &u,&y);
     }
   }
   if (a) y = ser_unscale(y, ginv(a));
-  return gerepilecopy(av,y);
+  return gerepilecopy(av0,y);
 }
 
 /*******************************************************************/
