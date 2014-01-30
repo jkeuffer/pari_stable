@@ -8,9 +8,25 @@ Doc: $\var{bnf}$ being as output by
  possible to remove the assumption of the Generalized Riemann
  Hypothesis\sidx{GRH}. It is correct if and only if the answer is 1. If it is
  incorrect, the program may output some error message, or loop indefinitely.
- You can check its progress by increasing the debug level.
+ You can check its progress by increasing the debug level. The \var{bnf}
+ structure must contain the fundamental units:
+ \bprog
+ ? K = bnfinit(x^3+2^2^3+1); bnfcertify(K)
+   ***   at top-level: K=bnfinit(x^3+2^2^3+1);bnfcertify(K)
+   ***                                        ^-------------
+   *** bnfcertify: missing units in bnf.
+ ? K = bnfinit(x^3+2^2^3+1, 1); \\ include units
+ ? bnfcertify(K)
+ %3 = 1
+ @eprog
 
  If flag is present, only certify that the class group is a quotient of the
  one computed in bnf (much simpler in general); likewise, the computed units
- may form a subgroup of the full unit group.
+ may form a subgroup of the full unit group. In this variant, the units are
+ no longer needed:
+ \bprog
+ ? K = bnfinit(x^3+2^2^3+1); bnfcertify(K, 1)
+ %4 = 1
+ @eprog
+
 Variant: Also available is  \fun{GEN}{bnfcertify}{GEN bnf} ($\fl=0$).
