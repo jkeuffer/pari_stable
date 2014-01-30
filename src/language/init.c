@@ -1872,7 +1872,7 @@ GEN
 obj_check(GEN S, long K)
 {
   GEN O, v = gel(S, lg(S)-1);
-  if (typ(v) != t_VEC) pari_err_TYPE("obj_check", S);
+  if (typ(v) != t_VEC || K >= lg(v)) pari_err_TYPE("obj_check", S);
   O = gel(v,K); return isintzero(O)? NULL: O;
 }
 
