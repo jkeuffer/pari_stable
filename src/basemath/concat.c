@@ -233,29 +233,26 @@ catmanyMAT(GEN y1, GEN y2)
   *z = evaltyp(t_MAT) | evallg(L);
   return z;
 }
-/* see catmany() */
 static GEN
 catmanySTR(GEN y1, GEN y2)
 {
-  long i, L = 1;
+  long L = 1; /* final \0 */
   GEN z, y;
-  char *s, *S = (char*)avma;
-  pari_sp av = avma;
-  (void)new_chunk(1); *--S = 0;
-  for (y = y2; y >= y1; y--)
+  char *s;
+  for (y = y1; y <= y2; y++)
+  {
+    char *c = GSTR( gel(y,0) );
+    L += strlen(c);
+  }
+  z = cgetg(nchar2nlong(L)+1, t_STR);
+  s = GSTR(z);
+  for (y = y1; y <= y2; y++)
   {
     char *c = GSTR( gel(y,0) );
     long nc = strlen(c);
-    if (nc == 0) continue;
-    L += nc; c += nc;
-    (void)new_chunk(nchar2nlong(nc));
-    for (i=1; i<=nc; i++) *--S = *--c;
+    if (nc) { (void)strncpy(s, c, nc); s += nc; }
   }
-  avma = av;
-  z = cgetg(nchar2nlong(L) + 1, t_STR);
-  s = GSTR(z);
-  if (S != s) { for (i = 0; i <= L; i++) *s++ = *S++; }
-  return z;
+  *s = 0; return z;
 }
 
 /* all entries in y have the same type t = t_VEC, COL, MAT or VECSMALL
@@ -276,7 +273,7 @@ catmany(GEN y1, GEN y2, long t)
     if (nc == 0) continue;
     L += nc;
     z = new_chunk(nc) - 1;
-    for (i=1; i<=nc; i++) z[i] = c[i];
+    for (i=1; i<=nc; i++) gel(z,i) = gel(c,i);
   }
   z = new_chunk(1);
   *z = evaltyp(t) | evallg(L);
