@@ -695,35 +695,53 @@ gatanh(GEN x, long prec)
 /**               CACHE BERNOULLI NUMBERS B_2k                     **/
 /**                                                                **/
 /********************************************************************/
+static GEN
+bern(GEN B, long pr)
+{
+  if (typ(B) != t_REAL) return fractor(B, pr);
+  if (realprec(B) < pr) return rtor(B,pr);
+  return B;
+}
 static const long BERN_MINNB = 5;
-/* compute B_2,...,B_2*nb. If prec = 0, compute exactly */
+/* need B[2..2*nb] at least prec accuracy. If prec = 0, compute exactly */
 void
 mpbern(long nb, long prec)
 {
   const pari_sp av = avma;
-  long n, n_is_small = 1, lbern = 0;
+  long n, pr, n_is_small = 1, lbern = 0;
   GEN B;
   pari_timer T;
 
-  /* one more word of accuracy than required */
-  if (prec) incrprec(prec); else prec = LONG_MAX; /* oo */
+  /* pr = accuracy for computation, prec = required accuracy for result */
+  if (prec)
+  {
+    pr = prec;
+    incrprec(pr);
+  }
+  else
+    pr = prec = LONG_MAX; /* oo */
   if (nb < BERN_MINNB) nb = BERN_MINNB;
   if (bernzone)
   { /* don't recompute known Bernoulli */
-    long i, N;
+    long i, min, max;
     lbern = lg(bernzone);
-    N = minss(lbern-1, nb);
+    if (lbern-1 < nb)
+    { min = lbern-1; max = nb; }
+    else
+    { min = nb; max = lbern-1; }
     /* skip B_2, ..., B_{2*MINNB}, always included as t_FRAC */
-    for (n = BERN_MINNB+1; n <= N; n++)
+    for (n = BERN_MINNB+1; n <= min; n++)
     {
       GEN c = gel(bernzone,n);
       /* also stop if prec = 0 (compute exactly) */
       if (typ(c) == t_REAL && realprec(c) < prec) break;
     }
-    /* B[1], ..., B_[n-1] are OK */
+    /* B[1..n-1] are OK */
     if (n > nb) return;
-    B = cgetg_block(nb+1, t_VEC);
+    B = cgetg_block(max+1, t_VEC);
     for (i = 1; i < n; i++) gel(B,i) = gel(bernzone,i);
+    /* keep B[nb+1..max] */
+    for (i = nb+1; i <= max; i++) gel(B,i) = gel(bernzone,i);
   }
   else
   {
@@ -750,12 +768,8 @@ mpbern(long nb, long prec)
     GEN S;
     if (n < lbern)
     {
-      GEN old = gel(bernzone,n);
-      if (typ(old) != t_REAL || realprec(old) >= prec)
-      {
-        gel(B,n) = old;
-        continue;
-      }
+      GEN b = gel(bernzone,n);
+      if (typ(b)!=t_REAL || realprec(b)>=prec) { gel(B,n) = b; continue; }
     }
     /* Not cached, must compute */
     /* huge accuracy ? May as well compute exactly */
@@ -771,8 +785,7 @@ mpbern(long nb, long prec)
 #endif
       ulong u = 8, v = 5, a = n-1, b = 2*n-3;
       n_is_small = 0;
-      S = gel(B,a); /* B_2a */
-      if (typ(S) != t_REAL) S = fractor(S, prec);
+      S = bern(gel(B,a), pr); /* B_2a */
       for (;;)
       { /* b = 2a-1, u = 2v-2, 2a + v = 2n+3 */
         if (a == 1) { S = mulri(S, muluu(u,v)); break; } /* a=b=1, v=2n+1, u=4n */
@@ -780,11 +793,12 @@ mpbern(long nb, long prec)
         S = (v <= mul_overflow)? mulru(S, u*v): mulri(S, muluu(u,v));
         S = (a <= mul_overflow)? divru(S, a*b): divri(S, muluu(a,b));
         u += 4; v += 2; a--; b -= 2;
-        S = gadd(gel(B,a), S);
+        S = addrr(bern(gel(B,a), pr), S);
         if ((a & 127) == 0) S = gerepileuptoleaf(av, S);
       }
       S = divru(subsr(2*n, S), 2*n+1);
       shiftr_inplace(S, -2*n);
+      if (realprec(S) != prec) S = rtor(S, prec);
     }
     gel(B,n) = gclone(S); /* S = B_2n */
   }
@@ -792,8 +806,10 @@ mpbern(long nb, long prec)
   swap(B, bernzone);
   if (B)
   { /* kill old non-reused values */
-    for (n = lg(B)-1; n; n--)
+    for (n = lbern-1; n; n--)
+    {
       if (gel(B,n) != gel(bernzone,n)) gunclone(gel(B,n));
+    }
     killblock(B);
   }
   avma = av;

@@ -435,4 +435,4 @@ x^17 - 1
 763732423 E-8*I
 ? if(getheap()!=HEAP,getheap())
 ? print("Total time spent: ",gettime);
-Total time spent: 24
+Total time spent: 44
