@@ -42,7 +42,7 @@ galoisgetpol(long a, long b, long sig)
   {
     case 1: si="real"; break;
     case 2: if (a%2==0) { si="complex"; break; }
-      pari_err_DOMAIN("galoisgetpol", "s", ">", gen_1, stoi(s));
+      pari_err_DOMAIN("galoisgetpol", "s", ">", gen_1, stoi(sig));
     default:
       pari_err_FLAG("galoisgetpol");
       return NULL;
