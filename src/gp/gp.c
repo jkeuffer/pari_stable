@@ -600,7 +600,7 @@ external_help(const char *s, int num)
     cdir = stack_sprintf("%c:& cd %s & ", *basedir, basedir);
   }
 #endif
-  str=stack_sprintf("%s%s -fromgp %s %c%s%s%c",cdir,help,opt,
+  str=stack_sprintf("\"%s%s\" -fromgp %s %c%s%s%c",cdir,help,opt,
                                                SHELL_Q,t,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
   pari_free(t);

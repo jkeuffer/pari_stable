@@ -683,7 +683,7 @@ parilvl0.h: \$(L0MODS)
 EOT
 fi
 
-if test -f $TOP/.git/index; then
+if test -f "$TOP/.git/index"; then
   vcfile="../.git/index"
   cat >> $file <<EOT
 paricfg.h: $vcfile $cfg/version

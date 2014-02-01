@@ -2,8 +2,11 @@
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
 Done for version ????? (released ??/??/2014):
+
+  Fixed
     1- e = ellinit(E over Qp); ellztopoint(e, 3) --> SEGV
     2- thue((x^2+1)^2*(x^2-2),-4) --> missing solutions [+-1, +-1]
+BA  3- spaces in directory names were not supported
 
 Done for version 2.6.2 (released 30/01/2014):
 
