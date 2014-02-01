@@ -402,20 +402,25 @@ new_sol(GEN z, GEN S)
   return 1;
 }
 
+/* add solution (x,y) if not already known */
 static void
 add_sol(GEN *pS, GEN x, GEN y)
 {
   GEN u = mkvec2(x,y);
   if (new_sol(u, *pS)) *pS = shallowconcat(*pS, mkvec(u));
 }
-
+/* z = P(p,q), d = deg P, |z| = |rhs|. Check signs and (possibly)
+ * add solutions (p,q), (-p,-q) */
 static void
-check_sol(GEN x, GEN y, GEN P, GEN rhs, GEN *pS)
+add_pm(GEN *pS, GEN p, GEN q, GEN z, long d, GEN rhs)
 {
-  if (gequal0(y))
-  { if (equalii(powiu(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
+  if (signe(z) == signe(rhs))
+  {
+    add_sol(pS, p, q);
+    if (!odd(d)) add_sol(pS, negi(p), negi(q));
+  }
   else
-  { if (equalii(poleval(RgX_rescale(P,y),x), rhs)) add_sol(pS, x, y); }
+    if (odd(d))  add_sol(pS, negi(p), negi(q));
 }
 
 /* Check whether a potential solution is a true solution. Return 0 if
@@ -427,14 +432,14 @@ CheckSol(GEN *pS, GEN z1, GEN z2, GEN P, GEN rhs, GEN ro)
   long e;
 
   y = grndtoi(real_i(gdiv(gsub(z2,z1), gsub(ro1,ro2))), &e);
-  if (e > 0) return 0;
+  if (e > 0 || !signe(y)) return 0; /* y = 0 taken care of in SmallSols */
   x = gadd(z1, gmul(ro1, y));
   x = grndtoi(real_i(x), &e);
   if (e > 0) return 0;
   if (e <= -13)
-  {
-    check_sol(     x ,      y,  P,rhs,pS);
-    check_sol(negi(x), negi(y), P,rhs,pS);
+  { /* y != 0 and rhs != 0; check whether P(x,y) = rhs or P(-x,-y) = rhs */
+    GEN z = poleval(RgX_rescale(P,y),x);
+    if (absi_equal(z, rhs)) add_pm(pS, x,y, z, degpol(P), rhs);
   }
   return 1;
 }
@@ -502,17 +507,8 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
       setabssign(Q);
       if (Z_ispowerall(Q, d, &Q))
       {
-        if (!is_pm1(Q)) {
-          p = mulii(p, Q);
-          q = mulii(q, Q);
-        }
-        if (signe(z) == signe(rhs))
-        {
-          add_sol(pS, p, q);
-          if (!odd(d)) add_sol(pS, negi(p), negi(q));
-        }
-        else
-          if (odd(d))  add_sol(pS, negi(p), negi(q));
+        if (!is_pm1(Q)) { p = mulii(p, Q); q = mulii(q, Q); }
+        add_pm(pS, p, q, z, d, rhs);
       }
     }
     if (j == lg(t)) pari_err_BUG("Short continued fraction in thue");
