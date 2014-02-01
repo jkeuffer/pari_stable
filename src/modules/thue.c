@@ -1099,7 +1099,7 @@ thue(GEN tnf, GEN rhs, GEN ne)
       ry = nfrootsQ(Rab);
       for (k = 1; k < lg(ry); k++)
         if (typ(gel(ry,k)) == t_INT) check_y(&S, P, POL, gel(ry,k), rhs);
-      if (!odd(e)) {
+      if (odd(e)) {
         Rab = gsubst(gsubst(R, va, negi(df)), vb, negi(dg));
         ry = nfrootsQ(Rab);
         for (k = 1; k < lg(ry); k++)
