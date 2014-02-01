@@ -557,12 +557,7 @@ SmallSols(GEN S, GEN x3, GEN poly, GEN rhs)
 
   if (DEBUGLEVEL>1) err_printf("* Checking for small solutions <= %Ps\n", x3);
   if (lgefint(x3) > 3)
-  {
-    char *s = pari_sprintf("thue (SmallSols): y <= %Ps", x3);
-    char *t = pari_strdup(s);
-    pari_free(s);
-    pari_err_OVERFLOW(t);
-  }
+    pari_err_OVERFLOW(stack_sprintf("thue (SmallSols): y <= %Ps", x3));
   By = itou(x3);
   /* y = 0 first: solve X^n = rhs */
   if (odd(n))
