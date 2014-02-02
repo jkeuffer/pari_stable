@@ -1969,8 +1969,12 @@ closure_alarmer(GEN C, long s)
   pari_CATCH(CATCH_ALL) /* We need to stop the timer after any error */
   {
     GEN E = pari_err_last();
+    char buf[64];
     if (err_get_num(E) != e_ALARM) { alarm0(0); pari_err(0, E); }
-    evalstate_restore(&state); x = gerepilecopy(avma, E);
+    evalstate_restore(&state); convert_time(buf, s*1000);
+    E = cgetg(3, t_ERROR);
+    E[1] = e_ALARM;
+    gel(E,2) = strtoGENstr(buf); return E;
   }
   pari_TRY { alarm0(s); x = closure_evalgen(C); alarm0(0); } pari_ENDCATCH;
   return x;
