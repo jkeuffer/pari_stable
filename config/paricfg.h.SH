@@ -11,7 +11,7 @@ esac
 if test -n "$perl"; then
   case "$osname" in
     os2|mingw) gphelp="perl -S gphelp -detex" ;;
-    *) gphelp="$bindir/gphelp" ;;
+    *) gphelp="\\\"$bindir/gphelp\\\"" ;;
   esac
 fi
 
