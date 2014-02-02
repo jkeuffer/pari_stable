@@ -18,4 +18,5 @@
   ***   at top-level: galoisgetpol(3,1,2)
   ***                 ^-------------------
   *** galoisgetpol: domain error in galoisgetpol: s > 1
-Total time spent: 0
+[96, 161]
+Total time spent: 3624
