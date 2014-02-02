@@ -9,6 +9,7 @@ galoisgetpol(3,1,2)
 test(n,k)=
   if(galoisidentify(galoisinit(galoisgetpol(n,k)[1])) != [n,k], error([n,k]));
 test(8,3)
+test(18,5)
 test(27,3)
 test(45,2)
 test(30,2)
