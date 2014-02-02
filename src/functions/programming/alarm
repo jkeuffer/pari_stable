@@ -21,7 +21,7 @@ Doc: if \var{code} is omitted, trigger an \var{e\_ALARM} exception after $s$
    ? type(E)
    %3 = "t_ERROR"
    ? print(E)
-   %4 = error("968 ms.\n.")
+   %4 = error("alarm interrupt after 964 ms.")
    ? alarm(10, factor(N));   \\ enough time
    %5 =
    [ 10000000000000000000000013 1]
@@ -45,14 +45,5 @@ Doc: if \var{code} is omitted, trigger an \var{e\_ALARM} exception after $s$
  remembered. When the alarm rings, the subsequent bounded factorization finds
  it right away.
 
- \misctitle{Caveat}
-
- \item It is not possible to set a new alarm \emph{within} another
- \kbd{alarm} code: the new timer erases the parent one.
-
- \item When \kbd{alarm(s, code)} triggers an alarm, the \typ{ERROR} indicates
- the delay $s$. On the other hand, if \kbd{code} is omitted, we set a generic
- alarm that eventually triggers a signal caught by the signal handler
- mechanism and $s$ is no longer available: in this case, the \typ{ERROR}
- indicates the time spent evaluating expressions since the last GP prompt, as
- when interrupting a computation with \kbd{<C-C>} / \kbd{SIGINT}.
+ \misctitle{Caveat} It is not possible to set a new alarm \emph{within}
+ another \kbd{alarm} code: the new timer erases the parent one.

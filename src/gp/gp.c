@@ -1665,12 +1665,15 @@ gp_sigint_fun(void) {
   pari_sigint(buf);
 }
 
+#if defined(SIGALRM) || defined(HAS_ALARM)
+static THREAD pari_timer ti_alarm;
+#endif
 #ifdef SIGALRM
 static void
 gp_alarm_fun(void) {
   char buf[64];
   if (GP_DATA->flags & gpd_TEXMACS) tm_start_output();
-  convert_time(buf, timer_get(GP_DATA->T));
+  convert_time(buf, timer_get(&ti_alarm));
   pari_err(e_ALARM, buf);
 }
 #endif /* SIGALRM */
@@ -1969,12 +1972,8 @@ closure_alarmer(GEN C, long s)
   pari_CATCH(CATCH_ALL) /* We need to stop the timer after any error */
   {
     GEN E = pari_err_last();
-    char buf[64];
     if (err_get_num(E) != e_ALARM) { alarm0(0); pari_err(0, E); }
-    evalstate_restore(&state); convert_time(buf, s*1000);
-    E = cgetg(3, t_ERROR);
-    E[1] = e_ALARM;
-    gel(E,2) = strtoGENstr(buf); return E;
+    evalstate_restore(&state); x = gerepilecopy(avma, E);
   }
   pari_TRY { alarm0(s); x = closure_evalgen(C); alarm0(0); } pari_ENDCATCH;
   return x;
@@ -1985,6 +1984,7 @@ alarm0(long s)
 {
   if (s < 0) pari_err_DOMAIN("alarm","delay","<",gen_0,stoi(s));
 #ifdef HAS_ALARM
+  if (s) timer_start(&ti_alarm);
   alarm(s);
 #else
   if (s) pari_err(e_ARCH,"alarm");
