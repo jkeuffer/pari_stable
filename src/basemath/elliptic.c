@@ -360,6 +360,7 @@ do_padic_agm(GEN *ptx, GEN *pty, GEN a1, GEN b1)
   {
     GEN p1, d, a = a1, b = b1;
     b1 = Qp_sqrt(gmul(a,b));
+    if (!b1) pari_err_PREC("p-adic AGM");
     if (!equalii(padic_mod(b1), bp)) b1 = gneg_i(b1);
     a1 = gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2);
     d = gsub(a1,b1);
@@ -1713,16 +1714,18 @@ doellQp_root(GEN E, long prec)
   GEN c4=ell_get_c4(E), c6=ell_get_c6(E), j=ell_get_j(E), p=ellQp_get_p(E);
   GEN c4p, c6p, T, a, pe;
   long alpha;
+  int pis2 = equaliu(p, 2);
   if (Q_pval(j, p) >= 0) pari_err_DOMAIN(".root", "v_p(j)", ">=", gen_0, j);
   /* v(j) < 0 => v(c4^3) = v(c6^2) = 2 alpha */
   alpha = Q_pvalrem(ell_get_c4(E), p, &c4) >> 1;
   if (alpha) (void)Q_pvalrem(ell_get_c6(E), p, &c6);
   /* Renormalized so that v(c4) = v(c6) = 0; multiply by p^alpha at the end */
+  if (prec < 4 && pis2) prec = 4;
   pe = powiu(p, prec);
   c4 = Rg_to_Fp(c4, pe); c4p = remii(c4,p);
   c6 = Rg_to_Fp(c6, pe); c6p = remii(c6,p);
-  if (equaliu(p, 2))
-  { /* Use 432(X/4) = 27X^3 - 9c4 X - 2c6 to have integral root; a=0 mod 2 */
+  if (pis2)
+  { /* Use 432T(X/4) = 27X^3 - 9c4 X - 2c6 to have integral root; a=0 mod 2 */
     T = mkpoln(4, utoipos(27), gen_0, Fp_muls(c4, -9, pe), Fp_muls(c6, -2, pe));
     a = ZpX_liftroot(T, gen_0, p, prec);
     alpha -= 2;
