@@ -46,5 +46,7 @@ Doc: if $E/\C \simeq \C/\Lambda$ is a complex elliptic curve,
  ? z^5
  %5 = 1 + O(11^5)
  ? E = ellinit(ellfromj(1/4), O(2^6)); x=1/2; y=ellordinate(E,x)[1];
- ellpointtoz(e,[x,y])
+ ? z = ellpointtoz(E,[x,y]); \\ t_POLMOD of t_POL with t_PADIC coeffs
+ ? liftint(z) \\ lift all p-adics
+ %8 = Mod(8*u + 7, u^2 + 437)
  @eprog

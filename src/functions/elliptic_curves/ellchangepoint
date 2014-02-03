@@ -17,7 +17,7 @@ Doc:
  ? ellisoncurve(E, P)
  %4 = 1
  ? ellchangepointinv(P,v)
-
+ %5 = [0, 1]
  @eprog
 Variant: The reciprocal function \fun{GEN}{ellchangepointinv}{GEN x, GEN ch}
  inverts the coordinate change.

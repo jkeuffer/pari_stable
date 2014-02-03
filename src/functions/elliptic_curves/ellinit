@@ -39,7 +39,11 @@ Doc:
  field $\F_q$.
 
  \item a \typ{PADIC}, $O(p^n)$: the field $\Q_p$, where $p$-adic quantities
- will be computed to a relative accuracy of $n$ digits.
+ will be computed to a relative accuracy of $n$ digits. We advise to input a
+ model defined over $\Q$ for such curves. In any case, if you input an
+ approximate model with \typ{PADIC} coefficients, it will be replaced by a lift
+ to $\Q$ (an exact model ``close'' to the one that was input) and all quantities
+ will then be computed in terms of this lifted model, at the given accuracy.
 
  \item a \typ{REAL} $x$: the field $\C$ of complex numbers, where floating
  point quantities are by default computed to a relative accuracy of

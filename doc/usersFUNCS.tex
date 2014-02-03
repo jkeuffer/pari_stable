@@ -653,6 +653,12 @@ convention.)
 
 \subsubsec{Curves over $\Q_p$}
 
+We advise to input a model defined over $\Q$ for such curves. In any case,
+if you input an approximate model with \typ{PADIC} coefficients, it will be
+replaced by a lift to $\Q$ (an exact model ``close'' to the one that was
+input) and all quantities will then be computed in terms of this lifted
+model.
+
 For the time being only curves with multiplicative reduction (split or
 non-split), i.e. $v_p(j) < 0$, are supported by non-trivial functions. In
 this case the curve is analytically isomorphic to $\bar{\Q}_p^*/q^\Z :=
@@ -668,7 +674,7 @@ under the Tate parametrization.
 
 \item \tet{tate} returns $[u^2,u,q,[a,b]]$ in the notation of Henniart-Mestre
 (CRAS t. 308, p.~391--395, 1989): $q$ is as above, $u\in \Q_p(\sqrt{-c_6})$
-is such that $\phi^* dx/(2y + a_1x+a3) = u dt/t$, where $\phi: E(q)\to E$
+is such that $\phi^* dx/(2y + a_1x+a3) = u dt/t$, where $\phi: E_q\to E$
 is an isomorphism (well defined up to sign) and $dt/t$ is the canonical
 invariant differential on the Tate curve; $u^2\in\Q_p$ does not depend on
 $\phi$. (Technicality: if $u\not\in\Q_p$, it is stored as a quadratic
