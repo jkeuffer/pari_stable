@@ -362,11 +362,17 @@ type0(GEN x)
 /*                                                                 */
 /*******************************************************************/
 
+#ifdef LONG_IS_64BIT
+static const long MAX_DIGITS = 19;
+#else
+static const long MAX_DIGITS = 9;
+#endif
+
 static ulong
 number(int *n, const char **s)
 {
   ulong m = 0;
-  for (*n = 0; *n < 9 && isdigit((int)**s); (*n)++,(*s)++)
+  for (*n = 0; *n < MAX_DIGITS && isdigit((int)**s); (*n)++,(*s)++)
     m = 10*m + (**s - '0');
   return m;
 }
@@ -374,8 +380,24 @@ number(int *n, const char **s)
 ulong
 u_pow10(int n)
 {
-  const ulong pw10[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL,
-                        1000000UL, 10000000UL, 100000000UL, 1000000000UL };
+  const ulong pw10[] = {
+    1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL, 1000000UL
+    ,10000000UL
+    ,100000000UL
+#ifdef LONG_IS_64BIT
+    ,1000000000UL
+    ,10000000000UL
+    ,100000000000UL
+    ,1000000000000UL
+    ,10000000000000UL
+    ,100000000000000UL
+    ,1000000000000000UL
+    ,10000000000000000UL
+    ,100000000000000000UL
+    ,1000000000000000000UL
+    ,10000000000000000000UL
+#endif
+  };
   return pw10[n];
 }
 
@@ -463,7 +485,7 @@ int_read(const char **s)
 {
   int nb;
   GEN y = utoi(number(&nb, s));
-  if (nb == 9) y = int_read_more(y, s);
+  if (nb == MAX_DIGITS) y = int_read_more(y, s);
   return y;
 }
 
