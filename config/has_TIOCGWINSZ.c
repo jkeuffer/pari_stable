@@ -4,4 +4,9 @@
 #  include <sys/termios.h>
 #endif
 #include <sys/ioctl.h>
-int main() { int x = TIOCGWINSZ; return x; }
+int main()
+{
+  struct winsize s;
+  int status = ioctl(0, TIOCGWINSZ, &s);
+  return s.ws_col;
+}
