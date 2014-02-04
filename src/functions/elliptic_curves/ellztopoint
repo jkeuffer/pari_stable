@@ -12,6 +12,6 @@ Doc:
  form $y^2 = 4x^3 - g_2x - g_3$, $[x,y]$ represents the Weierstrass
  $\wp$-function\sidx{Weierstrass $\wp$-function} and its derivative. More
  precisely, we have
- $$x = \wp(z),\quad y = \wp'(z) - (a_1 x + a_3)/2.$$
+ $$x = \wp(z) - b_2/12,\quad y = \wp'(z) - (a_1 x + a_3)/2.$$
  If $z$ is in the lattice defining $E$ over $\C$, the result is the point at
  infinity $[0]$.
