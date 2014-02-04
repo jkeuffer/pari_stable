@@ -4,10 +4,16 @@ C-Name: zell
 Prototype: GGp
 Help: ellpointtoz(E,P): lattice point z corresponding to the point P on the
  elliptic curve E.
-Doc: if $E/\C \simeq \C/\Lambda$ is a complex elliptic curve,
- computes a complex number $z$ (modulo the lattice $\Lambda$)
- corresponding to the point $P$; i.e.~such that $P = [\wp(z),\wp'(z)]$
- in the standard Weierstrass model ($z\not\in\Lambda$).
+Doc:
+ if $E/\C \simeq \C/\Lambda$ is a complex elliptic curve ($\Lambda =
+ \kbd{E.omega}$),
+ computes a complex number $z$, well-defined modulo the lattice $\Lambda$,
+ corresponding to the point $P$; i.e.~such that
+  $P = [\wp_\Lambda(z),\wp'_\Lambda(z)]$
+ satisfies the equation
+ $$y^2 = 4x^3 - g_2 x - g_3,$$
+ where $g_2$, $g_3$ are the elliptic invariants.
+
  If $E$ is defined over $\R$ and $P\in E(\R)$, we have more precisely, $0 \leq
  \Re(t) < w1$ and $0 \leq \Im(t) < \Im(w2)$, where $(w1,w2)$ are the real and
  complex periods of $E$.

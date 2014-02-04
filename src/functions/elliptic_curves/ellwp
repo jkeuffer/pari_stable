@@ -8,7 +8,7 @@ Help: ellwp(w,{z='x},{flag=0}): computes the value at z of the Weierstrass P
 Doc: Computes the value at $z$ of the Weierstrass $\wp$ function attached to
  the lattice $w$ as given by \tet{ellperiods}. It is also possible to
  directly input $w = [\omega_1,\omega_2]$, or an elliptic curve $E$ as given
- by \kbd{ellinit}.
+ by \kbd{ellinit} ($w = \kbd{E.omega}$).
  \bprog
  ? w = ellperiods([1,I]);
  ? ellwp(w, 1/2)

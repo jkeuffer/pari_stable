@@ -27,6 +27,6 @@ Doc:
 
  If $\fl = 2$, use Doud's algorithm: bound torsion by computing $\#E(\F_p)$
  for small primes of good reduction, then look for torsion points using
- Weierstrass parametrization (and Mazur's classification). For this variant,
+ Weierstrass $\wp$ function (and Mazur's classification). For this variant,
  $E$ must be an \var{ell}.
 Variant: Also available is \fun{GEN}{elltors}{GEN E} for \kbd{elltors(E, 0)}.

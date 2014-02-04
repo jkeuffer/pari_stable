@@ -9,6 +9,9 @@ Doc:
  \kbd{ellinit}, computes the coordinates $[x,y]$ on the curve $E$
  corresponding to the complex number $z$. Hence this is the inverse function
  of \kbd{ellpointtoz}. In other words, if the curve is put in Weierstrass
- form, $[x,y]$ represents the Weierstrass $\wp$-function\sidx{Weierstrass
- $\wp$-function} and its derivative. If $z$ is in the lattice defining $E$
- over $\C$, the result is the point at infinity $[0]$.
+ form $y^2 = 4x^3 - g_2x - g_3$, $[x,y]$ represents the Weierstrass
+ $\wp$-function\sidx{Weierstrass $\wp$-function} and its derivative. More
+ precisely, we have
+ $$x = \wp(z),\quad y = \wp'(z) - (a_1 x + a_3)/2.$$
+ If $z$ is in the lattice defining $E$ over $\C$, the result is the point at
+ infinity $[0]$.
