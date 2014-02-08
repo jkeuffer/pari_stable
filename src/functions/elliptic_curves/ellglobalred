@@ -25,4 +25,5 @@ Doc:
  \item $F$ is the factorization of $N$ over $\Z$.
 
  \item $L$ is a vector, whose $i$-th entry contains the local data
- at the $i$-th prime divisor of $N$, i.e. \kbd{L[i] = elllocalred(E,F[i,1])}
+ at the $i$-th prime divisor of $N$, i.e. \kbd{L[i] = elllocalred(E,F[i,1])},
+ where the local coordinate change has been deleted, and replaced by a $0$.
