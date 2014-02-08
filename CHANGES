@@ -8,6 +8,7 @@ Done for version ????? (released ??/??/2014):
     2- thue((x^2+1)^2*(x^2-2),-4) --> missing solutions [+-1, +-1]
 BA  3- spaces in directory names were not supported
     4- silent overflow when inputing t_REAL of huge exponent [#1526]
+    5- zeta(2+10^-101*I) -> overflow
 
 Done for version 2.6.2 (released 30/01/2014):
 

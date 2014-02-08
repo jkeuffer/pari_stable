@@ -1241,7 +1241,8 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   }
 
   B = prec2nbits_mul(prec, LOG2);
-  if (s <= 0) /* may occur if S ~ 0, and we don't use the func. eq. */
+  /* s < 0 may occur if S ~ 0, and we don't use the func. eq. */
+  if (s <= 0 || t < 0.01)
   { /* TODO: the crude bounds below are generally valid. Optimize ? */
     double l,l2, la = 1.; /* heuristic */
     double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
@@ -1253,25 +1254,12 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     l2 = (p + s/2. - .25);
     n = 1 + dabs(l2, t/2) * la / PI;
   }
-  else if (t != 0)
+  else if (t)
   {
     double sn = dabs(s, t), L = log(sn/s);
     alpha = B - 0.39 + L + s*(log2PI - log(sn));
     beta = (alpha+s)/t - atan(s/t);
-    if (beta <= 0)
-    {
-      if (s >= 1.0)
-      {
-        p = 0;
-        n = exp((B - LOG2 + L) / s);
-      }
-      else
-      {
-        p = 1;
-        n = dabs(s + 1, t) / (2*PI);
-      }
-    }
-    else
+    if (beta > 0)
     {
       beta = 1.0 - s + t * get_xinf(beta);
       if (beta > 0)
@@ -1283,6 +1271,19 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       {
         p = 0;
         n = exp((B - LOG2 + L) / s);
+      }
+    }
+    else
+    {
+      if (s >= 1.0)
+      {
+        p = 0;
+        n = exp((B - LOG2 + L) / s);
+      }
+      else
+      {
+        p = 1;
+        n = dabs(s + 1, t) / (2*PI);
       }
     }
   }
