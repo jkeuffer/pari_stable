@@ -1152,8 +1152,13 @@ RgX_mullow(GEN f, GEN g, long n)
   l = RgX_mullow(fe,ge,n1);
   h = RgX_mullow(fo,go,n0);
   m = RgX_sub(RgX_mullow(RgX_add(fe,fo),RgX_add(ge,go),n0), RgX_add(l,h));
-  l = RgX_inflate(l,2);
+  /* n1-1 <= n0 <= n1, deg l,m <= n1-1, deg h <= n0-1
+   * result is t^2 h(t^2) + t m(t^2) + l(t^2) */
+  l = RgX_inflate(l,2); /* deg l <= 2n1 - 2 <= n-1 */
+  /* deg(t m(t^2)) <= 2n1 - 1 <= n, truncate to < n */
+  if (2*degpol(m)+1 == n) m = normalizepol_lg(m, lg(m)-1);
   m = RgX_inflate(m,2);
+  /* deg(t^2 h(t^2)) <= 2n0 <= n, truncate to < n */
   if (2*degpol(h)+2 == n) h = normalizepol_lg(h, lg(h)-1);
   h = RgX_inflate(h,2);
   h = addmulXncopy(addmulXn(h,m,1), l,1);
@@ -1280,8 +1285,13 @@ RgX_sqrlow(GEN f, long n)
   l = RgX_sqrlow(fe,n1);
   h = RgX_sqrlow(fo,n0);
   m = RgX_sub(RgX_sqrlow(RgX_add(fe,fo),n0), RgX_add(l,h));
-  l = RgX_inflate(l,2);
+  /* n1-1 <= n0 <= n1, deg l,m <= n1-1, deg h <= n0-1
+   * result is t^2 h(t^2) + t m(t^2) + l(t^2) */
+  l = RgX_inflate(l,2); /* deg l <= 2n1 - 2 <= n-1 */
+  /* deg(t m(t^2)) <= 2n1 - 1 <= n, truncate to < n */
+  if (2*degpol(m)+1 == n) m = normalizepol_lg(m, lg(m)-1);
   m = RgX_inflate(m,2);
+  /* deg(t^2 h(t^2)) <= 2n0 <= n, truncate to < n */
   if (2*degpol(h)+2 == n) h = normalizepol_lg(h, lg(h)-1);
   h = RgX_inflate(h,2);
   h = addmulXncopy(addmulXn(h,m,1), l,1);
