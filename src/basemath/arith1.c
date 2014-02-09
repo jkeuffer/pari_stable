@@ -827,7 +827,8 @@ Zn_ispower(GEN a, GEN q, GEN K, GEN *pt)
     }
     goto END;
   }
-  if (!mod2(K) && kronecker(a,q) == -1) { avma = av; return 0; }
+  if (!mod2(K)
+      && kronecker(a, shifti(q,-vali(q))) == -1) { avma = av; return 0; }
   L = pt? vectrunc_init(expi(q)+1): NULL;
   u_forprime_init(&S, 2, tridiv_bound(q));
   while ((pp = u_forprime_next(&S)))

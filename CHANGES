@@ -12,6 +12,7 @@ BA  3- spaces in directory names were not supported
     6- RgX_mullow(f,g,n) could return a result of degree n (instead of < n)
        Same with RgX_sqrlow
     7- ellrootno(E) could lead to a SEGV [#1527]
+    8- issquare(Mod(3,22)) -> 0 [#1528]
 
 Done for version 2.6.2 (released 30/01/2014):
 
