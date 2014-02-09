@@ -1225,8 +1225,10 @@ get_xinf(double beta)
     x0 = x1;
   }
 }
-/* optimize for zeta( s + it, prec ), assume |s-1| > 0.1 (guaranteed since
- * if gexpo(u = s-1) < -5, we use the functional equation s->1-s) */
+/* optimize for zeta( s + it, prec ), assume
+ * 1) |s-1| > 0.1 (guaranteed since if gexpo(u = s-1) < -5, we use the
+ * functional equation s->1-s)
+ * 2) s > 0 if t = 0 [ we use the functional equation otherwise ] */
 static void
 optim_zeta(GEN S, long prec, long *pp, long *pn)
 {
@@ -1241,53 +1243,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   }
 
   B = prec2nbits_mul(prec, LOG2);
-  /* s < 0 may occur if S ~ 0, and we don't use the func. eq. */
-  if (s <= 0 || t < 0.01)
-  { /* TODO: the crude bounds below are generally valid. Optimize ? */
-    double l,l2, la = 1.; /* heuristic */
-    double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
-    l2 = (s - 0.5)*rlog - t*ilog; /* = Re( (S - 1/2) log (S-1) ) */
-    l = (B - l2 + s*log2PI) / (2. * (1.+ log((double)la)));
-    l2 = dabs(s, t)/2;
-    if (l < l2) l = l2;
-    p = (long) ceil(l); if (p < 2) p = 2;
-    l2 = (p + s/2. - .25);
-    n = 1 + dabs(l2, t/2) * la / PI;
-  }
-  else if (t)
-  {
-    double sn = dabs(s, t), L = log(sn/s);
-    alpha = B - 0.39 + L + s*(log2PI - log(sn));
-    beta = (alpha+s)/t - atan(s/t);
-    if (beta > 0)
-    {
-      beta = 1.0 - s + t * get_xinf(beta);
-      if (beta > 0)
-      {
-        p = (long)ceil(beta / 2.0);
-        n = dabs(s + 2*p-1, t) / (2*PI);
-      }
-      else
-      {
-        p = 0;
-        n = exp((B - LOG2 + L) / s);
-      }
-    }
-    else
-    {
-      if (s >= 1.0)
-      {
-        p = 0;
-        n = exp((B - LOG2 + L) / s);
-      }
-      else
-      {
-        p = 1;
-        n = dabs(s + 1, t) / (2*PI);
-      }
-    }
-  }
-  else
+  if (!t) /* real input */
   {
     double sn = fabs(s);
     beta = B + 0.61 + s*(log2PI - log(s));
@@ -1301,6 +1257,32 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       p = 0;
       n = exp((B - LOG2 + log(sn/s)) / s);
     }
+  }
+  else if (s <= 0 || t < 0.01) /* s < 0 may occur if s ~ 0 */
+  { /* TODO: the crude bounds below are generally valid. Optimize ? */
+    double l,l2, la = 1.; /* heuristic */
+    double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
+    l2 = (s - 0.5)*rlog - t*ilog; /* = Re( (S - 1/2) log (S-1) ) */
+    l = (B - l2 + s*log2PI) / (2. * (1.+ log((double)la)));
+    l2 = dabs(s, t)/2;
+    if (l < l2) l = l2;
+    p = (long) ceil(l); if (p < 2) p = 2;
+    n = 1 + dabs(p+s/2.-.25, t/2) * la / PI;
+  }
+  else
+  {
+    double sn = dabs(s, t), L = log(sn/s);
+    alpha = B - 0.39 + L + s*(log2PI - log(sn));
+    beta = (alpha+s)/t - atan(s/t);
+    p = 0;
+    if (beta > 0)
+    {
+      beta = 1.0 - s + t * get_xinf(beta);
+      if (beta > 0) p = (long)ceil(beta / 2.0);
+    }
+    else
+      if (s < 1.0) p = 1;
+    n = p? dabs(s + 2*p-1, t) / (2*PI) : exp((B-LOG2+L) / s);
   }
   *pp = p;
   *pn = (long)ceil(n);
@@ -1597,7 +1579,8 @@ czeta(GEN s0, long prec)
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (typ(s0) == t_INT) return gerepileupto(av, gzeta(s0, prec));
   u = gsubgs(s, 1); /* temp */
-  if (gexpo(u) < -5 || (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
+  if (gexpo(u) < -5 || ((signe(sig) <= 0 || expo(sig) < -1)
+                        && (gcmp0(imag_i(s)) || gexpo(s) > -5)))
   { /* s <--> 1-s */
     GEN t;
     s = gneg(u); sig = real_i(s);
