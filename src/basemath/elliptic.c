@@ -3800,8 +3800,9 @@ doellrootno(GEN e)
   }
   else
   {
-    e = ellglobalred_all(e, &S, &v);
+    GEN E = ellglobalred_all(e, &S, &v);
     obj_insert(e, Q_GLOBALRED, S);
+    e = E;
   }
   P = gmael(S,3,1); l = lg(P);
   V = cgetg(l, t_VECSMALL);
@@ -3842,7 +3843,7 @@ ellrootno(GEN e, GEN p)
   if (!signe(p)) return -1; /* local factor at infinity */
   if ( (S = obj_check(e, Q_ROOTNO)) )
   {
-    GEN T = obj_check(e, Q_GLOBALRED), NP = gmael(T,4,1);
+    GEN T = obj_check(e, Q_GLOBALRED), NP = gmael(T,3,1);
     long i, l = lg(NP);
     for (i = 1; i < l; i++)
     {

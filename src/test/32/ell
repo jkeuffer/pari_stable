@@ -375,4 +375,7 @@ ecsmall([0, 1]), [Vecsmall([0, 1]), Vecsmall([0]), Vecsmall([0]), Vecsmall([
   ***   at top-level: ellinit([1.,Mod(1,3)
   ***                 ^--------------------
   *** ellinit: incorrect type in elliptic curve base_ring (t_VEC).
-Total time spent: 1496
+1
+-1
+1
+Total time spent: 1928

@@ -11,6 +11,7 @@ BA  3- spaces in directory names were not supported
     5- zeta(2+10^-101*I) -> overflow
     6- RgX_mullow(f,g,n) could return a result of degree n (instead of < n)
        Same with RgX_sqrlow
+    7- ellrootno(E) could lead to a SEGV [#1527]
 
 Done for version 2.6.2 (released 30/01/2014):
 
