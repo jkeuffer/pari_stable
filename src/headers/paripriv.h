@@ -54,7 +54,7 @@ void abpq_init(struct abpq *A, long n);
 void abpq_sum(struct abpq_res *r, long n1, long n2, struct abpq *A);
 
 /* generic */
-GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
+GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, GEN *tau, pari_sp *av, GEN *res);
 GEN sort_factor_pol(GEN y, int (*cmp)(GEN,GEN));
 
 /* loops */

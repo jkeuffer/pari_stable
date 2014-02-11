@@ -1175,10 +1175,10 @@ cxerfc_r1(GEN x, long prec)
 GEN
 gerfc(GEN x, long prec)
 {
-  GEN z, xr, res;
+  GEN z, xr, xi, res;
   pari_sp av;
 
-  x = trans_fix_arg(&prec,&x,&xr,&av,&res);
+  x = trans_fix_arg(&prec,&x,&xr,&xi, &av,&res);
   if (signe(xr) >= 0) {
     if (cmprs(xr, 1) > 0) /* use numerical integration */
       z = cxerfc_r1(x, prec);
@@ -1567,7 +1567,7 @@ n_s(ulong n, GEN *tab)
 GEN
 czeta(GEN s0, long prec)
 {
-  GEN s, u, a, y, res, tes, sig, invn2, unr;
+  GEN s, u, a, y, res, tes, sig, tau, invn2, unr;
   GEN sim, *tab, tabn, funeq_factor = NULL;
   ulong p, sqn;
   long i, nn, lim, lim2, ct;
@@ -1576,14 +1576,30 @@ czeta(GEN s0, long prec)
   forprime_t S;
 
   if (DEBUGLEVEL>2) timer_start(&T);
-  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
+  s = trans_fix_arg(&prec,&s0,&sig,&tau,&av,&res);
   if (typ(s0) == t_INT) return gerepileupto(av, gzeta(s0, prec));
-  u = gsubgs(s, 1); /* temp */
-  if (gexpo(u) < -5 || ((signe(sig) <= 0 || expo(sig) < -1)
-                        && (gcmp0(imag_i(s)) || gexpo(s) > -5)))
+  if (!signe(tau)) /* real */
+  {
+    if (signe(sig) <= 0 || expo(sig) < -1)
+    { /* s < 1/2 */
+      s = subsr(1, s);
+      funeq_factor = gen_1;
+    }
+  }
+  else
+  {
+    u = gsubsg(1, s); /* temp */
+    if (gexpo(u) < -5 || ((signe(sig) <= 0 || expo(sig) < -1) && gexpo(s) > -5))
+    { /* |1-s| < 1/32  || (real(s) < 1/2 && |imag(s)| > 1/32) */
+      s = u;
+      funeq_factor = gen_1;
+    }
+  }
+
+  if (funeq_factor)
   { /* s <--> 1-s */
     GEN t;
-    s = gneg(u); sig = real_i(s);
+    sig = real_i(s);
     /* Gamma(s) (2Pi)^-s 2 cos(Pi s/2) */
     t = gmul(ggamma(gprec_w(s,prec),prec), gpow(Pi2n(1,prec), gneg(s), prec));
     funeq_factor = gmul2n(gmul(t, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);

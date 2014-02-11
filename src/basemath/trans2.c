@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "paripriv.h"
 
 GEN
-trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
+trans_fix_arg(long *prec, GEN *s0, GEN *sig, GEN *tau, pari_sp *av, GEN *res)
 {
   GEN s, p1;
   long l;
@@ -34,10 +34,12 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   { /* s = sig + i t */
     s = cxtofp(s, l+EXTRAPRECWORD);
     *sig = gel(s,1);
+    *tau = gel(s,2);
   }
   else /* real number */
   {
     *sig = s = gtofp(s, l+EXTRAPRECWORD);
+    *tau = gen_0;
     p1 = trunc2nr(s, 0);
     if (!signe(subri(s,p1))) *s0 = p1;
   }
@@ -1004,17 +1006,17 @@ red_mod_2z(GEN x, GEN z)
 static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {
-  GEN s, u, a, y, res, tes, sig, invn2, p1, nnx, pi, pi2, sqrtpi2;
+  GEN s, u, a, y, res, tes, sig, tau, invn2, p1, nnx, pi, pi2, sqrtpi2;
   long i, lim, nn, esig, et;
   pari_sp av, av2, avlim;
   int funeq = 0;
   pari_timer T;
 
   if (DEBUGLEVEL>5) timer_start(&T);
-  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
+  s = trans_fix_arg(&prec,&s0,&sig,&tau,&av,&res);
 
   esig = expo(sig);
-  et = (typ(s) == t_REAL) ? 0: gexpo(gel(s,2));
+  et = signe(tau)? expo(tau): 0;
   if ((signe(sig) <= 0 || esig < -1) && et <= 16)
   { /* s <--> 1-s */
     funeq = 1; s = gsubsg(1, s); sig = real_i(s);
@@ -1523,14 +1525,14 @@ GEN
 cxpsi(GEN s0, long prec)
 {
   pari_sp av, av2;
-  GEN sum,z,a,res,tes,in2,sig,s,unr;
+  GEN sum,z,a,res,tes,in2,sig,tau,s,unr;
   long lim,nn,k;
   const long la = 3;
   int funeq = 0;
   pari_timer T;
 
   if (DEBUGLEVEL>2) timer_start(&T);
-  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
+  s = trans_fix_arg(&prec,&s0,&sig,&tau,&av,&res);
   if (signe(sig) <= 0) { funeq = 1; s = gsub(gen_1, s); sig = real_i(s); }
   if (typ(s0) == t_INT && signe(s0) <= 0)
     pari_err_DOMAIN("psi","argument", "=",
