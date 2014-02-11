@@ -76,6 +76,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rnf.pol (absolute defining polynomial / Q) is now called rnf.polabs,
     rnf.pol is now the relative polynomial, defining the relative extension
     over the base.
+  - the prid structure returned by idealprimedec: the anti-uniformizer
+    tau (pr_get_tau / pr[5]) is now stored via its multiplication table
 
 * Specific to the PARI library:
 ===============================

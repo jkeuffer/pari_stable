@@ -12,12 +12,16 @@ Doc: computes the prime ideal
 
  The result is a vector of \tev{prid} structures, each representing one of the
  prime ideals above $p$ in the number field $\var{nf}$. The representation
- $\kbd{pr}=[p,a,e,f,b]$ of a prime ideal means the following: $a$ and $b$ are
- algebraic integers in the maximal order $\Z_K$; the prime ideal is
+ $\kbd{pr}=[p,a,e,f,\var{mb}]$ of a prime ideal means the following: $a$ and
+ is an algebraic integer in the maximal order $\Z_K$ and the prime ideal is
  equal to $\goth{p} = p\Z_K + a\Z_K$;
  $e$ is the ramification index; $f$ is the residual index;
- and $b$ is such that $\goth{p}^{-1}=\Z_K+ b/ p\Z_K$, which is used internally
- to compute valuations. The algebraic number $a$ is guaranteed to have a
+ finally, \var{mb} is the multiplication table associated to the algebraic
+ integer $b$ is such that $\goth{p}^{-1}=\Z_K+ b/ p\Z_K$, which is used
+ internally to compute valuations. In other words the $j$-th column of
+ \var{mb} is $b \cdot \kbd{nf.zk[j]}$.
+
+ The algebraic number $a$ is guaranteed to have a
  valuation equal to 1 at the prime ideal (this is automatic if $e>1$).
 
  The components of \kbd{pr} should be accessed by member functions: \kbd{pr.p},
