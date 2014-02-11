@@ -18,8 +18,9 @@ Doc: computes the prime ideal
  $e$ is the ramification index; $f$ is the residual index;
  finally, \var{mb} is the multiplication table associated to the algebraic
  integer $b$ is such that $\goth{p}^{-1}=\Z_K+ b/ p\Z_K$, which is used
- internally to compute valuations. In other words the $j$-th column of
- \var{mb} is $b \cdot \kbd{nf.zk[j]}$.
+ internally to compute valuations. In other words if $p$ is inert,
+ then \var{mb} is the integer $1$, and otherwise it's a square \typ{MAT}
+ whose $j$-th column is $b \cdot \kbd{nf.zk[j]}$.
 
  The algebraic number $a$ is guaranteed to have a
  valuation equal to 1 at the prime ideal (this is automatic if $e>1$).
