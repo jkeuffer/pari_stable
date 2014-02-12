@@ -123,5 +123,8 @@ rnfdet(L,[[;],[]])
 rnfdet(K,[[;],[]])
 rnfdet(K,id)
 rnfbasis(bnfinit(y^2-1105),x^2-y)
-\\ #1508
+\\#1508
 K=nfinit(y); L=rnfinit(K,x^3-2); rnfeltdown(L,Mod(Mod(1,K.pol),L.polabs))
+\\#1530
+L=rnfinit(nfinit(y^2-3),x^2+23);
+rnfidealtwoelt(L, [[1;0], [1/104]])

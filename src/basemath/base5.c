@@ -156,16 +156,15 @@ END:
 static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
-  GEN W = gel(x,1), I = gel(x,2), rnfeq = rnf_get_map(rnf), polabs = gel(rnfeq,1);
-  long i, j, k, n, m;
+  GEN W=gel(x,1), I=gel(x,2), rnfeq = rnf_get_map(rnf), polabs = gel(rnfeq,1);
+  long i, j, k, m, N = lg(W)-1;
   GEN zknf, czknf, M;
 
-  if (lg(W) == 1) return cgetg(1, t_VEC);
+  if (!N) return cgetg(1, t_VEC);
   rnf_get_nfzk(rnf, &zknf,&czknf);
-  n = rnf_get_degree(rnf);
   m = rnf_get_nfdegree(rnf);
-  M = cgetg(n*m+1, t_VEC);
-  for (k=i=1; i<=n; i++)
+  M = cgetg(N*m+1, t_VEC);
+  for (k=i=1; i<=N; i++)
   {
     GEN c0, cid, w = gel(W,i), id = gel(I,i);
 
