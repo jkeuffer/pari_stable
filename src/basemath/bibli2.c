@@ -360,7 +360,7 @@ polcyclo_eval(long n, GEN x)
       if (l == 1) return gerepileupto(av, gmulgs(x,n));
       return gerepilecopy(av, x); /* else 1 */
     }
-    if (gequalm1(x)) return gerepilecopy(av, x); /* -1 */
+    if (gequalm1(x)) return gerepileupto(av, gneg(x)); /* -1 */
   }
   /* Heuristic: evaluation will probably not improve things */
   if (tx == t_POL || tx == t_MAT || lg(x) > n)
