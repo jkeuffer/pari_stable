@@ -5110,7 +5110,7 @@ elltors_divpol(GEN E)
     if (!gel(p,7)) B /= 7;
   }
   /* B is the exponent of E_tors(Q), r2 is the rank of its 2-Sylow,
-   * for i > 2, p[i] is a point of order i if one exists and i is a prime power
+   * for i > 1, p[i] is a point of order i if one exists and i is a prime power
    * and NULL otherwise */
   if (r2 == 2) /* 2 cyclic factors */
   { /* C2 x C2 */
@@ -5135,7 +5135,7 @@ elltors_divpol(GEN E)
       if (B>>v2 == 1)
         P = gel(p, B);
       else
-        P = elladd(E, gel(p, B>>v2), gel(T2,1));
+        P = elladd(E, gel(p, B>>v2), gel(p,1<<v2));
     }
     else P = gel(p, B);
   }
