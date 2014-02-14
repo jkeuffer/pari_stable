@@ -432,7 +432,8 @@ CheckSol(GEN *pS, GEN z1, GEN z2, GEN P, GEN rhs, GEN ro)
   long e;
 
   y = grndtoi(real_i(gdiv(gsub(z2,z1), gsub(ro1,ro2))), &e);
-  if (e > 0 || !signe(y)) return 0; /* y = 0 taken care of in SmallSols */
+  if (e > 0) return 0;
+  if (!signe(y)) return 1; /* y = 0 taken care of in SmallSols */
   x = gadd(z1, gmul(ro1, y));
   x = grndtoi(real_i(x), &e);
   if (e > 0) return 0;
