@@ -634,9 +634,9 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   gaffect(u,y); avma = av; return y;
 }
 
-/* = incgam_cf(0, x, prec). typ(x) = t_REAL, x > 0. Optimized for eint1 */
+/* incgam(0, x, prec) = eint1(x); typ(x) = t_REAL, x > 0 */
 static GEN
-incgamcf_0(GEN x, GEN expx)
+incgam_0(GEN x, GEN expx)
 {
   pari_sp av;
   long l = realprec(x), n, i;
@@ -658,7 +658,7 @@ incgamcf_0(GEN x, GEN expx)
   }
   else
   {
-    long prec = l + nbits2extraprec(mx/LOG2);
+    long prec = l + nbits2extraprec((mx+log(mx))/LOG2);
     GEN S, t, H, run = real_1(prec);
     n = -prec2nbits(prec);
     x = rtor(x, prec);
@@ -929,7 +929,7 @@ mpeint1(GEN x, GEN expx)
 {
   GEN z = cgetr(lg(x));
   pari_sp av = avma;
-  affrr(incgamcf_0(x, expx), z);
+  affrr(incgam_0(x, expx), z);
   avma = av; return z;
 }
 
@@ -1069,13 +1069,13 @@ mpveceint1(GEN C, GEN eC, long N)
   av0 = avma;
   if (N < Nmin) Nmin = N;
   if (!eC) eC = mpexp(C);
-  en = eC; affrr(incgamcf_0(C, en), gel(w,1));
+  en = eC; affrr(incgam_0(C, en), gel(w,1));
   for (n = 2; n <= Nmin; n++)
   {
     pari_sp av2;
     en = mulrr(en,eC); /* exp(n C) */
     av2 = avma;
-    affrr(incgamcf_0(mulru(C,n), en), gel(w,n));
+    affrr(incgam_0(mulru(C,n), en), gel(w,n));
     avma = av2;
   }
   if (Nmin == N) { avma = av0; return w; }
@@ -1085,7 +1085,7 @@ mpveceint1(GEN C, GEN eC, long N)
   jmax = ceil(DL/log(Nmin)) + 1;
   v = sum_jall(C, jmax, prec);
   en = powrs(eC, -N); /* exp(-N C) */
-  affrr(incgamcf_0(mulru(C,N), invr(en)), gel(w,N));
+  affrr(incgam_0(mulru(C,N), invr(en)), gel(w,N));
   for (j = jmin, n = N-1; j <= jmax; j++)
   {
     long limN = maxss((long)ceil(exp(DL/j)), Nmin);
