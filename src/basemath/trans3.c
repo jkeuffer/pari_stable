@@ -658,7 +658,7 @@ incgamcf_0(GEN x, GEN expx)
   }
   else
   {
-    long prec = l + EXTRAPRECWORD;
+    long prec = l + nbits2extraprec(mx/LOG2);
     GEN S, t, H, run = real_1(prec);
     n = -prec2nbits(prec);
     x = rtor(x, prec);
