@@ -1590,7 +1590,7 @@ FpXQE_weilpairing(GEN P, GEN Q, GEN m, GEN a4, GEN T, GEN p)
 {
   pari_sp ltop = avma;
   GEN num, denom, result;
-  if (ell_is_inf(P) || ell_is_inf(Q) || ZX_equal(P,Q))
+  if (ell_is_inf(P) || ell_is_inf(Q) || gequal(P,Q))
     return pol_1(get_FpX_var(T));
   num    = FpXQE_Miller(P, Q, m, a4, T, p);
   if (!num) return pol_1(get_FpX_var(T));
