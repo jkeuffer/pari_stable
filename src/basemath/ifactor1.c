@@ -3372,7 +3372,7 @@ ispowerful(GEN n)
 {
   pari_sp av = avma;
   GEN F;
-  ulong p;
+  ulong p, bound;
   long i, l, v;
   forprime_t S;
 
@@ -3393,7 +3393,8 @@ ispowerful(GEN n)
   n = shifti(n, -vali(n));
   if (is_pm1(n)) return 1;
   setabssign(n);
-  u_forprime_init(&S, 3, tridiv_bound(n));
+  bound = tridiv_bound(n);
+  u_forprime_init(&S, 3, bound);
   while ((p = u_forprime_next_fast(&S)))
   {
     int stop;
@@ -3414,6 +3415,12 @@ ispowerful(GEN n)
       if (is_pm1(n)) { avma = av; return 1; }
     }
   }
+  /* no need to factor: must be p^2 or not powerful */
+  if(cmpii(powuu(bound+1, 3), n) > 0) {
+    long res = Z_issquare(n);
+    avma = av; return res;
+  }
+
   if (ifac_isprime(n)) { avma=av; return 0; }
   /* large composite without small factors */
   v = ifac_ispowerful(n);
