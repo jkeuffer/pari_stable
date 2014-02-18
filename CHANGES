@@ -29,6 +29,7 @@ JD 10- elltors(ellinit("90c3")) returned Z/12 but a generator of order 6
    21- nffactor(T, pol) possibly wrong results when nfinit(T) is not rigorously
        computed [#1545]
    22- gmodgs(t_POLMOD,): incorrect implementation
+BA 23- library functions Fp_pow/Fp_pow mishandled negative basis
 
   Added
 BA  1- library functions FlxX_to_FlxC, FlxXV_to_FlxM, polx_FlxX

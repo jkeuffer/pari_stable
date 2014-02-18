@@ -2474,7 +2474,7 @@ Fp_select_red(GEN *y, ulong k, GEN N, long lN, muldata *D)
 GEN
 Fp_powu(GEN A, ulong k, GEN N)
 {
-  long lN = lgefint(N);
+  long lN = lgefint(N), sA;
   int base_is_2, use_montgomery;
   muldata  D;
   pari_sp av;
@@ -2489,11 +2489,11 @@ Fp_powu(GEN A, ulong k, GEN N)
     if (k == 1) return A;
     if (k == 0) return gen_1;
   }
-
+  sA = signe(A)==-1 && odd(k);
   base_is_2 = 0;
   if (lgefint(A) == 3) switch(A[2])
   {
-    case 1: return gen_1;
+    case 1: return sA ? gen_m1 : gen_1;
     case 2:  base_is_2 = 1; break;
   }
 
@@ -2508,9 +2508,11 @@ Fp_powu(GEN A, ulong k, GEN N)
   {
     A = _montred(&D, A);
     if (cmpii(A,N) >= 0) A = subii(A,N);
+    if (sA) A = subii(N, A);
   }
   return gerepileuptoint(av, A);
 }
+
 GEN
 Fp_pows(GEN A, long k, GEN N)
 {
@@ -2532,7 +2534,7 @@ GEN
 Fp_pow(GEN A, GEN K, GEN N)
 {
   pari_sp av = avma;
-  long t,s, lN = lgefint(N);
+  long t,s, lN = lgefint(N), sA;
   int base_is_2, use_montgomery;
   GEN y;
   muldata  D;
@@ -2580,9 +2582,10 @@ Fp_pow(GEN A, GEN K, GEN N)
   if (lgefint(K) == 3) return gerepileuptoint(av, Fp_powu(y, K[2], N));
 
   base_is_2 = 0;
+  sA = signe(y)==-1 && mod2(K);
   if (lgefint(y) == 3) switch(y[2])
   {
-    case 1: avma = av; return gen_1;
+    case 1: return sA ? gen_m1 : gen_1;
     case 2:  base_is_2 = 1; break;
   }
 
@@ -2596,6 +2599,7 @@ Fp_pow(GEN A, GEN K, GEN N)
   {
     y = _montred(&D,y);
     if (cmpii(y,N) >= 0) y = subii(y,N);
+    if (sA) y = subii(N, y);
   }
   return gerepileuptoint(av,y);
 }
