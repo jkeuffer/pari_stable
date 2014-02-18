@@ -193,12 +193,12 @@ Kronecker_to_ZXX(GEN z, long n, long v)
     t = cgetg(N,t_POL); t[1] = evalvarn(v);
     for (j=2; j<N; j++) gel(t,j) = gel(z,j);
     z += (N-2);
-    gel(x,i) = ZXX_renormalize(t,N);
+    gel(x,i) = ZX_renormalize(t,N);
   }
   N = (l-2) % (N-2) + 2;
   t = cgetg(N,t_POL); t[1] = evalvarn(v);
   for (j=2; j<N; j++) gel(t,j) = gel(z,j);
-  gel(x,i) = ZXX_renormalize(t,N);
+  gel(x,i) = ZX_renormalize(t,N);
   return ZXX_renormalize(x, i+1);
 }
 /* shallow */
