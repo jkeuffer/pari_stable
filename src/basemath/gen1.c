@@ -1381,7 +1381,9 @@ mul_scal(GEN y, GEN x, long ty)
 {
   switch(ty)
   {
-    case t_POL: return RgX_Rg_mul(y, x);
+    case t_POL:
+      if (lg(y) == 2) return scalarpol(gmul(gen_0,x), varn(y));
+      return RgX_Rg_mul(y, x);
     case t_SER: return mul_ser_scal(y, x);
     case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
     case t_QFI: case t_QFR:
