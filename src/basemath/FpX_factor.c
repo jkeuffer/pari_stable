@@ -1518,8 +1518,8 @@ factmod_aux(GEN f, GEN p, GEN (*Factor)(GEN,GEN,long), long flag)
   factmod_init(&f, p);
   switch(lg(f))
   {
-    case 2: avma = av; return trivial_fact();
-    case 3: return gerepileupto(av, zero_fact_intmod(f, p));
+    case 3: avma = av; return trivial_fact();
+    case 2: return gerepileupto(av, zero_fact_intmod(f, p));
   }
   z = Factor(f,p,flag); t = gel(z,1); E = gel(z,2);
   y = cgetg(3, t_MAT); nbfact = lg(t);

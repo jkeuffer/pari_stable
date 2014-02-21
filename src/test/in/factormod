@@ -7,6 +7,8 @@ polrootsmod(x^5+x^2-4*x+2,5,1)
 polrootsmod(Pol(0),2)
 polrootsmod(Pol(1),2)
 factorcantor(x^3+x,2)
+factormod(Pol(0),2)
+factormod(Pol(1),2)
 factormod((x^2+x+1)*(x^3+x),2, 1)
 polrootsmod(x^5+4*x^4+2*x^3+x^2+4*x+2,7)
 
