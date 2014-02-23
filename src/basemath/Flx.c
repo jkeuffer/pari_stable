@@ -2779,6 +2779,28 @@ ZXXV_to_FlxXV(GEN V, ulong p, long v)
   return y;
 }
 
+GEN
+FlxX_to_FlxC(GEN x, long N, long sv)
+{
+  long i, l;
+  GEN z;
+  l = lg(x)-1; x++;
+  if (l > N+1) l = N+1; /* truncate higher degree terms */
+  z = cgetg(N+1,t_COL);
+  for (i=1; i<l ; i++) gel(z,i) = gel(x,i);
+  for (   ; i<=N; i++) gel(z,i) = pol0_Flx(sv);
+  return z;
+}
+
+GEN
+FlxXV_to_FlxM(GEN v, long n, long sv)
+{
+  long j, N = lg(v);
+  GEN y = cgetg(N, t_MAT);
+  for (j=1; j<N; j++) gel(y,j) = FlxX_to_FlxC(gel(v,j), n, sv);
+  return y;
+}
+
 /* matrix whose entries are given by the coeffs of the polynomial v in
  * two variables (considered as degree n polynomials) */
 GEN
@@ -3607,7 +3629,7 @@ FlxqXQ_powers(GEN x, long l, GEN S, GEN T, ulong p)
 GEN
 FlxqXQ_matrix_pow(GEN y, long n, long m, GEN S, GEN T, ulong p)
 {
-  return RgXV_to_RgM(FlxqXQ_powers(y,m-1,S,T,p),n);
+  return FlxXV_to_FlxM(FlxqXQ_powers(y,m-1,S,T,p), n, T[1]);
 }
 
 GEN
