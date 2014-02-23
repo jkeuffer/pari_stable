@@ -2716,8 +2716,8 @@ RgX_gcd(GEN x, GEN y)
   GEN d, g, h, p1, p2, u, v;
   int simple = 0, rational = 1;
 
-  if (lg(y) == 2) return RgX_copy(x);
-  if (lg(x) == 2) return RgX_copy(y);
+  if (!signe(y)) return RgX_copy(x);
+  if (!signe(x)) return RgX_copy(y);
   if (RgX_is_monomial(x)) return gcdmonome(x,y);
   if (RgX_is_monomial(y)) return gcdmonome(y,x);
   if (isinexactall(x,&simple,&rational) || isinexactall(y,&simple,&rational))
