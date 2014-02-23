@@ -20,6 +20,7 @@ JD 10- elltors(ellinit("90c3")) returned Z/12 but a generator of order 6
    13- SEGV in ellweilpairing [#1535]
    14- factor(Mod(1,2)*Pol(1)) -> [Mod(0, 2) 1]
    15- Mod(Pol(0), 2) -> 0, instead of Mod(0,2)
+   16- QXQ_to_mod was called with t_POLMOD arguments
 
 Done for version 2.6.2 (released 30/01/2014):
 

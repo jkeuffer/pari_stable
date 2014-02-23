@@ -2770,7 +2770,7 @@ rnfpolred_i(GEN nf, GEN relpol, long flag, long best)
     {
       long sa;
       pol = rnfequationall(nf, relpol, &sa, NULL);
-      rnfeq = mkvec5(gen_0,gen_0,stoi(sa),T,relpol);
+      rnfeq = mkvec5(gen_0,gen_0,stoi(sa),T,liftpol_shallow(relpol));
     }
     bas = listP? mkvec2(pol, listP): pol;
     if (best)

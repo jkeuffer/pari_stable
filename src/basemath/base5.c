@@ -605,7 +605,9 @@ rnfequation2(GEN nf, GEN pol) { return rnfequation0(nf,pol,1); }
 GEN
 nf_rnfeq(GEN nf, GEN relpol)
 {
-  GEN pol, a, k, junk, eq = rnfequation2(nf, relpol);
+  GEN pol, a, k, junk, eq;
+  relpol = liftpol_shallow(relpol);
+  eq = rnfequation2(nf, relpol);
   pol = gel(eq,1);
   a = gel(eq,2); if (typ(a) == t_POLMOD) a = gel(a,2);
   k = gel(eq,3);

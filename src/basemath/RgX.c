@@ -440,11 +440,13 @@ QXQ_to_mod_copy(GEN x, GEN T)
   {
     case t_INT:  return icopy(x);
     case t_FRAC: return gcopy(x);
-    default:
+    case t_POL:
       d = degpol(x);
       if (d < 0) return gen_0;
       if (d == 0) return gcopy(gel(x,2));
       return mkpolmod(RgX_copy(x), T);
+    default: pari_err_TYPE("QXQ_to_mod",x);
+             return NULL;/* not reached */
   }
 }
 /* pure shallow version */
@@ -456,11 +458,13 @@ QXQ_to_mod(GEN x, GEN T)
   {
     case t_INT:
     case t_FRAC: return x;
-    default:
+    case t_POL:
       d = degpol(x);
       if (d < 0) return gen_0;
       if (d == 0) return gel(x,2);
       return mkpolmod(x, T);
+    default: pari_err_TYPE("QXQ_to_mod",x);
+             return NULL;/* not reached */
   }
 }
 /* T a ZX, z lifted from (Q[Y]/(T(Y)))[X], apply QXQ_to_mod_copy to all coeffs.
