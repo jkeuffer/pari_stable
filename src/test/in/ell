@@ -253,3 +253,13 @@ E = ellinit([0,0,0,-82,0]);
 ellrootno(E,2)
 ellrootno(E)
 ellrootno(E,2)
+
+E=ellinit([0,0,0,Mod(x,x^2+5),0]);
+ellwp(E)
+ellzeta(E)
+ellsigma(E)
+
+E=ellinit([0,0,0,Mod(1,1009),0]);
+ellwp(E)
+ellzeta(E)
+ellsigma(E)

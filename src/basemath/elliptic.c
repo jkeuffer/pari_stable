@@ -2337,19 +2337,26 @@ ellwpseries_aux(GEN c4, GEN c6, long v, long PRECDL)
   return res;
 }
 
-static void
-get_c4c6(ellred_t *T, GEN *c4, GEN *c6)
+static int
+get_c4c6(GEN w, GEN *c4, GEN *c6, long prec)
 {
-  switch(T->type)
+  if (typ(w) == t_VEC) switch(lg(w))
   {
-    case t_PER_ELL:
-      *c4 = ell_get_c4(T->in);
-      *c6 = ell_get_c6(T->in);
-      break;
-    default:
-      *c4 = _elleisnum(T, 4);
-      *c6 = gneg(_elleisnum(T, 6));
+    case 17:
+      *c4 = ell_get_c4(w);
+      *c6 = ell_get_c6(w);
+      return 1;
+    case 3:
+    {
+      ellred_t T;
+      if (!get_periods(w,NULL,&T, prec)) break;
+      *c4 = _elleisnum(&T, 4);
+      *c6 = gneg(_elleisnum(&T, 6));
+      return 1;
+    }
   }
+  *c4 = *c6 = NULL;
+  return 0;
 }
 
 GEN
@@ -2361,14 +2368,6 @@ ellwpseries(GEN e, long v, long PRECDL)
   c6 = ell_get_c6(e); return ellwpseries_aux(c4,c6,v,PRECDL);
 }
 
-static GEN
-ellwpseries0(ellred_t *T, long v, long PRECDL)
-{
-  GEN c4,c6;
-  get_c4c6(T, &c4, &c6);
-  return ellwpseries_aux(c4,c6,v,PRECDL);
-}
-
 GEN
 ellwp(GEN w, GEN z, long prec)
 { return ellwp0(w,z,0,prec); }
@@ -2376,9 +2375,8 @@ ellwp(GEN w, GEN z, long prec)
 GEN
 ellwp0(GEN w, GEN z, long flag, long prec)
 {
-  ellred_t T;
-  GEN y;
   pari_sp av = avma;
+  GEN y;
 
   if (flag && flag != 1) pari_err_FLAG("ellwp");
   if (!z) z = pol_x(0);
@@ -2386,15 +2384,15 @@ ellwp0(GEN w, GEN z, long flag, long prec)
   if (y)
   {
     long vy = varn(y), v = valp(y);
-    GEN P, Q;
-    if (!get_periods(w,NULL,&T,prec)) pari_err_TYPE("ellwp",w);
+    GEN P, Q, c4,c6;
+    if (!get_c4c6(w,&c4,&c6,prec)) pari_err_TYPE("ellwp",w);
     if (v <= 0) pari_err(e_IMPL,"ellwp(t_SER) away from 0");
     if (gequal0(y)) {
       avma = av;
       if (!flag) return zeroser(vy, -2*v);
       retmkvec2(zeroser(vy, -2*v), zeroser(vy, -3*v));
     }
-    P = ellwpseries0(&T, vy, lg(y)-2);
+    P = ellwpseries_aux(c4,c6, vy, lg(y)-2);
     Q = gsubst(P, varn(P), y);
     if (!flag)
       return gerepileupto(av, Q);
@@ -2423,11 +2421,11 @@ ellzeta(GEN w, GEN z, long prec0)
   if (y)
   {
     long vy = varn(y), v = valp(y);
-    GEN P, Q;
-    if (!get_periods(w,NULL,&T,prec0)) pari_err_TYPE("ellzeta",w);
+    GEN P, Q, c4,c6;
+    if (!get_c4c6(w,&c4,&c6,prec0)) pari_err_TYPE("ellzeta",w);
     if (v <= 0) pari_err(e_IMPL,"ellzeta(t_SER) away from 0");
     if (gequal0(y)) { avma = av; return zeroser(vy, -v); }
-    P = ellwpseries0(&T, vy, lg(y)-2);
+    P = ellwpseries_aux(c4,c6, vy, lg(y)-2);
     P = integser(gneg(P)); /* \zeta' = - \wp*/
     Q = gsubst(P, varn(P), y);
     return gerepileupto(av, Q);
@@ -2494,12 +2492,12 @@ ellsigma(GEN w, GEN z, long flag, long prec0)
   if (y)
   {
     long vy = varn(y), v = valp(y);
-    GEN P, Q;
-    if (!get_periods(w,NULL,&T,prec0)) pari_err_TYPE("ellsigma",w);
+    GEN P, Q, c4,c6;
+    if (!get_c4c6(w,&c4,&c6,prec0)) pari_err_TYPE("ellsigma",w);
     if (v <= 0) pari_err_IMPL("ellsigma(t_SER) away from 0");
     if (flag) pari_err_TYPE("log(ellsigma)",y);
     if (gequal0(y)) { avma = av; return zeroser(vy, -v); }
-    P = ellwpseries0(&T, vy, lg(y)-2);
+    P = ellwpseries_aux(c4,c6, vy, lg(y)-2);
     P = integser(gneg(P)); /* \zeta' = - \wp*/
     /* (log \sigma)' = \zeta; remove log-singularity first */
     P = integser(gsub(P, monomial(gen_1,-1,vy)));
