@@ -1527,7 +1527,14 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     gel(x,i) = gel(y,i) = gel(z,i) = gen_0;
   }
   if (BORNE)
+  {
     borne1 = BORNE;
+    if (typ(borne1) != t_REAL)
+    {
+      long prec = nbits2prec(gexpo(borne1) + 10);
+      borne1 = gtofp(borne1, maxss(prec, DEFAULTPREC));
+    }
+  }
   else
   {
     borne1 = gcoeff(q,1,1);
