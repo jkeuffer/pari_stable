@@ -1389,6 +1389,7 @@ szeta_odd(long k, long prec)
   GEN y, p1, qn, z, q, pi2 = Pi2n(1, prec), binom= real_1(prec+EXTRAPRECWORD);
 
   q = mpexp(pi2); kk = k+1; /* >= 4 */
+  qn = sqrr(q);
   y = NULL; /* gcc -Wall */
   mpbern(kk>>1,prec);
   if ((k&3)==3)
@@ -1405,20 +1406,16 @@ szeta_odd(long k, long prec)
     y = mulrr(divrr(powru(pi2,k),mpfactr(kk,prec)),y);
 
     av2 = avma; limit = stack_lim(av2,1);
-    qn = sqrr(q); z = invr( addrs(q,-1) );
-    for (n=2; ; n++)
+    z = invr( addrs(q,-1) );
+    for (n=2;; n++)
     {
-      long ep1, l;
       p1 = invr( mulir(powuu(n,k),addrs(qn,-1)) );
-
-      z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = (ep1 < 0) ? prec+EXTRAPRECWORD : prec+EXTRAPRECWORD + nbits2extraprec(ep1);
-      if (l < realprec(qn)) setprec(qn, l);
+      z = addrr(z,p1); if (expo(p1) < li) break;
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
         if (DEBUGMEM>1) pari_warn(warnmem,"szeta, delta = %ld", expo(p1)-li);
-        gerepileall(av2,2, &z, &qn);
+        gerepileall(av2,2, &z,&qn);
       }
     }
     shiftr_inplace(z, 1);
@@ -1438,22 +1435,20 @@ szeta_odd(long k, long prec)
     }
     y = mulrr(divrr(powru(pi2,k),mpfactr(kk,prec)),y);
     y = divru(y,k-1);
+
     av2 = avma; limit = stack_lim(av2,1);
-    qn = q; z=gen_0;
-    for (n=1; ; n++)
+    p1 = sqrr(addrs(q,-1));
+    z = divrr(addrs(mulrr(q,addsr(1,mulur(2,p2))),-1),p1);
+    for (n=2;; n++)
     {
-      long ep1, l;
       p1 = mulir(powuu(n,k),sqrr(addrs(qn,-1)));
       p1 = divrr(addrs(mulrr(qn,addsr(1,mulur(n<<1,p2))),-1),p1);
-
-      z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
-      l = (ep1 < 0)? prec+EXTRAPRECWORD : prec+EXTRAPRECWORD + nbits2extraprec(ep1);
-      if (l < realprec(qn)) setprec(qn, l);
+      z = addrr(z,p1); if (expo(p1) < li) break;
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"szeta, delta = %ld", ep1-li);
-        gerepileall(av2,2, &z, &qn);
+        if (DEBUGMEM>1) pari_warn(warnmem,"szeta, delta = %ld", expo(p1)-li);
+        gerepileall(av2,2, &z,&qn);
       }
     }
     shiftr_inplace(z, 1);
