@@ -1396,7 +1396,7 @@ szeta_odd(long k, long prec)
     for (n=0; n <= kk>>1; n+=2)
     {
       p1 = mulrr(bernreal(kk-n,prec),bernreal(n,prec));
-      if (n) { binom = next_bin(binom,kk,n); setprec(binom,prec+EXTRAPRECWORD); }
+      if (n) binom = next_bin(binom,kk,n);
       p1 = mulrr(binom,p1);
       if (n == kk>>1) shiftr_inplace(p1, -1);
       if ((n>>1)&1) togglesign(p1);
