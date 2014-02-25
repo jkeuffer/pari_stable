@@ -86,7 +86,6 @@ set_disc(nfmaxord_t *S)
 {
   GEN l0, L, dT;
   long d;
-  if (S->dT) return S->dT;
   if (S->T0 == S->T) return ZX_disc(S->T);
   d = degpol(S->T0);
   l0 = leading_term(S->T0);
@@ -120,38 +119,27 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag)
   T = ZX_Q_normalize(T, &L);
   S->unscale = L;
   S->T = T;
-  S->dT = NULL;
+  S->dT = dT = set_disc(S);
   if (fa)
   {
-    if (!isint1(L)) fa = update_fact(set_disc(S), fa);
+    if (!isint1(L)) fa = update_fact(dT, fa);
     switch(typ(fa))
     {
-      case t_MAT:
-        dT = factorback(fa); break;
-
-      case t_VEC:
-        fa = leafcopy(fa); settyp(fa, t_COL);/*fall through*/
-      case t_COL:
-        dT = set_disc(S);
+      case t_VEC: case t_COL:
         fa = fact_from_factors(dT, fa, 0);
         break;
-
       case t_INT:
-      {
-        ulong all = (signe(fa) <= 0)? 1: itou(fa);
-        dT = set_disc(S);
-        fa = absi_factor_limit(dT, all);
+        fa = absi_factor_limit(dT, (signe(fa) <= 0)? 1: itou(fa));
         break;
-      }
-      default: pari_err_TYPE("nfmaxord",fa);
-               return; /*not reached*/
+      case t_MAT:
+        if (is_Z_factornon0(fa)) break;
+        /*fall through*/
+      default:
+        pari_err_TYPE("nfmaxord",fa);
     }
     if (!signe(dT)) pari_err_IRREDPOL("nfmaxord",mkvec2(T,fa));
-  } else {
-    dT = set_disc(S);
+  } else
     fa = (flag & nf_PARTIALFACT)? absi_factor_limit(dT, 0): absi_factor(dT);
-  }
-  S->dT = dT;
   P = gel(fa,1); l = lg(P);
   E = gel(fa,2);
   if (l > 1 && is_pm1(gel(P,1)))
