@@ -2716,6 +2716,15 @@ pol1_FlxX(long v, long sv)
   gel(z,2) = pol1_Flx(sv); return z;
 }
 
+GEN
+polx_FlxX(long v, long sv)
+{
+  GEN z = cgetg(4, t_POL);
+  z[1] = evalsigne(1) | evalvarn(v);
+  gel(z,2) = pol0_Flx(sv);
+  gel(z,3) = pol1_Flx(sv); return z;
+}
+
 /*Lift coefficient of B to constant Flx, to give a FlxY*/
 GEN
 Fly_to_FlxY(GEN B, long sv)

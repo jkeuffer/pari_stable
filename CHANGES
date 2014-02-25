@@ -31,7 +31,7 @@ JD 10- elltors(ellinit("90c3")) returned Z/12 but a generator of order 6
    22- gmodgs(t_POLMOD,): incorrect implementation
 
   Added
-BA  1- library functions FlxX_to_FlxC, FlxXV_to_FlxM
+BA  1- library functions FlxX_to_FlxC, FlxXV_to_FlxM, polx_FlxX
 BA  2- library function Flx_lead
 
 Done for version 2.6.2 (released 30/01/2014):
