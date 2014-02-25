@@ -4534,6 +4534,9 @@ a \kbd{FpX} to an extended modulus of for the corresponding \kbd{Flx}.
 
 \subsubsec{Basic operations}
 
+\fun{ulong}{Flx_lead}{GEN x} returns the leading coefficient of $x$ as a
+\kbd{ulong} (return $0$ for the zero polynomial).
+
 \fun{GEN}{Flx_red}{GEN z, ulong p} converts from \kbd{zx} with
 non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 

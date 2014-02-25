@@ -1935,7 +1935,7 @@ FpX_FpXY_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 static GEN
 Flx_FlyX_resultant_polint(GEN a, GEN b, ulong p, ulong dres, long sx)
 {
-  ulong i, n, la = (ulong)leading_term(a);
+  ulong i, n, la = Flx_lead(a);
   GEN  x = cgetg(dres+2, t_VECSMALL);
   GEN  y = cgetg(dres+2, t_VECSMALL);
  /* Evaluate at dres+ 1 points: 0 (if dres even) and +/- n, so that P_n(X) =

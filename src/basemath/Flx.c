@@ -2436,7 +2436,7 @@ Flxq_norm(GEN x, GEN TB, ulong p)
 {
   GEN T = get_Flx_mod(TB);
   ulong y = Flx_resultant(T, x, p);
-  ulong L = T[lg(T)-1];
+  ulong L = Flx_lead(T);
   if ( L==1 || lgpol(x)==0) return y;
   return Fl_div(y, Fl_powu(L, (ulong)degpol(x), p), p);
 }

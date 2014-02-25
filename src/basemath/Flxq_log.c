@@ -486,7 +486,7 @@ Flxq_log_Coppersmith(long nbrel, long r, GEN T, ulong p)
       Flx_cnext(v, p);
       Flx_renormalize_inplace(v, dT+2);
       avma = av;
-      if (u[lg(u)-1]==1)
+      if (Flx_lead(u)==1)
       {
         z = rel_Coppersmith(r, u, v, h, R, d, p);
         nbtest++;
@@ -499,7 +499,7 @@ Flxq_log_Coppersmith(long nbrel, long r, GEN T, ulong p)
         if (rel>nbrel) break;
       }
       if (i==j) continue;
-      if (v[lg(v)-1]==1)
+      if (Flx_lead(v)==1)
       {
         z = rel_Coppersmith(r, v, u, h, R, d, p);
         nbtest++;

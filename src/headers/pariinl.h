@@ -1783,6 +1783,8 @@ INLINE GEN
 constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
 INLINE GEN
 leading_term(GEN x) { return lg(x) == 2? gen_0: gel(x,lg(x)-1); }
+INLINE ulong
+Flx_lead(GEN x) { return lg(x) == 2? 0: x[lg(x)-1]; }
 INLINE long
 degpol(GEN x) { return lg(x)-3; }
 INLINE long
