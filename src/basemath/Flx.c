@@ -3278,7 +3278,7 @@ FlxqX_invBarrett_Newton(GEN S, GEN T, ulong p)
   GEN q, y, z, x = cgetg(l+2, t_POL) + 2;
   long dT = get_Flx_degree(T);
   ulong mask = quadratic_prec_mask(l-2); /* assume l > 2 */
-  for (i=0;i<l;i++) gel(x,i) = gen_0;
+  for (i=0;i<l;i++) gel(x,i) = pol0_Flx(T[1]);
   q = FlxX_recipspec(S+2,l+1,l+1,dT);
   lQ = lgpol(q); q+=2;
   /* We work on _spec_ FlxX's, all the l[xzq] below are lgpol's */
