@@ -854,7 +854,7 @@ manage_var(long n, entree *ep)
       case manage_var_delete: return delete_var();
       case manage_var_create:
         pari_var_create(ep);
-        return varn(initial_value(ep));
+        return varn((GEN)initial_value(ep));
   }
   pari_err(e_MISC, "panic");
   return -1; /* not reached */
@@ -881,7 +881,7 @@ fetch_named_var(const char *s)
 long
 fetch_user_var(const char *s)
 {
-  return varn( initial_value(fetch_named_var(s)) );
+  return varn((GEN)initial_value(fetch_named_var(s)) );
 }
 
 GEN

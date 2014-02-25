@@ -122,7 +122,7 @@ member_zk(GEN x)
       case typ_Q:
         y = cgetg(3,t_VEC);
         gel(y,1) = gen_1;
-        gel(y,2) = pol_x(varn(x[1])); return y;
+        gel(y,2) = pol_x(varn(gel(x,1))); return y;
       case typ_RNF:
         return gel(x,7);
     }

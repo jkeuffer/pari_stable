@@ -1143,7 +1143,7 @@ gadd(GEN x, GEN y)
   if (is_scalar_t(tx))  {
     if (tx == t_POLMOD)
     {
-      vx = varn(x[1]);
+      vx = varn(gel(x,1));
       vy = gvar(y);
       if (vx == vy) y = gmod(y, gel(x,1)); /* error if ty == t_SER */
       else
@@ -2060,7 +2060,7 @@ gmul(GEN x, GEN y)
     return mul_polmod_scal(gel(y,1), gel(y,2), x);
   if (is_scalar_t(tx)) {
     if (tx == t_POLMOD) {
-      vx = varn(x[1]);
+      vx = varn(gel(x,1));
       vy = gvar(y);
       if (vx != vy) {
         if (varncmp(vx,vy) > 0) return mul_scal(y, x, ty);

@@ -1302,7 +1302,7 @@ ggcd(GEN x, GEN y)
         return z;
 
       case t_RFRAC:
-        vy = varn(y[2]);
+        vy = varn(gel(y,2));
         if (varncmp(vy,vx) < 0) return cont_gcd_rfrac(y, x);
         av = avma;
         p1 = ggcd(gel(x,1),gel(y,2));

@@ -1274,7 +1274,7 @@ gsubst(GEN x, long v, GEN y)
 
   if (is_scalar_t(tx))
   {
-    if (tx!=t_POLMOD || varncmp(v, varn(x[1])) <= 0)
+    if (tx!=t_POLMOD || varncmp(v, varn(gel(x,1))) <= 0)
     {
       if (ty==t_MAT) return scalarmat(x,ly-1);
       return gcopy(x);
