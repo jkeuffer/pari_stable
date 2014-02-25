@@ -945,8 +945,8 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
 {
   pari_sp btop;
   long i;
-  long l=degpol(T);
-  long v=varn(T);
+  long l = get_FpX_degree(T);
+  long v = get_FpX_var(T);
   GEN M,W,Mi;
   GEN *gptr[2];
   long lV=lg(V);
@@ -980,8 +980,8 @@ FlxqV_Flx_Frobenius(GEN V, GEN P, GEN T, ulong p)
 {
   pari_sp btop;
   long i;
-  long l=degpol(T);
-  long v=varn(T);
+  long l = get_Flx_degree(T);
+  long v = get_Flx_var(T);
   GEN M,W,Mi;
   GEN PV=Flx_to_Flv(P, lgpol(P));
   GEN *gptr[2];
