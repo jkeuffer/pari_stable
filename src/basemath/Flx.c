@@ -3564,7 +3564,7 @@ _FlxqXQ_sqr(void *data, GEN x) {
 static GEN
 _FlxqXQ_one(void *data) {
   FlxqXQ_muldata *d = (FlxqXQ_muldata*) data;
-  return pol_1(varn(d->S));
+  return pol1_FlxX(varn(d->S),d->T[1]);
 }
 
 static GEN
