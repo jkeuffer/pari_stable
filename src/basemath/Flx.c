@@ -3358,7 +3358,7 @@ FlxqX_rem_Barrett(GEN x, GEN mg, GEN T, GEN Q, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;
-  long vs=Q[1];
+  long vs = get_Flx_var(Q);
   long l=lgpol(x);
   long lt=degpol(T); /*We discard the leading term*/
   long ld, lm, lT, lmg;
