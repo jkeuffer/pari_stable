@@ -2106,7 +2106,7 @@ RgXQ_norm(GEN x, GEN T)
 
   av = avma; y = resultant(T, x);
   L = leading_term(T);
-  if (gequal1(L) || dx < 0) return y;
+  if (gequal1(L) || !signe(x)) return y;
   return gerepileupto(av, gdiv(y, gpowgs(L, dx)));
 }
 

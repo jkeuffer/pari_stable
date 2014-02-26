@@ -31,3 +31,5 @@ Mod(1+O(y),y+1)
 
 modreverse(Mod(0,Pol(1)))
 modreverse(Mod(1,x+1))
+norm(Mod(2^65,3*x+1))
+norm(Mod('a,3*x+1))

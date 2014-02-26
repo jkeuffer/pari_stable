@@ -23,6 +23,9 @@ JD 10- elltors(ellinit("90c3")) returned Z/12 but a generator of order 6
    16- QXQ_to_mod was called with t_POLMOD arguments
    17- ellwp(E, 'z) had stopped working for E not defined over C
    18- nfdisc(T, t_MAT=partial discriminant factorization) => corruption [#1542]
+   19- norm(Mod(z,T)) where z is not a t_POL or in a different variable than T
+       => wrong result [#1539]
+   20- polresultant(Pol(Mod(0,2)), x) -> 0 instead of Mod(0,2)
 
 Done for version 2.6.2 (released 30/01/2014):
 

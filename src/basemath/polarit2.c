@@ -1925,14 +1925,14 @@ init_resultant(GEN x, GEN y)
   long tx = typ(x), ty = typ(y), vx, vy;
   if (is_scalar_t(tx) || is_scalar_t(ty))
   {
-    if (gequal0(x) || gequal0(y)) return gen_0;
+    if (gequal0(x) || gequal0(y)) return gmul(x,y); /* keep type info */
     if (tx==t_POL) return gpowgs(y, degpol(x));
     if (ty==t_POL) return gpowgs(x, degpol(y));
     return gen_1;
   }
   if (tx!=t_POL) pari_err_TYPE("resultant_all",x);
   if (ty!=t_POL) pari_err_TYPE("resultant_all",y);
-  if (!signe(x) || !signe(y)) return gen_0;
+  if (!signe(x) || !signe(y)) return gmul(RgX_get_0(x),RgX_get_0(y)); /*type*/
   vx = varn(x);
   vy = varn(y); if (vx == vy) return NULL;
   return (varncmp(vx,vy) < 0)? gpowgs(y,degpol(x)): gpowgs(x,degpol(y));
@@ -2354,7 +2354,7 @@ RgX_resultant_all(GEN P, GEN Q, GEN *sol)
   av = avma;
   if (dQ <= 0)
   {
-    if (dQ < 0) return gen_0;
+    if (dQ < 0) return RgX_get_0(P);
     s = gpowgs(gel(Q,2), dP);
     if (sig == -1) s = gerepileupto(av, gneg(s));
     return s;
@@ -2381,7 +2381,7 @@ RgX_resultant_all(GEN P, GEN Q, GEN *sol)
     }
     s = leading_term(P);
   }
-  if (!signe(Q)) { avma = av; return gen_0; }
+  if (!signe(Q)) { avma = av; return RgX_get_0(Q); }
   av2 = avma;
   s = Lazard(leading_term(Q), s, degpol(P));
   if (sig == -1) s = gneg(s);

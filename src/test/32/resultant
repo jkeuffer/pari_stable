@@ -408,4 +408,5 @@ y^4
 [-18*y, 6*y^2 + 4, 4]
 Mod(0, 3)
 Mod(1, 3)
-Total time spent: 6676
+Mod(0, 2)
+Total time spent: 6780
