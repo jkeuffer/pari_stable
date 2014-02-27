@@ -1387,7 +1387,7 @@ Flx_factorgalois(GEN P, ulong l, long d, long w, GEN MP)
   pari_sp ltop = avma;
   GEN R, V, Tl, z, M;
   long k, n = degpol(P), m = n/d;
-  long v = varn(P);
+  long v = P[1];
 
   if (m == 1) {
     R = polx_Flx(v);
