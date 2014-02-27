@@ -150,16 +150,12 @@ case "x$bugp" in
 esac
 if test -n "$file_diff"; then
   len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
-  pat=`${head}4 $file_diff|${tail}1|grep "12[7-8],136"`
+  pat=`${head}4 $file_diff|${tail}1|grep "\(99\|100\),107"`
   case "$pat" in
-    *127,136*) elen=30;;
-    *128,136*) elen=25;;
+    *99,107*) elen=29;;
+    *100,107*) elen=24;;
     *) elen=0;;
   esac
-  sys0190=`grep "^+ SYS0190\>" $file_diff`
-  if test -n "$sys0190"; then
-    len=`expr $len - 2`			# more verbose error message on OS/2
-  fi
   if test $len -eq $elen  -a  -n "$pat"; then
     cat << EOT
 NOTE: the problem noted in 'program' is that install() does not work in your
