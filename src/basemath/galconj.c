@@ -256,7 +256,7 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
     P = RgX_Rg_div(RgX_div_by_X_x(T, gel(L,i), NULL), gel(prep,i));
     gel(M,i) = RgX_to_RgV(P,n);
   }
-  return gerepileupto(ltop, gmul(den, M));
+  return den? gerepileupto(ltop, gmul(den, M)): gerepilecopy(ltop, M);
 }
 
 /* #r = r1 + r2 */
