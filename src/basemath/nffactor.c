@@ -42,6 +42,8 @@ typedef struct {
   GEN tozk;
   GEN topow;
   GEN topowden; /* topow x / topowden = basistoalg(x) */
+  GEN dn; /* NULL (we trust nf.zk) or a t_INT > 1 (an alg. integer has
+             denominator dividing dn, when expressed on nf.zk */
 } nflift_t;
 
 typedef struct
@@ -52,7 +54,6 @@ typedef struct
   GEN fact;
   GEN pr;
   GEN Br, bound, ZC, BS_2;
-  GEN dn;
 } nfcmbf_t;
 
 /*******************************************************************/
@@ -274,6 +275,7 @@ RgX_int_normalize(GEN P)
     P = shallowcopy(P);
     gel(P,lg(P)-1) = P0; /* now leading term is a t_INT */
   }
+  if (typ(P0) != t_INT) pari_err_BUG("RgX_int_normalize");
   if (is_pm1(P0)) return signe(P0) > 0? P: RgX_neg(P);
   return RgX_Rg_div(P, P0);
 }
@@ -453,8 +455,7 @@ nf_pol_lift(GEN pol, GEN bound, nfcmbf_t *T)
   GEN t, x = cgetg(l,t_POL);
 
   x[1] = pol[1];
-  t = gel(pol,l-1);
-  gel(x,l-1) = mul_content(T->L->topowden, t);
+  gel(x,l-1) = mul_content(gel(pol,l-1), T->L->topowden);
   for (i=l-2; i>1; i--)
   {
     t = nf_bestlift_to_pol(gel(pol,i), bound, T->L);
@@ -891,30 +892,36 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
 }
 
 typedef struct {
-  GEN lt, C, C2lt, C2ltpol;
+  GEN lt, C, Clt, C2lt, C2ltpol;
 } div_data;
 
 static void
-init_div_data(div_data *D, GEN pol, GEN C)
+init_div_data(div_data *D, GEN pol, nflift_t *L)
 {
-  GEN C2lt, lc = leading_term(pol), lt = is_pm1(lc)? NULL: absi(lc);
+  GEN C = mul_content(L->topowden, L->dn);
+  GEN C2lt, Clt, lc = leading_term(pol), lt = is_pm1(lc)? NULL: absi(lc);
   if (C)
   {
     GEN C2 = sqri(C);
-    C2lt = lt ? mulii(C2, lt): C2;
+    if (lt) {
+      C2lt = mulii(C2, lt);
+      Clt = mulii(C,lt);
+    } else {
+      C2lt = C2;
+      Clt = C;
+    }
   }
   else
-    C2lt = lt;
+    C2lt = Clt = lt;
   D->lt = lt;
   D->C = C;
+  D->Clt = Clt;
   D->C2lt = C2lt;
   D->C2ltpol = C2lt? RgX_Rg_mul(pol, C2lt): pol;
 }
 static void
 update_target(div_data *D, GEN pol)
-{
-  D->C2ltpol = D->C? RgX_Rg_mul(pol, D->C): pol;
-}
+{ D->C2ltpol = D->Clt? RgX_Rg_mul(pol, D->Clt): pol; }
 
 /* nb = number of modular factors; return a "good" K such that naive
  * recombination of up to maxK modular factors is not too costly */
@@ -935,8 +942,8 @@ cmbf_maxK(long nb)
 static GEN
 nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
 {
-  GEN pol = T->pol, nf = T->nf, famod = T->fact, dn = T->dn, bound = T->bound;
-  GEN lt, ltdn, nfpol = nf_get_pol(nf);
+  GEN nf = T->nf, famod = T->fact, bound = T->bound;
+  GEN ltdn, nfpol = nf_get_pol(nf);
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
   pari_sp av0 = avma;
   GEN Tpk = T->L->Tpk, pk = T->L->pk, pks2 = shifti(pk,-1);
@@ -952,17 +959,13 @@ nfcmbf(nfcmbf_t *T, long klim, long *pmaxK, int *done)
   timer_start(&ti);
 
   *pmaxK = cmbf_maxK(lfamod);
-  init_div_data(&D, pol, T->L->topowden);
-  ltdn = mul_content(D.lt, dn);
-  lt = D.lt; /* to be restored at the end */
+  init_div_data(&D, T->pol, T->L);
+  ltdn = mul_content(D.lt, T->L->dn);
   {
     GEN q = ceil_safe(sqrtr(T->BS_2));
-    GEN t1,t2, lt2dn;
+    GEN t1,t2, lt2dn = mul_content(ltdn, D.lt);
     GEN trace1   = cgetg(lfamod+1, t_MAT);
     GEN trace2   = cgetg(lfamod+1, t_MAT);
-
-    lt2dn= mul_content(ltdn, D.lt);
-
     for (i=1; i <= lfamod; i++)
     {
       pari_sp av = avma;
@@ -1012,9 +1015,8 @@ nextK:
       pari_sp av;
 
       av = avma;
-      /* d - 1 test */
       if (T1)
-      {
+      { /* d-1 test */
         t = get_trace(ind, T1);
         if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
         {
@@ -1022,9 +1024,8 @@ nextK:
           avma = av; goto NEXT;
         }
       }
-      /* d - 2 test */
       if (T2)
-      {
+      { /* d-2 test */
         t = get_trace(ind, T2);
         if (rtodbl(RgC_fpnorml2(t,DEFAULTPREC)) > Bhigh)
         {
@@ -1040,31 +1041,28 @@ nextK:
         if (y) q = gmul(y, q);
         y = FqX_centermod(q, Tpk, pk, pks2);
       }
-      /* y = C*lt*\prod_{i in ind} famod[i] */
       y = nf_pol_lift(y, bound, T);
       if (!y)
       {
         if (DEBUGLEVEL>3) err_printf("@");
         avma = av; goto NEXT;
       }
-      /* y is apparently in O_K[X], in fact in (Z[Y]/nf.pol)[X] due to the
-       * multiplication by C. Try out this candidate factor */
+      /* y = topowden*dn*lt*\prod_{i in ind} famod[i] is apparently in O_K[X],
+       * in fact in (Z[Y]/nf.pol)[X] due to multiplication by C = topowden*dn.
+       * Try out this candidate factor */
       q = RgXQX_divrem(D.C2ltpol, y, nfpol, ONLY_DIVIDES);
       if (!q)
       {
         if (DEBUGLEVEL>3) err_printf("*");
         avma = av; goto NEXT;
       }
-      /* pol in O_K[X] with leading coeff lt in Z,
+      /* Original T->pol in O_K[X] with leading coeff lt in Z,
        * y = C*lt \prod famod[i] is in O_K[X] with leading coeff in Z
-       * q = C^2 * lt * pol / y = C * (lt * pol) / (lt*\prod famod[i]), a
-       * K-rational factor, in fact in Z[Y]/nf.pol)[X] as above. */
-
-      /* found a factor */
-      if (D.C2lt) y = RgX_int_normalize(y); /* monic */
-      gel(fa,cnt++) = y;
-      /* fix up pol */
-      pol = q;
+       * q = C^2*lt*pol / y = C * (lt*pol) / (lt*\prod famod[i]) is a
+       * K-rational factor, in fact in Z[Y]/nf.pol)[X] as above, with
+       * leading term C*lt. */
+      update_target(&D, q);
+      gel(fa,cnt++) = D.C2lt? RgX_int_normalize(y): y; /* make monic */
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
         if (j <= K && i == ind[j]) j++;
@@ -1080,8 +1078,6 @@ nextK:
       *pmaxK = cmbf_maxK(lfamod);
       if (lfamod < 2*K) goto END;
       i = 1; curdeg = deg[ind[1]];
-
-      update_target(&D, pol);
       if (DEBUGLEVEL > 2)
       {
         err_printf("\n"); timer_printf(&ti, "to find factor %Ps",y);
@@ -1103,16 +1099,17 @@ NEXT:
   }
 END:
   *done = 1;
-  if (degpol(pol) > 0)
+  if (degpol(D.C2ltpol) > 0)
   { /* leftover factor */
-    if (D.C2lt) pol = RgX_int_normalize(pol);
+    GEN q = D.C2ltpol;
+    if (D.C2lt) q = RgX_int_normalize(q);
     if (lfamod >= 2*K)
     { /* restore leading coefficient [#930] */
-      if (lt) pol = RgX_Rg_mul(pol, lt);
+      if (D.lt) q = RgX_Rg_mul(q, D.lt);
       *done = 0; /* ... may still be reducible */
     }
     setlg(famod, lfamod+1);
-    gel(fa,cnt++) = pol;
+    gel(fa,cnt++) = q;
   }
   if (DEBUGLEVEL>6) err_printf("\n");
   if (cnt == 2) {
@@ -1142,7 +1139,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 
   r  = lg(piv)-1;
   list = cgetg(r+1, t_VEC);
-  init_div_data(&D, pol, T->L->topowden);
+  init_div_data(&D, pol, T->L);
   for (i = 1;;)
   {
     pari_sp av = avma;
@@ -1334,7 +1331,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long rec)
 {
   const double BitPerFactor = 0.4; /* nb bits / modular factor */
   nflift_t *L = T->L;
-  GEN famod = T->fact, ZC = T->ZC, Br = T->Br, P = T->pol, dn = T->dn;
+  GEN famod = T->fact, ZC = T->ZC, Br = T->Br, P = T->pol, dn = T->L->dn;
   long dnf = nf_get_degree(T->nf), dP = degpol(P);
   long i, C, tmax, n0;
   GEN lP, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO, Btra;
@@ -1512,14 +1509,15 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, long klim)
 }
 
 static GEN
-nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
+nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN init_fa, long nbf,
               long fl, nflift_t *L)
 {
-  GEN z, Cltdnx_r, C2ltdnpol, C = L->topowden;
-  GEN Cltdn  = mul_content(C, ltdn); /* t_INT */
-  GEN C2ltdn = mul_content(C,Cltdn); /* t_INT */
+  GEN z, Cltx_r, ltdn;
   long i, m;
+  div_data D;
 
+  init_div_data(&D, pol, L);
+  ltdn = mul_content(D.lt, L->dn);
   if (L->Tpk)
   {
     int cof = (degpol(pol) > nbf); /* non trivial cofactor ? */
@@ -1530,18 +1528,20 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
   }
   else
     z = rootpadicfast(polred, L->p, L->k);
-  Cltdnx_r = deg1pol_shallow(Cltdn? Cltdn: gen_1, NULL, varn(pol));
-  C2ltdnpol  = C2ltdn? RgX_Rg_mul(pol, C2ltdn): pol;
+  Cltx_r = deg1pol_shallow(D.Clt? D.Clt: gen_1, NULL, varn(pol));
   for (m=1,i=1; i<lg(z); i++)
   {
     GEN q, r = gel(z,i);
-
+    pari_sp av;
+    /* lt*dn*topowden * r = Clt * r */
     r = nf_bestlift_to_pol(ltdn? gmul(ltdn,r): r, NULL, L);
-    gel(Cltdnx_r,2) = gneg(r); /* check P(r) == 0 */
-    q = RgXQX_divrem(C2ltdnpol, Cltdnx_r, nfpol, ONLY_DIVIDES); /* integral */
+    av = avma;
+    gel(Cltx_r,2) = gneg(r); /* check P(r) == 0 */
+    q = RgXQX_divrem(D.C2ltpol, Cltx_r, nfpol, ONLY_DIVIDES); /* integral */
+    avma = av;
+    /* don't go on with q, usually much larger that C2ltpol */
     if (q) {
-      C2ltdnpol = C2ltdn? RgX_Rg_mul(q, Cltdn): q;
-      if (Cltdn) r = gdiv(r, Cltdn);
+      if (D.Clt) r = gdiv(r, D.Clt);
       gel(z,m++) = r;
     }
     else if (fl == ROOTS_SPLIT) return cgetg(1, t_VEC);
@@ -1801,8 +1801,9 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   }
   L.tozk = nf_get_invzk(nf);
   L.topow= Q_remove_denom(nf_get_zk(nf), &L.topowden);
+  if (is_pm1(den)) den = NULL;
+  L.dn = den;
   T.ZC = L2_bound(nf, den);
-  T.dn = is_pm1(den)? NULL: den;
   T.Br = nf_root_bounds(pol, nf); if (lt) T.Br = gmul(T.Br, lt);
 
   /* C0 = bound for T_2(Q_i), Q | P */
@@ -1828,8 +1829,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   polred = ZqX_normalize(polbase, lt, &L); /* monic */
 
   if (fl != FACTORS) {
-    GEN z = nf_DDF_roots(pol, polred, nfpol, mul_content(lt, T.dn),
-                         init_fa, nbf, fl, &L);
+    GEN z = nf_DDF_roots(pol, polred, nfpol, init_fa, nbf, fl, &L);
     if (lg(z) == 1) return cgetg(1, t_VEC);
     return z;
   }
@@ -1963,7 +1963,7 @@ nfcyclo_root(GEN nf, long n_cyclo, prklift_t *P)
     nbf = Flx_nbroots(ZX_to_Flx(pol,p), p);
   }
   if (nbf != deg) return NULL; /* no roots in residue field */
-  z = nf_DDF_roots(pol, pol, nfpol, NULL, init_fa, nbf, ROOTS_SPLIT, P->L);
+  z = nf_DDF_roots(pol, pol, nfpol, init_fa, nbf, ROOTS_SPLIT, P->L);
   if (lg(z) == 1) { avma = av; return NULL; } /* no roots */
   return gel(z,1);
 }
@@ -2133,6 +2133,7 @@ rootsof1(GEN nf)
   /* lift and reduce pr^k */
   if (DEBUGLEVEL>2) err_printf("Lift pr^k; GSmin wanted: %Ps\n",C0);
   bestlift_init((long)mybestlift_bound(C0), nf, P.pr, C0, P.L);
+  P.L->dn = NULL;
   if (DEBUGLEVEL>2) timer_start(&ti);
 
   /* Step 4 : actual computation of roots */

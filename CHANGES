@@ -26,6 +26,8 @@ JD 10- elltors(ellinit("90c3")) returned Z/12 but a generator of order 6
    19- norm(Mod(z,T)) where z is not a t_POL or in a different variable than T
        => wrong result [#1539]
    20- polresultant(Pol(Mod(0,2)), x) -> 0 instead of Mod(0,2)
+   21- nffactor(T, pol) possibly wrong results when nfinit(T) is not rigorously
+       computed [#1545]
 
 Done for version 2.6.2 (released 30/01/2014):
 
