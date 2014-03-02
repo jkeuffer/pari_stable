@@ -1014,6 +1014,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     Rk = mod_Xell_a(Rk, 0, ell, NULL, NULL); /* mod X^ell - 1 */
     for (i = 2; i < lg(Rk); i++)
     {
+      if (typ(gel(Rk,i)) != t_POL) continue;
       z = mod_Xell_a(gel(Rk,i), vT, ell, num_t,den_t); /* mod T^ell - t */
       gel(Rk,i) = RgXQX_red(z, nfzpol); /* mod nfz.pol */
     }
