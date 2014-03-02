@@ -714,7 +714,7 @@ gmodgs(GEN x, long y)
 
     case t_PADIC: return padic_to_Fp(x, stoi(y));
     case t_POL: return scalarpol(RgX_get_0(x), varn(x));
-    case t_POLMOD: retmkpolmod(RgX_get_0(x), RgX_copy(x));
+    case t_POLMOD: return gmul(gen_0,x);
   }
   pari_err_TYPE2("%",x,stoi(y));
   return NULL; /* not reached */
