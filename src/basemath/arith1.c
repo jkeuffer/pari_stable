@@ -4257,7 +4257,7 @@ classno2(GEN x)
 {
   pari_sp av = avma;
   const long prec = DEFAULTPREC;
-  long n, i, k, r, s;
+  long n, i, r, s;
   GEN p1, p2, S, p4, p5, p7, Hf, Pi, reg, logd, d, dr, D, half;
 
   check_quaddisc(x, &s, &r, "classno2");
@@ -4281,14 +4281,15 @@ classno2(GEN x)
 
   p4 = divri(Pi,d);
   p7 = invr(sqrtr_abs(Pi));
-  p1 = sqrtr_abs(dr);
-  S = gen_0;
   half = real2n(-1, prec);
   if (s > 0)
-  {
-    for (i=1; i<=n; i++)
+  { /* i = 1, shortcut */
+    p1 = sqrtr_abs(dr);
+    p5 = subsr(1, mulrr(p7,incgamc(half,p4,prec)));
+    S = addrr(mulrr(p1,p5), eint1(p4,prec));
+    for (i=2; i<=n; i++)
     {
-      k = kroiu(D,i); if (!k) continue;
+      long k = kroiu(D,i); if (!k) continue;
       p2 = mulir(sqru(i), p4);
       p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
       p5 = addrr(divru(mulrr(p1,p5),i), eint1(p2,prec));
@@ -4297,14 +4298,16 @@ classno2(GEN x)
     S = shiftr(divrr(S,reg),-1);
   }
   else
-  {
-    p1 = gdiv(p1,Pi);
-    for (i=1; i<=n; i++)
+  { /* i = 1, shortcut */
+    p1 = gdiv(sqrtr_abs(dr), Pi);
+    p5 = subsr(1, mulrr(p7,incgamc(half,p4,prec)));
+    S = addrr(p5, divrr(p1, mpexp(p4)));
+    for (i=2; i<=n; i++)
     {
-      k = kroiu(D,i); if (!k) continue;
+      long k = kroiu(D,i); if (!k) continue;
       p2 = mulir(sqru(i), p4);
       p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
-      p5 = addrr(p5, divrr(divru(p1,i), mpexp(p2)));
+      p5 = addrr(p5, divrr(p1, mulur(i, mpexp(p2))));
       S = (k>0)? addrr(S,p5): subrr(S,p5);
     }
   }
