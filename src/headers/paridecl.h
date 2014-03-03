@@ -1960,6 +1960,9 @@ GEN     elladd(GEN e, GEN z1, GEN z2);
 GEN     ellap(GEN e, GEN p);
 GEN     ellcard(GEN E, GEN p);
 GEN     ellchangecurve(GEN e, GEN ch);
+GEN     ellchangeinvert(GEN w);
+GEN     ellchangepoint(GEN x, GEN ch);
+GEN     ellchangepointinv(GEN x, GEN ch);
 GEN     elldivpol(GEN e, long n, long v);
 GEN     elleisnum(GEN om, long k, long flag, long prec);
 GEN     elleta(GEN om, long prec);
@@ -1993,18 +1996,14 @@ GEN     ellsigma(GEN om, GEN z, long flag, long prec);
 GEN     ellsub(GEN e, GEN z1, GEN z2);
 GEN     elltaniyama(GEN e, long prec);
 GEN     elltatepairing(GEN E, GEN t, GEN s, GEN m);
+GEN     elltors(GEN e);
 GEN     elltors0(GEN e, long flag);
 GEN     ellweilpairing(GEN E, GEN t, GEN s, GEN m);
 GEN     ellwp(GEN w, GEN z, long prec);
 GEN     ellwp0(GEN w, GEN z, long flag, long prec);
 GEN     ellwpseries(GEN e, long v, long PRECDL);
 GEN     ellzeta(GEN om, GEN z, long prec);
-GEN     ellchangeinvert(GEN w);
-GEN     ellchangepoint(GEN x, GEN ch);
-GEN     ellchangepointinv(GEN x, GEN ch);
-GEN     elltors(GEN e);
 GEN     expIxy(GEN x, GEN y, long prec);
-GEN     genus2red(GEN Q, GEN P, GEN p);
 GEN     ghell(GEN e, GEN a, long prec);
 GEN     mathell(GEN e, GEN x, long prec);
 int     oncurve(GEN e, GEN z);
@@ -2252,6 +2251,11 @@ GEN     galoissubfields(GEN G, long flag, long v);
 long    numberofconjugates(GEN T, long pdepart);
 GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 
+/* galpol.c */
+
+GEN     galoisnbpol(long a);
+GEN     galoisgetpol(long a, long b, long s);
+
 /* gen1.c */
 GEN     conjvec(GEN x,long prec);
 GEN     gadd(GEN x, GEN y);
@@ -2270,11 +2274,6 @@ GEN     inv_ser(GEN b);
 GEN     mulcxI(GEN x);
 GEN     mulcxmI(GEN x);
 GEN     ser_normalize(GEN x);
-
-/* galpol.c */
-
-GEN     galoisnbpol(long a);
-GEN     galoisgetpol(long a, long b, long s);
 
 /* gen2.c */
 
@@ -2503,6 +2502,10 @@ GEN     tayl(GEN x, long v, long precdl);
 GEN     toser_i(GEN x);
 GEN     trunc0(GEN x, GEN *pte);
 GEN     uu32toi(ulong a, ulong b);
+
+/* genus2red.c */
+
+GEN     genus2red(GEN Q, GEN P, GEN p);
 
 /* groupid.c */
 
