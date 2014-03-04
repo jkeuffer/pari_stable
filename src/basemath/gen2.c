@@ -2447,14 +2447,14 @@ sizedigit(GEN x)
 GEN
 normalize(GEN x)
 {
-  long i, lx = lg(x);
+  long i, lx = lg(x), vx=varn(x), vp=valp(x);
   GEN y, z;
 
   if (typ(x) != t_SER) pari_err_TYPE("normalize",x);
   if (lx==2) { setsigne(x,0); return x; }
   for (i=2; i<lx; i++)
     if (! isrationalzero(gel(x,i))) break;
-  if (i == lx) return zeroser(varn(x),lx-2+valp(x));
+  if (i == lx) return zeroser(vx,lx-2+vp);
   z = gel(x,i);
   while (i<lx && isexactzero(gel(x,i))) i++;
   if (i == lx)
@@ -2462,14 +2462,13 @@ normalize(GEN x)
     i -= 3; y = x + i;
     stackdummy((pari_sp)y, (pari_sp)x);
     gel(y,2) = z;
-    y[1] = evalsigne(0) | evalvalp(lx-2+valp(x)) | evalvarn(varn(x));
+    y[1] = evalsigne(0) | evalvalp(lx-2+vp) | evalvarn(vx);
     y[0] = evaltyp(t_SER) | _evallg(3);
     return y;
   }
 
   i -= 2; y = x + i; lx -= i;
-  /* don't swap the following two lines! [valp/varn corrupted] */
-  y[1] = evalsigne(1) | evalvalp(valp(x)+i) | evalvarn(varn(x));
+  y[1] = evalsigne(1) | evalvalp(vp+i) | evalvarn(vx);
   y[0] = evaltyp(t_SER) | evallg(lx);
 
   stackdummy((pari_sp)y, (pari_sp)x);
