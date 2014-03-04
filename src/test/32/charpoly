@@ -45,6 +45,23 @@ Mod(1, 18446744073709551629)*x^4 + Mod(18446744073709551600, 184467440737095
 
 [1]
 
+
+[0 0 0]
+
+[0 0 0]
+
+[0 0 0]
+
+
+[Mod(0, 2) Mod(0, 2) Mod(0, 2)]
+
+[Mod(0, 2) Mod(0, 2) Mod(0, 2)]
+
+[Mod(0, 2) Mod(0, 2) Mod(0, 2)]
+
+  ***   at top-level: charpoly(x*matid(3))
+  ***                 ^--------------------
+  *** charpoly: incorrect priority in charpoly: variable x = x
 x^4 - 4*x^3 + 6*x^2 - 4*x + 2
 x^2
 []
@@ -53,4 +70,4 @@ x^2
 [1]
 
 [[1], Mat(1)]
-Total time spent: 8
+Total time spent: 4

@@ -131,7 +131,7 @@ static GEN
 fix_pol(pari_sp av, GEN p)
 {
   long w = gvar2(p), v = varn(p);
-  if (w == v) pari_err_BUG("charpoly [incorrect variable]");
+  if (w == v) pari_err_PRIORITY("charpoly", p, "=", w);
   if (varncmp(w,v) < 0) p = gerepileupto(av, poleval(p, pol_x(v)));
   return p;
 }
@@ -163,13 +163,22 @@ caract(GEN x, long v)
   return fix_pol(av, RgX_Rg_div(T, mpfact(n)));
 }
 
-/* C = charpoly(x) */
+/* C = charpoly(x, v) */
 static GEN
-RgM_adj_from_char(GEN x, GEN C)
+RgM_adj_from_char(GEN x, long v, GEN C)
 {
-  C = RgX_shift_shallow(C, -1);
-  if (odd(lg(x))) C = RgX_neg(C); /* even dimension */
-  return RgX_RgM_eval(C, x);
+  if (varn(C) != v) /* problem with variable priorities */
+  {
+    C = gdiv(gsub(C, gsubst(C, v, gen_0)), pol_x(v));
+    if (odd(lg(x))) C = RgX_neg(C); /* even dimension */
+    return gsubst(C, v, x);
+  }
+  else
+  {
+    C = RgX_shift_shallow(C, -1);
+    if (odd(lg(x))) C = RgX_neg(C); /* even dimension */
+    return RgX_RgM_eval(C, x);
+  }
 }
 /* assume x square matrice */
 static GEN
@@ -187,6 +196,7 @@ bad_char(GEN q, long n)
 {
   forprime_t S;
   ulong p;
+  if (!signe(q)) return 0;
   (void)u_forprime_init(&S, 2, n);
   while ((p = u_forprime_next(&S)))
     if (!umodiu(q, p)) return 1;
@@ -240,7 +250,7 @@ caradj(GEN x, long v, GEN *py)
   { /* n! not invertible in base ring */
     T = charpoly(x, v);
     if (!py) return gerepileupto(av, T);
-    *py = RgM_adj_from_char(x, T);
+    *py = RgM_adj_from_char(x, v, T);
     gerepileall(av, 2, &T,py);
     return T;
   }
@@ -268,18 +278,19 @@ GEN
 adj(GEN x)
 {
   GEN y;
-  (void)caradj(x,MAXVARN,&y); return y;
+  (void)caradj(x, MAXVARN, &y); return y;
 }
 
 GEN
 adjsafe(GEN x)
 {
+  const long v = MAXVARN;
   pari_sp av = avma;
   GEN C;
   if (typ(x) != t_MAT) pari_err_TYPE("matadjoint",x);
   if (lg(x) < 3) return gcopy(x);
-  C = charpoly(x,0);
-  return gerepileupto(av, RgM_adj_from_char(x, C));
+  C = charpoly(x,v);
+  return gerepileupto(av, RgM_adj_from_char(x, v, C));
 }
 
 GEN

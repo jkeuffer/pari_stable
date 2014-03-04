@@ -31,6 +31,7 @@ JD 10- elltors(ellinit("90c3")) returned Z/12 but a generator of order 6
    22- gmodgs(t_POLMOD,): incorrect implementation
 BA 23- library functions Fp_pow/Fp_pow mishandled negative basis
    24- gcd(1/(2^64*y),Mod(x^2,2^64*x^3)) --> inconsistent gcd [#1541]
+   25- matadjoint([x,0,0;0,0,0;0,0,0]) => wrong variables [#1547]
 
   Added
 BA  1- library functions FlxX_to_FlxC, FlxXV_to_FlxM, polx_FlxX
