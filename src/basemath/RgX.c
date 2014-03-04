@@ -1463,6 +1463,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   else {
     for(;;) {
       p2 = f(gel(x,dx+2),y_lead);
+      p2 = simplify_shallow(p2);
       if (!isexactzero(p2) || (--dx < 0)) break;
     }
     if (dx < dy) /* leading coeff of x was in fact zero */
@@ -1526,7 +1527,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     av1=avma; p1=gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
-    if (y_lead) p1 = f(p1,y_lead);
+    if (y_lead) p1 = simplify(f(p1,y_lead));
 
     if (isrationalzero(p1)) { avma=av1; p1 = gen_0; }
     else

@@ -1371,7 +1371,14 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
   z = gred_rfrac2_i(x, d);
   n = simplify_shallow(n);
   if (typ(z) == t_RFRAC)
-    z = gred_rfrac_simple(gmul(gel(z,1), n), gel(z,2));
+  {
+    n = gmul(gel(z,1), n);
+    d = gel(z,2);
+    if (typ(n) == t_POL && varncmp(varn(n), varn(d)) < 0)
+      z = RgX_Rg_div(n, d);
+    else
+      z = gred_rfrac_simple(n, d);
+  }
   else
     z = gmul(z, n);
   return gerepileupto(av, z);

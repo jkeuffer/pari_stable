@@ -1022,7 +1022,14 @@ cont_gcd_rfrac(GEN x, GEN y)
   GEN cx; x = primitive_part(x, &cx);
   return gerepileupto(av, gred_rfrac_simple(ggcd(cx? cx: gen_1, y), gel(x,2)));
 }
-/* !is_const(tx), tx != t_RFRAC, y considered as constant */
+/* tx = t_POL, y considered as constant */
+static GEN
+cont_gcd_pol(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, scalarpol(ggcd(content(x),y), varn(x)));
+}
+/* !is_const_t(tx), tx != t_POL,t_RFRAC, y considered as constant */
 static GEN
 cont_gcd_gen(GEN x, GEN y)
 {
@@ -1033,7 +1040,12 @@ cont_gcd_gen(GEN x, GEN y)
 static GEN
 cont_gcd(GEN x, long tx, GEN y)
 {
-  return (tx == t_RFRAC)? cont_gcd_rfrac(x, y): cont_gcd_gen(x, y);
+  switch(tx)
+  {
+    case t_RFRAC: return cont_gcd_rfrac(x,y);
+    case t_POL: return cont_gcd_pol(x,y);
+    default: return cont_gcd_gen(x,y);
+  }
 }
 static GEN
 gcdiq(GEN x, GEN y)
@@ -1294,7 +1306,7 @@ ggcd(GEN x, GEN y)
     {
       case t_POL:
         vy = varn(y);
-        if (varncmp(vy,vx) < 0) return cont_gcd_gen(y, x);
+        if (varncmp(vy,vx) < 0) return cont_gcd_pol(y, x);
         z = cgetg(3,t_POLMOD);
         gel(z,1) = RgX_copy(gel(x,1));
         av = avma; p1 = ggcd(gel(x,1),gel(x,2));
@@ -2703,6 +2715,7 @@ gcdmonome(GEN x, GEN y)
   gel(v,1) = gel(x,dx+2);
   for (i = 2; i < l; i++) gel(v,i) = gel(y,i);
   t = content(v); /* gcd(lc(x), cont(y)) */
+  t = simplify_shallow(t);
   if (dx < e) e = dx;
   return gerepileupto(av, monomialcopy(t, e, varn(x)));
 }
