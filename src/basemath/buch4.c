@@ -846,14 +846,10 @@ rnfisnorm(GEN T, GEN x, long flag)
   setlg(Y, L);
   aux = factorback2(sunitrel, gfloor(Y));
   x = mkpolmod(x,nfpol);
-  if (!gequal1(aux)) x = gdiv(x, RgXQ_norm(lift_intern(aux), relpol));
-  if (typ(x) == t_POLMOD && (typ(gel(x,2)) != t_POL || !degpol(gel(x,2))))
-  {
-    x = gel(x,2); /* rational number */
-    if (typ(x) == t_POL) x = gel(x,2);
-  }
+  if (!gequal1(aux)) x = gdiv(x, gnorm(aux));
+  x = lift_if_rational(x);
   if (typ(aux) == t_POLMOD && degpol(nfpol) == 1)
-    gel(aux,2) = simplify_shallow( lift_intern(gel(aux,2)) );
+    gel(aux,2) = lift_if_rational(gel(aux,2));
   return gerepilecopy(av, mkvec2(aux, x));
 }
 
