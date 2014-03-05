@@ -2148,7 +2148,23 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   avma = av;
 }
 
-/* S & T for the general case */
+/* s += t*u. All 3 of them t_REAL, except we allow u = gen_0 and s = NULL (0) */
+static GEN
+_addmulrr(GEN s, GEN t, GEN u)
+{
+  if (signe(u))
+  {
+    GEN v = mulrr(t, u);
+    return s? addrr(s, v): v;
+  }
+  return s;
+}
+/* s += t. Both real, except we allow t = gen_0 and s = NULL (0) */
+static GEN
+_addrr(GEN s, GEN t)
+{ return signe(t)? (s? addrr(s, t): t) : s; }
+
+/* S & T for the general case. This is time-critical: optimize */
 static void
 get_cS_cT(ST_t *T, long n)
 {
@@ -2162,7 +2178,7 @@ get_cS_cT(ST_t *T, long n)
   aij = T->aij; i0= T->i0;
   bij = T->bij; r = T->r;
   Z = cgetg(r+1, t_VEC);
-  Z[1] = 0; /* unused */
+  gel(Z,1) = NULL; /* unused */
 
   csurn = divru(T->c1, n);
   nsurc = invr(csurn);
@@ -2177,36 +2193,38 @@ get_cS_cT(ST_t *T, long n)
   }
 
   /* i = i0 */
-    A = gel(aij,i0); t = gel(A,1);
-    B = gel(bij,i0); s = gel(B,1);
+    A = gel(aij,i0); t = _addrr(NULL, gel(A,1));
+    B = gel(bij,i0); s = _addrr(NULL, gel(B,1));
     for (j = 2; j <= r; j++)
     {
-      if (signe(gel(B,j))) s = mpadd(s, mulrr(gel(Z,j), gel(B,j)));
-      if (signe(gel(A,j))) t = mpadd(t, mulrr(gel(Z,j), gel(A,j)));
+      s = _addmulrr(s, gel(Z,j),gel(B,j));
+      t = _addmulrr(t, gel(Z,j),gel(A,j));
     }
   for (i = i0 - 1; i > 1; i--)
   {
-    A = gel(aij,i); if (signe(t)) t = mulrr(t, nsurc);
-    B = gel(bij,i); if (signe(s)) s = mulrr(s, nsurc);
+    A = gel(aij,i); if (t) t = mulrr(t, nsurc);
+    B = gel(bij,i); if (s) s = mulrr(s, nsurc);
     for (j = odd(i)? T->rc2: T->rc1; j > 1; j--)
     {
-      if (signe(gel(B,j))) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
-      if (signe(gel(A,j))) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
+      s = _addmulrr(s, gel(Z,j),gel(B,j));
+      t = _addmulrr(t, gel(Z,j),gel(A,j));
     }
-    if (signe(gel(B,1))) s = addrr(s, gel(B,1));
-    if (signe(gel(A,1))) t = addrr(t, gel(A,1));
+    s = _addrr(s, gel(B,1));
+    t = _addrr(t, gel(A,1));
   }
   /* i = 1 */
-    A = gel(aij,1); if (signe(t)) t = mulrr(t, nsurc);
-    B = gel(bij,1); if (signe(s)) s = mulrr(s, nsurc);
-    if (signe(gel(B,1))) s = addrr(s, gel(B,1));
-    if (signe(gel(A,1))) t = addrr(t, gel(A,1));
+    A = gel(aij,1); if (t) t = mulrr(t, nsurc);
+    B = gel(bij,1); if (s) s = mulrr(s, nsurc);
+    s = _addrr(s, gel(B,1));
+    t = _addrr(t, gel(A,1));
     for (j = 2; j <= r; j++)
     {
-      if (signe(gel(B,j))) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
-      if (signe(gel(A,j))) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
+      s = _addmulrr(s, gel(Z,j),gel(B,j));
+      t = _addmulrr(t, gel(Z,j),gel(A,j));
     }
-  s = addrr(s, T->b? mulrr(csurn, gel(T->powracpi,T->b)): csurn);
+  s = _addrr(s, T->b? mulrr(csurn, gel(T->powracpi,T->b)): csurn);
+  if (!s) s = gen_0;
+  if (!t) t = gen_0;
   gel(T->cS,n) = gclone(s);
   gel(T->cT,n) = gclone(t); avma = av;
 }
