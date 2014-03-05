@@ -1516,7 +1516,7 @@ static void
 affect_coeff(GEN q, long n, GEN y)
 {
   GEN x = _sercoeff(q,-n);
-  if (x == gen_0) gel(y,n) = gen_0; else affgr(x, gel(y,n));
+  if (x == gen_0) gel(y,n) = NULL; else affgr(x, gel(y,n));
 }
 
 typedef struct {
@@ -2148,21 +2148,21 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   avma = av;
 }
 
-/* s += t*u. All 3 of them t_REAL, except we allow u = gen_0 and s = NULL (0) */
+/* s += t*u. All 3 of them t_REAL, except we allow s or u = NULL (for 0) */
 static GEN
 _addmulrr(GEN s, GEN t, GEN u)
 {
-  if (signe(u))
+  if (u)
   {
     GEN v = mulrr(t, u);
     return s? addrr(s, v): v;
   }
   return s;
 }
-/* s += t. Both real, except we allow t = gen_0 and s = NULL (0) */
+/* s += t. Both real, except we allow s or t = NULL (for exact 0) */
 static GEN
 _addrr(GEN s, GEN t)
-{ return signe(t)? (s? addrr(s, t): t) : s; }
+{ return t? (s? addrr(s, t): t) : s; }
 
 /* S & T for the general case. This is time-critical: optimize */
 static void
