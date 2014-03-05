@@ -1288,6 +1288,7 @@ ellordinate_i(GEN E, GEN x, long prec)
       if (!FF_issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
       break;
     case t_ELL_Q:
+      if (typ(x) == t_COMPLEX) { d = gsqrt(D, prec); break; }
       if (!issquareall(D,&d)) { avma = av; return cgetg(1,t_VEC); }
       break;
 

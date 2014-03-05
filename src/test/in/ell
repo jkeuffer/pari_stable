@@ -196,6 +196,7 @@ ellpointtoz(e,[x,y])
 ellinit([1,1], Mod(1,11))
 ellrootno(ellinit([31^4,31^6]), 31)
 e=ellinit([1,0,0,1,1]);
+ellordinate(e, I)
 E=ellchangecurve(e,[1/(2^4*3^4*5^2*7),2,3,4]);
 forprime(p=2,11, if (ellap(e,p) != ellap(E,p),error(p)));
 for(k=2,50, if (ellak(e,k) != ellak(E,k),error(k)));
