@@ -214,7 +214,8 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     }
   c2 = gprec_w(myround(c2, -1), DEFAULTPREC);
 
-  if (t==0) x0 = gen_1;
+  if (t==0)
+    x0 = real_1(DEFAULTPREC);
   else
   {
     gpmin = NULL; /* min |P'(r_i)|, i > s */
@@ -468,7 +469,7 @@ GuessQi(GEN b, GEN c, GEN *eps)
 static GEN
 myfloor(GEN x) { return expo(x) > 30 ? ceil_safe(x): floorr(x); }
 
-/* Check for not-so-small solutions */
+/* Check for not-so-small solutions. Return a t_REAL or NULL */
 static GEN
 MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
 {
