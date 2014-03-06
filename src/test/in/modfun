@@ -5,4 +5,4 @@ eta(I)
 ellj(2+O(2^20))
 ellj(x+x^2+x^3+x^4+O(x^5))
 theta(1/2,I)
-
+weber(1.0*I,1)

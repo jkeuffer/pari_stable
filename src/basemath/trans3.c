@@ -2894,9 +2894,9 @@ INLINE GEN
 R_abs_shallow(GEN x)
 { return (typ(x) == t_FRAC)? absfrac_shallow(x): mpabs_shallow(x); }
 
-/* Check whether a t_COMPLEX or t_INT z != 0 can be written as
+/* Check whether a t_COMPLEX, t_REAL or t_INT z != 0 can be written as
  * z = u * 2^(v/2) * exp(I Pi/4 t), u > 0, v = 0,1 and -3 <= t <= 4.
- * Allow z t_INT to simplify handling of eta_correction() output */
+ * Allow z t_INT/t_REAL to simplify handling of eta_correction() output */
 static int
 cxanalyze(cxanalyze_t *T, GEN z)
 {
@@ -2904,9 +2904,9 @@ cxanalyze(cxanalyze_t *T, GEN z)
   long ta, tb;
 
   T->v = 0;
-  if (typ(z) == t_INT)
+  if (is_intreal_t(typ(z)))
   {
-    T->u = absi_shallow(z);
+    T->u = mpabs_shallow(z);
     T->t = signe(z) < 0? 4: 0;
     return 1;
   }
