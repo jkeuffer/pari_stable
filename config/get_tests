@@ -9,7 +9,8 @@ test_extra_out="ploth io parallel"
 # _not_ included automatically in Oxxx/Makefile (special cased there)
 test_extra_OUT="env"
 
-pattern_out='\bio\b|\benv\b|\bploth\b|\bparallel\b'
+test_extra_all_out="$test_extra_out $test_extra_OUT"
+pattern_out=`echo $test_extra_all_out | sed -e 's/\b/\\\b/g; s/ /|/g'`
 
 # included in 'make bench'
 test_basic="\
