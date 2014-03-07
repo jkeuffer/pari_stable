@@ -1317,7 +1317,7 @@ nf_set_multable(GEN nf, GEN bas, GEN basden)
   if (typ(bas) == t_MAT)
   { basM = bas; bas = RgM_to_RgXV(basM, varn(T)); }
   else
-    basM = RgXV_to_RgM(bas, n);
+    basM = RgV_to_RgM(bas, n);
   gel(nf,7) = bas;
   gel(nf,8) = invbas = QM_inv(basM, gen_1);
   gel(nf,9) = mul;
@@ -1591,7 +1591,7 @@ static GEN
 hnffromLLL(GEN nf)
 {
   GEN d, x;
-  x = RgXV_to_RgM(nf_get_zk(nf), nf_get_degree(nf));
+  x = RgV_to_RgM(nf_get_zk(nf), nf_get_degree(nf));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
   return RgM_solve(ZM_hnfmodid(x, d), x);
@@ -1773,7 +1773,7 @@ get_nfindex(GEN bas)
   { /* not triangular after all */
     bas = Q_remove_denom(bas, &d);
     if (!d) { avma = av; return D; }
-    mat = RgXV_to_RgM(bas, n);
+    mat = RgV_to_RgM(bas, n);
     d = diviiexact(powiu(d, n), ZM_det(mat));
     D = mulii(D,absi(d));
   }
@@ -2652,7 +2652,7 @@ store(GEN x, GEN z, GEN a, nfbasic_t *T, long flag, GEN u)
   if (flag & nf_ADDZK)
   { /* append integral basis for number field Q[X]/(z) to result */
     long n = degpol(x);
-    GEN t = RgV_RgM_mul(RgXQ_powers(b, n-1, z), RgXV_to_RgM(T->bas,n));
+    GEN t = RgV_RgM_mul(RgXQ_powers(b, n-1, z), RgV_to_RgM(T->bas,n));
     y = mkvec2(y, t);
   }
   return y;

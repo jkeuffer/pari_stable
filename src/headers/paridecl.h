@@ -738,6 +738,7 @@ GEN     Rg_to_RgV(GEN x, long N);
 GEN     RgM_to_RgXV(GEN x, long v);
 GEN     RgM_to_RgXX(GEN x, long v,long w);
 GEN     RgV_to_RgX(GEN x, long v);
+GEN     RgV_to_RgM(GEN v, long n);
 GEN     RgV_to_RgX_reverse(GEN x, long v);
 GEN     RgXQC_red(GEN P, GEN T);
 GEN     RgXQV_red(GEN P, GEN T);

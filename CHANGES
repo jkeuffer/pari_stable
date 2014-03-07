@@ -39,6 +39,7 @@ BA 23- library functions Fp_pow/Fp_pow mishandled negative basis
   Added
 BA  1- library functions FlxX_to_FlxC, FlxXV_to_FlxM, polx_FlxX
 BA  2- library function Flx_lead
+    3- library function RgV_to_RgM
 
 Done for version 2.6.2 (released 30/01/2014):
 

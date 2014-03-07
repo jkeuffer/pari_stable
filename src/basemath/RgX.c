@@ -578,11 +578,19 @@ RgM_to_RgXV(GEN x, long v)
 /* matrix whose entries are given by the coeffs of the polynomials in
  * vector v (considered as degree n-1 polynomials) */
 GEN
-RgXV_to_RgM(GEN v, long n)
+RgV_to_RgM(GEN v, long n)
 {
   long j, N = lg(v);
   GEN y = cgetg(N, t_MAT);
   for (j=1; j<N; j++) gel(y,j) = Rg_to_RgV(gel(v,j), n);
+  return y;
+}
+GEN
+RgXV_to_RgM(GEN v, long n)
+{
+  long j, N = lg(v);
+  GEN y = cgetg(N, t_MAT);
+  for (j=1; j<N; j++) gel(y,j) = RgX_to_RgV(gel(v,j), n);
   return y;
 }
 

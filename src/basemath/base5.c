@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+/* must return a t_POL */
 GEN
 eltreltoabs(GEN rnfeq, GEN x)
 {
@@ -152,7 +153,7 @@ END:
 }
 
 
-/* x a t_VEC of rnf elements in 'alg' form. Assume maximal rank or 0 */
+/* x a t_VEC of rnf elements in 'alg' form (t_POL). Assume maximal rank or 0 */
 static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
@@ -197,6 +198,7 @@ rnf_basM(GEN rnf)
 {
   GEN M, d, pol = rnf_get_polabs(rnf);
   long n = degpol(pol);
+  /* t_VEC of t_POL */
   M = Q_remove_denom(modulereltoabs(rnf, rnf_get_zk(rnf)), &d);
   if (d)
   {

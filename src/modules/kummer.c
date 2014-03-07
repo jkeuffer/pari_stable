@@ -851,7 +851,7 @@ Stelt(GEN nf, GEN J, GEN polrel)
     gel(I,i) = id;
   }
   x = cgetg(3,t_VEC);
-  gel(x,1) = RgXV_to_RgM(A, degpol(polrel));
+  gel(x,1) = RgV_to_RgM(A, degpol(polrel));
   gel(x,2) = I;
   return prodid(nf, gel(nfhnf(nf,x),2));
 }
