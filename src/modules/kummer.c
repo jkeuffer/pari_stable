@@ -840,7 +840,7 @@ static GEN
 Stelt(GEN nf, GEN J, GEN polrel)
 {
   long i, l = lg(J);
-  GEN x, A, I, id = matid(nf_get_degree(nf));
+  GEN A, I;
 
   A = cgetg(l, t_VEC);
   I = cgetg(l, t_VEC);
@@ -848,12 +848,10 @@ Stelt(GEN nf, GEN J, GEN polrel)
   {
     GEN v = gel(J,i);
     gel(A,i) = (typ(v) != t_POL)? v: RgX_rem(v, polrel);
-    gel(I,i) = id;
+    gel(I,i) = gen_1;
   }
-  x = cgetg(3,t_VEC);
-  gel(x,1) = RgV_to_RgM(A, degpol(polrel));
-  gel(x,2) = I;
-  return prodid(nf, gel(nfhnf(nf,x),2));
+  A = RgV_to_RgM(A, degpol(polrel));
+  return prodid(nf, gel(nfhnf(nf, mkvec2(A,I)),2));
 }
 
 static GEN
