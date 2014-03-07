@@ -35,6 +35,7 @@ BA 23- library functions Fp_pow/Fp_pow mishandled negative basis
    26- ellordinate(e, exact t_COMPLEX) => either a wrong result (no solution)
        or a solution computed at an incorrect accuracy (DEFAULTPREC) [#1548]
    27- weber(1.0*I,1) => SEGV [#1549]
+   28- primepi(2^32) => oo loop [on 32-bit machine]
 
   Added
 BA  1- library functions FlxX_to_FlxC, FlxXV_to_FlxM, polx_FlxX
