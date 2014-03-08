@@ -27,8 +27,8 @@ static ulong diffptrlen;
  * following two subroutines;  the user entry point is the function
  * initprimes() below.  initprimes1() is the old algorithm, called when
  * maxnum (size) is moderate. Must be called after pari_init_stack() )*/
-static byteptr
-initprimes1(ulong size, long *lenp, long *lastp, byteptr p1)
+static void
+initprimes1(ulong size, long *lenp, ulong *lastp, byteptr p1)
 {
   pari_sp av = avma;
   long k;
@@ -49,7 +49,7 @@ initprimes1(ulong size, long *lenp, long *lastp, byteptr p1)
   *r++ = 0;
   *lenp = r - p1;
   *lastp = ((s - p) << 1) + 1;
-  avma = av; return p1;
+  avma = av;
 }
 
 /*  Timing in ms (Athlon/850; reports 512K of secondary cache; looks
@@ -358,26 +358,24 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong n)
   }
 }
 
-/* Recursive workhorse */
-static byteptr
+/* assume maxnum <= 436273290 < 2^29 */
+static void
 initprimes0(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
 {
   pari_sp av = avma;
   long alloced, psize;
   byteptr q, end, p, end1, plast, curdiff;
-  ulong last, remains, curlow, rootnum, asize, maxpr = maxprime();
-  ulong prime_above = 3;
+  ulong last, remains, curlow, rootnum, asize;
+  ulong prime_above;
   byteptr p_prime_above;
 
   maxnum |= 1; /* make it odd. */
-  if (maxnum <= 1ul<<17) /* Arbitrary; break recursion */
-    return initprimes1(maxnum>>1, lenp, (long*)lastp, p1);
+  /* base case */
+  if (maxnum < 1ul<<17) { initprimes1(maxnum>>1, lenp, lastp, p1); return; }
 
   /* Checked to be enough up to 40e6, attained at 155893 */
-  rootnum = (ulong) sqrt((double)maxnum);
-  rootnum |= 1;
-  /* recursive call (remember that maxnum > maxpr) */
-  (void) initprimes0(maxss(rootnum, maxpr), &psize, &last, p1);
+  rootnum = usqrt(maxnum) | 1;
+  initprimes1(rootnum>>1, &psize, &last, p1);
   end1 = p1 + psize - 1;
   remains = (maxnum - last) >> 1; /* number of odd numbers to check */
 
@@ -400,6 +398,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
      it may point before p..end-1. */
   plast = p - 1;
   p_prime_above = p1 + 2;
+  prime_above = 3;
   while (remains)
   { /* cycle over arenas; performance not crucial */
     unsigned char was_delta;
@@ -428,7 +427,6 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
   *lenp = curdiff - p1;
   *lastp = last;
   if (alloced) pari_free(p); else avma = av;
-  return p1;
 }
 
 ulong
@@ -442,14 +440,13 @@ maxprime_check(ulong c) { if (_maxprime < c) pari_err_MAXPRIME(c); }
 byteptr
 initprimes(ulong maxnum, long *lenp, ulong *lastp)
 {
-  long size;
   byteptr t;
   if (maxnum < 65537)
     maxnum = 65537;
   else if (maxnum > 436273290)
     maxnum = 436273290;
-  size = (long) (1.09 * maxnum/log((double)maxnum)) + 146;
-  t = initprimes0(maxnum, lenp, lastp, (byteptr)pari_malloc(size));
+  t = (byteptr)pari_malloc((size_t) (1.09 * maxnum/log((double)maxnum)) + 146);
+  initprimes0(maxnum, lenp, lastp, t);
   return (byteptr)pari_realloc(t, *lenp);
 }
 
