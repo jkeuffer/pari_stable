@@ -722,15 +722,14 @@ gmodgs(GEN x, long y)
 GEN
 gmodsg(long x, GEN y)
 {
-  long d;
   switch(typ(y))
   {
     case t_INT: return modsi(x,y);
     case t_REAL: return modsr(x,y);
     case t_FRAC: return modsf(x,y);
-    case t_POL: d = degpol(y);
+    case t_POL:
       if (!signe(y)) pari_err_INV("gmodsg",y);
-      return d? gmulsg(x, RgX_get_1(y)): RgX_get_0(y);
+      return degpol(y)? gmulsg(x, RgX_get_1(y)): RgX_get_0(y);
   }
   pari_err_TYPE2("%",stoi(x),y);
   return NULL; /* not reached */
