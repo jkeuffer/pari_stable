@@ -1031,22 +1031,24 @@ uprimepi(ulong a)
   {
     byteptr d;
     prime_table_next_p(a, &d, &p, &n);
+    return p == a? n: n-1;
   }
   else
   {
     long i = prime_table_closest_p(a);
     forprime_t S;
     p = prime_table[i].p;
-    if (p > maxp)
+    if (p > a)
     {
       i--;
       p = prime_table[i].p;
     }
+    /* p = largest prime in table <= a */
     n = prime_table[i].n;
     (void)u_forprime_init(&S, p+1, a);
     for (; p; n++) p = u_forprime_next(&S);
+    return n-1;
   }
-  return p == a? n: n-1;
 }
 
 GEN
@@ -1061,7 +1063,6 @@ primepi(GEN x)
   if (signe(N) <= 0) return gen_0;
   avma = av; l = lgefint(N);
   if (l == 3) return utoi(uprimepi(N[2]));
-  new_chunk(l); /*HACK*/
   i = prime_table_len-1;
   p = prime_table[i].p;
   n = prime_table[i].n;
@@ -1069,7 +1070,7 @@ primepi(GEN x)
   nn = setloop(utoipos(n));
   pp = gen_0;
   for (; pp; incloop(nn)) pp = forprime_next(&S);
-  avma = av; return icopy(nn);
+  return gerepileuptoint(av, subiu(nn,1));
 }
 
 /* pi(x) < x/log x * (1 + 1/log x + 2.51/log^2 x)), x>=355991 [ Dusart ]
