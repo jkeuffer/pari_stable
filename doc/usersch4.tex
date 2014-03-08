@@ -1365,38 +1365,54 @@ The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to the
 coefficients of the polynomial \emph{in ascending order}, with \kbd{z[2]}
 being the constant term and so on.
 
-For an object of type \typ{POL}, \tet{leading_term}, \tet{constant_term},
-\tet{degpol} return a pointer to the leading term (with respect to the main
-variable of course), constant term, and degree of the polynomial (with the
-convention $\deg(0) = -1$). Applied to any other type, the result is
-unspecified. Note that no copy is made on the PARI stack so the returned
-value is not safe for a basic \kbd{gerepile} call. Note that $\kbd{degpol(z)}
-= \kbd{lg(z)} - 3$.
-
-The leading term is not allowed to be an exact rational $0$
-(\emph{unnormalized polynomial}), an exact non-rational $0$ (like
-\kbd{Mod(0,2)}) is possible for constant polynomials, and an inexact $0$
-(like \kbd{0.E-28}) is always possible. (The reason for this is that
-an inexact $0$ may not be actually $0$, and gives information on how much
-cancellation occurred; and an exact non-rational $0$ carries information
-about the base ring for the polynomial.) To ensure this, one uses
-
-\fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
-(with all coefficients correctly set except that \kbd{leading\_term(x)} might
-be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. For
-internal use.
+For a \typ{POL} of non-zero sign, \tet{degpol}, \tet{leading_term},
+\tet{constant_term}, return its degree, and a pointer to the leading,
+resp. constant, coefficient with respect to the main variable. Note that no
+copy is made on the PARI stack so the returned value is not safe for a basic
+\kbd{gerepile} call. Applied to any other type than \typ{POL}, the result is
+unspecified. Those three functions are still defined when the sign is $0$,
+see \secref{se:polynomials}.
 
 \fun{long}{degree}{GEN x} returns the degree of \kbd{x} with respect to its
 main variable even when \kbd{x} is not a polynomial (a rational function for
-instance). By convention, the degree of $0$ is~$-1$.
+instance). By convention, the degree of a zero polynomial is~$-1$.
 
-\misctitle{Important remark} A zero polynomial can be characterized by the
-fact that its sign is~0. However, its length may be greater than 2, meaning
-that all the coefficients of the polynomial are equal to zero, but the
-leading term \kbd{z[lg(z)-1]} is not an exact integer zero. More precisely,
-\kbd{gequal0(x)} is true for all coefficients \kbd{x} of the polynomial,
-and \kbd{isrationalzero(x)} is false for the leading coefficient. The same
-remark applies to \typ{SER}s.
+\misctitle{Important remark}
+The leading coefficient of a \typ{POL} may be equal to zero:
+
+\item it is not allowed to be an exact rational $0$, such as \tet{gen_0};
+
+\item an exact non-rational $0$, like \kbd{Mod(0,2)}, is possible for
+constant polynomials, i.e. of length $3$ and no other coefficient: this
+carries information about the base ring for the polynomial;
+
+\item an inexact $0$, like \kbd{0.E-38} or \kbd{O(3\pow 5)}, is always
+possible. Inexact zeroes do not correspond to an actual $0$, but to a
+very small coefficient according to some metric; we keep them to give
+information on how much cancellation occurred in previous computations.
+
+A polynomial disobeying any of these rules is an invalid \emph{unnormalized}
+object. We advise \emph{not} to use low-level constructions to build a
+\typ{POL} coefficient by coefficient, such as
+\bprog
+  GEN T = cgetg(4, t_POL);
+  T[1] = evalvarn(0);
+  gel(T, 2) = x;
+  gel(T, 3) = y;
+@eprog\noindent But if you do and it is not clear whether the result will be
+normalized, call
+
+\fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
+(with all coefficients correctly set except that \kbd{leading\_term(x)} might
+be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. This
+functions sets \kbd{signe} (to $0$ or $1$) properly.
+
+\misctitle{Caveat} A consequence of the remark above is that zero polynomials
+are characterized by the fact that there sign is~0. It is in general
+incorrect to check whether \kbd{lg(x)} is $2$ or \kbd{degpol(x)} $< 0$,
+although both tests are valid when the coefficient types are under control:
+for instance, when they are guaranteed to be \typ{INT}s or \typ{FRAC}s.
+The same remark applies to \typ{SER}s.
 
 \subsec{Type \typ{SER} (power series)}
 \kbdsidx{t_SER}\sidx{power series}This type also has a second codeword, which
