@@ -428,11 +428,12 @@ $x$ is defined, e.g. if $x\in \Z[a][b]$ return (the variable number for)
 $a$. Return \tet{NO_VARIABLE} if $x$ has no variable or is not defined over a
 polynomial ring.
 
-\fun{long}{degpol}{GEN x} returns the degree of \typ{POL}~\kbd{x},
-\emph{assuming} its leading coefficient is non-zero (an exact $0$ is
-impossible, but an inexact $0$ is allowed). By convention the degree of an
-exact $0$ polynomial is $-1$. If the leading coefficient of \kbd{x} is $0$,
-the result is undefined.
+\fun{long}{degpol}{GEN x} is a simple macro returning \kbd{lg(x) - 3}.
+This is the degree of the \typ{POL}~\kbd{x} with respect to its main
+variable, \emph{if} its leading coefficient is non-zero (a rational $0$ is
+impossible, but an inexact $0$ is allowed, as well as an exact modular $0$,
+e.g. \kbd{Mod(0,2)}). If $x$ has no coefficients (rational $0$ polynomial),
+its length is $2$ and we return the expected $-1$.
 
 \fun{long}{lgpol}{GEN x} is equal to \kbd{degpol(x) + 1}. Used to loop over
 the coefficients of a \typ{POL} in the following situation:
@@ -632,12 +633,14 @@ and otherwise of the \kbd{n}-th component of~\kbd{x}.
 \noindent On the contrary, the following routines return the address of a
 \kbd{GEN} component. No copy is made on the stack:
 
-\fun{GEN}{constant_term}{GEN x} returns the address the constant term of
-\typ{POL}~\kbd{x}. By convention, a $0$ polynomial (whose \kbd{sign} is $0$)
-has \kbd{gen\_0} constant term.
+\fun{GEN}{constant_term}{GEN x} returns the address of the constant
+coefficient of \typ{POL}~\kbd{x}. By convention, a $0$ polynomial (whose
+\kbd{sign} is $0$) has \kbd{gen\_0} constant term.
 
-\fun{GEN}{leading_term}{GEN x} returns the address the leading term of
-\typ{POL}~\kbd{x}. This may be an inexact $0$.
+\fun{GEN}{leading_term}{GEN x} returns the address of the leading coefficient
+of \typ{POL}~\kbd{x}, i.e. the coefficient of largest index stored in the
+array representing $x$. This may be an inexact $0$. By convention, return
+\kbd{gen\_0} if the coefficient array is empty.
 
 \fun{GEN}{gel}{GEN x, long i} returns the address of the
 \kbd{x[i]} entry of~\kbd{x}. (\kbd{el} stands for element.)
@@ -8985,16 +8988,26 @@ the coefficient of the term of degree \kbd{n} in the main variable.
 
 \fun{GEN}{polcoeff_i}{GEN x, long n, long v} internal shallow function. Rewrite
 $x$ as a Laurent polynomial in the variable $v$ and returns its coefficient
-of degree $n$. Allow \typ{POL}, \typ{SER}, \typ{RFRAC} and scalars.
+of degree $n$ (\kbd{gen\_0} if this falls outside the coefficient array).
+Allow \typ{POL}, \typ{SER}, \typ{RFRAC} and scalars.
 
 \fun{long}{degree}{GEN x} returns \kbd{poldegree(x, -1)}, the degree of
-\kbd{x} with respect to its main variable.
+\kbd{x} with respect to its main variable, with the usual meaning if the
+leading coefficient of $x$ is non-zero. If the sign of $x$ is $0$, this
+function always returns $-1$. Otherwise, we return the index of the leading
+coefficient of $x$, i.e. the coefficient of largest index stored in $x$.
+For instance the ``degrees'' of
+\bprog
+  0. E-38 * x^4 + 0.E-19 * x + 1
+  Mod(0,2) * x^0    \\ sign is 0 !
+@eprog\noindent are $4$ and $-1$ respectively.
 
-\fun{long}{degpol}{GEN x} returns the degree of \typ{POL}~\kbd{x},
-\emph{assuming} its leading coefficient is non-zero (an exact $0$ is
-impossible, but an inexact $0$ is allowed). By convention the degree of an
-exact $0$ polynomial is $-1$. If the leading coefficient of \kbd{x} is $0$,
-the result is undefined.
+\fun{long}{degpol}{GEN x} is a simple macro returning \kbd{lg(x) - 3}.
+This is the degree of the \typ{POL}~\kbd{x} with respect to its main
+variable, \emph{if} its leading coefficient is non-zero (a rational $0$ is
+impossible, but an inexact $0$ is allowed, as well as an exact modular $0$,
+e.g. \kbd{Mod(0,2)}). If $x$ has no coefficients (rational $0$ polynomial),
+its length is $2$ and we return the expected $-1$.
 
 \fun{GEN}{characteristic}{GEN x} returns the characteristic of the
 base ring over which the polynomial is defined (as defined by \typ{INTMOD}

@@ -1371,7 +1371,7 @@ resp. constant, coefficient with respect to the main variable. Note that no
 copy is made on the PARI stack so the returned value is not safe for a basic
 \kbd{gerepile} call. Applied to any other type than \typ{POL}, the result is
 unspecified. Those three functions are still defined when the sign is $0$,
-see \secref{se:polynomials}.
+see \secref{se:accessors} and \secref{se:polynomials}.
 
 \fun{long}{degree}{GEN x} returns the degree of \kbd{x} with respect to its
 main variable even when \kbd{x} is not a polynomial (a rational function for
@@ -1408,7 +1408,7 @@ be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. This
 functions sets \kbd{signe} (to $0$ or $1$) properly.
 
 \misctitle{Caveat} A consequence of the remark above is that zero polynomials
-are characterized by the fact that there sign is~0. It is in general
+are characterized by the fact that their sign is~0. It is in general
 incorrect to check whether \kbd{lg(x)} is $2$ or \kbd{degpol(x)} $< 0$,
 although both tests are valid when the coefficient types are under control:
 for instance, when they are guaranteed to be \typ{INT}s or \typ{FRAC}s.
