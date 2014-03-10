@@ -409,4 +409,5 @@ y^4
 Mod(0, 3)
 Mod(1, 3)
 Mod(0, 2)
-Total time spent: 6780
+[-x + 1, 1, 1]
+Total time spent: 6844

@@ -73,3 +73,5 @@ poldisc(x^3 + Mod(2,3)*x^2)
 poldisc(x^3 + Mod(2,3)*x^2+1)
 
 norm(Mod(Pol(Mod(0,2)), 3*x))
+
+polresultantext(x+1, x^2)

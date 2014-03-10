@@ -2558,7 +2558,7 @@ polresultantext0(GEN x, GEN y, long v)
     V = gsubst(gsubst(V, 0, pol_x(v)), MAXVARN, pol_x(0));
     R = gsubst(R,MAXVARN,pol_x(0));
   }
-  else
+  else if (v >= 0)
   {
     if (typ(U) == t_POL && varn(U) != v) U = poleval(U, pol_x(v));
     if (typ(V) == t_POL && varn(V) != v) V = poleval(V, pol_x(v));
