@@ -295,14 +295,33 @@ decimal digits of your integer. No decimal point!
 
 \subsec{Real numbers (\typ{REAL})}%
 \sidx{real number}\kbdsidx{t_REAL}
-After an (optional) leading \kbd{+} or \kbd{-},
-type a number with a decimal point. Leading zeroes may be omitted, up to the
-decimal point, but trailing zeroes are important: your \typ{REAL}
-is assigned an internal precision, which is the supremum of the input
-precision and the default precision, expressed in decimal digits. For
-example, if the default precision is 28 digits, typing \kbd{2.} yields a
-precision of 28 digits, but \kbd{2.0\dots0} with 45 zeros gives a number with
-internal precision at least 45, although less may be printed.
+
+Real numbers are represented (approximately) in a floating point system,
+internally in base 2, but converted to base 10 for input / output purposes.
+A \typ{REAL} object has a given \emph{accuracy} (or \emph{precision}) $\ell
+\geq 0$; it comprises
+
+\item a sign $s$: $+1$, $-1$ or $0$;
+
+\item a mantissa $m$: a multiprecision integer, $0\leq m < 10^\ell$;
+
+\item an exponent $e$: a small integer in $[-E,E]$, where $E \approx 2^B
+  \log_{10} 2$, and $B = 32$ on a 32-bit machine and 64 otherwise.
+
+This data may represent any real number $x$ such that
+$$|x - s m 10^e| < 10^{e-\ell}.$$
+We consider that a \typ{REAL} with sign $s = 0$ has accuracy $\ell = 0$, so
+that its mantissa is useless, but it still has an exponent $e$ and acts like
+a machine epsilon for all accuracies $< e$.
+
+After an (optional) leading \kbd{+} or \kbd{-}, type a number with a decimal
+point. Leading zeroes may be omitted, up to the decimal point, but trailing
+zeroes are important: your \typ{REAL} is assigned an internal precision,
+which is the supremum of the input precision, one more than the number of
+decimal digits input, and the default precision. For example, if the default
+precision is 28 digits, typing \kbd{2.} yields a precision of 28 digits, but
+\kbd{2.0\dots0} with 45 zeros gives a number with internal precision at least
+45, although less may be printed.
 
 You can also use scientific notation with the letter \kbd{E} or
 \kbd{e}. As usual, \kbd{e$n$} is interpreted as $\times 10^n$ for all
