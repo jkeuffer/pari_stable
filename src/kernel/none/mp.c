@@ -92,7 +92,7 @@ incpos(GEN a)
 static GEN
 incneg(GEN a)
 {
-  long l = lgefint(a)-1;
+  long i, l = lgefint(a)-1;
   if (a[l]--)
   {
     if (l == 2 && !a[2])
@@ -103,11 +103,14 @@ incneg(GEN a)
     }
     return a;
   }
-  for (l--; l>1; l--)
-    if (a[l]--) break;
-  l++; a++; /* save one cell */
-  a[0] = evaltyp(t_INT) | _evallg(l);
-  a[1] = evalsigne(-1) | evallgefint(l);
+  for (i = l-1;; i--) /* finishes since a[2] != 0 */
+    if (a[i]--) break;
+  if (!a[2])
+  {
+    a++; /* save one cell */
+    a[0] = evaltyp(t_INT) | _evallg(l);
+    a[1] = evalsigne(-1) | evallgefint(l);
+  }
   return a;
 }
 

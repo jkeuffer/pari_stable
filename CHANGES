@@ -40,6 +40,7 @@ BA 23- library functions Fp_pow/Fp_pow mishandled negative basis
 JD 30- [libpari] initprimetable(2^20): infinite recursion
    31- very inefficient div_rfrac_pol() [#1537]
    32- polresultantext(x+1,x^2) -> [-# + 1, 1, 1]
+   33- for(i=a, b, ) where a < 0, b < 0 : go through wrong indices if #a != #b
 
   Added
 BA  1- library functions FlxX_to_FlxC, FlxXV_to_FlxM, polx_FlxX

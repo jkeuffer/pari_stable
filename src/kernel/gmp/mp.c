@@ -168,21 +168,23 @@ incpos(GEN a)
 static GEN
 incneg(GEN a)
 {
-  long i, l = lgefint(a);
+  long i, l = lgefint(a)-1;
   if (a[2]--)
   {
-    if (l == 3 && !a[2])
+    if (!a[l]) /* implies l = 2 */
     {
       a[0] = evaltyp(t_INT) | _evallg(2);
       a[1] = evalsigne(0) | evallgefint(2);
     }
     return a;
   }
-  for (i=3; i<l; i++)
+  for (i=3; i<=l; i++)
     if (a[i]--) break;
-  l -= i - 2;
-  a[0] = evaltyp(t_INT) | _evallg(l);
-  a[1] = evalsigne(-1) | evallgefint(l);
+  if (!a[l])
+  {
+    a[0] = evaltyp(t_INT) | _evallg(l);
+    a[1] = evalsigne(-1) | evallgefint(l);
+  }
   return a;
 }
 
