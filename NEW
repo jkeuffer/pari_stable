@@ -3,6 +3,278 @@ This file highlights some of the novelties in PARI/GP 2.x compared to 1.39.15
 Incompatible changes are described in COMPAT. See TODO for possible future
 improvements.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.7 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+[Configure]
+  - Configure --mt=pthread or --mt=mpi: GP now supports POSIX threads and MPI.
+    See doc/parallel.dvi for an introduction, and have a look at the new
+    parxxx GP functions.
+
+  - Configure -gcov: support for gcov/lcov. As a result, the regression suite
+    (make test-all) has been much expanded and lots of obscure bugs fixed. See
+        http://pari.math.u-bordeaux1.fr/lcov-report/
+    for current coverage test reports.
+
+  - Configure now generates a file 'config.log' to help diagnose problems
+    (contains all messages from compilers)
+
+[The GP language]
+
+  - Ranges and slices: [a..b], x[a..b], x[^a]
+    ? v = [2..8]
+    %1 = [2, 3, 4, 5, 6, 7, 8]
+    ? v[2..4]
+    %2 = [3, 4, 5]
+    ? v[^2]     \\ remove 2nd element
+    %3 = [2, 4, 5, 6, 7, 8]
+    ? M = matid(3); M[1..2, ^2]  \\ first two rows, remove 2nd col
+    %4 =
+    [1 0]
+
+    [0 0]
+
+  - Set notations:
+    ? [ p | p <- primes(10), isprime(p+2) ]
+    %1 = [3, 5, 11, 17, 29]
+
+  - Multiple assignments: [a,b,c] = V, for a = V[1], b = V[2], c = V[3]
+    ? [D,U,V] = matsnf(A, 1)    \\ returns SNF and transformation matrices
+
+  - Error trapping: iferr() + a new data type 't_ERROR' to represent error
+    contexts. See ??iferr
+
+     \\ Compute [B]P on a "curve over Z/NZ". If an exception occurs,
+     \\ we found a zero divisor in Z/NZ, thereby factoring N.
+     ECM(N, B = 1000!, nb = 100)=
+     {
+       for(a = 1, nb,
+         iferr(ellmul(ellinit([a,1], N), [0,1], B),
+           E, return(gcd(lift(component(E,2)),N)),
+           errname(E) == "e_INV"));
+     }
+     ? ECM(2^101-1)
+     %1 = 7432339208719
+
+  - Timeouts: alarm(delay, expr) spends 'delay' seconds trying to evaluate
+    'expr', then aborts returning a t_ERROR object.
+
+  - Multi-if: to simplify successive 'else' clauses
+      ? if (a == 1,     print("1"),          \
+            a < 0,      print("negative"),   \
+            isprime(a), print("prime"),      \
+            print("generic"))
+
+  - new function cmp() to "compare" arbitrary objects (transitive order
+    relation, returns 0 iff x === y). Useful for sets.
+
+  - new function getenv()
+
+[The GP calculator]
+
+  - parallel GP support: parapply, pareval, parfor, parforprime, parselect,
+    parsum, parvector. E.g.
+      ? parapply(factor, [2^256 + 1, 2^193 - 1])
+    will factor these two integers in parallel.
+
+  - forprime(p = a, b, ...) now iterates over arbitrary ranges of primes,
+    independently of 'primelimit'. Parameter 'b' can be omitted (no upper
+    limit). More generally, primelimit is now deprecated: libpari functions
+    can quickly produce their own primes without relying on (enough)
+    precomputed primes.
+
+  - new iterators:  forcomposite(), forpart() forqfvec(), to loop
+    over composite integers, (possibly restricted) partitions and integer
+    points in ellipsoids.
+
+  - GP debugger, new functions expanding the 'break loop' mechanism: dbg_up(),
+    dbg_down(), dbg_x(), breakpoint()
+
+  - liftall(), liftint(), liftpol() give more flexibility than lift() in
+    complicated situations
+
+  - characteristic(x) returns the "characteristic" of the base ring over which
+    x is defined.
+
+  - ffgen(p^f), as an alias for ffgen(ffinit(p,f))
+
+  - vecsum(v), as an alias for sum(i=1,#v,v[i])
+
+  - variable() no longer raise exceptions, but returns 0 if the object
+    has no main variable.
+
+  - getabstime() returns the CPU time elapsed since gp startup, providing a
+    reentrant version of gettime()
+
+  - %#n returns the time it took to compute history result %n
+
+  - new default 'linewrap'
+
+  - arbitrary GP 'defaults' can now be set via the command-line:
+      gp -D default=value
+    gp --primelimit lim (gp -p lim) and gp --stacksize=lim are deprecated.
+    Use the generic form  (-D parisize=lim or -D primelimit=lim)
+
+[Multiprecision Kernel & Transcendental functions]
+
+  - binary splitting: Catalan's constant, Pi, log(2) (to be expanded)
+
+  - logint(x,b) for floor(log(x) / log(b)), avoiding rounding problems
+
+  - sqrtnint(x,b) for floor(x^(1/b))
+
+  - expm1(x) for exp(x) - 1, but also accurate for x ~ 0
+
+[Polynomial Arithmetic & Power series]
+
+  - Mulders/Hanrot-Zimmerman short products for power series
+
+  - Allow t_SER arguments for gamma, lngamma, and psi around arbitrary
+    complex numbers (was either forbidden or limited to z = 0 or 1)
+
+  - seralgdep: to find linear relations with polynomial coefficients
+    ? s = 1+1/2*y+3/8*y^2-3/16*y^3+3/128*y^4+15/256*y^5-57/1024*y^6 + O(y^7);
+    ? seralgdep(s,2,2) \\ relation of degree <= 2, degree(coeffs) <= 2
+    %2 = -x^2 + (y^2 + y + 1)
+
+  - polgraeffe(f): returns g such that g(x^2) = f(x)f(-x)
+
+  - poliscyclo(), poliscycloprod(), polcyclofactors(): cyclotomic factors
+    of rational polynomials
+
+[Linear Algebra]
+  - port of the program ISOM by Bernd Souvignier for computation of
+    automorphisms and isomorphisms of lattices.
+    New GP functions: qfauto, qfisom, qfisominit, qfautoexport
+
+  - linear algebra routines now try to convert generic GP constructions
+    involving t_INTMODs or t_FFELTs to appropriate (faster, more memory
+    efficient) representations, then call routines in the libpari modular
+    kernel (FpM, Flm, F2m, FqM, FlxqM, F2xqM).
+
+  - add optional flag to mateigen to also return the eigenvalues
+
+  - charpoly() now selects an appropriate algorithm by itself, depending
+    on the input. Using a flag should no longer be necessary and is
+    deprecated.
+
+  - mathnf for matrices over K[X]
+
+  - mathnfmodid(x,D), where D = [d1,...,dn] compute the HNF of
+    concat(x,matdiagonal(D)); in a more efficient way
+
+  - matqr() to compute the QR-decomposition of a real square matrix;
+    mathouseholder() to apply a sequence of Householder transforms
+
+  - internal support for sparse matrices and Wiedemann algorithm; currently
+    only used by the discrete log algorithms.
+
+  - matinverseimage(A, t_MAT B) would treat individual columns B[,i]
+    independently and successively. Now use a single Gauss reduction.
+
+  - normlp(): true L^p norm [ N.B. the old norml2() is still available,
+    and returns the *square* of the L^2 norm ].
+
+  - clean generalizations of current norml2: qfnorm(), qfbil()
+
+[Elementary Number Theory]
+
+  - arithmetic functions now accept factorization matrices as input, you can
+    use any of f(N), f(factor(N)) or f([N, factor(N)]).
+
+  - arithmetic functions no longer apply componentwise to vector / matrix
+    arguments [ to allow passing factorization matrices ]: use apply()
+
+  - new convenience functions: hamming(), ispowerful(), digits() /
+    sumdigits(), ispolygonal(), istotient(), isprimepower()
+
+  - randomprime(), random([a,b])
+
+  - Bernoulli polynomials: bernpol() and sumformal()
+    ? sumformal(n^2)     \\ F such that F(b) = \sum_{n <= b} n^2
+    %1 = 1/3*n^3 + 1/2*n^2 + 1/6*n
+
+  - sumdivmult: to sum multiplicative expressions
+
+  - sieve algorithms for znlog() and fflog(), computing discrete logs in F_q^*
+
+[Elliptic curves & Arithmetic geometry]
+
+  - new dynamic implementation of the 'ell' data structure: ellinit is now
+    used to record the coefficients of the curve and the domain over which it
+    is defined. Further data is added to the structure on demand, if and when
+    it is needed, e.g. cardinality and group structure. See ??ellinit.
+
+  - elliptic curves functions no longer assume that a curve over Q is given by
+    a minimal model. A non-miminal model used to silently produce wrong
+    answers; no longer!
+
+  - allow ellinit(E / Qp) for arbitrary p (also p = 2) and reduction type
+    (no longer restricted to Tate curves)
+
+  - allow ellinit(E / Fq) for non-prime finite fields, incl. point counting
+    (SEA, Harley)
+
+  - allow ellinit(E / C)
+
+  - new function ellheegner() to find a non-torsion rational point on
+    E / Q of rank 1.
+
+  - new implementation of ellweilpairing / elltatepairing
+
+  - ellsearch now accepts both syntaxes allowed by ellconvertname(),
+    e.g. "11a3" / "11a" and [11,0,3] / [11,0]
+
+  - extend ellinit inputs: ellinit([a4, a6]). On singular curve, return []
+    instead of raising an error. New function ellfromj().
+
+  - genus2red: an implementation of Liu's algorithm to determine the
+     reduction of a genus 2 curve (at p > 2). Based on genus2reduction-0.3,
+       http://www.math.u-bordeaux1.fr/~liu/G2R/ (Cohen & Liu, 1994)
+    mostly rewritten from scratch, and fixing known problems in the original
+    implementation (so-called bug27, bug28). The regression bench contains a
+    check of at least one instance of each of Namikawa-Ueno's types + all
+    cases on which the original genus2reduction was known to fail.
+    CAVEAT: the interface will probably change & reduction at p = 2 not handled
+
+[Number Fields]
+
+  - maximal orders (when the discriminant is hard to factor): allow to specify
+    a list of primes at which the order nf.zk must be maximal. This [T, listP]
+    format supersedes the old addprimes() hack as well as rigid optional
+    flags for nfbasis, nfdisc, polredabs. (And no longer depends on the
+    global 'primelimit'...) See ??nfinit
+    ? T = polcompositum(x^5 - 101, polcyclo(7))[1];
+    ? nf = nfinit( [T, 10^3] );
+    ? nfcertify(nf)
+    %3 = []
+    A priori, nf.zk defines an order which is known to be maximal at all
+    p <= 10^3. The final certification step proves it is in fact
+    globally maximal.
+
+  - polredbest / rnfpolredbest: "best-effort" variants of polredabs /
+    rnfpolredabs. Not canonical but often smaller, and run in poly-time !
+
+  - idealprincipalunits: structure of the multiplicative group
+    (1 + pr) / (1 + pr^k), for a prime ideal pr
+    [ special case of idealstar, faster ]
+
+[COMPATIBILITY WARNING]
+
+  - lift(x,'v) / centerlift(x,'v) now only lift t_POLMODs in variable v,
+    no longer (most) t_INTMOD / t_PADICs met along the way
+
+  - rnf.pol (absolute defining polynomial / Q) has been renamed rnf.polabs.
+    rnf.pol is now the relative polynomial, defining the relative extension
+    over the base.
+
+  - as a side effect of the new %#n construction, all GP results are now stored
+    as history entries,  including the "void" object returned by functions
+    such as print() or for().
+
+  - renamed bezout() -> gcdext()
+
+  - renamed ellpow() -> ellmul()
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.5 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [Libpari Build & Configuration]

@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version ????? (released ??/??/2014):
+Done for version 2.7.0 (released 21/03/2014):
 
   Fixed
     1- e = ellinit(E over Qp); ellztopoint(e, 3) --> SEGV

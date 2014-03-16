@@ -2,10 +2,10 @@
 VersionMajor='2'
 
 # minor version number
-VersionMinor='6'
+VersionMinor='7'
 
 # Patch level
-patch='2'
+patch='0'
 
 # Version code
 version_code=`expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
