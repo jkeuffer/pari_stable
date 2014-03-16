@@ -13,9 +13,9 @@ rgb(mag) =
 default(graphcolormap, concat(["white","black","blue"], vector(25,i,rgb(10*i))));
 default(graphcolors, vector(25,i,i+2));
 
-\\ plot Taylor polynomials of f (sin by default),
+\\ plot Taylor polynomials of f,
 \\ of index  first + i*step <= ordlim, for x in [xmin,xmax].
-plot_taylor(f = x->sin(x), xmin=-5, xmax=5, ordlim=16, first=1, step=1) =
+plot_taylor(f, xmin=-5, xmax=5, ordlim=16, first=1, step=1) =
 {
   my(T,s,t,w,h,dw,dh,cw,ch,gh, extrasize = 0.6);
   my(Taylor_array);
@@ -52,7 +52,7 @@ plot_taylor(f = x->sin(x), xmin=-5, xmax=5, ordlim=16, first=1, step=1) =
 }
 
 \p9
-plot_taylor()
-plot_taylor(x->exp(x),-3,3)
+plot_taylor(sin)
+plot_taylor(exp,-3,3)
 plot_taylor(x->besselk(2,x), 1,5)
 plot_taylor(x->1/(1+x^2), -1.2,1.2)
