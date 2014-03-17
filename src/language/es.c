@@ -1102,7 +1102,7 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
             str_putc(S, '[');
             for (j=1; j<h; j++)
             {
-              fmtreal(S, gcoeff(gvalue,i,j), space, signvalue, FORMAT, maxwidth,
+              fmtreal(S, gcoeff(gvalue,j,i), space, signvalue, FORMAT, maxwidth,
                       ljust,len,zpad);
               if (j<h-1) str_putc(S, ' ');
             }
