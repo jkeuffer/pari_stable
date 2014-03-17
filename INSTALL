@@ -13,5 +13,8 @@ P.S: Useful optional packages can be downloaded separately
 
   http://pari.math.u-bordeaux1.fr/packages.html
 
-in particular elldata (Cremona tables), galdata (polgalois in degrees 8
-through 11), seadata (allow ellcard(E) for large finite fields)
+in particular
+
+  elldata: Cremona's Elliptic Curve Data, needed by ellsearch and ellidentify; 
+  galdata: needed by polgalois to compute Galois group in degrees 8 through 11; 
+  seadata: allow ellcard(E) for large finite fields.

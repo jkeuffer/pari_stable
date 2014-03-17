@@ -5,22 +5,23 @@ PARI/GP Number Theory-oriented Computer Algebra System
 
 ==========================================================================
 
-To get started, run TeX on the file doc/INSTALL.tex and have a look at the dvi
-(extracted verbatim from Appendix A of the user manual). If you are in a
-hurry, look at INSTALL (ascii file). But a lot of information is missing
-there.
+To get started, run 
 
-Typing 'make doc' typesets separate user's manual for GP and libpari,
-a tutorial and reference card in directory doc.
+  tex doc/INSTALL.tex 
+
+and have a look at the file doc/INЅTALL.dvi, extracted verbatim from Appendix A
+of the User Manual. If you are in a hurry, look at INSTALL (ascii file). But
+a lot of information is missing there.
+
+Once 'Configure' has been run, 'make doc' typesets separate user's manual for
+GP and libpari, a tutorial and reference card in directory doc.
 
 See the files NEW and COMPAT for new features and incompatible changes
-respectively between 2.7 and older versions. See CHANGES for a terse
+respectively between 2.7 and older versions. See CHANGES-* for a terse
 description of subsequent patches.
 
-For the adventurous:
-* If you want to check up-to-date, but possibly unstable, development
-versions of PARI/GP or do development work yourself, see the file
-README-git.
+For the adventurous: to check out bleeding-edge development versions of
+PARI/GP, see the file README-git.
 
 Afterwards, you're on your own.
 
