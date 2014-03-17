@@ -1,4 +1,4 @@
-This is PARI/GP, version 2.6.x (*).
+This is PARI/GP, version 2.7.x (*).
 
 PARI/GP Number Theory-oriented Computer Algebra System
         Copyright (C) 2000-2014 The PARI Group, Bordeaux.
@@ -14,7 +14,7 @@ Typing 'make doc' typesets separate user's manual for GP and libpari,
 a tutorial and reference card in directory doc.
 
 See the files NEW and COMPAT for new features and incompatible changes
-respectively between 2.6 and older versions. See CHANGES for a terse
+respectively between 2.7 and older versions. See CHANGES for a terse
 description of subsequent patches.
 
 For the adventurous:
