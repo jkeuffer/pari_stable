@@ -1260,7 +1260,8 @@ vecexpr0(GEN vec, GEN code, GEN pred)
 GEN
 vecexpr1(GEN vec, GEN code, GEN pred)
 {
-  return shallowconcat1(vecexpr0(vec, code, pred));
+  GEN v = vecexpr0(vec, code, pred);
+  return lg(v) == 1? v: shallowconcat1(v);
 }
 
 GEN

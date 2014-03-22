@@ -612,8 +612,8 @@ GEN
 veccatapply(void *E, GEN (*f)(void* E, GEN x), GEN x)
 {
   pari_sp av = avma;
-  GEN z = shallowconcat1(vecapply(E, f, x));
-  return gerepilecopy(av, z);
+  GEN v = vecapply(E, f, x);
+  return lg(v) == 1? v: gerepilecopy(av, shallowconcat1(v));
 }
 
 static GEN
@@ -697,8 +697,8 @@ veccatselapply(void *Epred, long (*pred)(void* E, GEN x), void *Efun,
                             GEN (*fun)(void* E, GEN x), GEN A)
 {
   pari_sp av = avma;
-  GEN z = shallowconcat1(vecselapply(Epred, pred, Efun, fun, A));
-  return gerepilecopy(av, z);
+  GEN v = vecselapply(Epred, pred, Efun, fun, A);
+  return lg(v) == 1? v: gerepilecopy(av, shallowconcat1(v));
 }
 
 GEN
