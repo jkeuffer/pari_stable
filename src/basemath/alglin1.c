@@ -2482,7 +2482,7 @@ deplin_aux(GEN x0)
   if (k > nc) { avma = av; return cgetg(1,t_COL); }
   if (k == 1) { avma = av; return scalarcol_shallow(gen_1,nc); }
   y = cgetg(nc+1,t_COL);
-  gel(y,1) = gel(ck, l[1]);
+  gel(y,1) = gcopy(gel(ck, l[1]));
   for (D=gel(d,1),j=2; j<k; j++)
   {
     gel(y,j) = gmul(gel(ck, l[j]), D);
