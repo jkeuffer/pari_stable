@@ -1061,7 +1061,7 @@ Q_pvalrem(GEN x, GEN p, GEN *y)
   b = gel(x,2);
   v = Z_pvalrem(b, p, &b);
   if (v) { *y = isint1(b)? a: mkfrac(a, b); return -v; }
-  v = Z_pvalrem(b, p, &a);
+  v = Z_pvalrem(a, p, &a);
   *y = mkfrac(a, b); return v;
 }
 
