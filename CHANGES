@@ -1,0 +1,8 @@
+# $Id$
+Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
+
+Done for version 2.7.1 (released ??/??/2014):
+
+  Fixed
+    1- make install fails on OS/X: ln -s libpari.dylib libpari.dylib fails
+

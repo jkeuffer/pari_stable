@@ -495,7 +495,8 @@ install-lib-dyn-base:
 	$install_implib
 
 install-lib-dyn-link: install-lib-dyn-base
-	\$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO);
+	-if test "\$(LIBPARI_DYN)" != "\$(LIBDIR)/\$(LIBPARI_SO)"; then \
+          \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO); fi
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME); fi
 install-lib-dyn: \$(LIBPARI_DYN) install-lib-dyn-link
