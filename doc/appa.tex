@@ -17,9 +17,10 @@ to fetch \kbd{gcc} at the address
 \kbd{http://www.gnu.org/order/ftp.html}
 
 \noindent (On Mac OS X, this is also provided in the \kbd{Xcode} tool
-suite.) You can certainly compile PARI with a different compiler, but
-the PARI kernel takes advantage of optimizations provided by \kbd{gcc}.
-This results in at least 20\% speedup on most architectures.
+suite; or the lightweight ``Command-line tools for \kbd{Xcode}''.) You can
+certainly compile PARI with a different compiler, but the PARI kernel takes
+advantage of optimizations provided by \kbd{gcc}. This results in at least
+20\% speedup on most architectures.
 
 \misctitle{Optional libraries and programs} The following programs and libraries are useful
 in conjunction with \kbd{gp}, but not mandatory. In any case, get them before
@@ -379,9 +380,10 @@ have to click on the mouse button after seeing each image. There will be
 eight of them, probably shown twice (try to resize at least one of them as a
 further test).
 
-The \kbd{make bench} and \kbd{make test-compat} runs produce a Postscript
-file \kbd{pari.ps} in \kbd{O$xxx$} which you can send to a Postscript
-printer. The output should bear some similarity to the screen images.
+The \kbd{make bench}, \kbd{make test-compat} and \kbd{make test-ploth} runs
+all produce a Postscript file \kbd{pari.ps} in \kbd{O$xxx$} which you can
+send to a Postscript printer. The output should bear some similarity to the
+screen images.
 
 \subsubsec{Heavy-duty testing} [{\sl Optional\/}]
 There are a few extra tests which should be useful only for developers.
@@ -399,6 +401,14 @@ to be available. If you want to test such an extra package \emph{before}
   env GP_DATA_DIR=$PWD/data make test-all
 @eprog\noindent from the PARI toplevel directory, otherwise the test will
 fail.
+
+\kbd{make test-io} tests writing to and reading from  files. It requires
+a working \kbd{system()} command (fails on Windows + MingW).
+
+\kbd{make test-time} tests absolute and relative timers. This test has a
+tendency to fail when the machine is heavily loaded or if the granularity
+of the chosen system timer is bigger than 2ms. Try it a few times before
+reporting a problem.
 
 \section{Installation} When everything looks fine, type
 
@@ -592,7 +602,7 @@ following form (BibTeX format):
 @@manual{PARI2,
     organization = "{The PARI~Group}",
     title        = "{PARI/GP, Version @vers}",
-    year         = 2012,
+    year         = 2014,
     address      = "Bordeaux",
     note         = "available from {\tt http://pari.math.u-bordeaux.fr/}"
 }
