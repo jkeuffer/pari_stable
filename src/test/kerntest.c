@@ -1,12 +1,15 @@
 #include "pari.h"
 
 GEN   gen_0, gen_1, gen_m1, gen_2, gen_m2;
-pari_sp top, bot, avma;
-size_t memused = 0;
+THREAD pari_sp top, bot, avma;
+THREAD size_t memused = 0;
 ulong  DEBUGLEVEL,DEBUGMEM = 0;
 const double LOG10_2 = 0.;
 const long lontyp[] = {0};
-VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
+THREAD VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
+
+void mt_sigint_block(void) { }
+void mt_sigint_unblock(void) { }
 
 void specinit()
 {
