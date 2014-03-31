@@ -940,6 +940,7 @@ best_lift(GEN N, GEN Q, GEN NQ, GEN f)
 static GEN
 lift_points(GEN N, GEN listQ, GEN f, GEN *pt, GEN *pQ)
 {
+  pari_sp av = avma;
   GEN yf = gen_0, tf = NULL, Qf = NULL;
   long k, l = lg(listQ);
   for (k = 1; k < l; ++k)
@@ -948,6 +949,7 @@ lift_points(GEN N, GEN listQ, GEN f, GEN *pt, GEN *pQ)
     GEN t = best_lift(N, Q, NQ, f), y = qimag2(t);
     if (gcmp(y, yf) > 0) { yf = y; Qf = Q; tf = t; }
   }
+  gerepileall(av, 3, &tf, &Qf, &yf);
   *pt = tf; *pQ = Qf; return yf;
 }
 
