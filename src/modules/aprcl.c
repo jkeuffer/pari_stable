@@ -662,7 +662,6 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
   av = avma; m = divis(R->N, pk);
   for (e=1; e<=ltab && signe(m); e++)
   {
-//    long s = Z_lvalrem(m, 2, &m);
     long s = vali(m); m = shifti(m,-s);
     tabt[e] = e==1? s: s + R->k;
     taba[e] = signe(m)? ((mod2BIL(m) & R->mask)+1)>>1: 0;
