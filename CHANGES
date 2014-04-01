@@ -11,3 +11,4 @@ Done for version 2.7.1 (released ??/??/2014):
 BA  4- test-kernel did not work when using --mt=pthread                    [F4]
 BA  5- ellheegner was using too much memory in some case                   [F5]
 BA  6- ellap can overflow on 32-bit machine [#1558] (minimal fix)          [F6]
+    7- nfhilbert(K,x,y, P above 2) could give wrong results [#1561]        [F7]

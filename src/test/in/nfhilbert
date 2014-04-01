@@ -49,3 +49,6 @@ print("p = 5:");
 for (i=1,#L, print(i, ": ", iferr(hilbert(L[i],L[i], 5), E, E)))
 \\#1251
 hilbert(-1,-1,0)
+\\#1261
+K=nfinit(y^2+5); P=idealprimedec(K,2)[1];
+nfhilbert(K,2*y,2,P)

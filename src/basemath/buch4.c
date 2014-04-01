@@ -173,16 +173,8 @@ check2(GEN nf, GEN x, GEN zinit)
 static long
 psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
 {
-  long v;
   pari_sp av = avma;
-
-  x = nf_to_scalar_or_basis(nf, x);
-  /* x /= pi^v, pi a pr-uniformizer. v >= 0 */
-  if (typ(x) == t_INT) {
-    if (!signe(x)) return 1;
-    v = Z_lvalrem(x, 2, &x) * pr_get_e(pr);
-  } else
-    v = ZC_nfvalrem(nf, x, pr, &x);
+  long v = nfvalrem(nf, x, pr, &x);
   if (v&1) return 0;
   /* now (x,pr) = 1 */
   v = check2(nf,x,zinit); avma = av; return v;
