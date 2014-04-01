@@ -6,4 +6,5 @@ Done for version 2.7.1 (released ??/??/2014):
   Fixed
     1- make install fails on OS/X: ln -s libpari.dylib libpari.dylib fails
     2- Q_pvalrem(t_FRAC) => wrong result
+    3- [] == 0 but []~ != 0  (now []~ == 0 as well) [#1560]
 

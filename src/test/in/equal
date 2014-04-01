@@ -21,3 +21,4 @@ quadgen(5)==quadgen(13)
 ["ab"==="ac", "ab"==="ab"]
 L=List([1,2]);
 [L===List([]), L===List([2,1]), L===List([1]), L===L]
+[[]==0, []~==0]

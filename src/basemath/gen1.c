@@ -786,7 +786,6 @@ add_rfrac_scal(GEN y, GEN x)
 static GEN
 add_scal(GEN y, GEN x, long ty)
 {
-  long tx;
   switch(ty)
   {
     case t_POL: return RgX_Rg_add(y, x);
@@ -794,8 +793,7 @@ add_scal(GEN y, GEN x, long ty)
     case t_RFRAC: return add_rfrac_scal(y, x);
     case t_COL: return RgC_Rg_add(y, x);
     case t_VEC:
-      tx = typ(x);
-      if (!is_matvec_t(tx) && isrationalzero(x)) return gcopy(y);
+      if (isintzero(x)) return gcopy(y);
       break;
   }
   pari_err_TYPE2("+",x,y);
