@@ -4691,7 +4691,7 @@ irreducible factors of $f$ are of degree at most $r$, $0$ otherwise.
 
 \fun{long}{Flx_nbfact}{GEN z, ulong p}, as \kbd{FpX\_nbfact}.
 
-\fun{GEN}{FlX_degfact}{GEN f, ulong p}, as \kbd{FpX\_degfact}.
+\fun{GEN}{Flx_degfact}{GEN f, ulong p}, as \kbd{FpX\_degfact}.
 
 \fun{GEN}{Flx_nbfact_by_degree}{GEN z, long *nb, ulong p} Assume
 that the \kbd{Flx} $z$ is squarefree mod the prime $p$. Returns a
@@ -7419,7 +7419,8 @@ polynomial of \kbd{Mod(x, T)}, in variable $v$.
 \fun{GEN}{RgX_RgXQ_eval}{GEN f, GEN x, GEN T} returns $\kbd{f}(\kbd{x})$ modulo
 $T$.
 
-\fun{GEN}{RgX_RgXQV_eval}{GEN f, GEN V} as \kbd{RgX\_RgXQ\_eval(f, x, T)},
+\fun{GEN}{RgX_RgXQV_eval}{GEN f, GEN V, GEN T} as
+\kbd{RgX\_RgXQ\_eval(f, x, T)},
 assuming $V$ was output by \kbd{RgXQ\_powers(x, n, T)} for some $n\geq 1$.
 
 \fun{GEN}{RgX_translate}{GEN P, GEN c} assume $c$ is a scalar or
