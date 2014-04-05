@@ -5,7 +5,7 @@ Prototype: Gp
 Help: polroots(x): complex roots of the polynomial x using
  Schonhage's method, as modified by Gourdon.
 Doc: complex roots of the polynomial
- \var{pol}, given as a column vector where each root is repeated according to
+ \var{x}, given as a column vector where each root is repeated according to
  its multiplicity. The precision is given as for transcendental functions: in
  GP it is kept in the variable \kbd{realprecision} and is transparent to the
  user, but it must be explicitly given as a second argument in library mode.
