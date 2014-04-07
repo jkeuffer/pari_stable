@@ -264,3 +264,7 @@ E=ellinit([0,0,0,Mod(1,1009),0]);
 ellwp(E)
 ellzeta(E)
 ellsigma(E)
+
+\\#1558
+ellap(ellinit([-1137195,489565862]),2038074751)
+ellap(ellinit([582304190,64196421]),2147438927)

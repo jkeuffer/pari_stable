@@ -1167,7 +1167,7 @@ Fp_ellcard(GEN a4, GEN a6, GEN p)
   { GEN a = Fp_ellcard_CM(a4,a6,p); if (a) return a; }
   if (lp >= 56)
   { GEN a = Fp_ellcard_SEA(a4, a6, p, 0); if (a) return a; }
-  if (lp <= BITS_IN_LONG-2)
+  if (lp <= BITS_IN_LONG-3)
     return utoi(Fl_ellcard_Shanks(umodiu(a4,pp), umodiu(a6,pp), pp));
   if (lp >= 90) pari_err_PACKAGE("seadata");
   return Fp_ellcard_Shanks(a4, a6, p);

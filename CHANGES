@@ -10,3 +10,4 @@ Done for version 2.7.1 (released ??/??/2014):
     3- [] == 0 but []~ != 0  (now []~ == 0 as well) [#1560]                [F3]
 BA  4- test-kernel did not work when using --mt=pthread                    [F4]
 BA  5- ellheegner was using too much memory in some case                   [F5]
+BA  6- ellap can overflow on 32-bit machine [#1558] (minimal fix)          [F6]
