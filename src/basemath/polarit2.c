@@ -923,10 +923,17 @@ isirreducible(GEN x)
 static GEN
 triv_cont_gcd(GEN x, GEN y)
 {
-  pari_sp av = avma, tetpil;
-  GEN p1 = (typ(x)==t_COMPLEX)? ggcd(gel(x,1),gel(x,2))
-                              : ggcd(gel(x,2),gel(x,3));
-  tetpil=avma; return gerepile(av,tetpil,ggcd(p1,y));
+  pari_sp av = avma;
+  GEN c;
+  if (typ(x)==t_COMPLEX)
+  {
+    GEN a = gel(x,1), b = gel(x,2);
+    if (typ(a) == t_REAL || typ(b) == t_REAL) return gen_1;
+    c = ggcd(a,b);
+  }
+  else
+    c = ggcd(gel(x,2),gel(x,3));
+  return gerepileupto(av, ggcd(c,y));
 }
 
 /* y is a PADIC, x a rational number or an INTMOD */
@@ -1233,6 +1240,8 @@ ggcd(GEN x, GEN y)
         {
           case t_COMPLEX:
             if (c_is_rational(y)) return gauss_gcd(x,y);
+          case t_QUAD:
+            return triv_cont_gcd(y,x);
           case t_FFELT:
           {
             GEN p = gel(y,4);
@@ -1240,8 +1249,6 @@ ggcd(GEN x, GEN y)
             if (!FF_equal0(y)) return FF_1(y);
             return dvdii(gel(x,1),p)? FF_zero(y): FF_1(y);
           }
-          case t_QUAD:
-            return triv_cont_gcd(y,x);
 
           case t_PADIC:
             return padic_gcd(x,y);

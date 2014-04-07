@@ -54,6 +54,7 @@ for (i=1,#v,
 gcd(0,1.+I)
 gcd(0,1+I)
 gcd(0,Mod(1,3)+I)
+gcd(1/2, 1.+I)
 
 default(realprecision,38);
 gcd(Pol(0.),x)

@@ -107,6 +107,7 @@ error("inconsistent gcd t_FFELT , t_PADIC.")
 1 + I
 Mod(1, 3)
 1
+1
 (-k + 0.E-38)/k
 1/18446744073709551616
-Total time spent: 0
+Total time spent: 4
