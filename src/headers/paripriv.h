@@ -503,6 +503,7 @@ GEN     nfdisc_gp(GEN T, GEN P, GEN junk);
 /* base3.c */
 
 void    check_nfelt(GEN x, GEN *den);
+long    nfvalrem(GEN nf, GEN x, GEN pr, GEN *py);
 GEN     zk_ei_mul(GEN nf, GEN x, long i);
 
 /* base4.c */
