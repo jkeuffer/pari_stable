@@ -20,9 +20,9 @@ Doc: general factorization function, where $x$ is a
  See \tet{factorint} for more information about the algorithms used.
  The rational or Gaussian primes are in fact \var{pseudoprimes}
  (see \kbd{ispseudoprime}), a priori not rigorously proven primes. In fact,
- any factor which is $\leq 10^{15}$ (whose norm is $\leq 10^{15}$ for an
- irrational Gaussian prime) is a genuine prime. Use
- \kbd{isprime} to prove primality of other factors, as in
+ any factor which is $\leq 2^{64}$ (whose norm is $\leq 2^{64}$ for an
+ irrational Gaussian prime) is a genuine prime. Use \kbd{isprime} to prove
+ primality of other factors, as in
  \bprog
  ? fa = factor(2^2^7 + 1)
  %1 =
@@ -93,7 +93,7 @@ Doc: general factorization function, where $x$ is a
  [59649589127497217 1]
 
  [5704689200685129054721 1]
- @eprog\noindent Over $\Q$, the prime factors are sorted by increasing size.
+ @eprog\noindent Over $\Q$, the prime factors are sorted in increasing order.
 
  \misctitle{Rational functions}
  The polynomials or rational functions to be factored must have scalar
