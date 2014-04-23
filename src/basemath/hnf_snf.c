@@ -1646,7 +1646,7 @@ ZV_gcdext_i(GEN A)
   }
   if (signe(gel(A,n-1)) < 0)
   {
-    togglesign_safe(&gel(A,n-1));
+    gel(A,n-1) = negi(gel(A,n-1));
     ZV_togglesign(gel(B,n-1));
   }
   return mkvec2(gel(A,n-1), B);
