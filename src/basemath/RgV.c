@@ -562,9 +562,9 @@ RgM_transmul(GEN x, GEN y)
   M = cgetg(ly, t_MAT);
   for (i=1; i<ly; i++)
   {
-    GEN xi = gel(x,i), c = cgetg(lx,t_COL);
+    GEN yi = gel(y,i), c = cgetg(lx,t_COL);
     gel(M,i) = c;
-    for (j=1; j<lx; j++) gel(c,j) = RgV_dotproduct_i(xi,gel(y,j),l);
+    for (j=1; j<lx; j++) gel(c,j) = RgV_dotproduct_i(yi,gel(x,j),l);
   }
   return M;
 }
