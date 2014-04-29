@@ -14,7 +14,7 @@ Doc:
  See \kbd{qfisominit} for the meaning of \var{fl}.
 
  The output is a two-components vector $[o,g]$ where $o$ is the group order
- and $g$ is the list of generators (as a vector). For each generators $H$,
+ and $g$ is the list of generators (as a vector). For each generator $H$,
  the equality $G={^t}H\*G\*H$ holds.
 
  The interface of this function is experimental and will likely change in the
