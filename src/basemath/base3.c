@@ -596,7 +596,7 @@ nfpow_u(GEN nf, GEN z, ulong n)
   nf = checknf(nf); T = nf_get_pol(nf); N = degpol(T);
   if (!n) return scalarcol_shallow(gen_1,N);
   x = nf_to_scalar_or_basis(nf, z);
-  if (typ(x) != t_COL) { GEN y = zerocol(N); gel(y,1) = powiu(x,n); return y; }
+  if (typ(x) != t_COL) { GEN y = zerocol(N); gel(y,1) = gpowgs(x,n); return y; }
   x = primitive_part(x, &cx);
   x = gen_powu(x, n, (void*)nf, _sqr, _mul);
   if (cx) x = RgC_Rg_mul(x, powgi(cx, utoipos(n)));
