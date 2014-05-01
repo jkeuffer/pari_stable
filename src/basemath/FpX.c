@@ -1531,7 +1531,7 @@ int
 Fq_issquare(GEN x, GEN T, GEN p)
 {
   if (typ(x) != t_INT) return FpXQ_issquare(x, T, p);
-  return (! odd(get_FpX_degree(T)) || Fp_issquare(x, p));
+  return (T && ! odd(get_FpX_degree(T))) || Fp_issquare(x, p);
 }
 
 static GEN
