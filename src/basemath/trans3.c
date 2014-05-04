@@ -643,6 +643,7 @@ incgam_0(GEN x, GEN expx)
   double mx = rtodbl(x), L = prec2nbits_mul(l,LOG2);
   GEN z;
 
+  if (!mx) pari_err_DOMAIN("eint1", "x","=",gen_0, x);
   if (mx > L)
   {
     double m = (L + mx)/4;
