@@ -52,3 +52,7 @@ hilbert(-1,-1,0)
 \\#1261
 K=nfinit(y^2+5); P=idealprimedec(K,2)[1];
 nfhilbert(K,2*y,2,P)
+
+\\#1569
+K=nfinit(x^3-4*x+2);
+nfhilbert(K,2,-2, idealprimedec(K,2)[1])

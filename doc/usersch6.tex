@@ -885,10 +885,10 @@ with coefficients in \kbd{nf}.
 structure, that $P$, $Q$ are \kbd{prid}.
 
 \fun{long}{ZC_nfval}{GEN nf, GEN x, GEN P} returns $v_P(x)$,
-assuming $x$ is a \kbd{ZC}, representing an algebraic integer.
+assuming $x$ is a \kbd{ZC}, representing a non-zero algebraic integer.
 
 \fun{long}{ZC_nfvalrem}{GEN nf, GEN x, GEN pr, GEN *newx} returns $v = v_P(x)$,
-assuming $x$ is a \kbd{ZC}, representing an algebraic integer, and sets
+assuming $x$ is a \kbd{ZC}, representing a non-zero algebraic integer, and sets
 \kbd{*newx} to $x\tau^v$ which is an algebraic integer coprime to $p$.
 
 \fun{int}{ZC_prdvd}{GEN nf, GEN x, GEN P} returns $1$ is $P$ divides $x$ and

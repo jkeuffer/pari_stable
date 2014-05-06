@@ -170,14 +170,19 @@ check2(GEN nf, GEN x, GEN zinit)
 }
 
 /* pr | 2. Return 1 if x in Z_K is square in Z_{K_pr}, 0 otherwise */
-static long
+static int
+psquare2nf_i(GEN nf,GEN x,GEN pr,GEN zinit)
+{
+  long v = nfvalrem(nf, x, pr, &x);
+  /* now (x,pr) = 1 */
+  return v == LONG_MAX || (!odd(v) && check2(nf,x,zinit));
+}
+static int
 psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
 {
   pari_sp av = avma;
-  long v = nfvalrem(nf, x, pr, &x);
-  if (v&1) return 0;
-  /* now (x,pr) = 1 */
-  v = check2(nf,x,zinit); avma = av; return v;
+  long v = psquare2nf_i(nf,x,pr,zinit);
+  avma = av; return v;
 }
 
 /* pr above an odd prime */
