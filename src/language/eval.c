@@ -477,8 +477,8 @@ pop_lex(long n)
   s_trace.n--;
 }
 
-static pari_stack s_relocs;
-static entree **relocs;
+static THREAD pari_stack s_relocs;
+static THREAD entree **relocs;
 
 void
 pari_init_evaluator(void)
