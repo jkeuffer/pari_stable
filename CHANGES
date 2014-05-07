@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.7.1 (released ??/??/2014):
+Done for version 2.7.1 (released 14/05/2014):
 [last column crossreferences current development release 2.8.0]
 
   Fixed
@@ -17,3 +17,4 @@ BA  6- ellap can overflow on 32-bit machine [#1558] (minimal fix)          [F6]
    10- [libpari] RgM_transmul did not work                                [F12]
    11- [libpari] Fq_issquare didn't support T=NULL                        [F13]
    12- [libpari] nfpow_u didn't handle non-integral rational numbers      [F14]
+   13- eint1(0) -> stack overflow [#1568]                                 [F15]
