@@ -807,9 +807,9 @@ DDF_roots(GEN A)
   { lc = NULL; lcpol = A; }
   else
   { lc = absi(lc); lcpol = ZX_Z_mul(A, lc); }
-  Ap = ZX_to_Flx(A, pp);
+  Ap = Flx_normalize(ZX_to_Flx(A, pp), pp);
   bound = root_bound(A);
-  if (lc) { Ap = Flx_normalize(Ap, pp); bound = mulii(lc, bound); }
+  if (lc) bound = mulii(lc, bound);
   e = logint(addiu(shifti(bound, 1), 1), p, &pe);
   pes2 = shifti(pe, -1);
   if (DEBUGLEVEL>2) timer_printf(&T, "Root bound");
