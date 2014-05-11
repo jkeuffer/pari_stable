@@ -6,17 +6,18 @@ Done for version 2.7.3 (released ??/??/2015):
 
   Fixed
     1- [from 2.7.2] ??bnrL1 and ??ellL1 did not work anymore
-XR  2- bnrL1(bnrinit(bnfinit(x^2-168),[6,[1,1]],1)) -> bug in ArtinNumber [F55]
-    3- nfisincl(t_POL, t_POL) could lead to wrong negative results        [F58]
-    4- polresultant(1+x*z^2,1+y*z^4,z) -> GC error [#1614]                [F59]
-BA  5- ellcard over non-prime fields could return wrong results           [F60]
-    6- [libpari] FpX_roots could produce GC errors [#1618]                [F61]
-    7- weber(1+I) was missing its imaginary part                          [F62]
-    8- (1+I)*(1+1/2*I) => wrong result (type errors) [#1619]              [F63]
-    9- contfracpnqn([a]) => [1,a;0,1] instead of [a,1;1,0]                [F64]
-   10- primes([2^50, 2^50+200000]) => stack overflow                      [F65]
-   11- possibly missing roots in nfroots (when using Trager)              [F68]
-   12- quadray(bnf, ideal) did not work                                   [F69]
+    2- thue(f^e*g, ...), e even, (f,g)=1 missed solutions such that f<0   [F22]
+XR  3- bnrL1(bnrinit(bnfinit(x^2-168),[6,[1,1]],1)) -> bug in ArtinNumber [F55]
+    4- nfisincl(t_POL, t_POL) could lead to wrong negative results        [F58]
+    5- polresultant(1+x*z^2,1+y*z^4,z) -> GC error [#1614]                [F59]
+BA  6- ellcard over non-prime fields could return wrong results           [F60]
+    7- [libpari] FpX_roots could produce GC errors [#1618]                [F61]
+    8- weber(1+I) was missing its imaginary part                          [F62]
+    9- (1+I)*(1+1/2*I) => wrong result (type errors) [#1619]              [F63]
+   10- contfracpnqn([a]) => [1,a;0,1] instead of [a,1;1,0]                [F64]
+   11- primes([2^50, 2^50+200000]) => stack overflow                      [F65]
+   12- possibly missing roots in nfroots (when using Trager)              [F68]
+   13- quadray(bnf, ideal) did not work                                   [F69]
 
 Done for version 2.7.2 (released 19/09/2014):
 [last column crossreferences current development release 2.8.0]
