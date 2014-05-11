@@ -189,7 +189,7 @@ precprime(GEN n)
   {
     ulong k = (ulong)n[2];
     avma = av;
-    return utoipos(uprecprime(k));
+    return utoi(uprecprime(k));
   }
   if (!mod2(n)) n = addsi(-1,n);
   rc = rc0 = smodis(n, 210);
