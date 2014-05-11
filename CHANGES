@@ -5,6 +5,7 @@ Done for version 2.7.2 (released ??/??/2014):
 [last column crossreferences current development release 2.8.0]
 
   Fixed
+    1- gaffsg(0, t_PADIC): wrong valuation                                [F21]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]
