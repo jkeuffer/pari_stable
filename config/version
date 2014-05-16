@@ -5,7 +5,7 @@ VersionMajor='2'
 VersionMinor='7'
 
 # Patch level
-patch='1'
+patch='2'
 
 # Version code
 version_code=`expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`

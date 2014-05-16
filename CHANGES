@@ -1,6 +1,11 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
+Done for version 2.7.2 (released ??/??/2014):
+[last column crossreferences current development release 2.8.0]
+
+  Fixed
+
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]
 
