@@ -3869,7 +3869,7 @@ by the \kbd{Fp}~\kbd{y}.
 \fun{GEN}{FpX_mulu}{GEN x, ulong y, GEN p} multiplies the \kbd{FpX}~\kbd{x}
 by \kbd{y}.
 
-\fun{GEN}{FpX_Fp_mul_to_monic}{GEN y,GEN x,GEN p} returns $y*x$ assuming the
+\fun{GEN}{FpX_Fp_mul_to_monic}{GEN y,GEN x,GEN p} returns $y\*x$ assuming the
 result is monic of the same degree as $y$ (in particular $x\neq 0$).
 
 \subsubsec{Miscellaneous operations}
@@ -4271,7 +4271,7 @@ enforce strict consistency, which would not imply any efficiency gain.)
 \kbd{FqX}~\kbd{x} by the \typ{INT}~\kbd{y}.
 
 \fun{GEN}{FqX_Fq_mul_to_monic}{GEN x, GEN y, GEN T, GEN p}
-returns $x*y$ assuming the result is monic of the same degree as $x$ (in
+returns $x\*y$ assuming the result is monic of the same degree as $x$ (in
 particular $y\neq 0$).
 
 \fun{GEN}{FqX_normalize}{GEN z, GEN T, GEN p} divides the \kbd{FqX}~\kbd{z}
@@ -4566,14 +4566,14 @@ and $y$ are equal, and 0~(false) otherwise.
 
 \fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
 
-\fun{GEN}{Flx_double}{GEN y, ulong p} returns $2y$.
+\fun{GEN}{Flx_double}{GEN y, ulong p} returns $2\*y$.
 
-\fun{GEN}{Flx_triple}{GEN y, ulong p} returns $3y$.
+\fun{GEN}{Flx_triple}{GEN y, ulong p} returns $3\*y$.
 
 \fun{GEN}{Flx_mulu}{GEN y, ulong x, ulong p} as \kbd{Flx\_Fl\_mul} but do not
 assume that $x<p$.
 
-\fun{GEN}{Flx_Fl_mul_to_monic}{GEN y, ulong x, ulong p} returns $y*x$
+\fun{GEN}{Flx_Fl_mul_to_monic}{GEN y, ulong x, ulong p} returns $y\*x$
 assuming the result is monic of the same degree as $y$ (in particular $x\neq
 0$).
 
