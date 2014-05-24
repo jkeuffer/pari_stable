@@ -332,7 +332,7 @@ bachcomp(GEN pol, long I, long S, GEN V, GEN W, GEN Fv)
   long n = lg(V)-1;
   long sum = mael(pol,1,1), mind = mael(pol,1,2), maxd = mael(pol,1,3);
   GEN coef = gel(pol,2);
-  I = abs(I);
+  I = labs(I);
   vI = gel(V,I);
   list = zero_Flv(sum);
   /* nlist should be equal to pol.sum */
