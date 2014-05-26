@@ -358,7 +358,7 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong n)
   }
 }
 
-/* assume maxnum <= 436273290 < 2^29 */
+/* assume maxnum <= 436273289 < 2^29 */
 static void
 initprimes0(ulong maxnum, long *lenp, ulong *lastp, byteptr p1)
 {
@@ -435,16 +435,18 @@ maxprime(void) { return diffptr ? _maxprime : 0; }
 void
 maxprime_check(ulong c) { if (_maxprime < c) pari_err_MAXPRIME(c); }
 
-/* We ensure 65302 <= maxnum <= 436273290: the LHS ensures modular function
- * have enough fast primes to work, the RHS ensures that p_{n+1} - p_n < 255 */
+/* We ensure 65302 <= maxnum <= 436273289: the LHS ensures modular function
+ * have enough fast primes to work, the RHS ensures that p_{n+1} - p_n < 255
+ * (N.B. RHS would be incorrect since initprimes0 would make it odd, thereby
+ * increasing it by 1) */
 byteptr
 initprimes(ulong maxnum, long *lenp, ulong *lastp)
 {
   byteptr t;
   if (maxnum < 65537)
     maxnum = 65537;
-  else if (maxnum > 436273290)
-    maxnum = 436273290;
+  else if (maxnum > 436273289)
+    maxnum = 436273289;
   t = (byteptr)pari_malloc((size_t) (1.09 * maxnum/log((double)maxnum)) + 146);
   initprimes0(maxnum, lenp, lastp, t);
   return (byteptr)pari_realloc(t, *lenp);

@@ -7,6 +7,9 @@ Done for version 2.7.2 (released ??/??/2014):
   Fixed
     1- gaffsg(0, t_PADIC): wrong valuation                                [F21]
     2- (t_INTMOD with word-sized modulus)^(huge negative power) [#1584]   [F24]
+    3- (gp -p N) or (primelimit=N in gprc_ for N >= 436273290 resulted in an
+       incorrect primetable. N.B. Such commands are now useless: needed primes
+       are produced dynamically anyway.                                   [F25]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]
