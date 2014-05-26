@@ -2564,9 +2564,11 @@ Fp_pow(GEN A, GEN K, GEN N)
           /* CRT: = a^K (mod n1), = 0 (mod n2)*/
           return utoi( Fl_mul(Fl_powu(a, k, n1), n2 * Fl_inv(n2,n1), n) );
         }
+        /* gcd(a,n) = 1 */
+        k = umodiu(K, eulerphiu(n));
       }
-      /* gcd(a,n) = 1 */
-      k = umodiu(K, eulerphiu(n));
+      else
+        k = umodiu(negi(K), eulerphiu(n));
     }
     else
       k = (ulong)K[2];

@@ -61,4 +61,8 @@ Mod(1, 2)*x
 Mod(1, y)*x
 Mod(0, 2)
 Mod(0, 2)
+  *** _^_: Warning: Mod(a,b)^n with n >> b : wasteful.
+Mod(2, 7)
+  *** _^_: Warning: Mod(a,b)^n with n >> b : wasteful.
+Mod(4, 7)
 Total time spent: 4
