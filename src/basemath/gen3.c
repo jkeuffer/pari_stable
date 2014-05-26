@@ -3312,7 +3312,9 @@ liftall_shallow(GEN x)
 }
 GEN
 liftall(GEN x)
-{ pari_sp av = avma; return gerepilecopy(av, liftall_shallow(x)); }
+{ pari_sp av = avma;
+  GEN z = liftall_shallow(x);
+  return z==x ? gcopy(z): gerepilecopy(av, z); }
 
 GEN
 liftint_shallow(GEN x)
@@ -3342,7 +3344,9 @@ liftint_shallow(GEN x)
 }
 GEN
 liftint(GEN x)
-{ pari_sp av = avma; return gerepilecopy(av, liftint_shallow(x)); }
+{ pari_sp av = avma;
+  GEN z = liftint_shallow(x);
+  return z==x ? gcopy(z): gerepilecopy(av, z); }
 
 GEN
 liftpol_shallow(GEN x)
@@ -3371,7 +3375,9 @@ liftpol_shallow(GEN x)
 }
 GEN
 liftpol(GEN x)
-{ pari_sp av = avma; return gerepilecopy(av, liftpol_shallow(x)); }
+{ pari_sp av = avma;
+  GEN z = liftpol_shallow(x);
+  return z==x ? gcopy(z): gerepilecopy(av, z); }
 
 /* same as lift, without copy. May DESTROY x. For internal use only */
 GEN
