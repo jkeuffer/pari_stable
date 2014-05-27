@@ -10,6 +10,7 @@ Done for version 2.7.2 (released ??/??/2014):
     3- (gp -p N) or (primelimit=N in gprc_ for N >= 436273290 resulted in an
        incorrect primetable. N.B. Such commands are now useless: needed primes
        are produced dynamically anyway.                                   [F25]
+    4- monomial(exact zero, d, v) returned an invalid t_POL / t_RFRAC     [F26]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]
