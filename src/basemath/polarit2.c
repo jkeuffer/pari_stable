@@ -454,7 +454,7 @@ gauss_factor(GEN x)
   P2 = cgetg(l, t_COL);
   E2 = cgetg(l, t_COL);
   for (j = 1, i = l-1; i > 0; i--) /* remove largest factors first */
-  {
+  { /* either p = 2 (ramified) or those factors split in Q(i) */
     GEN p = gel(P,i), w, w2, t, we, pe;
     long v, e = itos(gel(E,i));
     int is2 = equaliu(p, 2);
@@ -468,12 +468,12 @@ gauss_factor(GEN x)
     else {
       /* y /= conj(w)^e, should be y /= w2^e */
       y = gauss_primpart_try( gmul(y, we), pe );
-      swap(w, w2); exp += 3 * e;
+      swap(w, w2); exp -= e; /* += 3*e mod 4 */
     }
     gel(P,i) = w;
     v = Z_pvalrem(n, p, &n);
     if (v) {
-      exp += 3*v;
+      exp -= v; /* += 3*v mod 4 */
       if (is2) v <<= 1; /* 2 = w^2 I^3 */
       else {
         gel(P2,j) = w2;
@@ -483,7 +483,7 @@ gauss_factor(GEN x)
     }
     v = Z_pvalrem(d, p, &d);
     if (v) {
-      exp -= 3*v;
+      exp += v; /* -= 3*v mod 4 */
       if (is2) v <<= 1; /* 2 is ramified */
       else {
         gel(P2,j) = w2;
@@ -494,9 +494,20 @@ gauss_factor(GEN x)
     exp &= 3;
   }
   if (j > 1) {
-    setlg(P2, j);
-    setlg(E2, j);
-    fa = famat_mul_shallow(fa, mkmat2(P2,E2));
+    long k = 1;;
+    GEN P1 = cgetg(l, t_COL);
+    GEN E1 = cgetg(l, t_COL);
+    /* remove factors with exponent 0 */
+    for (i = 1; i < l; i++)
+      if (signe(gel(E,i)))
+      {
+        gel(P1,k) = gel(P,i);
+        gel(E1,k) = gel(E,i);
+        k++;
+      }
+    setlg(P1, k); setlg(E1, k);
+    setlg(P2, j); setlg(E2, j);
+    fa = famat_mul_shallow(mkmat2(P1,E1), mkmat2(P2,E2));
   }
   if (!is_pm1(n) || !is_pm1(d))
   {
@@ -524,7 +535,7 @@ gauss_factor(GEN x)
         P = shallowconcat(P, gauss_normal( gconj(w) ));
         E = shallowconcat(E, gel(E,i));
       }
-      exp += 3*e;
+      exp -= e; /* += 3*e mod 4 */
       exp &= 3;
     }
     gel(Fa,1) = P;
