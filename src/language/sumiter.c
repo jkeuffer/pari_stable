@@ -25,8 +25,7 @@ iferrpari(GEN a, GEN b, GEN c)
   {
     GEN E;
     if (!b&&!c) return gnil;
-    evalstate_restore(&state);
-    E = gerepilecopy(avma, pari_err_last());
+    E = evalstate_restore_err(&state);
     if (c)
     {
       push_lex(E,c);

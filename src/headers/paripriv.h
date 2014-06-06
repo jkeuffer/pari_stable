@@ -363,6 +363,7 @@ void compilestate_restore(struct pari_compilestate *comp);
 void evalstate_clone(void);
 void evalstate_reset(void);
 void evalstate_restore(struct pari_evalstate *state);
+GEN  evalstate_restore_err(struct pari_evalstate *state);
 void evalstate_save(struct pari_evalstate *state);
 
 void mtstate_save(long *pending);

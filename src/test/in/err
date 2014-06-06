@@ -38,6 +38,9 @@ ecm2(N,t,B)=
           ,errname(err)=="e_INV"));
 }
 ecm2(2^64+1,10,200!)
+
+rev(A) = my(B=Ser(A)); serreverse(B);
+iferr(rev([0,0,0,2,2,4,8,4,16,12]),E,0);
 \\ e_COPRIME
 T=t^2-2;p=2;A=x^2+1;B=[x+t,x+t];r=polhensellift(A,B,[p,T],6)
 \\ e_DIM / e_TYPE

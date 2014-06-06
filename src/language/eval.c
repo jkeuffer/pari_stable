@@ -1396,6 +1396,14 @@ evalstate_restore(struct pari_evalstate *state)
   compilestate_restore(&state->comp);
 }
 
+GEN
+evalstate_restore_err(struct pari_evalstate *state)
+{
+  GENbin* err = copy_bin(pari_err_last());
+  evalstate_restore(state);
+  return bin_copy(err);
+}
+
 void
 evalstate_reset(void)
 {

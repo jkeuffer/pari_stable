@@ -14,6 +14,7 @@ Done for version 2.7.2 (released ??/??/2014):
     5- contfracpnqn(v, n) returned partial quotients p[-1]/q[-1] ...
        p[n-1]/q[n-1], instead of the documented p[0]/q[0] ... p[n]/q[n]   [F27]
     6- factor((3+4*I)/25) -> factor 2+I had 0 exponent [#1586]            [F29]
+BA  7- iferr() could crash if some component of the t_ERROR were clones.  [F31]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]

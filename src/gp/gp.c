@@ -1973,7 +1973,7 @@ closure_alarmer(GEN C, long s)
   {
     GEN E = pari_err_last();
     if (err_get_num(E) != e_ALARM) { alarm0(0); pari_err(0, E); }
-    evalstate_restore(&state); x = gerepilecopy(avma, E);
+    x = evalstate_restore_err(&state);
   }
   pari_TRY { alarm0(s); x = closure_evalgen(C); alarm0(0); } pari_ENDCATCH;
   return x;
