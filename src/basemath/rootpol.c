@@ -652,7 +652,8 @@ lower_bound(GEN p, long *k, double eps)
   avma = ltop; return R;
 }
 
-/* log of modulus of the largest root of p with relative error tau */
+/* log of modulus of the largest root of p with relative error tau. Assume
+ * P(0) != 0 and P non constant */
 static double
 logmax_modulus(GEN p, double tau)
 {
@@ -696,10 +697,12 @@ logmax_modulus(GEN p, double tau)
   r = itor(r, DEFAULTPREC); shiftr_inplace(r, -M);
   avma = ltop; return -rtodbl(r) * LOG2; /* -log(2) sum e_i 2^-i */
 }
+/* assume P non constant */
 GEN
 logmax_modulus_bound(GEN P)
 {
-  return dblexp(logmax_modulus(P, 0.01) + 0.01);
+  (void)RgX_valrem_inexact(P,&P);
+  return lg(P)==3? gen_0: dblexp(logmax_modulus(P, 0.01) + 0.01);
 }
 
 /* log of modulus of the smallest root of p, with relative error tau */
