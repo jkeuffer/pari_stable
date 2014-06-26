@@ -17,6 +17,7 @@ Done for version 2.7.2 (released ??/??/2014):
 BA  7- iferr() could crash if some component of the t_ERROR were clones.  [F31]
     8- nffactor() could overflow the stack when default accuracy too low  [F32]
 BA  9- obsolete use of E=[a1,a2,a3,a4,a6] in ellmul crashed  [#1589]      [F33]
+   10- incorrect rounding in mulrr for one-word precision reals.          [F34]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]
