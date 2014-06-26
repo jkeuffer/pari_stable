@@ -1419,7 +1419,7 @@ ellmul_Z(GEN e, GEN z, GEN n)
 {
   long s;
   if (ell_is_inf(z)) return ellinf();
-  if (ell_over_Fq(e)) return ellffmul(e,z,n);
+  if (lg(e)==17 && ell_over_Fq(e)) return ellffmul(e,z,n);
   s = signe(n);
   if (!s) return ellinf();
   if (s < 0) z = ellneg_i(e,z);
@@ -1510,7 +1510,8 @@ static GEN
 ellmul_CM_aux(GEN e, GEN z, GEN a, GEN w)
 {
   GEN A, B, q;
-  if (typ(a) != t_INT) pari_err_TYPE("ellmul_Z",a);
+  checkell(e);
+  if (typ(a) != t_INT) pari_err_TYPE("ellmul_CM",a);
   q = CM_factor(e, w);
   if (!q) pari_err_TYPE("ellmul [not a complex multiplication]",w);
   if (q != gen_1) w = gdiv(w, q);

@@ -234,6 +234,7 @@ elllocalred(E,5)
 ellisoncurve(E,[0.,125.])
 ellisoncurve(E,[0.,125+1e-50])
 elladd(E,[0.,125.],[0.,125+1e-38])
+iferr(ellmul([0,1,0,2,-15],[2,1],5),E,E)
 x='x;
 E=ellinit([x^2,x])
 ellminimalmodel(E)
