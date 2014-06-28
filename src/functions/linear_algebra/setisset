@@ -7,7 +7,7 @@ Help: setisset(x): true(1) if x is a set (row vector with strictly
 Doc:
  returns true (1) if $x$ is a set, false (0) if
  not. In PARI, a set is a row vector whose entries are strictly
- increasing with respect to a (somewhat arbitray) universal comparison
+ increasing with respect to a (somewhat arbitrary) universal comparison
  function. To convert any object into a set (this is most useful for
  vectors, of course), use the function \kbd{Set}.
  \bprog

@@ -44,7 +44,7 @@ Doc: \sidx{linear dependence} finds a small non-trivial integral linear
  @eprog\noindent For better control, it is preferable to use \typ{POL} rather
  than \typ{SER} in the input, otherwise one gets a linear combination which is
  $t$-adically small, but not necessarily $0$. Indeed, power series are first
- converted to the minimal absolute accuracy occuring among the entries of $v$
+ converted to the minimal absolute accuracy occurring among the entries of $v$
  (which can cause some coefficients to be ignored), then truncated to
  polynomials:
  \bprog

@@ -2,7 +2,7 @@ Function: matpascal
 Section: linear_algebra
 C-Name: matqpascal
 Prototype: LDG
-Help: matpascal(n,{q}): Pascal triangle of order n if q is omited. q-Pascal
+Help: matpascal(n,{q}): Pascal triangle of order n if q is omitted. q-Pascal
  triangle otherwise.
 Doc: creates as a matrix the lower triangular
  \idx{Pascal triangle} of order $x+1$ (i.e.~with binomial coefficients

@@ -10,7 +10,7 @@ Description:
   (gen,gen):gen    genselect(${1 cookie}, ${1 wrapper}, $2)
   (gen,gen,0):gen  genselect(${1 cookie}, ${1 wrapper}, $2)
   (gen,gen,1):gen  genindexselect(${1 cookie}, ${1 wrapper}, $2)
-Doc: We first describe the default behaviour, when $\fl$ is 0 or omitted.
+Doc: We first describe the default behavior, when $\fl$ is 0 or omitted.
  Given a vector or list \kbd{A} and a \typ{CLOSURE} \kbd{f}, \kbd{select}
  returns the elements $x$ of \kbd{A} such that $f(x)$ is non-zero. In other
  words, \kbd{f} is seen as a selection function returning a boolean value.

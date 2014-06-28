@@ -9,4 +9,4 @@ Doc: a string that will be printed
  line-terminating backslash). Everything that applies to \kbd{prompt}
  applies to \kbd{prompt\_cont} as well.
 
- The defaut value is \kbd{""}.
+ The default value is \kbd{""}.

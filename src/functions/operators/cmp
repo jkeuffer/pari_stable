@@ -25,6 +25,6 @@ Doc: gives the result of a comparison between arbitrary objects $x$ and $y$
  ? cmp(x + Pi, [])
  %4 = -1
  @eprog\noindent This function is mostly useful to handle sorted lists or
- vectors of arbitrary objets. For instance, if $v$ is a vector, the
+ vectors of arbitrary objects. For instance, if $v$ is a vector, the
  construction \kbd{vecsort(v, cmp)} is equivalent to \kbd{Set(v)}.
 

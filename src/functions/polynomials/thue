@@ -21,7 +21,7 @@ Doc: returns all solutions of the equation
  If \var{tnf} was computed without assuming GRH (flag $1$ in \tet{thueinit}),
  then the result is unconditional. Otherwise, it depends in principle of the
  truth of the GRH, but may still be unconditionally correct in some
- favourable cases. The result is conditional on the GRH if
+ favorable cases. The result is conditional on the GRH if
  $a\neq \pm 1$ and, $P$ has a single irreducible rational factor, whose
  associated tentative class number $h$ and regulator $R$ (as computed
  assuming the GRH) satisfy

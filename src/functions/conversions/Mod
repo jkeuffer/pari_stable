@@ -45,7 +45,7 @@ Doc: in its basic form, creates an intmod or a polmod $(a \mod b)$; $b$ must
  @eprog
 
  This function is not the same as $x$ \kbd{\%} $y$, the result of which
- has no knowledge of the indended modulus $y$. Compare
+ has no knowledge of the intended modulus $y$. Compare
  \bprog
  ? x = 4 % 5; x + 1
  %1 = 5

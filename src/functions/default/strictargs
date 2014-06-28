@@ -13,7 +13,7 @@ Doc: this toggle is either 1 (on) or 0 (off). If on, all arguments to \emph{new}
  \bprog
    fun(a,b=2)=a+b
  @eprog
- \kbd{a} is mandatory, while \kbd{b} is optionnal. If \kbd{strictargs} is on:
+ \kbd{a} is mandatory, while \kbd{b} is optional. If \kbd{strictargs} is on:
  \bprog
  ? fun()
   ***   at top-level: fun()

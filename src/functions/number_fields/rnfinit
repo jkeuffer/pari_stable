@@ -17,7 +17,7 @@ Doc: $\var{nf}$ being a number field in \kbd{nfinit}
  description, we let $K$ be the base field defined by $\var{nf}$ and $L/K$
  the large field associated to the \var{rnf}. Furthermore, we let
  $m = [K:\Q]$ the degree of the base field, $n = [L:K]$ the relative degree,
- $r_1$ and $r_2$ the number of real and complex places of $K$. Acces to this
+ $r_1$ and $r_2$ the number of real and complex places of $K$. Access to this
  information via \emph{member functions} is preferred since the specific
  data organization specified below will change in the future.
 

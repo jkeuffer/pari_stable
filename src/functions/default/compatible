@@ -11,7 +11,7 @@ Doc: The GP function names and syntax
 
  \quad \kbd{compatible} = 0: no backward compatibility. In this mode, a very
  handy function, to be described in \secref{se:whatnow}, is \kbd{whatnow},
- which tells you what has become of your favourite functions, which \kbd{gp}
+ which tells you what has become of your favorite functions, which \kbd{gp}
  suddenly can't seem to remember.
 
  \quad \kbd{compatible} = 1: warn when using obsolete functions, but

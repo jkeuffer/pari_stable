@@ -128,7 +128,7 @@ Doc: \var{pol} being a non-constant,
  \tet{nfbasis}). Instead of the maximal order, \kbd{nfinit} then computes an
  order which is maximal at these particular primes as well as the primes
  contained in the private prime table (see \tet{addprimes}). The result is
- unconditionnaly correct when the discriminant \kbd{nf.disc} factors
+ unconditionaly correct when the discriminant \kbd{nf.disc} factors
  completely over this set of primes. The function \tet{nfcertify} automates
  this:
  \bprog

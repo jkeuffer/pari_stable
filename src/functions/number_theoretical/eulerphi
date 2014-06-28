@@ -12,5 +12,5 @@ Doc: Euler's $\phi$ (totient)\sidx{Euler totient function} function of the
  %1 = 16
  @eprog\noindent
  According to this definition we let $\phi(0) := 2$, since $\Z^* = \{-1,1\}$;
- this is consistant with \kbd{znstar(0)}: we have \kbd{znstar$(n)$.no =
+ this is consistent with \kbd{znstar(0)}: we have \kbd{znstar$(n)$.no =
  eulerphi(n)} for all $n\in\Z$.

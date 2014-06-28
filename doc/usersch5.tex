@@ -3741,7 +3741,7 @@ to reduce $a$ and $b$ mod $p^e$ first.
 
 \subsec{\kbd{FpX}} Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
-be wary. Recall than an \kbd{Fp} object is a \typ{INT}, preferrably belonging
+be wary. Recall than an \kbd{Fp} object is a \typ{INT}, preferably belonging
 to $[0, \kbd{p}-1]$; an \kbd{FpX} is a \typ{POL} in a fixed variable whose
 coefficients are \kbd{Fp} objects. Unless mentioned otherwise, all outputs in
 this section are \kbd{FpX}s. All operations are understood to take place in
@@ -4486,7 +4486,7 @@ inverse automorphism of \kbd{S}, in the same format, i.e.~an \kbd{FpX}~$H$
 such that $H(\kbd{S}) \equiv X$ modulo $(\kbd{T}, \kbd{p})$.
 
 \fun{long}{FpXQX_nbfact}{GEN S, GEN T, GEN p} returns the number of
-irreductible factor of the polynomial $S$ over the finite field $\F_q$
+irreducible factors of the polynomial $S$ over the finite field $\F_q$
 defined by $T$ and $p$.
 
 \fun{long}{FqX_nbfact}{GEN S, GEN T, GEN p} as above but accept \kbd{T=NULL}.
@@ -8051,7 +8051,7 @@ equal to $x$.
 returns the $1$-column \typ{MAT} with colum \kbd{x}.
 
 \fun{GEN}{retmkmat2}{GEN x, GEN y}
-returns the $2$-column \typ{MAT} with colums \kbd{x}, \kbd{y}.
+returns the $2$-column \typ{MAT} with columns \kbd{x}, \kbd{y}.
 
 \fun{GEN}{retmkmat3}{GEN x, GEN y, GEN z}
 returns the $3$-dimensional \typ{MAT} with columns
@@ -9017,7 +9017,7 @@ primes arise from \typ{FFELT} and \typ{PADIC} components. Shallow function.
 
 \fun{GEN}{residual_characteristic}{GEN x} returns a kind of ``residual
 characteristic'' of the base ring over which the polynomial is defined. This
-is defined as the gcd of all moduli \typ{INTMOD}s occuring in the structure,
+is defined as the gcd of all moduli \typ{INTMOD}s occurring in the structure,
 as well as primes $p$ arising from \typ{PADIC}s or \typ{FFELT}s. The function
 raises an exception if incompatible primes arise from \typ{FFELT} and
 \typ{PADIC} components. Shallow function.
@@ -9351,7 +9351,7 @@ the components of \kbd{res} if needed (in a \kbd{gerepile}-safe way). Further
 convert \kbd{res} to a \typ{REAL} if $x$ is a \typ{REAL}.
 
 \fun{GEN}{trans_eval}{const char *fun, GEN (*f) (GEN, long), GEN x, long prec}
-evaluate transcendantal function $f$ (named \kbd{"fun"} at the argument
+evaluate transcendental function $f$ (named \kbd{"fun"} at the argument
 $x$ and precision \kbd{prec}. This is a quick way to implement a transcendental
 function to be made available under GP, starting from a $C$ function
 handling only \typ{REAL} and \typ{COMPLEX} arguments. This routine first
@@ -9797,14 +9797,14 @@ rendered in color, possibly in bold or underlined.
 
 \fun{void}{term_color}{long c} prints (as if using \tet{pari_puts}) the ANSI
 color escape sequence associated to output object \kbd{c}. If \kbd{c} is
-\tet{c_NONE}, revert to defaut printing style.
+\tet{c_NONE}, revert to default printing style.
 
 \fun{void}{out_term_color}{PariOUT *out, long c} as \tet{term_color},
 using output context \kbd{out}.
 
 \fun{char*}{term_get_color}{char *s, long c} returns as a character
 string the ANSI color escape sequence associated to output object \kbd{c}.
-If \kbd{c} is \tet{c_NONE}, the value used to revert to defaut printing
+If \kbd{c} is \tet{c_NONE}, the value used to revert to default printing
 style is returned. The argument \kbd{s} is either \kbd{NULL} (string
 allocated on the PARI stack), or preallocated storage (in which case, it must
 be able to hold at least 16 chars, including the final \kbd{\bs 0}).
@@ -10799,7 +10799,7 @@ with the lexical variable number $-1$ set to $x$.
 
 \fun{long}{gp_evalvoid}{void *E, GEN x} is used for the prototype code
 \kbd{`I'}. The resulting value is discarded.  Return a non-zero value if a
-control-flow instruction request the iterator to terminate immediatly.
+control-flow instruction request the iterator to terminate immediately.
 
 \fun{long}{gp_evalbool}{void *E, GEN x} returns the boolean
 \kbd{gp\_eval(E, x)} evaluates to (i.e. true iff the value is non-zero).
@@ -10819,7 +10819,7 @@ $x$, returns \kbd{1} if its result is non-zero, and \kbd{0} otherwise.
 
 \fun{long}{gp_callvoid}{void *E, GEN x} evaluates the closure \kbd{(GEN)E} on
 $x$, discarding the result. Return a non-zero value if a control-flow
-instruction request the iterator to terminate immediatly.
+instruction request the iterator to terminate immediately.
 
 \section{Defaults}
 
@@ -11024,7 +11024,7 @@ components of actual C \kbd{struct}s.
 
 
 \fun{GEN}{obj_check}{GEN S, long tag} if the \emph{tag}-component in $S$
-is non empty, return it. Otherwhise return \kbd{NULL}. The \typ{INT} $0$
+is non empty, return it. Otherwise return \kbd{NULL}. The \typ{INT} $0$
 (initial value) is used as a sentinel to indicated an empty component.
 
 \fun{GEN}{obj_insert}{GEN S, long tag, GEN O} insert (a clone of) $O$

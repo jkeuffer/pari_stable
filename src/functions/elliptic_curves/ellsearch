@@ -11,7 +11,7 @@ Doc: This function finds all curves in the \tet{elldata} database satisfying
 
  \item if $N$ is a character string, it selects a given curve, e.g.
  \kbd{"11a1"}, or curves in the given isogeny class, e.g. \kbd{"11a"}, or
- curves with given condutor, e.g. \kbd{"11"};
+ curves with given conductor, e.g. \kbd{"11"};
 
  \item if $N$ is a vector of integers, it encodes the same constraints
  as the character string above, according to the \tet{ellconvertname}

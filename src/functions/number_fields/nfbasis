@@ -76,7 +76,7 @@ Doc:
  Adding a composite $C$ such that $C^2$ \emph{divides} $D$ may help because
  when we consider $C$ as a prime and run the algorithm, two good things can
  happen: either we
- succed in proving that no prime dividing $C$ can divide the index
+ succeed in proving that no prime dividing $C$ can divide the index
  (without actually needing to find those primes), or the computation
  exhibits a non-trivial zero divisor, thereby factoring $C$ and
  we go on with the refined factorization. (Note that including a $C$

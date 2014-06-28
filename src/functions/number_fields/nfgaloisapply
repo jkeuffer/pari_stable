@@ -26,7 +26,7 @@ Doc: let $\var{nf}$ be a
   %8 = 1
  @eprog\noindent The surprising failure of the equality test (\kbd{\%7}) is
  due to the fact that although the corresponding prime ideals are equal, their
- representations are not. (A prime ideal is specificed by a uniformizer, and
+ representations are not. (A prime ideal is specified by a uniformizer, and
  there is no guarantee that applying automorphisms yields the same elements
  as a direct \kbd{idealprimedec} call.)
 

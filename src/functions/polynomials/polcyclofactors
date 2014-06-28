@@ -14,7 +14,7 @@ Doc: returns a vector of polynomials, whose product is the product of
  %3 = [1, 1, 1]
  ? apply(poliscyclo, v)
  %4 = [4, 3, 10]
- @eprog\noindent In general, the poynomials are products of cyclotomic
+ @eprog\noindent In general, the polynomials are products of cyclotomic
  polynomials and not themselves irreducible:
  \bprog
  ? g = x^8+2*x^7+6*x^6+9*x^5+12*x^4+11*x^3+10*x^2+6*x+3;

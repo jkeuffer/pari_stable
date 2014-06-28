@@ -63,6 +63,6 @@ Doc: evaluate \var{seq} over the partitions $X=[x_1,\dots x_n]$ of the
  [0, 1, 2, 2]
  [1, 1, 1, 2]
  @eprog\noindent
- The behaviour is unspecified if $X$ is modified inside the loop.
+ The behavior is unspecified if $X$ is modified inside the loop.
 
  \synt{forpart}{void *data, long (*call)(void*,GEN), long k, GEN a, GEN n}.
