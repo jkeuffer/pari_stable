@@ -42,11 +42,11 @@ Doc: creates the greatest common divisor of $x$ and $y$.
  ? b = y*x + O(y); gcd(b,b)
  %2 = y
  ? c = 4*x + O(2^3); gcd(c,c)
- %2 = 4
+ %3 = 4
  @eprog\noindent A good quantitative check to decide whether such a
  gcd ``should be'' non-trivial, is to use \tet{polresultant}: a value
  close to $0$ means that a small deformation of the inputs has non-trivial gcd.
- You may also use \tet{bezout}, which does try to compute an approximate gcd
+ You may also use \tet{gcdext}, which does try to compute an approximate gcd
  $d$ and provides $u$, $v$ to check whether $u x + v y$ is close to $d$.
 
 Variant: Also available are \fun{GEN}{ggcd}{GEN x, GEN y}, if \kbd{y} is not
