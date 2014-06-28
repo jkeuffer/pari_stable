@@ -10,7 +10,7 @@ Doc: return $\exp(x)-1$, computed in a way that is also accurate
  A naive direct computation would suffer from catastrophic cancellation;
  PARI's direct computation of $\exp(x)$ alleviates this well known problem at
  the expense of computing $\exp(x)$ to a higher accuracy when $x$ is small.
- Using \kbd{expm1} is recommanded instead:
+ Using \kbd{expm1} is recommended instead:
  \bprog
  ? default(realprecision, 10000); x = 1e-100;
  ? a = expm1(x);
