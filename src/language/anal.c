@@ -1022,8 +1022,12 @@ ifpari_multi(GEN g, GEN a/*closure*/)
   if (!gequal0(g)) /* false */
     return closure_evalgen(gel(a,1));
   for(i=2;i<nb;i+=2)
-    if (!gequal0(closure_evalgen(gel(a,i))))
+  {
+    GEN g = closure_evalgen(gel(a,i));
+    if (!g) return g;
+    if (!gequal0(g))
       return closure_evalgen(gel(a,i+1));
+  }
   return i<=nb? closure_evalgen(gel(a,i)): gnil;
 }
 

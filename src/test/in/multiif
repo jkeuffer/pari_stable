@@ -17,3 +17,6 @@ f(x)=
     ,print("default"));
 }
 for(i=1,4,f(i));
+g(x)=if(x,return(1),return(2),return(3));
+g(1)
+g(0)

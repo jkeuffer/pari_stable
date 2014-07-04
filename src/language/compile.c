@@ -1524,8 +1524,10 @@ compilefunc(entree *ep, long n, int mode, long flag)
           {
             long k, n=nb+1-j;
             GEN g=cgetg(n+1,t_VEC);
+            int ismif = is_func_named(ep,"_multi_if");
             for(k=1; k<=n; k++)
-              gel(g, k) = compilefuncinline(n, c, arg[j+k-1], flag, 1, lev, ev);
+              gel(g, k) = compilefuncinline(n, c, arg[j+k-1], flag,
+                          ismif && (k==n || odd(k)), lev, ev);
             op_push(OCpushgen, data_push(g), arg[j]);
             j=nb+1;
             break;
