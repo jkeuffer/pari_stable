@@ -475,7 +475,7 @@ vecrange(GEN a, GEN b)
   l = itos(subii(b,a))+1;
   a = setloop(a);
   y = cgetg(l+1, t_VEC);
-  for (i=1; i<=l; incloop(a), i++)
+  for (i=1; i<=l; a = incloop(a), i++)
     gel(y,i) = icopy(a);
   return y;
 }

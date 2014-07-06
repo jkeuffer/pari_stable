@@ -560,11 +560,11 @@ forcomposite_next(forcomposite_t *C)
     C->p = forprime_next(&C->T);
   }
   else
-    incloop(C->n);
+    C->n = incloop(C->n);
   if (C->p)
   {
     if (cmpii(C->n, C->p) < 0) return C->n;
-    incloop(C->n);
+    C->n = incloop(C->n);
     /* n = p+1 */
     C->p = forprime_next(&C->T); /* nextprime(p) > n */
     if (C->p) return C->n;
