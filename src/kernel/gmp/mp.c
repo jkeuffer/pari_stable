@@ -736,8 +736,15 @@ divrr(GEN x, GEN y)
       l >>= 1; if (k&1) l |= HIGHBIT;
       k >>= 1;
     }
-    r = cgetr(3); r[1] = evalsigne(sx) | evalexpo(e);
-    hiremainder=k; r[2]=divll(l,y[2]); return r;
+    hiremainder = k; k = divll(l,y[2]);
+    if (hiremainder & HIGHBIT)
+    {
+      k++;
+      if (!k) { k = HIGHBIT; e++; }
+    }
+    r = cgetr(3);
+    r[1] = evalsigne(sx) | evalexpo(e);
+    r[2] = k; return r;
   }
 
   if (ly>=DIVRR_GMP_LIMIT)
