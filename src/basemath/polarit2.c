@@ -2420,7 +2420,7 @@ RgX_resultant_all(GEN P, GEN Q, GEN *sol)
   if (sol) { *sol = P; gerepileall(av, 2, &s, sol); return s; }
   return (avma == av2)? gerepilecopy(av, s): gerepileupto(av, s);
 }
-/* Return resultant(P,Q). If sol != NULL: set *sol to the last non-zero
+/* Return resultant(P,Q). If sol != NULL: set *sol to the last non-constant
  * polynomial in the prs IF the sequence was computed, and gen_0 otherwise.
  * Uses Sylvester's matrix if P or Q inexact, a modular algorithm if they
  * are in Q[X], and Ducos/Lazard optimization of the subresultant algorithm

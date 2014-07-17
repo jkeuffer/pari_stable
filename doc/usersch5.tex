@@ -7293,7 +7293,7 @@ with respect to its main variable.
 
 \fun{GEN}{RgX_resultant_all}{GEN x, GEN y, GEN *sol} returns
 \kbd{resultant(x,y)}. If \kbd{sol} is not \kbd{NULL}, sets it to the last
-non-zero remainder in the polynomial remainder sequence if it exists and to
+non-constant remainder in the polynomial remainder sequence if it exists and to
 \kbd{gen\_0} otherwise (e.g. one polynomial has degree 0). Compared to
 \kbd{resultant\_all}, this function always uses the generic subresultant
 algorithm, hence always computes \kbd{sol}.
@@ -9034,7 +9034,7 @@ of Sylvester's matrix.
 
 \fun{GEN}{resultant_all}{GEN u, GEN v, GEN *sol} returns
 \kbd{resultant(x,y)}. If \kbd{sol} is not \kbd{NULL}, sets it to the last
-non-zero remainder in the polynomial remainder sequence if such a sequence
+non-constant remainder in the polynomial remainder sequence if such a sequence
 was computed, and to \kbd{gen\_0} otherwise (e.g. polynomials of degree 0,
 $u,v$ in $\Q[X]$).
 
