@@ -2598,16 +2598,16 @@ as if its sign was \kbd{sy}.
 
 \subsec{Exact division and divisibility}
 
-\fun{void}{diviiexact}{GEN x, GEN y} returns the Euclidean quotient
+\fun{GEN}{diviiexact}{GEN x, GEN y} returns the Euclidean quotient
 $\kbd{x} / \kbd{y}$, assuming $\kbd{y}$ divides $\kbd{x}$. Uses Jebelean
 algorithm (Jebelean-Krandick bidirectional exact division is not
 implemented).
 
-\fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
+\fun{GEN}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
 $\kbd{x} / \kbd{y}$, assuming $\kbd{y}$ divides
 $\kbd{x}$ and $\kbd{y}$ is non-zero.
 
-\fun{void}{diviuuexact}{GEN x, ulong y, ulong z} returns the Euclidean
+\fun{GEN}{diviuuexact}{GEN x, ulong y, ulong z} returns the Euclidean
 quotient $x/(yz)$, assuming $yz$ divides $x$ and $yz \neq 0$.
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
@@ -7860,7 +7860,8 @@ lower or same priority, with $(x,y) = 1$.
 \fun{GEN}{mkcolcopy}{GEN x} creates a 1-dimensional \typ{COL} containing
 \kbd{x}.
 
-\fun{GEN}{mkmatcopy}{GEN x} creates a 1-by-1 \typ{MAT} containing \kbd{x}.
+\fun{GEN}{mkmatcopy}{GEN x} creates a 1-by-1 \typ{MAT} wrapping the \typ{COL}
+\kbd{x}.
 
 \fun{GEN}{mkveccopy}{GEN x} creates a 1-dimensional \typ{VEC} containing
 \kbd{x}.
