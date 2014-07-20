@@ -950,18 +950,21 @@ closure_eval(GEN C)
       break;
     case OCgerepile:
     {
-      pari_sp av, av2;
+      pari_sp av;
       GEN x;
       sp--;
       av = st[sp-1];
       x = gel(st,sp);
-      av2 = (pari_sp)(x + lg(x));
-      if (av - av2 > 1000000)
+      if (isonstack(x))
       {
-        if (DEBUGMEM>=2)
-          pari_warn(warnmem,"eval: recovering %ld bytes", av - av2);
-        x = gerepileupto(av, x);
-      }
+        pari_sp av2 = (pari_sp)(x + lg(x));
+        if ((long) (av - av2) > 1000000L)
+        {
+          if (DEBUGMEM>=2)
+            pari_warn(warnmem,"eval: recovering %ld bytes", av - av2);
+          x = gerepileupto(av, x);
+        }
+      } else avma = av;
       gel(st,sp-1) = x;
       break;
     }
