@@ -982,7 +982,7 @@ getfu(GEN nf, GEN *ptA, long *pte, long prec)
     for (   ; i<=RU; i++) gel(c,i) = gadd(s, gmul2n(gel(Aj,i),-1));
   }
   u = lll(real_i(matep));
-  if (typ(u) != t_MAT) return not_given(fupb_PRECI);
+  if (lg(u) < RU) return not_given(fupb_PRECI);
 
   y = RgM_mul(matep,u);
   if (!exp_OK(y, pte))

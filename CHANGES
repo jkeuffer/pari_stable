@@ -20,6 +20,7 @@ BA  9- obsolete use of E=[a1,a2,a3,a4,a6] in ellmul crashed  [#1589]      [F33]
    10- incorrect rounding in mulrr/divrr for one-word precision reals     [F34]
 BA 11- multiif did not handle correctly return() in conditions [#1590]    [F35]
    12- [0..5] -> [0,0,0,0,0] on some architectures                        [F36]
+   13- bnfinit: SEGV due to precision issues [#1592]                      [F39]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]
