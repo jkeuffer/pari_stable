@@ -302,11 +302,12 @@ zmrow_zc_mul(GEN x, GEN y, long lx, long i)
 GEN
 zm_zc_mul(GEN x, GEN y)
 {
-  long lx = lg(x);
-  GEN z = cgetg(lx,t_VECSMALL);
-  long i;
-  for (i=1; i<lx; i++)
-    z[i] = zmrow_zc_mul(x, y, lx, i);
+  long lx = lg(x), l, i;
+  GEN z;
+  if (lx == 1) return cgetg(1, t_VECSMALL);
+  l = lg(gel(x,1));
+  z = cgetg(l,t_VECSMALL);
+  for (i=1; i<l; i++) z[i] = zmrow_zc_mul(x, y, lx, i);
   return z;
 }
 
