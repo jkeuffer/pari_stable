@@ -1585,6 +1585,7 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
     g = constant_term(g);
   }
   n_q = Fp_log(a,g,op,p);
+  if (lg(n_q)==1) return gerepileuptoleaf(av, n_q);
   if (q) n_q = mulii(q, n_q);
   return gerepileuptoint(av, n_q);
 }
