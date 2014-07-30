@@ -106,7 +106,7 @@ pgener_Fl(ulong p) { return pgener_Fl_local(p, NULL); }
 int
 is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L)
 {
-  long i, t = lgefint(x)==3? krosi(x[2], p): kronecker(x, p);
+  long i, t = lgefint(x)==3 && x[2]>0? krosi(x[2], p): kronecker(x, p);
   if (t >= 0) return 0;
   for (i = lg(L)-1; i; i--)
   {
