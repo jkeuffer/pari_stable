@@ -2115,8 +2115,23 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
         GEN c = gel(list,i);
         if (!valp(gel(c,2))) prod = RgX_mul(prod,c);
       }
-      if (degpol(prod) > 2) pari_err_BUG("genus2localred [padicfactors 2]");
-      dism = valp(RgX_disc(prod));
+      switch(degpol(prod))
+      {
+        GEN e0, e1, e2;
+        case 0:
+          dism = 0; break;
+        case 1:
+          e1 = gel(prod,3);
+          dism = 2*valp(e1); break;
+        case 2:
+          e0 = gel(prod,2);
+          e1 = gel(prod,3);
+          e2 = gel(prod,4);
+          dism = valp(gsub(gsqr(e1),gmul2n(gmul(e0,e2),2))); break;
+        default:
+          pari_err_BUG("genus2localred [padicfactors 2]");
+          dism = 0;
+      }
       switch(itos(gmulgs(theta,12))+alpha-4)
       {
         case 0:

@@ -685,3 +685,6 @@ genus2red(Q,P,3)
 \\ M. Stoll, bug27
 Q=x^3+1; P=-7*x^6+5*x^3+5*x^2-6*x+1;
 genus2red(Q,P,3)
+
+\\ #1596
+genus2red(0,27*x^5 + 97*x^4 + 118*x^3 + 60*x^2 + 13*x + 1,3)
