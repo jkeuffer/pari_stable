@@ -482,7 +482,7 @@ sub posttex {
 #
 sub fit_loop {
   my($i);
-  return if ($miss > 9);
+  return if ($miss > 9 || $#_ <= 0);
   while ($miss > 0)
   {
 #  print "1:$miss ";print @_;print "\n";
