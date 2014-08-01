@@ -467,6 +467,16 @@ end:
   return polf;
 }
 
+/* a in Q[i], return a^3 mod 3 */
+static GEN
+zi_pow3mod(GEN a)
+{
+  GEN x, y;
+  if (typ(a) != t_COMPLEX) return gmodgs(a,3);
+  x = gmodgs(gel(a,1), 3);
+  y = gmodgs(gel(a,2), 3);
+  return mkcomplex(x, negi(y));
+}
 static GEN
 polymini_zi(GEN pol) /* polynome minimal dans Z[i] */
 {
@@ -494,7 +504,7 @@ polymini_zi(GEN pol) /* polynome minimal dans Z[i] */
     }
     RgX_to_6(polh, &a0,&a1,&a2,&a3,&a4,&a5,&a6);
     if (!gequal0(theta) || !myval_zi(a4) || !myval_zi(a5)) break;
-    rac = Fp_neg(Fp_powu(Fp_div(a6, a3, p), 3, p), p);
+    rac = zi_pow3mod(gdiv(a6, gneg(a3)));
   }
   if (alpha && myval_zi(a0) >= 3 && myval_zi(a1) >= 2 && myval_zi(a2) >= 1)
   {
@@ -505,23 +515,13 @@ polymini_zi(GEN pol) /* polynome minimal dans Z[i] */
   return mkvec3(theta, stoi(alpha), stoi(beta));
 }
 
-/* u in Z[i,Y]/(Y^2-3), compute u mod Y */
-static GEN
-zi2mod(GEN u)
-{
-  GEN a,b,unmodp = mkintmod(gen_1, stoi(3));
-  u = truecoeff(lift(u),0);
-  a = gmul(unmodp,real_i(u));
-  b = gmul(unmodp,imag_i(u));
-  return gadd(a,gmul(b,gen_I()));
-}
 /* pol is a ZX, minimal polynomial over Z_3[i,Y]/(Y^2-3) */
 static GEN
 polymini_zi2(GEN pol)
 {
   long alpha, beta, v = MAXVARN;
   GEN a0, a1, a2, a3, a4, a5, a6;
-  GEN p, polh, rac, theta, b3, b6, y = pol_x(v);
+  GEN p, polh, rac, theta, y = pol_x(v);
 
   p = stoi(3);
   if (polval(pol,p)) pari_err_BUG("polymini_zi2 [polynomial not minimal]");
@@ -552,9 +552,9 @@ polymini_zi2(GEN pol)
     }
     RgX_to_6(polh, &a0,&a1,&a2,&a3,&a4,&a5,&a6);
     if (!gequal0(theta) || !myval_zi2(a4) || !myval_zi2(a5)) break;
-    b3 = zi2mod(a3);
-    b6 = zi2mod(a6);
-    rac = lift(gpowgs(gdiv(b6,gneg(b3)), 3));
+    a3 = liftpol_shallow(a3);
+    a6 = liftpol_shallow(a6);
+    rac = zi_pow3mod(gdiv(a6,gneg(a3)));
   }
   if (alpha)
   {
