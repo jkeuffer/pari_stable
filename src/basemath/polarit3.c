@@ -657,7 +657,17 @@ Fq_sqrtn(GEN x, GEN n, GEN T, GEN p, GEN *zeta)
     long d;
     if (!T) return Fp_sqrtn(x,n,p,zeta);
     d = get_FpX_degree(T);
-    if (ugcd(umodiu(n,d),d) == 1) return Fp_sqrtn(x,n,p,zeta);
+    if (ugcd(umodiu(n,d),d) == 1)
+    {
+      if (!zeta)
+        return Fp_sqrtn(x,n,p,NULL);
+      else
+      {
+        /* gcd(n,p-1)=gcd(n,p^d-1) <=> same number of solutions if Fp and F_{p^d} */
+        if (equalii(gcdii(subiu(p,1),n), gcdii(subiu(Fp_powu(p,d,n), 1), n)))
+          return Fp_sqrtn(x,n,p,zeta);
+      }
+    }
     x = scalarpol_shallow(x, get_FpX_var(T));
   }
   return FpXQ_sqrtn(x,n,T,p,zeta);
