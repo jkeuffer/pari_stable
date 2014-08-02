@@ -552,8 +552,8 @@ polymini_zi2(GEN pol)
     }
     RgX_to_6(polh, &a0,&a1,&a2,&a3,&a4,&a5,&a6);
     if (!gequal0(theta) || !myval_zi2(a4) || !myval_zi2(a5)) break;
-    a3 = liftpol_shallow(a3);
-    a6 = liftpol_shallow(a6);
+    a3 = liftpol_shallow(a3); if (typ(a3)==t_POL) a3 = constant_term(a3);
+    a6 = liftpol_shallow(a6); if (typ(a6)==t_POL) a6 = constant_term(a6);
     rac = zi_pow3mod(gdiv(a6,gneg(a3)));
   }
   if (alpha)
