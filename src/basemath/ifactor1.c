@@ -3207,7 +3207,7 @@ factoru(ulong n)
   forprime_t S;
 
   if (n == 0) retmkvec2(mkvecsmall(0), mkvecsmall(1));
-  if (n == 1) return trivial_fact();
+  if (n == 1) retmkvec2(cgetg(1,t_VECSMALL), cgetg(1,t_VECSMALL));
 
   v = vals(n);
   if (v)
