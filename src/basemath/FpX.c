@@ -145,8 +145,9 @@ Fp_red_FpX(GEN x, GEN p, long v)
   GEN z;
   if (!signe(x)) return pol_0(v);
   z = cgetg(3, t_POL);
-  z[1] = evalsigne(1) | evalvarn(v);
-  gel(z,2) = Fp_red(x,p); return z;
+  gel(z,2) = Fp_red(x,p);
+  z[1] = evalvarn(v);
+  return FpX_renormalize(z, 3);
 }
 
 static GEN
@@ -155,8 +156,9 @@ Fp_neg_FpX(GEN x, GEN p, long v)
   GEN z;
   if (!signe(x)) return pol_0(v);
   z = cgetg(3, t_POL);
-  z[1] = evalsigne(1) | evalvarn(v);
-  gel(z,2) = Fp_neg(x,p); return z;
+  gel(z,2) = Fp_neg(x,p);
+  z[1] = evalvarn(v);
+  return FpX_renormalize(z, 3);
 }
 
 GEN
