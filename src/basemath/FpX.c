@@ -1625,8 +1625,7 @@ static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,hash_GEN,
 
 const struct bb_group *get_FpXQ_star(void **E, GEN T, GEN p)
 {
-  GEN z = new_chunk(sizeof(struct _FpXQ));
-  struct _FpXQ *e = (struct _FpXQ *) z;
+  struct _FpXQ *e = (struct _FpXQ *) stack_malloc(sizeof(struct _FpXQ));
   e->T = T; e->p  = p; e->aut =  FpXQ_pow(pol_x(get_FpX_var(T)), p, T, p);
   *E = (void*)e; return &FpXQ_star;
 }
