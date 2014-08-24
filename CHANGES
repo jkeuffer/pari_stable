@@ -28,6 +28,7 @@ BA 11- multiif did not handle correctly return() in conditions [#1590]    [F35]
    18- [ghelp] oo loop when $COLUMNS too small [#1594]                    [F42]
    19- genus2red(x,-x^6-3*x^4-10*x^2-1,3) -> impossible inverse [#1597]   [F43]
    20- factoru(1) returned a t_MAT instead of the expected "matsmall"     [F44]
+   21- FpM_charpoly wrong in small characteristic [#1602]                 [F45]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]

@@ -497,13 +497,17 @@ carhess(GEN x, long v)
 GEN
 FpM_charpoly(GEN x, GEN p)
 {
-  pari_sp av;
+  pari_sp av = avma;
   long lx, r, i;
   GEN y, H;
 
-  /* Flm_charpoly left on stack */
-  if (lgefint(p) == 3) return Flx_to_ZX(Flm_charpoly(x, p[2]));
-  lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
+  if (lgefint(p) == 3)
+  {
+    ulong pp = p[2];
+    y = Flx_to_ZX(Flm_charpoly(ZM_to_Flm(x,pp), pp));
+    return gerepileupto(av, y);
+  }
+  lx = lg(x); y = cgetg(lx+1, t_VEC);
   gel(y,1) = pol_1(0); H = FpM_hess(x, p);
   for (r = 1; r < lx; r++)
   {
