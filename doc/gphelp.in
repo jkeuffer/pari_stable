@@ -846,6 +846,7 @@ sub basic_subst {
   s/ *>  *([=>]) */ >$1 /g;
   s/ *([*+-\/^&=|:]) += */ $1= /g;
   s/ *! *= */ != /g;
+  s/ == = / === /g;
 
   s/ *\\Rightarrow */ ==$tr{gt} /g;
   s/\\rangle(?![a-zA-Z])\s*/$tr{startcode}$tr{gt}$tr{endcode}/g;
