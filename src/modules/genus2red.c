@@ -279,7 +279,7 @@ factmz(GEN Q, GEN p, long *maxord)
   }
   if (m >= 3 && degpol(z) == 2)
   {
-    GEN F = factmod(z,p);
+    GEN F = FpX_factor(z,p);
     z = gcoeff(F,1,1);
   }
   *maxord = m; return z;
