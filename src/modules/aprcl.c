@@ -63,19 +63,19 @@ static GEN
 red_cyclop(GEN T, long p)
 {
   long i, d;
-  GEN y, *z;
+  GEN y, z;
 
   d = degpol(T) - p; /* < p */
   if (d <= -2) return T;
 
   /* reduce mod (x^p - 1) */
   y = ZX_mod_Xnm1(T, p);
-  z = (GEN*)(y+2);
+  z = y+2;
 
   /* reduce mod x^(p-1) + ... + 1 */
   d = p-1;
-  if (signe(z[d]))
-    for (i=0; i<d; i++) z[i] = subii(z[i], z[d]);
+  if (degpol(y) == d)
+    for (i=0; i<d; i++) gel(z,i) = subii(gel(z,i), gel(z,d));
   return normalizepol_lg(y, d+2);
 }
 
