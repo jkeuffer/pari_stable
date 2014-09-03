@@ -298,7 +298,7 @@ sub treat {
 
   my ($first);
   my ($pat) = $help;
-  if ($pat =~ /^[a-zA-Z]/) { $pat .= '\b'; } else { $pat .= '}'; }
+  if ($pat =~ /[a-zA-Z]$/) { $pat .= '\b'; } else { $pat .= '}'; }
   while (<DOC>)
   {
     if (/\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter|label){$pat/)
