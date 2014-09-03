@@ -125,7 +125,8 @@ member          @Member functions@2
 <<=             @GP operators@2
 <<              @shift
 >>              @shift
-<>              @Comparison and boolean operators
+<>              @Comparison and Boolean operators
+===             @Comparison and Boolean operators
 +/-             @+$/$-
 min             @max
 emacs           @Using GP under GNU Emacs@2
