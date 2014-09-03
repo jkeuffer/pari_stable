@@ -2172,6 +2172,17 @@ genus2localred(struct igusa *I, struct igusa_p *Ip, GEN p, GEN polmini)
   return condp;
 }
 
+static long
+chk_pol(GEN P) {
+  switch(typ(P))
+  {
+    case t_INT: break;
+    case t_POL: RgX_check_ZX(P,"genus2red"); return varn(P); break;
+    default: pari_err_TYPE("genus2red", P);
+  }
+  return -1;
+}
+
 /* P,Q are ZX, study Y^2 + Q(X) Y = P(X) */
 GEN
 genus2red(GEN Q, GEN P, GEN p)
@@ -2179,17 +2190,16 @@ genus2red(GEN Q, GEN P, GEN p)
   pari_sp av = avma;
   struct igusa I;
   GEN j22, j42, j2j6, a0,a1,a2,a3,a4,a5,a6, V,polr,facto,factp, vecmini, cond;
-  long i, l, dd;
+  long i, l, dd, vP,vQ;
 
-  if (typ(P) != t_POL) pari_err_TYPE("genus2red", P);
-  RgX_check_ZX(P, "genus2red");
-  switch (typ(Q))
+  vP = chk_pol(P);
+  vQ = chk_pol(Q);
+  if (vP < 0)
   {
-    case t_INT: Q = scalarpol(Q, varn(P)); break;
-    case t_POL:
-      RgX_check_ZX(Q, "genus2red");
-      if (varn(Q) != varn(P)) pari_err_VAR("genus2red",P,Q);
+    if (vQ < 0) pari_err_TYPE("genus2red",mkvec2(P,Q));
+    P = scalarpol(P,vQ);
   }
+  else if (vQ < 0) Q = scalarpol(Q,vP);
   if (p && typ(p) != t_INT) pari_err_TYPE("genus2red", p);
 
   polr = ZX_add(ZX_sqr(Q), gmul2n(P,2)); /* ZX */

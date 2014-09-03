@@ -710,5 +710,9 @@ x^2 - 82136*x - 12052, [3, [6, [Mod(0, 3)]], ["(tame) [I{12}-I{0}-1] page 17
 [2401, Mat([7, 4]), 6*x^6 + 180*x^5 + 2255*x^4 + 15100*x^3 + 57001*x^2 + 115
 010*x + 96901, [7, [5, [Mod(0, 7), Mod(0, 7)]], ["(tame) [II-II-0] page 163"
 , []]]]
+? genus2red(x^3-1,1)
+[18225, [3, 6; 5, 2], x^6 - 2*x^3 + 5, [[3, [5, [Mod(0, 3), Mod(0, 3)]], ["[
+II-II-0] pages 159-174", []]], [5, [5, [Mod(0, 5), Mod(0, 5)]], ["[I{0}-II-0
+] page 159", []]]]]
 ? print("Total time spent: ",gettime);
-Total time spent: 64
+Total time spent: 72

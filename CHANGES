@@ -32,6 +32,7 @@ BA 11- multiif did not handle correctly return() in conditions [#1590]    [F35]
    22- when compatible = 3; series() used a random precision              [F50]
    23- genus2red(0,6*x^6+5*x^4+x^2+1,7) -> impossible inverse [#1597]     [F51]
    24- isprime() could crash on large input [#1604]                       [F52]
+   25- genus2red(x^3+1,1) -> type error [#1597]                           [F53]
 
 Done for version 2.7.1 (released 16/05/2014):
 [last column crossreferences current development release 2.8.0]
