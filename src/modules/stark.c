@@ -1066,7 +1066,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   l = lg(dataCR);
   for (j = 1; j < l; j++)
   {
-    GEN dtcr = gel(dataCR,j), f0 = gel(dtcr,1);
+    GEN dtcr = gel(dataCR,j), f0 = gel(ch_cond(dtcr),1);
     ch_C(dtcr) = gmul(C, gsqrt(ZM_det_triangular(f0), prec2));
 
     gmael(ch_bnr(dtcr), 1, 7) = nf;
