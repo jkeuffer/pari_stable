@@ -283,7 +283,6 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 #define ch_CHI(x)  gel(x,5)
 #define ch_diff(x) gel(x,6)
 #define ch_cond(x) gel(x,7)
-#define ch_cond0(x) gmael(x,7,1)
 #define ch_CHI0(x) gel(x,8)
 #define ch_comp(x) gel(x,9)
 
@@ -975,7 +974,6 @@ InitChar(GEN bnr, GEN listCR, long prec)
       ch_C(dtcr) = gmul(C, gsqrt(ZM_det_triangular(gel(cond,1)), prec2));
       ch_4(dtcr) = _data4(gel(cond,2),r1,r2);
       ch_cond(dtcr) = cond;
-      ch_cond0(dtcr) = gel(cond,1);
       if (gequal(cond,modul))
       {
         ch_bnr(dtcr) = bnr;
@@ -1068,8 +1066,8 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   l = lg(dataCR);
   for (j = 1; j < l; j++)
   {
-    GEN dtcr = gel(dataCR,j);
-    ch_C(dtcr) = gmul(C, gsqrt(ZM_det_triangular(ch_cond0(dtcr)), prec2));
+    GEN dtcr = gel(dataCR,j), f0 = gel(dtcr,1);
+    ch_C(dtcr) = gmul(C, gsqrt(ZM_det_triangular(f0), prec2));
 
     gmael(ch_bnr(dtcr), 1, 7) = nf;
 
