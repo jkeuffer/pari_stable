@@ -2692,8 +2692,6 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   checkbnr(bnr);
   if (flag < 0 || flag > 8) pari_err_FLAG("bnrL1");
 
-  /* compute bnr(conductor) */
-  if (!(flag & 2)) bnr = gel(bnrconductor(bnr, NULL, 2),2);
   cyc  = bnr_get_cyc(bnr);
   subgp = get_subgroup(subgp, cyc, "bnrL1");
 
