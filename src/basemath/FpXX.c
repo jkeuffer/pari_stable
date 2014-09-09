@@ -783,7 +783,11 @@ FpXY_evaly(GEN Q, GEN y, GEN p, long vx)
   GEN z;
   if (lb == 2) return pol_0(vx);
   z = gel(Q, lb-1);
-  if (lb == 3 || !signe(y)) return typ(z)==t_INT? scalar_ZX(z, vx): ZX_copy(z);
+  if (lb == 3) return typ(z)==t_INT? scalar_ZX(z, vx): ZX_copy(z);
+  if (!signe(y)) {
+    z = gel(Q, 2);
+    return typ(z)==t_INT? scalar_ZX(z, vx): ZX_copy(z);
+  }
 
   if (typ(z) == t_INT) z = scalar_ZX_shallow(z, vx);
   for (i=lb-2; i>=2; i--) z = Fq_add(gel(Q,i), FpX_Fp_mul(z, y, p), NULL, p);
