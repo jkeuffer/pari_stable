@@ -4226,8 +4226,9 @@ element of $\F_p[X][Y]$. Returns the \kbd{Fp} $Q(x,y)$.
 \fun{GEN}{FpXY_evalx}{GEN Q, GEN x, GEN p} $Q$ being an \kbd{FpXY}, returns the
 \kbd{FpX} $Q(x,Y)$, where $Y$ is the main variable of $Q$.
 
-\fun{GEN}{FpXY_evaly}{GEN Q, GEN y, GEN p, long vy} $Q$ an \kbd{FpXY}, returns
-the \kbd{FpX} $Q(X,y)$, where $X$ is the second variable of $Q$.
+\fun{GEN}{FpXY_evaly}{GEN Q, GEN y, GEN p, long vx} $Q$ an \kbd{FpXY}, returns
+the \kbd{FpX} $Q(X,y)$, where $X$ is the second variable of $Q$, and \kbd{vx}
+is the variable number of $X$.
 
 \fun{GEN}{FpXY_Fq_evaly}{GEN Q, GEN y, GEN T, GEN p, long vx} $Q$ an \kbd{FpXY}
 and $y$ being an \kbd{Fq}, returns the \kbd{FqX} $Q(X,y)$, where $X$ is the
