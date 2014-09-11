@@ -1177,9 +1177,9 @@ gprc_get(void)
     if (!f)  /* in basedir */
     {
       const char *basedir = win32_basedir();
-      char *t = (char *) pari_malloc(strlen(basedir) + 9);
+      char *t = (char *) pari_malloc(strlen(basedir)+strlen(s)+2);
       sprintf(t, "%s/%s", basedir, s);
-      f = gprc_chk(t);
+      f = gprc_chk(t); free(t);
     }
 #endif
     pari_free(str);
