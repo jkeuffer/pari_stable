@@ -80,3 +80,7 @@ nfnewprec(vector(6))
 nfnewprec(vector(8))
 nfnewprec(vector(9))
 nfnewprec(vector(16))
+
+g=polcyclo(13);
+f=x^12-2*x^11+17*x^10-73*x^9+198*x^8-578*x^7+1533*x^6-3404*x^5+5716*x^4-8260*x^3+18652*x^2-25578*x+15601;
+nfisincl(f,g)

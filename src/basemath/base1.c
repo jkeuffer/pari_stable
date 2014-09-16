@@ -1149,8 +1149,8 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
   for (i=1; i<nP; i++)
     if (mod2(gel(E,i)) && !dvdii(db, powiu(gel(P,i),q))) return 0;
   U = gel(P,nP);
-  if (expi(U) < 150) /* "unfactored" cofactor is small, finish */
-  {
+  if (mod2(gel(E,i)) && expi(U) < 150)
+  { /* "unfactored" cofactor is small, finish */
     if (cmpiu(U, maxprime()) > 0)
     {
       fa = Z_factor(U);
@@ -1160,7 +1160,7 @@ tests_OK(GEN a, GEN nfa, GEN b, GEN nfb, long fliso)
     else
     {
       P = mkvec(U);
-      E = mkvec(gel(E,nP));
+      E = mkvec(gen_1);
     }
     nP = lg(P) - 1;
     for (i=1; i<=nP; i++)
