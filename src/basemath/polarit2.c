@@ -2412,13 +2412,12 @@ RgX_resultant_all(GEN P, GEN Q, GEN *sol)
     s = leading_term(P);
   }
   if (!signe(Q)) { avma = av; return RgX_get_0(Q); }
-  av2 = avma;
   s = Lazard(leading_term(Q), s, degpol(P));
   if (sig == -1) s = gneg(s);
   if (cP) s = gmul(s, gpowgs(cP,dQ));
   if (cQ) s = gmul(s, gpowgs(cQ,dP));
   if (sol) { *sol = P; gerepileall(av, 2, &s, sol); return s; }
-  return (avma == av2)? gerepilecopy(av, s): gerepileupto(av, s);
+  return gerepilecopy(av, s);
 }
 /* Return resultant(P,Q). If sol != NULL: set *sol to the last non-constant
  * polynomial in the prs IF the sequence was computed, and gen_0 otherwise.
