@@ -1484,7 +1484,7 @@ Fq_ellcard_SEA(GEN a4, GEN a6, GEN q, GEN T, GEN p, long smallfact)
     if (cmpii(mulii(TR_mod, prod_atkin), bound) > 0)
     {
       GEN bound_tr;
-      if (!nb_atkin) return gerepileuptoint(ltop, subii(addis(p,1),TR));
+      if (!nb_atkin) return gerepileuptoint(ltop, subii(addis(q, 1), TR));
       bound_tr = mulrr(bound_bsgs, dbltor(bound_gr));
       bound_gr *= growth_factor;
       if (signe(max_traces))

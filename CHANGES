@@ -5,10 +5,11 @@ Done for version 2.7.3 (released ??/??/2015):
 [last column crossreferences current development release 2.8.0]
 
   Fixed
-   1- [from 2.7.2] ??bnrL1 and ??ellL1 did not work anymore
-XR 2- bnrL1(bnrinit(bnfinit(x^2-168),[6,[1,1]],1)) -> bug in ArtinNumber  [F55]
-   3- nfisincl(t_POL, t_POL) could lead to wrong negative results         [F58]
-   4- polresultant(1+x*z^2,1+y*z^4,z) -> GC error [#1614]                 [F59]
+    1- [from 2.7.2] ??bnrL1 and ??ellL1 did not work anymore
+XR  2- bnrL1(bnrinit(bnfinit(x^2-168),[6,[1,1]],1)) -> bug in ArtinNumber [F55]
+    3- nfisincl(t_POL, t_POL) could lead to wrong negative results        [F58]
+    4- polresultant(1+x*z^2,1+y*z^4,z) -> GC error [#1614]                [F59]
+BA  5- ellcard over non-prime fields could return wrong results           [F60]
 
 Done for version 2.7.2 (released 19/09/2014):
 [last column crossreferences current development release 2.8.0]
