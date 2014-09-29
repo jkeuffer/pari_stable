@@ -12,6 +12,7 @@ Done for version 2.7.4 (released ??/??/2015):
     5- qfminim(A, 0, ...) -> stack overflow                      [#1682] [F97]
     6- div_scal_rfrac could create an invalid t_POL              [#1651] [F99]
     7- polroots(t_POL with leading coeff = 0) -> fp exception    [#1690] [F100]
+    8- \r cannot deal with very long filenames                   [#1616] [F101]
 
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]

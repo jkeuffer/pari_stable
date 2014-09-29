@@ -16,18 +16,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /* Simple-minded parsing utilities. These are forbidden to use the GP stack
  * which may not exist at this point [e.g upon GP initialization]  */
 
-#ifdef MAXPATHLEN
-#  define GET_SEP_SIZE MAXPATHLEN
-#else
-#  define GET_SEP_SIZE 128
-#endif
-
 /* Return all chars, up to next separator
  * [as strtok but must handle verbatim character string] */
 char*
 get_sep(const char *t)
 {
-  static char buf[GET_SEP_SIZE], *lim = buf + GET_SEP_SIZE;
+  char *buf = stack_malloc(strlen(t)+1);
   char *s = buf;
   int outer = 1;
 
@@ -43,11 +37,8 @@ get_sep(const char *t)
         if (outer) { s[-1] = 0; return buf; }
         break;
       case '\\': /* gobble next char */
-        if (s == lim) break;
         if (! (*s++ = *t++) ) return buf;
     }
-    if (s == lim)
-      pari_err(e_MISC,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);
   }
 }
 
@@ -91,24 +82,27 @@ my_int(char *s)
 long
 get_int(const char *s, long dflt)
 {
+  pari_sp av = avma;
   char *p = get_sep(s);
   long n;
   int minus = 0;
 
   if (*p == '-') { minus = 1; p++; }
-  if (!isdigit((int)*p)) return dflt;
+  if (!isdigit((int)*p)) { avma = av; return dflt; }
 
   n = (long)my_int(p);
   if (n < 0) pari_err(e_SYNTAX,"integer too large",s,s);
-  return minus? -n: n;
+  avma = av; return minus? -n: n;
 }
 
 ulong
 get_uint(const char *s)
 {
+  pari_sp av = avma;
   char *p = get_sep(s);
+  ulong u;
   if (*p == '-') pari_err(e_SYNTAX,"arguments must be positive integers",s,s);
-  return my_int(p);
+  u = my_int(p); avma = av; return u;
 }
 
 /********************************************************************/
