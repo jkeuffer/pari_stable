@@ -304,8 +304,8 @@ struct split_t { GEN todo, done; };
 static void
 split_init(struct split_t *S, long max)
 {
-  S->done = vectrunc_init(max);
   S->todo = vectrunc_init(max);
+  S->done = vectrunc_init(max);
 }
 #if 0
 /* move todo[i] to done */
@@ -363,7 +363,7 @@ FpX_roots_i(GEN f, GEN p)
   switch(degpol(f))
   {
     case 0: return S.done;
-    case 1: split_add_done(&S, subii(p, gel(f,2))); return S.done;
+    case 1: split_add_done(&S, subii(p, gel(f,2))); return ZC_copy(S.done);
     case 2: {
       GEN s, r = FpX_quad_root(f, p, 1);
       if (r) {
