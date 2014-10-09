@@ -505,6 +505,7 @@ pari_close_evaluator(void)
   pari_stack_delete(&s_var);
   pari_stack_delete(&s_lvars);
   pari_stack_delete(&s_trace);
+  pari_stack_delete(&s_relocs);
 }
 
 static gp_pointer *
