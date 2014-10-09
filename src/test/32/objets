@@ -120,6 +120,7 @@ O(x^12)
   ***   at top-level: Mod(10873,49649)^-1
   ***                                 ^---
   *** _^_: impossible inverse in Fp_inv: Mod(131, 49649).
-? if(getheap()!=HEAP,getheap())
+? (1+I)*(1+1/2*I)
+1/2 + 3/2*I
 ? print("Total time spent: ",gettime);
 Total time spent: 4

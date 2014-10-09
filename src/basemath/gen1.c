@@ -1707,7 +1707,7 @@ mulcc(GEN x, GEN y)
   gel(z,1) = gadd(p1,p2);
   gel(z,2) = gadd(p3,p4);
 #else
-  if (typ(xr)==t_INT && typ(yr)==t_INT && typ(xi)==t_INT && typ(yr)==t_INT)
+  if (typ(xr)==t_INT && typ(yr)==t_INT && typ(xi)==t_INT && typ(yi)==t_INT)
   { /* 3M formula */
     p3 = addii(xr,xi);
     p4 = addii(yr,yi);
