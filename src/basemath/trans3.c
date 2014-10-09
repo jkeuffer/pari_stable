@@ -3028,7 +3028,7 @@ weberf1(GEN x, long prec)
   z = apply_eta_correction(z, st_a, st_b, gen_0, NULL, prec);
   return gerepileupto(av, z);
 }
-/* e(-1/24) * eta((x+1)/2) / eta(x) */
+/* exp(-I*Pi/24) * eta((x+1)/2) / eta(x) */
 GEN
 weberf(GEN x, long prec)
 {
@@ -3045,7 +3045,7 @@ weberf(GEN x, long prec)
   st_b = eta_correction(b, Ub, 1);
   t0 = mkfrac(gen_m1, utoipos(24));
   z = apply_eta_correction(z, st_a, st_b, t0, NULL, prec);
-  if (typ(z) == t_COMPLEX && isexactzero(real_i(a)))
+  if (typ(z) == t_COMPLEX && isexactzero(real_i(x)))
     z = gerepilecopy(av, gel(z,1));
   else
     z = gerepileupto(av, z);
