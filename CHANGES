@@ -13,6 +13,7 @@ BA  5- ellcard over non-prime fields could return wrong results           [F60]
     6- [libpari] FpX_roots could produce GC errors [#1618]                [F61]
     7- weber(1+I) was missing its imaginary part                          [F62]
     8- (1+I)*(1+1/2*I) => wrong result (type errors) [#1619]              [F63]
+    9- contfracpnqn([a]) => [1,a;0,1] instead of [a,1;1,0]                [F64]
 
 Done for version 2.7.2 (released 19/09/2014):
 [last column crossreferences current development release 2.8.0]

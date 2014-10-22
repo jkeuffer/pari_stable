@@ -3573,7 +3573,7 @@ contfracpnqn(GEN x, long n)
     if (lx == 2) return gerepilecopy(av, mkmat(mkcol2(p1,q1)));
   }
   else if (lx == 2)
-    return gerepilecopy(av, mkmat2(mkcol2(gen_1,gen_0), mkcol2(p1,q1)));
+    return gerepilecopy(av, mkmat2(mkcol2(p1,q1), mkcol2(gen_1,gen_0)));
   /* lx >= 3 */
   p0 = gen_1;
   q0 = gen_0; /* p[-1], q[-1] */
