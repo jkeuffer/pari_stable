@@ -654,76 +654,36 @@ Zp_issquare(GEN a, GEN p)
                       : kronecker(ap,p) == 1;
 }
 
-static int
-is_char_2(GEN a)
-{
-  long j;
-  GEN b;
-  switch(typ(a))
-  {
-  case t_INTMOD:
-    b = gel(a,1);
-    if (!mod2(b))
-    {
-      if (!equaliu(b, 2)) pari_err_IMPL( "issquare for this input");
-      return 1;
-    }
-    return 0;
-  case t_FFELT:
-    if (equaliu(FF_p_i(a), 2)) return 1;
-    return 0;
-  case t_POLMOD:
-    if (is_char_2(gel(a,1)) || is_char_2(gel(a,2))) return 1;
-    return 0;
-  case t_POL:
-    for (j = 2; j < lg(a); j++)
-      if (is_char_2(gel(a,j))) return 1;
-    return 0;
-  }
-  return 0;
-}
-
 static long
 polissquareall(GEN x, GEN *pt)
 {
   pari_sp av;
-  long v, l = degpol(x);
-  GEN y, a, b;
+  long v;
+  GEN y, a, b, p;
 
   if (!signe(x))
   {
     if (pt) *pt = gcopy(x);
     return 1;
   }
-  if (pt) *pt = gen_0;
-  if (l&1) return 0; /* odd degree */
+  if (odd(degpol(x))) return 0; /* odd degree */
   av = avma;
   v = RgX_valrem(x, &x);
-  if (v) {
-    l = degpol(x);
-    if (l&1) return 0;
-  }
-  a = gel(x,2);
-  switch (typ(a))
-  {
-    case t_INT:
-      if (!Z_issquareall(a,&b)) { avma = av; return 0; }
-      break;
-    case t_POL:
-      if (!polissquareall(a,&b)) { avma = av; return 0; }
-      break;
-    default:
-      if (!issquare(a)) { avma = av; return 0; }
-      b = NULL; break;
-  }
-  if (!l) {
+  if (v & 1) { avma = av; return 0; }
+  a = gel(x,2); /* test constant coeff */
+  if (!pt)
+  { if (!issquare(a)) { avma = av; return 0; } }
+  else
+  { if (!issquareall(a,&b)) { avma = av; return 0; } }
+  if (!degpol(x)) { /* constant polynomial */
     if (!pt) { avma = av; return 1; }
-    if (!b) b = gsqrt(a,DEFAULTPREC);
     y = scalarpol(b, varn(x)); goto END;
   }
-  if (is_char_2(x))
+  p = characteristic(x);
+  if (signe(p) && !mod2(p))
   {
     long i, lx;
+    if (!equaliu(p,2)) pari_err_IMPL("issquare for even characteristic != 2");
     x = gmul(x, mkintmod(gen_1, gen_2));
     lx = lg(x);
     if ((lx-3) & 1) { avma = av; return 0; }
@@ -744,14 +704,10 @@ polissquareall(GEN x, GEN *pt)
   else
   {
     x = RgX_Rg_div(x,a);
-    y = gtrunc(gsqrt(RgX_to_ser(x,2+l),0));
+    y = gtrunc(gsqrt(RgX_to_ser(x,lg(x)),0));
     if (!RgX_equal(gsqr(y), x)) { avma = av; return 0; }
     if (!pt) { avma = av; return 1; }
-    if (!gequal1(a))
-    {
-      if (!b) b = gsqrt(a,DEFAULTPREC);
-      y = gmul(b, y);
-    }
+    if (!gequal1(a)) y = gmul(b, y);
   }
 END:
   *pt = v? gerepilecopy(av, RgX_shift_shallow(y, v >> 1)): gerepileupto(av, y);
@@ -1039,23 +995,28 @@ static long
 polispower(GEN x, GEN K, GEN *pt)
 {
   pari_sp av;
-  long v, l = degpol(x), k = itos(K);
+  long v, k = itos(K);
   GEN y, a, b;
 
-  if (!signe(x)) return 1;
-  if (l % k) return 0; /* degree not multiple of k */
+  if (!signe(x))
+  {
+    if (pt) *pt = gcopy(x);
+    return 1;
+  }
+  if (degpol(x) % k) return 0; /* degree not multiple of k */
+  av = avma;
   v = RgX_valrem(x, &x);
   if (v % k) return 0;
-  av = avma; a = gel(x,2); b = NULL;
+  a = gel(x,2); b = NULL;
   if (!ispower(a, K, &b)) { avma = av; return 0; }
-  av = avma;
   if (degpol(x))
   {
     x = RgX_Rg_div(x,a);
     y = gtrunc(gsqrtn(RgX_to_ser(x,lg(x)), K, NULL, 0));
     if (!RgX_equal(powgi(y, K), x)) { avma = av; return 0; }
   }
-  else y = pol_1(varn(x));
+  else
+    y = pol_1(varn(x));
   if (pt)
   {
     if (!gequal1(a))

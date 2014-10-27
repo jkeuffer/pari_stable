@@ -1170,6 +1170,13 @@ t^2 + t + 1
 0
 1
 1
+1/2
+x + 1/2
+1/2
+1
+  ***   at top-level: issquare(Mod(1,4)*(x
+  ***                 ^--------------------
+  *** issquare: sorry, issquare for even characteristic != 2 is not yet implemented.
 0
 -2
 1
@@ -1191,4 +1198,4 @@ x + 2
 121
 187
 1
-Total time spent: 5192
+Total time spent: 2600
