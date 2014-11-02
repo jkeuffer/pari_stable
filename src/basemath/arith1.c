@@ -704,7 +704,7 @@ polissquareall(GEN x, GEN *pt)
   else
   {
     x = RgX_Rg_div(x,a);
-    y = gtrunc(gsqrt(RgX_to_ser(x,lg(x)),0));
+    y = gtrunc(gsqrt(RgX_to_ser(x,lg(x)-1),0));
     if (!RgX_equal(gsqr(y), x)) { avma = av; return 0; }
     if (!pt) { avma = av; return 1; }
     if (!gequal1(a)) y = gmul(b, y);
