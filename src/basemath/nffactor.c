@@ -1701,7 +1701,7 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
       pari_err_IRREDPOL("factornf [modulus]",T);
     gel(P,i) = QXQX_normalize(F, T);
   }
-  gen_sort_inplace(P, (void*)&cmp_RgX, cmp_nodata, NULL);
+  gen_sort_inplace(P, (void*)&cmp_RgX, (void*)&gen_cmp_RgX, NULL);
   return P;
 }
 
