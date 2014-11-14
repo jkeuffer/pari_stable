@@ -1777,7 +1777,7 @@ modulo \kbd{p} (smallest positive representative). Assumes \kbd{p} to be
 prime, and \kbd{x} to be a square modulo \kbd{p}.
 
 \fun{ulong}{Fl_order}{ulong a, ulong o, ulong p} returns the order of the
-\typ{Fp} \kbd{a}. It is assumed that \kbd{o} is a multiple of the order of
+\kbd{Fp} \kbd{a}. It is assumed that \kbd{o} is a multiple of the order of
 \kbd{a}, $0$ being allowed (no non-trivial information).
 
 \fun{ulong}{random_Fl}{ulong p} returns a pseudo-random integer uniformly
@@ -2931,7 +2931,7 @@ $a^e \equiv g \pmod{p}$. If $e$ does not exist, the result is currently
 undefined.
 
 \fun{GEN}{Fp_order}{GEN a, GEN N, GEN p} returns the order of the
-\typ{Fp} \kbd{a}. If \kbd{N} is non-\kbd{NULL}, it is assumed that \kbd{N}
+\kbd{Fp} \kbd{a}. If \kbd{N} is non-\kbd{NULL}, it is assumed that \kbd{N}
 is a multiple of the order of \kbd{a}, as a \typ{INT} or a
 factorization matrix.
 
@@ -4071,7 +4071,7 @@ that \kbd{T} is irreducible mod \kbd{p}.
 \kbd{FpXQ\_log}, \kbd{a} being a \kbd{Fp}.
 
 \fun{GEN}{FpXQ_order}{GEN a, GEN ord, GEN T, GEN p} returns the order of the
-\typ{FpXQ} \kbd{a}. If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o}
+\kbd{FpXQ} \kbd{a}. If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o}
 is a multiple of the order of \kbd{a}, either as a \typ{INT} or a
 factorization matrix. Assumes that \kbd{T} is irreducible mod \kbd{p}.
 
@@ -4115,7 +4115,7 @@ error if \kbd{x} is not invertible.
 
 \fun{GEN}{Fq_div}{GEN x, GEN y, GEN T, GEN p}
 
-\fun{GEN}{FqV_inv}{GEN x, GEN T, GEN p} $x$ being a vector of \typ{Fq}s,
+\fun{GEN}{FqV_inv}{GEN x, GEN T, GEN p} $x$ being a vector of \kbd{Fq}s,
 return the vector of inverses of the $x[i]$. The routine uses Montgomery's
 trick, and involves a single inversion, plus $3(N-1)$ multiplications for
 $N$ entries. The routine is not stack-clean: $2N$ \kbd{FpXQ} are left on
@@ -4193,7 +4193,7 @@ $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$.
 
 \subsec{\kbd{FpXX}, \kbd{FpXY}}
 Contrary to what the name implies, an \kbd{FpXX} is a \typ{POL} whose
-coefficients are either \typ{INT}s or \typ{FpX}s. This reduces memory
+coefficients are either \typ{INT}s or \kbd{FpX}s. This reduces memory
 overhead at the expense of consistency. The prefix \kbd{FpXY} is an
 alias for \kbd{FpXX} when variables matters.
 
@@ -6286,7 +6286,7 @@ still assume that $M'$ has integer coefficients.
 \fun{GEN}{ZM_det_triangular}{GEN x} returns the product of the diagonal
 entries of $x$ (its determinant if it is indeed triangular).
 
-\fun{int}{ZM_isidentity}{GEN x} return 1 is the \typ{ZM} $x$ is the
+\fun{int}{ZM_isidentity}{GEN x} return 1 is the \kbd{ZM} $x$ is the
 identity matrix, and 0 otherwise.
 
 \fun{int}{ZM_ishnf}{GEN x} return $1$ if $x$ is in HNF form, i.e. is upper
