@@ -3527,7 +3527,7 @@ findquad(GEN a, GEN x, GEN p)
   v = simplify_shallow(v); tv = typ(v);
   if (!is_scalar_t(tu)) pari_err_TYPE("findquad", u);
   if (!is_scalar_t(tv)) pari_err_TYPE("findquad", v);
-  x = deg1pol(v, u, varn(a));
+  x = deg1pol(u, v, varn(a));
   if (typ(x) == t_POL) x = gmodulo(x,p);
   return gerepileupto(av, x);
 }

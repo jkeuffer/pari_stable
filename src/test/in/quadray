@@ -17,3 +17,17 @@ Q(-251,2)
 Q(-35,2)
 Q(-4,31)
 Q(-51,3)
+Q(8-48*3,2)
+Q(1-48*3,3)
+Q(1-48*3,4)
+Q(40-48*3,6)
+Q(-7,7)
+
+K = bnfinit(y^2+5);
+P5=idealprimedec(K,5)[1];
+Q(K,P5)
+
+K = bnfinit(y^2+5*12);
+P2=idealprimedec(K,2)[1];
+P5=idealprimedec(K,5)[1];
+Q(K,idealmul(K,P2,P5))
