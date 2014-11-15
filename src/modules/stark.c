@@ -3494,7 +3494,7 @@ do_compo(GEN x, GEN y)
   GEN z;
   y = leafcopy(y); /* y := t^deg(y) y(#/t) */
   for (i = 2; i < l; i++)
-    if (signe(gel(y,i))) gel(y,i) = monomial(gel(y,i), l-i-1, MAXVARN);
+    gel(y,i) = monomial(gel(y,i), l-i-1, MAXVARN);
   for  (a = 0;; a = nexta(a))
   {
     if (a) x = gsubst(x, 0, gaddsg(a, pol_x(0)));
