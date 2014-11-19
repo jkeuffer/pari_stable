@@ -368,8 +368,8 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   else
     triv = addir(sqri(BS->Ind), sqrr(B0));
 
-  gcoeff(lllmat, 3, 1) = roundr(negr(mulir(C, BS->lambda)));
-  gcoeff(lllmat, 3, 2) = roundr(negr(mulir(C, BS->delta)));
+  gcoeff(lllmat, 3, 1) = roundr_safe(negr(mulir(C, BS->lambda)));
+  gcoeff(lllmat, 3, 2) = roundr_safe(negr(mulir(C, BS->delta)));
   gcoeff(lllmat, 3, 3) = C;
   lllmat = ZM_lll(lllmat, 0.99, LLL_IM|LLL_INPLACE);
 
