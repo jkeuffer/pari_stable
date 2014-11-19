@@ -513,7 +513,17 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
         add_pm(pS, p, q, z, d, rhs);
       }
     }
-    if (j == lg(t)) pari_err_BUG("Short continued fraction in thue");
+    if (j == lg(t))
+    {
+      long prec;
+      if (j > nmax) pari_err_BUG("thue [short continued fraction]");
+      /* the theoretical value is bit_prec = gexpo(ro)+1+log2(bound) */
+      prec = precdbl(precision(real_i(gel(roo,k))));
+      if (DEBUGLEVEL>1) pari_warn(warnprec,"thue",prec);
+      roo = vec_shorten(cleanroots(poly, prec), s);
+      k--;
+    }
+
   }
   return bndcf;
 }
