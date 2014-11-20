@@ -3616,6 +3616,7 @@ ellrootno_2(GEN e)
   if (d) { /* not minimal */
     ellmin_t M;
     min_set_2(&M, e, d);
+    min_set_D(&M, e);
     e = min_to_ell(&M, e);
   }
   val_init(e, 2,64,&v4,&u, &v6,&v, &vD,&D1);

@@ -255,6 +255,8 @@ E = ellinit([0,0,0,-82,0]);
 ellrootno(E,2)
 ellrootno(E)
 ellrootno(E,2)
+E=ellinit([0,20,0,-352,512]);
+ellrootno(E,2)
 
 E=ellinit([0,0,0,Mod(x,x^2+5),0]);
 ellwp(E)

@@ -388,6 +388,7 @@ ecsmall([0, 1]), [Vecsmall([0, 1]), Vecsmall([0]), Vecsmall([0]), Vecsmall([
 1
 -1
 1
+1
 x^-2 + Mod(-1/5*x, x^2 + 5)*x^2 + Mod(-1/15, x^2 + 5)*x^6 + Mod(2/975*x, x^2
  + 5)*x^10 + O(x^14)
 x^-1 + Mod(1/15*x, x^2 + 5)*x^3 + Mod(1/105, x^2 + 5)*x^7 + Mod(-2/10725*x, 
@@ -402,4 +403,4 @@ Mod(1, 1009)*x + Mod(185, 1009)*x^5 + Mod(101, 1009)*x^9 + Mod(990, 1009)*x^
 13 + O(x^17)
 -52760
 -52832
-Total time spent: 568
+Total time spent: 580
