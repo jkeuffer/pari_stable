@@ -368,8 +368,10 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   else
     triv = addir(sqri(BS->Ind), sqrr(B0));
 
-  gcoeff(lllmat, 3, 1) = roundr_safe(negr(mulir(C, BS->lambda)));
-  gcoeff(lllmat, 3, 2) = roundr_safe(negr(mulir(C, BS->delta)));
+  gcoeff(lllmat, 3, 1) = grndtoi(negr(mulir(C, BS->lambda)), &e);
+  if (e >= 0) return -1;
+  gcoeff(lllmat, 3, 2) = grndtoi(negr(mulir(C, BS->delta)), &e);
+  if (e >= 0) return -1;
   gcoeff(lllmat, 3, 3) = C;
   lllmat = ZM_lll(lllmat, 0.99, LLL_IM|LLL_INPLACE);
 
@@ -810,6 +812,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       for (cf = 0; cf < cfMAX; cf++, kappa = muliu(kappa,10))
       {
         int res = LLL_1stPass(&B0, kappa, BS, &Bx);
+        if (res < 0) return NULL;
         if (res) break;
         if (DEBUGLEVEL>1) err_printf("LLL failed. Increasing kappa\n");
       }
