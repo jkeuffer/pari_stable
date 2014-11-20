@@ -20,6 +20,7 @@ BA  6- ellcard over non-prime fields could return wrong results           [F60]
    13- quadray(bnf, ideal) did not work                                   [F69]
    14- thue(-14*x^3 + 10*x^2 + 63*x - 5,1) -> "short continued fraction"  [F70]
    15- thue(29*x^3+130*x^2-35*x-48,1) -> "round error" bug                [F71]
+   16- T=thueinit(10*x^3+6*x^2-41*x+8,1); thue(T,8) => SEGV [#1630]       [F72]
 
 Done for version 2.7.2 (released 19/09/2014):
 [last column crossreferences current development release 2.8.0]

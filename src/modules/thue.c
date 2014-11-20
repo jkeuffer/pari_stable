@@ -1011,9 +1011,10 @@ LargeSols(GEN P, GEN tnf, GEN rhs, GEN ne, GEN *pS)
 
 PRECPB:
   ne = gerepilecopy(av, ne);
-  prec += 5 * (DEFAULTPREC-2);
+  prec += nbits2extraprec(5 * prec2nbits(DEFAULTPREC));
   if (DEBUGLEVEL>1) pari_warn(warnprec,"thue",prec);
   tnf = inithue(P, bnf, 0, prec);
+  *pS = cgetg(1, t_VEC); /* reset */
   return LargeSols(P, tnf, rhs, ne, pS);
 }
 
