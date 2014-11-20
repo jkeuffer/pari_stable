@@ -3713,6 +3713,7 @@ ellrootno_3(GEN e)
     ellmin_t M;
     min_set_3(&M, e, d);
     min_set_a(&M);
+    min_set_D(&M, e);
     e = min_to_ell(&M, e);
   }
   val_init(e, 3,81, &v4,&u, &v6,&v, &vD,&D1);
