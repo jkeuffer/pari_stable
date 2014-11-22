@@ -8,4 +8,7 @@ Description:
  (vecsmall):vecsmall              gclone($1)
  (vec):vec                        gclone($1)
  (pol):pol                        gclone($1)
+ (list):list                      gclone($1)
+ (closure):closure                gclone($1)
+ (genstr):genstr                  gclone($1)
  (gen):gen                        gclone($1)
