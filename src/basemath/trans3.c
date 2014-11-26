@@ -3256,7 +3256,7 @@ mplambertW0(GEN y)
     x = mulrr(x, divrr(subsr(1, mplog(divrr(x,y))), addrs(x,1)));
   } while (expo(tmp) - expo(subrr(x,tmp)) < bitprec);
   return x;
-};
+}
 
 /* Lambert W function using Newton, increasing prec */
 GEN

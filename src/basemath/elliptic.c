@@ -4655,7 +4655,7 @@ doellff_get_o(GEN E)
 }
 GEN
 ellff_get_o(GEN E)
-{ return obj_checkbuild(E, FF_O, &doellff_get_o); };
+{ return obj_checkbuild(E, FF_O, &doellff_get_o); }
 
 GEN
 elllog(GEN E, GEN a, GEN g, GEN o)
