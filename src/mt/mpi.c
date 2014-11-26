@@ -290,7 +290,7 @@ void
 mt_queue_start(struct pari_mt *pt, GEN worker)
 {
   if (pari_mt || pari_MPI_size <= 2 || pari_mt_nbthreads <= 1)
-    return mtsingle_queue_start(pt, worker);
+    mtsingle_queue_start(pt, worker);
   else
   {
     struct mt_mstate *mt = &pari_mt_data;

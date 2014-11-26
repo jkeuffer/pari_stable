@@ -77,7 +77,7 @@ _copy(void *E, GEN x)
 static void
 gerepile_gauss_ker(GEN x, long k, long t, pari_sp av)
 {
-  return gen_gerepile_gauss_ker(x, k, t, av, NULL, &_copy);
+  gen_gerepile_gauss_ker(x, k, t, av, NULL, &_copy);
 }
 
 static void

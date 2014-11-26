@@ -45,5 +45,5 @@ pari_mt_init(void)
 void
 mt_queue_start(struct pari_mt *pt, GEN worker)
 {
-  return mtsingle_queue_start(pt, worker);
+  mtsingle_queue_start(pt, worker);
 }

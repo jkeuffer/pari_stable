@@ -260,7 +260,7 @@ void
 mt_queue_start(struct pari_mt *pt, GEN worker)
 {
   if (pari_mt)
-    return mtsingle_queue_start(pt, worker);
+    mtsingle_queue_start(pt, worker);
   else
   {
     long NBT = pari_mt_nbthreads;
