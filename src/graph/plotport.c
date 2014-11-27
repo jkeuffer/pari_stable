@@ -2127,19 +2127,18 @@ gen_rectdraw0(struct plot_eng *eng, long *w, long *x, long *y, long lw, double x
 /*                           RGB COLORS                                  */
 /*                                                                       */
 /*************************************************************************/
-#if 0
-/* generated from /etc/X11/rgb.txt by the following perl script */
+/* generated from /etc/X11/rgb.txt by the following perl script
 #!/usr/bin/perl
 while(<>)
 {
   ($hex, $name) = split(/\t\t/, $_);
-  $hex =~ s/^ +//; chomp($name); $name =~ s/ *//g;
+  $hex =~ s/^ +//; chomp($name); $name =~ s, *,,g;
   $hex = sprintf("0x%02x%02x%02x", split(/\s+/, $hex));
   $name = lc($name); next if ($done{$name});
   $done{$name} = 1;
   print "COL(\"$name\", $hex),\n";
 }
-#endif
+*/
 
 #define COL(x,y) {(void*)x,(void*)y,0,NULL}
 static hashentry col_list[] = {
