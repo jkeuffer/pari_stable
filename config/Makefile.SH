@@ -322,17 +322,17 @@ test-kernel:: kerntest
 	diff -c gp.out $src/test/$numbits/kernel > kern.dif;\
 	if test -s kern.dif; then echo "KERNEL BUG"; else echo OK; fi
 
-tune.o: $src/test/tune.c
-	\$(CC) \$(GMPFLAGS) \$(CPPFLAGS) \$(CFLAGS) -o \$@ \$< -c
+tune\$(_O): .headers $src/test/tune.c
+	\$(CC) \$(GMPFLAGS) \$(CPPFLAGS) \$(CFLAGS) -o \$@ $src/test/tune.c -c
 
 tune: mpinl.h tune-sta
 	-\$(RM) tune ../tune
 	-\$(LN) tune-sta tune
 	-\$(LN) $ln_objdir/tune ../tune
 
-tune-dyn: tune.o \$(LIBPARI_DYN)
+tune-dyn: tune\$(_O) \$(LIBPARI_DYN)
 	\$(LD) -L. \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) \$(LDDYN) \$(STA_LIBS)
-tune-sta: tune.o \$(LIBPARI_STA)
+tune-sta: tune\$(_O) \$(LIBPARI_STA)
 	\$(LD) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(STA_LIBS)
 
 gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
@@ -349,7 +349,7 @@ cleanobj:
 cleandesc:
 	-\$(RM) $desc/\$(DESC) *\$(TMPSUF)
 cleantune:
-	-\$(RM) tune tune-sta tune.o
+	-\$(RM) tune tune-sta tune\$(_O)
 
 cleanall: cleanobj cleantune cleantest cleandesc
 
