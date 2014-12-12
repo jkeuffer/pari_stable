@@ -2512,7 +2512,7 @@ mkvecsmalln(long n, ...)
   long i;
   va_start(ap,n);
   x = cgetg(n+1, t_VECSMALL);
-  for (i=1; i <= n; i++) gel(x,i) = va_arg(ap, GEN);
+  for (i=1; i <= n; i++) x[i] = va_arg(ap, long);
   va_end(ap); return x;
 }
 
