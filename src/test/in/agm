@@ -16,3 +16,4 @@ testagm(x)= {
 }
 
 for(i=-6,6,for(j=-6,6,testagm(1/6+i/3+j*I/3)));
+agm(1,2+O(5))

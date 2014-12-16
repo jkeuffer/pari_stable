@@ -2205,7 +2205,7 @@ zellagmcx(GEN a0, GEN b0, GEN r, GEN t, long prec)
 static GEN
 agm1(GEN x, long prec)
 {
-  GEN p1, a, a1, b1, y;
+  GEN p1, a1, b1, y;
   long l, l2, ep;
   pari_sp av;
 
@@ -2227,9 +2227,10 @@ agm1(GEN x, long prec)
       a1 = x; b1 = gen_1; l = precp(x);
       do
       {
-        a = a1;
+        GEN a = a1;
         a1 = gmul2n(gadd(a,b1),-1);
-        b1 = Qp_sqrt(gmul(a,b1));
+        a = gmul(a,b1);
+        b1 = Qp_sqrt(a); if (!b1) pari_err_SQRTN("Qp_sqrt",a);
         p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
         if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep=valp(p1)-valp(b1); }
       }
@@ -2242,7 +2243,7 @@ agm1(GEN x, long prec)
       l2 = 5-prec2nbits(prec);
       do
       {
-        a = a1;
+        GEN a = a1;
         a1 = gmul2n(gadd(a,b1),-1);
         b1 = gsqrt(gmul(a,b1), prec);
         p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
