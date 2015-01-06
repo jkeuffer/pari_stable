@@ -23,6 +23,7 @@ BA  6- ellcard over non-prime fields could return wrong results           [F60]
    16- T=thueinit(10*x^3+6*x^2-41*x+8,1); thue(T,8) => SEGV [#1630]       [F72]
    17- ellrootno(e,p = 2 or 3) when e not minimal at p => random result   [F73]
    18- agm(1,2+O(5)) -> SEGV [#1645]                                      [F76]
+BA 19- [cygwin64] ellap(ellinit([0,0,1,-1,0]),10007) was broken           [F77]
 
 Done for version 2.7.2 (released 19/09/2014):
 [last column crossreferences current development release 2.8.0]

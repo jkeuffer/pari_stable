@@ -904,7 +904,7 @@ Fl_ellcard_Shanks(ulong c4, ulong c6, ulong p)
   p2p = p1p << 1;
   x = 0; u = c6; KRO = krouu(u, p); KROold = -KRO;
 
-  switch(Flx_nbroots(mkvecsmalln(5,0, c6,c4,0,1), p))
+  switch(Flx_nbroots(mkvecsmalln(5, 0L, c6,c4,0L,1L), p))
   {
     case 3:  A = 0; B = 4; break;
     case 1:  A = 0; B = 2; break;
