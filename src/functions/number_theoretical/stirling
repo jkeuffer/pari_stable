@@ -24,7 +24,7 @@ Doc: \idx{Stirling number} of the first kind $s(n,k)$ ($\fl=1$, default) or
  /* list of S(n,k), k = 1..n */
  vecstirling2(n) =
  { my(Q = x^(n-1), t);
-   vector(n, i, t = divrem(Q, x-i); Q=t[1]; t[2]);
+   vector(n, i, t = divrem(Q, x-i); Q=t[1]; simplify(t[2]));
  }
  @eprog
 Variant: Also available are \fun{GEN}{stirling1}{ulong n, ulong k}
