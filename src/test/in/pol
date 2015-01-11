@@ -20,3 +20,7 @@ norm(I*x+1)
 trace(I*x+1)
 matcompanion(2*x^2+1)
 Pol("")
+
+\\#1651
+f1=(x-1)/(x*x-x);
+type(subst(1/f1,x,1))
