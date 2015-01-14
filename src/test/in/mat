@@ -14,6 +14,8 @@ default(realprecision,38);
 h=mathilbert(40);
 [Q,R] = matqr(h); vecmax(abs(h-Q*R)) < 1e-37
 [q,R] = matqr(h,1); vecmax(abs(mathouseholder(q,h)-R)) < 1e-37
+matqr([;])
+matqr([;],1)
 mathouseholder(1,1)
 mathouseholder(q,1)
 Mat(List())

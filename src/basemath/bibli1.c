@@ -164,9 +164,16 @@ matqr(GEN x, long flag, long prec)
 {
   pari_sp av = avma;
   GEN B, Q, L;
+  long n = lg(x)-1;
   if (typ(x) != t_MAT) pari_err_TYPE("matqr",x);
+  if (!n)
+  {
+    if (!flag) retmkvec2(cgetg(1,t_MAT),cgetg(1,t_MAT));
+    retmkvec2(cgetg(1,t_VEC),cgetg(1,t_MAT));
+  }
+  if (n != nbrows(x)) pari_err_DIM("matqr");
   if (!RgM_QR_init(x, &B,&Q,&L, prec)) pari_err_PREC("matqr");
-  if (!flag) Q = shallowtrans(mathouseholder(Q, matid(lg(x)-1)));
+  if (!flag) Q = shallowtrans(mathouseholder(Q, matid(n)));
   return gerepilecopy(av, mkvec2(Q, shallowtrans(L)));
 }
 
