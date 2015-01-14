@@ -1185,6 +1185,7 @@ primes_interval(GEN a, GEN b)
   GEN y, d, p;
   if (typ(a) != t_INT) a = gceil(a);
   if (typ(b) != t_INT) b = gfloor(b);
+  if (signe(a) < 0) a = gen_2;
   d = subii(b, a);
   if (signe(d) < 0 || signe(b) <= 0) { avma = av; return cgetg(1, t_VEC); }
   if (lgefint(b) == 3)
