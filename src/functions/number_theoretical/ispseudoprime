@@ -9,7 +9,7 @@ Description:
  (int,?0):bool      BPSW_psp($1)
  (int,#small):bool  millerrabin($1,$2)
  (int,small):bool   ispseudoprime($1, $2)
- (gen,?small):bool  gispseudoprime($1, $2)
+ (gen,?small):gen   gispseudoprime($1, $2)
 Doc: true (1) if $x$ is a strong pseudo
  prime (see below), false (0) otherwise. If this function returns false, $x$
  is not prime; if, on the other hand it returns true, it is only highly likely
