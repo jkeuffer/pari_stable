@@ -660,17 +660,19 @@ used to implement \kbd{[a(x)|x<-b,c(x)]}.
 
 \subsec{Function related to the GP parser}
 
-The GP parser can generate an opcode saving the current lexical context
-(pairs made of a lexical variable name and its value) in a \kbd{GEN}, called
-\kbd{pack} in the sequel. These can be used from debuggers (e.g. gp's break
-loop) to track values of lexical variable. Indeed, lexical variables have
-disappeared from the compiled code, only their values in a given scope exist
-(on some value stack). Provided the parser generated the proper opcode, there
-remains a trace of lexical variable names and everything can still be
-unravelled.
+The prototype code \kbd{C} instructs the GP compiler to save the current
+lexical context (pairs made of a lexical variable name and its value)
+in a \kbd{GEN}, called \kbd{pack} in the sequel. This \kbd{pack} can be used
+to evaluate expressions in the corresponding lexical context, providing it is
+current.
 
 \fun{GEN}{localvars_read_str}{const char *s, GEN pack} evaluate the string $s$
-in the lexical context given by \kbd{pack}.  Used by \tet{geval_gp} in GP.
+in the lexical context given by \kbd{pack}.  Used by \tet{geval_gp} in GP
+to implement the behaviour below:
+\bprog
+? my(z=3);eval("z=z^2");z
+%1 = 9
+@eprog
 
 \fun{long}{localvars_find}{GEN pack, entree *ep} does \kbd{pack} contain
 a pair whose variable corresponds to \kbd{ep}? If so, where is the
