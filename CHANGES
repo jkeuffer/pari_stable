@@ -26,6 +26,8 @@ BA  6- ellcard over non-prime fields could return wrong results           [F60]
 BA 19- [cygwin64] ellap(ellinit([0,0,1,-1,0]),10007) was broken           [F77]
    20- primes([-5,5]) -> [5] (spurious absolute values)                   [F78]
    21- matqr([;]) -> crash                                                [F79]
+   22- Fp_rem_mBarrett could return a non-normalized result               [F80]
+       p=436^56-35;Mod(271,p)^((p-1)/2) -> p+1
 
 Done for version 2.7.2 (released 19/09/2014):
 [last column crossreferences current development release 2.8.0]

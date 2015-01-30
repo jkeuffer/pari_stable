@@ -2352,7 +2352,7 @@ Fp_rem_mBarrett(GEN a, GEN B, long s, GEN p)
 {
   pari_sp av = avma;
   GEN Q = gel(B, 1), R = gel(B, 2);
-  long sQ = expi(Q);
+  long sQ = expi(Q) + 1;
   GEN A = addii(remi2n(a, 3*s), mulii(R,shifti(a, -3*s)));
   GEN q = shifti(mulii(shifti(A, sQ-3*s), Q), -sQ);
   GEN r = subii(A, mulii(q, p));
