@@ -79,5 +79,13 @@
   ***   at top-level: ploth(x=0,1,x,,1)
   ***                 ^-----------------
   *** ploth: domain error in ploth: #points < 2
+? plotinit(1);
+? plotcopy(0,1,300,0);
+? plotclip(1);
+? plotdraw([1,10,10]);
+? plotinit(100)
+  ***   at top-level: plotinit(100)
+  ***                 ^-------------
+  *** plotinit: domain error in graphic function: rectwindow > 15
 ? print("Total time spent: ",gettime);
-Total time spent: 36
+Total time spent: 44

@@ -34,3 +34,8 @@ plotdraw([0,10,10])
 psdraw([0,10,10])
 ploth(x=0,2*Pi,if (x <1, [cos(x),sin(x)], 1),1)
 ploth(x=0,1,x,,1)
+plotinit(1);
+plotcopy(0,1, 300,0);
+plotclip(1);
+plotdraw([1,10,10]);
+plotinit(100)

@@ -891,7 +891,7 @@ rectcopy(long source, long dest, long xoff, long yoff)
         break;
       case ROt_ST:
         next = (RectObj*) pari_malloc(sizeof(RectObjST));
-        memcpy(next,R,sizeof(RectObjMP));
+        memcpy(next,R,sizeof(RectObjST));
         RoSTs(next) = (char*) pari_malloc(RoSTl(R)+1);
         memcpy(RoSTs(next),RoSTs(R),RoSTl(R)+1);
         RoSTx(next) += xoff; RoSTy(next) += yoff;
