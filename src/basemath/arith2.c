@@ -826,7 +826,7 @@ divisors_init(GEN n, GEN *pP, GEN *pE)
       set_fact(absi_factor(n), &P,&E);
       isint = 1; break;
     case t_VEC:
-      if (lg(n) != 3) pari_err_TYPE("divisors",n);
+      if (lg(n) != 3 || typ(gel(n,2)) !=t_MAT) pari_err_TYPE("divisors",n);
       set_fact_check(gel(n,2), &P,&E, &isint);
       break;
     case t_MAT:

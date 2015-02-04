@@ -39,3 +39,6 @@ sumdiv(n, d, d)
 sumdiv(fa, d, d)
 sumdivmult(n, d, d)
 sumdivmult(fa, d, d)
+
+\\#1664
+divisors([1,2])
