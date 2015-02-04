@@ -30,6 +30,7 @@ BA 20- [cygwin64] ellap(ellinit([0,0,1,-1,0]),10007) was broken           [F77]
    23- Fp_rem_mBarrett could return a non-normalized result               [F80]
        p=436^56-35;Mod(271,p)^((p-1)/2) -> p+1
    24- plotcopy would corrupt "string" objects (ROt_ST)                   [F81]
+BA 25- [GP] default arguments to GP functions could cause corruption      [F82]
 
 Done for version 2.7.2 (released 19/09/2014):
 [last column crossreferences current development release 2.8.0]

@@ -2017,12 +2017,12 @@ compilenode(long n, int mode, long flag)
           if (tree[a].f==Fassign && (strict || !is_node_zero(y)))
           {
             if (tree[y].f==Fsmall)
-              compilenode(y,Ggen,a);
+              compilenode(y, Ggen, 0);
             else
             {
               struct codepos lpos;
               getcodepos(&lpos);
-              compilenode(y,Ggen,a);
+              compilenode(y, Ggen, 0);
               op_push(OCpushgen, data_push(getclosure(&lpos)),a);
             }
             op_push(OCdefaultarg,-nb+i-1,a);
