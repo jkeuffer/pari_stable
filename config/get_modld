@@ -12,7 +12,7 @@ LIBS=$__LIBS
 
 case $osname in
 darwin) MODLD=$CC;
-        MODLDFLAGS="-bundle -flat_namespace -undefined suppress \
+        MODLDFLAGS="-bundle -undefined dynamic_lookup \
 \$(CFLAGS) \$(DLCFLAGS)";;
 *)      MODLD="$DLLD";
         MODLDFLAGS=`echo "$DLLDFLAGS" | \

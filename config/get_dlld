@@ -74,7 +74,7 @@ if test -n "$DLLD"; then
   else # DLLD != GNU ld
     case "$osname" in
       aix)     DLLDFLAGS='-r' ;;
-      darwin)  DLLDFLAGS="-flat_namespace -undefined suppress -compatibility_version $compat_ver -current_version $num_ver" ;;
+      darwin)  DLLDFLAGS="-compatibility_version $compat_ver -current_version $num_ver" ;;
       freebsd) DLLDFLAGS='-Bshareable -x' ;;
       hpux)    DLLDFLAGS='-b' ;;
       irix)    DLLDFLAGS='-shared -elf -no_unresolved -all' ;;
