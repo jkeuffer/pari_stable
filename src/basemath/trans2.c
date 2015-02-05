@@ -277,7 +277,7 @@ gacos(GEN x, long prec)
       if (lg(y) > 2)
       {
         p1 = gsubsg(1,gsqr(y));
-        if (gequal0(p1)) return zeroser(varn(y), valp(p1)>>1);
+        if (gequal0(p1)) { avma = av; return zeroser(varn(y), valp(p1)>>1); }
         p1 = integser(gdiv(gneg(derivser(y)), gsqrt(p1,prec)));
         /*y(t) = 1+O(t)*/
         if (gequal1(gel(y,2)) && !valp(y)) return gerepileupto(av, p1);

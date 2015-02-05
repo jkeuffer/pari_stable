@@ -6,6 +6,7 @@ Done for version 2.7.4 (released ??/??/2015):
 
   Fixed
     1- divisors([2,1]) -> SEGV                                    [#1664] [F84]
+    2- acos([Pol(1)]) -> GC bug [#1663]                                   [F85]
 
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]
