@@ -11,4 +11,7 @@
 5758
 61938
 2
-Total time spent: 523
+  ***   at top-level: primes([1,Pol(2)])
+  ***                 ^------------------
+  *** primes: incorrect type in primes_interval (t_POL).
+Total time spent: 488
