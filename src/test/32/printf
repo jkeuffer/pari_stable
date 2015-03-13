@@ -184,4 +184,8 @@ a
 [1.00]
 
 [2.00]
+  ***   at top-level: printf("%c",'x)
+  ***                 ^---------------
+  *** printf: incorrect type in gtolong (t_POL).
+-0.0000000000000000000000000000000000000029387
 Total time spent: 4

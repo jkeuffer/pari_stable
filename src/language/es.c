@@ -710,23 +710,27 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
   }
 
   /* '.', " E", exponent, trailing \0 */
-  buf0 = buf = stack_malloc( ls + 1+2+MAX_EXPO_LEN+1 );
   point = ls - beta; /* position of . in s; < 0 or > 0 */
   if (beta <= 0 || format == 'e' || (format == 'g' && point-1 < -4))
   { /* e format */
+    buf0 = buf = stack_malloc(ls+1+2+MAX_EXPO_LEN + 1);
     wr_dec(buf, s, 1); buf += ls + 1;
     if (sp) *buf++ = ' ';
     *buf++ = exp_char;
     sprintf(buf, "%ld", point-1);
-  } else { /* f format */
-    if (point > 0) /* write integer_part.fractional_part */
-      wr_dec(buf, s, point); /* point < ls since beta > 0 */
-    else { /* point <= 0, write fractional part */
-      *buf++ = '0';
-      *buf++ = '.';
-      buf = zeros(buf, -point);
-      strcpy(buf, s);
-    }
+  }
+  else if (point > 0) /* f format, write integer_part.fractional_part */
+  {
+    buf0 = buf = stack_malloc(ls+1 + 1);
+    wr_dec(buf, s, point); /* point < ls since beta > 0 */
+  }
+  else /* f format, point <= 0, write fractional part */
+  {
+    buf0 = buf = stack_malloc(2-point+ls + 1);
+    *buf++ = '0';
+    *buf++ = '.';
+    buf = zeros(buf, -point);
+    strcpy(buf, s);
   }
   return buf0;
 }
