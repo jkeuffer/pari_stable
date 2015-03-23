@@ -1159,12 +1159,14 @@ minim0_dolll(GEN a, GEN BORNE, GEN STOCKMAX, long flag, long dolll)
       break;
     case min_FIRST:
       if (n == 1) return cgetg(1,t_VEC);
+      if (!sBORNE && BORNE) return cgetg(1, t_VEC);
       break;
     case min_PERF:
       if (n == 1) return gen_0;
       break;
     default:
-      if (n == 1) retmkvec3(gen_0, gen_0, cgetg(1, t_MAT));
+      if (n == 1 || (!sBORNE && BORNE))
+        retmkvec3(gen_0, gen_0, cgetg(1, t_MAT));
       break;
   }
   minim_alloc(n, &q, &x, &y, &z, &v);
@@ -1389,7 +1391,7 @@ minim2(GEN a, GEN borne, GEN stockmax)
 GEN
 perf(GEN a)
 {
-  return minim0(a,gen_0,gen_0,min_PERF);
+  return minim0(a,NULL,NULL,min_PERF);
 }
 
 static GEN
@@ -1538,7 +1540,9 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     borne1 = BORNE;
     if (typ(borne1) != t_REAL)
     {
-      long prec = nbits2prec(gexpo(borne1) + 10);
+      long prec;
+      if (gequal0(borne1)) retmkvec3(gen_0, gen_0, cgetg(1,t_MAT));
+      prec = nbits2prec(gexpo(borne1) + 10);
       borne1 = gtofp(borne1, maxss(prec, DEFAULTPREC));
     }
   }
