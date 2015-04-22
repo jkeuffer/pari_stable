@@ -1134,8 +1134,8 @@ checkdeflate(GEN x)
 {
   ulong d = 0, i, lx = (ulong)lg(x);
   for (i=3; i<lx; i++)
-    if (!gequal0(gel(x,i))) { d = ugcd(d,i-2); if (d == 1) break; }
-  return (long)d;
+    if (!gequal0(gel(x,i))) { d = ugcd(d,i-2); if (d == 1) return 1; }
+  return d? (long)d: 1;
 }
 
 /* deflate (non-leaf) x recursively */
