@@ -34,4 +34,6 @@ x^2 + 1
   ***                 ^-------
   *** Pol: incorrect type in gtopoly (t_STR).
 "t_INT"
+  *** polroots: Warning: normalizing a polynomial with 0 leading term.
+[0.E-38 + 0.E-38*I]~
 Total time spent: 0

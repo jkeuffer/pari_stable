@@ -1907,10 +1907,25 @@ fix_roots(GEN r, GEN *m, long h, long bit)
 }
 
 static GEN
+RgX_normalize1(GEN x)
+{
+  long i, n = lg(x)-1;
+  GEN y;
+  for (i = n; i > 1; i--)
+    if (!gequal0( gel(x,i) )) break;
+  if (i == n) return x;
+  pari_warn(warner,"normalizing a polynomial with 0 leading term");
+  if (i == 1) pari_err_ROOTS0("roots");
+  y = cgetg(i+1, t_POL); y[1] = x[1];
+  for (; i > 1; i--) gel(y,i) = gel(x,i);
+  return y;
+}
+
+static GEN
 all_roots(GEN p, long bit)
 {
   GEN lc, pd, q, roots_pol, m;
-  long bit0,  bit2, n = degpol(p), i, e, h;
+  long bit0,  bit2, i, e, h, n = degpol(p);
   pari_sp av;
 
   pd = RgX_deflate_max(p, &h); lc = leading_term(pd);
@@ -1996,8 +2011,12 @@ roots_com(GEN q, long bit)
 {
   GEN L, p;
   long v = RgX_valrem_inexact(q, &p);
-  if (lg(p) == 3) L = cgetg(1,t_VEC); /* constant polynomial */
-  else L = isexactpol(p)? solve_exact_pol(p,bit): all_roots(p,bit);
+  int ex = isexactpol(p);
+  if (!ex) p = RgX_normalize1(p);
+  if (lg(p) == 3)
+    L = cgetg(1,t_VEC); /* constant polynomial */
+  else
+    L = ex? solve_exact_pol(p,bit): all_roots(p,bit);
   if (v)
   {
     GEN M, z, t = gel(q,2);

@@ -5,12 +5,13 @@ Done for version 2.7.4 (released ??/??/2015):
 [last column crossreferences current development release 2.8.0]
 
   Fixed
-    1- divisors([2,1]) -> SEGV                                    [#1664] [F84]
-    2- acos([Pol(1)]) -> GC bug [#1663]                                   [F85]
-    3- primes([1,Pol(2)]) -> SEGV [#1668]                                 [F87]
-    4- buffer overflow after default(format,"f.precision")                [F95]
-    5- qfminim(A, 0, ...) -> stack overflow                       [#1682] [F97]
-    6- div_scal_rfrac could create an invalid t_POL               [#1651] [F99]
+    1- divisors([2,1]) -> SEGV                                   [#1664] [F84]
+    2- acos([Pol(1)]) -> GC bug [#1663]                                  [F85]
+    3- primes([1,Pol(2)]) -> SEGV [#1668]                                [F87]
+    4- buffer overflow after default(format,"f.precision")               [F95]
+    5- qfminim(A, 0, ...) -> stack overflow                      [#1682] [F97]
+    6- div_scal_rfrac could create an invalid t_POL              [#1651] [F99]
+    7- polroots(t_POL with leading coeff = 0) -> fp exception    [#1690] [F100]
 
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]
