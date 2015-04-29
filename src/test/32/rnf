@@ -45,6 +45,10 @@
 1
 1
 1
+  *** rnfisabelian: Warning: non-monic polynomial. Result of the form [nf,c].
+0
+  *** rnfisabelian: Warning: non-monic polynomial. Result of the form [nf,c].
+1
 [x, 1]
 [(-78/43*y^2 - 14/43*y + 173/43)*x^2 + (60/43*y^2 + 24/43*y - 143/43)*x + (-
 23/43*y^2 - 35/43*y + 110/43), 1]
@@ -751,4 +755,4 @@ error("inconsistent operation 'RgV_RgC_mul' t_VEC (3 elts) , t_COL (2 elts).
   ***   at top-level: rnfidealtwoelt(L,[[1
   ***                 ^--------------------
   *** rnfidealtwoelt: incorrect type in idealtyp [non-square t_MAT] (t_MAT).
-Total time spent: 356
+Total time spent: 380

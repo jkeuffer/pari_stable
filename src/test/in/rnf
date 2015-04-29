@@ -31,6 +31,8 @@ rnfisabelian(y^2+23,x^3+x^2-1)
 T = polcyclo(7, x+Mod(y, nf.pol));
 rnfisabelian(nf.pol, T)
 rnfisabelian(nf, T)
+rnfisabelian(a^2+1,5*x^3+2)
+rnfisabelian(4*a^2+1, 9*x^2 + (12*a+3)*x + 2*a)
 
 pol = y^3+y^2-2*y-1;
 bnf = bnfinit(pol);

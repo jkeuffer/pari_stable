@@ -287,14 +287,32 @@ proper_nf(GEN nf)
 { return (lg(nf) == 3)? gel(nf,1): nf; }
 
 static GEN
-get_den(GEN *pnf, GEN T)
+fix_nf(GEN *pnf, GEN *pT, GEN *pA)
 {
   GEN den = gen_1;
   if (!*pnf)
   {
-    GEN fa, P, q, D;
-    *pnf = nfinitall(T, nf_PARTIALFACT, DEFAULTPREC);
-    D = nf_get_disc(proper_nf(*pnf));
+    GEN fa, P, q, D, T = *pT;
+    GEN nf, NF = nfinitall(T, nf_PARTIALFACT, DEFAULTPREC);
+    *pnf = nf = proper_nf(NF);
+    if (nf != NF) { /* t_POL defining base field changed (not monic) */
+      long i, l;
+      GEN A = *pA, a = cgetg_copy(A, &l);
+      GEN rev = gel(NF,2), pow, dpow;
+
+      *pT = T = nf_get_pol(nf); /* need to update T */
+      pow = QXQ_powers(lift_intern(rev), degpol(T)-1, T);
+      pow = Q_remove_denom(pow, &dpow);
+      a[1] = A[1];
+      for (i=2; i<l; i++) {
+        GEN c = gel(A,i);
+        if (typ(c) == t_POL) c = QX_ZXQV_eval(c, pow, dpow);
+        gel(a,i) = c;
+      }
+      *pA = Q_primpart(a); /* need to update A */
+    }
+
+    D = nf_get_disc(nf);
     if (is_pm1(D)) return gen_1;
     fa = absi_factor_limit(D, 0);
     P = gel(fa,1); q = gel(P, lg(P)-1);
@@ -311,33 +329,17 @@ get_nfsqff_data(GEN *pnf, GEN *pT, GEN *pA, GEN *pB, GEN *ptbad)
   long n = degpol(T);
   if (nfsqff_use_Trager(n, degpol(A)))
   {
-    *pnf = T; bad = den = ZX_disc(T);
+    *pnf = T;
+    bad = den = ZX_disc(T);
     if (is_pm1(leading_term(T))) den = indexpartial(T, den);
   }
   else
   {
-    GEN nf;
-    den = get_den(pnf, T);
-    nf = proper_nf(*pnf);
-    bad = nf_get_index(nf);
+    den = fix_nf(pnf, pT, pA);
+    bad = nf_get_index(*pnf);
     if (den != gen_1) bad = mulii(bad, den);
-    if (nf != *pnf) { /* t_POL defining base field changed (not monic) */
-      long i, l;
-      GEN a = cgetg_copy(A, &l);
-      GEN rev = gel(*pnf,2), pow, dpow;
-
-      *pT = T = nf_get_pol(nf); /* need to update T */
-      pow = QXQ_powers(lift_intern(rev), n-1, T);
-      pow = Q_remove_denom(pow, &dpow);
-      a[1] = A[1];
-      for (i=2; i<l; i++) {
-        GEN c = gel(A,i);
-        if (typ(c) == t_POL) c = QX_ZXQV_eval(c, pow, dpow);
-        gel(a,i) = c;
-      }
-      *pA = A = Q_primpart(a); /* need to update A */
-      *pnf = nf; /* now discard change of variable */
-    }
+    A = *pA;
+    T = *pT;
   }
   (void)nfgcd_all(A, RgX_deriv(A), T, bad, pB);
   if( ptbad) *ptbad = bad;
@@ -1865,7 +1867,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 GEN
 nfroots_split(GEN nf, GEN pol)
 {
-  GEN T = get_nfpol(nf,&nf), den = get_den(&nf, T);
+  GEN T = get_nfpol(nf,&nf), den = fix_nf(&nf, &T, &pol);
   pari_sp av = avma;
   GEN z = gerepilecopy(av, nfsqff(nf, pol, ROOTS_SPLIT, den));
   return (lg(z) == 1)? NULL: mkvec2(z, nf);
