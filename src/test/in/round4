@@ -466,3 +466,7 @@ valuation(nfdisc(f, [2]), 2)
 T = (x+1)^2 + 3*5^2*7^31;
 P = [[7], [5,7], factor(poldisc(T)), 7, 2, 1];
 for (i=1,#P, print(nfbasis(T,P[i]), ", ", nfdisc(T,P[i])));
+
+p=10^100+267; q=10^120+79;
+T=polcompositum(x^2-p,x^2-q)[1];
+nfdisc([T,[2,p,q]])

@@ -53,7 +53,8 @@ fact_from_factors(GEN D, GEN P, long flag)
   if (!is_pm1(D))
   {
     long k = Z_isanypower(D, &D);
-    gel(Q,iq) = D; gel(E,iq) = utoipos(k ? k: 1);
+    if (!k) k = 1;
+    gel(Q,iq) = D; gel(E,iq) = utoipos(k); iq++;
   }
   setlg(Q,iq);
   setlg(E,iq); return mkmat2(Q,E);

@@ -14,6 +14,7 @@ Done for version 2.7.4 (released ??/??/2015):
     7- polroots(t_POL with leading coeff = 0) -> fp exception    [#1690] [F100]
     8- \r cannot deal with very long filenames                   [#1616] [F101]
     9- rnfisabelian(nf, non monic t_POL) -> SEGV                 [#1693] [F102]
+   10- possibly incorrect result in nfdisc(T,listP)                      [F104]
 
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]
