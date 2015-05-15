@@ -2661,7 +2661,7 @@ ZM_count_0_cols(GEN M)
 }
 
 static void indexrank_all(long m, long n, long r, GEN d, GEN *prow, GEN *pcol);
-/* As above, integer entries */
+/* As RgM_pivots, integer entries. Set *rr = dim Ker M0 */
 GEN
 ZM_pivots(GEN M0, long *rr)
 {
@@ -2688,11 +2688,12 @@ ZM_pivots(GEN M0, long *rr)
     for (av = avma, i = 0;; avma = av, i++)
     {
       ulong p = u_forprime_next(&S);
+      long rp;
       if (!p) pari_err_OVERFLOW("ZM_pivots [ran out of primes]");
-      d = Flm_gauss_pivot(ZM_to_Flm(M0, p), p, rr);
-      if (*rr == rmin) goto END; /* maximal rank, return */
-      if (*rr < rbest) { /* save best r so far */
-        rbest = *rr;
+      d = Flm_gauss_pivot(ZM_to_Flm(M0, p), p, &rp);
+      if (rp == rmin) { rbest = rp; goto END; } /* maximal rank, return */
+      if (rp < rbest) { /* save best r so far */
+        rbest = rp;
         if (dbest) gunclone(dbest);
         dbest = gclone(d);
         if (beenthere) break;
@@ -2719,7 +2720,7 @@ ZM_pivots(GEN M0, long *rr)
     avma = av;
   }
 END:
-  if (dbest) gunclone(dbest);
+  *rr = rbest; if (dbest) gunclone(dbest);
   return gerepileuptoleaf(av0, d);
 }
 
