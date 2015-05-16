@@ -13,9 +13,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* This file defines the parameters of the GEN type               */
 
-typedef long *GEN;
+#ifdef _WIN64
+typedef unsigned long long pari_ulong;
+#define long long long
+#define labs llabs
+#else
 typedef unsigned long pari_ulong;
+#endif
 #define ulong pari_ulong
+typedef long *GEN;
 
 #undef ULONG_MAX
 #undef LONG_MAX
