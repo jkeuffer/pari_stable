@@ -16,10 +16,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                        PARI CALCULATOR                        **/
 /**                                                               **/
 /*******************************************************************/
-#include "pari.h"
-#include "paripriv.h"
-#include "gp.h"
-
 #ifdef _WIN32
 #  include <windows.h>
 #  include "../systems/mingw/mingw.h"
@@ -27,6 +23,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 #    include <process.h>
 #  endif
 #endif
+
+#include "pari.h"
+#include "paripriv.h"
+#include "gp.h"
 
 /********************************************************************/
 /**                                                                **/

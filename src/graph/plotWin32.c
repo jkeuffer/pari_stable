@@ -13,11 +13,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 /* Written by Vasili Burdo */
 
+#include <windows.h>
+#include <time.h>
 #include "pari.h"
 #include "paripriv.h"
 #include "rect.h"
-#include <windows.h>
-#include <time.h>
 
 static void SetForeground(void *data, long col)
 {

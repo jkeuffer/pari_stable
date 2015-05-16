@@ -16,13 +16,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /**                 INPUT/OUTPUT SUBROUTINES                      **/
 /**                                                               **/
 /*******************************************************************/
+#ifdef _WIN32
+#include <windows.h>
+#include <process.h> /* for getpid */
+#include "../systems/mingw/mingw.h"
+#endif
+#include "paricfg.h"
+#ifdef HAS_STAT
+#include <sys/stat.h>
+#endif
+#ifdef HAS_OPENDIR
+#include <dirent.h>
+#endif
+
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
-#ifdef _WIN32
-#include <windows.h>
-#include "../systems/mingw/mingw.h"
-#endif
 
 static const char esc = (0x1f & '['); /* C-[ = escape */
 
@@ -3622,7 +3631,6 @@ pari_get_homedir(const char *user) { (void) user; return NULL; }
 /*******************************************************************/
 #ifdef HAS_OPENDIR
 /* slow, but more portable than stat + S_ISDIR */
-#  include <dirent.h>
 static int
 is_dir_opendir(const char *name)
 {
@@ -3633,7 +3641,6 @@ is_dir_opendir(const char *name)
 #endif
 
 #ifdef HAS_STAT
-#include <sys/stat.h>
 static int
 is_dir_stat(const char *name)
 {
@@ -4611,9 +4618,6 @@ pari_nb_hist(void)
 /**                       TEMPORARY FILES                         **/
 /**                                                               **/
 /*******************************************************************/
-#ifdef __WIN32
-#  include <process.h> /* for getpid */
-#endif
 
 #ifndef R_OK
 #  define R_OK 4

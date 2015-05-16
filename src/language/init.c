@@ -17,15 +17,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 /*                                                                 */
 /*******************************************************************/
 #include <string.h>
-#include "pari.h"
-#include "paripriv.h"
-#include "anal.h"
 #if defined(_WIN32) || defined(__CYGWIN32__)
 #  include "../systems/mingw/mingw.h"
 #  ifndef WINCE
 #    include <process.h>
 #  endif
 #endif
+#include "pari.h"
+#include "paripriv.h"
+#include "anal.h"
 
 const double LOG2    = 0.6931471805599453; /* log(2) */
 const double LOG10_2 = 0.3010299956639812; /* log_10(2) */
