@@ -4857,7 +4857,6 @@ install0(const char *name, const char *lib)
 }
 #else
 #  ifdef _WIN32
-#  include <windows.h>
 static HMODULE
 try_LoadLibrary(const char *s)
 { void *h = LoadLibrary(s); pari_free((void*)s); return h; }
