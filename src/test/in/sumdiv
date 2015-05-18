@@ -42,3 +42,6 @@ sumdivmult(fa, d, d)
 
 \\#1664
 divisors([1,2])
+
+\\#1702
+moebius(factor(18))

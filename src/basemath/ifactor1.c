@@ -3330,7 +3330,7 @@ moebius(GEN n)
     E = gel(F,2);
     l = lg(E);
     for(i = 1; i < l; i++)
-      if (!equali1(gel(E,1))) { avma = av; return 0; }
+      if (!equali1(gel(E,i))) { avma = av; return 0; }
     avma = av; return odd(l)? 1: -1;
   }
   if (lgefint(n) == 3) return moebiusu(n[2]);

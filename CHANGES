@@ -17,6 +17,7 @@ Done for version 2.7.4 (released ??/??/2015):
    10- possibly incorrect result in nfdisc(T,listP)                      [F104]
    11- wrong dim(Ker) returned by ZM_pivot => SEGV in Z-linear algebra
        routines.  E.g. setrand(1);quadclassunit(-612556842419)   [#1700] [F105]
+   12- moebius(factor(18)) -> 1 instead of 0                     [#1702] [F106]
 
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]
