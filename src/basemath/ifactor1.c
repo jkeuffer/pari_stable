@@ -3382,8 +3382,9 @@ ispowerful(GEN n)
     if (lg(P) == 1) return 1; /* 1 */
     p = gel(P,1);
     if (!signe(p)) return 1; /* 0 */
+    i = is_pm1(p)? 2: 1; /* skip -1 */
     l = lg(E);
-    for (i = 1; i < l; i++)
+    for (; i < l; i++)
       if (equali1(gel(E,i))) return 0;
     return 1;
   }

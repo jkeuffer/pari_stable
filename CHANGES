@@ -19,6 +19,7 @@ Done for version 2.7.4 (released ??/??/2015):
        routines.  E.g. setrand(1);quadclassunit(-612556842419)   [#1700] [F105]
    12- moebius(factor(18)) -> 1 instead of 0                     [#1702] [F106]
    13- ispower(-167^10) => domain error                          [#1703] [F107]
+   14- ispowerful(factor(0)) != ispowerful(0)                            [F108]
 
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]
