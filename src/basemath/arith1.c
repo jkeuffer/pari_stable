@@ -1314,6 +1314,7 @@ Z_isanypower_aux(GEN x, GEN *pty)
 
   if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
 
+  if (signe(x) < 0) x = negi(x);
   k = l = 1;
   P = cgetg(26 + 1, t_VECSMALL);
   E = cgetg(26 + 1, t_VECSMALL);

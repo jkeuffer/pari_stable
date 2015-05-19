@@ -121,3 +121,6 @@ ispower(3^(11^2))
 ispower((2/3)^(11^2))
 ispower(30011^(17*11))
 issquare(Mod(3,22))
+
+\\#1703
+ispower(-167^10)
