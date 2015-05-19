@@ -21,3 +21,6 @@ setrand(38);quadclassunit(-29920).cyc
 quadclassunit(-13163208,,[0.1]).cyc
 setrand(1); quadclassunit((2^70+25)).cyc
 setrand(1); quadclassunit(8*3*5*7).cyc
+
+\\ #1700
+setrand(1);quadclassunit(-612556842419).cyc
