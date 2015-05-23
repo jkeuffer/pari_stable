@@ -27,7 +27,8 @@ invmod(GEN a, GEN b, GEN *res)
   { /* General case: use gcdext(a+b, b) since mpn_gcdext require S1>=S2 */
     pari_sp av = avma;
     GEN  ca, cb, u, d;
-    long lu, l, su, sa = signe(a), lb,lna;
+    long l, su, sa = signe(a), lb,lna;
+    mp_size_t lu;
     GEN na;
     if (!sa) { avma = av; *res = absi(b); return 0; }
     if (signe(b) < 0) b = negi(b);
@@ -144,7 +145,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     GEN cb = icopy_ef(b,lgefint(b)+1);
     GEN u = cgeti(lgefint(a)+1), v = NULL;
     GEN d = cgeti(lgefint(a)+1);
-    long su,l,lu;
+    long su,l;
+    mp_size_t lu;
     l = mpn_gcdext(LIMBS(d), LIMBS(u), &lu, LIMBS(ca), NLIMBS(ca), LIMBS(cb), NLIMBS(cb));
     if (lu<=0)
     {
