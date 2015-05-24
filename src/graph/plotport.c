@@ -1981,9 +1981,9 @@ psplot_init(struct plot_eng *S, FILE *f, double xscale, double yscale, long font
 50 50 translate\n\
 /p {moveto 0 2 rlineto 2 0 rlineto 0 -2 rlineto closepath fill} def\n\
 /l {lineto} def\n\
-/m {moveto} def\n\
-/Times-Roman findfont %ld scalefont setfont\n\
-%g %g scale\n", fontsize, yscale, xscale);
+/m {moveto} def\n"
+"/Times-Roman findfont %ld scalefont setfont\n"
+"%g %g scale\n", fontsize, yscale, xscale);
 
   S->sc = &ps_sc;
   S->pt = &ps_point;
