@@ -1227,8 +1227,10 @@ nextch:
           case 'l':
             if (GENflag)
               pari_err(e_MISC, "P/l length modifiers in the same conversion");
+#if !defined(_WIN64)
             if (longflag)
               pari_err_IMPL( "ll length modifier in printf");
+#endif
             longflag = 1;
             goto nextch;
           case 'P':
