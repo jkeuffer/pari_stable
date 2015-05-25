@@ -9,6 +9,8 @@ lngamma(-2+x)
 psi(2+I+x)
 psi(1+x)
 psi(-2+x)
+gamma(-1/2+x)
+gamma(1+a*x+O(x^2))
 
 psi(x)
 gamma(x)

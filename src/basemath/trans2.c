@@ -1708,7 +1708,8 @@ serpsi(GEN y, long prec)
   else
   {
     GEN t;
-    z0 = gel(y,2); t = ground(z0);
+    z0 = simplify_shallow(gel(y,2));
+    t = ground(z0);
     if (gequal(t,z0)) z0 = t;
   }
   reflect = (gcmp(real_i(z0),ghalf) < 0); /* use reflection formula */

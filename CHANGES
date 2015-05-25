@@ -21,7 +21,8 @@ Done for version 2.7.4 (released ??/??/2015):
    13- ispower(-167^10) => domain error                          [#1703] [F107]
    14- ispowerful(factor(0)) != ispowerful(0)                            [F108]
    15- expm1(2*I) => wrong result                                        [F109]
-   16- printsep() printed its argument in random format instead of f_RAW [F111]
+   16- gamma(1+a*x+O(x^2)) => error [#1707]                              [F110]
+   17- printsep() printed its argument in random format instead of f_RAW [F111]
 
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]
