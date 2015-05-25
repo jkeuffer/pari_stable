@@ -49,5 +49,9 @@ for (i=0,7, z=1e-20+i*w; test(z))
 for (i=0,7, z=1e-20+i*w+I; test(z))
 erfc(1/2+I)
 erfc(-1/2+I)
+expm1(3/4)
+expm1(1)
+forstep(x=1, 1+2*Pi, Pi/2, if(abs(expm1(I*x)-exp(I*x)+1) > 1e-38,print(x)))
+
 default(realprecision,2003);
 log(exp(1.5)) - 1.5

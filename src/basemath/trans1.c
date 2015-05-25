@@ -2922,7 +2922,7 @@ mpsincosm1(GEN x, GEN *s, GEN *c)
   switch(mod8)
   {
     case 0: *c=rcopy(p1); *s=mpaut(p1); break;
-    case 1: *s=addsr(1,p1); *c=subrs(mpaut(p1),1); togglesign(*c); break;
+    case 1: *s=addsr(1,p1); *c=addrs(mpaut(p1),1); togglesign(*c); break;
     case 2: *c=subsr(-2,p1); *s=mpaut(p1); togglesign(*s); break;
     case 3: *s=subsr(-1,p1); *c=subrs(mpaut(p1),1); break;
     case 4: *c=rcopy(p1); *s=mpaut(p1); togglesign(*s); break;
