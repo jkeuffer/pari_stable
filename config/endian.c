@@ -1,4 +1,9 @@
 #include <stdio.h>
+
+#ifdef _WIN64
+#define long long long
+#endif
+
 int main()
 {
   if (sizeof(long) == 4)
@@ -14,7 +19,7 @@ int main()
   {
     union {double d; unsigned long l;} x;
     x.d = 2.;
-    if (x.l==(1UL<<62)) printf("-\n");
+    if (x.l==((unsigned long)1)<<62) printf("-\n");
     else
       printf("NOT IEEE (64 bit)\n");
   }
