@@ -6,6 +6,9 @@ Help: random({N=2^31}): random object, depending on the type of N.
  Integer between 0 and N-1 (t_INT), int mod N (t_INTMOD), element in a finite
  field (t_FFELT), point on an elliptic curve (ellinit mod p or over a finite
  field).
+Description:
+ (?int):int    genrand($1)
+ (gen):gen     genrand($1)
 Doc:
  returns a random element in various natural sets depending on the
  argument $N$.
