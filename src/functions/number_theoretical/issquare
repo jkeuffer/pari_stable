@@ -7,7 +7,7 @@ Help: issquare(x,{&n}): true(1) if x is a square, false(0) if not. If n is
 Description:
  (int):bool        Z_issquare($1)
  (gen):bool        issquare($1)
- (int, &int):bool  Z_issquarerem($1, &$2)
+ (int, &int):bool  Z_issquareall($1, &$2)
  (gen, &gen):bool  issquareall($1, &$2)
 Doc: true (1) if $x$ is a square, false (0)
  if not. What ``being a square'' means depends on the type of $x$: all
