@@ -4392,10 +4392,13 @@ print0(GEN g, long flag) { out_print0(pariOut, NULL, g, flag); }
 
 void
 printsep(const char *s, GEN g, long flag)
-{ out_print0(pariOut, s, g, flag); pari_putc('\n'); pari_flush(); }
+{ (void) flag;
+  out_print0(pariOut, s, g, f_RAW); pari_putc('\n'); pari_flush(); }
 
 void
-printsep1(const char *s, GEN g, long flag) { out_print0(pariOut, s, g, flag); }
+printsep1(const char *s, GEN g, long flag)
+{ (void) flag;
+  out_print0(pariOut, s, g, f_RAW); }
 
 /* dummy needed to pass a (empty!) va_list to sm_dopr */
 static char *
