@@ -1,3 +1,3 @@
 #include <stdio.h>
 #include <readline/readline.h>
-int main(){ printf("%s", rl_library_version); return 0; }
+int main(){ printf("%s\n", rl_library_version); return 0; }
