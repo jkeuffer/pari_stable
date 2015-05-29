@@ -24,6 +24,9 @@ Done for version 2.7.4 (released ??/??/2015):
    16- gamma(1+a*x+O(x^2)) => error [#1707]                              [F110]
    17- printsep() printed its argument in random format instead of f_RAW [F111]
 
+  Added
+ED  1- mingw64 support                                                   [A111]
+
 Done for version 2.7.3 (released 18/02/2015):
 [last column crossreferences current development release 2.8.0]
 

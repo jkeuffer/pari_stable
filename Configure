@@ -177,6 +177,12 @@ done
 
 . $config_dir/extract_files
 
+if test "$osname" = mingw && test "$sizeof_long" = 8; then
+  echo $n "Patching PARI source for LLP64 mode...  $c"
+  ./config/convertllp64.sh > /dev/null
+  echo done
+fi
+
 #  Building...
 cat << EOT
 ==========================================================================
