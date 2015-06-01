@@ -179,7 +179,7 @@ done
 
 if test "$osname" = mingw && test "$sizeof_long" = 8; then
   echo $n "Patching PARI source for LLP64 mode...  $c"
-  ./config/convertllp64.sh > /dev/null
+  ./config/convertllp64 > /dev/null
   echo done
 fi
 
