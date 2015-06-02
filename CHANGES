@@ -23,6 +23,7 @@ Done for version 2.7.4 (released ??/??/2015):
    15- expm1(2*I) => wrong result                                        [F109]
    16- gamma(1+a*x+O(x^2)) => error [#1707]                              [F110]
    17- printsep() printed its argument in random format instead of f_RAW [F111]
+   18- nfdisc(x^10 - 29080*x^5 - 25772600) -> oo loop            [#1710] [F112]
 
   Added
 ED  1- mingw64 support                                                   [A111]

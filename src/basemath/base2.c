@@ -1667,7 +1667,7 @@ static GEN
 getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
          long oE, long Ediv)
 {
-  GEN chin, q, qp;
+  GEN z, chin, q, qp;
   long r, s;
 
   if (phi && dvdii(constant_term(chip), S->psc))
@@ -1701,7 +1701,8 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
   q = powiu(S->p, s); qp = mulii(q, S->p);
   nup = FpXQ_powu(nup, r, S->chi, qp);
   if (!phi) return RgX_Rg_div(nup, q); /* phi = X : no composition */
-  return compmod(S->p, nup, phi, S->chi, qp, -s);
+  z = compmod(S->p, nup, phi, S->chi, qp, -s);
+  return signe(z)? z: NULL;
 }
 
 static void
